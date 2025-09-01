@@ -6,13 +6,13 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/',
-        destination: '/en/machine',
+        destination: '/en/calendar',
         permanent: true,
         locale: false
       },
       {
         source: '/:lang(en|fr|ar)',
-        destination: '/en/machine',
+        destination: '/:lang(en|fr|ar)/calendar',
         permanent: true,
         locale: false
       },
