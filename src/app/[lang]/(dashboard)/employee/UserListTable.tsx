@@ -12,7 +12,13 @@ import MenuItem from '@mui/material/MenuItem'
 
 // Third-party Imports
 import classnames from 'classnames'
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable
+} from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
 import { Input } from '@mui/material'
@@ -115,6 +121,7 @@ const UserListTable = () => {
 
       // // 서버 API에 맞게 파라미터 설정
       queryParams.append('page', String(filterParams.page))
+
       queryParams.append('size', String(filterParams.pageSize))
 
       // 필터 조건들 추가
@@ -132,8 +139,9 @@ const UserListTable = () => {
 
       const result = await response.json()
 
-      setData(result.data.content || [])
-      setTotalCount(result.totalElements || 0)
+      setData(result?.data.content ?? [])
+      setTotalCount(result?.data.page.totalElements)
+      console.log(result)
     } catch (error) {
       console.error('Failed to fetch filtered data:', error)
     } finally {
@@ -144,83 +152,38 @@ const UserListTable = () => {
   // 필터 변경 시 API 호출
   useEffect(() => {
     fetchFilteredData(filters)
-  }, [
-    filters.search,
-    filters.roleDescription,
-    filters.companyName,
-    filters.officeDepartmentName,
-    filters.officePosition,
-    filters.memberStatusDescription,
-    filters.page,
-    filters.pageSize,
-    filters.careerYear,
-    filters.contractType,
-    filters.laborForm,
-    filters.workForm,
-    filters.gender,
-    filters.foreignYn,
-    fetchFilteredData
-  ])
+  }, [filters, fetchFilteredData])
+
+  function ColumnAccessor(id: keyof UsersType, header: string) {
+    return columnHelper.accessor(id, {
+      header: header,
+      cell: ({ row }) => (
+        <div className='flex items-center gap-2'>
+          {typeof row.original[id] === 'object' && row.original[id] !== null
+            ? JSON.stringify(row.original[id])
+            : row.original[id]}
+        </div>
+      ),
+      id: id
+    })
+  }
 
   const columns = useMemo<ColumnDef<UsersTypeWithAction, any>[]>(
     () => [
-      {
-        id: 'id',
-        header: 'ID',
-        cell: ({ row }) => <p>{row.original.memberId}</p>
-      },
-      columnHelper.accessor('roleDescription', {
-        header: '권한',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.roleDescription}</div>
-      }),
-      columnHelper.accessor('name', {
-        header: '이름',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.name}</div>
-      }),
-      columnHelper.accessor('staffNum', {
-        header: '사번',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.staffNum}</div>
-      }),
-      columnHelper.accessor('companyName', {
-        header: '소속',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.companyName}</div>
-      }),
-      columnHelper.accessor('officeDepartmentName', {
-        header: '부서',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.officeDepartmentName}</div>
-      }),
-      columnHelper.accessor('officePosition', {
-        header: '직위',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.officePositionDescription}</div>
-      }),
-      columnHelper.accessor('age', {
-        header: '나이',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.age}</div>
-      }),
-      columnHelper.accessor('email', {
-        header: '이메일',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.email}</div>
-      }),
-      columnHelper.accessor('phoneNumber', {
-        header: '휴대폰',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.phoneNumber}</div>
-      }),
-      columnHelper.accessor('isTechnician', {
-        header: '기술인',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.phoneNumber}</div>
-      }),
-      columnHelper.accessor('joinDate', {
-        header: '입사일',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.joinDate}</div>
-      }),
-      columnHelper.accessor('careerYear', {
-        header: '근속년수',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.careerYear}</div>
-      }),
-      columnHelper.accessor('memberStatusDescription', {
-        header: '상태',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.memberStatusDescription}</div>
-      })
+      ColumnAccessor('memberId', 'ID'),
+      ColumnAccessor('roleDescription', '권한'),
+      ColumnAccessor('name', '이름'),
+      ColumnAccessor('staffNum', '사번'),
+      ColumnAccessor('companyName', '소속'),
+      ColumnAccessor('officeDepartmentName', '부서'),
+      ColumnAccessor('officePositionDescription', '직위'),
+      ColumnAccessor('age', '나이'),
+      ColumnAccessor('email', '이메일'),
+      ColumnAccessor('phoneNumber', '휴대폰'),
+      ColumnAccessor('isTechnician', '기술인'),
+      ColumnAccessor('joinDate', '입사일'),
+      ColumnAccessor('careerYear', '근속년수'),
+      ColumnAccessor('memberStatusDescription', '상태')
     ],
     []
   )
@@ -236,6 +199,7 @@ const UserListTable = () => {
   const table = useReactTable({
     data: data as UsersType[],
     columns,
+    getSortedRowModel: getSortedRowModel(),
     manualFiltering: true,
     manualPagination: true,
     filterFns,
@@ -371,8 +335,10 @@ const UserListTable = () => {
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <th key={header.id}>
+                      {/* 오름차순, 내림차순 토글 */}
                       {header.isPlaceholder ? null : (
                         <div
+                          key={header.id}
                           className={classnames({
                             'flex items-center': header.column.getIsSorted(),
                             'cursor-pointer select-none': header.column.getCanSort()
@@ -380,10 +346,17 @@ const UserListTable = () => {
                           onClick={header.column.getToggleSortingHandler()}
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: <i className='tabler-chevron-up text-xl' />,
-                            desc: <i className='tabler-chevron-down text-xl' />
-                          }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
+                          {
+                            <i
+                              className={
+                                {
+                                  none: '',
+                                  asc: 'tabler-chevron-up text-xl',
+                                  desc: 'tabler-chevron-down text-xl'
+                                }[String(header.column.getIsSorted() ? header.column.getIsSorted() : 'none')] ?? ''
+                              }
+                            />
+                          }
                         </div>
                       )}
                     </th>
@@ -435,6 +408,7 @@ const UserListTable = () => {
             const newPageSize = parseInt(event.target.value, 10)
 
             handlePageSizeChange(newPageSize)
+            handlePageChange(0)
           }}
           disabled={loading}
           showFirstButton
