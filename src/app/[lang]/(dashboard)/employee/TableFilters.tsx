@@ -26,24 +26,26 @@ const memberStatusDescription = [
   { value: 'LEAVE', label: '휴직' }
 ]
 
+interface filterType {
+  search: string
+  roleDescription: string
+  companyName: string
+  officeDepartmentName: string
+  officePosition: string
+  memberStatusDescription: string
+  page: number
+  pageSize: number
+  careerYear: number
+  contractType: string
+  laborForm: string
+  workForm: string
+  gender: string
+  foreignYn: string
+}
+
 interface TableFiltersProps {
-  filters: {
-    search: string
-    roleDescription: string
-    companyName: string
-    officeDepartmentName: string
-    officePosition: string
-    memberStatusDescription: string
-    page: number
-    pageSize: number
-    careerYear: number
-    contractType: string
-    laborForm: string
-    workForm: string
-    gender: string
-    foreignYn: string
-  }
-  onFiltersChange: (filters: any) => void
+  filters: filterType
+  onFiltersChange: (filters: filterType) => void
   loading: boolean
 }
 
