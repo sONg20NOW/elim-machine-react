@@ -84,15 +84,45 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
+        <MenuItem href={`/${locale}/calendar`} icon={<i className='tabler-calendar' />}>
+          {'대시보드'}
+        </MenuItem>
         <MenuSection label='기계설비점검'>
+          <MenuItem href={`/${locale}/machine`} icon={<i className='tabler-settings' />}>
+            {'기계설비현장'}
+          </MenuItem>
           <MenuItem href={`/${locale}/employee`} icon={<i className='tabler-users' />}>
+            {'설비인력'}
+          </MenuItem>
+          <MenuItem href={``} icon={<i className='tabler-clipboard' />}>
+            {'양식관리'}
+          </MenuItem>
+        </MenuSection>
+        <MenuSection label='문의'>
+          <MenuItem href={``} icon={<i className='tabler-speakerphone' />}>
+            {'공지사항'}
+          </MenuItem>
+          <MenuItem href={``} icon={<i className='tabler-paperclip' />}>
+            {'자료실'}
+          </MenuItem>
+          <MenuItem href={``} icon={<i className='tabler-clipboard-check' />}>
+            {'FAQ'}
+          </MenuItem>
+          <MenuItem href={``} icon={<i className='tabler-zoom-question' />}>
+            {'일대일 문의'}
+          </MenuItem>
+        </MenuSection>
+        <MenuSection label='관리'>
+          <MenuItem href={``} icon={<i className='tabler-users-plus' />}>
             {'직원관리'}
           </MenuItem>
-          <MenuItem href={`/${locale}/calendar`} icon={<i className='tabler-calendar' />}>
-            {'달력'}
+          <MenuItem href={``} icon={<i className='tabler-history' />}>
+            {'로그인 기록'}
           </MenuItem>
-          <MenuItem href={`/${locale}/machine`} icon={<i className='tabler-user' />}>
-            {'기계설비현장'}
+        </MenuSection>
+        <MenuSection label='라이선스'>
+          <MenuItem href={``} icon={<i className='tabler-heart-handshake' />}>
+            {'라이선스관리'}
           </MenuItem>
         </MenuSection>
 
