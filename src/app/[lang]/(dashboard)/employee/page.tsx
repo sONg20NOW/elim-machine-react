@@ -1,4 +1,4 @@
-import UserListTable from './UserListTable'
+import UserListTable from './_components/UserListTable'
 
 const Employee = async () => {
   return <UserListTable />

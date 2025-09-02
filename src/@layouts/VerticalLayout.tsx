@@ -6,7 +6,6 @@ import type { ReactNode } from 'react'
 import type { ChildrenType } from '@core/types'
 
 // Component Imports
-import LayoutContent from './components/vertical/LayoutContent'
 
 type VerticalLayoutProps = ChildrenType & {
   navigation?: ReactNode
@@ -23,7 +22,7 @@ const VerticalLayout = (props: VerticalLayoutProps) => {
       {navigation || null}
       <div className={'flex flex-col w-full px-[10px] pb-[10px] gap-[5px]'}>
         {/* Content */}
-        <LayoutContent>{children}</LayoutContent>
+        <main className='flex-auto w-full pt-[5px] pb-[10px]'>{children}</main>
         {footer || null}
       </div>
     </div>
