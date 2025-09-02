@@ -30,7 +30,7 @@ const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> 
       <div className={'flex flex- auto relative'}>
         <Navigation dictionary={dictionary} mode={mode} />
         <div className='flex flex-col w-full px-[10px] pb-[10px] gap-[5px]'>
-          <div className='flex-auto w-full pt-[5px] pb-[10px]'>{children}</div>
+          <div className='flex-auto w-full pt-[10px] pb-[10px]'>{children}</div>
           <VerticalFooter />
         </div>
       </div>
