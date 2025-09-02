@@ -23,6 +23,8 @@ import type { ColumnDef } from '@tanstack/react-table'
 
 import { Input } from '@mui/material'
 
+import { toast } from 'react-toastify'
+
 import type { UsersType } from '@/types/apps/userTypes'
 
 // Component Imports
@@ -141,9 +143,8 @@ const UserListTable = () => {
 
       setData(result?.data.content ?? [])
       setTotalCount(result?.data.page.totalElements)
-      console.log(result)
     } catch (error) {
-      console.error('Failed to fetch filtered data:', error)
+      toast.error(`Failed to fetch filtered data: ${error}`)
     } finally {
       setLoading(false)
     }
