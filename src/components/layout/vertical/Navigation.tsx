@@ -121,8 +121,8 @@ const Navigation = (props: Props) => {
         </Link>
         {!(isCollapsed && !isHovered) && (
           <NavCollapseIcons
-            lockedIcon={<i className='tabler-circle-dot text-xl' />}
-            unlockedIcon={<i className='tabler-circle text-xl' />}
+            lockedIcon={<i className='tabler-chevrons-left text-xl' />}
+            unlockedIcon={<i className='tabler-chevrons-right text-xl' />}
             closeIcon={<i className='tabler-x text-xl' />}
             onClick={() => updateSettings({ layout: !isCollapsed ? 'collapsed' : 'vertical' })}
           />
