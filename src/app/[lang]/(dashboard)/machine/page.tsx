@@ -1,6 +1,6 @@
 import Grid from '@mui/material/Grid2'
 
-import MachineListTable from './MachineListTable'
+import MachineListTable from './_components/MachineListTable'
 
 const Machine = async () => {
   return (
