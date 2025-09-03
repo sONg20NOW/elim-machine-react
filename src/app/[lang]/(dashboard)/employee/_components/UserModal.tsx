@@ -64,6 +64,48 @@ const UserModal = ({ open, setOpen, data, handlePageChange }: EditUserInfoProps)
 
   const [value, setValue] = useState<string>('1')
   const [userData, setUserData] = useState<EditUserInfoData>(data ?? initialData)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  const handleDeleteUser = async () => {
+    const version = userData.memberBasicResponseDto?.version
+    const memberId = userData.memberBasicResponseDto?.memberId
+
+    console.log(memberId, version)
+
+    if (version !== undefined && memberId !== undefined) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberDeleteList: [{ memberId: memberId, version: version }] })
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        console.log(`memberId: ${memberId} user is deleted successfully`)
+        toast.info('해당 직원이 삭제되었습니다.')
+      } else {
+        throw new Error(result.message)
+      }
+
+      handleClose()
+    } else {
+      throw new Error('delete fail!')
+    }
+  }
+
+  const onDeleteUserConfirm = async () => {
+    try {
+      await handleDeleteUser()
+      handlePageChange()
+    } catch (error: any) {
+      toast.error(`${error.message}`)
+    }
+  }
+
+  const onDeleteUser = () => {
+    setShowDeleteModal(true)
+  }
 
   const handleClose = () => {
     setOpen(false)
@@ -164,6 +206,19 @@ const UserModal = ({ open, setOpen, data, handlePageChange }: EditUserInfoProps)
           취소
         </Button>
       }
+      deleteButton={
+        <Button
+          variant='contained'
+          className='bg-color-warning hover:bg-color-warning-dark text-white'
+          color='secondary'
+          type='reset'
+          onClick={() => {
+            onDeleteUser()
+          }}
+        >
+          삭제
+        </Button>
+      }
       handleClose={() => handleClose()}
     >
       <TabList centered onChange={handleChange} aria-label='centered tabs example'>
@@ -193,6 +248,30 @@ const UserModal = ({ open, setOpen, data, handlePageChange }: EditUserInfoProps)
       <TabPanel value='5'>
         <EtcContent userData={userData} setUserData={setUserData} />
       </TabPanel>
+      {showDeleteModal && (
+        <DefaultModal
+          size='xs'
+          open={showDeleteModal}
+          setOpen={setShowDeleteModal}
+          title={'정말 삭제하시겠습니까?'}
+          headerDescription='삭제 후에는 되돌리지 못합니다.'
+          primaryButton={
+            <Button
+              variant='contained'
+              className='bg-color-warning hover:bg-color-warning-light'
+              onClick={onDeleteUserConfirm}
+              type='submit'
+            >
+              삭제
+            </Button>
+          }
+          secondaryButton={
+            <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
+              취소
+            </Button>
+          }
+        />
+      )}
     </DefaultModal>
   )
 }
