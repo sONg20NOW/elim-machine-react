@@ -4,16 +4,16 @@ import { MenuItem } from '@mui/material'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 
-interface DefaultSelectBoxProps {
+interface MultiSelectBoxProps {
   id: string
   label: string
   value: string
-  loading: boolean
+  disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
   options: Array<object>
 }
 
-const DefaultSelectBox = ({ id, label, value, loading, onChange, options }: DefaultSelectBoxProps) => {
+const MultiSelectBox = ({ id, label, value, disabled = false, onChange, options }: MultiSelectBoxProps) => {
   return (
     <CustomTextField
       select
@@ -22,7 +22,7 @@ const DefaultSelectBox = ({ id, label, value, loading, onChange, options }: Defa
       label={label}
       value={value || ''}
       onChange={onChange}
-      disabled={loading}
+      disabled={disabled}
       slotProps={{
         select: { displayEmpty: true }
       }}
@@ -37,4 +37,4 @@ const DefaultSelectBox = ({ id, label, value, loading, onChange, options }: Defa
   )
 }
 
-export default DefaultSelectBox
+export default MultiSelectBox
