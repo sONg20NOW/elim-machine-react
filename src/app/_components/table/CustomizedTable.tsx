@@ -10,13 +10,14 @@ interface TableProps<T> {
   table: Table<T>
   data: T[]
   loading: boolean
-  handleRowClick: (row: any) => void
+  handleRowClick: (row: T) => void
 }
 
 export function CustomizedTable<T>({ table, data, loading, handleRowClick }: TableProps<T>) {
   return (
     <div className='overflow-x-auto'>
       <table className={tableStyles.table}>
+        {/* 헤더 */}
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
@@ -30,7 +31,9 @@ export function CustomizedTable<T>({ table, data, loading, handleRowClick }: Tab
                         'flex items-center': header.column.getIsSorted(),
                         'cursor-pointer select-none': header.column.getCanSort()
                       })}
-                      onClick={header.column.getToggleSortingHandler()}
+                      onClick={() => {
+                        header.column.toggleSorting()
+                      }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {
@@ -51,7 +54,7 @@ export function CustomizedTable<T>({ table, data, loading, handleRowClick }: Tab
             </tr>
           ))}
         </thead>
-
+        {/* 바디 */}
         {data.length === 0 ? (
           <tbody>
             <tr>
