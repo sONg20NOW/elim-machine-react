@@ -24,13 +24,6 @@ import { initialData } from '@/data/initialData/userInfo'
 import EtcContent from './etcContent'
 import DefaultModal from '@/app/_components/DefaultModal'
 
-type EditUserInfoProps = {
-  open: boolean
-  setOpen: (open: boolean) => void
-  data?: EditUserInfoData
-  handlePageChange: () => void
-}
-
 const requestRule = {
   basic: {
     url: '',
@@ -53,10 +46,17 @@ const requestRule = {
     value: 4
   },
   etc: {
-    url: '/memeber-etc',
+    url: '/member-etc',
     text: '기타정보',
     value: 5
   }
+}
+
+type EditUserInfoProps = {
+  open: boolean
+  setOpen: (open: boolean) => void
+  data?: EditUserInfoData
+  handlePageChange: () => void
 }
 
 const UserModal = ({ open, setOpen, data, handlePageChange }: EditUserInfoProps) => {
