@@ -70,7 +70,7 @@ const BasicContent = ({ userData, setUserData }: any) => {
             label='권한'
             value={userData?.memberBasicResponseDto?.role || ''}
             loading={false}
-            onChange={(e: any) =>
+            onChange={e =>
               setUserData({
                 ...userData,
                 memberBasicResponseDto: {
@@ -94,7 +94,7 @@ const BasicContent = ({ userData, setUserData }: any) => {
             label='재직 상태'
             value={userData?.memberBasicResponseDto?.memberStatus || ''}
             loading={false}
-            onChange={(e: any) =>
+            onChange={e =>
               setUserData({
                 ...userData,
                 memberBasicResponseDto: {

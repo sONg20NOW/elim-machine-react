@@ -28,9 +28,9 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           <DefaultSelectBox
             id={'officeDepartmentName'}
             label='부서'
-            value={userData?.memberOfficeResponseDto?.officeDepartmentName || ''}
+            value={userData?.memberOfficeResponseDto?.officeDepartmentName ?? ''}
             loading={false}
-            onChange={(e: any) =>
+            onChange={e =>
               setUserData({
                 ...userData,
                 memberOfficeResponseDto: {

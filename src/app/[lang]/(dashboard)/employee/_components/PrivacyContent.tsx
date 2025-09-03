@@ -1,9 +1,18 @@
+import type { Dispatch, SetStateAction } from 'react'
+
 import { DialogContent, Divider, MenuItem } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import CustomTextField from '@/@core/components/mui/TextField'
+import type { EditUserInfoData } from '@/data/type/userInfoTypes'
 
-const PrivacyContent = ({ userData, setUserData }: any) => {
+const PrivacyContent = ({
+  userData,
+  setUserData
+}: {
+  userData: EditUserInfoData
+  setUserData: Dispatch<SetStateAction<EditUserInfoData>>
+}) => {
   return (
     <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
       <Grid container spacing={5}>
@@ -32,7 +41,7 @@ const PrivacyContent = ({ userData, setUserData }: any) => {
           <CustomTextField
             fullWidth
             label='주민번호'
-            value={userData?.memberPrivacyResponseDto?.juminNum || ''}
+            value={userData?.memberPrivacyResponseDto?.juminNum ?? ''}
             onChange={e =>
               setUserData({
                 ...userData,
@@ -111,7 +120,11 @@ const PrivacyContent = ({ userData, setUserData }: any) => {
             }
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+      </Grid>
+      <Divider className='my-[20px]' />
+
+      <Grid container spacing={5}>
+        <Grid size={{ xs: 8, sm: 4 }}>
           <CustomTextField
             fullWidth
             label='가족 수'
@@ -129,7 +142,7 @@ const PrivacyContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid size={{ xs: 8, sm: 4 }}>
           <CustomTextField
             fullWidth
             label='종교'
@@ -184,6 +197,7 @@ const PrivacyContent = ({ userData, setUserData }: any) => {
             }
           />
         </Grid>
+
         <Grid size={12}>
           <CustomTextField
             fullWidth
@@ -275,10 +289,7 @@ const PrivacyContent = ({ userData, setUserData }: any) => {
             }
           />
         </Grid>
-      </Grid>
 
-      <Divider className='my-[20px]' />
-      <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <CustomTextField
             fullWidth
