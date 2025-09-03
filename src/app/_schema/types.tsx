@@ -4,6 +4,23 @@ import type { ThemeColor } from '@core/types'
 // UserTypes.ts
 export type UsersType = {
   memberId: number
+  roleDescription: string
+  name: string
+  staffNum: string
+  companyName: string
+  officeDepartmentName: string
+  officePositionDescription: string
+  age: number
+  email: string
+  phoneNumber: string
+  joinDate: string
+  careerYear: number
+  memberStatusDescription: string
+  isTechnician: string
+}
+
+export type OldUsersType = {
+  memberId: number
   role: string
   status: string
   avatar: string
@@ -16,7 +33,7 @@ export type UsersType = {
   avatarColor?: ThemeColor
   billing: string
 
-  // 여기부터 기계설비
+  // 여기부터 직원관리
   auth: string
   roleDescription: string
   name: string
@@ -34,7 +51,7 @@ export type UsersType = {
   memberEtcResponseDto: {
     militaryPeriod: string
   }
-  isTechnician: boolean
+  isTechnician: string
   contractType: string
 }
 
