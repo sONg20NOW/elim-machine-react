@@ -43,6 +43,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'companyName'}
             label='소속'
+            disabled={loading}
             value={filters.companyName || ''}
             onChange={(e: any) => handleFilterChange('companyName', e.target.value)}
             options={[
@@ -59,6 +60,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'officePosition'}
             label='직위'
+            disabled={loading}
             value={filters.officePosition || ''}
             onChange={(e: any) => handleFilterChange('officePosition', e.target.value)}
             options={[
@@ -89,6 +91,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'officeDepartmentName'}
             label='부서'
+            disabled={loading}
             value={filters.officeDepartmentName || ''}
             onChange={(e: any) => handleFilterChange('officeDepartmentName', e.target.value)}
             options={[
@@ -106,6 +109,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'contractType'}
             label='계약 유형'
+            disabled={loading}
             value={filters.contractType || ''}
             onChange={(e: any) => handleFilterChange('contractType', e.target.value)}
             options={[
@@ -123,6 +127,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'laborForm'}
             label='상근/비상근'
+            disabled={loading}
             value={filters?.laborForm || ''}
             onChange={(e: any) => handleFilterChange('laborForm', e.target.value)}
             options={[
@@ -136,6 +141,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'workForm'}
             label='근무형태'
+            disabled={loading}
             value={filters.workForm || ''}
             onChange={(e: any) => handleFilterChange('workForm', e.target.value)}
             options={[
@@ -149,6 +155,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id='foreignYn'
             label='외국인 여부'
+            disabled={loading}
             value={filters.foreignYn || ''}
             onChange={(e: any) => handleFilterChange('foreignYn', e.target.value)}
             options={[
@@ -162,6 +169,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'gender'}
             label='성별'
+            disabled={loading}
             value={filters.gender || ''}
             onChange={(e: any) => handleFilterChange('gender', e.target.value)}
             options={[
@@ -175,6 +183,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'careerYear'}
             label='근속년수'
+            disabled={loading}
             value={filters.careerYear.toString() ?? ''}
             onChange={(e: any) => handleFilterChange('careerYear', e.target.value)}
             options={[
@@ -196,6 +205,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
           <MultiSelectBox
             id={'memberStatusDescription'}
             label='재직 상태'
+            disabled={loading}
             value={filters.memberStatus || ''}
             onChange={(e: any) => handleFilterChange('memberStatus', e.target.value)}
             options={[
