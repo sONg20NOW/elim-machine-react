@@ -20,8 +20,6 @@ import { Input } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
-import membersHeaders from '@/app/_components/table/headerTranslate.json'
-
 // Component Imports
 import TableFilters from './_components/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
@@ -31,13 +29,55 @@ import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
 import type { UsersType } from '@/app/_schema/types'
 import { CustomizedTable } from '@/app/_components/table/CustomizedTable'
+import { HEADERS } from '@/app/_constant/constants'
+import type { EditUserInfoData } from '@/data/type/userInfoTypes'
 
-type UsersTypeWithAction = UsersType & {
-  action?: string
+const initialFilters = {
+  roleDescription: '',
+  companyName: '',
+  officeDepartmentName: '',
+  officePosition: '',
+  memberStatus: '',
+  careerYear: '',
+  contractType: '',
+  laborForm: '',
+  workForm: '',
+  gender: '',
+  foreignYn: '',
+
+  // 이름으로 검색
+  name: '',
+
+  // 고정
+  page: 0,
+  size: 30
 }
 
 // Column Definitions
-const columnHelper = createColumnHelper<UsersTypeWithAction>()
+const columnHelper = createColumnHelper<UsersType>()
+
+// Column 생성 함수
+/**
+ * row.original = 해당 행의 원본 데이터 객체
+ * @param id
+ * 컬럼의 키로 사용되는 값
+ * @param header
+ * 테이블 헤더 텍스트
+ * @returns
+ */
+function ColumnAccessor(id: keyof UsersType, header: string) {
+  return columnHelper.accessor(id, {
+    header: header,
+    cell: ({ row }) => (
+      <div className='flex items-center gap-2'>
+        {typeof row.original[id] === 'object' && row.original[id] !== null
+          ? JSON.stringify(row.original[id])
+          : row.original[id]}
+      </div>
+    ),
+    id: id
+  })
+}
 
 const EmployeePage = () => {
   // States
@@ -49,30 +89,15 @@ const EmployeePage = () => {
 
   // States에 추가
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<UsersType | null>(null)
+  const [selectedUser, setSelectedUser] = useState<EditUserInfoData | null>(null)
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
 
   // 필터 상태 - 컬럼에 맞게 수정
-  const [filters, setFilters] = useState({
-    name: '',
-    roleDescription: '',
-    companyName: '',
-    officeDepartmentName: '',
-    officePosition: '',
-    memberStatus: '',
-    page: 0,
-    size: 30,
-    careerYear: '',
-    contractType: '',
-    laborForm: '',
-    workForm: '',
-    gender: '',
-    foreignYn: ''
-  })
+  const [filters, setFilters] = useState(initialFilters)
 
   const queryParams = new URLSearchParams()
 
-  // 기계설비 인력 리스트 호출 API 함수
+  // 직원 리스트 호출 API 함수
   const fetchFilteredData = useCallback(
     async (filterParams: any) => {
       setLoading(true)
@@ -97,6 +122,7 @@ const EmployeePage = () => {
 
         setData(result?.data.content ?? [])
         setTotalCount(result?.data.page.totalElements)
+        console.log(result?.data)
       } catch (error) {
         toast.error(`Failed to fetch filtered data: ${error}`)
       } finally {
@@ -111,29 +137,16 @@ const EmployeePage = () => {
     fetchFilteredData(filters)
   }, [filters, fetchFilteredData])
 
-  // Column 생성 함수
-  function ColumnAccessor(id: keyof UsersType, header: string) {
-    return columnHelper.accessor(id, {
-      header: header,
-      cell: ({ row }) => (
-        <div className='flex items-center gap-2'>
-          {typeof row.original[id] === 'object' && row.original[id] !== null
-            ? JSON.stringify(row.original[id])
-            : row.original[id]}
-        </div>
-      ),
-      id: id
-    })
-  }
-
-  const columns = useMemo<ColumnDef<UsersTypeWithAction, any>[]>(
+  // 컬럼 생성
+  const columns = useMemo<ColumnDef<UsersType, string>[]>(
     () =>
-      (Object.keys(membersHeaders.members) as Array<keyof typeof membersHeaders.members>).map(key =>
-        ColumnAccessor(key, membersHeaders.members[key])
+      (Object.keys(HEADERS.members) as Array<keyof typeof HEADERS.members>).map(key =>
+        ColumnAccessor(key, HEADERS.members[key])
       ),
     []
   )
 
+  // 필터 함수
   const filterFns = {
     fuzzy: (row: { getValue: (arg0: any) => any }, columnId: any, filterValue: string) => {
       const value = row.getValue(columnId)
@@ -142,6 +155,7 @@ const EmployeePage = () => {
     }
   }
 
+  // table 인스턴스 생성
   const table = useReactTable({
     data: data as UsersType[],
     columns,
@@ -161,6 +175,33 @@ const EmployeePage = () => {
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel()
   })
+
+  // TODO: 현재 sort 기능 미구현으로 불가.
+  // 정렬 시 마다 그에 맞게 데이터 페칭
+  // const handleToggleSorting = async (headerId: string, isSorted: boolean | 'asc' | 'desc') => {
+  //   if (isSorted) {
+  //     try {
+  //       const response = await fetch(
+  //         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members?${queryParams.toString()}`,
+  //         {
+  //           method: 'GET',
+  //           body: JSON.stringify({ sort: [headerId, isSorted] })
+  //         }
+  //       )
+
+  //       const result = await response.json()
+
+  //       setData(result?.data.content ?? [])
+  //       setTotalCount(result?.data.page.totalElements)
+  //     } catch (error) {
+  //       toast.error(`Failed to fetch filtered data: ${error}`)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   } else {
+  //     fetchFilteredData(filters)
+  //   }
+  // }
 
   // 검색 핸들러
   const handleNameChange = (value: string) => {
@@ -196,29 +237,30 @@ const EmployeePage = () => {
 
     const data = await response.json()
 
-    setSelectedUser(data.data)
-    setUserDetailModalOpen(true)
+    if (response.ok) {
+      setSelectedUser(data.data)
+      setUserDetailModalOpen(true)
+    } else {
+      toast.error(data.message)
+    }
   }
 
   return (
     <>
       <Card>
+        <Button
+          startIcon={<i className='tabler-reload' />}
+          onClick={() => setFilters(initialFilters)}
+          className='max-sm:is-full absolute right-8 top-8'
+          disabled={loading}
+        >
+          필터 초기화
+        </Button>
         <CardHeader title='직원관리' className='pbe-4' />
         <TableFilters filters={filters} onFiltersChange={setFilters} loading={loading} />
 
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <div className='flex justify-center items-center gap-2'>
-            <CustomTextField
-              select
-              value={filters.size}
-              onChange={e => handleSizeChange(Number(e.target.value))}
-              className='max-sm:w-full sm:is-[70px]'
-              disabled={loading}
-            >
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={30}>30</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-            </CustomTextField>
             <Input
               value={name}
               onChange={e => setName(e.currentTarget.value)}
@@ -244,7 +286,7 @@ const EmployeePage = () => {
                 '&.Mui-focused': {
                   borderColor: 'var(--mui-palette-primary-main)'
                 },
-                padding: '5px 10px',
+                padding: '3px 10px',
                 borderTopRightRadius: 6,
                 borderBottomRightRadius: 6,
                 borderTopLeftRadius: 6,
@@ -252,12 +294,29 @@ const EmployeePage = () => {
               }}
               disableUnderline={true}
             />
-            <div className='text-color-primary-light hover:text-color-primary-dark grid place-items-center'>
-              <i className='tabler-search' onClick={() => handleNameChange(name)} />
-            </div>
+            <Button
+              variant={'contained'}
+              className='text-color-primary-light  hover:text-color-primary-dark grid place-items-center p-[5px]'
+            >
+              <i className='tabler-search text-3xl text-white' onClick={() => handleNameChange(name)} />
+            </Button>
           </div>
 
-          <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
+          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+            <div className='flex gap-3 itmes-center'>
+              <span className='grid place-items-center'>페이지당 행 수 </span>
+              <CustomTextField
+                select
+                value={filters.size}
+                onChange={e => handleSizeChange(Number(e.target.value))}
+                className='gap-[5px]'
+                disabled={loading}
+              >
+                <MenuItem value={10}>10</MenuItem>
+                <MenuItem value={30}>30</MenuItem>
+                <MenuItem value={50}>50</MenuItem>
+              </CustomTextField>
+            </div>
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
@@ -273,8 +332,9 @@ const EmployeePage = () => {
         {/* 로딩 표시 */}
         {loading && <div className='text-center p-4'>Loading...</div>}
 
-        {/* table */}
+        {/* 테이블 */}
         <CustomizedTable<UsersType> table={table} data={data} loading={loading} handleRowClick={handleUserClick} />
+        {/* 페이지네이션 */}
         <TablePagination
           rowsPerPageOptions={[1, 10, 30, 50]} // 1 추가 (테스트용)
           component='div'
