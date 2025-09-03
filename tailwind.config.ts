@@ -28,6 +28,11 @@ const config: Config = {
             main: '#7367F0',
             light: '#8F85F3',
             dark: '#675DD8'
+          },
+          warning: {
+            DEFAULT: 'rgba(255, 88, 88, 1)',
+            light: 'rgba(255, 145, 145, 1)',
+            dark: 'rgba(209, 61, 61, 1)'
           }
         },
         background: 'hsl(var(--background))',
