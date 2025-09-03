@@ -1,8 +1,9 @@
-import { DialogContent, Divider, MenuItem } from '@mui/material'
+import { DialogContent, Divider } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
+import YNSelectBox from '@/components/selectbox/YNSelectBox'
 
 const MemberOfficeContent = ({ userData, setUserData }: any) => {
   return (
@@ -131,9 +132,7 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <CustomTextField
-            select
-            fullWidth
+          <YNSelectBox
             label='계약 여부'
             value={userData?.memberOfficeResponseDto?.contractYn || ''}
             onChange={e =>
@@ -145,10 +144,7 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
                 }
               })
             }
-          >
-            <MenuItem value='Y'>예</MenuItem>
-            <MenuItem value='N'>아니오</MenuItem>
-          </CustomTextField>
+          />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <MultiSelectBox
@@ -191,9 +187,8 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <CustomTextField
-            select
-            fullWidth
+          <YNSelectBox
+            id='fieldworkYn'
             label='현장근무 여부'
             value={userData?.memberOfficeResponseDto?.fieldworkYn || ''}
             onChange={e =>
@@ -205,16 +200,11 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
                 }
               })
             }
-          >
-            <MenuItem value='Y'>예</MenuItem>
-            <MenuItem value='N'>아니오</MenuItem>
-          </CustomTextField>
+          />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <CustomTextField
-            select
-            fullWidth
+          <YNSelectBox
             label='사원증 여부'
             value={userData?.memberOfficeResponseDto?.staffCardYn || ''}
             onChange={e =>
@@ -226,10 +216,7 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
                 }
               })
             }
-          >
-            <MenuItem value='Y'>예</MenuItem>
-            <MenuItem value='N'>아니오</MenuItem>
-          </CustomTextField>
+          />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <CustomTextField
@@ -292,7 +279,6 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
             fullWidth
             label='보험 취득일'
             type='date'
-            InputLabelProps={{ shrink: true }}
             value={userData?.memberOfficeResponseDto?.insuranceAcquisitionDate || ''}
             onChange={e =>
               setUserData({
@@ -310,7 +296,6 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
             fullWidth
             label='보험 상실일'
             type='date'
-            InputLabelProps={{ shrink: true }}
             value={userData?.memberOfficeResponseDto?.insuranceLostDate || ''}
             onChange={e =>
               setUserData({
@@ -324,9 +309,7 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <CustomTextField
-            select
-            fullWidth
+          <YNSelectBox
             label='단체보험 가입여부'
             value={userData?.memberOfficeResponseDto?.groupInsuranceYn || ''}
             onChange={e =>
@@ -338,10 +321,7 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
                 }
               })
             }
-          >
-            <MenuItem value='Y'>예</MenuItem>
-            <MenuItem value='N'>아니오</MenuItem>
-          </CustomTextField>
+          />
         </Grid>
       </Grid>
     </DialogContent>
