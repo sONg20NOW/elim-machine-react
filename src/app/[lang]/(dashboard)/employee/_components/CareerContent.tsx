@@ -2,18 +2,17 @@ import { DialogContent } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 const CareerContent = ({ userData, setUserData }: any) => {
   return (
     <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
       <Grid container spacing={5}>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'grade'}
             label='등급'
             value={userData?.memberCareerResponseDto?.grade || ''}
-            loading={true}
             onChange={(e: any) =>
               setUserData({
                 ...userData,

@@ -2,7 +2,7 @@ import { DialogContent } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 const BasicContent = ({ userData, setUserData }: any) => {
   return (
@@ -41,11 +41,10 @@ const BasicContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'companyName'}
             label='소속'
             value={userData?.memberBasicResponseDto?.companyName || ''}
-            loading={false}
             onChange={(e: any) =>
               setUserData({
                 ...userData,
@@ -65,11 +64,10 @@ const BasicContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'role'}
             label='권한'
             value={userData?.memberBasicResponseDto?.role || ''}
-            loading={false}
             onChange={e =>
               setUserData({
                 ...userData,
@@ -89,11 +87,10 @@ const BasicContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'memberStatusDescription'}
             label='재직 상태'
             value={userData?.memberBasicResponseDto?.memberStatus || ''}
-            loading={false}
             onChange={e =>
               setUserData({
                 ...userData,

@@ -12,17 +12,20 @@ import Tab from '@mui/material/Tab'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 
+import { toast } from 'react-toastify'
+
 import BasicContent from './BasicContent'
 import { initialData } from '@/data/initialData/userInfo'
-import type { EditUserInfoData } from '@/data/type/userInfoTypes'
 import DefaultModal from '@/app/_components/DefaultModal'
+import type { EditUserInfoData } from '@/app/_schema/types'
 
 type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
+  handlePageChange: () => void
 }
 
-const AddUserModal = ({ open, setOpen }: EditUserInfoProps) => {
+const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) => {
   // States
 
   const [value, setValue] = useState<string>('1')
@@ -39,14 +42,24 @@ const AddUserModal = ({ open, setOpen }: EditUserInfoProps) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
         method: 'POST',
-        body: {}
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(basicDto)
       })
 
-      console.log('Basic info saved:', response.data)
-      alert('기본 정보가 저장되었습니다.')
-    } catch (error) {
-      console.error(error)
+      const result = await response.json()
+
+      if (response.ok) {
+        console.log('new employee added', result.data)
+        toast.success('새 직원이 추가되었습니다.')
+      } else {
+        toast.error(`${result.statusCode}:\n${result.message}`)
+      }
+    } catch (error: any) {
+      toast.error(error)
     }
+
+    handlePageChange()
+    setOpen(false)
   }
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {

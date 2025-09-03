@@ -2,7 +2,7 @@
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
 
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 interface filterType {
   name: string
@@ -13,7 +13,7 @@ interface filterType {
   memberStatus: string
   page: number
   size: number
-  careerYear: number
+  careerYear: string
   contractType: string
   laborForm: string
   workForm: string
@@ -40,11 +40,10 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
     <CardContent>
       <Grid container spacing={6}>
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'companyName'}
             label='소속'
             value={filters.companyName || ''}
-            loading={false}
             onChange={(e: any) => handleFilterChange('companyName', e.target.value)}
             options={[
               { value: '엘림기술원(주)', label: '엘림기술원(주)' },
@@ -57,11 +56,10 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'officePosition'}
             label='직위'
             value={filters.officePosition || ''}
-            loading={loading}
             onChange={(e: any) => handleFilterChange('officePosition', e.target.value)}
             options={[
               { value: 'TEMPORARY', label: '단기' },
@@ -88,11 +86,10 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'officeDepartmentName'}
             label='부서'
             value={filters.officeDepartmentName || ''}
-            loading={false}
             onChange={(e: any) => handleFilterChange('officeDepartmentName', e.target.value)}
             options={[
               { value: '건설사업', label: '건설사업' },
@@ -106,11 +103,10 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'contractType'}
             label='계약 유형'
             value={filters.contractType || ''}
-            loading={false}
             onChange={(e: any) => handleFilterChange('contractType', e.target.value)}
             options={[
               { value: 'REGULAR', label: '정규직' },
@@ -124,11 +120,10 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'laborForm'}
             label='상근/비상근'
             value={filters?.laborForm || ''}
-            loading={false}
             onChange={(e: any) => handleFilterChange('laborForm', e.target.value)}
             options={[
               { value: 'RESIDENT', label: '상근' },
@@ -138,11 +133,10 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'workForm'}
             label='근무형태'
             value={filters.workForm || ''}
-            loading={false}
             onChange={(e: any) => handleFilterChange('workForm', e.target.value)}
             options={[
               { value: 'DEEMED', label: '간주근로' },
@@ -152,11 +146,10 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id='foreignYn'
             label='외국인 여부'
             value={filters.foreignYn || ''}
-            loading={false}
             onChange={(e: any) => handleFilterChange('foreignYn', e.target.value)}
             options={[
               { value: 'Y', label: '예' },
@@ -166,11 +159,10 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'gender'}
             label='성별'
             value={filters.gender || ''}
-            loading={false}
             onChange={(e: any) => handleFilterChange('gender', e.target.value)}
             options={[
               { value: 'MALE', label: '남' },
@@ -180,33 +172,31 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'careerYear'}
             label='근속년수'
-            value={filters.careerYear || ''}
-            loading={false}
+            value={filters.careerYear.toString() ?? ''}
             onChange={(e: any) => handleFilterChange('careerYear', e.target.value)}
             options={[
-              { value: 0, label: '1년차' },
-              { value: 1, label: '2년차' },
-              { value: 2, label: '3년차' },
-              { value: 3, label: '4년차' },
-              { value: 4, label: '5년차' },
-              { value: 5, label: '6년차' },
-              { value: 6, label: '7년차' },
-              { value: 7, label: '8년차' },
-              { value: 8, label: '9년차' },
-              { value: 9, label: '10년차' }
+              { value: '1', label: '1년차' },
+              { value: '2', label: '2년차' },
+              { value: '3', label: '3년차' },
+              { value: '4', label: '4년차' },
+              { value: '5', label: '5년차' },
+              { value: '6', label: '6년차' },
+              { value: '7', label: '7년차' },
+              { value: '8', label: '8년차' },
+              { value: '9', label: '9년차' },
+              { value: '10', label: '10년차' }
             ]}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'memberStatusDescription'}
             label='재직 상태'
             value={filters.memberStatus || ''}
-            loading={false}
             onChange={(e: any) => handleFilterChange('memberStatus', e.target.value)}
             options={[
               { value: 'NORMAL', label: '재직중' },

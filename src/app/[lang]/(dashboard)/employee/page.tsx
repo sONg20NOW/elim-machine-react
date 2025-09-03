@@ -13,14 +13,7 @@ import MenuItem from '@mui/material/MenuItem'
 // Table
 
 // Third-party Imports
-import classnames from 'classnames'
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable
-} from '@tanstack/react-table'
+import { createColumnHelper, getCoreRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 
 import { Input } from '@mui/material'
@@ -29,16 +22,15 @@ import { toast } from 'react-toastify'
 
 import membersHeaders from '@/app/_components/table/headerTranslate.json'
 
-import type { UsersType } from '@/types/apps/userTypes'
-
 // Component Imports
 import TableFilters from './_components/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import tableStyles from '@core/styles/table.module.css'
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
+import type { UsersType } from '@/app/_schema/types'
+import { CustomizedTable } from '@/app/_components/table/CustomizedTable'
 
 type UsersTypeWithAction = UsersType & {
   action?: string
@@ -70,7 +62,7 @@ const EmployeePage = () => {
     memberStatus: '',
     page: 0,
     size: 30,
-    careerYear: 0,
+    careerYear: '',
     contractType: '',
     laborForm: '',
     workForm: '',
@@ -281,74 +273,8 @@ const EmployeePage = () => {
         {/* 로딩 표시 */}
         {loading && <div className='text-center p-4'>Loading...</div>}
 
-        <div className='overflow-x-auto'>
-          <table className={tableStyles.table}>
-            <thead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id}>
-                      {/* 오름차순, 내림차순 토글 */}
-                      {header.isPlaceholder ? null : (
-                        <div
-                          key={header.id}
-                          className={classnames({
-                            'flex items-center': header.column.getIsSorted(),
-                            'cursor-pointer select-none': header.column.getCanSort()
-                          })}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {
-                            <i
-                              className={
-                                {
-                                  none: '',
-                                  asc: 'tabler-chevron-up text-xl',
-                                  desc: 'tabler-chevron-down text-xl'
-                                }[String(header.column.getIsSorted() ? header.column.getIsSorted() : 'none')] ?? ''
-                              }
-                            />
-                          }
-                        </div>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-
-            {data.length === 0 ? (
-              <tbody>
-                <tr>
-                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                    {loading ? 'Loading...' : 'No data available'}
-                  </td>
-                </tr>
-              </tbody>
-            ) : (
-              <tbody>
-                {data.map((row, index) => {
-                  const tableRow = table.getRowModel().rows[index]
-
-                  if (!tableRow) return null
-
-                  return (
-                    <tr
-                      key={row.memberId}
-                      className={classnames({ selected: tableRow.getIsSelected() }, 'cursor-pointer hover:bg-gray-50')}
-                      onClick={() => handleUserClick(row)}
-                    >
-                      {tableRow.getVisibleCells().map(cell => (
-                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                      ))}
-                    </tr>
-                  )
-                })}
-              </tbody>
-            )}
-          </table>
-        </div>
+        {/* table */}
+        <CustomizedTable<UsersType> table={table} data={data} loading={loading} handleRowClick={handleUserClick} />
         <TablePagination
           rowsPerPageOptions={[1, 10, 30, 50]} // 1 추가 (테스트용)
           component='div'
@@ -377,7 +303,13 @@ const EmployeePage = () => {
           }}
         />
       </Card>
-      {addUserModalOpen && <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} />}
+      {addUserModalOpen && (
+        <AddUserModal
+          open={addUserModalOpen}
+          setOpen={setAddUserModalOpen}
+          handlePageChange={() => handlePageChange(0)}
+        />
+      )}
       {userDetailModalOpen && selectedUser && (
         <UserModal
           open={userDetailModalOpen}

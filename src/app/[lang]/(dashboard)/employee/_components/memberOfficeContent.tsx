@@ -2,7 +2,7 @@ import { DialogContent, Divider, MenuItem } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 const MemberOfficeContent = ({ userData, setUserData }: any) => {
   return (
@@ -25,11 +25,10 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'officeDepartmentName'}
             label='부서'
             value={userData?.memberOfficeResponseDto?.officeDepartmentName ?? ''}
-            loading={false}
             onChange={e =>
               setUserData({
                 ...userData,
@@ -51,11 +50,10 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'officePosition'}
             label='직위'
             value={userData?.memberOfficeResponseDto?.officePosition || ''}
-            loading={false}
             onChange={(e: any) =>
               setUserData({
                 ...userData,
@@ -91,7 +89,7 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
       </Grid>
 
       <Divider className='my-[20px]' />
-      <Grid container spacing={2}>
+      <Grid container spacing={5}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <CustomTextField
             fullWidth
@@ -109,11 +107,10 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'contractType'}
             label='계약 유형'
             value={userData?.memberOfficeResponseDto?.contractType || ''}
-            loading={false}
             onChange={(e: any) =>
               setUserData({
                 ...userData,
@@ -154,11 +151,10 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           </CustomTextField>
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'laborForm'}
             label='상근/비상근'
             value={userData?.memberOfficeResponseDto?.laborForm || ''}
-            loading={false}
             onChange={(e: any) =>
               setUserData({
                 ...userData,
@@ -175,11 +171,10 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'workForm'}
             label='근무형태'
             value={userData?.memberOfficeResponseDto?.workForm || ''}
-            loading={false}
             onChange={(e: any) =>
               setUserData({
                 ...userData,
@@ -255,7 +250,7 @@ const MemberOfficeContent = ({ userData, setUserData }: any) => {
       </Grid>
 
       <Divider className='my-[20px]' />
-      <Grid container spacing={2}>
+      <Grid container spacing={5}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <CustomTextField
             fullWidth

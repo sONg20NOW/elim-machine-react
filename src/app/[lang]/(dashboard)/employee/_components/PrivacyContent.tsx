@@ -21,7 +21,8 @@ const PrivacyContent = ({
             select
             fullWidth
             label='외국인 여부'
-            value={userData?.memberPrivacyResponseDto?.foreignYn || ''}
+            onClick={() => console.log(userData?.memberPrivacyResponseDto?.foreignYn ?? '')}
+            value={userData?.memberPrivacyResponseDto?.foreignYn ?? ''}
             onChange={e =>
               setUserData({
                 ...userData,
@@ -32,7 +33,6 @@ const PrivacyContent = ({
               })
             }
           >
-            <MenuItem value=''>전체</MenuItem>
             <MenuItem value='Y'>예</MenuItem>
             <MenuItem value='N'>아니오</MenuItem>
           </CustomTextField>
