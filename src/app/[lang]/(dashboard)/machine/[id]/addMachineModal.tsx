@@ -8,7 +8,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, MenuIt
 
 import DialogCloseButton from './DialogCloseButton'
 import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 type EditUserInfoProps = {
   open: boolean
@@ -243,7 +243,7 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
           </Grid>
 
           <Grid item xs={12}>
-            <DefaultSelectBox
+            <MultiSelectBox
               label='점검자 1'
               id={'engineerNames'}
               value={formData.engineerId1 || ''}
@@ -256,7 +256,7 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
           </Grid>
 
           <Grid item xs={12}>
-            <DefaultSelectBox
+            <MultiSelectBox
               label='점검자 2'
               id={'engineerNames'}
               value={formData.engineerId2 || ''}
@@ -269,7 +269,7 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
           </Grid>
 
           <Grid item xs={12}>
-            <DefaultSelectBox
+            <MultiSelectBox
               label='점검자 3'
               id={'engineerNames'}
               value={formData.engineerId3 || ''}
@@ -282,7 +282,7 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
           </Grid>
 
           <Grid item xs={12}>
-            <DefaultSelectBox
+            <MultiSelectBox
               label='점검자 4'
               id={'engineerNames'}
               value={formData.engineerId4 || ''}

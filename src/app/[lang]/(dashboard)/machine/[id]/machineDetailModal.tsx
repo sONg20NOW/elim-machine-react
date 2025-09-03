@@ -7,7 +7,7 @@ import { Dialog, DialogTitle, DialogContent, Button } from '@mui/material'
 import axios from 'axios'
 
 import { initialData } from '@/data/initialData/userInfo'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 import CustomTextField from '@/@core/components/mui/TextField'
 import InspectionDetailModal from './insepctionDetailModal'
 
@@ -90,7 +90,7 @@ const MachineDetailModal = ({ id, open, setOpen, selectedMachine, engineerOption
               <td style={{ padding: '8px' }}>
                 <div className='flex gap-1 align-center items-center'>
                   {/* <div style={{ width: '25%' }}>
-                    <DefaultSelectBox
+                    <MultiSelectBox
                       id={'projectStatusDescription'}
                       value={'설치'}
                       loading={false}
@@ -124,7 +124,7 @@ const MachineDetailModal = ({ id, open, setOpen, selectedMachine, engineerOption
               <td style={{ padding: '8px' }} colSpan={3}>
                 <div className='grid grid-cols-4 gap-1'>
                   {(selectedMachine.engineerInfos || []).map((eng: any, idx: number) => (
-                    <DefaultSelectBox
+                    <MultiSelectBox
                       key={idx}
                       id={'engineerNames'}
                       value={eng.machineEngineerId || ''}

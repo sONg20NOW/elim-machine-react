@@ -27,7 +27,7 @@ import type { TextFieldProps } from '@mui/material/TextField'
 import DialogCloseButton from './DialogCloseButton'
 import CustomTextField from '@/@core/components/mui/TextField'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 type EditUserInfoProps = {
   open: boolean
@@ -169,7 +169,7 @@ const AddProjectModal = ({ open, setOpen }: EditUserInfoProps) => {
           <form onSubmit={handleSubmit} className='p-6'>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <DefaultSelectBox
+                <MultiSelectBox
                   id={'companyName'}
                   label='점검업체'
                   value={form.companyName || ''}

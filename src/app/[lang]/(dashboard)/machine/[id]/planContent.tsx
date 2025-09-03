@@ -4,7 +4,7 @@ import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 const PlanContent = ({ projectData, engineerOptions }: any) => {
   const [editData, setEditData] = useState(projectData || {})
@@ -273,7 +273,7 @@ const PlanContent = ({ projectData, engineerOptions }: any) => {
                     점검종류
                   </th>
                   <td style={{ padding: '10px 12px' }}>
-                    <DefaultSelectBox
+                    <MultiSelectBox
                       id={'projectStatusDescription'}
                       value={editData.machineProjectScheduleAndEngineerResponseDto.checkType || ''}
                       loading={false}
@@ -296,7 +296,7 @@ const PlanContent = ({ projectData, engineerOptions }: any) => {
                     건물등급
                   </th>
                   <td style={{ padding: '10px 12px' }}>
-                    <DefaultSelectBox
+                    <MultiSelectBox
                       id={'projectStatusDescription'}
                       value={editData.machineProjectScheduleAndEngineerResponseDto.buildingGrade || ''}
                       loading={false}
@@ -417,7 +417,7 @@ const PlanContent = ({ projectData, engineerOptions }: any) => {
                   (eng: any, idx: number) => (
                     <tr key={idx}>
                       <td style={{ padding: '6px', border: '1px solid #d1d5db' }} className='flex items-center gap-1'>
-                        <DefaultSelectBox
+                        <MultiSelectBox
                           id={'engineerNames'}
                           value={eng.engineerId || ''}
                           onChange={(e: any) => handleEngineerChange(idx, 'engineerId', e.target.value)}

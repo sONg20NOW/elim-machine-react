@@ -5,7 +5,7 @@ import { Button } from '@mui/material'
 import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
@@ -415,7 +415,7 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                     진행상태
                   </th>
                   <td style={{ padding: '10px 12px' }}>
-                    <DefaultSelectBox
+                    <MultiSelectBox
                       id={'projectStatusDescription'}
                       value={editData.machineProjectManagementResponseDto.projectStatus || ''}
                       loading={false}
@@ -463,7 +463,7 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                     점검 업체
                   </th>
                   <td style={{ padding: '10px 12px' }}>
-                    <DefaultSelectBox
+                    <MultiSelectBox
                       id={'companyName'}
                       value={editData.machineProjectManagementResponseDto.companyName || ''}
                       loading={false}
