@@ -103,7 +103,7 @@ const AddUserDrawer = (props: Props) => {
       memberEtcResponseDto: {
         militaryPeriod: ''
       },
-      isTechnician: false,
+      isTechnician: '',
       contractType: ''
     }
 

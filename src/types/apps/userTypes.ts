@@ -33,6 +33,6 @@ export type UsersType = {
   memberEtcResponseDto: {
     militaryPeriod: string
   }
-  isTechnician: boolean
+  isTechnician: string
   contractType: string
 }
