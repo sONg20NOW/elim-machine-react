@@ -27,10 +27,11 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
+import { BROWER_TAB_DESCRIPTION, BROWER_TAB_TITLE } from '../_constant/constants'
 
 export const metadata = {
-  title: 'Elim',
-  description: 'Elim-safety 114'
+  title: BROWER_TAB_TITLE,
+  description: BROWER_TAB_DESCRIPTION
 }
 
 const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
