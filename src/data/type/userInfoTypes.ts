@@ -1,4 +1,4 @@
-export type EditUserInfoData = {
+export type OldEditUserInfoData = {
   memberBasicResponseDto?: {
     companyName?: string
     email?: string
