@@ -1,4 +1,4 @@
-export const BROWER_TAB_TITLE = 'Elim'
+export const BROWER_TAB_TITLE = 'ELIM'
 export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
 
 // table 생성 중 헤더 생성에 필요.

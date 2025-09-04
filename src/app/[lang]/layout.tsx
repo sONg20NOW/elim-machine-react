@@ -31,7 +31,10 @@ import { BROWER_TAB_DESCRIPTION, BROWER_TAB_TITLE } from '../_constant/constants
 
 export const metadata = {
   title: BROWER_TAB_TITLE,
-  description: BROWER_TAB_DESCRIPTION
+  description: BROWER_TAB_DESCRIPTION,
+  icons: {
+    icon: '/images/elim_icon.png'
+  }
 }
 
 const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
