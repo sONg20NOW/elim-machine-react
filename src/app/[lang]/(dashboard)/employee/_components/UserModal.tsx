@@ -15,14 +15,10 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { toast } from 'react-toastify'
 
-import BasicContent from './BasicContent'
-import CareerContent from './CareerContent'
-import PrivacyContent from './PrivacyContent'
-import MemberOfficeContent from './memberOfficeContent'
-import type { EditUserInfoData } from '@/data/type/userInfoTypes'
 import { initialData } from '@/data/initialData/userInfo'
-import EtcContent from './etcContent'
 import DefaultModal from '@/app/_components/DefaultModal'
+import MemberTabContent from './memberTabContent'
+import type { EditUserInfoData } from '@/app/_schema/types'
 
 const requestRule = {
   basic: {
@@ -109,7 +105,7 @@ const UserModal = ({ open, setOpen, data, handlePageChange }: EditUserInfoProps)
 
   const handleClose = () => {
     setOpen(false)
-    setUserData(data || initialData)
+    setUserData(data ?? initialData)
   }
 
   const onSubmitHandler = async () => {
@@ -234,19 +230,19 @@ const UserModal = ({ open, setOpen, data, handlePageChange }: EditUserInfoProps)
         })}
       </TabList>
       <TabPanel value='1'>
-        <BasicContent userData={userData} setUserData={setUserData} />
+        <MemberTabContent tabName='basic' userData={userData} setUserData={setUserData} />
       </TabPanel>
       <TabPanel value='2'>
-        <PrivacyContent userData={userData} setUserData={setUserData} />
+        <MemberTabContent tabName='privacy' userData={userData} setUserData={setUserData} />
       </TabPanel>
       <TabPanel value='3'>
-        <MemberOfficeContent userData={userData} setUserData={setUserData} />
+        <MemberTabContent tabName='office' userData={userData} setUserData={setUserData} />
       </TabPanel>
       <TabPanel value='4'>
-        <CareerContent userData={userData} setUserData={setUserData} />
+        <MemberTabContent tabName='career' userData={userData} setUserData={setUserData} />
       </TabPanel>
       <TabPanel value='5'>
-        <EtcContent userData={userData} setUserData={setUserData} />
+        <MemberTabContent tabName='etc' userData={userData} setUserData={setUserData} />
       </TabPanel>
       {showDeleteModal && (
         <DefaultModal

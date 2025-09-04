@@ -14,7 +14,20 @@ interface YNSelectBoxProps {
 
 const YNSelectBox = ({ id, label, value, disabled = false, onChange }: YNSelectBoxProps) => {
   return (
-    <CustomTextField select fullWidth id={id} label={label} value={value || ''} onChange={onChange} disabled={disabled}>
+    <CustomTextField
+      select
+      fullWidth
+      id={id}
+      label={label}
+      value={value === '' ? '전체' : (value ?? '전체')}
+      onChange={onChange}
+      disabled={disabled}
+    >
+      {value === '' && (
+        <MenuItem disabled={true} value='전체'>
+          전체
+        </MenuItem>
+      )}
       <MenuItem value='Y'>예</MenuItem>
       <MenuItem value='N'>아니오</MenuItem>
     </CustomTextField>

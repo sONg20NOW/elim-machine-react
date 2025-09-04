@@ -14,10 +14,10 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { toast } from 'react-toastify'
 
-import BasicContent from './BasicContent'
 import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/DefaultModal'
 import type { EditUserInfoData } from '@/app/_schema/types'
+import MemberTabContent from './memberTabContent'
 
 type EditUserInfoProps = {
   open: boolean
@@ -87,7 +87,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) =>
         <Tab value='1' label='기본정보' />
       </TabList>
       <TabPanel value='1'>
-        <BasicContent userData={userData} setUserData={setUserData} />
+        <MemberTabContent tabName='basic' userData={userData} setUserData={setUserData} />
       </TabPanel>
     </DefaultModal>
   )

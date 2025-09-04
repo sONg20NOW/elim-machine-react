@@ -3,32 +3,40 @@ import type { ChangeEventHandler } from 'react'
 import { MenuItem } from '@mui/material'
 
 import CustomTextField from '@/@core/components/mui/TextField'
+import type { TabFieldType } from '@/app/_schema/EmployeeTabInfo'
 
 interface MultiSelectBoxProps {
+  tabField: TabFieldType
   id: string
-  label: string
   value: string
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
-  options: Array<object>
 }
 
-const MultiSelectBox = ({ id, label, value, disabled = false, onChange, options }: MultiSelectBoxProps) => {
+/**
+ *
+ * @param tabField
+ * 어떤 페이지에서 사용하는지 여부 (ex. employee, machine, ...)
+ * @param id
+ * 속성의 영어 이름 (ex. companyName, officePosition, ...)
+ * @returns
+ */
+const MultiSelectBox = ({ tabField, id, disabled = false, value, onChange }: MultiSelectBoxProps) => {
   return (
     <CustomTextField
+      id={id}
+      disabled={disabled}
       select
       fullWidth
-      id={id}
-      label={label}
-      value={value || ''}
+      label={tabField?.label ?? ''}
+      value={value ?? ''}
       onChange={onChange}
-      disabled={disabled}
       slotProps={{
         select: { displayEmpty: true }
       }}
     >
       <MenuItem value=''>전체</MenuItem>
-      {options.map((option: any) => (
+      {tabField?.options?.map(option => (
         <MenuItem key={option.value} value={option.value}>
           {option.label}
         </MenuItem>

@@ -27,10 +27,9 @@ import CustomTextField from '@core/components/mui/TextField'
 // Style Imports
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
-import type { UsersType } from '@/app/_schema/types'
+import type { EditUserInfoData, UsersType } from '@/app/_schema/types'
 import { CustomizedTable } from '@/app/_components/table/CustomizedTable'
 import { HEADERS } from '@/app/_constant/constants'
-import type { EditUserInfoData } from '@/data/type/userInfoTypes'
 
 const initialFilters = {
   roleDescription: '',
@@ -122,7 +121,7 @@ const EmployeePage = () => {
 
         setData(result?.data.content ?? [])
         setTotalCount(result?.data.page.totalElements)
-        console.log(result?.data)
+        console.log(data)
       } catch (error) {
         toast.error(`Failed to fetch filtered data: ${error}`)
       } finally {
