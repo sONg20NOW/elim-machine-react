@@ -5,23 +5,17 @@ import type { SyntheticEvent } from 'react'
 import { useState } from 'react'
 
 // MUI Imports
-import Dialog from '@mui/material/Dialog'
 import Button from '@mui/material/Button'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogActions from '@mui/material/DialogActions'
 
 // Component Imports
 import Tab from '@mui/material/Tab'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
-import TabContext from '@mui/lab/TabContext'
-
-import { IconButton } from '@mui/material'
 
 import BasicContent from './BasicContent'
 import { initialData } from '@/data/initialData/userInfo'
 import type { EditUserInfoData } from '@/data/type/userInfoTypes'
-import DefaultModal from '@/@layouts/components/DefaultModal'
+import DefaultModal from '@/app/_components/DefaultModal'
 
 type EditUserInfoProps = {
   open: boolean

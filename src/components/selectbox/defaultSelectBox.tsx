@@ -1,8 +1,19 @@
+import type { ChangeEventHandler } from 'react'
+
 import { MenuItem } from '@mui/material'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 
-const DefaultSelectBox = ({ id, label, value, loading, onChange, options }: any) => {
+interface DefaultSelectBoxProps {
+  id: string
+  label: string
+  value: string
+  loading: boolean
+  onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  options: Array<object>
+}
+
+const DefaultSelectBox = ({ id, label, value, loading, onChange, options }: DefaultSelectBoxProps) => {
   return (
     <CustomTextField
       select

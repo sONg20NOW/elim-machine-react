@@ -13,7 +13,8 @@ import { i18n } from '@configs/i18n'
 // Util Imports
 import { getDictionary } from '@/utils/getDictionary'
 import { getMode } from '@core/utils/serverHelpers'
-import ScrollToTopButton from '@/@layouts/components/ScrollToTopButton'
+
+import ScrollToTopButton from '@/app/_components/ScrollToTopButton'
 
 const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
   const params = await props.params

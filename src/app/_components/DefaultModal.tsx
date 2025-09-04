@@ -11,13 +11,14 @@ import DialogActions from '@mui/material/DialogActions'
 // Component Imports
 import TabContext from '@mui/lab/TabContext'
 
-import { IconButton } from '@mui/material'
+import { IconButton, Typography } from '@mui/material'
 
 type DefaultModalProps = {
   value: string
   open: boolean
   setOpen: (open: boolean) => void
   title: string
+  headerDescription?: string
   children?: ReactNode
   primaryButton?: ReactNode
   secondaryButton?: ReactNode
@@ -38,6 +39,7 @@ export default function DefaultModal({
   open,
   setOpen,
   title,
+  headerDescription,
   children,
   primaryButton,
   secondaryButton,
@@ -70,6 +72,9 @@ export default function DefaultModal({
       </IconButton>
       <DialogTitle variant='h4' className='flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'>
         {title}
+        <Typography component='span' className='flex flex-col text-center'>
+          {headerDescription}
+        </Typography>
       </DialogTitle>
       <div>
         <TabContext value={value}>{children}</TabContext>

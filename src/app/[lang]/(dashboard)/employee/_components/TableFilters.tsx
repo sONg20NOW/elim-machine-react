@@ -1,40 +1,18 @@
 // MUI Imports
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
-import MenuItem from '@mui/material/MenuItem'
 
-import CustomTextField from '@core/components/mui/TextField'
 import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
 
-const yearPlan = [
-  { value: 0, label: '1년차' },
-  { value: 1, label: '2년차' },
-  { value: 2, label: '3년차' },
-  { value: 3, label: '4년차' },
-  { value: 4, label: '5년차' },
-  { value: 5, label: '6년차' },
-  { value: 6, label: '7년차' },
-  { value: 7, label: '8년차' },
-  { value: 8, label: '9년차' },
-  { value: 9, label: '10년차' }
-]
-
-const memberStatusDescription = [
-  { value: 'NORMAL', label: '재직중' },
-  { value: 'QUIT', label: '퇴사' },
-  { value: 'PENDING', label: '가입 승인대기' },
-  { value: 'LEAVE', label: '휴직' }
-]
-
 interface filterType {
-  search: string
+  name: string
   roleDescription: string
   companyName: string
   officeDepartmentName: string
   officePosition: string
-  memberStatusDescription: string
+  memberStatus: string
   page: number
-  pageSize: number
+  size: number
   careerYear: number
   contractType: string
   laborForm: string
@@ -202,35 +180,40 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <CustomTextField
-            select
-            fullWidth
-            id='careerYear'
+          <DefaultSelectBox
+            id={'careerYear'}
             label='근속년수'
             value={filters.careerYear || ''}
-            onChange={e => handleFilterChange('careerYear', e.target.value)}
-            disabled={loading}
-            slotProps={{
-              select: { displayEmpty: true }
-            }}
-          >
-            <MenuItem value=''>전체</MenuItem>
-            {yearPlan.map(option => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </CustomTextField>
+            loading={false}
+            onChange={(e: any) => handleFilterChange('careerYear', e.target.value)}
+            options={[
+              { value: 0, label: '1년차' },
+              { value: 1, label: '2년차' },
+              { value: 2, label: '3년차' },
+              { value: 3, label: '4년차' },
+              { value: 4, label: '5년차' },
+              { value: 5, label: '6년차' },
+              { value: 6, label: '7년차' },
+              { value: 7, label: '8년차' },
+              { value: 8, label: '9년차' },
+              { value: 9, label: '10년차' }
+            ]}
+          />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
           <DefaultSelectBox
             id={'memberStatusDescription'}
             label='재직 상태'
-            value={filters.memberStatusDescription || ''}
+            value={filters.memberStatus || ''}
             loading={false}
-            onChange={(e: any) => handleFilterChange('memberStatusDescription', e.target.value)}
-            options={memberStatusDescription}
+            onChange={(e: any) => handleFilterChange('memberStatus', e.target.value)}
+            options={[
+              { value: 'NORMAL', label: '재직중' },
+              { value: 'QUIT', label: '퇴사' },
+              { value: 'PENDING', label: '가입 승인대기' },
+              { value: 'LEAVE', label: '휴직' }
+            ]}
           />
         </Grid>
       </Grid>
