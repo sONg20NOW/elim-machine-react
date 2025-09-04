@@ -17,6 +17,7 @@ C:\Users\MS\Desktop\full-version\src\components\layout\vertical\VerticalMenu.tsx
 ### 중요 데이터 설명 (app/_schema에 위치)
 1. type.tsx: 각종 유저 타입들을 설명
 2. EmployeeTabInfo.tsx: employee(직원관리) 탭의 정보들 총괄 관리 (filter, modal tab 관련)
+3. src\app\_constant\constants.tsx: 테이블 생성에 필요한 헤더를 (테이블이 필요한) 페이지별로 목차를 나누어 보관.
 
 
 ### 컴포넌트 설명
