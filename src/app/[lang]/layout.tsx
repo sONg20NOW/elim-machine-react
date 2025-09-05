@@ -27,7 +27,7 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
-import { BROWER_TAB_DESCRIPTION, BROWER_TAB_TITLE } from '../_constant/constants'
+import { BROWER_TAB_DESCRIPTION, BROWER_TAB_TITLE } from '../_schema/TableHeader'
 
 export const metadata = {
   title: BROWER_TAB_TITLE,

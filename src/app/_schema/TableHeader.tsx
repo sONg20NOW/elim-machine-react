@@ -1,10 +1,12 @@
+import type { UsersType } from './types'
+
 export const BROWER_TAB_TITLE = 'ELIM'
 export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
 
 // table 생성 중 헤더 생성에 필요.
 export const HEADERS = {
-  members: {
-    memberId: 'ID',
+  // 직원관리 탭 테이블
+  employee: {
     roleDescription: '권한',
     name: '이름',
     staffNum: '사번',
@@ -18,6 +20,6 @@ export const HEADERS = {
     joinDate: '입사일',
     careerYear: '근속년수',
     memberStatusDescription: '상태'
-  },
+  } as Record<keyof UsersType, string>,
   engineers: {}
 }
