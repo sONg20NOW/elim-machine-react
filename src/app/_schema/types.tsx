@@ -51,7 +51,7 @@ export type UsersType = {
   joinDate: string
   careerYear: number
   memberStatusDescription: string
-  isTechnician: string
+  genderDescription: string
 }
 
 // userInfoTypes.ts
@@ -165,3 +165,15 @@ export interface EmployeeFilterType {
   gender: string
   foreignYn: string
 }
+
+// table header 관련 타입
+export interface HeaderInfoType {
+  label: string
+  canSort: boolean
+}
+
+export type HeaderType<T> = Record<keyof T, HeaderInfoType>
+
+export type SortType = '' | 'asc' | 'desc'
+
+export type SortInfoType<T> = Record<'target', keyof T> & Record<'sort', SortType>

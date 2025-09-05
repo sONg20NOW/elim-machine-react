@@ -52,10 +52,10 @@ type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
   data?: EditUserInfoData
-  reloadDate: () => void
+  reloadData: () => void
 }
 
-const UserModal = ({ open, setOpen, data, reloadDate }: EditUserInfoProps) => {
+const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
   // States
 
   const [value, setValue] = useState<string>('1')
@@ -93,7 +93,7 @@ const UserModal = ({ open, setOpen, data, reloadDate }: EditUserInfoProps) => {
   const onDeleteUserConfirm = async () => {
     try {
       await handleDeleteUser()
-      reloadDate()
+      reloadData()
     } catch (error: any) {
       toast.error(`${error.message}`)
     }
@@ -177,7 +177,7 @@ const UserModal = ({ open, setOpen, data, reloadDate }: EditUserInfoProps) => {
       toast.error(error)
     }
 
-    reloadDate()
+    reloadData()
     setOpen(false)
   }
 

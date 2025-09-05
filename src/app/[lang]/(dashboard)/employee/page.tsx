@@ -1,6 +1,5 @@
 'use client'
 
-// React Imports
 import { useEffect, useState, useCallback } from 'react'
 
 // MUI Imports
@@ -22,10 +21,10 @@ import CustomTextField from '@core/components/mui/TextField'
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
 import type { EditUserInfoData, EmployeeFilterType, UsersType } from '@/app/_schema/types'
-import { CustomizedTable } from '@/app/_components/table/CustomizedTable'
-import { HEADERS } from '@/app/_schema/TableHeader'
-import CreateTableInstance from '@/app/_components/table/CreateTableInstance'
-import CreateColumns from '@/app/_components/table/CreateColumns'
+import { HEADERS, InitialSorting } from '@/app/_schema/TableHeader'
+import BasicTable from '@/app/_components/table/BasicTable'
+import CompactButton from '@/app/_components/button/CompactButton'
+import IconButton from '@/app/_components/button/IconButton'
 
 // 초기 필터링 값
 const initialFilters: EmployeeFilterType = {
@@ -47,9 +46,15 @@ const PageSizeOptions = [1, 10, 30, 50]
 
 const EmployeePage = () => {
   // States
-  const [rowSelection, setRowSelection] = useState({})
   const [data, setData] = useState<UsersType[]>([])
+
+  // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
+
+  // 에러 발생 시 true
+  const [error, setError] = useState(false)
+  const disabled = loading || error
+
   const [totalCount, setTotalCount] = useState(0)
 
   // 이름 검색 인풋
@@ -70,26 +75,37 @@ const EmployeePage = () => {
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(initialFilters)
 
+  // 정렬 상태
+  const [sorting, setSorting] = useState(InitialSorting)
+
   const queryParams = new URLSearchParams()
 
   // 직원 리스트 호출 API 함수
   const fetchFilteredData = useCallback(async () => {
     setLoading(true)
+    setError(false)
 
     try {
       // 필터링
-      Object.keys(filters).map(filter => {
-        const key = filter as keyof EmployeeFilterType
+      Object.keys(filters).map(prop => {
+        const key = prop as keyof EmployeeFilterType
 
         if (filters[key]) {
-          queryParams.set(filter, filters[key] as string)
+          queryParams.set(prop, filters[key] as string)
         } else {
-          queryParams.delete(filter)
+          queryParams.delete(prop)
         }
       })
 
+      // 정렬
+      if (sorting.sort) {
+        queryParams.append('sort', `${sorting.target},${sorting.sort}`.toString())
+      } else {
+        queryParams.delete('sort')
+      }
+
       // 이름으로 검색
-      if (nameToFilter !== '') {
+      if (nameToFilter) {
         queryParams.set('name', nameToFilter)
       } else {
         queryParams.delete('name')
@@ -106,43 +122,22 @@ const EmployeePage = () => {
       const result = await response.json()
 
       setData(result?.data.content ?? [])
+      setPage(result?.data.page.number)
+      setSize(result?.data.page.size)
       setTotalCount(result?.data.page.totalElements)
-      console.log(result?.data)
+      console.log(result)
     } catch (error) {
       toast.error(`Failed to fetch filtered data: ${error}`)
+      setError(true)
     } finally {
       setLoading(false)
     }
-  }, [filters, page, size, nameToFilter])
+  }, [filters, sorting, page, size, nameToFilter])
 
   // 필터 변경 시 API 호출
   useEffect(() => {
     fetchFilteredData()
   }, [filters, fetchFilteredData])
-
-  // column 생성
-  const columns = CreateColumns<UsersType>(HEADERS.employee)
-
-  // table 인스턴스 생성
-  const table = CreateTableInstance<UsersType>({ data, columns, rowSelection, setRowSelection, pageSize: size })
-
-  // TODO: 현재 sort 기능 미구현으로 불가.
-  // 정렬 시 마다 그에 맞게 데이터 페칭
-  const handleToggleSorting = async (headerId: string, isSorted: boolean | 'asc' | 'desc') => {
-    if (isSorted) {
-      try {
-        queryParams.set('sort', `${headerId}, ${isSorted as 'asc' | 'desc'}`)
-        fetchFilteredData()
-      } catch (error) {
-        toast.error(`Failed to fetch filtered data: ${error}`)
-      } finally {
-        setLoading(false)
-      }
-    } else {
-      queryParams.delete('sort')
-      fetchFilteredData()
-    }
-  }
 
   // 사용자 선택 핸들러
   const handleUserClick = async (user: UsersType) => {
@@ -163,17 +158,21 @@ const EmployeePage = () => {
   return (
     <>
       <Card>
+        {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<i className='tabler-reload' />}
           onClick={() => setFilters(initialFilters)}
           className='max-sm:is-full absolute right-8 top-8'
-          disabled={loading}
+          disabled={disabled}
         >
           필터 초기화
         </Button>
+        {/* 탭 제목 */}
         <CardHeader title='직원관리' className='pbe-4' />
-        <TableFilters filters={filters} onFiltersChange={setFilters} loading={loading} setPage={setPage} />
+        {/* 필터바 */}
+        <TableFilters filters={filters} onFiltersChange={setFilters} disabled={disabled} setPage={setPage} />
 
+        {/* 이름으로 검색 */}
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <div className='flex justify-center items-center gap-2'>
             <Input
@@ -188,7 +187,7 @@ const EmployeePage = () => {
               }}
               placeholder='이름으로 검색'
               className='max-sm:is-full'
-              disabled={loading}
+              disabled={disabled}
               sx={{
                 borderTop: '1px solid var(--mui-palette-customColors-inputBorder)',
                 borderBottom: '1px solid var(--mui-palette-customColors-inputBorder)',
@@ -211,22 +210,19 @@ const EmployeePage = () => {
               }}
               disableUnderline={true}
             />
-            <Button
-              variant={'contained'}
-              className='text-color-primary-light  hover:text-color-primary-dark grid place-items-center p-[5px]'
-            >
-              <i
-                className='tabler-search text-3xl text-white'
-                onClick={() => {
-                  setNameToFilter(name)
-                  setPage(0)
-                }}
-              />
-            </Button>
+            <IconButton
+              tablerIcon='tabler-search'
+              onClick={() => {
+                setNameToFilter(name)
+                setPage(0)
+              }}
+              disabled={disabled}
+            />
           </div>
 
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
             <div className='flex gap-3 itmes-center'>
+              {/* 페이지당 행수 */}
               <span className='grid place-items-center'>페이지당 행 수 </span>
               <CustomTextField
                 select
@@ -236,7 +232,7 @@ const EmployeePage = () => {
                   setPage(0)
                 }}
                 className='gap-[5px]'
-                disabled={loading}
+                disabled={disabled}
               >
                 {PageSizeOptions.map(pageSize => (
                   <MenuItem key={pageSize} value={pageSize}>
@@ -245,32 +241,39 @@ const EmployeePage = () => {
                 ))}
               </CustomTextField>
             </div>
-            <Button
-              variant='contained'
-              startIcon={<i className='tabler-plus' />}
+
+            {/* 유저 추가 버튼 */}
+            <CompactButton
+              tablerIcon='tabler-plus'
               onClick={() => setAddUserModalOpen(!addUserModalOpen)}
-              className='max-sm:is-full'
-              disabled={loading}
-            >
-              추가
-            </Button>
+              text='추가'
+              disabled={disabled}
+            />
           </div>
         </div>
+
+        {/* 테이블 */}
+        <BasicTable<UsersType>
+          header={HEADERS.employee}
+          data={data}
+          handleRowClick={handleUserClick}
+          page={page}
+          pageSize={size}
+          Exceptions={{ age: ['age', 'genderDescription'] }}
+          sorting={sorting}
+          setSorting={setSorting}
+          disabled={disabled}
+        />
 
         {/* 로딩 표시 */}
         {loading && <div className='text-center p-4'>Loading...</div>}
 
-        {/* 테이블 */}
-        <CustomizedTable<UsersType>
-          table={table}
-          data={data}
-          loading={loading}
-          handleRowClick={handleUserClick}
-          handleToggleSorting={handleToggleSorting}
-        />
+        {/* 데이터가 없을 경우 */}
+        {error && <div className='text-center p-4'>There is problem to fetch data...</div>}
+
         {/* 페이지네이션 */}
         <TablePagination
-          rowsPerPageOptions={PageSizeOptions} // 1 추가 (테스트용)
+          rowsPerPageOptions={PageSizeOptions}
           component='div'
           count={totalCount}
           rowsPerPage={size}
@@ -282,7 +285,7 @@ const EmployeePage = () => {
             setSize(newsize)
             setPage(0)
           }}
-          disabled={loading}
+          disabled={disabled}
           showFirstButton
           showLastButton
           labelRowsPerPage='페이지당 행 수:'
@@ -297,6 +300,7 @@ const EmployeePage = () => {
           }}
         />
       </Card>
+      {/* 모달들 */}
       {addUserModalOpen && (
         <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} handlePageChange={() => setPage(0)} />
       )}
@@ -305,7 +309,7 @@ const EmployeePage = () => {
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           data={selectedUser}
-          reloadDate={() => fetchFilteredData()} //수정 시 데이터 리페치를 위한 상태
+          reloadData={() => fetchFilteredData()}
         />
       )}
     </>

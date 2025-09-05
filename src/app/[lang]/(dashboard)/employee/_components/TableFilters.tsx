@@ -11,11 +11,11 @@ import type { EmployeeFilterType } from '@/app/_schema/types'
 interface TableFiltersProps {
   filters: EmployeeFilterType
   onFiltersChange: (filters: EmployeeFilterType) => void
-  loading: boolean
+  disabled: boolean
   setPage: Dispatch<SetStateAction<number>>
 }
 
-const TableFilters = ({ filters, onFiltersChange, loading, setPage }: TableFiltersProps) => {
+const TableFilters = ({ filters, onFiltersChange, disabled, setPage }: TableFiltersProps) => {
   const handleFilterChange = (key: string, value: string) => {
     onFiltersChange({
       ...filters,
@@ -33,7 +33,7 @@ const TableFilters = ({ filters, onFiltersChange, loading, setPage }: TableFilte
             size='sm'
             tabInfos={EMPLOYEE_FILTER_INFO}
             tabFieldKey={property}
-            disabled={loading}
+            disabled={disabled}
             value={filters[property as keyof EmployeeFilterType]?.toString() ?? ''}
             onChange={(e: any) => handleFilterChange(property, e.target.value)}
           />
