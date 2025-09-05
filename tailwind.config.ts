@@ -33,6 +33,12 @@ const config: Config = {
             DEFAULT: 'rgba(255, 88, 88, 1)',
             light: 'rgba(255, 145, 145, 1)',
             dark: 'rgba(209, 61, 61, 1)'
+          },
+          border: {
+            DEFAULT: '#d1d0d4'
+          },
+          background: {
+            header: '#f1f1f1ff'
           }
         },
         background: 'hsl(var(--background))',
