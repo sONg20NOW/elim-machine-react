@@ -1,40 +1,27 @@
 // MUI Imports
+import type { Dispatch, SetStateAction } from 'react'
+
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
 
 import { EMPLOYEE_FILTER_INFO } from '@/app/_schema/EmployeeTabInfo'
 import { InputBox } from '@/components/selectbox/InputBox'
-
-interface filterType {
-  name: string
-  roleDescription: string
-  companyName: string
-  officeDepartmentName: string
-  officePosition: string
-  memberStatus: string
-  page: number
-  size: number
-  careerYear: string
-  contractType: string
-  laborForm: string
-  workForm: string
-  gender: string
-  foreignYn: string
-}
+import type { EmployeeFilterType } from '@/app/_schema/types'
 
 interface TableFiltersProps {
-  filters: filterType
-  onFiltersChange: (filters: filterType) => void
+  filters: EmployeeFilterType
+  onFiltersChange: (filters: EmployeeFilterType) => void
   loading: boolean
+  setPage: Dispatch<SetStateAction<number>>
 }
 
-const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) => {
-  const handleFilterChange = (key: string, value: any) => {
+const TableFilters = ({ filters, onFiltersChange, loading, setPage }: TableFiltersProps) => {
+  const handleFilterChange = (key: string, value: string) => {
     onFiltersChange({
       ...filters,
-      [key]: value,
-      page: 0 // 필터 변경 시 첫 페이지로
+      [key]: value
     })
+    setPage(0)
   }
 
   return (
@@ -47,7 +34,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
             tabInfos={EMPLOYEE_FILTER_INFO}
             tabFieldKey={property}
             disabled={loading}
-            value={filters[property as keyof filterType]?.toString() ?? ''}
+            value={filters[property as keyof EmployeeFilterType]?.toString() ?? ''}
             onChange={(e: any) => handleFilterChange(property, e.target.value)}
           />
         ))}

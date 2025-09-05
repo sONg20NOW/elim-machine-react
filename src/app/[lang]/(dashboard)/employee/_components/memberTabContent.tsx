@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { DialogContent } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-import type { AddressType, EditUserInfoData, memberPrivacyData, TabType } from '@/app/_schema/types'
+import type { EditUserInfoData, TabType } from '@/app/_schema/types'
 import { EMPLOYEE_DETAIL_TAB_INFO } from '@/app/_schema/EmployeeTabInfo'
 import { InputBox } from '@/components/selectbox/InputBox'
 
@@ -28,37 +28,10 @@ const MemberTabContent = ({
 
   const properties = Object.keys(EMPLOYEE_DETAIL_TAB_INFO[tabName])
 
-  // 예외 항목들 핸들링
-  const addressKeys = Object.keys({} as AddressType) as string[]
-
   return (
     <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
       <Grid container spacing={5}>
         {properties.map(property => {
-          // address 예외 핸들링
-          if (addressKeys.includes(property)) {
-            return (
-              <InputBox
-                key={property}
-                tabInfos={tabInfos}
-                tabFieldKey={property}
-                value={
-                  ((userData[dtoMap[tabName]] as memberPrivacyData)['address'] as Record<string, string>)[property] ??
-                  ''
-                }
-                onChange={e => {
-                  setUserData({
-                    ...userData,
-                    [dtoMap[tabName]]: {
-                      ...userData[dtoMap[tabName]],
-                      [property]: e.target.value
-                    }
-                  })
-                }}
-              />
-            )
-          }
-
           return (
             <InputBox
               key={property}

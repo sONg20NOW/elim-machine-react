@@ -54,13 +54,6 @@ export type UsersType = {
   isTechnician: string
 }
 
-// 주소 타입
-export type AddressType = {
-  roadAddress?: string | null
-  jibunAddress?: string | null
-  detailAddress?: string | null
-}
-
 // userInfoTypes.ts
 interface memberBasicData {
   companyName?: string
@@ -121,7 +114,9 @@ interface memberOfficeData {
   workFormDescription?: string
 }
 export interface memberPrivacyData {
-  address?: AddressType
+  roadAddress?: string | null
+  jibunAddress?: string | null
+  detailAddress?: string | null
   bankName?: string
   bankNumber?: string
   birthday?: string
@@ -154,4 +149,19 @@ export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date'
 
 export type TabType = {
   employee: 'basic' | 'privacy' | 'office' | 'career' | 'etc'
+}
+
+// filter 관련 타입
+export interface EmployeeFilterType {
+  role: string
+  companyName: string
+  officeDepartmentName: string
+  officePosition: string
+  memberStatus: string
+  careerYear: string
+  contractType: string
+  laborForm: string
+  workForm: string
+  gender: string
+  foreignYn: string
 }

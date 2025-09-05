@@ -11,9 +11,10 @@ interface TableProps<T> {
   data: T[]
   loading: boolean
   handleRowClick: (row: T) => void
+  handleToggleSorting: (headerId: string, isSorted: boolean | 'asc' | 'desc') => void
 }
 
-export function CustomizedTable<T>({ table, data, loading, handleRowClick }: TableProps<T>) {
+export function CustomizedTable<T>({ table, data, loading, handleRowClick, handleToggleSorting }: TableProps<T>) {
   return (
     <div className='overflow-x-auto'>
       <table className={tableStyles.table}>
@@ -33,6 +34,7 @@ export function CustomizedTable<T>({ table, data, loading, handleRowClick }: Tab
                       })}
                       onClick={() => {
                         header.column.toggleSorting()
+                        handleToggleSorting(header.id, header.column.getIsSorted())
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}

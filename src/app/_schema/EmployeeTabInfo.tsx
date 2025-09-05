@@ -4,7 +4,7 @@
 // label: id를 한글화한 것
 // options: 선택지
 
-import type { AddressType, BoxSizeType, EditUserInfoData, InputType, TabType } from './types'
+import type { BoxSizeType, EditUserInfoData, EmployeeFilterType, InputType, TabType } from './types'
 
 export type TabFieldType = {
   size?: BoxSizeType
@@ -14,11 +14,9 @@ export type TabFieldType = {
   disable?: boolean
 }
 
-type AllSubKeys =
-  | {
-      [K in keyof EditUserInfoData]: keyof EditUserInfoData[K]
-    }[keyof EditUserInfoData]
-  | keyof AddressType
+type AllSubKeys = {
+  [K in keyof EditUserInfoData]: keyof EditUserInfoData[K]
+}[keyof EditUserInfoData]
 
 export type employeeTab = Record<TabType['employee'], Partial<Record<AllSubKeys, TabFieldType>>>
 
@@ -52,11 +50,12 @@ export const EMPLOYEE_DETAIL_TAB_INFO: employeeTab = {
       type: 'multi',
       label: '권한',
       options: [
-        { value: 'USER', label: '유저' },
+        { value: 'GUEST', label: '게스트' },
+        { value: 'USER', label: '일반 사용자' },
         { value: 'STAFF', label: '직원' },
         { value: 'MANAGER', label: '매니저' },
-        { value: 'ADMIN', label: '어드민' },
-        { value: 'SUPERADMIN', label: '슈퍼어드민' }
+        { value: 'ADMIN', label: '관리자' },
+        { value: 'SUPERADMIN', label: '최고 관리자' }
       ]
     },
     memberStatus: {
@@ -390,11 +389,12 @@ export const EMPLOYEE_DETAIL_TAB_INFO: employeeTab = {
 }
 
 // 필터
-const { companyName, memberStatus } = EMPLOYEE_DETAIL_TAB_INFO.basic
+const { role, companyName, memberStatus } = EMPLOYEE_DETAIL_TAB_INFO.basic
 const { officePosition, officeDepartmentName, contractType, laborForm, workForm } = EMPLOYEE_DETAIL_TAB_INFO.office
 const { foreignYn } = EMPLOYEE_DETAIL_TAB_INFO.privacy
 
-export const EMPLOYEE_FILTER_INFO: Record<string, TabFieldType> = {
+export const EMPLOYEE_FILTER_INFO: Record<keyof EmployeeFilterType, TabFieldType> = {
+  role: role!,
   companyName: companyName!,
   officePosition: officePosition!,
   officeDepartmentName: officeDepartmentName!,
