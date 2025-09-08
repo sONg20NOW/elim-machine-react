@@ -1,24 +1,18 @@
-import type { Dispatch, SetStateAction } from 'react'
-
 import { IconButton, Input } from '@mui/material'
 
 interface SearchBarProps {
-  name: string
-  setName: Dispatch<SetStateAction<string>>
-  onClick: () => void
+  onClick: (name: string) => void
   disabled?: boolean
 }
 
-export default function SearchBar({ name, setName, onClick, disabled }: SearchBarProps) {
+export default function SearchBar({ onClick, disabled }: SearchBarProps) {
   return (
     <div className='relative'>
       <Input
-        value={name}
-        onChange={(e: any) => setName(e.target.value)}
         id='name_search_input'
         onKeyDown={(e: any) => {
           if (e.key === 'Enter') {
-            onClick()
+            onClick(e.target.value)
           }
         }}
         placeholder='이름으로 검색'
@@ -45,7 +39,9 @@ export default function SearchBar({ name, setName, onClick, disabled }: SearchBa
       />
       <IconButton
         onClick={() => {
-          onClick()
+          const nameSearchInput = document.getElementById('name_search_input') as HTMLInputElement
+
+          onClick(nameSearchInput?.value ?? '')
         }}
         disabled={disabled}
         color='primary'

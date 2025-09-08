@@ -6,7 +6,7 @@ export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
 // table 생성 중 헤더 생성에 필요.
 export const HEADERS = {
   // 직원관리 탭 테이블
-  employee: {
+  member: {
     roleDescription: { label: '권한', canSort: true },
     name: { label: '이름', canSort: true },
     staffNum: { label: '사번', canSort: false },
@@ -25,6 +25,6 @@ export const HEADERS = {
 
 // 초기 정렬 값
 export const InitialSorting = {
-  target: 'roleDescription',
+  target: '',
   sort: ''
 } as SortInfoType<memberPageDtoType>

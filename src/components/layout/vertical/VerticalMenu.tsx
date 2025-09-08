@@ -113,7 +113,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           </MenuItem>
         </MenuSection>
         <MenuSection label='관리'>
-          <MenuItem href={`/${locale}/employee`} icon={<i className='tabler-users-plus' />}>
+          <MenuItem href={`/${locale}/member`} icon={<i className='tabler-users-plus' />}>
             {'직원관리'}
           </MenuItem>
           <MenuItem href={``} icon={<i className='tabler-history' />}>

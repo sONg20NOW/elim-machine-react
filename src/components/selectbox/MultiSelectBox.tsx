@@ -3,7 +3,7 @@ import type { ChangeEventHandler } from 'react'
 import { MenuItem } from '@mui/material'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import type { TabFieldType } from '@/app/_schema/EmployeeTabInfo'
+import type { TabFieldType } from '@/app/_schema/MemberTabInfo'
 
 interface MultiSelectBoxProps {
   tabField: TabFieldType
@@ -17,7 +17,7 @@ interface MultiSelectBoxProps {
 /**
  *
  * @param tabField
- * 어떤 페이지에서 사용하는지 여부 (ex. employee, machine, ...)
+ * 어떤 페이지에서 사용하는지 여부 (ex. member, machine, ...)
  * @param id
  * 속성의 영어 이름 (ex. companyName, officePosition, ...)
  * @returns

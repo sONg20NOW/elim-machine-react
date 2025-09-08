@@ -18,13 +18,13 @@ import CustomTextField from '@core/components/mui/TextField'
 // Style Imports
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
-import type { memberDetailDtoType, EmployeeFilterType, memberPageDtoType } from '@/app/_schema/types'
+import type { memberDetailDtoType, MemberFilterType, memberPageDtoType } from '@/app/_schema/types'
 import { HEADERS, InitialSorting } from '@/app/_schema/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
 
 // 초기 필터링 값
-const initialFilters: EmployeeFilterType = {
+const initialFilters: MemberFilterType = {
   role: '',
   companyName: '',
   officeDepartmentName: '',
@@ -41,8 +41,8 @@ const initialFilters: EmployeeFilterType = {
 // 페이지 당 행수 선택 옵션
 const PageSizeOptions = [1, 10, 30, 50]
 
-const EmployeePage = () => {
-  // States
+export default function MemberPage() {
+  // 데이터 리스트
   const [data, setData] = useState<memberPageDtoType[]>([])
 
   // 로딩 시도 중 = true, 로딩 끝 = false
@@ -50,24 +50,24 @@ const EmployeePage = () => {
 
   // 에러 발생 시 true
   const [error, setError] = useState(false)
+
+  // 로딩이 끝나고 에러가 없으면 not disabled
   const disabled = loading || error
 
+  // 전체 데이터 개수 => fetching한 데이터에서 추출
   const [totalCount, setTotalCount] = useState(0)
 
   // 이름 검색 인풋
   const [name, setName] = useState('')
 
-  // 실제 필터링에 사용되는 상태
-  const [nameToFilter, setNameToFilter] = useState('')
-
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
   const [size, setSize] = useState(30)
 
-  // States에 추가
+  // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<memberDetailDtoType | null>(null)
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<memberDetailDtoType | null>(null)
 
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(initialFilters)
@@ -75,6 +75,7 @@ const EmployeePage = () => {
   // 정렬 상태
   const [sorting, setSorting] = useState(InitialSorting)
 
+  // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
 
   // 직원 리스트 호출 API 함수
@@ -85,51 +86,42 @@ const EmployeePage = () => {
     try {
       // 필터링
       Object.keys(filters).map(prop => {
-        const key = prop as keyof EmployeeFilterType
+        const key = prop as keyof MemberFilterType
 
-        if (filters[key]) {
-          queryParams.set(prop, filters[key] as string)
-        } else {
-          queryParams.delete(prop)
-        }
+        filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
       })
 
       // 정렬
-      if (sorting.sort) {
-        queryParams.append('sort', `${sorting.target},${sorting.sort}`.toString())
-      } else {
-        queryParams.delete('sort')
-      }
+      sorting.sort
+        ? queryParams.append('sort', `${sorting.target},${sorting.sort}`.toString())
+        : queryParams.delete('sort')
 
       // 이름으로 검색
-      if (nameToFilter) {
-        queryParams.set('name', nameToFilter)
-      } else {
-        queryParams.delete('name')
-      }
+      name ? queryParams.set('name', name) : queryParams.delete('name')
 
       // 페이지 관련 설정
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
 
+      // 데이터 받아오기
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members?${queryParams.toString()}`, {
         method: 'GET'
       })
 
       const result = await response.json()
 
+      // 데이터 반영하여 상태 변경
       setData(result?.data.content ?? [])
       setPage(result?.data.page.number)
       setSize(result?.data.page.size)
       setTotalCount(result?.data.page.totalElements)
-      console.log(result)
     } catch (error) {
       toast.error(`Failed to fetch filtered data: ${error}`)
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, size, nameToFilter])
+  }, [filters, sorting, page, size, name])
 
   // 필터 변경 시 API 호출
   useEffect(() => {
@@ -172,10 +164,8 @@ const EmployeePage = () => {
         <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           {/* 이름으로 검색 */}
           <SearchBar
-            name={name}
-            setName={setName}
-            onClick={() => {
-              setNameToFilter(name)
+            onClick={name => {
+              setName(name)
               setPage(0)
             }}
             disabled={disabled}
@@ -218,7 +208,7 @@ const EmployeePage = () => {
 
         {/* 테이블 */}
         <BasicTable<memberPageDtoType>
-          header={HEADERS.employee}
+          header={HEADERS.member}
           data={data}
           handleRowClick={handleUserClick}
           page={page}
@@ -280,5 +270,3 @@ const EmployeePage = () => {
     </>
   )
 }
-
-export default EmployeePage

@@ -18,7 +18,7 @@ import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/DefaultModal'
 import type { memberDetailDtoType } from '@/app/_schema/types'
 import MemberTabContent from './memberTabContent'
-import { EMPLOYEE_DETAIL_TAB_INFO } from '@/app/_schema/EmployeeTabInfo'
+import { MEMBER_DETAIL_TAB_INFO } from '@/app/_schema/MemberTabInfo'
 
 type EditUserInfoProps = {
   open: boolean
@@ -41,7 +41,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) =>
     const basicDto = { ...userData?.memberBasicResponseDto }
 
     // 비고란을 제외한 칸이 다 안 채워져있으면 (basic만)
-    Object.keys(EMPLOYEE_DETAIL_TAB_INFO.basic).forEach(key => {
+    Object.keys(MEMBER_DETAIL_TAB_INFO.basic).forEach(key => {
       if (!basicDto[key as keyof typeof basicDto]) {
         toast.error('비고를 제외한 모든 직원 정보를 입력해주세요.')
 
@@ -59,7 +59,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) =>
       const result = await response.json()
 
       if (response.ok) {
-        console.log('new employee added', result.data)
+        console.log('new member added', result.data)
         toast.success('새 직원이 추가되었습니다.')
       } else {
         toast.error(`${result.statusCode}:\n${result.message}`)

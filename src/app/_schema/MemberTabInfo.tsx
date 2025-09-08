@@ -4,7 +4,7 @@
 // label: id를 한글화한 것
 // options: 선택지
 
-import type { BoxSizeType, memberDetailDtoType, EmployeeFilterType, InputType, TabType } from './types'
+import type { BoxSizeType, memberDetailDtoType, MemberFilterType, InputType, TabType } from './types'
 
 export type TabFieldType = {
   size?: BoxSizeType
@@ -18,10 +18,10 @@ type AllSubKeys = {
   [K in keyof memberDetailDtoType]: keyof memberDetailDtoType[K]
 }[keyof memberDetailDtoType]
 
-export type employeeTab = Record<TabType['employee'], Partial<Record<AllSubKeys, TabFieldType>>>
+export type memberTab = Record<TabType['member'], Partial<Record<AllSubKeys, TabFieldType>>>
 
 // 유저 상세 페이지
-export const EMPLOYEE_DETAIL_TAB_INFO: employeeTab = {
+export const MEMBER_DETAIL_TAB_INFO: memberTab = {
   basic: {
     name: {
       size: 'md',
@@ -389,11 +389,11 @@ export const EMPLOYEE_DETAIL_TAB_INFO: employeeTab = {
 }
 
 // 필터
-const { role, companyName, memberStatus } = EMPLOYEE_DETAIL_TAB_INFO.basic
-const { officePosition, officeDepartmentName, contractType, laborForm, workForm } = EMPLOYEE_DETAIL_TAB_INFO.office
-const { foreignYn } = EMPLOYEE_DETAIL_TAB_INFO.privacy
+const { role, companyName, memberStatus } = MEMBER_DETAIL_TAB_INFO.basic
+const { officePosition, officeDepartmentName, contractType, laborForm, workForm } = MEMBER_DETAIL_TAB_INFO.office
+const { foreignYn } = MEMBER_DETAIL_TAB_INFO.privacy
 
-export const EMPLOYEE_FILTER_INFO: Record<keyof EmployeeFilterType, TabFieldType> = {
+export const MEMBER_FILTER_INFO: Record<keyof MemberFilterType, TabFieldType> = {
   role: role!,
   companyName: companyName!,
   officePosition: officePosition!,

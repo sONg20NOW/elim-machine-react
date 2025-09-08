@@ -2,7 +2,7 @@ import type { ChangeEventHandler } from 'react'
 
 import Grid from '@mui/material/Grid2'
 
-import { type TabFieldType } from '@/app/_schema/EmployeeTabInfo'
+import { type TabFieldType } from '@/app/_schema/MemberTabInfo'
 import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
@@ -25,7 +25,7 @@ interface InputBoxProps {
  * @param tabFieldKey
  * box 구성 정보를 알아내는 데 필요한 id (ex. companyName, ...)
  * @see
- * src\app\_schema\EmployeeTabInfo.tsx 참고
+ * src\app\_schema\MemberTabInfo.tsx 참고
  */
 export function InputBox({ size, tabInfos, tabFieldKey, disabled = false, value, onChange }: InputBoxProps) {
   const SizeMap = {

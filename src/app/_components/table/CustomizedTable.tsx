@@ -33,8 +33,9 @@ export function CustomizedTable<T>({ table, data, loading, handleRowClick, handl
                         'cursor-pointer select-none': header.column.getCanSort()
                       })}
                       onClick={() => {
-                        header.column.toggleSorting()
                         handleToggleSorting(header.id, header.column.getIsSorted())
+
+                        header.column.toggleSorting()
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}

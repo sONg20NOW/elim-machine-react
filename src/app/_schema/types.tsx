@@ -1,43 +1,5 @@
-// Type Imports
-// import type { ThemeColor } from '@core/types'
-// export type OldmemberPageDtoType = {
-//   memberId: number
-//   role: string
-//   status: string
-//   avatar: string
-//   company: string
-//   country: string
-//   contact: string
-//   fullName: string
-//   username: string
-//   currentPlan: string
-//   avatarColor?: ThemeColor
-//   billing: string
-
-//   // 여기부터 직원관리
-//   auth: string
-//   roleDescription: string
-//   name: string
-//   officeDepartmentName: string
-//   companyName: string
-//   age: number
-//   email: string
-//   phoneNumber: string
-//   joinDate: string
-//   careerYear: number
-//   memberStatusDescription: string
-//   staffNum: string
-//   officePosition: string
-//   officePositionDescription: string
-//   memberEtcResponseDto: {
-//     militaryPeriod: string
-//   }
-//   isTechnician: string
-//   contractType: string
-// }
-
-// -------- 직원관리 타입 --------
-// api/members
+// -------- 직원관리 --------
+// api/members (리스트)
 export type memberPageDtoType = {
   memberId: number
   roleDescription: string
@@ -142,17 +104,13 @@ export interface memberPrivacyDtoType {
   version?: number
 }
 
-// 모달 Box 관련 타입
-export type BoxSizeType = 'sm' | 'md' | 'lg'
-
-export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date'
-
+// 직원관리 - 상세페이지 모달
 export type TabType = {
-  employee: 'basic' | 'privacy' | 'office' | 'career' | 'etc'
+  member: 'basic' | 'privacy' | 'office' | 'career' | 'etc'
 }
 
-// filter 관련 타입
-export interface EmployeeFilterType {
+// 직원관리 필터
+export interface MemberFilterType {
   role: string
   companyName: string
   officeDepartmentName: string
@@ -166,7 +124,112 @@ export interface EmployeeFilterType {
   foreignYn: string
 }
 
-// table header 관련 타입
+// ----------- 기계설비현장 -----------
+// api/machine-projects (리스트)
+export interface machineProjectPageDtoType {
+  machineProjectId: number
+  projectStatusDescription: string
+  region: string
+  machineProjectName: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  inspectionCount: number
+  companyName: string
+  grossArea: number
+  tel: string
+  engineerNames: string[]
+}
+
+// api/machine-projects/[machineProjectId]
+export type MachineProjectDetailDtoType = {
+  machineProjectResponseDto: machineProjectDtoType
+  machineProjectScheduleAndEngineerResponseDto: MachineProjectScheduleAndEngineerDtoType
+}
+
+// 관리 정보 DTO
+export type machineProjectDtoType = {
+  roadAddress?: string | null
+  bizno?: string | null
+  completeDate?: string | null
+  contractDate?: string | null
+  contractManager?: string | null
+  contractManagerEmail?: string | null
+  contractManagerTel?: string | null
+  contractPartner?: string | null
+  contractPartnerEmail?: string | null
+  contractPartnerTel?: string | null
+  contractPrice?: number | null
+  grossArea?: number | null
+  houseCnt?: number | null
+  institutionName?: string | null
+  machineMaintainer1Info?: string | null
+  machineMaintainer1Name?: string | null
+  machineMaintainer2Info?: string | null
+  machineMaintainer2Name?: string | null
+  machineMaintainer3Info?: string | null
+  machineMaintainer3Name?: string | null
+  machineManager1Info?: string | null
+  machineManager1Name?: string | null
+  machineManager2Info?: string | null
+  machineManager2Name?: string | null
+  machineManager3Info?: string | null
+  machineManager3Name?: string | null
+  manager?: string | null
+  managerPhone?: string | null
+  projectStatus?: string | null
+  projectStatusDescription?: string | null
+  purpose?: string | null
+  representative?: string | null
+  requirement?: string | null
+  structure?: string | null
+  tel?: string | null
+  vatIncludedYn?: string | null
+  version?: number | null
+}
+
+// 일정 및 기술진 DTO
+export type MachineProjectScheduleAndEngineerDtoType = {
+  beginDate?: string | null
+  buildingGrade?: string | null
+  buildingGradeDescription?: string | null
+  checkType?: string | null
+  checkTypeDescription?: string | null
+  endDate?: string | null
+  engineers?: machineProjectEngineerDetailDtoType[] // 필요시 엔지니어 타입 정의
+  fieldBeginDate?: string | null
+  fieldEndDate?: string | null
+  machineProjectId?: number | null
+  note?: string | null
+  reportDeadline?: string | null
+  reportManagerEmail?: string | null
+  tiIssueDate?: string | null
+  version?: number | null
+}
+
+// 엔지니어 정보
+export interface machineProjectEngineerDetailDtoType {
+  engineerId: number
+  memberName: string
+  grade: string
+  gradeDescription: string
+  licenseNum: string
+  beginDate: string
+  endDate: string
+  note: string
+}
+
+// 기계설비현장 필터
+export interface MachineFilterType {
+  projectStatusDescription: string
+  region: string
+  companyName: string
+  engineerName: string
+}
+
+// ----------- 공통 -----------
+
+// 테이블 헤더
 export interface HeaderInfoType {
   label: string
   canSort: boolean
@@ -174,6 +237,11 @@ export interface HeaderInfoType {
 
 export type HeaderType<T> = Record<keyof T, HeaderInfoType>
 
+// 테이블 정렬
 export type SortType = '' | 'asc' | 'desc'
 
-export type SortInfoType<T> = Record<'target', keyof T> & Record<'sort', SortType>
+export type SortInfoType<T> = Record<'target', keyof T | ''> & Record<'sort', SortType>
+
+// 모달 Box 사이징, 입력 타입
+export type BoxSizeType = 'sm' | 'md' | 'lg'
+export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date'

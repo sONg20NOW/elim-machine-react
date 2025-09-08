@@ -18,17 +18,17 @@ import TabPanel from '@mui/lab/TabPanel'
 import axios from 'axios'
 
 import SiteInfoContent from './siteInfoContent'
-import type { MachineProjectDetail } from '@/types/apps/machineTypes'
 import PlanContent from './planContent'
 import MachineContent from './machineContent'
 import MachinePictures from './machinePictures'
 import NoteContent from './noteContent'
+import type { MachineProjectDetailDtoType } from '@/app/_schema/types'
 
 const MachineUpdatePage = () => {
   const params = useParams()
   const id = params?.id as string
 
-  const [projectData, setProjectData] = useState<MachineProjectDetail | null>(null)
+  const [projectData, setProjectData] = useState<MachineProjectDetailDtoType | null>(null)
   const [engineerOptions, setEngineerOptions] = useState([])
   const [value, setValue] = useState<string>('1')
 
@@ -103,7 +103,7 @@ const MachineUpdatePage = () => {
                 />
               </TabList>
               <TabPanel value='1'>
-                {projectData?.machineProjectManagementResponseDto ? (
+                {projectData?.machineProjectResponseDto ? (
                   <SiteInfoContent projectData={projectData} />
                 ) : (
                   <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>

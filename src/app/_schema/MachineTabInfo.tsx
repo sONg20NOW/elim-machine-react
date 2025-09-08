@@ -7,7 +7,7 @@
 
 type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date'
 
-type EmployeeTabType = 'basic' | 'privacy' | 'office' | 'career' | 'etc'
+type MemberTabType = 'basic' | 'privacy' | 'office' | 'career' | 'etc'
 
 export type TabField = {
   size: 'sm' | 'md' | 'lg'
@@ -16,9 +16,9 @@ export type TabField = {
   options?: Array<{ value: string; label: string }>
 }
 
-export type employeeTab = Record<EmployeeTabType, Record<string, TabField>>
+export type memberTab = Record<MemberTabType, Record<string, TabField>>
 
-export const MACHINE_TAB_INFO: employeeTab = {
+export const MACHINE_TAB_INFO: memberTab = {
   basic: {
     name: {
       size: 'md',

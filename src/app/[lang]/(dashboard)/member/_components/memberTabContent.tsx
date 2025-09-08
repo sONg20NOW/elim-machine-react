@@ -4,7 +4,7 @@ import { DialogContent } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
 import type { memberDetailDtoType, TabType } from '@/app/_schema/types'
-import { EMPLOYEE_DETAIL_TAB_INFO } from '@/app/_schema/EmployeeTabInfo'
+import { MEMBER_DETAIL_TAB_INFO } from '@/app/_schema/MemberTabInfo'
 import { InputBox } from '@/components/selectbox/InputBox'
 
 const MemberTabContent = ({
@@ -12,11 +12,11 @@ const MemberTabContent = ({
   userData,
   setUserData
 }: {
-  tabName: TabType['employee']
+  tabName: TabType['member']
   userData: memberDetailDtoType
   setUserData: Dispatch<SetStateAction<memberDetailDtoType>>
 }) => {
-  const tabInfos = EMPLOYEE_DETAIL_TAB_INFO[tabName]
+  const tabInfos = MEMBER_DETAIL_TAB_INFO[tabName]
 
   const dtoMap: Record<typeof tabName, keyof memberDetailDtoType> = {
     basic: 'memberBasicResponseDto',
@@ -26,11 +26,11 @@ const MemberTabContent = ({
     etc: 'memberEtcResponseDto'
   }
 
-  const properties = Object.keys(EMPLOYEE_DETAIL_TAB_INFO[tabName])
+  const properties = Object.keys(MEMBER_DETAIL_TAB_INFO[tabName])
 
   return (
     <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-      <Grid container spacing={5}>
+      <Grid container spacing={3}>
         {properties.map(property => {
           return (
             <InputBox

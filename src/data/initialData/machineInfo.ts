@@ -1,8 +1,8 @@
-import type { MachineProjectDetail } from '@/types/apps/machineTypes'
+import type { MachineProjectDetailDtoType } from '@/app/_schema/types'
 
-export const initialData: MachineProjectDetail = {
-  machineProjectManagementResponseDto: {
-    address: null,
+export const initialData: MachineProjectDetailDtoType = {
+  machineProjectResponseDto: {
+    roadAddress: null,
     bizno: null,
     completeDate: null,
     contractDate: null,

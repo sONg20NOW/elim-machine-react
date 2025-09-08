@@ -63,7 +63,7 @@ export default function BasicTable<T extends Record<string, string | number>>({
   }
 
   return (
-    <TableContainer className='rounded-t-lg p-2 '>
+    <TableContainer className='px-2'>
       <Table sx={{ minWidth: 650 }} aria-label='simple table' className='relative'>
         <TableHead className='select-none'>
           <TableRow>
@@ -137,7 +137,7 @@ export default function BasicTable<T extends Record<string, string | number>>({
           ))}
         </TableBody>
         {/* 전달된 데이터가 없을 때 */}
-        {data.length === 0 && <caption className='text-center'>There is no data!</caption>}
+        {data.length === 0 && <caption className='text-center py-5'>데이터가 없습니다.</caption>}
       </Table>
     </TableContainer>
   )
