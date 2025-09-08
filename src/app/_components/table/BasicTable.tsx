@@ -21,7 +21,7 @@ import type { HeaderType, SortInfoType } from '@/app/_type/types'
  * (ex. {age: ['age', 'genderDescription']}) => 나이 항목에 나이와 성별을 동시에 표시.
  * @returns
  */
-export default function BasicTable<T extends Record<string, string | number>>({
+export default function BasicTable<T extends Record<keyof T, string | number | string[]>>({
   header,
   data,
   handleRowClick,
@@ -30,7 +30,8 @@ export default function BasicTable<T extends Record<string, string | number>>({
   sorting,
   setSorting,
   Exceptions,
-  disabled = false
+  loading,
+  error
 }: {
   header: HeaderType<T>
   data: T[]
@@ -40,11 +41,13 @@ export default function BasicTable<T extends Record<string, string | number>>({
   sorting: SortInfoType<T>
   setSorting: Dispatch<SetStateAction<SortInfoType<T>>>
   Exceptions?: Partial<Record<keyof T, Array<keyof T>>>
-  disabled?: boolean
+  loading: boolean
+  error: boolean
 }) {
   function toggleOrder(key: string) {
+    // 로딩이 끝나고 에러가 없으면 not disabled
     if (key !== sorting.target) {
-      setSorting({ target: key, sort: 'asc' })
+      setSorting({ target: key as keyof T, sort: 'asc' })
     } else {
       switch (sorting.sort) {
         case '':
@@ -78,11 +81,11 @@ export default function BasicTable<T extends Record<string, string | number>>({
                   key={key}
                   align='center'
                   className={classNames('relative text-base', {
-                    'cursor-pointer hover:underline': !disabled && header[k].canSort,
+                    'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
                     'font-bold select-none': header[k].canSort,
                     'font-medium': !header[k].canSort
                   })}
-                  onClick={!disabled && header[k].canSort ? () => toggleOrder(key) : undefined}
+                  onClick={!(loading || error) && header[k].canSort ? () => toggleOrder(key) : undefined}
                 >
                   <div className='flex'></div>
                   <span>{header[k].label}</span>
@@ -117,7 +120,8 @@ export default function BasicTable<T extends Record<string, string | number>>({
                 // header 속성에 포함되지 않다면 출력 x & 예외 출력
                 if (!Object.keys(header).includes(property)) return null
                 else if (Exceptions && Object.keys(Exceptions).includes(property)) {
-                  const pieces = Exceptions[property]?.map(value => user[value])
+                  const key = property as keyof typeof Exceptions
+                  const pieces = Exceptions[key]?.map(value => user[value])
                   const output = pieces?.join('  ')
 
                   return (
@@ -136,8 +140,13 @@ export default function BasicTable<T extends Record<string, string | number>>({
             </TableRow>
           ))}
         </TableBody>
+
         {/* 전달된 데이터가 없을 때 */}
-        {data.length === 0 && <caption className='text-center py-5'>데이터가 없습니다.</caption>}
+        {data.length === 0 && (
+          <caption className='text-center py-5'>
+            {loading ? 'Loading...' : error ? '데이터를 불러오는 데 실패했습니다.' : '데이터가 없습니다.'}
+          </caption>
+        )}
       </Table>
     </TableContainer>
   )

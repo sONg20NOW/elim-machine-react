@@ -31,7 +31,7 @@ import CustomTextField from '@core/components/mui/TextField'
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
-import AddMachineModal from './addProjectModal'
+import AddMachineModal from './addMachineProjectModal'
 
 type MachineTypeWithAction = MachineType & {
   action?: string

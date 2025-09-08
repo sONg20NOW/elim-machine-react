@@ -1,9 +1,9 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useMemo, useCallback, forwardRef } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
-import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
@@ -11,38 +11,23 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-// Third-party Imports
-import classnames from 'classnames'
-import { flexRender } from '@tanstack/react-table'
-
-import { Input } from '@mui/material'
-
-import { format } from 'date-fns'
-
-import type { TextFieldProps } from '@mui/material/TextField'
-
 import { toast } from 'react-toastify'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import tableStyles from '@core/styles/table.module.css'
-import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
-import AddMachineModal from './_components/addProjectModal'
+import AddMachineModal from './_components/addMachineProjectModal'
 import type { MachineFilterType, machineProjectPageDtoType } from '@/app/_type/types'
-import { InitialSorting } from '@/app/_type/TableHeader'
-
-// TODO: initialFilters 뺴고 싹 다 정리
-type CustomInputProps = TextFieldProps & {
-  label: string
-  end: Date | number
-  start: Date | number
-}
+import { HEADERS, createInitialSorting } from '@/app/_type/TableHeader'
+import TableFilters from '@/app/_components/table/TableFilters'
+import { MACHINE_FILTER_INFO } from '@/app/_schema/filter/MachineFilterInfo'
+import SearchBar from '@/app/_components/SearchBar'
+import BasicTable from '@/app/_components/table/BasicTable'
 
 // 초기 필터링 값
 const initialFilters: MachineFilterType = {
-  projectStatusDescription: '',
+  projectStatus: '',
   companyName: '',
   engineerName: '', // ← engineerNames → engineerName
   region: ''
@@ -75,21 +60,17 @@ export default function MachinePage() {
   const [page, setPage] = useState(0)
   const [size, setSize] = useState(30)
 
-  // 상세 페이지 관련
+  // 모달 상태
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
 
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(initialFilters)
 
   // 정렬 상태
-  const [sorting, setSorting] = useState(InitialSorting)
+  const [sorting, setSorting] = useState(createInitialSorting<machineProjectPageDtoType>)
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
-
-  const [startDate, setStartDate] = useState<Date | null>(null)
-  const [endDate, setEndDate] = useState<Date | null>(null)
-  const [rowSelection, setRowSelection] = useState({})
 
   // 기계설비현장 리스트 호출 API 함수
   const fetchFilteredData = useCallback(async () => {
@@ -145,215 +126,114 @@ export default function MachinePage() {
     fetchFilteredData()
   }, [filters, fetchFilteredData])
 
-  const CustomInput = forwardRef((props: CustomInputProps, ref) => {
-    const { label, start, end, ...rest } = props
+  // 기계설비현장 선택 핸들러
+  const handleMachineProjectClick = async (machineProject: machineProjectPageDtoType) => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProject?.machineProjectId}`,
+      {
+        method: 'GET'
+      }
+    )
 
-    const startDate = format(start, 'MM/dd/yyyy')
-    const endDate = end !== null ? ` - ${format(end, 'MM/dd/yyyy')}` : null
+    const data = await response.json()
 
-    const value = `${startDate}${endDate !== null ? endDate : ''}`
-
-    return <CustomTextField fullWidth inputRef={ref} {...rest} label={label} value={value} />
-  })
-
-  const handleOnChange = (dates: any) => {
-    const [start, end] = dates
-
-    setStartDate(start)
-    setEndDate(end)
-
-    setFilters(prev => ({
-      ...prev,
-      fieldBeginDate: start,
-      fieldEndDate: end
-    }))
+    if (response.ok) {
+      redirect(`/machine/${machineProject?.machineProjectId}`)
+    } else {
+      toast.error(data.message)
+    }
   }
 
   return (
     <>
       <Card>
         <CardHeader title='기계설비현장' className='pbe-4' />
-        <TableFilters filterInfo={} filters={filters} onFiltersChange={setFilters} loading={loading} />
-
+        {/* 필터바 */}
+        <TableFilters<MachineFilterType>
+          filterInfo={MACHINE_FILTER_INFO}
+          filters={filters}
+          onFiltersChange={setFilters}
+          disabled={disabled}
+          setPage={setPage}
+        />
+        {/* 필터 초기화 버튼 */}
+        <Button
+          startIcon={<i className='tabler-reload' />}
+          onClick={() => setFilters(initialFilters)}
+          className='max-sm:is-full absolute right-8 top-8'
+          disabled={disabled}
+        >
+          필터 초기화
+        </Button>
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <div className='flex justify-center items-center gap-2'>
-            <CustomTextField
-              select
-              value={filters.size}
-              onChange={e => handlePageSizeChange(Number(e.target.value))}
-              className='max-sm:is-full sm:is-[70px]'
-              disabled={loading}
-            >
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={30}>30</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-            </CustomTextField>
-            <Input
-              value={search}
-              onChange={e => setSearch(e.currentTarget.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  console.log('검색어:', e.currentTarget.value)
-                  handleSearchChange(search)
-                }
-              }}
-              placeholder='이름으로 검색'
-              className='max-sm:is-full'
-              disabled={loading}
-              sx={{
-                borderTop: '1px solid var(--mui-palette-customColors-inputBorder)',
-                borderBottom: '1px solid var(--mui-palette-customColors-inputBorder)',
-                borderLeft: '1px solid var(--mui-palette-customColors-inputBorder)',
-                borderRight: '1px solid var(--mui-palette-customColors-inputBorder)',
-                borderRadius: 0,
-                background: 'transparent',
-                boxShadow: 'none',
-                '&:hover': {
-                  borderColor: 'var(--mui-palette-primary-main)'
-                },
-                '&.Mui-focused': {
-                  borderColor: 'var(--mui-palette-primary-main)'
-                },
-                padding: '5px 10px',
-                borderTopRightRadius: 6,
-                borderBottomRightRadius: 6,
-                borderTopLeftRadius: 6,
-                borderBottomLeftRadius: 6
-              }}
-              disableUnderline={true}
-            />
-            <p>현장투입 기간: </p>
-            <AppReactDatepicker
-              selectsRange
-              endDate={endDate as Date}
-              selected={startDate}
-              startDate={startDate as Date}
-              id='date-range-picker'
-              onChange={handleOnChange}
-              shouldCloseOnSelect={false}
-              customInput={<CustomInput label='' start={startDate as Date | number} end={endDate as Date | number} />}
-            />
-            <Button
-              variant='contained'
-              onClick={() => {
-                console.log('1개월 버튼 클릭')
-              }}
-              className='max-sm:is-full'
-              disabled={loading}
-            >
-              1개월
-            </Button>
-            <Button
-              variant='contained'
-              onClick={() => {
-                console.log('1개월 버튼 클릭')
-              }}
-              className='max-sm:is-full'
-              disabled={loading}
-            >
-              3개월
-            </Button>
-            <Button
-              variant='contained'
-              onClick={() => {
-                console.log('1개월 버튼 클릭')
-              }}
-              className='max-sm:is-full'
-              disabled={loading}
-            >
-              6개월
-            </Button>
-          </div>
-
-          <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
+          {/* 이름으로 검색 */}
+          <SearchBar
+            onClick={name => {
+              setName(name)
+              setPage(0)
+            }}
+            disabled={disabled}
+          />
+          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+            <div className='flex gap-3 itmes-center'>
+              {/* 페이지당 행수 */}
+              <span className='grid place-items-center'>페이지당 행 수 </span>
+              <CustomTextField
+                select
+                value={size.toString()}
+                onChange={e => {
+                  setSize(Number(e.target.value))
+                  setPage(0)
+                }}
+                className='gap-[5px]'
+                disabled={disabled}
+              >
+                {PageSizeOptions.map(pageSize => (
+                  <MenuItem key={pageSize} value={pageSize}>
+                    {pageSize}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            </div>
+            {/* 기계설비현장 추가 버튼 */}
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
               onClick={() => setAddMachineModalOpen(!addMachineModalOpen)}
               className='max-sm:is-full'
-              disabled={loading}
+              disabled={disabled}
             >
               추가
             </Button>
           </div>
         </div>
 
-        {/* 로딩 표시 */}
-        {loading && <div className='text-center p-4'>Loading...</div>}
-
-        <div className='overflow-x-auto'>
-          <table className={tableStyles.table}>
-            <thead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id}>
-                      {header.isPlaceholder ? null : (
-                        <div
-                          className={classnames({
-                            'flex items-center': header.column.getIsSorted(),
-                            'cursor-pointer select-none': header.column.getCanSort()
-                          })}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: <i className='tabler-chevron-up text-xl' />,
-                            desc: <i className='tabler-chevron-down text-xl' />
-                          }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
-                        </div>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-
-            {data.length === 0 ? (
-              <tbody>
-                <tr>
-                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                    {loading ? 'Loading...' : 'No data available'}
-                  </td>
-                </tr>
-              </tbody>
-            ) : (
-              <tbody>
-                {data.map((row, index) => {
-                  const tableRow = table.getRowModel().rows[index]
-
-                  if (!tableRow) return null
-
-                  return (
-                    <tr key={row.machineProjectId} className='hover:bg-gray-50'>
-                      {tableRow.getVisibleCells().map(cell => (
-                        <td key={tableRow.id + '-' + cell.column.id}>
-                          <Link href={`/en/machine/${row.machineProjectId}`}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </Link>
-                        </td>
-                      ))}
-                    </tr>
-                  )
-                })}
-              </tbody>
-            )}
-          </table>
-        </div>
+        {/* 테이블 */}
+        <BasicTable<machineProjectPageDtoType>
+          header={HEADERS.machine}
+          data={data}
+          handleRowClick={handleMachineProjectClick}
+          page={page}
+          pageSize={size}
+          sorting={sorting}
+          setSorting={setSorting}
+          loading={loading}
+          error={error}
+        />
 
         <TablePagination
           rowsPerPageOptions={[1, 10, 30, 50]} // 1 추가 (테스트용)
           component='div'
           count={totalCount}
-          rowsPerPage={filters.size}
-          page={filters.page}
-          onPageChange={(_, newPage) => handlePageChange(newPage)}
+          rowsPerPage={size}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
           onRowsPerPageChange={event => {
             const newPageSize = parseInt(event.target.value, 10)
 
-            handlePageSizeChange(newPageSize)
+            setSize(newPageSize)
           }}
-          disabled={loading}
+          disabled={disabled}
           showFirstButton
           showLastButton
           labelRowsPerPage='페이지당 행 수:'
@@ -368,7 +248,14 @@ export default function MachinePage() {
           }}
         />
       </Card>
-      {addMachineModalOpen && <AddMachineModal open={addMachineModalOpen} setOpen={setAddMachineModalOpen} />}
+      {/* 생성 모달 */}
+      {addMachineModalOpen && (
+        <AddMachineModal
+          open={addMachineModalOpen}
+          setOpen={setAddMachineModalOpen}
+          handlePageChange={() => setPage(0)}
+        />
+      )}
     </>
   )
 }

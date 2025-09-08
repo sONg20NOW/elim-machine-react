@@ -19,7 +19,7 @@ import CustomTextField from '@core/components/mui/TextField'
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
 import type { memberDetailDtoType, MemberFilterType, memberPageDtoType } from '@/app/_type/types'
-import { HEADERS, InitialSorting } from '@/app/_type/TableHeader'
+import { createInitialSorting, HEADERS } from '@/app/_type/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_schema/filter/MemberFilterInfo'
@@ -74,7 +74,7 @@ export default function MemberPage() {
   const [filters, setFilters] = useState(initialFilters)
 
   // 정렬 상태
-  const [sorting, setSorting] = useState(InitialSorting)
+  const [sorting, setSorting] = useState(createInitialSorting<memberPageDtoType>)
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
@@ -148,9 +148,10 @@ export default function MemberPage() {
   return (
     <>
       <Card>
+        {/* 탭 제목 */}
         <CardHeader title='직원관리' className='pbe-4' />
         {/* 필터바 */}
-        <TableFilters
+        <TableFilters<MemberFilterType>
           filterInfo={MEMBER_FILTER_INFO}
           filters={filters}
           onFiltersChange={setFilters}
@@ -166,7 +167,6 @@ export default function MemberPage() {
         >
           필터 초기화
         </Button>
-        {/* 탭 제목 */}
         <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           {/* 이름으로 검색 */}
           <SearchBar
@@ -176,7 +176,6 @@ export default function MemberPage() {
             }}
             disabled={disabled}
           />
-
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
             <div className='flex gap-3 itmes-center'>
               {/* 페이지당 행수 */}
@@ -222,14 +221,9 @@ export default function MemberPage() {
           Exceptions={{ age: ['age', 'genderDescription'] }}
           sorting={sorting}
           setSorting={setSorting}
-          disabled={disabled}
+          loading={loading}
+          error={error}
         />
-
-        {/* 로딩 표시 */}
-        {loading && <div className='text-center p-4'>Loading...</div>}
-
-        {/* 데이터가 없을 경우 */}
-        {error && <div className='text-center p-4'>There is problem in fetching data...</div>}
 
         {/* 페이지네이션 */}
         <TablePagination

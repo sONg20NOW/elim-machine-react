@@ -54,9 +54,10 @@ interface InputBoxContainerProps {
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
   disabled?: boolean
   tabField: InputFieldType
+  placeholder?: string
 }
 
-function InputBoxContainer({ tabField, tabFieldKey, value, disabled, onChange }: InputBoxContainerProps) {
+function InputBoxContainer({ tabField, tabFieldKey, value, disabled, onChange, placeholder }: InputBoxContainerProps) {
   switch (tabField?.type) {
     case 'date':
     case 'number':
@@ -104,6 +105,22 @@ function InputBoxContainer({ tabField, tabFieldKey, value, disabled, onChange }:
           label={tabField.label}
           value={value}
           onChange={onChange}
+          placeholder={placeholder}
+        />
+      )
+    case 'long text':
+      return (
+        <CustomTextField
+          multiline
+          rows={4}
+          slotProps={{ htmlInput: { name: tabFieldKey } }}
+          id={tabFieldKey}
+          disabled={disabled}
+          fullWidth
+          label={tabField.label}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
         />
       )
     default:

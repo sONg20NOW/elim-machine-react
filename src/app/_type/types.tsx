@@ -12,12 +12,16 @@ type AllSubKeys<T> = {
 
 export type TabType = {
   member: 'basic' | 'privacy' | 'office' | 'career' | 'etc'
-  machine: ''
+  machine: 'project' | 'schedule'
 }
 
-// -------- 직원관리 --------
 // member 인풋 정보 형식
 export type memberInputType = InputInfoType<TabType['member'], memberDetailDtoType>
+
+// machine 인풋 정보 형식
+export type machineInputType = InputInfoType<TabType['machine'], MachineProjectDetailDtoType>
+
+// -------- 직원관리 --------
 
 // api/members (리스트)
 export type memberPageDtoType = {
@@ -175,6 +179,7 @@ export type machineProjectDtoType = {
   contractPartnerEmail?: string | null
   contractPartnerTel?: string | null
   contractPrice?: number | null
+  companyName?: string | null
   grossArea?: number | null
   houseCnt?: number | null
   institutionName?: string | null
@@ -236,7 +241,7 @@ export interface machineProjectEngineerDetailDtoType {
 
 // 기계설비현장 필터
 export interface MachineFilterType {
-  projectStatusDescription: string
+  projectStatus: string
   region: string
   companyName: string
   engineerName: string
@@ -267,4 +272,4 @@ export type SortInfoType<T> = Record<'target', keyof T | ''> & Record<'sort', So
 
 // 모달 Box 사이징, 입력 타입
 export type BoxSizeType = 'sm' | 'md' | 'lg'
-export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date'
+export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text'

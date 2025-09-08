@@ -20,13 +20,13 @@ import type { memberDetailDtoType } from '@/app/_type/types'
 import MemberTabContent from './memberTabContent'
 import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
 
-type EditUserInfoProps = {
+type AddUserModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   handlePageChange: () => void
 }
 
-const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) => {
+const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) => {
   // 선택된 탭
   const [value, setValue] = useState<string>('1')
 

@@ -29,11 +29,6 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
-type EditUserInfoProps = {
-  open: boolean
-  setOpen: (open: boolean) => void
-}
-
 type CustomInputProps = TextFieldProps & {
   label: string
   end: Date | number | null
@@ -58,7 +53,13 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(({ label, sta
   )
 })
 
-const AddProjectModal = ({ open, setOpen }: EditUserInfoProps) => {
+type AddMachineProjectModalProps = {
+  open: boolean
+  setOpen: (open: boolean) => void
+  handlePageChange: () => void
+}
+
+const AddMachineProjectModal = ({ open, setOpen, handlePageChange }: AddMachineProjectModalProps) => {
   const [form, setForm] = useState({
     companyName: '',
     projectName: '',
@@ -243,4 +244,4 @@ const AddProjectModal = ({ open, setOpen }: EditUserInfoProps) => {
   )
 }
 
-export default AddProjectModal
+export default AddMachineProjectModal

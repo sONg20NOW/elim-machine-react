@@ -36,8 +36,10 @@ export const HEADERS = {
   engineers: {}
 }
 
-// 초기 정렬 값
-export const InitialSorting = {
-  target: '',
-  sort: ''
-} as SortInfoType<memberPageDtoType>
+// 초기 정렬 생성
+export function createInitialSorting<T>(): SortInfoType<T> {
+  return {
+    target: '',
+    sort: ''
+  }
+}
