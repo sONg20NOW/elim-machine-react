@@ -3,10 +3,10 @@ import type { ChangeEventHandler } from 'react'
 import { MenuItem } from '@mui/material'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import type { TabFieldType } from '@/app/_schema/MemberTabInfo'
+import type { InputFieldType } from '@/app/_type/types'
 
 interface MultiSelectBoxProps {
-  tabField: TabFieldType
+  tabField: InputFieldType
   name?: string
   id?: string
   value: string

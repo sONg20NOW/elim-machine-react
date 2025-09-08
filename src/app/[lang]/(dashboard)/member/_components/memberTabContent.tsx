@@ -3,8 +3,8 @@ import type { Dispatch, SetStateAction } from 'react'
 import { DialogContent } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-import type { memberDetailDtoType, TabType } from '@/app/_schema/types'
-import { MEMBER_DETAIL_TAB_INFO } from '@/app/_schema/MemberTabInfo'
+import type { memberDetailDtoType, TabType } from '@/app/_type/types'
+import { MEMBER_INPUT_INFO } from '@/app/_type/input/MemberTabInfo'
 import { InputBox } from '@/components/selectbox/InputBox'
 
 const MemberTabContent = ({
@@ -16,7 +16,7 @@ const MemberTabContent = ({
   userData: memberDetailDtoType
   setUserData: Dispatch<SetStateAction<memberDetailDtoType>>
 }) => {
-  const tabInfos = MEMBER_DETAIL_TAB_INFO[tabName]
+  const tabInfos = MEMBER_INPUT_INFO[tabName]
 
   const dtoMap: Record<typeof tabName, keyof memberDetailDtoType> = {
     basic: 'memberBasicResponseDto',
@@ -26,7 +26,7 @@ const MemberTabContent = ({
     etc: 'memberEtcResponseDto'
   }
 
-  const properties = Object.keys(MEMBER_DETAIL_TAB_INFO[tabName])
+  const properties = Object.keys(MEMBER_INPUT_INFO[tabName])
 
   return (
     <DialogContent className='overflow-visible pbs-0 sm:pli-16'>

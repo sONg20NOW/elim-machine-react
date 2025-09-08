@@ -8,7 +8,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import type { MachineProjectDetailDtoType } from '@/app/_schema/types'
+import type { MachineProjectDetailDtoType } from '@/app/_type/types'
 
 const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDtoType }) => {
   // 초기값 세팅

@@ -1,27 +1,7 @@
-// 첫번째 키: members 정보 카테고리 (ex. basic, offic, ...)
-// 두번째 키: MultiSelectBox의 id (ex. companyName, role) => types.tsx-memberDetailDtoType의 속성값들
-// type: 선택자 타입: multi | yn | text
-// label: id를 한글화한 것
-// options: 선택지
+import type { memberInputType } from '../types'
 
-import type { BoxSizeType, memberDetailDtoType, MemberFilterType, InputType, TabType } from './types'
-
-export type TabFieldType = {
-  size?: BoxSizeType
-  type: InputType
-  label: string
-  options?: Array<{ value: string; label: string }>
-  disable?: boolean
-}
-
-type AllSubKeys = {
-  [K in keyof memberDetailDtoType]: keyof memberDetailDtoType[K]
-}[keyof memberDetailDtoType]
-
-export type memberTab = Record<TabType['member'], Partial<Record<AllSubKeys, TabFieldType>>>
-
-// 유저 상세 페이지
-export const MEMBER_DETAIL_TAB_INFO: memberTab = {
+// 직원 상세 페이지
+export const MEMBER_INPUT_INFO: memberInputType = {
   basic: {
     name: {
       size: 'md',
@@ -386,45 +366,4 @@ export const MEMBER_DETAIL_TAB_INFO: memberTab = {
       label: '청년 일자리 도약'
     }
   }
-}
-
-// 필터
-const { role, companyName, memberStatus } = MEMBER_DETAIL_TAB_INFO.basic
-const { officePosition, officeDepartmentName, contractType, laborForm, workForm } = MEMBER_DETAIL_TAB_INFO.office
-const { foreignYn } = MEMBER_DETAIL_TAB_INFO.privacy
-
-export const MEMBER_FILTER_INFO: Record<keyof MemberFilterType, TabFieldType> = {
-  role: role!,
-  companyName: companyName!,
-  officePosition: officePosition!,
-  officeDepartmentName: officeDepartmentName!,
-  contractType: contractType!,
-  laborForm: laborForm!,
-  workForm: workForm!,
-  foreignYn: foreignYn!,
-  gender: {
-    type: 'multi',
-    label: '성별',
-    options: [
-      { value: 'MALE', label: '남' },
-      { value: 'FEMALE', label: '여' }
-    ]
-  },
-  careerYear: {
-    type: 'multi',
-    label: '근속년수',
-    options: [
-      { value: '1', label: '1년차' },
-      { value: '2', label: '2년차' },
-      { value: '3', label: '3년차' },
-      { value: '4', label: '4년차' },
-      { value: '5', label: '5년차' },
-      { value: '6', label: '6년차' },
-      { value: '7', label: '7년차' },
-      { value: '8', label: '8년차' },
-      { value: '9', label: '9년차' },
-      { value: '10', label: '10년차' }
-    ]
-  },
-  memberStatus: memberStatus!
 }

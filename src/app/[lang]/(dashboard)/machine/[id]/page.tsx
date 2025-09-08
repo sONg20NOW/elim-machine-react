@@ -22,7 +22,7 @@ import PlanContent from './planContent'
 import MachineContent from './machineContent'
 import MachinePictures from './machinePictures'
 import NoteContent from './noteContent'
-import type { MachineProjectDetailDtoType } from '@/app/_schema/types'
+import type { MachineProjectDetailDtoType } from '@/app/_type/types'
 
 const MachineUpdatePage = () => {
   const params = useParams()

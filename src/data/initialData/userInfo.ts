@@ -1,4 +1,4 @@
-import type { memberDetailDtoType } from '@/app/_schema/types'
+import type { memberDetailDtoType } from '@/app/_type/types'
 
 export const initialData: memberDetailDtoType = {
   memberBasicResponseDto: {
@@ -60,11 +60,9 @@ export const initialData: memberDetailDtoType = {
     workFormDescription: ''
   },
   memberPrivacyResponseDto: {
-    address: {
-      roadAddress: '',
-      jibunAddress: null,
-      detailAddress: ''
-    },
+    roadAddress: '',
+    jibunAddress: null,
+    detailAddress: '',
     bankName: '',
     bankNumber: '',
     birthday: '',

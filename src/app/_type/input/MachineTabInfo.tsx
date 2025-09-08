@@ -1,24 +1,7 @@
-// TODO: machine 페이지에 맞게 조정.
-// 첫번째 키: members 정보 카테고리 (ex. basic, offic, ...)
-// 두번째 키: MultiSelectBox의 id (ex. companyName, role) => types.tsx-memberDetailDtoType의 속성값들
-// type: 선택자 타입: multi | yn | text
-// label: id를 한글화한 것
-// options: 선택지
+import type { memberInputType } from '../types'
 
-type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date'
-
-type MemberTabType = 'basic' | 'privacy' | 'office' | 'career' | 'etc'
-
-export type TabField = {
-  size: 'sm' | 'md' | 'lg'
-  type: InputType
-  label: string
-  options?: Array<{ value: string; label: string }>
-}
-
-export type memberTab = Record<MemberTabType, Record<string, TabField>>
-
-export const MACHINE_TAB_INFO: memberTab = {
+// 기계설비현장 상세페이지
+export const MACHINE_INPUT_INFO: memberInputType = {
   basic: {
     name: {
       size: 'md',
@@ -47,14 +30,15 @@ export const MACHINE_TAB_INFO: memberTab = {
       type: 'multi',
       label: '권한',
       options: [
-        { value: 'USER', label: '유저' },
+        { value: 'GUEST', label: '게스트' },
+        { value: 'USER', label: '일반 사용자' },
         { value: 'STAFF', label: '직원' },
         { value: 'MANAGER', label: '매니저' },
-        { value: 'ADMIN', label: '어드민' },
-        { value: 'SUPERADMIN', label: '슈퍼어드민' }
+        { value: 'ADMIN', label: '관리자' },
+        { value: 'SUPERADMIN', label: '최고 관리자' }
       ]
     },
-    memberStatusDescription: {
+    memberStatus: {
       size: 'md',
       type: 'multi',
       label: '재직 상태',
@@ -171,11 +155,27 @@ export const MACHINE_TAB_INFO: memberTab = {
       options: [
         { value: '건설사업', label: '건설사업' },
         { value: '건설안전', label: '건설안전' },
-        { value: '기술개발', label: '기술개발' },
+        { value: '건축기술', label: '건축기술' },
+        { value: '경영기획', label: '경영기획' },
         { value: '경영지원', label: '경영지원' },
-        { value: '영업', label: '영업' },
-        { value: '총무', label: '총무' },
-        { value: '인사', label: '인사' }
+        { value: '구조', label: '구조' },
+        { value: '구조기술', label: '구조기술' },
+        { value: '기계설비', label: '기계설비' },
+        { value: '기술영업', label: '기술영업' },
+        { value: '기술영업CS', label: '기술영업CS' },
+        { value: '기술자료', label: '기술자료' },
+        { value: '기업부설연구소', label: '기업부설연구소' },
+        { value: '기획부', label: '기획부' },
+        { value: '기획홍보', label: '기획홍보' },
+        { value: '대외협력팀', label: '대외협력팀' },
+        { value: '대표이사', label: '대표이사' },
+        { value: '법률자문', label: '법률자문' },
+        { value: '사무', label: '사무' },
+        { value: '설계팀', label: '설계팀' },
+        { value: '안전진단부', label: '안전진단부' },
+        { value: '임원실', label: '임원실' },
+        { value: '토목기술', label: '토목기술' },
+        { value: '토목부', label: '토목부' }
       ]
     },
     officePosition: {
@@ -290,7 +290,8 @@ export const MACHINE_TAB_INFO: memberTab = {
         { value: 'BEGINNER', label: '초급' },
         { value: 'INTERMEDIATE', label: '중급' },
         { value: 'ADVANCED', label: '고급' }
-      ]
+      ],
+      disable: true
     },
     jobField: {
       size: 'md',

@@ -16,9 +16,9 @@ import { toast } from 'react-toastify'
 
 import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/DefaultModal'
-import type { memberDetailDtoType } from '@/app/_schema/types'
+import type { memberDetailDtoType } from '@/app/_type/types'
 import MemberTabContent from './memberTabContent'
-import { MEMBER_DETAIL_TAB_INFO } from '@/app/_schema/MemberTabInfo'
+import { MEMBER_INPUT_INFO } from '@/app/_type/input/MemberTabInfo'
 
 type EditUserInfoProps = {
   open: boolean
@@ -27,9 +27,10 @@ type EditUserInfoProps = {
 }
 
 const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) => {
-  // States
-
+  // 선택된 탭
   const [value, setValue] = useState<string>('1')
+
+  // 직원 데이터
   const [userData, setUserData] = useState<memberDetailDtoType>(initialData)
 
   const handleClose = () => {
@@ -40,14 +41,20 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) =>
   const onSubmitHandler = async () => {
     const basicDto = { ...userData?.memberBasicResponseDto }
 
-    // 비고란을 제외한 칸이 다 안 채워져있으면 (basic만)
-    Object.keys(MEMBER_DETAIL_TAB_INFO.basic).forEach(key => {
-      if (!basicDto[key as keyof typeof basicDto]) {
-        toast.error('비고를 제외한 모든 직원 정보를 입력해주세요.')
-
-        return
+    // 비고란을 제외한 칸이 하나라도 안 채워져있으면 경고 문구 표시 (basic만)
+    const NotAllFull = Object.keys(MEMBER_INPUT_INFO.basic).some(key => {
+      if (key === 'note') {
+        return false
       }
+
+      return !basicDto[key as keyof typeof basicDto]
     })
+
+    if (NotAllFull) {
+      toast.error('비고를 제외한 모든 정보를 입력해주세요.')
+
+      return
+    }
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {

@@ -12,16 +12,17 @@ import MenuItem from '@mui/material/MenuItem'
 import { toast } from 'react-toastify'
 
 // Component Imports
-import TableFilters from './_components/TableFilters'
+import TableFilters from '../../../_components/table/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
-import type { memberDetailDtoType, MemberFilterType, memberPageDtoType } from '@/app/_schema/types'
-import { HEADERS, InitialSorting } from '@/app/_schema/TableHeader'
+import type { memberDetailDtoType, MemberFilterType, memberPageDtoType } from '@/app/_type/types'
+import { HEADERS, InitialSorting } from '@/app/_type/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
+import { MEMBER_FILTER_INFO } from '@/app/_type/filter/MemberFilterInfo'
 
 // 초기 필터링 값
 const initialFilters: MemberFilterType = {
@@ -147,6 +148,15 @@ export default function MemberPage() {
   return (
     <>
       <Card>
+        <CardHeader title='직원관리' className='pbe-4' />
+        {/* 필터바 */}
+        <TableFilters
+          filterInfo={MEMBER_FILTER_INFO}
+          filters={filters}
+          onFiltersChange={setFilters}
+          disabled={disabled}
+          setPage={setPage}
+        />
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<i className='tabler-reload' />}
@@ -157,10 +167,6 @@ export default function MemberPage() {
           필터 초기화
         </Button>
         {/* 탭 제목 */}
-        <CardHeader title='직원관리' className='pbe-4' />
-        {/* 필터바 */}
-        <TableFilters filters={filters} onFiltersChange={setFilters} disabled={disabled} setPage={setPage} />
-
         <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           {/* 이름으로 검색 */}
           <SearchBar

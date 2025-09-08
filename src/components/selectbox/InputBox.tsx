@@ -2,11 +2,10 @@ import type { ChangeEventHandler } from 'react'
 
 import Grid from '@mui/material/Grid2'
 
-import { type TabFieldType } from '@/app/_schema/MemberTabInfo'
 import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
-import type { BoxSizeType } from '@/app/_schema/types'
+import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
 
 interface InputBoxProps {
   tabFieldKey: string
@@ -14,7 +13,7 @@ interface InputBoxProps {
   size?: BoxSizeType
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
-  tabInfos: Record<string, TabFieldType>
+  tabInfos: Record<string, InputFieldType>
 }
 
 /**
@@ -54,7 +53,7 @@ interface InputBoxContainerProps {
   value: string
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
   disabled?: boolean
-  tabField: TabFieldType
+  tabField: InputFieldType
 }
 
 function InputBoxContainer({ tabField, tabFieldKey, value, disabled, onChange }: InputBoxContainerProps) {

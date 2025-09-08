@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow'
 
 import classNames from 'classnames'
 
-import type { HeaderType, SortInfoType } from '@/app/_schema/types'
+import type { HeaderType, SortInfoType } from '@/app/_type/types'
 
 /**
  * @param header

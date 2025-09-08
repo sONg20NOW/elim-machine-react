@@ -1,4 +1,4 @@
-import type { HeaderInfoType, SortInfoType, memberPageDtoType } from './types'
+import type { HeaderInfoType, SortInfoType, machineProjectPageDtoType, memberPageDtoType } from './types'
 
 export const BROWER_TAB_TITLE = 'ELIM'
 export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
@@ -20,6 +20,19 @@ export const HEADERS = {
     careerYear: { label: '근속년수', canSort: true },
     memberStatusDescription: { label: '상태', canSort: false }
   } as Record<keyof memberPageDtoType, HeaderInfoType>,
+  machine: {
+    projectStatusDescription: { label: '상태', canSort: false },
+    region: { label: '지역', canSort: true },
+    machineProjectName: { label: '현장명', canSort: true },
+    fieldBeginDate: { label: '현장점검', canSort: true },
+    fieldEndDate: { label: '점검종료', canSort: true },
+    reportDeadline: { label: '보고서마감', canSort: true },
+    inspectionCount: { label: '설비', canSort: true },
+    companyName: { label: '점검업체', canSort: true },
+    engineerNames: { label: '참여기술진', canSort: false },
+    grossArea: { label: '연면적(㎡)', canSort: true },
+    tel: { label: '전화번호', canSort: false }
+  } as Record<keyof machineProjectPageDtoType, HeaderInfoType>,
   engineers: {}
 }
 

@@ -18,7 +18,7 @@ import { toast } from 'react-toastify'
 import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/DefaultModal'
 import MemberTabContent from './memberTabContent'
-import type { memberDetailDtoType } from '@/app/_schema/types'
+import type { memberDetailDtoType } from '@/app/_type/types'
 
 const requestRule = {
   basic: {

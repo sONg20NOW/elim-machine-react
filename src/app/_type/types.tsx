@@ -1,4 +1,12 @@
 // -------- 직원관리 --------
+
+// 인풋 형식
+type AllMemberSubKeys = {
+  [K in keyof memberDetailDtoType]: keyof memberDetailDtoType[K]
+}[keyof memberDetailDtoType]
+
+export type memberInputType = Record<TabType['member'], Partial<Record<AllMemberSubKeys, InputFieldType>>>
+
 // api/members (리스트)
 export type memberPageDtoType = {
   memberId: number
@@ -228,6 +236,14 @@ export interface MachineFilterType {
 }
 
 // ----------- 공통 -----------
+// 인풋 형식
+export type InputFieldType = {
+  size?: BoxSizeType
+  type: InputType
+  label: string
+  options?: Array<{ value: string; label: string }>
+  disable?: boolean
+}
 
 // 테이블 헤더
 export interface HeaderInfoType {

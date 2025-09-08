@@ -13,8 +13,7 @@ import MenuItem from '@mui/material/MenuItem'
 
 // Third-party Imports
 import classnames from 'classnames'
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import type { ColumnDef } from '@tanstack/react-table'
+import { flexRender } from '@tanstack/react-table'
 
 import { Input } from '@mui/material'
 
@@ -24,27 +23,17 @@ import type { TextFieldProps } from '@mui/material/TextField'
 
 import { toast } from 'react-toastify'
 
-import type { MachineType } from '@/types/apps/machineTypes'
-
 // Component Imports
-import TableFilters from './_components/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import AddMachineModal from './_components/addProjectModal'
-import type { MachineFilterType, machineProjectPageDtoType } from '@/app/_schema/types'
-import { InitialSorting } from '@/app/_schema/TableHeader'
+import type { MachineFilterType, machineProjectPageDtoType } from '@/app/_type/types'
+import { InitialSorting } from '@/app/_type/TableHeader'
 
 // TODO: initialFilters 뺴고 싹 다 정리
-type MachineTypeWithAction = MachineType & {
-  action?: string
-}
-
-// Column Definitions
-const columnHelper = createColumnHelper<MachineTypeWithAction>()
-
 type CustomInputProps = TextFieldProps & {
   label: string
   end: Date | number
@@ -153,138 +142,8 @@ export default function MachinePage() {
 
   // 필터 변경 시 API 호출
   useEffect(() => {
-    fetchFilteredData(filters)
-  }, [
-    filters.projectStatusDescription,
-    filters.region,
-    filters.machineProjectName,
-    filters.fieldBeginDate,
-    filters.fieldEndDate,
-    filters.reportDeadline,
-    filters.page,
-    filters.size,
-    filters.companyName,
-    filters.projectName,
-    fetchFilteredData
-  ])
-
-  const columns = useMemo<ColumnDef<MachineTypeWithAction, any>[]>(
-    () => [
-      {
-        id: 'id',
-        header: '번호',
-        cell: ({ row }) => <p>{row.original.machineProjectId}</p>
-      },
-      columnHelper.accessor('projectStatusDescription', {
-        header: '상태',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.projectStatusDescription}</div>
-      }),
-      columnHelper.accessor('region', {
-        header: '지역',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.region}</div>
-      }),
-      columnHelper.accessor('machineProjectName', {
-        header: '현장명',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.machineProjectName}</div>
-      }),
-      columnHelper.accessor('fieldBeginDate', {
-        header: '현장점검',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.fieldBeginDate}</div>
-      }),
-      columnHelper.accessor('fieldEndDate', {
-        header: '점검종료',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.fieldEndDate}</div>
-      }),
-      columnHelper.accessor('reportDeadline', {
-        header: '보고서마감',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.reportDeadline}</div>
-      }),
-      columnHelper.accessor('inspectionCount', {
-        header: '설비',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.inspectionCount}</div>
-      }),
-      columnHelper.accessor('companyName', {
-        header: '점검업체',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.companyName}</div>
-      }),
-      columnHelper.accessor('engineerNames', {
-        header: '참여기술진',
-        cell: ({ row }) => {
-          const names = row.original.engineerNames
-          const display = Array.isArray(names) ? names.join(', ') : names
-
-          // 30글자 이상이면 ...으로 표시
-          return (
-            <div className='flex items-center gap-2'>
-              {display.length > 30 ? display.slice(0, 10) + '...' : display}
-            </div>
-          )
-        }
-      }),
-      columnHelper.accessor('grossArea', {
-        header: '연면적(㎡)',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.grossArea}</div>
-      }),
-      columnHelper.accessor('tel', {
-        header: '전화번호',
-        cell: ({ row }) => <div className='flex items-center gap-2'>{row.original.tel}</div>
-      })
-    ],
-    []
-  )
-
-  const filterFns = {
-    fuzzy: (row: { getValue: (arg0: any) => any }, columnId: any, filterValue: string) => {
-      const value = row.getValue(columnId)
-
-      return value?.toString().toLowerCase().includes(filterValue.toLowerCase())
-    }
-  }
-
-  const table = useReactTable({
-    data: data as MachineType[],
-    columns,
-    manualFiltering: true,
-    manualPagination: true,
-    filterFns,
-    state: {
-      rowSelection
-    },
-    initialState: {
-      pagination: {
-        pageSize: filters.size
-      }
-    },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel()
-  })
-
-  // 검색 핸들러
-  const handleSearchChange = (value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      projectName: value,
-      page: 0
-    }))
-  }
-
-  // 페이지 크기 변경 핸들러
-  const handlePageSizeChange = (size: number) => {
-    setFilters(prev => ({
-      ...prev,
-      size,
-      page: 0
-    }))
-  }
-
-  // 페이지 변경 핸들러
-  const handlePageChange = (page: number) => {
-    setFilters(prev => ({
-      ...prev,
-      page
-    }))
-  }
+    fetchFilteredData()
+  }, [filters, fetchFilteredData])
 
   const CustomInput = forwardRef((props: CustomInputProps, ref) => {
     const { label, start, end, ...rest } = props
@@ -314,7 +173,7 @@ export default function MachinePage() {
     <>
       <Card>
         <CardHeader title='기계설비현장' className='pbe-4' />
-        <TableFilters filters={filters} onFiltersChange={setFilters} loading={loading} />
+        <TableFilters filterInfo={} filters={filters} onFiltersChange={setFilters} loading={loading} />
 
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <div className='flex justify-center items-center gap-2'>
