@@ -11,16 +11,19 @@ import DialogActions from '@mui/material/DialogActions'
 // Component Imports
 import TabContext from '@mui/lab/TabContext'
 
-import { IconButton } from '@mui/material'
+import { IconButton, Typography } from '@mui/material'
 
 type DefaultModalProps = {
-  value: string
+  size?: 'xs' | 'sm' | 'md' | 'lg'
+  value?: string
   open: boolean
   setOpen: (open: boolean) => void
   title: string
+  headerDescription?: string
   children?: ReactNode
   primaryButton?: ReactNode
   secondaryButton?: ReactNode
+  deleteButton?: ReactNode
   handleClose?: () => void
 }
 
@@ -34,13 +37,16 @@ type DefaultModalProps = {
  * modal component 리턴.
  */
 export default function DefaultModal({
+  size = 'md',
   value,
   open,
   setOpen,
   title,
+  headerDescription,
   children,
   primaryButton,
   secondaryButton,
+  deleteButton,
   handleClose = () => {
     setOpen(false)
   }
@@ -51,7 +57,7 @@ export default function DefaultModal({
       fullWidth
       open={open}
       onClose={handleClose}
-      maxWidth='md'
+      maxWidth={size}
       scroll='body'
       closeAfterTransition={false}
       sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
@@ -68,12 +74,14 @@ export default function DefaultModal({
       >
         <i className='tabler-x' />
       </IconButton>
+      <div className='absolute left-8 top-8'>{deleteButton}</div>
       <DialogTitle variant='h4' className='flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'>
         {title}
+        <Typography component='span' className='flex flex-col text-center'>
+          {headerDescription}
+        </Typography>
       </DialogTitle>
-      <div>
-        <TabContext value={value}>{children}</TabContext>
-      </div>
+      <div>{value && children && <TabContext value={value}>{children}</TabContext>}</div>
       <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16 mt-[20px] lg:mt-[40px]'>
         {primaryButton}
         {secondaryButton}

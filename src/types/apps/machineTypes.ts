@@ -1,12 +1,6 @@
-// 주소 타입
-export type AddressType = {
-  roadAddress?: string | null
-  detailAddress?: string | null
-}
-
 // 관리 정보 DTO
 export type MachineProjectManagementResponseDto = {
-  address?: AddressType | null
+  roadAddress?: string | null
   bizno?: string | null
   completeDate?: string | null
   contractDate?: string | null
@@ -81,7 +75,7 @@ export type MachineType = {
   reportDeadline: string
   inspectionCount: number
   companyName: string
-  engineerNames: string | string[]
   grossArea: number
   tel: string
+  engineerNames: string | string[]
 }

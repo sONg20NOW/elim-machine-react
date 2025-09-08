@@ -13,7 +13,7 @@ import Divider from '@mui/material/Divider'
 import { useForm, Controller } from 'react-hook-form'
 
 // Types Imports
-import type { UsersType } from '@/types/apps/userTypes'
+import type { memberPageDtoType } from '@/types/apps/userTypes'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
@@ -21,8 +21,8 @@ import CustomTextField from '@core/components/mui/TextField'
 type Props = {
   open: boolean
   handleClose: () => void
-  userData?: UsersType[]
-  setData: (data: UsersType[]) => void
+  userData?: memberPageDtoType[]
+  setData: (data: memberPageDtoType[]) => void
 }
 
 type FormValidateType = {
@@ -72,7 +72,7 @@ const AddUserDrawer = (props: Props) => {
   })
 
   const onSubmit = (data: FormValidateType) => {
-    const newUser: UsersType = {
+    const newUser: memberPageDtoType = {
       memberId: (userData?.length && userData?.length + 1) || 1,
       avatar: `/images/avatars/${Math.floor(Math.random() * 8) + 1}.png`,
       fullName: data.fullName,
@@ -103,7 +103,7 @@ const AddUserDrawer = (props: Props) => {
       memberEtcResponseDto: {
         militaryPeriod: ''
       },
-      isTechnician: false,
+      isTechnician: '',
       contractType: ''
     }
 

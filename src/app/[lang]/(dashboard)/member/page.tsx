@@ -1,10 +1,8 @@
 'use client'
 
-// React Imports
 import { useEffect, useState, useCallback } from 'react'
 
-import { redirect } from 'next/navigation'
-
+// MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
@@ -14,31 +12,39 @@ import MenuItem from '@mui/material/MenuItem'
 import { toast } from 'react-toastify'
 
 // Component Imports
+import TableFilters from '../../../_components/table/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import AddMachineModal from './_components/addMachineProjectModal'
-import type { MachineFilterType, machineProjectPageDtoType } from '@/app/_type/types'
-import { HEADERS, createInitialSorting } from '@/app/_type/TableHeader'
-import TableFilters from '@/app/_components/table/TableFilters'
-import { MACHINE_FILTER_INFO } from '@/app/_schema/filter/MachineFilterInfo'
-import SearchBar from '@/app/_components/SearchBar'
+import UserModal from './_components/UserModal'
+import AddUserModal from './_components/addUserModal'
+import type { memberDetailDtoType, MemberFilterType, memberPageDtoType } from '@/app/_type/types'
+import { createInitialSorting, HEADERS } from '@/app/_type/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
+import SearchBar from '@/app/_components/SearchBar'
+import { MEMBER_FILTER_INFO } from '@/app/_schema/filter/MemberFilterInfo'
 
 // 초기 필터링 값
-const initialFilters: MachineFilterType = {
-  projectStatus: '',
+const initialFilters: MemberFilterType = {
+  role: '',
   companyName: '',
-  engineerName: '', // ← engineerNames → engineerName
-  region: ''
+  officeDepartmentName: '',
+  officePosition: '',
+  memberStatus: '',
+  careerYear: '',
+  contractType: '',
+  laborForm: '',
+  workForm: '',
+  gender: '',
+  foreignYn: ''
 }
 
 // 페이지 당 행수 선택 옵션
 const PageSizeOptions = [1, 10, 30, 50]
 
-export default function MachinePage() {
+export default function MemberPage() {
   // 데이터 리스트
-  const [data, setData] = useState<machineProjectPageDtoType[]>([])
+  const [data, setData] = useState<memberPageDtoType[]>([])
 
   // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
@@ -53,26 +59,27 @@ export default function MachinePage() {
   const [totalCount, setTotalCount] = useState(0)
 
   // 이름 검색 인풋
-  // TODO: name으로 통일
   const [name, setName] = useState('')
 
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
   const [size, setSize] = useState(30)
 
-  // 모달 상태
-  const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
+  // 모달 관련 상태
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false)
+  const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<memberDetailDtoType | null>(null)
 
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(initialFilters)
 
   // 정렬 상태
-  const [sorting, setSorting] = useState(createInitialSorting<machineProjectPageDtoType>)
+  const [sorting, setSorting] = useState(createInitialSorting<memberPageDtoType>)
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
 
-  // 기계설비현장 리스트 호출 API 함수
+  // 직원 리스트 호출 API 함수
   const fetchFilteredData = useCallback(async () => {
     setLoading(true)
     setError(false)
@@ -80,7 +87,7 @@ export default function MachinePage() {
     try {
       // 필터링
       Object.keys(filters).map(prop => {
-        const key = prop as keyof MachineFilterType
+        const key = prop as keyof MemberFilterType
 
         filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
       })
@@ -93,18 +100,14 @@ export default function MachinePage() {
       // 이름으로 검색
       name ? queryParams.set('name', name) : queryParams.delete('name')
 
-      // TODO: 기간 필터링
-
       // 페이지 관련 설정
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects?${queryParams.toString()}`,
-        {
-          method: 'GET'
-        }
-      )
+      // 데이터 받아오기
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members?${queryParams.toString()}`, {
+        method: 'GET'
+      })
 
       const result = await response.json()
 
@@ -126,19 +129,17 @@ export default function MachinePage() {
     fetchFilteredData()
   }, [filters, fetchFilteredData])
 
-  // 기계설비현장 선택 핸들러
-  const handleMachineProjectClick = async (machineProject: machineProjectPageDtoType) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProject?.machineProjectId}`,
-      {
-        method: 'GET'
-      }
-    )
+  // 사용자 선택 핸들러
+  const handleUserClick = async (user: memberPageDtoType) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${user?.memberId}`, {
+      method: 'GET'
+    })
 
     const data = await response.json()
 
     if (response.ok) {
-      redirect(`/machine/${machineProject?.machineProjectId}`)
+      setSelectedUser(data.data)
+      setUserDetailModalOpen(true)
     } else {
       toast.error(data.message)
     }
@@ -147,10 +148,11 @@ export default function MachinePage() {
   return (
     <>
       <Card>
-        <CardHeader title='기계설비현장' className='pbe-4' />
+        {/* 탭 제목 */}
+        <CardHeader title='직원관리' className='pbe-4' />
         {/* 필터바 */}
-        <TableFilters<MachineFilterType>
-          filterInfo={MACHINE_FILTER_INFO}
+        <TableFilters<MemberFilterType>
+          filterInfo={MEMBER_FILTER_INFO}
           filters={filters}
           onFiltersChange={setFilters}
           disabled={disabled}
@@ -165,7 +167,7 @@ export default function MachinePage() {
         >
           필터 초기화
         </Button>
-        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           {/* 이름으로 검색 */}
           <SearchBar
             onClick={name => {
@@ -195,11 +197,12 @@ export default function MachinePage() {
                 ))}
               </CustomTextField>
             </div>
-            {/* 기계설비현장 추가 버튼 */}
+
+            {/* 유저 추가 버튼 */}
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
-              onClick={() => setAddMachineModalOpen(!addMachineModalOpen)}
+              onClick={() => setAddUserModalOpen(!addUserModalOpen)}
               className='max-sm:is-full'
               disabled={disabled}
             >
@@ -209,29 +212,32 @@ export default function MachinePage() {
         </div>
 
         {/* 테이블 */}
-        <BasicTable<machineProjectPageDtoType>
-          header={HEADERS.machine}
+        <BasicTable<memberPageDtoType>
+          header={HEADERS.member}
           data={data}
-          handleRowClick={handleMachineProjectClick}
+          handleRowClick={handleUserClick}
           page={page}
           pageSize={size}
+          Exceptions={{ age: ['age', 'genderDescription'] }}
           sorting={sorting}
           setSorting={setSorting}
           loading={loading}
           error={error}
         />
 
+        {/* 페이지네이션 */}
         <TablePagination
-          rowsPerPageOptions={[1, 10, 30, 50]} // 1 추가 (테스트용)
+          rowsPerPageOptions={PageSizeOptions}
           component='div'
           count={totalCount}
           rowsPerPage={size}
           page={page}
           onPageChange={(_, newPage) => setPage(newPage)}
           onRowsPerPageChange={event => {
-            const newPageSize = parseInt(event.target.value, 10)
+            const newsize = parseInt(event.target.value, 10)
 
-            setSize(newPageSize)
+            setSize(newsize)
+            setPage(0)
           }}
           disabled={disabled}
           showFirstButton
@@ -248,12 +254,17 @@ export default function MachinePage() {
           }}
         />
       </Card>
-      {/* 생성 모달 */}
-      {addMachineModalOpen && (
-        <AddMachineModal
-          open={addMachineModalOpen}
-          setOpen={setAddMachineModalOpen}
-          handlePageChange={() => setPage(0)}
+
+      {/* 모달들 */}
+      {addUserModalOpen && (
+        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} handlePageChange={() => setPage(0)} />
+      )}
+      {userDetailModalOpen && selectedUser && (
+        <UserModal
+          open={userDetailModalOpen}
+          setOpen={setUserDetailModalOpen}
+          data={selectedUser}
+          reloadData={() => fetchFilteredData()}
         />
       )}
     </>

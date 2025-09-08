@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid2'
 
 import axios from 'axios'
 
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 interface TableFiltersProps {
   filters: {
@@ -64,7 +64,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
     <CardContent>
       <Grid container spacing={6}>
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'projectStatusDescription'}
             label='상태'
             value={filters.projectStatusDescription || ''}
@@ -82,7 +82,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'region'}
             label='지역'
             value={filters.region || ''}
@@ -111,7 +111,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'companyName'}
             label='점검업체'
             value={filters.companyName || ''}
@@ -128,7 +128,7 @@ const TableFilters = ({ filters, onFiltersChange, loading }: TableFiltersProps) 
         </Grid>
 
         <Grid size={{ xs: 12, sm: 2 }}>
-          <DefaultSelectBox
+          <MultiSelectBox
             id={'engineerNames'}
             label='점검자'
             value={filters.engineerName || ''}

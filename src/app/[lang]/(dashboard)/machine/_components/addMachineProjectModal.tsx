@@ -27,12 +27,7 @@ import type { TextFieldProps } from '@mui/material/TextField'
 import DialogCloseButton from './DialogCloseButton'
 import CustomTextField from '@/@core/components/mui/TextField'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
-
-type EditUserInfoProps = {
-  open: boolean
-  setOpen: (open: boolean) => void
-}
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 
 type CustomInputProps = TextFieldProps & {
   label: string
@@ -58,7 +53,13 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(({ label, sta
   )
 })
 
-const AddProjectModal = ({ open, setOpen }: EditUserInfoProps) => {
+type AddMachineProjectModalProps = {
+  open: boolean
+  setOpen: (open: boolean) => void
+  handlePageChange: () => void
+}
+
+const AddMachineProjectModal = ({ open, setOpen, handlePageChange }: AddMachineProjectModalProps) => {
   const [form, setForm] = useState({
     companyName: '',
     projectName: '',
@@ -169,7 +170,7 @@ const AddProjectModal = ({ open, setOpen }: EditUserInfoProps) => {
           <form onSubmit={handleSubmit} className='p-6'>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <DefaultSelectBox
+                <MultiSelectBox
                   id={'companyName'}
                   label='점검업체'
                   value={form.companyName || ''}
@@ -243,4 +244,4 @@ const AddProjectModal = ({ open, setOpen }: EditUserInfoProps) => {
   )
 }
 
-export default AddProjectModal
+export default AddMachineProjectModal

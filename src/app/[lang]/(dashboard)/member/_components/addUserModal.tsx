@@ -5,34 +5,33 @@ import type { SyntheticEvent } from 'react'
 import { useState } from 'react'
 
 // MUI Imports
-import Dialog from '@mui/material/Dialog'
 import Button from '@mui/material/Button'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogActions from '@mui/material/DialogActions'
 
 // Component Imports
 import Tab from '@mui/material/Tab'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
-import TabContext from '@mui/lab/TabContext'
 
-import { IconButton } from '@mui/material'
+import { toast } from 'react-toastify'
 
-import BasicContent from './BasicContent'
 import { initialData } from '@/data/initialData/userInfo'
-import type { EditUserInfoData } from '@/data/type/userInfoTypes'
-import DefaultModal from '@/@layouts/components/DefaultModal'
+import DefaultModal from '@/app/_components/DefaultModal'
+import type { memberDetailDtoType } from '@/app/_type/types'
+import MemberTabContent from './memberTabContent'
+import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
 
-type EditUserInfoProps = {
+type AddUserModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
+  handlePageChange: () => void
 }
 
-const AddUserModal = ({ open, setOpen }: EditUserInfoProps) => {
-  // States
-
+const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) => {
+  // 선택된 탭
   const [value, setValue] = useState<string>('1')
-  const [userData, setUserData] = useState<EditUserInfoData>(initialData)
+
+  // 직원 데이터
+  const [userData, setUserData] = useState<memberDetailDtoType>(initialData)
 
   const handleClose = () => {
     setOpen(false)
@@ -42,17 +41,42 @@ const AddUserModal = ({ open, setOpen }: EditUserInfoProps) => {
   const onSubmitHandler = async () => {
     const basicDto = { ...userData?.memberBasicResponseDto }
 
+    // 비고란을 제외한 칸이 하나라도 안 채워져있으면 경고 문구 표시 (basic만)
+    const NotAllFull = Object.keys(MEMBER_INPUT_INFO.basic).some(key => {
+      if (key === 'note') {
+        return false
+      }
+
+      return !basicDto[key as keyof typeof basicDto]
+    })
+
+    if (NotAllFull) {
+      toast.error('비고를 제외한 모든 정보를 입력해주세요.')
+
+      return
+    }
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
         method: 'POST',
-        body: {}
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(basicDto)
       })
 
-      console.log('Basic info saved:', response.data)
-      alert('기본 정보가 저장되었습니다.')
-    } catch (error) {
-      console.error(error)
+      const result = await response.json()
+
+      if (response.ok) {
+        console.log('new member added', result.data)
+        toast.success('새 직원이 추가되었습니다.')
+      } else {
+        toast.error(`${result.statusCode}:\n${result.message}`)
+      }
+    } catch (error: any) {
+      toast.error(error)
     }
+
+    handlePageChange()
+    setOpen(false)
   }
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
@@ -80,7 +104,7 @@ const AddUserModal = ({ open, setOpen }: EditUserInfoProps) => {
         <Tab value='1' label='기본정보' />
       </TabList>
       <TabPanel value='1'>
-        <BasicContent userData={userData} setUserData={setUserData} />
+        <MemberTabContent tabName='basic' userData={userData} setUserData={setUserData} />
       </TabPanel>
     </DefaultModal>
   )

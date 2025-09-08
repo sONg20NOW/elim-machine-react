@@ -4,7 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
-*.json
+package.json
+/*.json
 
 # testing
 /coverage
@@ -40,3 +41,6 @@ next-env.d.ts
 # icon generated file
 src/assets/iconify-icons/generated-icons.js
 src/assets/iconify-icons/generated-icons.css
+
+# vscode
+.vscode/*

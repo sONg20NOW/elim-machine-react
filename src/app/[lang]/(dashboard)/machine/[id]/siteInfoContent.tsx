@@ -5,11 +5,12 @@ import { Button } from '@mui/material'
 import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultSelectBox from '@/components/selectbox/defaultSelectBox'
+import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import type { MachineProjectDetailDtoType } from '@/app/_type/types'
 
-const SiteInfoContent = ({ projectData }: any) => {
+const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDtoType }) => {
   // 초기값 세팅
   const [editData, setEditData] = useState(projectData || {})
   const [isEditing, setIsEditing] = useState(false)
@@ -21,14 +22,14 @@ const SiteInfoContent = ({ projectData }: any) => {
     try {
       const result = await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${editData.machineProjectScheduleAndEngineerResponseDto.machineProjectId}/machine-project-management`,
-        editData.machineProjectManagementResponseDto
+        editData.machineProjectResponseDto
       )
 
       setIsEditing(false)
 
       setEditData((prev: any) => ({
         ...prev,
-        machineProjectManagementResponseDto: {
+        machineProjectResponseDto: {
           ...result.data.data
         }
       }))
@@ -155,12 +156,12 @@ const SiteInfoContent = ({ projectData }: any) => {
                   </td>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto?.institutionName || ''}
+                      value={editData.machineProjectResponseDto?.institutionName ?? ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             institutionName: e.target.value
                           }
                         }))
@@ -175,16 +176,12 @@ const SiteInfoContent = ({ projectData }: any) => {
                   </th>
                   <td colSpan={3} style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={`
-${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
- ${editData?.machineProjectManagementResponseDto?.address?.jibunAddress || ''}
- ${editData?.machineProjectManagementResponseDto?.address?.detailAddress || ''}
-                    `}
+                      value={editData?.machineProjectResponseDto?.roadAddress ?? ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             address: e.target.value
                           }
                         }))
@@ -200,12 +197,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.representative || ''}
+                      value={editData.machineProjectResponseDto.representative || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             representative: e.target.value
                           }
                         }))
@@ -218,12 +215,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.grossArea || ''}
+                      value={editData.machineProjectResponseDto.grossArea || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             grossArea: e.target.value
                           }
                         }))
@@ -238,12 +235,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.bizno || ''}
+                      value={editData.machineProjectResponseDto.bizno || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             bizno: e.target.value
                           }
                         }))
@@ -256,12 +253,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.houseCnt || ''}
+                      value={editData.machineProjectResponseDto.houseCnt || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             houseCnt: e.target.value
                           }
                         }))
@@ -276,12 +273,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.purpose || ''}
+                      value={editData.machineProjectResponseDto.purpose || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             purpose: e.target.value
                           }
                         }))
@@ -294,12 +291,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.manager || ''}
+                      value={editData.machineProjectResponseDto.manager || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             manager: e.target.value
                           }
                         }))
@@ -314,12 +311,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.structure || ''}
+                      value={editData.machineProjectResponseDto.structure || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             structure: e.target.value
                           }
                         }))
@@ -332,12 +329,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.managerPhone || ''}
+                      value={editData.machineProjectResponseDto.managerPhone || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             managerPhone: e.target.value
                           }
                         }))
@@ -352,12 +349,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.tel || ''}
+                      value={editData.machineProjectResponseDto.tel || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             tel: e.target.value
                           }
                         }))
@@ -370,12 +367,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <AppReactDatepicker
-                      selected={editData?.machineProjectManagementResponseDto.completeDate}
+                      selected={editData?.machineProjectResponseDto.completeDate}
                       onChange={(date: Date | null) =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             completeDate: date
                           }
                         }))
@@ -397,12 +394,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <AppReactDatepicker
-                      selected={editData?.machineProjectManagementResponseDto.contractDate}
+                      selected={editData?.machineProjectResponseDto.contractDate}
                       onChange={(date: Date | null) =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             contractDate: date
                           }
                         }))
@@ -415,15 +412,15 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                     진행상태
                   </th>
                   <td style={{ padding: '10px 12px' }}>
-                    <DefaultSelectBox
+                    <MultiSelectBox
                       id={'projectStatusDescription'}
-                      value={editData.machineProjectManagementResponseDto.projectStatus || ''}
-                      loading={false}
+                      value={editData.machineProjectResponseDto.projectStatus || ''}
+                      disabled={false}
                       onChange={(e: any) =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             projectStatus: e.target.value
                           }
                         }))
@@ -445,12 +442,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.contractPrice || ''}
+                      value={editData.machineProjectResponseDto.contractPrice || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             contractPrice: e.target.value
                           }
                         }))
@@ -463,15 +460,15 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                     점검 업체
                   </th>
                   <td style={{ padding: '10px 12px' }}>
-                    <DefaultSelectBox
+                    <MultiSelectBox
                       id={'companyName'}
-                      value={editData.machineProjectManagementResponseDto.companyName || ''}
+                      value={editData.machineProjectResponseDto.companyName || ''}
                       loading={false}
                       onChange={(e: any) =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             companyName: e.target.value
                           }
                         }))
@@ -493,12 +490,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.contractManager || ''}
+                      value={editData.machineProjectResponseDto.contractManager || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             contractManager: e.target.value
                           }
                         }))
@@ -508,12 +505,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.contractManagerTel || ''}
+                      value={editData.machineProjectResponseDto.contractManagerTel || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             contractManagerTel: e.target.value
                           }
                         }))
@@ -523,12 +520,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.contractManagerEmail || ''}
+                      value={editData.machineProjectResponseDto.contractManagerEmail || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             contractManagerEmail: e.target.value
                           }
                         }))
@@ -542,12 +539,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.contractPartner || ''}
+                      value={editData.machineProjectResponseDto.contractPartner || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             contractPartner: e.target.value
                           }
                         }))
@@ -557,12 +554,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.contractPartnerTel || ''}
+                      value={editData.machineProjectResponseDto.contractPartnerTel || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             contractPartnerTel: e.target.value
                           }
                         }))
@@ -572,12 +569,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.contractPartnerEmail || ''}
+                      value={editData.machineProjectResponseDto.contractPartnerEmail || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             contractPartnerEmail: e.target.value
                           }
                         }))
@@ -598,12 +595,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       multiline
                       label=''
                       placeholder='참고 사항을 입력해 주세요'
-                      value={editData.machineProjectManagementResponseDto.requirement || ''}
+                      value={editData.machineProjectResponseDto.requirement || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             requirement: e.target.value
                           }
                         }))
@@ -623,12 +620,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineMaintainer1Name || ''}
+                      value={editData.machineProjectResponseDto.machineMaintainer1Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineMaintainer1Name: e.target.value
                           }
                         }))
@@ -637,12 +634,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineMaintainer1Info || ''}
+                      value={editData.machineProjectResponseDto.machineMaintainer1Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineMaintainer1Info: e.target.value
                           }
                         }))
@@ -655,12 +652,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineManager1Name || ''}
+                      value={editData.machineProjectResponseDto.machineManager1Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineManager1Name: e.target.value
                           }
                         }))
@@ -669,12 +666,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineManager1Info || ''}
+                      value={editData.machineProjectResponseDto.machineManager1Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineManager1Info: e.target.value
                           }
                         }))
@@ -689,12 +686,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineMaintainer2Name || ''}
+                      value={editData.machineProjectResponseDto.machineMaintainer2Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineMaintainer2Name: e.target.value
                           }
                         }))
@@ -703,12 +700,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineMaintainer2Info || ''}
+                      value={editData.machineProjectResponseDto.machineMaintainer2Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineMaintainer2Info: e.target.value
                           }
                         }))
@@ -721,12 +718,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineManager2Name || ''}
+                      value={editData.machineProjectResponseDto.machineManager2Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineManager2Name: e.target.value
                           }
                         }))
@@ -735,12 +732,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineManager2Info || ''}
+                      value={editData.machineProjectResponseDto.machineManager2Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineManager2Info: e.target.value
                           }
                         }))
@@ -755,12 +752,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineMaintainer3Name || ''}
+                      value={editData.machineProjectResponseDto.machineMaintainer3Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineMaintainer3Name: e.target.value
                           }
                         }))
@@ -769,12 +766,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineMaintainer3Info || ''}
+                      value={editData.machineProjectResponseDto.machineMaintainer3Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineMaintainer3Info: e.target.value
                           }
                         }))
@@ -787,12 +784,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineManager3Name || ''}
+                      value={editData.machineProjectResponseDto.machineManager3Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineManager3Name: e.target.value
                           }
                         }))
@@ -801,12 +798,12 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectManagementResponseDto.machineManager3Info || ''}
+                      value={editData.machineProjectResponseDto.machineManager3Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectManagementResponseDto: {
-                            ...prev.machineProjectManagementResponseDto,
+                          machineProjectResponseDto: {
+                            ...prev.machineProjectResponseDto,
                             machineManager3Info: e.target.value
                           }
                         }))
@@ -855,7 +852,7 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       기관명
                     </td>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.institutionName}
+                      {editData?.machineProjectResponseDto?.institutionName ?? ''}
                     </td>
                   </tr>
                   <tr>
@@ -863,67 +860,60 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       주소
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto?.address?.roadAddress || ''}
-                      {editData.machineProjectManagementResponseDto.address?.detailAddress
-                        ? `, ${editData.machineProjectManagementResponseDto.address.detailAddress}`
-                        : ''}
+                      {editData.machineProjectResponseDto?.roadAddress ?? ''}
                     </td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       대표자
                     </th>
-                    <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.representative}
-                    </td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.representative}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       연면적(㎡)
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectManagementResponseDto.grossArea}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.grossArea}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       사업자번호
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectManagementResponseDto.bizno}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.bizno}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       세대수
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectManagementResponseDto.houseCnt}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.houseCnt}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       용도
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectManagementResponseDto.purpose}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.purpose}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectManagementResponseDto.manager}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.manager}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       건물구조
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectManagementResponseDto.structure}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.structure}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       연락처
                     </th>
-                    <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.managerPhone}
-                    </td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.managerPhone}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       전화번호
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectManagementResponseDto.tel}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.tel}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       준공일
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.completeDate
-                        ? new Date(editData.machineProjectManagementResponseDto.completeDate).toLocaleDateString()
+                      {editData.machineProjectResponseDto.completeDate
+                        ? new Date(editData.machineProjectResponseDto.completeDate).toLocaleDateString()
                         : ''}
                     </td>
                   </tr>
@@ -937,22 +927,22 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       계약일
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.contractDate
-                        ? new Date(editData.machineProjectManagementResponseDto.contractDate).toLocaleDateString()
+                      {editData.machineProjectResponseDto.contractDate
+                        ? new Date(editData.machineProjectResponseDto.contractDate).toLocaleDateString()
                         : ''}
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       진행상태
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.projectStatusDescription}
+                      {editData.machineProjectResponseDto.projectStatusDescription}
                     </td>
                     {/* <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약금액
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.contractPrice?.toLocaleString()} 원
-                      {editData.machineProjectManagementResponseDto.vatIncludedYn === 'Y' && (
+                      {editData.machineProjectResponseDto.contractPrice?.toLocaleString()} 원
+                      {editData.machineProjectResponseDto.vatIncludedYn === 'Y' && (
                         <span style={{ color: '#888', marginLeft: 8 }}>(VAT포함)</span>
                       )}
                     </td> */}
@@ -962,43 +952,43 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       계약금액
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.contractPrice?.toLocaleString()} 원
-                      {editData.machineProjectManagementResponseDto.vatIncludedYn === 'Y' && (
+                      {editData.machineProjectResponseDto.contractPrice?.toLocaleString()} 원
+                      {editData.machineProjectResponseDto.vatIncludedYn === 'Y' && (
                         <span style={{ color: '#888', marginLeft: 8 }}>(VAT포함)</span>
                       )}
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       점검업체
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectManagementResponseDto.companyName}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.companyName}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약담당자
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.contractManager}
+                      {editData.machineProjectResponseDto.contractManager}
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.contractManagerTel}
+                        {editData.machineProjectResponseDto.contractManagerTel}
                       </span>
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.contractManagerEmail}
+                        {editData.machineProjectResponseDto.contractManagerEmail}
                       </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약상대자
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.contractPartner}
+                      {editData.machineProjectResponseDto.contractPartner}
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.contractPartnerTel}
+                        {editData.machineProjectResponseDto.contractPartnerTel}
                       </span>
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.contractPartnerEmail}
+                        {editData.machineProjectResponseDto.contractPartnerEmail}
                       </span>
                     </td>
                   </tr>
@@ -1007,7 +997,7 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       요구사항
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px', minHeight: 200 }}>
-                      <p>{editData.machineProjectManagementResponseDto.requirement}</p>
+                      <p>{editData.machineProjectResponseDto.requirement}</p>
                     </td>
                   </tr>
                   <tr style={{ background: '#f3f4f6' }}>
@@ -1020,20 +1010,20 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       유지관리자1
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.machineMaintainer1Name}
+                      {editData.machineProjectResponseDto.machineMaintainer1Name}
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.machineMaintainer1Info}
+                        {editData.machineProjectResponseDto.machineMaintainer1Info}
                       </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자1
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.machineManager1Name}
+                      {editData.machineProjectResponseDto.machineManager1Name}
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.machineManager1Info}
+                        {editData.machineProjectResponseDto.machineManager1Info}
                       </span>
                     </td>
                   </tr>
@@ -1042,20 +1032,20 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       유지관리자2
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.machineMaintainer2Name}
+                      {editData.machineProjectResponseDto.machineMaintainer2Name}
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.machineMaintainer2Info}
+                        {editData.machineProjectResponseDto.machineMaintainer2Info}
                       </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자2
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.machineManager2Name}
+                      {editData.machineProjectResponseDto.machineManager2Name}
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.machineManager2Info}
+                        {editData.machineProjectResponseDto.machineManager2Info}
                       </span>
                     </td>
                   </tr>
@@ -1064,20 +1054,20 @@ ${editData?.machineProjectManagementResponseDto?.address?.roadAddress || ''}
                       유지관리자3
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.machineMaintainer3Name}
+                      {editData.machineProjectResponseDto.machineMaintainer3Name}
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.machineMaintainer3Info}
+                        {editData.machineProjectResponseDto.machineMaintainer3Info}
                       </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자3
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectManagementResponseDto.machineManager3Name}
+                      {editData.machineProjectResponseDto.machineManager3Name}
                       <br />
                       <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectManagementResponseDto.machineManager3Info}
+                        {editData.machineProjectResponseDto.machineManager3Info}
                       </span>
                     </td>
                   </tr>

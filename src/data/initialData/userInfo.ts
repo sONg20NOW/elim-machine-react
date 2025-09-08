@@ -1,6 +1,6 @@
-import type { EditUserInfoData } from '@/data/type/userInfoTypes'
+import type { memberDetailDtoType } from '@/app/_type/types'
 
-export const initialData: EditUserInfoData = {
+export const initialData: memberDetailDtoType = {
   memberBasicResponseDto: {
     companyName: '',
     email: '',
@@ -60,11 +60,9 @@ export const initialData: EditUserInfoData = {
     workFormDescription: ''
   },
   memberPrivacyResponseDto: {
-    address: {
-      roadAddress: '',
-      jibunAddress: null,
-      detailAddress: ''
-    },
+    roadAddress: '',
+    jibunAddress: null,
+    detailAddress: '',
     bankName: '',
     bankNumber: '',
     birthday: '',

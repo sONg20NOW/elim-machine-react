@@ -1,0 +1,153 @@
+import type { Dispatch, SetStateAction } from 'react'
+
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+
+import classNames from 'classnames'
+
+import type { HeaderType, SortInfoType } from '@/app/_type/types'
+
+/**
+ * @param header
+ * 테이블 헤더를 정의 (ex. {name: {label: '이름', canSort: true}, ...})
+ * @type HeaderTpye<T>
+ * @param Exceptions
+ * 기본적으로 데이터의 해당되는 속성만 row에 표시하는데, 다르게 표시할 속성들을 정의
+ *
+ * (ex. {age: ['age', 'genderDescription']}) => 나이 항목에 나이와 성별을 동시에 표시.
+ * @returns
+ */
+export default function BasicTable<T extends Record<keyof T, string | number | string[]>>({
+  header,
+  data,
+  handleRowClick,
+  page,
+  pageSize,
+  sorting,
+  setSorting,
+  Exceptions,
+  loading,
+  error
+}: {
+  header: HeaderType<T>
+  data: T[]
+  handleRowClick: (row: T) => Promise<void>
+  page: number
+  pageSize: number
+  sorting: SortInfoType<T>
+  setSorting: Dispatch<SetStateAction<SortInfoType<T>>>
+  Exceptions?: Partial<Record<keyof T, Array<keyof T>>>
+  loading: boolean
+  error: boolean
+}) {
+  function toggleOrder(key: string) {
+    // 로딩이 끝나고 에러가 없으면 not disabled
+    if (key !== sorting.target) {
+      setSorting({ target: key as keyof T, sort: 'asc' })
+    } else {
+      switch (sorting.sort) {
+        case '':
+          setSorting({ ...sorting, sort: 'asc' })
+          break
+        case 'asc':
+          setSorting({ ...sorting, sort: 'desc' })
+          break
+        case 'desc':
+          setSorting({ ...sorting, sort: '' })
+          break
+        default:
+          break
+      }
+    }
+  }
+
+  return (
+    <TableContainer className='px-2'>
+      <Table sx={{ minWidth: 650 }} aria-label='simple table' className='relative'>
+        <TableHead className='select-none'>
+          <TableRow>
+            <TableCell align='center' key='order' className='font-medium text-base'>
+              번호
+            </TableCell>
+            {Object.keys(header).map(key => {
+              const k = key as keyof T
+
+              return (
+                <TableCell
+                  key={key}
+                  align='center'
+                  className={classNames('relative text-base', {
+                    'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
+                    'font-bold select-none': header[k].canSort,
+                    'font-medium': !header[k].canSort
+                  })}
+                  onClick={!(loading || error) && header[k].canSort ? () => toggleOrder(key) : undefined}
+                >
+                  <div className='flex'></div>
+                  <span>{header[k].label}</span>
+                  {header[k].canSort && sorting.target === k && (
+                    <i
+                      className={classNames('absolute text-xl top-[30%] text-color-primary-dark', {
+                        'tabler-square-chevron-down': sorting.sort === 'desc',
+                        'tabler-square-chevron-up': sorting.sort === 'asc'
+                      })}
+                    />
+                  )}
+                </TableCell>
+              )
+            })}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((user, index) => (
+            <TableRow
+              hover={true}
+              onClick={() => handleRowClick(user)}
+              key={index}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              className='cursor-pointer'
+            >
+              <TableCell align='center' key={'order'}>
+                {page * pageSize + index + 1}
+              </TableCell>
+              {Object.keys(user).map(property => {
+                const key = property as keyof T
+
+                // header 속성에 포함되지 않다면 출력 x & 예외 출력
+                if (!Object.keys(header).includes(property)) return null
+                else if (Exceptions && Object.keys(Exceptions).includes(property)) {
+                  const key = property as keyof typeof Exceptions
+                  const pieces = Exceptions[key]?.map(value => user[value])
+                  const output = pieces?.join('  ')
+
+                  return (
+                    <TableCell key={key.toString()} align='center'>
+                      {output}
+                    </TableCell>
+                  )
+                } else {
+                  return (
+                    <TableCell key={key.toString()} align='center'>
+                      {user[key]}
+                    </TableCell>
+                  )
+                }
+              })}
+            </TableRow>
+          ))}
+        </TableBody>
+
+        {/* 전달된 데이터가 없을 때 */}
+        {data.length === 0 && (
+          <caption className='text-center py-5'>
+            {loading ? 'Loading...' : error ? '데이터를 불러오는 데 실패했습니다.' : '데이터가 없습니다.'}
+          </caption>
+        )}
+      </Table>
+    </TableContainer>
+  )
+}
