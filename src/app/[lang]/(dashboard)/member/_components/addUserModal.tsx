@@ -18,7 +18,7 @@ import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/DefaultModal'
 import type { memberDetailDtoType } from '@/app/_type/types'
 import MemberTabContent from './memberTabContent'
-import { MEMBER_INPUT_INFO } from '@/app/_type/input/MemberTabInfo'
+import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
 
 type EditUserInfoProps = {
   open: boolean

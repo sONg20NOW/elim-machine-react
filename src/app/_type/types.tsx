@@ -1,11 +1,23 @@
+/**
+ * @type T
+ * 탭 카테고리 타입 (ex. 'basic' | 'privacy' | ...)
+ * @type K
+ * 상세 정보 타입 (ex. {memberBasicResponseDto: ...})
+ */
+export type InputInfoType<T extends string, K> = Record<T, Partial<Record<AllSubKeys<K>, InputFieldType>>>
+
+type AllSubKeys<T> = {
+  [K in keyof T]: keyof T[K]
+}[keyof T]
+
+export type TabType = {
+  member: 'basic' | 'privacy' | 'office' | 'career' | 'etc'
+  machine: ''
+}
+
 // -------- 직원관리 --------
-
-// 인풋 형식
-type AllMemberSubKeys = {
-  [K in keyof memberDetailDtoType]: keyof memberDetailDtoType[K]
-}[keyof memberDetailDtoType]
-
-export type memberInputType = Record<TabType['member'], Partial<Record<AllMemberSubKeys, InputFieldType>>>
+// member 인풋 정보 형식
+export type memberInputType = InputInfoType<TabType['member'], memberDetailDtoType>
 
 // api/members (리스트)
 export type memberPageDtoType = {
@@ -110,11 +122,6 @@ export interface memberPrivacyDtoType {
   phoneNumber?: string
   religion?: string
   version?: number
-}
-
-// 직원관리 - 상세페이지 모달
-export type TabType = {
-  member: 'basic' | 'privacy' | 'office' | 'career' | 'etc'
 }
 
 // 직원관리 필터

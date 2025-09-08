@@ -1,4 +1,4 @@
-import type { memberInputType } from '../types'
+import type { memberInputType } from '../../_type/types'
 
 // 기계설비현장 상세페이지
 export const MACHINE_INPUT_INFO: memberInputType = {

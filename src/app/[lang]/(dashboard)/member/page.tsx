@@ -22,7 +22,7 @@ import type { memberDetailDtoType, MemberFilterType, memberPageDtoType } from '@
 import { HEADERS, InitialSorting } from '@/app/_type/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
-import { MEMBER_FILTER_INFO } from '@/app/_type/filter/MemberFilterInfo'
+import { MEMBER_FILTER_INFO } from '@/app/_schema/filter/MemberFilterInfo'
 
 // 초기 필터링 값
 const initialFilters: MemberFilterType = {

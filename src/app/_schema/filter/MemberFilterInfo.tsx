@@ -1,5 +1,5 @@
-import { MEMBER_INPUT_INFO } from '../input/MemberTabInfo'
-import type { InputFieldType, MemberFilterType } from '../types'
+import { MEMBER_INPUT_INFO } from '../input/MemberInputInfo'
+import type { InputFieldType, MemberFilterType } from '../../_type/types'
 
 const { role, companyName, memberStatus } = MEMBER_INPUT_INFO.basic
 const { officePosition, officeDepartmentName, contractType, laborForm, workForm } = MEMBER_INPUT_INFO.office

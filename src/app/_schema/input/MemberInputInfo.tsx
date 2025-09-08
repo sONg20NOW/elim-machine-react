@@ -1,4 +1,4 @@
-import type { memberInputType } from '../types'
+import type { memberInputType } from '../../_type/types'
 
 // 직원 상세 페이지
 export const MEMBER_INPUT_INFO: memberInputType = {
