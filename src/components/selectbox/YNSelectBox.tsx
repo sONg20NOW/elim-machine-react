@@ -5,6 +5,7 @@ import { MenuItem } from '@mui/material'
 import CustomTextField from '@/@core/components/mui/TextField'
 
 interface YNSelectBoxProps {
+  name?: string
   id?: string
   label: string
   value: string
@@ -12,9 +13,10 @@ interface YNSelectBoxProps {
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
 }
 
-const YNSelectBox = ({ id, label, value, disabled = false, onChange }: YNSelectBoxProps) => {
+const YNSelectBox = ({ name, id, label, value, disabled = false, onChange }: YNSelectBoxProps) => {
   return (
     <CustomTextField
+      slotProps={{ htmlInput: { name: name } }}
       select
       fullWidth
       id={id}

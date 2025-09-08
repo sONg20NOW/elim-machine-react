@@ -7,7 +7,8 @@ import type { TabFieldType } from '@/app/_schema/EmployeeTabInfo'
 
 interface MultiSelectBoxProps {
   tabField: TabFieldType
-  id: string
+  name?: string
+  id?: string
   value: string
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
@@ -21,7 +22,7 @@ interface MultiSelectBoxProps {
  * 속성의 영어 이름 (ex. companyName, officePosition, ...)
  * @returns
  */
-const MultiSelectBox = ({ tabField, id, disabled = false, value, onChange }: MultiSelectBoxProps) => {
+const MultiSelectBox = ({ name, tabField, id, disabled = false, value, onChange }: MultiSelectBoxProps) => {
   return (
     <CustomTextField
       id={id}
@@ -32,7 +33,8 @@ const MultiSelectBox = ({ tabField, id, disabled = false, value, onChange }: Mul
       value={value ?? ''}
       onChange={onChange}
       slotProps={{
-        select: { displayEmpty: true }
+        select: { displayEmpty: true },
+        htmlInput: { name: name }
       }}
     >
       <MenuItem value=''>전체</MenuItem>

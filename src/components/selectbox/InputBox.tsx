@@ -63,6 +63,7 @@ function InputBoxContainer({ tabField, tabFieldKey, value, disabled, onChange }:
     case 'number':
       return (
         <CustomTextField
+          slotProps={{ htmlInput: { name: tabFieldKey } }}
           type={tabField.type}
           id={tabFieldKey}
           disabled={disabled}
@@ -74,15 +75,30 @@ function InputBoxContainer({ tabField, tabFieldKey, value, disabled, onChange }:
       )
     case 'multi':
       return (
-        <MultiSelectBox tabField={tabField} id={tabFieldKey} disabled={disabled} value={value} onChange={onChange} />
+        <MultiSelectBox
+          name={tabFieldKey}
+          tabField={tabField}
+          id={tabFieldKey}
+          disabled={disabled}
+          value={value}
+          onChange={onChange}
+        />
       )
     case 'yn':
       return (
-        <YNSelectBox id={tabFieldKey} disabled={disabled} label={tabField.label} value={value} onChange={onChange} />
+        <YNSelectBox
+          name={tabFieldKey}
+          id={tabFieldKey}
+          disabled={disabled}
+          label={tabField.label}
+          value={value}
+          onChange={onChange}
+        />
       )
     case 'text':
       return (
         <CustomTextField
+          slotProps={{ htmlInput: { name: tabFieldKey } }}
           id={tabFieldKey}
           disabled={disabled}
           fullWidth

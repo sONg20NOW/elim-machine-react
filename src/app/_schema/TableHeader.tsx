@@ -1,4 +1,4 @@
-import type { HeaderInfoType, SortInfoType, UsersType } from './types'
+import type { HeaderInfoType, SortInfoType, memberPageDtoType } from './types'
 
 export const BROWER_TAB_TITLE = 'ELIM'
 export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
@@ -19,7 +19,7 @@ export const HEADERS = {
     joinDate: { label: '입사일', canSort: true },
     careerYear: { label: '근속년수', canSort: true },
     memberStatusDescription: { label: '상태', canSort: false }
-  } as Record<keyof UsersType, HeaderInfoType>,
+  } as Record<keyof memberPageDtoType, HeaderInfoType>,
   engineers: {}
 }
 
@@ -27,4 +27,4 @@ export const HEADERS = {
 export const InitialSorting = {
   target: 'roleDescription',
   sort: ''
-} as SortInfoType<UsersType>
+} as SortInfoType<memberPageDtoType>

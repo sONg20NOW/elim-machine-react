@@ -26,7 +26,7 @@ const TableFilters = ({ filters, onFiltersChange, disabled, setPage }: TableFilt
 
   return (
     <CardContent>
-      <Grid container spacing={6}>
+      <Grid container spacing={3}>
         {Object.keys(EMPLOYEE_FILTER_INFO).map(property => (
           <InputBox
             key={property}

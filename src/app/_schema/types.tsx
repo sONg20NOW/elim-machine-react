@@ -1,6 +1,6 @@
 // Type Imports
 // import type { ThemeColor } from '@core/types'
-// export type OldUsersType = {
+// export type OldmemberPageDtoType = {
 //   memberId: number
 //   role: string
 //   status: string
@@ -36,8 +36,9 @@
 //   contractType: string
 // }
 
-// UserTypes.ts
-export type UsersType = {
+// -------- 직원관리 타입 --------
+// api/members
+export type memberPageDtoType = {
   memberId: number
   roleDescription: string
   name: string
@@ -54,8 +55,15 @@ export type UsersType = {
   genderDescription: string
 }
 
-// userInfoTypes.ts
-interface memberBasicData {
+// api/members/[memberId]
+export type memberDetailDtoType = {
+  memberBasicResponseDto: memberBasicDtoType
+  memberCareerResponseDto: memberCareerDtoType
+  memberEtcResponseDto: memberEtcDtoType
+  memberOfficeResponseDto: memberOfficeDtoType
+  memberPrivacyResponseDto: memberPrivacyDtoType
+}
+interface memberBasicDtoType {
   companyName?: string
   email?: string
   memberId?: number
@@ -68,7 +76,7 @@ interface memberBasicData {
   storedFileName?: string | null
   version?: number
 }
-interface memberCareerData {
+interface memberCareerDtoType {
   grade?: string
   gradeDescription?: string
   industryOtherMonth?: number
@@ -78,7 +86,7 @@ interface memberCareerData {
   licenseName2?: string
   version?: number
 }
-interface memberEtcData {
+interface memberEtcDtoType {
   employedType?: string
   incomeTaxReducedBeginDate?: string
   incomeTaxReducedEndDate?: string
@@ -90,7 +98,7 @@ interface memberEtcData {
   youthJobLeap?: string
   version?: number
 }
-interface memberOfficeData {
+interface memberOfficeDtoType {
   apprentice?: string
   contractType?: string
   contractTypeDescription?: string
@@ -113,7 +121,7 @@ interface memberOfficeData {
   workForm?: string
   workFormDescription?: string
 }
-export interface memberPrivacyData {
+export interface memberPrivacyDtoType {
   roadAddress?: string | null
   jibunAddress?: string | null
   detailAddress?: string | null
@@ -132,14 +140,6 @@ export interface memberPrivacyData {
   phoneNumber?: string
   religion?: string
   version?: number
-}
-
-export type EditUserInfoData = {
-  memberBasicResponseDto: memberBasicData
-  memberCareerResponseDto: memberCareerData
-  memberEtcResponseDto: memberEtcData
-  memberOfficeResponseDto: memberOfficeData
-  memberPrivacyResponseDto: memberPrivacyData
 }
 
 // 모달 Box 관련 타입

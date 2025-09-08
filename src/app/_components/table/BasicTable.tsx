@@ -63,8 +63,8 @@ export default function BasicTable<T extends Record<string, string | number>>({
   }
 
   return (
-    <TableContainer className='rounded-t-lg p-2'>
-      <Table sx={{ minWidth: 650 }} aria-label='simple table'>
+    <TableContainer className='rounded-t-lg p-2 '>
+      <Table sx={{ minWidth: 650 }} aria-label='simple table' className='relative'>
         <TableHead className='select-none'>
           <TableRow>
             <TableCell align='center' key='order' className='font-medium text-base'>
@@ -77,9 +77,10 @@ export default function BasicTable<T extends Record<string, string | number>>({
                 <TableCell
                   key={key}
                   align='center'
-                  className={classNames('font-medium relative text-base', {
-                    'cursor-pointer hover:underline': !disabled,
-                    'font-extrabold select-none': header[k].canSort
+                  className={classNames('relative text-base', {
+                    'cursor-pointer hover:underline': !disabled && header[k].canSort,
+                    'font-bold select-none': header[k].canSort,
+                    'font-medium': !header[k].canSort
                   })}
                   onClick={!disabled && header[k].canSort ? () => toggleOrder(key) : undefined}
                 >
@@ -135,35 +136,9 @@ export default function BasicTable<T extends Record<string, string | number>>({
             </TableRow>
           ))}
         </TableBody>
+        {/* 전달된 데이터가 없을 때 */}
+        {data.length === 0 && <caption className='text-center'>There is no data!</caption>}
       </Table>
     </TableContainer>
   )
 }
-
-// 원본 형식
-// <TableContainer component={Paper}>
-//   <Table sx={{ minWidth: 650 }} aria-label='simple table'>
-//     <TableHead>
-//       <TableRow>
-//         <TableCell>Dessert (100g serving)</TableCell>
-//         <TableCell align='right'>Calories</TableCell>
-//         <TableCell align='right'>Fat&nbsp;(g)</TableCell>
-//         <TableCell align='right'>Carbs&nbsp;(g)</TableCell>
-//         <TableCell align='right'>Protein&nbsp;(g)</TableCell>
-//       </TableRow>
-//     </TableHead>
-//     <TableBody>
-//       {rows.map(row => (
-//         <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-//           <TableCell component='th' scope='row'>
-//             {row.name}
-//           </TableCell>
-//           <TableCell align='right'>{row.calories}</TableCell>
-//           <TableCell align='right'>{row.fat}</TableCell>
-//           <TableCell align='right'>{row.carbs}</TableCell>
-//           <TableCell align='right'>{row.protein}</TableCell>
-//         </TableRow>
-//       ))}
-//     </TableBody>
-//   </Table>
-// </TableContainer>

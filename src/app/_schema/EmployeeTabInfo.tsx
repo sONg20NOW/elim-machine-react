@@ -1,10 +1,10 @@
 // 첫번째 키: members 정보 카테고리 (ex. basic, offic, ...)
-// 두번째 키: MultiSelectBox의 id (ex. companyName, role) => types.tsx-EditUserInfoData의 속성값들
+// 두번째 키: MultiSelectBox의 id (ex. companyName, role) => types.tsx-memberDetailDtoType의 속성값들
 // type: 선택자 타입: multi | yn | text
 // label: id를 한글화한 것
 // options: 선택지
 
-import type { BoxSizeType, EditUserInfoData, EmployeeFilterType, InputType, TabType } from './types'
+import type { BoxSizeType, memberDetailDtoType, EmployeeFilterType, InputType, TabType } from './types'
 
 export type TabFieldType = {
   size?: BoxSizeType
@@ -15,8 +15,8 @@ export type TabFieldType = {
 }
 
 type AllSubKeys = {
-  [K in keyof EditUserInfoData]: keyof EditUserInfoData[K]
-}[keyof EditUserInfoData]
+  [K in keyof memberDetailDtoType]: keyof memberDetailDtoType[K]
+}[keyof memberDetailDtoType]
 
 export type employeeTab = Record<TabType['employee'], Partial<Record<AllSubKeys, TabFieldType>>>
 

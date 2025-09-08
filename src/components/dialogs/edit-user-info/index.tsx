@@ -27,7 +27,7 @@ import TabContext from '@mui/lab/TabContext'
 import DialogCloseButton from '../DialogCloseButton'
 import CustomTextField from '@core/components/mui/TextField'
 
-type EditUserInfoData = {
+type memberDetailDtoType = {
   firstName?: string
   lastName?: string
   userName?: string
@@ -43,7 +43,7 @@ type EditUserInfoData = {
 type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  data?: EditUserInfoData
+  data?: memberDetailDtoType
 }
 
 const initialData: EditUserInfoProps['data'] = {

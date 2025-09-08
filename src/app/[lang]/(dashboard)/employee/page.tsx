@@ -9,8 +9,6 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import { Input } from '@mui/material'
-
 import { toast } from 'react-toastify'
 
 // Component Imports
@@ -20,11 +18,10 @@ import CustomTextField from '@core/components/mui/TextField'
 // Style Imports
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
-import type { EditUserInfoData, EmployeeFilterType, UsersType } from '@/app/_schema/types'
+import type { memberDetailDtoType, EmployeeFilterType, memberPageDtoType } from '@/app/_schema/types'
 import { HEADERS, InitialSorting } from '@/app/_schema/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
-import CompactButton from '@/app/_components/button/CompactButton'
-import IconButton from '@/app/_components/button/IconButton'
+import SearchBar from '@/app/_components/SearchBar'
 
 // 초기 필터링 값
 const initialFilters: EmployeeFilterType = {
@@ -46,7 +43,7 @@ const PageSizeOptions = [1, 10, 30, 50]
 
 const EmployeePage = () => {
   // States
-  const [data, setData] = useState<UsersType[]>([])
+  const [data, setData] = useState<memberPageDtoType[]>([])
 
   // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
@@ -69,7 +66,7 @@ const EmployeePage = () => {
 
   // States에 추가
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<EditUserInfoData | null>(null)
+  const [selectedUser, setSelectedUser] = useState<memberDetailDtoType | null>(null)
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
 
   // 필터 상태 - 컬럼에 맞게 수정
@@ -140,7 +137,7 @@ const EmployeePage = () => {
   }, [filters, fetchFilteredData])
 
   // 사용자 선택 핸들러
-  const handleUserClick = async (user: UsersType) => {
+  const handleUserClick = async (user: memberPageDtoType) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${user?.memberId}`, {
       method: 'GET'
     })
@@ -172,53 +169,17 @@ const EmployeePage = () => {
         {/* 필터바 */}
         <TableFilters filters={filters} onFiltersChange={setFilters} disabled={disabled} setPage={setPage} />
 
-        {/* 이름으로 검색 */}
-        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <div className='flex justify-center items-center gap-2'>
-            <Input
-              value={name}
-              onChange={(e: any) => setName(e.target.value)}
-              id='name_search_input'
-              onKeyDown={(e: any) => {
-                if (e.key === 'Enter') {
-                  setNameToFilter(name)
-                  setPage(0)
-                }
-              }}
-              placeholder='이름으로 검색'
-              className='max-sm:is-full'
-              disabled={disabled}
-              sx={{
-                borderTop: '1px solid var(--mui-palette-customColors-inputBorder)',
-                borderBottom: '1px solid var(--mui-palette-customColors-inputBorder)',
-                borderLeft: '1px solid var(--mui-palette-customColors-inputBorder)',
-                borderRight: '1px solid var(--mui-palette-customColors-inputBorder)',
-                borderRadius: 0,
-                background: 'transparent',
-                boxShadow: 'none',
-                '&:hover': {
-                  borderColor: 'var(--mui-palette-primary-main)'
-                },
-                '&.Mui-focused': {
-                  borderColor: 'var(--mui-palette-primary-main)'
-                },
-                padding: '3px 10px',
-                borderTopRightRadius: 6,
-                borderBottomRightRadius: 6,
-                borderTopLeftRadius: 6,
-                borderBottomLeftRadius: 6
-              }}
-              disableUnderline={true}
-            />
-            <IconButton
-              tablerIcon='tabler-search'
-              onClick={() => {
-                setNameToFilter(name)
-                setPage(0)
-              }}
-              disabled={disabled}
-            />
-          </div>
+        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+          {/* 이름으로 검색 */}
+          <SearchBar
+            name={name}
+            setName={setName}
+            onClick={() => {
+              setNameToFilter(name)
+              setPage(0)
+            }}
+            disabled={disabled}
+          />
 
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
             <div className='flex gap-3 itmes-center'>
@@ -243,17 +204,20 @@ const EmployeePage = () => {
             </div>
 
             {/* 유저 추가 버튼 */}
-            <CompactButton
-              tablerIcon='tabler-plus'
+            <Button
+              variant='contained'
+              startIcon={<i className='tabler-plus' />}
               onClick={() => setAddUserModalOpen(!addUserModalOpen)}
-              text='추가'
+              className='max-sm:is-full'
               disabled={disabled}
-            />
+            >
+              추가
+            </Button>
           </div>
         </div>
 
         {/* 테이블 */}
-        <BasicTable<UsersType>
+        <BasicTable<memberPageDtoType>
           header={HEADERS.employee}
           data={data}
           handleRowClick={handleUserClick}
@@ -269,7 +233,7 @@ const EmployeePage = () => {
         {loading && <div className='text-center p-4'>Loading...</div>}
 
         {/* 데이터가 없을 경우 */}
-        {error && <div className='text-center p-4'>There is problem to fetch data...</div>}
+        {error && <div className='text-center p-4'>There is problem in fetching data...</div>}
 
         {/* 페이지네이션 */}
         <TablePagination
@@ -300,6 +264,7 @@ const EmployeePage = () => {
           }}
         />
       </Card>
+
       {/* 모달들 */}
       {addUserModalOpen && (
         <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} handlePageChange={() => setPage(0)} />

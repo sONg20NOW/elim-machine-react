@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { DialogContent } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 
-import type { EditUserInfoData, TabType } from '@/app/_schema/types'
+import type { memberDetailDtoType, TabType } from '@/app/_schema/types'
 import { EMPLOYEE_DETAIL_TAB_INFO } from '@/app/_schema/EmployeeTabInfo'
 import { InputBox } from '@/components/selectbox/InputBox'
 
@@ -13,12 +13,12 @@ const MemberTabContent = ({
   setUserData
 }: {
   tabName: TabType['employee']
-  userData: EditUserInfoData
-  setUserData: Dispatch<SetStateAction<EditUserInfoData>>
+  userData: memberDetailDtoType
+  setUserData: Dispatch<SetStateAction<memberDetailDtoType>>
 }) => {
   const tabInfos = EMPLOYEE_DETAIL_TAB_INFO[tabName]
 
-  const dtoMap: Record<typeof tabName, keyof EditUserInfoData> = {
+  const dtoMap: Record<typeof tabName, keyof memberDetailDtoType> = {
     basic: 'memberBasicResponseDto',
     privacy: 'memberPrivacyResponseDto',
     office: 'memberOfficeResponseDto',

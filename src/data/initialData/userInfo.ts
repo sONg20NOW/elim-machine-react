@@ -1,6 +1,6 @@
-import type { EditUserInfoData } from '@/app/_schema/types'
+import type { memberDetailDtoType } from '@/app/_schema/types'
 
-export const initialData: EditUserInfoData = {
+export const initialData: memberDetailDtoType = {
   memberBasicResponseDto: {
     companyName: '',
     email: '',

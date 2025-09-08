@@ -18,7 +18,7 @@ import { toast } from 'react-toastify'
 import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/DefaultModal'
 import MemberTabContent from './memberTabContent'
-import type { EditUserInfoData } from '@/app/_schema/types'
+import type { memberDetailDtoType } from '@/app/_schema/types'
 
 const requestRule = {
   basic: {
@@ -51,7 +51,7 @@ const requestRule = {
 type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  data?: EditUserInfoData
+  data?: memberDetailDtoType
   reloadData: () => void
 }
 
@@ -59,7 +59,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
   // States
 
   const [value, setValue] = useState<string>('1')
-  const [userData, setUserData] = useState<EditUserInfoData>(data ?? initialData)
+  const [userData, setUserData] = useState<memberDetailDtoType>(data ?? initialData)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const handleDeleteUser = async () => {

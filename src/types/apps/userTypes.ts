@@ -1,7 +1,7 @@
 // Type Imports
 import type { ThemeColor } from '@core/types'
 
-export type UsersType = {
+export type memberPageDtoType = {
   memberId: number
   role: string
   status: string

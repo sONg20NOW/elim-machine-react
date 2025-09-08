@@ -1,6 +1,6 @@
 // TODO: machine 페이지에 맞게 조정.
 // 첫번째 키: members 정보 카테고리 (ex. basic, offic, ...)
-// 두번째 키: MultiSelectBox의 id (ex. companyName, role) => types.tsx-EditUserInfoData의 속성값들
+// 두번째 키: MultiSelectBox의 id (ex. companyName, role) => types.tsx-memberDetailDtoType의 속성값들
 // type: 선택자 타입: multi | yn | text
 // label: id를 한글화한 것
 // options: 선택지

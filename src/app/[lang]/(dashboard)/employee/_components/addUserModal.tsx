@@ -16,8 +16,9 @@ import { toast } from 'react-toastify'
 
 import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/DefaultModal'
-import type { EditUserInfoData } from '@/app/_schema/types'
+import type { memberDetailDtoType } from '@/app/_schema/types'
 import MemberTabContent from './memberTabContent'
+import { EMPLOYEE_DETAIL_TAB_INFO } from '@/app/_schema/EmployeeTabInfo'
 
 type EditUserInfoProps = {
   open: boolean
@@ -29,7 +30,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) =>
   // States
 
   const [value, setValue] = useState<string>('1')
-  const [userData, setUserData] = useState<EditUserInfoData>(initialData)
+  const [userData, setUserData] = useState<memberDetailDtoType>(initialData)
 
   const handleClose = () => {
     setOpen(false)
@@ -38,6 +39,15 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: EditUserInfoProps) =>
 
   const onSubmitHandler = async () => {
     const basicDto = { ...userData?.memberBasicResponseDto }
+
+    // 비고란을 제외한 칸이 다 안 채워져있으면 (basic만)
+    Object.keys(EMPLOYEE_DETAIL_TAB_INFO.basic).forEach(key => {
+      if (!basicDto[key as keyof typeof basicDto]) {
+        toast.error('비고를 제외한 모든 직원 정보를 입력해주세요.')
+
+        return
+      }
+    })
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
