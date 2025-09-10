@@ -8,7 +8,6 @@ import { useState } from 'react'
 import Button from '@mui/material/Button'
 
 // Component Imports
-import Tab from '@mui/material/Tab'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 
@@ -101,7 +100,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
       }
     >
       <TabList centered onChange={handleChange} aria-label='centered tabs example'>
-        <Tab value='1' label='기본정보' />
+        {/* <Tab value='1' label='기본정보' /> */}
       </TabList>
       <TabPanel value='1'>
         <MemberTabContent tabName='basic' userData={userData} setUserData={setUserData} />

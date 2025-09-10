@@ -17,7 +17,19 @@ interface MultiSelectBoxProps {
 /**
  *
  * @param tabField
- * 어떤 페이지에서 사용하는지 여부 (ex. member, machine, ...)
+ * 해당 필드의 정보 (ex. {
+ *
+    size?: BoxSizeType
+
+     type: InputType
+
+    label: string
+
+     options?: Array<{ value: string; label: string }>
+
+     disable?: boolean
+
+ })
  * @param id
  * 속성의 영어 이름 (ex. companyName, officePosition, ...)
  * @returns

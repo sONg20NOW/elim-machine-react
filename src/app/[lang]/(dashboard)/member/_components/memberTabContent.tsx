@@ -8,10 +8,12 @@ import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
 import { InputBox } from '@/components/selectbox/InputBox'
 
 const MemberTabContent = ({
+  isEditing,
   tabName,
   userData,
   setUserData
 }: {
+  isEditing?: boolean
   tabName: TabType['member']
   userData: memberDetailDtoType
   setUserData: Dispatch<SetStateAction<memberDetailDtoType>>
@@ -34,6 +36,7 @@ const MemberTabContent = ({
         {properties.map(property => {
           return (
             <InputBox
+              isEditing={isEditing}
               key={property}
               tabInfos={tabInfos}
               tabFieldKey={property}

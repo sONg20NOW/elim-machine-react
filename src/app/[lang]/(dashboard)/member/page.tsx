@@ -193,6 +193,7 @@ export default function MemberPage() {
                 {PageSizeOptions.map(pageSize => (
                   <MenuItem key={pageSize} value={pageSize}>
                     {pageSize}
+                    {`\u00a0\u00a0`}
                   </MenuItem>
                 ))}
               </CustomTextField>
@@ -218,7 +219,7 @@ export default function MemberPage() {
           handleRowClick={handleUserClick}
           page={page}
           pageSize={size}
-          Exceptions={{ age: ['age', 'genderDescription'] }}
+          multiException={{ age: ['age', 'genderDescription'] }}
           sorting={sorting}
           setSorting={setSorting}
           loading={loading}

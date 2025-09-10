@@ -14,6 +14,9 @@ import MenuItem from '@mui/material/MenuItem'
 import { toast } from 'react-toastify'
 
 // Component Imports
+import DatePicker from 'react-datepicker'
+import dateFormat from 'dateformat'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
@@ -36,6 +39,9 @@ const initialFilters: MachineFilterType = {
 // 페이지 당 행수 선택 옵션
 const PageSizeOptions = [1, 10, 30, 50]
 
+// 현장점검 기간 버튼 옵션
+const periodOptions = [1, 3, 6]
+
 export default function MachinePage() {
   // 데이터 리스트
   const [data, setData] = useState<machineProjectPageDtoType[]>([])
@@ -53,8 +59,7 @@ export default function MachinePage() {
   const [totalCount, setTotalCount] = useState(0)
 
   // 이름 검색 인풋
-  // TODO: name으로 통일
-  const [name, setName] = useState('')
+  const [projectName, setProjectName] = useState('')
 
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
@@ -65,6 +70,10 @@ export default function MachinePage() {
 
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(initialFilters)
+
+  // 현장점검 기간 상태
+  const [fieldBeginDate, setFieldBeginDate] = useState<Date>()
+  const [fieldEndDate, setFieldEndDate] = useState<Date>()
 
   // 정렬 상태
   const [sorting, setSorting] = useState(createInitialSorting<machineProjectPageDtoType>)
@@ -91,9 +100,15 @@ export default function MachinePage() {
         : queryParams.delete('sort')
 
       // 이름으로 검색
-      name ? queryParams.set('name', name) : queryParams.delete('name')
+      projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
 
-      // TODO: 기간 필터링
+      // TODO: 현장점검 필터링
+      fieldBeginDate
+        ? queryParams.set('fieldBeginDate', dateFormat(fieldBeginDate, 'yyyy-mm-dd'))
+        : queryParams.delete('fieldBeginDate')
+      fieldEndDate
+        ? queryParams.set('fieldEndDate', dateFormat(fieldEndDate, 'yyyy-mm-dd'))
+        : queryParams.delete('fieldEndDate')
 
       // 페이지 관련 설정
       queryParams.set('page', page.toString())
@@ -110,6 +125,7 @@ export default function MachinePage() {
 
       // 데이터 반영하여 상태 변경
       setData(result?.data.content ?? [])
+      console.log(result?.data.content ?? [])
       setPage(result?.data.page.number)
       setSize(result?.data.page.size)
       setTotalCount(result?.data.page.totalElements)
@@ -119,7 +135,7 @@ export default function MachinePage() {
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, size, name])
+  }, [filters, sorting, page, size, projectName, fieldBeginDate, fieldEndDate])
 
   // 필터 변경 시 API 호출
   useEffect(() => {
@@ -144,6 +160,9 @@ export default function MachinePage() {
     }
   }
 
+  //TODO: 현장점검기간 버튼 클릭 핸들러
+  function onClickMonth(month: number) {}
+
   return (
     <>
       <Card>
@@ -165,15 +184,49 @@ export default function MachinePage() {
         >
           필터 초기화
         </Button>
-        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          {/* 이름으로 검색 */}
-          <SearchBar
-            onClick={name => {
-              setName(name)
-              setPage(0)
-            }}
-            disabled={disabled}
-          />
+        <div className='flex justify-between flex-col items-start  md:flex-row md:items-center p-6 border-bs gap-4'>
+          <div className='flex gap-8 items-center'>
+            {/* 이름으로 검색 */}
+            <SearchBar
+              onClick={projectName => {
+                setProjectName(projectName)
+                setPage(0)
+              }}
+              disabled={disabled}
+            />
+            <div className='flex gap-4'>
+              {/* 현장점검 기간 */}
+              <div className='flex items-center gap-2 text-base'>
+                <DatePicker
+                  disabled={disabled}
+                  placeholderText='점검 시작일'
+                  className='text-base text-center rounded-lg w-28 py-1 border-solid border-[1px] border-color-border'
+                  dateFormat={'yyyy.MM.dd'}
+                  selected={fieldBeginDate}
+                  onChange={date => setFieldBeginDate(date ?? new Date())}
+                />
+                <span>~</span>
+                <DatePicker
+                  disabled={disabled}
+                  placeholderText='점검 종료일'
+                  className='text-base text-center rounded-lg w-28 py-1 border-solid border-[1px] border-color-border'
+                  dateFormat={'yyyy.MM.dd'}
+                  selected={fieldEndDate}
+                  onChange={date => setFieldEndDate(date ?? new Date())}
+                />
+              </div>
+              <div className='flex gap-2'>
+                {periodOptions.map(month => (
+                  <Button disabled={disabled} key={month} variant='contained'>
+                    {month}개월
+                  </Button>
+                ))}
+                <Button disabled={disabled} variant='contained'>
+                  전체
+                </Button>
+              </div>
+            </div>
+          </div>
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
             <div className='flex gap-3 itmes-center'>
               {/* 페이지당 행수 */}
@@ -185,12 +238,12 @@ export default function MachinePage() {
                   setSize(Number(e.target.value))
                   setPage(0)
                 }}
-                className='gap-[5px]'
                 disabled={disabled}
               >
                 {PageSizeOptions.map(pageSize => (
                   <MenuItem key={pageSize} value={pageSize}>
                     {pageSize}
+                    {`\u00a0\u00a0`}
                   </MenuItem>
                 ))}
               </CustomTextField>
@@ -219,6 +272,7 @@ export default function MachinePage() {
           setSorting={setSorting}
           loading={loading}
           error={error}
+          listException={['engineerNames']}
         />
 
         <TablePagination

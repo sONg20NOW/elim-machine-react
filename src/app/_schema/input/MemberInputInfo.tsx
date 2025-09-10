@@ -63,7 +63,7 @@ export const MEMBER_INPUT_INFO: memberInputType = {
     },
     juminNum: {
       size: 'md',
-      type: 'text',
+      type: 'juminNum',
       label: '주민번호'
     },
     birthday: {
@@ -287,9 +287,11 @@ export const MEMBER_INPUT_INFO: memberInputType = {
       type: 'multi', // 다중 선택 가능
       label: '등급',
       options: [
+        { value: 'ASSIST', label: '보조' },
         { value: 'BEGINNER', label: '초급' },
         { value: 'INTERMEDIATE', label: '중급' },
-        { value: 'ADVANCED', label: '고급' }
+        { value: 'ADVANCED', label: '고급' },
+        { value: 'EXPERT', label: '특급' }
       ],
       disable: true
     },

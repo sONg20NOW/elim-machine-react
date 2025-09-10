@@ -16,7 +16,7 @@ export default function SearchBar({ onClick, disabled }: SearchBarProps) {
           }
         }}
         placeholder='이름으로 검색'
-        className='max-sm:is-full'
+        className='max-sm:is-full min-w-60'
         disabled={disabled}
         sx={{
           border: '1px solid var(--mui-palette-customColors-inputBorder)',

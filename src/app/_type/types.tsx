@@ -272,4 +272,4 @@ export type SortInfoType<T> = Record<'target', keyof T | ''> & Record<'sort', So
 
 // 모달 Box 사이징, 입력 타입
 export type BoxSizeType = 'sm' | 'md' | 'lg'
-export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text'
+export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text' | 'juminNum'
