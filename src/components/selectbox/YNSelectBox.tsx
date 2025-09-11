@@ -7,7 +7,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 interface YNSelectBoxProps {
   name?: string
   id?: string
-  label: string
+  label?: string | false
   value: string
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>

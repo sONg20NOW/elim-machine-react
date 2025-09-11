@@ -41,12 +41,12 @@ const MemberTabContent = ({
               tabInfos={tabInfos}
               tabFieldKey={property}
               value={(userData[dtoMap[tabName]] as Record<string, string>)[property] ?? ''}
-              onChange={e => {
+              onChange={(value: string) => {
                 setUserData({
                   ...userData,
                   [dtoMap[tabName]]: {
                     ...userData[dtoMap[tabName]],
-                    [property]: e.target.value
+                    [property]: value
                   }
                 })
               }}

@@ -14,26 +14,36 @@ import MenuItem from '@mui/material/MenuItem'
 import { toast } from 'react-toastify'
 
 // Component Imports
-import DatePicker from 'react-datepicker'
-import dateFormat from 'dateformat'
+import 'dayjs/locale/ko'
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers/'
+
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+
+import type { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 
 import CustomTextField from '@core/components/mui/TextField'
 
-// Style Imports
-import AddMachineModal from './_components/addMachineProjectModal'
-import type { MachineFilterType, machineProjectPageDtoType } from '@/app/_type/types'
-import { HEADERS, createInitialSorting } from '@/app/_type/TableHeader'
+import type {
+  MachineEngineerOptionListResponseDtoType,
+  MachineFilterType,
+  machineProjectPageDtoType
+} from '@/app/_type/types'
+import { HEADERS, createInitialSorting } from '@/app/_schema/TableHeader'
 import TableFilters from '@/app/_components/table/TableFilters'
 import { MACHINE_FILTER_INFO } from '@/app/_schema/filter/MachineFilterInfo'
 import SearchBar from '@/app/_components/SearchBar'
 import BasicTable from '@/app/_components/table/BasicTable'
+import AddMachineProjectModal from './_components/addMachineProjectModal'
+
+// datepicker 한글화
+dayjs.locale('ko')
 
 // 초기 필터링 값
 const initialFilters: MachineFilterType = {
   projectStatus: '',
   companyName: '',
-  engineerName: '', // ← engineerNames → engineerName
-  region: ''
+  engineerName: '' // ← engineerNames → engineerName
 }
 
 // 페이지 당 행수 선택 옵션
@@ -43,40 +53,73 @@ const PageSizeOptions = [1, 10, 30, 50]
 const periodOptions = [1, 3, 6]
 
 export default function MachinePage() {
-  // 데이터 리스트
   const [data, setData] = useState<machineProjectPageDtoType[]>([])
-
-  // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
-
-  // 에러 발생 시 true
   const [error, setError] = useState(false)
 
-  // 로딩이 끝나고 에러가 없으면 not disabled
   const disabled = loading || error
 
-  // 전체 데이터 개수 => fetching한 데이터에서 추출
   const [totalCount, setTotalCount] = useState(0)
 
-  // 이름 검색 인풋
   const [projectName, setProjectName] = useState('')
 
-  // 페이지네이션 관련
+  const [region, setRegion] = useState('')
+
   const [page, setPage] = useState(0)
   const [size, setSize] = useState(30)
 
-  // 모달 상태
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
 
-  // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(initialFilters)
 
-  // 현장점검 기간 상태
-  const [fieldBeginDate, setFieldBeginDate] = useState<Date>()
-  const [fieldEndDate, setFieldEndDate] = useState<Date>()
+  const [fieldBeginDate, setFieldBeginDate] = useState<Dayjs | null>(null)
+  const [fieldEndDate, setFieldEndDate] = useState<Dayjs | null>(null)
 
-  // 정렬 상태
+  const [dateTrigger, setDateTrigger] = useState(true)
+
   const [sorting, setSorting] = useState(createInitialSorting<machineProjectPageDtoType>)
+
+  const [engineers, setEngineers] = useState<string[]>()
+
+  const fetchEngineers = useCallback(async () => {
+    setLoading(true)
+    setError(false)
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`, {
+        method: 'GET'
+      })
+
+      const result = await response.json()
+      const data = result?.data as MachineEngineerOptionListResponseDtoType
+
+      // 데이터 반영하여 상태 변경
+      setEngineers(data.engineers.map(engineer => engineer.engineerName))
+    } catch (error) {
+      toast.error(`Failed to fetch filtered data: ${error}`)
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchEngineers()
+  }, [fetchEngineers])
+
+  const MACHINE_FILTER_INFO_WITH_ENGINEERS = {
+    ...MACHINE_FILTER_INFO,
+    engineerName: {
+      ...MACHINE_FILTER_INFO.engineerName,
+      options: engineers?.map(engineer => {
+        return { value: engineer, label: engineer }
+      })
+    }
+  }
+
+  function ToggleDate() {
+    setDateTrigger(prev => !prev)
+  }
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
@@ -87,30 +130,27 @@ export default function MachinePage() {
     setError(false)
 
     try {
-      // 필터링
       Object.keys(filters).map(prop => {
         const key = prop as keyof MachineFilterType
 
         filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
       })
 
-      // 정렬
       sorting.sort
         ? queryParams.append('sort', `${sorting.target},${sorting.sort}`.toString())
         : queryParams.delete('sort')
 
-      // 이름으로 검색
       projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
 
-      // TODO: 현장점검 필터링
+      region ? queryParams.set('region', region) : queryParams.delete('region')
+
       fieldBeginDate
-        ? queryParams.set('fieldBeginDate', dateFormat(fieldBeginDate, 'yyyy-mm-dd'))
+        ? queryParams.set('fieldBeginDate', fieldBeginDate.format('YYYY-MM-DD'))
         : queryParams.delete('fieldBeginDate')
       fieldEndDate
-        ? queryParams.set('fieldEndDate', dateFormat(fieldEndDate, 'yyyy-mm-dd'))
+        ? queryParams.set('fieldEndDate', fieldEndDate.format('YYYY-MM-DD'))
         : queryParams.delete('fieldEndDate')
 
-      // 페이지 관련 설정
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
 
@@ -123,9 +163,7 @@ export default function MachinePage() {
 
       const result = await response.json()
 
-      // 데이터 반영하여 상태 변경
       setData(result?.data.content ?? [])
-      console.log(result?.data.content ?? [])
       setPage(result?.data.page.number)
       setSize(result?.data.page.size)
       setTotalCount(result?.data.page.totalElements)
@@ -135,7 +173,7 @@ export default function MachinePage() {
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, size, projectName, fieldBeginDate, fieldEndDate])
+  }, [filters, sorting, page, size, projectName, region, dateTrigger])
 
   // 필터 변경 시 API 호출
   useEffect(() => {
@@ -160,16 +198,28 @@ export default function MachinePage() {
     }
   }
 
-  //TODO: 현장점검기간 버튼 클릭 핸들러
-  function onClickMonth(month: number) {}
+  function onClickMonth(month: number) {
+    if (month === 0) {
+      setFieldBeginDate(null)
+      setFieldEndDate(null)
+    } else {
+      const currentTime = dayjs()
+
+      setFieldEndDate(currentTime)
+
+      setFieldBeginDate(currentTime.subtract(month, 'month'))
+    }
+
+    ToggleDate()
+  }
 
   return (
-    <>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ko'>
       <Card>
         <CardHeader title='기계설비현장' className='pbe-4' />
         {/* 필터바 */}
         <TableFilters<MachineFilterType>
-          filterInfo={MACHINE_FILTER_INFO}
+          filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS}
           filters={filters}
           onFiltersChange={setFilters}
           disabled={disabled}
@@ -178,7 +228,10 @@ export default function MachinePage() {
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<i className='tabler-reload' />}
-          onClick={() => setFilters(initialFilters)}
+          onClick={() => {
+            setFilters(initialFilters)
+            setSorting(createInitialSorting<machineProjectPageDtoType>)
+          }}
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
         >
@@ -186,42 +239,61 @@ export default function MachinePage() {
         </Button>
         <div className='flex justify-between flex-col items-start  md:flex-row md:items-center p-6 border-bs gap-4'>
           <div className='flex gap-8 items-center'>
-            {/* 이름으로 검색 */}
-            <SearchBar
-              onClick={projectName => {
-                setProjectName(projectName)
-                setPage(0)
-              }}
-              disabled={disabled}
-            />
+            <div className='flex gap-2'>
+              {/* 이름으로 검색 */}
+              <SearchBar
+                placeholder='이름으로 검색'
+                onClick={projectName => {
+                  setProjectName(projectName)
+                  setPage(0)
+                }}
+                disabled={disabled}
+              />
+              {/* 지역으로 검색 */}
+              <SearchBar
+                placeholder='지역으로 검색'
+                onClick={region => {
+                  setRegion(region)
+                  setPage(0)
+                }}
+                disabled={disabled}
+              />
+            </div>
+
             <div className='flex gap-4'>
               {/* 현장점검 기간 */}
               <div className='flex items-center gap-2 text-base'>
                 <DatePicker
                   disabled={disabled}
-                  placeholderText='점검 시작일'
-                  className='text-base text-center rounded-lg w-28 py-1 border-solid border-[1px] border-color-border'
-                  dateFormat={'yyyy.MM.dd'}
-                  selected={fieldBeginDate}
-                  onChange={date => setFieldBeginDate(date ?? new Date())}
+                  label='점검 시작일'
+                  value={fieldBeginDate}
+                  format={'YYYY.MM.DD'}
+                  onChange={date => setFieldBeginDate(dayjs(date))}
+                  onAccept={ToggleDate}
+                  showDaysOutsideCurrentMonth
+                  slotProps={{ textField: { size: 'small' } }}
+                  sx={{ p: 0, m: 0, width: 150 }}
                 />
                 <span>~</span>
                 <DatePicker
                   disabled={disabled}
-                  placeholderText='점검 종료일'
-                  className='text-base text-center rounded-lg w-28 py-1 border-solid border-[1px] border-color-border'
-                  dateFormat={'yyyy.MM.dd'}
-                  selected={fieldEndDate}
-                  onChange={date => setFieldEndDate(date ?? new Date())}
+                  label='점검 종료일'
+                  value={fieldEndDate}
+                  format={'YYYY.MM.DD'}
+                  onChange={date => setFieldEndDate(dayjs(date))}
+                  onAccept={ToggleDate}
+                  showDaysOutsideCurrentMonth
+                  slotProps={{ textField: { size: 'small' } }}
+                  sx={{ p: 0, m: 0, width: 150 }}
                 />
               </div>
               <div className='flex gap-2'>
                 {periodOptions.map(month => (
-                  <Button disabled={disabled} key={month} variant='contained'>
+                  <Button onClick={() => onClickMonth(month)} disabled={disabled} key={month} variant='contained'>
                     {month}개월
                   </Button>
                 ))}
-                <Button disabled={disabled} variant='contained'>
+                <Button onClick={() => onClickMonth(0)} disabled={disabled} variant='contained'>
                   전체
                 </Button>
               </div>
@@ -304,12 +376,12 @@ export default function MachinePage() {
       </Card>
       {/* 생성 모달 */}
       {addMachineModalOpen && (
-        <AddMachineModal
+        <AddMachineProjectModal
           open={addMachineModalOpen}
           setOpen={setAddMachineModalOpen}
           handlePageChange={() => setPage(0)}
         />
       )}
-    </>
+    </LocalizationProvider>
   )
 }

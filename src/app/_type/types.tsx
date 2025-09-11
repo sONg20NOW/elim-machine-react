@@ -22,8 +22,17 @@ export type memberInputType = InputInfoType<TabType['member'], memberDetailDtoTy
 export type machineInputType = InputInfoType<TabType['machine'], MachineProjectDetailDtoType>
 
 // -------- 직원관리 --------
+// POST api/members (필수: role)
+export interface MemberCreateRequestDtoType {
+  companyName: string
+  name: string
+  role: string
+  memberStatus: string
+  email: string
+  note: string
+}
 
-// api/members (리스트)
+// GET api/members (리스트)
 export type memberPageDtoType = {
   memberId: number
   roleDescription: string
@@ -41,7 +50,7 @@ export type memberPageDtoType = {
   genderDescription: string
 }
 
-// api/members/[memberId]
+// GET api/members/[memberId]
 export type memberDetailDtoType = {
   memberBasicResponseDto: memberBasicDtoType
   memberCareerResponseDto: memberCareerDtoType
@@ -109,7 +118,6 @@ interface memberOfficeDtoType {
 }
 export interface memberPrivacyDtoType {
   roadAddress?: string | null
-  jibunAddress?: string | null
   detailAddress?: string | null
   bankName?: string
   bankNumber?: string
@@ -144,7 +152,18 @@ export interface MemberFilterType {
 }
 
 // ----------- 기계설비현장 -----------
-// api/machine-projects (리스트)
+// POST api/machine-projects
+export interface MachineProjectCreateRequestDtoType {
+  companyName: string
+  machineProjectName: string
+  beginDate: string
+  endDate: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  note: string
+}
+
+// GET api/machine-projects (리스트)
 export interface machineProjectPageDtoType {
   machineProjectId: number
   projectStatusDescription: string
@@ -160,7 +179,7 @@ export interface machineProjectPageDtoType {
   engineerNames: string[]
 }
 
-// api/machine-projects/[machineProjectId]
+// GET api/machine-projects/[machineProjectId]
 export type MachineProjectDetailDtoType = {
   machineProjectResponseDto: machineProjectDtoType
   machineProjectScheduleAndEngineerResponseDto: MachineProjectScheduleAndEngineerDtoType
@@ -183,6 +202,7 @@ export type machineProjectDtoType = {
   grossArea?: number | null
   houseCnt?: number | null
   institutionName?: string | null
+  machineProjectName?: string | null
   machineMaintainer1Info?: string | null
   machineMaintainer1Name?: string | null
   machineMaintainer2Info?: string | null
@@ -210,21 +230,21 @@ export type machineProjectDtoType = {
 
 // 일정 및 기술진 DTO
 export type MachineProjectScheduleAndEngineerDtoType = {
-  beginDate?: string | null
-  buildingGrade?: string | null
-  buildingGradeDescription?: string | null
-  checkType?: string | null
-  checkTypeDescription?: string | null
-  endDate?: string | null
-  engineers?: machineProjectEngineerDetailDtoType[] // 필요시 엔지니어 타입 정의
-  fieldBeginDate?: string | null
-  fieldEndDate?: string | null
-  machineProjectId?: number | null
-  note?: string | null
-  reportDeadline?: string | null
-  reportManagerEmail?: string | null
-  tiIssueDate?: string | null
-  version?: number | null
+  machineProjectScheduleId: number
+  version: number
+  beginDate: string
+  endDate: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  projectEndDate: string
+  checkType: string
+  checkTypeDescription: string
+  buildingGrade: string
+  buildingGradeDescription: string
+  reportManagerEmail: string
+  tiIssueDate: string
+  engineers: machineProjectEngineerDetailDtoType
 }
 
 // 엔지니어 정보
@@ -242,9 +262,22 @@ export interface machineProjectEngineerDetailDtoType {
 // 기계설비현장 필터
 export interface MachineFilterType {
   projectStatus: string
-  region: string
   companyName: string
   engineerName: string
+}
+
+// ----------- Engineer 관련 API -----------
+// api/engineers/options
+export interface MachineEngineerOptionListResponseDtoType {
+  engineers: MachineEngineerOptionResponseDtoType[]
+}
+
+export interface MachineEngineerOptionResponseDtoType {
+  engineerId: number
+  engineerName: string
+  gradeDescription: string
+  engineerLicenseNum: string
+  officePositionDescription: string
 }
 
 // ----------- 공통 -----------
@@ -254,7 +287,7 @@ export type InputFieldType = {
   type: InputType
   label: string
   options?: Array<{ value: string; label: string }>
-  disable?: boolean
+  disabled?: boolean
 }
 
 // 테이블 헤더
@@ -272,4 +305,4 @@ export type SortInfoType<T> = Record<'target', keyof T | ''> & Record<'sort', So
 
 // 모달 Box 사이징, 입력 타입
 export type BoxSizeType = 'sm' | 'md' | 'lg'
-export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text' | 'juminNum'
+export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text' | 'juminNum' | 'map'

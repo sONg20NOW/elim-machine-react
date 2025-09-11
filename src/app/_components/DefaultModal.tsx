@@ -11,7 +11,7 @@ import DialogActions from '@mui/material/DialogActions'
 // Component Imports
 import TabContext from '@mui/lab/TabContext'
 
-import { DialogContent, IconButton, Typography } from '@mui/material'
+import { DialogContent, Divider, IconButton, Typography } from '@mui/material'
 
 type DefaultModalProps = {
   size?: 'xs' | 'sm' | 'md' | 'lg'
@@ -31,9 +31,9 @@ type DefaultModalProps = {
 /**
  *
  * @param childeren
- * TabList, TabPanel
+ * (optional) TabList, TabPanel
  * @param value
- * 몇번째 탭인지 알려주는 상태.
+ * (optional) 몇번째 탭인지 알려주는 상태.
  * @returns
  * modal component 리턴.
  */
@@ -86,11 +86,19 @@ export default function DefaultModal({
         className='flex items-center gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'
       >
         {title}
-        <Typography component='span' className='flex flex-col text-center'>
-          {headerDescription}
-        </Typography>
+        {headerDescription && (
+          <Typography component='span' className='flex flex-col text-center'>
+            {headerDescription}
+          </Typography>
+        )}
       </DialogTitle>
-      <div>{value && children && <TabContext value={value}>{children}</TabContext>}</div>
+      {value ? (
+        children && <TabContext value={value}>{children}</TabContext>
+      ) : (
+        <div className='flex flex-col gap-10'>
+          <Divider variant='middle' /> {children}
+        </div>
+      )}
 
       {primaryButton || secondaryButton ? (
         <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16 mt-[20px] lg:mt-[40px]'>

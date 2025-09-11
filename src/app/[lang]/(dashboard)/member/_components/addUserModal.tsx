@@ -1,23 +1,20 @@
 'use client'
 
 // React Imports
-import type { SyntheticEvent } from 'react'
 import { useState } from 'react'
 
 // MUI Imports
 import Button from '@mui/material/Button'
 
-// Component Imports
-import TabList from '@mui/lab/TabList'
-import TabPanel from '@mui/lab/TabPanel'
-
 import { toast } from 'react-toastify'
 
-import { initialData } from '@/data/initialData/userInfo'
+import { DialogContent, Grid2 } from '@mui/material'
+
 import DefaultModal from '@/app/_components/DefaultModal'
-import type { memberDetailDtoType } from '@/app/_type/types'
-import MemberTabContent from './memberTabContent'
+import type { MemberCreateRequestDtoType } from '@/app/_type/types'
 import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
+import { MemberInitialData } from '@/app/_schema/seed/MemberInitialData'
+import { InputBox } from '@/components/selectbox/InputBox'
 
 type AddUserModalProps = {
   open: boolean
@@ -26,40 +23,27 @@ type AddUserModalProps = {
 }
 
 const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) => {
-  // 선택된 탭
-  const [value, setValue] = useState<string>('1')
-
-  // 직원 데이터
-  const [userData, setUserData] = useState<memberDetailDtoType>(initialData)
-
-  const handleClose = () => {
-    setOpen(false)
-    setUserData(initialData)
-  }
+  const [userData, setUserData] = useState<MemberCreateRequestDtoType>(MemberInitialData)
 
   const onSubmitHandler = async () => {
-    const basicDto = { ...userData?.memberBasicResponseDto }
+    try {
+      // 비고란을 제외한 칸이 하나라도 안 채워져있으면 경고 문구 표시 (basic만)
+      const NotAllFull = Object.keys(userData).some(key => {
+        if (key === 'note') {
+          return false
+        }
 
-    // 비고란을 제외한 칸이 하나라도 안 채워져있으면 경고 문구 표시 (basic만)
-    const NotAllFull = Object.keys(MEMBER_INPUT_INFO.basic).some(key => {
-      if (key === 'note') {
-        return false
+        return !userData[key as keyof typeof userData]
+      })
+
+      if (NotAllFull) {
+        throw new Error(`비고를 제외한 모든 정보를 입력해주세요.`)
       }
 
-      return !basicDto[key as keyof typeof basicDto]
-    })
-
-    if (NotAllFull) {
-      toast.error('비고를 제외한 모든 정보를 입력해주세요.')
-
-      return
-    }
-
-    try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(basicDto)
+        body: JSON.stringify(userData)
       })
 
       const result = await response.json()
@@ -67,24 +51,19 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
       if (response.ok) {
         console.log('new member added', result.data)
         toast.success('새 직원이 추가되었습니다.')
+
+        handlePageChange()
+        setOpen(false)
       } else {
-        toast.error(`${result.statusCode}:\n${result.message}`)
+        throw new Error(`${result.statusCode}:\n${result.message}`)
       }
     } catch (error: any) {
-      toast.error(error)
+      toast.error(error.toString())
     }
-
-    handlePageChange()
-    setOpen(false)
-  }
-
-  const handleChange = (event: SyntheticEvent, newValue: string) => {
-    setValue(newValue)
   }
 
   return (
     <DefaultModal
-      value={value}
       open={open}
       setOpen={setOpen}
       title='사용자 정보 추가'
@@ -94,17 +73,33 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
         </Button>
       }
       secondaryButton={
-        <Button variant='tonal' color='secondary' type='reset' onClick={handleClose}>
+        <Button variant='tonal' color='secondary' type='reset' onClick={() => setOpen(false)}>
           취소
         </Button>
       }
     >
-      <TabList centered onChange={handleChange} aria-label='centered tabs example'>
-        {/* <Tab value='1' label='기본정보' /> */}
-      </TabList>
-      <TabPanel value='1'>
-        <MemberTabContent tabName='basic' userData={userData} setUserData={setUserData} />
-      </TabPanel>
+      <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
+        <Grid2 container spacing={3}>
+          {Object.keys(userData).map(property => {
+            const key = property as keyof typeof userData
+
+            return (
+              <InputBox
+                key={key}
+                tabInfos={MEMBER_INPUT_INFO.basic}
+                tabFieldKey={key}
+                value={userData[key] ?? ''}
+                onChange={(value: string) => {
+                  setUserData({
+                    ...userData,
+                    [key]: value
+                  })
+                }}
+              />
+            )
+          })}
+        </Grid2>
+      </DialogContent>
     </DefaultModal>
   )
 }

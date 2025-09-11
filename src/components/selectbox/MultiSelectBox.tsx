@@ -9,6 +9,7 @@ interface MultiSelectBoxProps {
   tabField: InputFieldType
   name?: string
   id?: string
+  label?: string | false
   value: string
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
@@ -27,21 +28,21 @@ interface MultiSelectBoxProps {
 
      options?: Array<{ value: string; label: string }>
 
-     disable?: boolean
+     disabled?: boolean
 
  })
  * @param id
  * 속성의 영어 이름 (ex. companyName, officePosition, ...)
  * @returns
  */
-const MultiSelectBox = ({ name, tabField, id, disabled = false, value, onChange }: MultiSelectBoxProps) => {
+const MultiSelectBox = ({ label, name, tabField, id, disabled = false, value, onChange }: MultiSelectBoxProps) => {
   return (
     <CustomTextField
       id={id}
       disabled={disabled}
       select
       fullWidth
-      label={tabField?.label ?? ''}
+      label={label}
       value={value ?? ''}
       onChange={onChange}
       slotProps={{

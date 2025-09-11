@@ -1,11 +1,18 @@
 import { IconButton, Input } from '@mui/material'
 
 interface SearchBarProps {
+  placeholder: string
   onClick: (name: string) => void
   disabled?: boolean
 }
 
-export default function SearchBar({ onClick, disabled }: SearchBarProps) {
+/**
+ *
+ * @param onClick
+ * e.target.value를 인자로 넣는 함수
+ * @returns
+ */
+export default function SearchBar({ placeholder, onClick, disabled }: SearchBarProps) {
   return (
     <div className='relative'>
       <Input
@@ -15,7 +22,7 @@ export default function SearchBar({ onClick, disabled }: SearchBarProps) {
             onClick(e.target.value)
           }
         }}
-        placeholder='이름으로 검색'
+        placeholder={placeholder}
         className='max-sm:is-full min-w-60'
         disabled={disabled}
         sx={{

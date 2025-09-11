@@ -1,4 +1,4 @@
-import { useContext, useState, type ChangeEventHandler } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 import Grid from '@mui/material/Grid2'
 
@@ -11,6 +11,7 @@ import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
 import { MemberIdContext } from '@/app/[lang]/(dashboard)/member/_components/UserModal'
+import { execDaumPostcode } from '@/app/_handler/daumMapPostcode'
 
 interface InputBoxProps {
   isEditing?: boolean
@@ -18,62 +19,53 @@ interface InputBoxProps {
   value: string
   size?: BoxSizeType
   disabled?: boolean
-  onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  onChange: (value: string) => void
   tabInfos: Record<string, InputFieldType>
+  showLabel?: boolean
 }
+
+const InputBoxContext = createContext<InputBoxProps | null>(null)
 
 /**
  * @param size
- * box의 size, tabField에 정의되어 있는 사이즈보다 우선시됨.
+ * (optional) box의 size, tabField에 정의되어 있는 사이즈보다 우선시됨.
  * @param tabInfos
- * id와 그에 따른 박스 구성에 필요한 정보들 (ex. name: {size: 'md', type: 'text', label: '이름'})
+ * id와 그에 따른 박스 구성에 필요한 정보들 (ex. {name: {size: 'md', type: 'text', label: '이름'}, ...})
  * @param tabFieldKey
  * box 구성 정보를 알아내는 데 필요한 id (ex. companyName, ...)
+ * @param value
+ * value
+ * @param onChange
+ * (value: string) => void
  * @see
  * src\app\_schema\MemberTabInfo.tsx 참고
  */
-export function InputBox({ size, tabInfos, tabFieldKey, disabled = false, value, onChange, isEditing }: InputBoxProps) {
+export function InputBox(props: InputBoxProps) {
+  const { size, tabFieldKey, tabInfos } = props
+  const tabField = tabInfos[tabFieldKey]
+
   const SizeMap = {
     sm: { xs: 12, sm: 2 },
     md: { xs: 12, sm: 6 },
     lg: { xs: 12 }
   }
 
-  const tabField = tabInfos[tabFieldKey]
-
   return (
-    <Grid size={SizeMap[size ?? tabField?.size ?? 'md']}>
-      <InputBoxContainer
-        isEditing={isEditing}
-        tabField={tabField}
-        tabFieldKey={tabFieldKey}
-        value={value}
-        disabled={tabField.disable ?? disabled}
-        onChange={onChange}
-      />
-    </Grid>
+    <InputBoxContext.Provider value={props}>
+      <Grid size={SizeMap[size ?? tabField?.size ?? 'md']}>
+        <InputBoxContent />
+      </Grid>
+    </InputBoxContext.Provider>
   )
 }
 
-interface InputBoxContainerProps {
-  isEditing?: boolean
-  tabFieldKey: string
-  value: string
-  onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
-  disabled?: boolean
-  tabField: InputFieldType
-  placeholder?: string
-}
+function InputBoxContent() {
+  const props = useContext(InputBoxContext)
+  const { isEditing, tabInfos, tabFieldKey, value, disabled, onChange, showLabel } = props!
+  const tabField = tabInfos[tabFieldKey]
 
-function InputBoxContainer({
-  isEditing,
-  tabField,
-  tabFieldKey,
-  value,
-  disabled,
-  onChange,
-  placeholder
-}: InputBoxContainerProps) {
+  // labe
+
   // 주민번호 핸들링
   const [juminNum, setJuminNum] = useState(value)
   const memberId = useContext(MemberIdContext)
@@ -120,7 +112,7 @@ function InputBoxContainer({
                 size='small'
                 className='absolute top-[50%] -translate-y-1/2 right-1 p-1'
               >
-                show
+                노출
               </Button>
             </>
           )}
@@ -139,9 +131,9 @@ function InputBoxContainer({
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={tabField.label}
+          label={showLabel && tabField.label}
           value={value}
-          onChange={onChange}
+          onChange={e => onChange(e.target.value)}
         />
       )
     case 'multi':
@@ -150,9 +142,10 @@ function InputBoxContainer({
           name={tabFieldKey}
           tabField={tabField}
           id={tabFieldKey}
+          label={showLabel && tabField.label}
           disabled={disabled}
           value={value}
-          onChange={onChange}
+          onChange={e => onChange(e.target.value)}
         />
       )
     case 'yn':
@@ -161,9 +154,9 @@ function InputBoxContainer({
           name={tabFieldKey}
           id={tabFieldKey}
           disabled={disabled}
-          label={tabField.label}
+          label={showLabel && tabField.label}
           value={value}
-          onChange={onChange}
+          onChange={e => onChange(e.target.value)}
         />
       )
     case 'text':
@@ -173,10 +166,9 @@ function InputBoxContainer({
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={tabField.label}
+          label={showLabel && tabField.label}
           value={value}
-          onChange={onChange}
-          placeholder={placeholder}
+          onChange={e => onChange(e.target.value)}
         />
       )
     case 'long text':
@@ -188,10 +180,9 @@ function InputBoxContainer({
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={tabField.label}
+          label={showLabel && tabField.label}
           value={value}
-          onChange={onChange}
-          placeholder={placeholder}
+          onChange={e => onChange(e.target.value)}
         />
       )
     case 'juminNum':
@@ -202,17 +193,41 @@ function InputBoxContainer({
             id={tabFieldKey}
             disabled={disabled}
             fullWidth
-            label={tabField.label}
+            label={showLabel && tabField.label}
             value={juminNum}
             onChange={e => {
               setJuminNum(e.target.value)
-              onChange(e)
+              onChange(e.target.value)
             }}
-            placeholder={placeholder}
           />
 
           <Button onClick={getJuminNum} variant='contained' size='small' className='absolute bottom-[10%] right-1 p-1'>
-            show
+            노출
+          </Button>
+        </div>
+      )
+    case 'map':
+      return (
+        <div className='relative'>
+          <CustomTextField
+            slotProps={{ htmlInput: { name: tabFieldKey } }}
+            id={tabFieldKey}
+            disabled={disabled}
+            fullWidth
+            label={showLabel && tabField.label}
+            value={value}
+            onChange={e => onChange(e.target.value)}
+          />
+
+          <Button
+            onClick={() => {
+              execDaumPostcode(tabFieldKey, onChange)
+            }}
+            variant='contained'
+            size='small'
+            className='absolute bottom-[10%] right-1 p-1'
+          >
+            검색
           </Button>
         </div>
       )

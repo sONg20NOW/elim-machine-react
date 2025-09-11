@@ -1,11 +1,12 @@
-import type { machineInputType } from '../../_type/types'
-import { MEMBER_INPUT_INFO } from './MemberInputInfo'
+import { buildingGradeOption, checkTypeOption, companyNameOption, projectStatusOption } from '@/app/_constants/options'
+import type { InputFieldType, machineInputType, MachineProjectCreateRequestDtoType } from '../../_type/types'
 
 // 기계설비현장 상세페이지
 export const MACHINE_INPUT_INFO: machineInputType = {
   // 현장정보 탭
   project: {
     institutionName: { type: 'text', label: '기관명' },
+    machineProjectName: { type: 'text', label: '현장명' },
     roadAddress: { type: 'text', label: '주소' },
     representative: { type: 'text', label: '대표자' },
     grossArea: { type: 'number', label: '연면적(㎡)' },
@@ -21,17 +22,10 @@ export const MACHINE_INPUT_INFO: machineInputType = {
     projectStatus: {
       type: 'multi',
       label: '진행상태',
-      options: [
-        { value: 'CONTRACT_COMPLETED', label: '계약 완료' },
-        { value: 'SITE_INSPECTION_COMPLETED', label: '현장 점검 완료' },
-        { value: 'REPORT_WRITING', label: '보고서 작성중' },
-        { value: 'REPORT_WRITING_COMPLETED', label: '보고서 작성완료' },
-        { value: 'REPORT_SUBMITTING', label: '보고서 제출중' },
-        { value: 'REPORT_SUBMITTED', label: '보고서 제출완료' }
-      ]
+      options: projectStatusOption
     },
     contractPrice: { type: 'number', label: '계약금액' },
-    companyName: MEMBER_INPUT_INFO.basic.companyName,
+    companyName: { type: 'multi', label: '점검업체', options: companyNameOption },
     contractManager: { type: 'text', label: '계약담당자(이름)' },
     contractManagerTel: { type: 'text', label: '계약담당자(연락처)' },
     contractManagerEmail: { type: 'text', label: '계약담당자(이메일)' },
@@ -53,6 +47,73 @@ export const MACHINE_INPUT_INFO: machineInputType = {
     machineManager3Info: { type: 'text', label: '담당자3(정보)' }
   },
 
-  // 점검일정 / 참여기술진 탭
-  schedule: {}
+  // 점검일정 / 참여기술진 탭 테이블 수정에 사용.
+  schedule: {
+    fieldBeginDate: {
+      type: 'date',
+      label: '현장점검시작일'
+    },
+    fieldEndDate: {
+      type: 'date',
+      label: '현장점검종료일'
+    },
+    beginDate: {
+      type: 'date',
+      label: '투입시작일'
+    },
+    endDate: {
+      type: 'date',
+      label: '투입종료일'
+    },
+    reportDeadline: {
+      type: 'date',
+      label: '보고서 마감일'
+    },
+    projectEndDate: {
+      type: 'date',
+      label: '프로젝트 종료'
+    },
+    checkType: {
+      type: 'multi',
+      label: '점검종류',
+      options: checkTypeOption
+    },
+    buildingGrade: {
+      type: 'multi',
+      label: '건물등급',
+      options: buildingGradeOption
+    },
+    reportManagerEmail: {
+      type: 'text',
+      label: '담당자 이메일'
+    },
+    tiIssueDate: {
+      type: 'date',
+      label: '계산서 발급일'
+    },
+    engineers: {
+      type: 'multi',
+      label: '참여 기술진',
+
+      // ! engineer API
+      options: []
+    }
+  }
+}
+
+// 기계설비현장 추가 페이지
+const { companyName, machineProjectName } = MACHINE_INPUT_INFO.project
+const { beginDate, endDate, fieldBeginDate, fieldEndDate } = MACHINE_INPUT_INFO.schedule
+
+export const MACHINE_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoType, InputFieldType> = {
+  companyName: companyName!,
+  machineProjectName: machineProjectName!,
+  beginDate: beginDate!,
+  endDate: endDate!,
+  fieldBeginDate: fieldBeginDate!,
+  fieldEndDate: fieldEndDate!,
+  note: {
+    type: 'long text',
+    label: '비고'
+  }
 }

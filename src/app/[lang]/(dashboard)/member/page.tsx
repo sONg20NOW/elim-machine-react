@@ -19,7 +19,7 @@ import CustomTextField from '@core/components/mui/TextField'
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
 import type { memberDetailDtoType, MemberFilterType, memberPageDtoType } from '@/app/_type/types'
-import { createInitialSorting, HEADERS } from '@/app/_type/TableHeader'
+import { createInitialSorting, HEADERS } from '@/app/_schema/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_schema/filter/MemberFilterInfo'
@@ -61,6 +61,9 @@ export default function MemberPage() {
   // 이름 검색 인풋
   const [name, setName] = useState('')
 
+  // 지역 검색 인풋
+  const [region, setRegion] = useState('')
+
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
   const [size, setSize] = useState(30)
@@ -100,6 +103,9 @@ export default function MemberPage() {
       // 이름으로 검색
       name ? queryParams.set('name', name) : queryParams.delete('name')
 
+      // 지역으로 검색
+      region ? queryParams.set('region', region) : queryParams.delete('region')
+
       // 페이지 관련 설정
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
@@ -122,7 +128,7 @@ export default function MemberPage() {
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, size, name])
+  }, [filters, sorting, page, size, name, region])
 
   // 필터 변경 시 API 호출
   useEffect(() => {
@@ -168,14 +174,27 @@ export default function MemberPage() {
           필터 초기화
         </Button>
         <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          {/* 이름으로 검색 */}
-          <SearchBar
-            onClick={name => {
-              setName(name)
-              setPage(0)
-            }}
-            disabled={disabled}
-          />
+          <div className='flex gap-2'>
+            {/* 이름으로 검색 */}
+            <SearchBar
+              placeholder='이름으로 검색'
+              onClick={name => {
+                setName(name)
+                setPage(0)
+              }}
+              disabled={disabled}
+            />
+            {/* 지역으로 검색 */}
+            <SearchBar
+              placeholder='지역으로 검색'
+              onClick={region => {
+                setRegion(region)
+                setPage(0)
+              }}
+              disabled={disabled}
+            />
+          </div>
+
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
             <div className='flex gap-3 itmes-center'>
               {/* 페이지당 행수 */}

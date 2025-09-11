@@ -1,8 +1,9 @@
-import type { HeaderInfoType, SortInfoType, machineProjectPageDtoType, memberPageDtoType } from './types'
+import type { HeaderInfoType, SortInfoType, machineProjectPageDtoType, memberPageDtoType } from '../_type/types'
 
 export const BROWER_TAB_TITLE = 'ELIM'
 export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
 
+// TODO: 추후 input info와 연동..? 타입들에 대해서 번역한 단어를 저장해두는 것도 좋을 듯..
 // table 생성 중 헤더 생성에 필요.
 export const HEADERS = {
   // 직원관리 탭 테이블
@@ -22,12 +23,12 @@ export const HEADERS = {
   } as Record<keyof memberPageDtoType, HeaderInfoType>,
   machine: {
     projectStatusDescription: { label: '상태', canSort: false },
-    region: { label: '지역', canSort: true },
+    region: { label: '지역', canSort: false },
     machineProjectName: { label: '현장명', canSort: true },
     fieldBeginDate: { label: '현장점검', canSort: true },
     fieldEndDate: { label: '점검종료', canSort: true },
     reportDeadline: { label: '보고서마감', canSort: true },
-    inspectionCount: { label: '설비', canSort: true },
+    inspectionCount: { label: '설비', canSort: false },
     companyName: { label: '점검업체', canSort: true },
     engineerNames: { label: '참여기술진', canSort: false },
     grossArea: { label: '연면적(㎡)', canSort: true },
