@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -13,14 +13,19 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import type { MachineProjectDetailDtoType } from '@/app/_type/types'
 import { InputBox } from '@/components/selectbox/InputBox'
 import { MACHINE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
+import { ProjectDataContext } from '../page'
 
 const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDtoType }) => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
   // 초기값 세팅
-  const [editData, setEditData] = useState(projectData || {})
+  const [editData, setEditData] = useState<MachineProjectDetailDtoType>(useContext(ProjectDataContext)!)
   const [isEditing, setIsEditing] = useState(false)
+
+  if (!editData) {
+    return <span>데이터를 찾을 수 없습니다.</span>
+  }
 
   const handleSave = async () => {
     console.log('editData는요!', editData)
@@ -29,7 +34,7 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
     try {
       const result = await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`,
-        editData.machineProjectResponseDto
+        editData?.machineProjectResponseDto
       )
 
       setIsEditing(false)
@@ -37,7 +42,7 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
       setEditData((prev: any) => ({
         ...prev,
         machineProjectResponseDto: {
-          ...result.data
+          ...result.data.data
         }
       }))
 
@@ -166,7 +171,7 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                     <InputBox
                       showLabel={false}
                       tabFieldKey={'institutionName'}
-                      value={editData.machineProjectResponseDto.institutionName ?? ''}
+                      value={editData?.machineProjectResponseDto.institutionName ?? ''}
                       onChange={value =>
                         setEditData(prev => ({
                           ...prev,

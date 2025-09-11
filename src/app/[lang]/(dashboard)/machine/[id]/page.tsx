@@ -1,7 +1,7 @@
 'use client'
 
 import type { MouseEvent, SyntheticEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 
 import { redirect, useParams } from 'next/navigation'
 
@@ -23,6 +23,8 @@ import MachineContent from './_components/machineContent'
 import MachinePictures from './_components/machinePictures'
 import NoteContent from './_components/noteContent'
 import type { MachineProjectDetailDtoType, machineProjectEngineerDetailDtoType } from '@/app/_type/types'
+
+export const ProjectDataContext = createContext(null)
 
 const MachineUpdatePage = () => {
   const params = useParams()
@@ -61,91 +63,93 @@ const MachineUpdatePage = () => {
   }, [id])
 
   return (
-    <Grid container spacing={6}>
-      <Grid size={{ xs: 12 }}>
-        <Card>
-          <div className='flex gap-0 p-6 items-center'>
-            <CardHeader
-              title='기계설비현장'
-              sx={{ cursor: 'pointer', padding: 0 }}
-              slotProps={{ title: { sx: { ':hover': { color: 'primary.main' } } } }}
-              onClick={() => redirect('/machine')}
-            />
-            <i className='tabler-chevron-right' />
-            <CardHeader title={projectData?.machineProjectResponseDto.machineProjectName} sx={{ padding: 0 }} />
-          </div>
+    <ProjectDataContext.Provider value={{ projectData, setProjectData }}>
+      <Grid container spacing={6}>
+        <Grid size={{ xs: 12 }}>
+          <Card>
+            <div className='flex gap-0 p-6 items-center'>
+              <CardHeader
+                title='기계설비현장'
+                sx={{ cursor: 'pointer', padding: 0 }}
+                slotProps={{ title: { sx: { ':hover': { color: 'primary.main' } } } }}
+                onClick={() => redirect('/machine')}
+              />
+              <i className='tabler-chevron-right' />
+              <CardHeader title={projectData?.machineProjectResponseDto.machineProjectName} sx={{ padding: 0 }} />
+            </div>
 
-          <CardContent>
-            <TabContext value={value}>
-              <TabList onChange={handleChange} aria-label='nav tabs example'>
-                <Tab
-                  value='1'
-                  component='a'
-                  label='현장정보'
-                  href='/site'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-                <Tab
-                  value='2'
-                  component='a'
-                  label='점검일정 / 참여기술진'
-                  href='/plan'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-                <Tab
-                  value='3'
-                  component='a'
-                  label='설비목록'
-                  href='/list'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-                <Tab
-                  value='4'
-                  component='a'
-                  label='전체사진'
-                  href='/pictures'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-                <Tab
-                  value='5'
-                  component='a'
-                  label='특이사항'
-                  href='/memo'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-              </TabList>
-              <TabPanel value='1'>
-                {projectData?.machineProjectResponseDto ? (
-                  <SiteInfoContent projectData={projectData} />
-                ) : (
-                  <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
-                )}
-              </TabPanel>
-              <TabPanel value='2'>
-                {projectData?.machineProjectScheduleAndEngineerResponseDto ? (
-                  <PlanContent projectData={projectData} engineerOptions={engineerOptions} />
-                ) : (
-                  <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
-                )}
-              </TabPanel>
-              <TabPanel value='3'>
-                <MachineContent id={id} engineerOptions={engineerOptions} />
-              </TabPanel>
-              <TabPanel value='4'>
-                <MachinePictures id={id} />
-              </TabPanel>
-              <TabPanel value='5'>
-                {projectData ? (
-                  <NoteContent id={id} projectData={projectData} />
-                ) : (
-                  <Typography>특이사항 정보를 불러오는 중입니다.</Typography>
-                )}
-              </TabPanel>
-            </TabContext>
-          </CardContent>
-        </Card>
+            <CardContent>
+              <TabContext value={value}>
+                <TabList onChange={handleChange} aria-label='nav tabs example'>
+                  <Tab
+                    value='1'
+                    component='a'
+                    label='현장정보'
+                    href='/site'
+                    onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
+                  />
+                  <Tab
+                    value='2'
+                    component='a'
+                    label='점검일정 / 참여기술진'
+                    href='/plan'
+                    onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
+                  />
+                  <Tab
+                    value='3'
+                    component='a'
+                    label='설비목록'
+                    href='/list'
+                    onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
+                  />
+                  <Tab
+                    value='4'
+                    component='a'
+                    label='전체사진'
+                    href='/pictures'
+                    onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
+                  />
+                  <Tab
+                    value='5'
+                    component='a'
+                    label='특이사항'
+                    href='/memo'
+                    onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
+                  />
+                </TabList>
+                <TabPanel value='1'>
+                  {projectData?.machineProjectResponseDto ? (
+                    <SiteInfoContent projectData={projectData} />
+                  ) : (
+                    <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
+                  )}
+                </TabPanel>
+                <TabPanel value='2'>
+                  {projectData?.machineProjectScheduleAndEngineerResponseDto ? (
+                    <PlanContent projectData={projectData} engineerOptions={engineerOptions} />
+                  ) : (
+                    <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
+                  )}
+                </TabPanel>
+                <TabPanel value='3'>
+                  <MachineContent id={id} engineerOptions={engineerOptions} />
+                </TabPanel>
+                <TabPanel value='4'>
+                  <MachinePictures id={id} />
+                </TabPanel>
+                <TabPanel value='5'>
+                  {projectData ? (
+                    <NoteContent id={id} projectData={projectData} />
+                  ) : (
+                    <Typography>특이사항 정보를 불러오는 중입니다.</Typography>
+                  )}
+                </TabPanel>
+              </TabContext>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
-    </Grid>
+    </ProjectDataContext.Provider>
   )
 }
 
