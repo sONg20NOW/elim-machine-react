@@ -3,7 +3,7 @@
 import type { MouseEvent, SyntheticEvent } from 'react'
 import { useEffect, useState } from 'react'
 
-import { useParams } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 
 import Grid from '@mui/material/Grid2'
 
@@ -17,22 +17,23 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import axios from 'axios'
 
-import SiteInfoContent from './siteInfoContent'
-import PlanContent from './planContent'
-import MachineContent from './machineContent'
-import MachinePictures from './machinePictures'
-import NoteContent from './noteContent'
-import type { MachineProjectDetailDtoType } from '@/app/_type/types'
+import SiteInfoContent from './_components/siteInfoContent'
+import PlanContent from './_components/planContent'
+import MachineContent from './_components/machineContent'
+import MachinePictures from './_components/machinePictures'
+import NoteContent from './_components/noteContent'
+import type { MachineProjectDetailDtoType, machineProjectEngineerDetailDtoType } from '@/app/_type/types'
 
 const MachineUpdatePage = () => {
   const params = useParams()
   const id = params?.id as string
 
   const [projectData, setProjectData] = useState<MachineProjectDetailDtoType | null>(null)
-  const [engineerOptions, setEngineerOptions] = useState([])
+  const [engineerOptions, setEngineerOptions] = useState<machineProjectEngineerDetailDtoType[]>([])
   const [value, setValue] = useState<string>('1')
 
-  const init = async (machineId: string) => {
+  // 프로젝트 데이터 가져오기.
+  const getProjectData = async (machineId: string) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineId}`, {
       method: 'GET'
     })
@@ -42,7 +43,8 @@ const MachineUpdatePage = () => {
     setProjectData(result.data)
   }
 
-  const initEngineer = async () => {
+  // 엔지니어 목록 가져오기
+  const getEngineerList = async () => {
     const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`)
     const options = response.data.data.engineers
 
@@ -54,15 +56,25 @@ const MachineUpdatePage = () => {
   }
 
   useEffect(() => {
-    if (id) init(id)
-    if (id) initEngineer()
+    if (id) getProjectData(id)
+    if (id) getEngineerList()
   }, [id])
 
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
         <Card>
-          <CardHeader title='기계설비현장 자세히보기' className='pbe-4' />
+          <div className='flex gap-0 p-6 items-center'>
+            <CardHeader
+              title='기계설비현장'
+              sx={{ cursor: 'pointer', padding: 0 }}
+              slotProps={{ title: { sx: { ':hover': { color: 'primary.main' } } } }}
+              onClick={() => redirect('/machine')}
+            />
+            <i className='tabler-chevron-right' />
+            <CardHeader title={projectData?.machineProjectResponseDto.machineProjectName} sx={{ padding: 0 }} />
+          </div>
+
           <CardContent>
             <TabContext value={value}>
               <TabList onChange={handleChange} aria-label='nav tabs example'>

@@ -24,6 +24,12 @@ const nextConfig: NextConfig = {
         destination: '/public/:path*',
         permanent: true,
         locale: false
+      },
+      {
+        source: '/:path((?!en|fr|ar|front-pages|favicon\\.ico|api).*)',
+        destination: '/en/:path',
+        permanent: true,
+        locale: false
       }
     ]
   }

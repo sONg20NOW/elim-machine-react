@@ -7,7 +7,8 @@ export const MACHINE_INPUT_INFO: machineInputType = {
   project: {
     institutionName: { type: 'text', label: '기관명' },
     machineProjectName: { type: 'text', label: '현장명' },
-    roadAddress: { type: 'text', label: '주소' },
+    roadAddress: { type: 'map', label: '주소' },
+    detailAddress: { type: 'text', label: '상세주소' },
     representative: { type: 'text', label: '대표자' },
     grossArea: { type: 'number', label: '연면적(㎡)' },
     bizno: { type: 'text', label: '사업자번호' },

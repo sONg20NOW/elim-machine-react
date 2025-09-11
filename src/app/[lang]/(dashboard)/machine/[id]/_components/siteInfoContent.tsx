@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { useParams } from 'next/navigation'
+
 import { Button } from '@mui/material'
 
 import axios from 'axios'
@@ -9,19 +11,24 @@ import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import type { MachineProjectDetailDtoType } from '@/app/_type/types'
+import { InputBox } from '@/components/selectbox/InputBox'
+import { MACHINE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
 
 const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDtoType }) => {
+  const params = useParams()
+  const machineProjectId = params?.id as string
+
   // 초기값 세팅
   const [editData, setEditData] = useState(projectData || {})
   const [isEditing, setIsEditing] = useState(false)
 
   const handleSave = async () => {
     console.log('editData는요!', editData)
-    console.log('Saving data...', editData.machineProjectScheduleAndEngineerResponseDto.machineProjectId)
+    console.log('Saving data...', machineProjectId)
 
     try {
       const result = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${editData.machineProjectScheduleAndEngineerResponseDto.machineProjectId}/machine-project-management`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`,
         editData.machineProjectResponseDto
       )
 
@@ -30,7 +37,7 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
       setEditData((prev: any) => ({
         ...prev,
         machineProjectResponseDto: {
-          ...result.data.data
+          ...result.data
         }
       }))
 
@@ -46,6 +53,7 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
   return (
     <div>
       <div className='flex mb-4 gap-[4px]'>
+        {/* TODO: 버튼 구현 */}
         <Button
           variant='contained'
           color='info'
@@ -155,18 +163,20 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                     기관명
                   </td>
                   <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineProjectResponseDto?.institutionName ?? ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey={'institutionName'}
+                      value={editData.machineProjectResponseDto.institutionName ?? ''}
+                      onChange={value =>
+                        setEditData(prev => ({
                           ...prev,
                           machineProjectResponseDto: {
                             ...prev.machineProjectResponseDto,
-                            institutionName: e.target.value
+                            institutionName: value
                           }
                         }))
                       }
-                      fullWidth
+                      tabInfos={MACHINE_INPUT_INFO.project}
                     />
                   </td>
                 </tr>
@@ -175,19 +185,20 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                     주소
                   </th>
                   <td colSpan={3} style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData?.machineProjectResponseDto?.roadAddress ?? ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey={'roadAddress'}
+                      value={editData.machineProjectResponseDto.roadAddress ?? ''}
+                      onChange={value =>
+                        setEditData(prev => ({
                           ...prev,
                           machineProjectResponseDto: {
                             ...prev.machineProjectResponseDto,
-                            address: e.target.value
+                            roadAddress: value
                           }
                         }))
                       }
-                      fullWidth
-                      sx={{ mb: 1 }}
+                      tabInfos={MACHINE_INPUT_INFO.project}
                     />
                   </td>
                 </tr>

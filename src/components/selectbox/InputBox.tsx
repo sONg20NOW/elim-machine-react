@@ -51,7 +51,7 @@ export function InputBox(props: InputBoxProps) {
   }
 
   return (
-    <InputBoxContext.Provider value={props}>
+    <InputBoxContext.Provider value={{ ...props, showLabel: props.showLabel ?? true }}>
       <Grid size={SizeMap[size ?? tabField?.size ?? 'md']}>
         <InputBoxContent />
       </Grid>

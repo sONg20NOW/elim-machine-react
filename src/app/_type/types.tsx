@@ -188,6 +188,7 @@ export type MachineProjectDetailDtoType = {
 // 관리 정보 DTO
 export type machineProjectDtoType = {
   roadAddress?: string | null
+  detailAddress?: string | null
   bizno?: string | null
   completeDate?: string | null
   contractDate?: string | null
