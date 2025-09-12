@@ -4,14 +4,13 @@ import Grid from '@mui/material/Grid2'
 
 import { Box, Button } from '@mui/material'
 
-import { toast } from 'react-toastify'
-
 import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
 import { MemberIdContext } from '@/app/[lang]/(dashboard)/member/_components/UserModal'
 import { execDaumPostcode } from '@/app/_handler/daumMapPostcode'
+import { handleApiError } from '@/utils/errorHandler'
 
 interface InputBoxProps {
   isEditing?: boolean
@@ -71,17 +70,14 @@ function InputBoxContent() {
 
   async function getJuminNum() {
     try {
-      const juminNumRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/jumin-num/view`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ memberId: memberId })
-      })
+      const response = await axios.post<{ data: { juminNum: string } }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/jumin-num/view`,
+        { memberId: memberId }
+      )
 
-      const juminNumResult = await juminNumRes.json()
-
-      setJuminNum(juminNumResult.data.juminNum)
+      setJuminNum(response.data.data.juminNum)
     } catch (error: any) {
-      toast.error(error)
+      handleApiError(error)
     }
   }
 

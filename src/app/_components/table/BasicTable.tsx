@@ -26,7 +26,6 @@ import type { HeaderType, SortInfoType } from '@/app/_type/types'
  * @returns
  */
 export default function BasicTable<T extends Record<keyof T, string | number | string[]>>({
-  headerTextSize,
   header,
   data,
   handleRowClick,
@@ -39,7 +38,6 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   loading,
   error
 }: {
-  headerTextSize?: string
   header: HeaderType<T>
   data: T[]
   handleRowClick: (row: T) => Promise<void>
@@ -78,11 +76,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
       <Table sx={{ minWidth: 650 }} aria-label='simple table' className='relative'>
         <TableHead className='select-none'>
           <TableRow>
-            <TableCell
-              align='center'
-              key='order'
-              className={`font-medium ${!headerTextSize ? 'text-base' : headerTextSize}`}
-            >
+            <TableCell align='center' key='order' className={'font-medium text-base'}>
               번호
             </TableCell>
             {Object.keys(header).map(key => {
@@ -92,7 +86,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 <TableCell
                   key={key}
                   align='center'
-                  className={classNames(`relative ${!headerTextSize ? 'text-base' : headerTextSize}`, {
+                  className={classNames('relativetext-base', {
                     'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
                     'font-bold select-none': header[k].canSort,
                     'font-medium': !header[k].canSort

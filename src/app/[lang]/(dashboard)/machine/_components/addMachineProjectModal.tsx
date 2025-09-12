@@ -26,23 +26,9 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
 
   const onSubmitHandler = async () => {
     try {
-      // 비고란을 제외한 칸이 하나라도 안 채워져있으면 경고 문구 표시 (basic만)
-      const NotAllFull = Object.keys(newData).some(key => {
-        if (key === 'note') return false
-
-        return !newData[key as keyof typeof newData]
-      })
-
-      if (NotAllFull) {
-        throw new Error(`비고를 제외한 모든 정보를 입력해주세요.`)
-      }
-
       const response = await axios.post<{ data: MachineProjectCreateRequestDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects`,
-        newData,
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
+        newData
       )
 
       console.log('new machine project added', response.data.data)
@@ -60,7 +46,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
       size='sm'
       open={open}
       setOpen={setOpen}
-      title='기계설비현장 정보 추가'
+      title='신규 기계설비현장 추가'
       primaryButton={
         <Button variant='contained' onClick={onSubmitHandler} type='submit'>
           추가하기

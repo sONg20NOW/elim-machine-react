@@ -1,7 +1,7 @@
 import { gradeOption } from '@/app/_constants/options'
-import type { InputFieldType } from '@/app/_type/types'
+import type { engineerInputType } from '@/app/_type/types'
 
-export const ENGINEER_INPUT_INFO: Record<string, InputFieldType> = {
+export const ENGINEER_INPUT_INFO: engineerInputType = {
   name: { type: 'text', label: '이름' },
   email: { type: 'text', label: '이메일' },
   phoneNumber: { type: 'text', label: '번호' },

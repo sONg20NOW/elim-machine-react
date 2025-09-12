@@ -1,4 +1,4 @@
-~'use client'
+'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -15,33 +15,18 @@ import axios from 'axios'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import UserModal from './_components/UserModal'
-import AddUserModal from './_components/addUserModal'
-import type {
-  EngineerFilterType,
-  EngineerResponseDtoType,
-  MachineEngineerPageResponseDtoType,
-  successResponseDtoType
-} from '@/app/_type/types'
+import type { LicensePageResponseDtoType, LicenseResponseDtoType, successResponseDtoType } from '@/app/_type/types'
 import { createInitialSorting, HEADERS } from '@/app/_schema/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
-import TableFilters from '@/app/_components/table/TableFilters'
 import { PageSizeOptions } from '@/app/_constants/options'
-import { EngineerInitialFilters } from '@/app/_constants/EngineerSeed'
-import { ENGINEER_FILTER_INFO } from '@/app/_schema/filter/EngineerFilterInfo'
 import { handleApiError } from '@/utils/errorHandler'
+import AddModal from './_components/addModal'
+import DetailModal from './_components/DetailModal'
 
-/**
- * @type T
- * MachineEngineerPageResponseDtoType
- * @type K
- * MachineDetialResponseDtoType
- * @returns
- */
-export default function EngineerPage() {
+export default function Licensepage() {
   // 데이터 리스트
-  const [data, setData] = useState<MachineEngineerPageResponseDtoType[]>([])
+  const [data, setData] = useState<LicensePageResponseDtoType[]>([])
 
   // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
@@ -55,28 +40,25 @@ export default function EngineerPage() {
   // 전체 데이터 개수 => fetching한 데이터에서 추출
   const [totalCount, setTotalCount] = useState(0)
 
-  // 이름 검색 인풋
-  const [name, setName] = useState('')
+  // 업체명 검색 인풋
+  const [companyName, setCompanyName] = useState('')
 
-  // 현장명 검색 인풋
-  const [projectName, setProjectName] = useState('')
+  // 업체명 검색 인풋
+  const [region, setRegion] = useState('')
 
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
   const [size, setSize] = useState(30)
 
   // 모달 관련 상태
-  const [addUserModalOpen, setAddUserModalOpen] = useState(false)
-  const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
 
   // TODO restrict type
-  const [selectedUser, setSelectedUser] = useState<EngineerResponseDtoType | null>(null)
-
-  // 필터 상태 - 컬럼에 맞게 수정
-  const [filters, setFilters] = useState(EngineerInitialFilters)
+  const [selectedData, setSelectedData] = useState<LicenseResponseDtoType | null>(null)
 
   // 정렬 상태
-  const [sorting, setSorting] = useState(createInitialSorting<MachineEngineerPageResponseDtoType>)
+  const [sorting, setSorting] = useState(createInitialSorting<LicensePageResponseDtoType>)
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
@@ -87,29 +69,22 @@ export default function EngineerPage() {
     setError(false)
 
     try {
-      // 필터링
-      Object.keys(filters).forEach(prop => {
-        const key = prop as keyof typeof filters
-
-        filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
-      })
-
       // 정렬
       sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
 
-      // 이름 검색
-      name ? queryParams.set('name', name) : queryParams.delete('name')
+      // 업체명 검색
+      companyName ? queryParams.set('companyName', companyName) : queryParams.delete('companyName')
 
-      // 현장명 검색
-      projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
+      // 지역 검색
+      region ? queryParams.set('region', region) : queryParams.delete('region')
 
       // 페이지 설정
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
 
       // axios GET 요청
-      const response = await axios.get<{ data: successResponseDtoType<MachineEngineerPageResponseDtoType[]> }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers?${queryParams.toString()}`
+      const response = await axios.get<{ data: successResponseDtoType<LicensePageResponseDtoType[]> }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses?${queryParams.toString()}`
       )
 
       const result = response.data.data
@@ -125,26 +100,26 @@ export default function EngineerPage() {
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, size, name, projectName])
+  }, [sorting, page, size, companyName, region])
 
-  // 필터 변경 시 API 호출
+  // 함수 변경 시 API 호출
   useEffect(() => {
     getFilteredData()
-  }, [filters, getFilteredData])
+  }, [getFilteredData])
 
-  // 엔지니어 선택 핸들러
-  const handleEngineerClick = async (engineerData: MachineEngineerPageResponseDtoType) => {
+  // 라이선스 선택 핸들러
+  const handleLicenseClick = async (licenseData: LicensePageResponseDtoType) => {
     try {
-      const response = await axios.get<{ data: EngineerResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/${engineerData.engineerId}`
+      const response = await axios.get<{ data: LicenseResponseDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/${licenseData.licenseId}`
       )
 
-      const engineerInfo = response.data.data
+      const licenseInfo = response.data.data
 
-      setSelectedUser(engineerInfo)
-      setUserDetailModalOpen(true)
+      setSelectedData(licenseInfo)
+      setDetailModalOpen(true)
     } catch (error) {
-      handleApiError(error, '엔지니어를 선택하는 데 실패했습니다.')
+      handleApiError(error, '라이선스를 선택하는 데 실패했습니다.')
     }
   }
 
@@ -152,44 +127,39 @@ export default function EngineerPage() {
     <>
       <Card>
         {/* 탭 제목 */}
-        <CardHeader title={`기계설비 기술자 (${totalCount})`} className='pbe-4' />
-        {/* 필터바 */}
-        <TableFilters<EngineerFilterType>
+        <CardHeader title={`라이선스관리 (${totalCount})`} className='pbe-4' />
+        {/* <TableFilters<EngineerFilterType>
           filterInfo={ENGINEER_FILTER_INFO}
           filters={filters}
           onFiltersChange={setFilters}
           disabled={disabled}
           setPage={setPage}
         />
-        {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<i className='tabler-reload' />}
           onClick={() => {
-            setFilters(EngineerInitialFilters)
-            setName('')
-            setProjectName('')
+            setCompanyName('')
+            setRegion('')
           }}
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
         >
           필터 초기화
-        </Button>
+        </Button>  */}
         <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <div className='flex gap-2'>
-            {/* 이름으로 검색 */}
             <SearchBar
-              placeholder='이름으로 검색'
-              onClick={name => {
-                setName(name)
+              placeholder='업체명으로 검색'
+              onClick={companyName => {
+                setCompanyName(companyName)
                 setPage(0)
               }}
               disabled={disabled}
             />
-            {/* 현장명으로 검색 */}
             <SearchBar
-              placeholder='현장명으로 검색'
-              onClick={projectName => {
-                setProjectName(projectName)
+              placeholder='지역으로 검색'
+              onClick={region => {
+                setRegion(region)
                 setPage(0)
               }}
               disabled={disabled}
@@ -223,7 +193,7 @@ export default function EngineerPage() {
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
-              onClick={() => setAddUserModalOpen(!addUserModalOpen)}
+              onClick={() => setAddModalOpen(!addModalOpen)}
               className='max-sm:is-full'
               disabled={disabled}
             >
@@ -233,12 +203,10 @@ export default function EngineerPage() {
         </div>
 
         {/* 테이블 */}
-        <BasicTable<MachineEngineerPageResponseDtoType>
-          headerTextSize={'text-sm'}
-          multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
-          header={HEADERS.engineers}
+        <BasicTable<LicensePageResponseDtoType>
+          header={HEADERS.licenses}
           data={data}
-          handleRowClick={handleEngineerClick}
+          handleRowClick={handleLicenseClick}
           page={page}
           pageSize={size}
           sorting={sorting}
@@ -278,14 +246,12 @@ export default function EngineerPage() {
       </Card>
 
       {/* 모달들 */}
-      {addUserModalOpen && (
-        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} reloadPage={() => getFilteredData()} />
-      )}
-      {userDetailModalOpen && selectedUser && (
-        <UserModal
-          open={userDetailModalOpen}
-          setOpen={setUserDetailModalOpen}
-          data={selectedUser}
+      {addModalOpen && <AddModal open={addModalOpen} setOpen={setAddModalOpen} reloadPage={() => getFilteredData()} />}
+      {detailModalOpen && selectedData && (
+        <DetailModal
+          open={detailModalOpen}
+          setOpen={setDetailModalOpen}
+          initialData={selectedData}
           reloadData={() => getFilteredData()}
         />
       )}

@@ -234,7 +234,6 @@ export default function EngineerPage() {
 
         {/* 테이블 */}
         <BasicTable<MachineEngineerPageResponseDtoType>
-          headerTextSize={'text-sm'}
           multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
           header={HEADERS.engineers}
           data={data}
