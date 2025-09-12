@@ -32,7 +32,7 @@ const Footer = () => {
       </p>
       {!isBreakpointReached && (
         <div className='flex items-center gap-4'>
-          <Link href='https://elimsafety.com/' target='_blank' className={`text-color-primary-main`}>
+          <Link href='https://elimsafety.com/' target='_blank' className={`text-color-primary`}>
             Go to Elim
           </Link>
         </div>

@@ -1,3 +1,5 @@
+import { toast } from 'react-toastify'
+
 /**
  * API 에러 응답에서 메시지를 추출하여 사용자에게 표시할 수 있는 형태로 포맷팅합니다.
  * @param error - axios 에러 객체
@@ -45,7 +47,7 @@ export const handleApiError = (
   const errorMessage = getErrorMessage(error, defaultMessage)
 
   if (showAlert) {
-    alert(errorMessage)
+    toast.error(errorMessage)
   }
 
   return errorMessage
@@ -58,6 +60,6 @@ export const handleApiError = (
  */
 export const handleSuccess = (message: string = '성공적으로 처리되었습니다.', showAlert: boolean = true): void => {
   if (showAlert) {
-    alert(message)
+    toast.success(message)
   }
 }

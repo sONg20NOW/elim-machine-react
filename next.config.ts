@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   basePath: process.env.BASEPATH,
   redirects: async () => {
     return [
+      // 기본적으로 캘린더로 가도록
       {
         source: '/',
         destination: '/en/calendar',
@@ -17,13 +18,7 @@ const nextConfig: NextConfig = {
         locale: false
       },
       {
-        source: '/public/:path*',
-        destination: '/public/:path*',
-        permanent: true,
-        locale: false
-      },
-      {
-        source: '/((?!(?:en|fr|ar|front-pages|favicon.ico|api|)\\b)):path',
+        source: '/:path((?!en|fr|ar|front-pages|favicon\\.ico|api|images|fonts|_next|public).*)',
         destination: '/en/:path',
         permanent: true,
         locale: false

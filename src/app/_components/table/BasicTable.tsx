@@ -15,13 +15,18 @@ import type { HeaderType, SortInfoType } from '@/app/_type/types'
  * @param header
  * 테이블 헤더를 정의 (ex. {name: {label: '이름', canSort: true}, ...})
  * @type HeaderTpye<T>
- * @param Exceptions
- * 기본적으로 데이터의 해당되는 속성만 row에 표시하는데, 다르게 표시할 속성들을 정의
+ * @param listException
+ * 리스트 데이터를 가진 데이터를 표시
+ * @param multiException
+ * 해당 열에 표시할 데이터 객체
+ * @param headerTextSize
+ * (optional) 헤더의 텍스트 크기 (tailwind className)
  *
  * (ex. {age: ['age', 'genderDescription']}) => 나이 항목에 나이와 성별을 동시에 표시.
  * @returns
  */
 export default function BasicTable<T extends Record<keyof T, string | number | string[]>>({
+  headerTextSize,
   header,
   data,
   handleRowClick,
@@ -29,10 +34,12 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   pageSize,
   sorting,
   setSorting,
-  Exceptions,
+  multiException,
+  listException,
   loading,
   error
 }: {
+  headerTextSize?: string
   header: HeaderType<T>
   data: T[]
   handleRowClick: (row: T) => Promise<void>
@@ -40,7 +47,8 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   pageSize: number
   sorting: SortInfoType<T>
   setSorting: Dispatch<SetStateAction<SortInfoType<T>>>
-  Exceptions?: Partial<Record<keyof T, Array<keyof T>>>
+  multiException?: Partial<Record<keyof T, Array<keyof T>>>
+  listException?: Array<keyof T>
   loading: boolean
   error: boolean
 }) {
@@ -70,7 +78,11 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
       <Table sx={{ minWidth: 650 }} aria-label='simple table' className='relative'>
         <TableHead className='select-none'>
           <TableRow>
-            <TableCell align='center' key='order' className='font-medium text-base'>
+            <TableCell
+              align='center'
+              key='order'
+              className={`font-medium ${!headerTextSize ? 'text-base' : headerTextSize}`}
+            >
               번호
             </TableCell>
             {Object.keys(header).map(key => {
@@ -80,7 +92,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 <TableCell
                   key={key}
                   align='center'
-                  className={classNames('relative text-base', {
+                  className={classNames(`relative ${!headerTextSize ? 'text-base' : headerTextSize}`, {
                     'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
                     'font-bold select-none': header[k].canSort,
                     'font-medium': !header[k].canSort
@@ -103,10 +115,10 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((user, index) => (
+          {data.map((info, index) => (
             <TableRow
               hover={true}
-              onClick={() => handleRowClick(user)}
+              onClick={() => handleRowClick(info)}
               key={index}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               className='cursor-pointer'
@@ -114,25 +126,41 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
               <TableCell align='center' key={'order'}>
                 {page * pageSize + index + 1}
               </TableCell>
-              {Object.keys(user).map(property => {
+              {Object.keys(header).map(property => {
                 const key = property as keyof T
 
                 // header 속성에 포함되지 않다면 출력 x & 예외 출력
                 if (!Object.keys(header).includes(property)) return null
-                else if (Exceptions && Object.keys(Exceptions).includes(property)) {
-                  const key = property as keyof typeof Exceptions
-                  const pieces = Exceptions[key]?.map(value => user[value])
-                  const output = pieces?.join('  ')
+                else if (multiException && Object.keys(multiException).includes(property)) {
+                  const key = property as keyof typeof multiException
+
+                  const pieces = multiException[key]?.map(value =>
+                    value === 'latestProjectEndDate' ? info[value]?.toString().slice(5) : info[value]
+                  )
 
                   return (
                     <TableCell key={key.toString()} align='center'>
-                      {output}
+                      {pieces?.join(key === 'age' ? '  ' : ' ~ ')}
+                    </TableCell>
+                  )
+                } else if (listException && listException.includes(key)) {
+                  const list = info[key] as string[]
+
+                  // 세 개 이상일 경우 외 ... 로 처리
+                  return (
+                    <TableCell key={key.toString()} align='center'>
+                      {list.length < 3 ? list.join(', ') : list.slice(0, 2).join(', ').concat(' 외 ...')}
                     </TableCell>
                   )
                 } else {
                   return (
                     <TableCell key={key.toString()} align='center'>
-                      {user[key]}
+                      {key === 'remark'
+                        ? info[key]
+                            ?.toString()
+                            .slice(0, 3)
+                            .concat(info[key]?.toString().length > 3 ? '..' : '')
+                        : info[key]}
                     </TableCell>
                   )
                 }

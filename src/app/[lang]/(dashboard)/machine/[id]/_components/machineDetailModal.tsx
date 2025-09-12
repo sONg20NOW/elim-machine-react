@@ -7,7 +7,7 @@ import { Dialog, DialogTitle, DialogContent, Button } from '@mui/material'
 import axios from 'axios'
 
 import { initialData } from '@/data/initialData/userInfo'
-import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
+import MultiSelectBox from '@/app/_components/selectbox/MultiSelectBox'
 import CustomTextField from '@/@core/components/mui/TextField'
 import InspectionDetailModal from './insepctionDetailModal'
 

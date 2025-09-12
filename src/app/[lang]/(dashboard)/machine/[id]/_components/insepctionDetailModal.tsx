@@ -169,8 +169,8 @@ const InspectionDetailModal = ({
     if (!open) return
     if (!selectedMachine || !selectedMachine.machineInspectionId) return
 
-    const fetchData = async () => {
-      const response = await axios.post(
+    const getData = async () => {
+      const response = await axios.post<{ data: any }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${id}/machine-pics?page=0&size=10`,
         {
           machineInspectionId: selectedMachine.machineInspectionId,
@@ -182,7 +182,7 @@ const InspectionDetailModal = ({
       console.log('response', response.data.data)
     }
 
-    fetchData()
+    getData()
   }, [open, selectedMachine, id])
 
   return (

@@ -5,13 +5,15 @@ import Grid from '@mui/material/Grid2'
 
 import type { memberDetailDtoType, TabType } from '@/app/_type/types'
 import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
-import { InputBox } from '@/components/selectbox/InputBox'
+import { InputBox } from '@/app/_components/selectbox/InputBox'
 
 const MemberTabContent = ({
+  isEditing,
   tabName,
   userData,
   setUserData
 }: {
+  isEditing?: boolean
   tabName: TabType['member']
   userData: memberDetailDtoType
   setUserData: Dispatch<SetStateAction<memberDetailDtoType>>
@@ -34,16 +36,17 @@ const MemberTabContent = ({
         {properties.map(property => {
           return (
             <InputBox
+              isEditing={isEditing}
               key={property}
               tabInfos={tabInfos}
               tabFieldKey={property}
               value={(userData[dtoMap[tabName]] as Record<string, string>)[property] ?? ''}
-              onChange={e => {
+              onChange={(value: string) => {
                 setUserData({
                   ...userData,
                   [dtoMap[tabName]]: {
                     ...userData[dtoMap[tabName]],
-                    [property]: e.target.value
+                    [property]: value
                   }
                 })
               }}

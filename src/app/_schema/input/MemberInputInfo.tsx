@@ -1,3 +1,13 @@
+import {
+  companyNameOption,
+  contractTypeOption,
+  gradeOption,
+  memberStatusOption,
+  officeDepartmentNameOption,
+  officePositionOption,
+  roleOption,
+  workFormOption
+} from '@/app/_constants/options'
 import type { memberInputType } from '../../_type/types'
 
 // 직원 상세 페이지
@@ -17,37 +27,19 @@ export const MEMBER_INPUT_INFO: memberInputType = {
       size: 'md',
       type: 'multi',
       label: '소속',
-      options: [
-        { value: '엘림기술원(주)', label: '엘림기술원(주)' },
-        { value: '엘림주식회사', label: '엘림주식회사' },
-        { value: '엘림테크원(주)', label: '엘림테크원(주)' },
-        { value: '이엘엔지니어링(주)', label: '이엘엔지니어링(주)' },
-        { value: '이엘테크원(주)', label: '이엘테크원(주)' }
-      ]
+      options: companyNameOption
     },
     role: {
       size: 'md',
       type: 'multi',
       label: '권한',
-      options: [
-        { value: 'GUEST', label: '게스트' },
-        { value: 'USER', label: '일반 사용자' },
-        { value: 'STAFF', label: '직원' },
-        { value: 'MANAGER', label: '매니저' },
-        { value: 'ADMIN', label: '관리자' },
-        { value: 'SUPERADMIN', label: '최고 관리자' }
-      ]
+      options: roleOption
     },
     memberStatus: {
       size: 'md',
       type: 'multi',
       label: '재직 상태',
-      options: [
-        { value: 'NORMAL', label: '재직중' },
-        { value: 'QUIT', label: '퇴사' },
-        { value: 'PENDING', label: '가입 승인대기' },
-        { value: 'LEAVE', label: '휴직' }
-      ]
+      options: memberStatusOption
     },
     note: {
       size: 'lg',
@@ -63,7 +55,7 @@ export const MEMBER_INPUT_INFO: memberInputType = {
     },
     juminNum: {
       size: 'md',
-      type: 'text',
+      type: 'juminNum',
       label: '주민번호'
     },
     birthday: {
@@ -98,18 +90,13 @@ export const MEMBER_INPUT_INFO: memberInputType = {
     },
     roadAddress: {
       size: 'lg',
-      type: 'text',
+      type: 'map',
       label: '도로명 주소'
     },
     detailAddress: {
       size: 'lg',
       type: 'text',
       label: '상세 주소'
-    },
-    jibunAddress: {
-      size: 'lg',
-      type: 'text',
-      label: '지번 주소'
     },
     educationLevel: {
       size: 'md',
@@ -152,57 +139,13 @@ export const MEMBER_INPUT_INFO: memberInputType = {
       size: 'md',
       type: 'multi', // 다중 선택 가능
       label: '부서',
-      options: [
-        { value: '건설사업', label: '건설사업' },
-        { value: '건설안전', label: '건설안전' },
-        { value: '건축기술', label: '건축기술' },
-        { value: '경영기획', label: '경영기획' },
-        { value: '경영지원', label: '경영지원' },
-        { value: '구조', label: '구조' },
-        { value: '구조기술', label: '구조기술' },
-        { value: '기계설비', label: '기계설비' },
-        { value: '기술영업', label: '기술영업' },
-        { value: '기술영업CS', label: '기술영업CS' },
-        { value: '기술자료', label: '기술자료' },
-        { value: '기업부설연구소', label: '기업부설연구소' },
-        { value: '기획부', label: '기획부' },
-        { value: '기획홍보', label: '기획홍보' },
-        { value: '대외협력팀', label: '대외협력팀' },
-        { value: '대표이사', label: '대표이사' },
-        { value: '법률자문', label: '법률자문' },
-        { value: '사무', label: '사무' },
-        { value: '설계팀', label: '설계팀' },
-        { value: '안전진단부', label: '안전진단부' },
-        { value: '임원실', label: '임원실' },
-        { value: '토목기술', label: '토목기술' },
-        { value: '토목부', label: '토목부' }
-      ]
+      options: officeDepartmentNameOption
     },
     officePosition: {
       size: 'md',
       type: 'multi', // 다중 선택 가능
       label: '직위',
-      options: [
-        { value: 'TEMPORARY', label: '단기' },
-        { value: 'INTERN', label: '인턴' },
-        { value: 'STAFF', label: '사원' },
-        { value: 'JUNIOR_STAFF', label: '주임' },
-        { value: 'ASSISTANT_MANAGER', label: '대리' },
-        { value: 'SENIOR_ASSISTANT_MANAGER', label: '선임' },
-        { value: 'RESPONSIBLE', label: '책임' },
-        { value: 'TEAM_LEADER', label: '팀장' },
-        { value: 'SECTION_CHIEF', label: '소장' },
-        { value: 'DEPUTY_GENERAL_MANAGER', label: '본부장' },
-        { value: 'MANAGER', label: '과장' },
-        { value: 'SENIOR_MANAGER', label: '부장' },
-        { value: 'DEPUTY_MANAGER', label: '차장' },
-        { value: 'DIRECTOR', label: '이사' },
-        { value: 'EXECUTIVE_DIRECTOR', label: '상무' },
-        { value: 'SENIOR_EXECUTIVE_DIRECTOR', label: '전무' },
-        { value: 'ADVISOR', label: '고문' },
-        { value: 'VICE_PRESIDENT', label: '부사장' },
-        { value: 'PRESIDENT', label: '사장' }
-      ]
+      options: officePositionOption
     },
     apprentice: {
       size: 'md',
@@ -213,14 +156,7 @@ export const MEMBER_INPUT_INFO: memberInputType = {
       size: 'md',
       type: 'multi', // 다중 선택 가능
       label: '계약 유형',
-      options: [
-        { value: 'REGULAR', label: '정규직' },
-        { value: 'CONTRACT_1Y', label: '계약직1년' },
-        { value: 'CONTRACT_2Y', label: '계약직2년' },
-        { value: 'NON_REGULAR', label: '무기계약직' },
-        { value: 'DAILY', label: '일용직' },
-        { value: 'TEMPORARY', label: '단기시급' }
-      ]
+      options: contractTypeOption
     },
     contractYn: {
       size: 'md',
@@ -240,10 +176,7 @@ export const MEMBER_INPUT_INFO: memberInputType = {
       size: 'md',
       type: 'multi', // 다중 선택 가능
       label: '근무형태',
-      options: [
-        { value: 'DEEMED', label: '간주근로' },
-        { value: 'SPECIAL', label: '별정근로' }
-      ]
+      options: workFormOption
     },
     fieldworkYn: {
       size: 'md',
@@ -286,12 +219,8 @@ export const MEMBER_INPUT_INFO: memberInputType = {
       size: 'md',
       type: 'multi', // 다중 선택 가능
       label: '등급',
-      options: [
-        { value: 'BEGINNER', label: '초급' },
-        { value: 'INTERMEDIATE', label: '중급' },
-        { value: 'ADVANCED', label: '고급' }
-      ],
-      disable: true
+      options: gradeOption,
+      disabled: true
     },
     jobField: {
       size: 'md',

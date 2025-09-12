@@ -8,7 +8,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, MenuIt
 
 import DialogCloseButton from './DialogCloseButton'
 import CustomTextField from '@/@core/components/mui/TextField'
-import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
+import MultiSelectBox from '@/app/_components/selectbox/MultiSelectBox'
 
 type EditUserInfoProps = {
   open: boolean

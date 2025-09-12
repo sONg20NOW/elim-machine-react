@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
 
-import { InputBox } from '@/components/selectbox/InputBox'
+import { InputBox } from '@/app/_components/selectbox/InputBox'
 import type { InputFieldType } from '@/app/_type/types'
 
 interface TableFiltersProps<T> {
@@ -48,7 +48,7 @@ export default function TableFilters<T>({
             tabFieldKey={property}
             disabled={disabled}
             value={filters[property as keyof T]?.toString() ?? ''}
-            onChange={(e: any) => handleFilterChange(property, e.target.value)}
+            onChange={value => handleFilterChange(property, value)}
           />
         ))}
       </Grid>

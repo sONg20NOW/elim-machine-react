@@ -1,9 +1,9 @@
 'use client'
 
 import type { MouseEvent, SyntheticEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 
-import { useParams } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 
 import Grid from '@mui/material/Grid2'
 
@@ -17,33 +17,48 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import axios from 'axios'
 
-import SiteInfoContent from './siteInfoContent'
-import PlanContent from './planContent'
-import MachineContent from './machineContent'
-import MachinePictures from './machinePictures'
-import NoteContent from './noteContent'
-import type { MachineProjectDetailDtoType } from '@/app/_type/types'
+import SiteInfoContent from './_components/siteInfoContent'
+import PlanContent from './_components/planContent'
+import MachineContent from './_components/machineContent'
+import MachinePictures from './_components/machinePictures'
+import NoteContent from './_components/noteContent'
+import type {
+  MachineEngineerOptionListResponseDtoType,
+  MachineEngineerOptionResponseDtoType,
+  machineProjectResponseDtoType
+} from '@/app/_type/types'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+
+export const ProjectDataContext = createContext(null)
 
 const MachineUpdatePage = () => {
   const params = useParams()
   const id = params?.id as string
 
-  const [projectData, setProjectData] = useState<MachineProjectDetailDtoType | null>(null)
-  const [engineerOptions, setEngineerOptions] = useState([])
+  const [projectData, setProjectData] = useState<machineProjectResponseDtoType | null>(null)
+  const [engineerOptions, setEngineerOptions] = useState<MachineEngineerOptionResponseDtoType[]>([])
   const [value, setValue] = useState<string>('1')
 
-  const init = async (machineId: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineId}`, {
-      method: 'GET'
-    })
+  const getProjectData = async (machineId: string) => {
+    try {
+      const response = await axios.get<{ data: machineProjectResponseDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineId}`
+      )
 
-    const result = await response.json()
+      setProjectData(response.data.data)
 
-    setProjectData(result.data)
+      handleSuccess('프로젝트 정보를 불러왔습니다.')
+    } catch (error) {
+      handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
+    }
   }
 
-  const initEngineer = async () => {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`)
+  // 엔지니어 목록 가져오기
+  const getEngineerList = async () => {
+    const response = await axios.get<{ data: MachineEngineerOptionListResponseDtoType }>(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`
+    )
+
     const options = response.data.data.engineers
 
     setEngineerOptions(options)
@@ -54,15 +69,25 @@ const MachineUpdatePage = () => {
   }
 
   useEffect(() => {
-    if (id) init(id)
-    if (id) initEngineer()
+    if (id) getProjectData(id)
+    if (id) getEngineerList()
   }, [id])
 
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
         <Card>
-          <CardHeader title='기계설비현장 자세히보기' className='pbe-4' />
+          <div className='flex gap-0 p-6 items-center'>
+            <CardHeader
+              title='기계설비현장'
+              sx={{ cursor: 'pointer', padding: 0 }}
+              slotProps={{ title: { sx: { ':hover': { color: 'primary.main' } } } }}
+              onClick={() => redirect('/machine')}
+            />
+            <i className='tabler-chevron-right' />
+            <CardHeader title={projectData?.machineProjectName ?? ''} sx={{ padding: 0 }} />
+          </div>
+
           <CardContent>
             <TabContext value={value}>
               <TabList onChange={handleChange} aria-label='nav tabs example'>
@@ -103,14 +128,14 @@ const MachineUpdatePage = () => {
                 />
               </TabList>
               <TabPanel value='1'>
-                {projectData?.machineProjectResponseDto ? (
+                {projectData ? (
                   <SiteInfoContent projectData={projectData} />
                 ) : (
                   <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
                 )}
               </TabPanel>
               <TabPanel value='2'>
-                {projectData?.machineProjectScheduleAndEngineerResponseDto ? (
+                {projectData ? (
                   <PlanContent projectData={projectData} engineerOptions={engineerOptions} />
                 ) : (
                   <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>

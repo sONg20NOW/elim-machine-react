@@ -1,38 +1,43 @@
 import { useState } from 'react'
 
+import { useParams } from 'next/navigation'
+
 import { Button } from '@mui/material'
 
 import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import type { MachineProjectDetailDtoType } from '@/app/_type/types'
+import { InputBox } from '@/app/_components/selectbox/InputBox'
+import { MACHINE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
+import type { machineProjectResponseDtoType } from '@/app/_type/types'
 
-const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDtoType }) => {
+const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseDtoType }) => {
+  const params = useParams()
+  const machineProjectId = params?.id as string
+
   // 초기값 세팅
-  const [editData, setEditData] = useState(projectData || {})
+  const [editData, setEditData] = useState<machineProjectResponseDtoType>(projectData)
   const [isEditing, setIsEditing] = useState(false)
+
+  if (!editData) {
+    return <span>데이터를 찾을 수 없습니다.</span>
+  }
 
   const handleSave = async () => {
     console.log('editData는요!', editData)
-    console.log('Saving data...', editData.machineProjectScheduleAndEngineerResponseDto.machineProjectId)
+    console.log('Saving data...', machineProjectId)
 
     try {
-      const result = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${editData.machineProjectScheduleAndEngineerResponseDto.machineProjectId}/machine-project-management`,
-        editData.machineProjectResponseDto
+      const result = await axios.put<{ data: machineProjectResponseDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`,
+        editData
       )
 
       setIsEditing(false)
 
-      setEditData((prev: any) => ({
-        ...prev,
-        machineProjectResponseDto: {
-          ...result.data.data
-        }
-      }))
+      setEditData(result.data.data)
 
       console.log('result:', result.data.data)
       handleSuccess('수정되었습니다.')
@@ -46,6 +51,7 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
   return (
     <div>
       <div className='flex mb-4 gap-[4px]'>
+        {/* TODO: 버튼 구현 */}
         <Button
           variant='contained'
           color='info'
@@ -155,18 +161,17 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                     기관명
                   </td>
                   <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineProjectResponseDto?.institutionName ?? ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey={'institutionName'}
+                      value={editData?.institutionName ?? ''}
+                      onChange={value =>
+                        setEditData(prev => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            institutionName: e.target.value
-                          }
+                          institutionName: value
                         }))
                       }
-                      fullWidth
+                      tabInfos={MACHINE_INPUT_INFO.project}
                     />
                   </td>
                 </tr>
@@ -175,19 +180,17 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                     주소
                   </th>
                   <td colSpan={3} style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData?.machineProjectResponseDto?.roadAddress ?? ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey={'roadAddress'}
+                      value={editData.roadAddress ?? ''}
+                      onChange={value =>
+                        setEditData(prev => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            address: e.target.value
-                          }
+                          roadAddress: value
                         }))
                       }
-                      fullWidth
-                      sx={{ mb: 1 }}
+                      tabInfos={MACHINE_INPUT_INFO.project}
                     />
                   </td>
                 </tr>
@@ -197,14 +200,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.representative || ''}
+                      value={editData.representative || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            representative: e.target.value
-                          }
+                          representative: e.target.value
                         }))
                       }
                       fullWidth
@@ -215,14 +215,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.grossArea || ''}
+                      value={editData.grossArea || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            grossArea: e.target.value
-                          }
+                          grossArea: e.target.value
                         }))
                       }
                       fullWidth
@@ -235,14 +232,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.bizno || ''}
+                      value={editData.bizno || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            bizno: e.target.value
-                          }
+                          bizno: e.target.value
                         }))
                       }
                       fullWidth
@@ -253,14 +247,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.houseCnt || ''}
+                      value={editData.houseCnt || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            houseCnt: e.target.value
-                          }
+                          houseCnt: e.target.value
                         }))
                       }
                       fullWidth
@@ -273,14 +264,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.purpose || ''}
+                      value={editData.purpose || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            purpose: e.target.value
-                          }
+                          purpose: e.target.value
                         }))
                       }
                       fullWidth
@@ -291,14 +279,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.manager || ''}
+                      value={editData.manager || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            manager: e.target.value
-                          }
+                          manager: e.target.value
                         }))
                       }
                       fullWidth
@@ -311,14 +296,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.structure || ''}
+                      value={editData.structure || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            structure: e.target.value
-                          }
+                          structure: e.target.value
                         }))
                       }
                       fullWidth
@@ -329,14 +311,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.managerPhone || ''}
+                      value={editData.managerPhone || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            managerPhone: e.target.value
-                          }
+                          managerPhone: e.target.value
                         }))
                       }
                       fullWidth
@@ -349,14 +328,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.tel || ''}
+                      value={editData.tel || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            tel: e.target.value
-                          }
+                          tel: e.target.value
                         }))
                       }
                       fullWidth
@@ -367,14 +343,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <AppReactDatepicker
-                      selected={editData?.machineProjectResponseDto.completeDate}
+                      selected={new Date(editData?.completeDate ?? '')}
                       onChange={(date: Date | null) =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            completeDate: date
-                          }
+                          completeDate: date
                         }))
                       }
                       placeholderText='준공일을 선택하세요'
@@ -394,14 +367,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <AppReactDatepicker
-                      selected={editData?.machineProjectResponseDto.contractDate}
+                      selected={new Date(editData?.contractDate ?? '')}
                       onChange={(date: Date | null) =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            contractDate: date
-                          }
+                          contractDate: date
                         }))
                       }
                       placeholderText='계약일을 선택하세요'
@@ -412,27 +382,17 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                     진행상태
                   </th>
                   <td style={{ padding: '10px 12px' }}>
-                    <MultiSelectBox
-                      id={'projectStatusDescription'}
-                      value={editData.machineProjectResponseDto.projectStatus || ''}
+                    <InputBox
+                      tabInfos={MACHINE_INPUT_INFO.project}
+                      tabFieldKey={'projectStatusDescription'}
+                      value={editData.projectStatus || ''}
                       disabled={false}
-                      onChange={(e: any) =>
+                      onChange={value =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            projectStatus: e.target.value
-                          }
+                          projectStatus: value
                         }))
                       }
-                      options={[
-                        { value: 'CONTRACT_COMPLETED', label: '계약 완료' },
-                        { value: 'SITE_INSPECTION_COMPLETED', label: '현장 점검 완료' },
-                        { value: 'REPORT_WRITING', label: '보고서 작성중' },
-                        { value: 'REPORT_WRITING_COMPLETED', label: '보고서 작성완료' },
-                        { value: 'REPORT_SUBMITTING', label: '보고서 제출중' },
-                        { value: 'REPORT_SUBMITTED', label: '보고서 제출완료' }
-                      ]}
                     />
                   </td>
                 </tr>
@@ -442,14 +402,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.contractPrice || ''}
+                      value={editData.contractPrice || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            contractPrice: e.target.value
-                          }
+                          contractPrice: e.target.value
                         }))
                       }
                       fullWidth
@@ -460,26 +417,16 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                     점검 업체
                   </th>
                   <td style={{ padding: '10px 12px' }}>
-                    <MultiSelectBox
-                      id={'companyName'}
-                      value={editData.machineProjectResponseDto.companyName || ''}
-                      loading={false}
-                      onChange={(e: any) =>
+                    <InputBox
+                      tabInfos={MACHINE_INPUT_INFO.project}
+                      tabFieldKey={'companyName'}
+                      value={editData?.companyName || ''}
+                      onChange={value =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            companyName: e.target.value
-                          }
+                          companyName: value
                         }))
                       }
-                      options={[
-                        { value: '엘림기술원(주)', label: '엘림기술원(주)' },
-                        { value: '엘림주식회사', label: '엘림주식회사' },
-                        { value: '엘림테크원(주)', label: '엘림테크원(주)' },
-                        { value: '이엘엔지니어링(주)', label: '이엘엔지니어링(주)' },
-                        { value: '이엘테크원(주)', label: '이엘테크원(주)' }
-                      ]}
                     />
                   </td>
                 </tr>
@@ -490,14 +437,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.contractManager || ''}
+                      value={editData?.contractManager || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            contractManager: e.target.value
-                          }
+                          contractManager: e.target.value
                         }))
                       }
                       fullWidth
@@ -505,14 +449,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.contractManagerTel || ''}
+                      value={editData.contractManagerTel || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            contractManagerTel: e.target.value
-                          }
+                          contractManagerTel: e.target.value
                         }))
                       }
                       fullWidth
@@ -520,14 +461,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.contractManagerEmail || ''}
+                      value={editData.contractManagerEmail || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            contractManagerEmail: e.target.value
-                          }
+                          contractManagerEmail: e.target.value
                         }))
                       }
                       fullWidth
@@ -539,14 +477,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.contractPartner || ''}
+                      value={editData.contractPartner || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            contractPartner: e.target.value
-                          }
+                          contractPartner: e.target.value
                         }))
                       }
                       fullWidth
@@ -554,14 +489,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.contractPartnerTel || ''}
+                      value={editData.contractPartnerTel || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            contractPartnerTel: e.target.value
-                          }
+                          contractPartnerTel: e.target.value
                         }))
                       }
                       fullWidth
@@ -569,14 +501,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.contractPartnerEmail || ''}
+                      value={editData.contractPartnerEmail || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            contractPartnerEmail: e.target.value
-                          }
+                          contractPartnerEmail: e.target.value
                         }))
                       }
                       fullWidth
@@ -595,14 +524,11 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       multiline
                       label=''
                       placeholder='참고 사항을 입력해 주세요'
-                      value={editData.machineProjectResponseDto.requirement || ''}
+                      value={editData.requirement || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            requirement: e.target.value
-                          }
+                          requirement: e.target.value
                         }))
                       }
                     />
@@ -620,28 +546,22 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineMaintainer1Name || ''}
+                      value={editData.machineMaintainer1Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineMaintainer1Name: e.target.value
-                          }
+                          machineMaintainer1Name: e.target.value
                         }))
                       }
                       fullWidth
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineMaintainer1Info || ''}
+                      value={editData.machineMaintainer1Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineMaintainer1Info: e.target.value
-                          }
+                          machineMaintainer1Info: e.target.value
                         }))
                       }
                       fullWidth
@@ -652,28 +572,22 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineManager1Name || ''}
+                      value={editData.machineManager1Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineManager1Name: e.target.value
-                          }
+                          machineManager1Name: e.target.value
                         }))
                       }
                       fullWidth
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineManager1Info || ''}
+                      value={editData.machineManager1Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineManager1Info: e.target.value
-                          }
+                          machineManager1Info: e.target.value
                         }))
                       }
                       fullWidth
@@ -686,28 +600,22 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineMaintainer2Name || ''}
+                      value={editData.machineMaintainer2Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineMaintainer2Name: e.target.value
-                          }
+                          machineMaintainer2Name: e.target.value
                         }))
                       }
                       fullWidth
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineMaintainer2Info || ''}
+                      value={editData.machineMaintainer2Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineMaintainer2Info: e.target.value
-                          }
+                          machineMaintainer2Info: e.target.value
                         }))
                       }
                       fullWidth
@@ -718,28 +626,22 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineManager2Name || ''}
+                      value={editData.machineManager2Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineManager2Name: e.target.value
-                          }
+                          machineManager2Name: e.target.value
                         }))
                       }
                       fullWidth
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineManager2Info || ''}
+                      value={editData.machineManager2Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineManager2Info: e.target.value
-                          }
+                          machineManager2Info: e.target.value
                         }))
                       }
                       fullWidth
@@ -752,28 +654,22 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineMaintainer3Name || ''}
+                      value={editData.machineMaintainer3Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineMaintainer3Name: e.target.value
-                          }
+                          machineMaintainer3Name: e.target.value
                         }))
                       }
                       fullWidth
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineMaintainer3Info || ''}
+                      value={editData.machineMaintainer3Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineMaintainer3Info: e.target.value
-                          }
+                          machineMaintainer3Info: e.target.value
                         }))
                       }
                       fullWidth
@@ -784,28 +680,22 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                   </th>
                   <td style={{ padding: '10px 12px' }}>
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineManager3Name || ''}
+                      value={editData.machineManager3Name || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineManager3Name: e.target.value
-                          }
+                          machineManager3Name: e.target.value
                         }))
                       }
                       fullWidth
                       sx={{ mb: 1 }}
                     />
                     <CustomTextField
-                      value={editData.machineProjectResponseDto.machineManager3Info || ''}
+                      value={editData.machineManager3Info || ''}
                       onChange={e =>
                         setEditData((prev: any) => ({
                           ...prev,
-                          machineProjectResponseDto: {
-                            ...prev.machineProjectResponseDto,
-                            machineManager3Info: e.target.value
-                          }
+                          machineManager3Info: e.target.value
                         }))
                       }
                       fullWidth
@@ -851,70 +741,66 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                     <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       기관명
                     </td>
-                    <td style={{ padding: '10px 12px' }}>
-                      {editData?.machineProjectResponseDto?.institutionName ?? ''}
-                    </td>
+                    <td style={{ padding: '10px 12px' }}>{editData?.institutionName ?? ''}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       주소
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto?.roadAddress ?? ''}
+                      {editData?.roadAddress ?? ''}
                     </td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       대표자
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.representative}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.representative}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       연면적(㎡)
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.grossArea}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.grossArea}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       사업자번호
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.bizno}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.bizno}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       세대수
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.houseCnt}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.houseCnt}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       용도
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.purpose}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.purpose}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.manager}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.manager}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       건물구조
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.structure}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.structure}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       연락처
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.managerPhone}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.managerPhone}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       전화번호
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.tel}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.tel}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       준공일
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.completeDate
-                        ? new Date(editData.machineProjectResponseDto.completeDate).toLocaleDateString()
-                        : ''}
+                      {editData.completeDate ? new Date(editData.completeDate).toLocaleDateString() : ''}
                     </td>
                   </tr>
                   <tr style={{ background: '#f3f4f6' }}>
@@ -927,16 +813,12 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       계약일
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.contractDate
-                        ? new Date(editData.machineProjectResponseDto.contractDate).toLocaleDateString()
-                        : ''}
+                      {editData.contractDate ? new Date(editData.contractDate).toLocaleDateString() : ''}
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       진행상태
                     </th>
-                    <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.projectStatusDescription}
-                    </td>
+                    <td style={{ padding: '10px 12px' }}>{editData.projectStatusDescription}</td>
                     {/* <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약금액
                     </th>
@@ -952,44 +834,36 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       계약금액
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.contractPrice?.toLocaleString()} 원
-                      {editData.machineProjectResponseDto.vatIncludedYn === 'Y' && (
+                      {editData.contractPrice?.toLocaleString()} 원
+                      {editData.vatIncludedYn === 'Y' && (
                         <span style={{ color: '#888', marginLeft: 8 }}>(VAT포함)</span>
                       )}
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       점검업체
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.machineProjectResponseDto.companyName}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.companyName}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약담당자
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.contractManager}
+                      {editData.contractManager}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.contractManagerTel}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.contractManagerTel}</span>
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.contractManagerEmail}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.contractManagerEmail}</span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약상대자
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.contractPartner}
+                      {editData.contractPartner}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.contractPartnerTel}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.contractPartnerTel}</span>
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.contractPartnerEmail}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.contractPartnerEmail}</span>
                     </td>
                   </tr>
                   <tr>
@@ -997,7 +871,7 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       요구사항
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px', minHeight: 200 }}>
-                      <p>{editData.machineProjectResponseDto.requirement}</p>
+                      <p>{editData.requirement}</p>
                     </td>
                   </tr>
                   <tr style={{ background: '#f3f4f6' }}>
@@ -1010,21 +884,17 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       유지관리자1
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.machineMaintainer1Name}
+                      {editData.machineMaintainer1Name}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.machineMaintainer1Info}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineMaintainer1Info}</span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자1
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.machineManager1Name}
+                      {editData.machineManager1Name}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.machineManager1Info}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineManager1Info}</span>
                     </td>
                   </tr>
                   <tr>
@@ -1032,21 +902,17 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       유지관리자2
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.machineMaintainer2Name}
+                      {editData.machineMaintainer2Name}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.machineMaintainer2Info}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineMaintainer2Info}</span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자2
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.machineManager2Name}
+                      {editData.machineManager2Name}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.machineManager2Info}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineManager2Info}</span>
                     </td>
                   </tr>
                   <tr>
@@ -1054,21 +920,17 @@ const SiteInfoContent = ({ projectData }: { projectData: MachineProjectDetailDto
                       유지관리자3
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.machineMaintainer3Name}
+                      {editData.machineMaintainer3Name}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.machineMaintainer3Info}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineMaintainer3Info}</span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자3
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.machineManager3Name}
+                      {editData.machineManager3Name}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>
-                        {editData.machineProjectResponseDto.machineManager3Info}
-                      </span>
+                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineManager3Info}</span>
                     </td>
                   </tr>
                 </tbody>
