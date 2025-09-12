@@ -61,10 +61,9 @@ export function InputBox(props: InputBoxProps) {
 
 function InputBoxContent() {
   const props = useContext(InputBoxContext)
-  const { isEditing, tabInfos, tabFieldKey, value, disabled, onChange, showLabel } = props!
+  const { isEditing, tabInfos, tabFieldKey, value, onChange, showLabel } = props!
   const tabField = tabInfos[tabFieldKey]
-
-  // labe
+  const disabled = props?.disabled ?? tabField?.disabled ?? false
 
   // 주민번호 핸들링
   const [juminNum, setJuminNum] = useState(value)
@@ -87,7 +86,7 @@ function InputBoxContent() {
   }
 
   // 수정 중이 아닐 때는 input이 아닌 일반 텍스트 박스가 뜨도록.
-  if (isEditing === false) {
+  if (tabField && isEditing === false) {
     const realValue =
       tabField.type === 'multi'
         ? tabField.options?.find(option => option.value === value)?.label
@@ -99,8 +98,12 @@ function InputBoxContent() {
 
     return (
       <div className='flex flex-col p-0'>
-        <span className=' text-[13px] p-0 mb-[1px] w-fit'>{tabField.label}</span>
-        <Box className='relative border border-color-border rounded-lg px-[14px] py-[7.25px]'>
+        {showLabel && <span className=' text-[13px] p-0 mb-[1px] w-fit'>{tabField.label}</span>}
+        <Box
+          className={'my-[1px] relative text-[15px] border-color-border rounded-lg px-[14px] py-[7.25px]'.concat(
+            showLabel ? ' border' : ''
+          )}
+        >
           {tabField.type !== 'juminNum' ? (
             <span>{realValue ? realValue : '_'}</span>
           ) : (

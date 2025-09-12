@@ -98,6 +98,24 @@ export const gradeOption = [
   { value: 'EXPERT', label: '특급' }
 ]
 
+export const genderOption = [
+  { value: 'MALE', label: '남' },
+  { value: 'FEMALE', label: '여' }
+]
+
+export const careerYearOption = [
+  { value: '1', label: '1년차' },
+  { value: '2', label: '2년차' },
+  { value: '3', label: '3년차' },
+  { value: '4', label: '4년차' },
+  { value: '5', label: '5년차' },
+  { value: '6', label: '6년차' },
+  { value: '7', label: '7년차' },
+  { value: '8', label: '8년차' },
+  { value: '9', label: '9년차' },
+  { value: '10', label: '10년차' }
+]
+
 // machine - project
 export const projectStatusOption = [
   { value: 'CONTRACT_COMPLETED', label: '계약 완료' },
@@ -120,4 +138,15 @@ export const buildingGradeOption = [
   { value: 'ADVANCED', label: '고급' }
 ]
 
+// engineer
 export const engineersOption: { value: string | number; label: string }[] = []
+
+export const workStatusOption = [
+  { value: 'WAITING', label: '대기' },
+  { value: 'ONSITE', label: '현장' },
+  { value: 'WORKING', label: '작업' },
+  { value: 'RESERVED', label: '예약' }
+]
+
+// 공통
+export const PageSizeOptions = [1, 10, 30, 50]

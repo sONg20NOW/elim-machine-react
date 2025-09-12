@@ -91,7 +91,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           <MenuItem href={`/${locale}/machine`} icon={<i className='tabler-settings' />}>
             {'기계설비현장'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-users' />}>
+          <MenuItem href={`/${locale}/machine/engineer`} icon={<i className='tabler-users' />}>
             {'설비인력'}
           </MenuItem>
           <MenuItem href={``} icon={<i className='tabler-clipboard' />}>
@@ -121,7 +121,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           </MenuItem>
         </MenuSection>
         <MenuSection label='라이선스'>
-          <MenuItem href={``} icon={<i className='tabler-heart-handshake' />}>
+          <MenuItem href={`/${locale}/license`} icon={<i className='tabler-heart-handshake' />}>
             {'라이선스관리'}
           </MenuItem>
         </MenuSection>

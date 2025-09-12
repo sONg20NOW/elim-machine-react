@@ -17,16 +17,8 @@ const nextConfig: NextConfig = {
         permanent: true,
         locale: false
       },
-
-      // public 폴더에서는 변환 x
       {
-        source: '/public/:path*',
-        destination: '/public/:path*',
-        permanent: true,
-        locale: false
-      },
-      {
-        source: '/:path((?!en|fr|ar|front-pages|favicon\\.ico|api).*)',
+        source: '/:path((?!en|fr|ar|front-pages|favicon\\.ico|api|images|fonts|_next|public).*)',
         destination: '/en/:path',
         permanent: true,
         locale: false

@@ -3,7 +3,7 @@
 // React Imports
 import { useEffect, useState, useCallback } from 'react'
 
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
@@ -11,7 +11,7 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import { toast } from 'react-toastify'
+import axios from 'axios'
 
 // Component Imports
 import 'dayjs/locale/ko'
@@ -27,7 +27,8 @@ import CustomTextField from '@core/components/mui/TextField'
 import type {
   MachineEngineerOptionListResponseDtoType,
   MachineFilterType,
-  machineProjectPageDtoType
+  MachineProjectPageDtoType,
+  successResponseDtoType
 } from '@/app/_type/types'
 import { HEADERS, createInitialSorting } from '@/app/_schema/TableHeader'
 import TableFilters from '@/app/_components/table/TableFilters'
@@ -35,25 +36,20 @@ import { MACHINE_FILTER_INFO } from '@/app/_schema/filter/MachineFilterInfo'
 import SearchBar from '@/app/_components/SearchBar'
 import BasicTable from '@/app/_components/table/BasicTable'
 import AddMachineProjectModal from './_components/addMachineProjectModal'
+import { PageSizeOptions } from '@/app/_constants/options'
+import { MachineInitialFilters } from '@/app/_constants/MachineProjectSeed'
+import { handleApiError } from '@/utils/errorHandler'
 
 // datepicker 한글화
 dayjs.locale('ko')
-
-// 초기 필터링 값
-const initialFilters: MachineFilterType = {
-  projectStatus: '',
-  companyName: '',
-  engineerName: '' // ← engineerNames → engineerName
-}
-
-// 페이지 당 행수 선택 옵션
-const PageSizeOptions = [1, 10, 30, 50]
 
 // 현장점검 기간 버튼 옵션
 const periodOptions = [1, 3, 6]
 
 export default function MachinePage() {
-  const [data, setData] = useState<machineProjectPageDtoType[]>([])
+  const router = useRouter()
+
+  const [data, setData] = useState<MachineProjectPageDtoType[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
 
@@ -70,33 +66,31 @@ export default function MachinePage() {
 
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
 
-  const [filters, setFilters] = useState(initialFilters)
+  const [filters, setFilters] = useState(MachineInitialFilters)
 
   const [fieldBeginDate, setFieldBeginDate] = useState<Dayjs | null>(null)
   const [fieldEndDate, setFieldEndDate] = useState<Dayjs | null>(null)
 
   const [dateTrigger, setDateTrigger] = useState(true)
 
-  const [sorting, setSorting] = useState(createInitialSorting<machineProjectPageDtoType>)
+  const [sorting, setSorting] = useState(createInitialSorting<MachineProjectPageDtoType>)
 
   const [engineers, setEngineers] = useState<string[]>()
 
-  const fetchEngineers = useCallback(async () => {
+  const getEngineers = useCallback(async () => {
     setLoading(true)
     setError(false)
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`, {
-        method: 'GET'
-      })
+      const response = await axios.get<{ data: MachineEngineerOptionListResponseDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`
+      )
 
-      const result = await response.json()
-      const data = result?.data as MachineEngineerOptionListResponseDtoType
+      const data = response.data.data
 
-      // 데이터 반영하여 상태 변경
       setEngineers(data.engineers.map(engineer => engineer.engineerName))
     } catch (error) {
-      toast.error(`Failed to fetch filtered data: ${error}`)
+      handleApiError(error, '엔지니어 옵션을 불러오는 데 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
@@ -104,8 +98,8 @@ export default function MachinePage() {
   }, [])
 
   useEffect(() => {
-    fetchEngineers()
-  }, [fetchEngineers])
+    getEngineers()
+  }, [getEngineers])
 
   const MACHINE_FILTER_INFO_WITH_ENGINEERS = {
     ...MACHINE_FILTER_INFO,
@@ -125,7 +119,7 @@ export default function MachinePage() {
   const queryParams = new URLSearchParams()
 
   // 기계설비현장 리스트 호출 API 함수
-  const fetchFilteredData = useCallback(async () => {
+  const getFilteredData = useCallback(async () => {
     setLoading(true)
     setError(false)
 
@@ -154,21 +148,18 @@ export default function MachinePage() {
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects?${queryParams.toString()}`,
-        {
-          method: 'GET'
-        }
-      )
+      const response = await axios.get<{
+        data: successResponseDtoType<MachineProjectPageDtoType[]>
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects?${queryParams.toString()}`)
 
-      const result = await response.json()
+      const result = response.data.data
 
-      setData(result?.data.content ?? [])
-      setPage(result?.data.page.number)
-      setSize(result?.data.page.size)
-      setTotalCount(result?.data.page.totalElements)
+      setData(result.content ?? [])
+      setPage(result.page.number)
+      setSize(result.page.size)
+      setTotalCount(result.page.totalElements)
     } catch (error) {
-      toast.error(`Failed to fetch filtered data: ${error}`)
+      handleApiError(error, '필터링된 데이터를 불러오는 데 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
@@ -177,24 +168,17 @@ export default function MachinePage() {
 
   // 필터 변경 시 API 호출
   useEffect(() => {
-    fetchFilteredData()
-  }, [filters, fetchFilteredData])
+    getFilteredData()
+  }, [filters, getFilteredData])
 
   // 기계설비현장 선택 핸들러
-  const handleMachineProjectClick = async (machineProject: machineProjectPageDtoType) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProject?.machineProjectId}`,
-      {
-        method: 'GET'
-      }
-    )
+  const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
+    if (!machineProject?.machineProjectId) return
 
-    const data = await response.json()
-
-    if (response.ok) {
-      redirect(`/machine/${machineProject?.machineProjectId}`)
-    } else {
-      toast.error(data.message)
+    try {
+      router.push(`/machine/${machineProject.machineProjectId}`)
+    } catch (error) {
+      handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
     }
   }
 
@@ -216,7 +200,7 @@ export default function MachinePage() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ko'>
       <Card>
-        <CardHeader title='기계설비현장' className='pbe-4' />
+        <CardHeader title={`기계설비현장 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
         <TableFilters<MachineFilterType>
           filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS}
@@ -229,8 +213,8 @@ export default function MachinePage() {
         <Button
           startIcon={<i className='tabler-reload' />}
           onClick={() => {
-            setFilters(initialFilters)
-            setSorting(createInitialSorting<machineProjectPageDtoType>)
+            setFilters(MachineInitialFilters)
+            setSorting(createInitialSorting<MachineProjectPageDtoType>)
           }}
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
@@ -334,7 +318,7 @@ export default function MachinePage() {
         </div>
 
         {/* 테이블 */}
-        <BasicTable<machineProjectPageDtoType>
+        <BasicTable<MachineProjectPageDtoType>
           header={HEADERS.machine}
           data={data}
           handleRowClick={handleMachineProjectClick}
@@ -379,7 +363,7 @@ export default function MachinePage() {
         <AddMachineProjectModal
           open={addMachineModalOpen}
           setOpen={setAddMachineModalOpen}
-          handlePageChange={() => setPage(0)}
+          reloadPage={() => getFilteredData()}
         />
       )}
     </LocalizationProvider>

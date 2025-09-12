@@ -16,7 +16,7 @@ export default function SearchBar({ placeholder, onClick, disabled }: SearchBarP
   return (
     <div className='relative'>
       <Input
-        id='name_search_input'
+        id={placeholder}
         onKeyDown={(e: any) => {
           if (e.key === 'Enter') {
             onClick(e.target.value)
@@ -46,9 +46,9 @@ export default function SearchBar({ placeholder, onClick, disabled }: SearchBarP
       />
       <IconButton
         onClick={() => {
-          const nameSearchInput = document.getElementById('name_search_input') as HTMLInputElement
+          const searchInput = document.getElementById(placeholder) as HTMLInputElement
 
-          onClick(nameSearchInput?.value ?? '')
+          onClick(searchInput?.value ?? '')
         }}
         disabled={disabled}
         color='primary'

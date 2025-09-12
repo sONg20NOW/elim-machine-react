@@ -9,34 +9,39 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import { toast } from 'react-toastify'
-
-// Component Imports
 import axios from 'axios'
 
-import TableFilters from '../../../_components/table/TableFilters'
+// Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
 import type {
-  memberDetailDtoType,
-  MemberFilterType,
-  memberPageDtoType,
+  EngineerFilterType,
+  EngineerResponseDtoType,
+  MachineEngineerPageResponseDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
 import { createInitialSorting, HEADERS } from '@/app/_schema/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
-import { MEMBER_FILTER_INFO } from '@/app/_schema/filter/MemberFilterInfo'
+import TableFilters from '@/app/_components/table/TableFilters'
 import { PageSizeOptions } from '@/app/_constants/options'
-import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
+import { EngineerInitialFilters } from '@/app/_constants/EngineerSeed'
+import { ENGINEER_FILTER_INFO } from '@/app/_schema/filter/EngineerFilterInfo'
 import { handleApiError } from '@/utils/errorHandler'
 
-export default function MemberPage() {
+/**
+ * @type T
+ * MachineEngineerPageResponseDtoType
+ * @type K
+ * MachineDetialResponseDtoType
+ * @returns
+ */
+export default function EngineerPage() {
   // 데이터 리스트
-  const [data, setData] = useState<memberPageDtoType[]>([])
+  const [data, setData] = useState<MachineEngineerPageResponseDtoType[]>([])
 
   // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
@@ -53,8 +58,8 @@ export default function MemberPage() {
   // 이름 검색 인풋
   const [name, setName] = useState('')
 
-  // 지역 검색 인풋
-  const [region, setRegion] = useState('')
+  // 현장명 검색 인풋
+  const [projectName, setProjectName] = useState('')
 
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
@@ -63,13 +68,15 @@ export default function MemberPage() {
   // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<memberDetailDtoType | null>(null)
+
+  // TODO restrict type
+  const [selectedUser, setSelectedUser] = useState<EngineerResponseDtoType | null>(null)
 
   // 필터 상태 - 컬럼에 맞게 수정
-  const [filters, setFilters] = useState(MemeberInitialFilters)
+  const [filters, setFilters] = useState(EngineerInitialFilters)
 
   // 정렬 상태
-  const [sorting, setSorting] = useState(createInitialSorting<memberPageDtoType>)
+  const [sorting, setSorting] = useState(createInitialSorting<MachineEngineerPageResponseDtoType>)
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
@@ -82,7 +89,7 @@ export default function MemberPage() {
     try {
       // 필터링
       Object.keys(filters).forEach(prop => {
-        const key = prop as keyof MemberFilterType
+        const key = prop as keyof typeof filters
 
         filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
       })
@@ -93,16 +100,16 @@ export default function MemberPage() {
       // 이름 검색
       name ? queryParams.set('name', name) : queryParams.delete('name')
 
-      // 지역 검색
-      region ? queryParams.set('region', region) : queryParams.delete('region')
+      // 현장명 검색
+      projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
 
       // 페이지 설정
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
 
       // axios GET 요청
-      const response = await axios.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members?${queryParams.toString()}`
+      const response = await axios.get<{ data: successResponseDtoType<MachineEngineerPageResponseDtoType[]> }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers?${queryParams.toString()}`
       )
 
       const result = response.data.data
@@ -118,26 +125,26 @@ export default function MemberPage() {
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, size, name, region])
+  }, [filters, sorting, page, size, name, projectName])
 
   // 필터 변경 시 API 호출
   useEffect(() => {
     getFilteredData()
   }, [filters, getFilteredData])
 
-  // 사용자 선택 핸들러
-  const handleUserClick = async (user: memberPageDtoType) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${user?.memberId}`, {
-      method: 'GET'
-    })
+  // 엔지니어 선택 핸들러
+  const handleEngineerClick = async (engineerData: MachineEngineerPageResponseDtoType) => {
+    try {
+      const response = await axios.get<{ data: EngineerResponseDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/${engineerData.engineerId}`
+      )
 
-    const data = await response.json()
+      const engineerInfo = response.data.data
 
-    if (response.ok) {
-      setSelectedUser(data.data)
+      setSelectedUser(engineerInfo)
       setUserDetailModalOpen(true)
-    } else {
-      toast.error(data.message)
+    } catch (error) {
+      handleApiError(error, '엔지니어를 선택하는 데 실패했습니다.')
     }
   }
 
@@ -145,10 +152,10 @@ export default function MemberPage() {
     <>
       <Card>
         {/* 탭 제목 */}
-        <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
+        <CardHeader title={`기계설비 기술자 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        <TableFilters<MemberFilterType>
-          filterInfo={MEMBER_FILTER_INFO}
+        <TableFilters<EngineerFilterType>
+          filterInfo={ENGINEER_FILTER_INFO}
           filters={filters}
           onFiltersChange={setFilters}
           disabled={disabled}
@@ -157,7 +164,11 @@ export default function MemberPage() {
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<i className='tabler-reload' />}
-          onClick={() => setFilters(MemeberInitialFilters)}
+          onClick={() => {
+            setFilters(EngineerInitialFilters)
+            setName('')
+            setProjectName('')
+          }}
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
         >
@@ -174,11 +185,11 @@ export default function MemberPage() {
               }}
               disabled={disabled}
             />
-            {/* 지역으로 검색 */}
+            {/* 현장명으로 검색 */}
             <SearchBar
-              placeholder='지역으로 검색'
-              onClick={region => {
-                setRegion(region)
+              placeholder='현장명으로 검색'
+              onClick={projectName => {
+                setProjectName(projectName)
                 setPage(0)
               }}
               disabled={disabled}
@@ -222,13 +233,14 @@ export default function MemberPage() {
         </div>
 
         {/* 테이블 */}
-        <BasicTable<memberPageDtoType>
-          header={HEADERS.member}
+        <BasicTable<MachineEngineerPageResponseDtoType>
+          headerTextSize={'text-sm'}
+          multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
+          header={HEADERS.engineers}
           data={data}
-          handleRowClick={handleUserClick}
+          handleRowClick={handleEngineerClick}
           page={page}
           pageSize={size}
-          multiException={{ age: ['age', 'genderDescription'] }}
           sorting={sorting}
           setSorting={setSorting}
           loading={loading}
@@ -267,7 +279,7 @@ export default function MemberPage() {
 
       {/* 모달들 */}
       {addUserModalOpen && (
-        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} handlePageChange={() => setPage(0)} />
+        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} reloadPage={() => getFilteredData()} />
       )}
       {userDetailModalOpen && selectedUser && (
         <UserModal

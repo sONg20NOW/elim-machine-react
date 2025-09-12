@@ -14,12 +14,12 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { toast } from 'react-toastify'
 
-import { IconButton } from '@mui/material'
+import axios from 'axios'
 
-import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/DefaultModal'
 import MemberTabContent from './memberTabContent'
 import type { memberDetailDtoType } from '@/app/_type/types'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 type requestRuleBodyType = {
   url: string
@@ -66,7 +66,7 @@ const requestRule: Record<tabType, requestRuleBodyType> = {
 type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  data?: memberDetailDtoType
+  data: memberDetailDtoType
   reloadData: () => void
 }
 
@@ -74,12 +74,12 @@ export const MemberIdContext = createContext<number>(0)
 
 const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
   const [value, setValue] = useState<tabType>('1')
-  const [userData, setUserData] = useState(data ?? initialData)
+  const [userData, setUserData] = useState(data)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
 
   const [isEditing, setIsEditing] = useState(false)
-  const [unsavedUserData, setUnsavedUserData] = useState(data ?? initialData)
+  const [unsavedUserData, setUnsavedUserData] = useState(data)
 
   // 수정할 때마다 unsavedUserData를 userData와 동기화
   useEffect(() => {
@@ -94,7 +94,6 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
 
   const handleDeleteUser = async () => {
     const version = userData.memberBasicResponseDto?.version
-    const memberId = userData.memberBasicResponseDto?.memberId
 
     if (version !== undefined && memberId !== undefined) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
@@ -128,39 +127,39 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
   }
 
   const onSubmitHandler = async () => {
-    // 주민번호에 *이 없을 때만 포함
+    // 주민번호에 *이 있으면 빈 값으로 변경
     if (juminNum && juminNum.includes('*')) {
-      // *이 있으면 주민번호를 빈 값으로 보냄
-      setUserData({ ...userData, memberPrivacyResponseDto: { ...userData.memberPrivacyResponseDto, juminNum: '' } })
+      setUserData({
+        ...userData,
+        memberPrivacyResponseDto: {
+          ...userData.memberPrivacyResponseDto,
+          juminNum: ''
+        }
+      })
     }
 
     try {
-      const response = await fetch(
+      const response = await axios.put<{ data: memberDetailDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${memberId}${requestRule[value].url}`,
+        { ...userData[requestRule[value].dtoKey] },
         {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...userData[requestRule[value].dtoKey] })
+          headers: { 'Content-Type': 'application/json' }
         }
       )
 
-      const result = await response.json()
+      const returnData = response.data.data
 
-      if (response.ok) {
-        const returnData = result.data
-
-        console.log(`${requestRule[value].value} info saved: `, returnData)
-        toast.success(`${requestRule[value].label}가 수정되었습니다.`)
-        setUserData({ ...userData, [requestRule[value].dtoKey]: returnData })
-        setIsEditing(false)
-      } else {
-        toast.error(result.message)
-      }
+      setUserData({
+        ...userData,
+        [requestRule[value].dtoKey]: returnData
+      })
+      console.log(`${requestRule[value].value} info saved: `, returnData)
+      handleSuccess(`${requestRule[value].label}가 수정되었습니다.`)
+      setIsEditing(false)
+      reloadData()
     } catch (error: any) {
-      toast.error(error)
+      handleApiError(error)
     }
-
-    reloadData()
   }
 
   return (
@@ -179,8 +178,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
           ) : (
             <Button
               variant='contained'
-              className='bg-color-primary hover:bg-color-primary-dark text-white'
-              color='secondary'
+              color='primary'
               type='reset'
               onClick={() => {
                 setIsEditing(true)
@@ -192,31 +190,9 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
         }
         modifyButton={
           isEditing && (
-            <IconButton
-              color='secondary'
-              type='reset'
-              onClick={() => {
-                if (existChange) {
-                  setShowAlertModal(true)
-                } else {
-                  setIsEditing(false)
-                }
-
-                console.log('unsaved', unsavedUserData)
-                console.log('userdata', userData)
-                console.log('??', userData === unsavedUserData)
-              }}
-            >
-              <i className='tabler-arrow-narrow-left size-8' />
-            </IconButton>
-          )
-        }
-        secondaryButton={
-          isEditing && (
             <Button
               variant='contained'
-              className='bg-color-warning hover:bg-color-warning-dark text-white'
-              color='secondary'
+              color='error'
               type='reset'
               onClick={() => {
                 setShowDeleteModal(true)
@@ -225,6 +201,11 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
               삭제
             </Button>
           )
+        }
+        secondaryButton={
+          <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
+            취소
+          </Button>
         }
         handleClose={() => setOpen(false)}
       >
@@ -265,7 +246,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
             size='xs'
             open={showDeleteModal}
             setOpen={setShowDeleteModal}
-            title={''}
+            title={'정말 삭제하시겠습니까?'}
             headerDescription='삭제 후에는 되돌리지 못합니다.'
             primaryButton={
               <Button

@@ -4,7 +4,7 @@ import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
-import MultiSelectBox from '@/components/selectbox/MultiSelectBox'
+import MultiSelectBox from '@/app/_components/selectbox/MultiSelectBox'
 
 const PlanContent = ({ projectData, engineerOptions }: any) => {
   const [editData, setEditData] = useState(projectData || {})

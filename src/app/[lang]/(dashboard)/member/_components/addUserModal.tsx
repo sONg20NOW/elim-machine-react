@@ -13,8 +13,8 @@ import { DialogContent, Grid2 } from '@mui/material'
 import DefaultModal from '@/app/_components/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@/app/_type/types'
 import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
-import { MemberInitialData } from '@/app/_schema/seed/MemberInitialData'
-import { InputBox } from '@/components/selectbox/InputBox'
+import { MemberInitialData } from '@/app/_constants/MemberSeed'
+import { InputBox } from '@/app/_components/selectbox/InputBox'
 
 type AddUserModalProps = {
   open: boolean

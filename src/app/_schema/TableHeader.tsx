@@ -1,4 +1,10 @@
-import type { HeaderInfoType, SortInfoType, machineProjectPageDtoType, memberPageDtoType } from '../_type/types'
+import type {
+  HeaderInfoType,
+  MachineEngineerPageResponseDtoType,
+  SortInfoType,
+  MachineProjectPageDtoType,
+  memberPageDtoType
+} from '../_type/types'
 
 export const BROWER_TAB_TITLE = 'ELIM'
 export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
@@ -14,7 +20,7 @@ export const HEADERS = {
     companyName: { label: '소속', canSort: true },
     officeDepartmentName: { label: '부서', canSort: true },
     officePositionDescription: { label: '직위', canSort: false },
-    age: { label: '나이', canSort: true },
+    age: { label: '나이', canSort: true }, //gender도 함께 표시
     email: { label: '이메일', canSort: true },
     phoneNumber: { label: '휴대폰', canSort: false },
     joinDate: { label: '입사일', canSort: true },
@@ -33,8 +39,22 @@ export const HEADERS = {
     engineerNames: { label: '참여기술진', canSort: false },
     grossArea: { label: '연면적(㎡)', canSort: true },
     tel: { label: '전화번호', canSort: false }
-  } as Record<keyof machineProjectPageDtoType, HeaderInfoType>,
-  engineers: {}
+  } as Record<keyof MachineProjectPageDtoType, HeaderInfoType>,
+  engineers: {
+    companyName: { label: '회사명', canSort: false },
+    gradeDescription: { label: '등급', canSort: true },
+    name: { label: '이름', canSort: true },
+    officeDepartmentName: { label: '부서', canSort: false },
+    officePositionDescription: { label: '직급', canSort: false },
+    engineerLicenseNum: { label: '수첩발급번호', canSort: false },
+    email: { label: '이메일', canSort: false },
+    phoneNumber: { label: '휴대폰', canSort: false },
+    workStatusDescription: { label: '상태', canSort: false },
+    projectCnt: { label: '현장수', canSort: false },
+    latestProjectName: { label: '마지막현장', canSort: false },
+    latestProjectBeginDate: { label: '투입기간', canSort: false }, // latestProjectEndDate도 함께 표시
+    remark: { label: '비고', canSort: false }
+  } as Record<keyof MachineEngineerPageResponseDtoType, HeaderInfoType>
 }
 
 // 초기 정렬 생성
