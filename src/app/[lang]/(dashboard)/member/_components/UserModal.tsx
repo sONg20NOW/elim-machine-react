@@ -96,24 +96,20 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
     const version = userData.memberBasicResponseDto?.version
 
     if (version !== undefined && memberId !== undefined) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ memberDeleteList: [{ memberId: memberId, version: version }] })
-      })
+      try {
+        await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
+          // @ts-ignore
+          data: { memberDeleteRequestDtos: [{ memberId: memberId, version: version }] }
+        })
 
-      const result = await response.json()
-
-      if (response.ok) {
         console.log(`memberId: ${memberId} user is deleted successfully`)
-        toast.info('해당 직원이 삭제되었습니다.')
-      } else {
-        throw new Error(result.message)
+        handleSuccess('해당 직원이 삭제되었습니다.')
+        setOpen(false)
+      } catch (error) {
+        handleApiError(error)
       }
-
-      setOpen(false)
     } else {
-      throw new Error('delete fail!')
+      handleApiError(version, '버전 혹은 memberId가 없습니다.')
     }
   }
 
@@ -141,10 +137,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
     try {
       const response = await axios.put<{ data: memberDetailDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${memberId}${requestRule[value].url}`,
-        { ...userData[requestRule[value].dtoKey] },
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
+        { ...userData[requestRule[value].dtoKey] }
       )
 
       const returnData = response.data.data
@@ -203,7 +196,22 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
           )
         }
         secondaryButton={
-          <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
+          <Button
+            variant='tonal'
+            color='secondary'
+            type='reset'
+            onClick={() => {
+              if (isEditing) {
+                if (existChange) {
+                  setShowAlertModal(true)
+                } else {
+                  setIsEditing(false)
+                }
+              } else {
+                setOpen(false)
+              }
+            }}
+          >
             취소
           </Button>
         }

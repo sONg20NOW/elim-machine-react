@@ -9,7 +9,27 @@ import TableRow from '@mui/material/TableRow'
 
 import classNames from 'classnames'
 
+import { Checkbox } from '@mui/material'
+
 import type { HeaderType, SortInfoType } from '@/app/_type/types'
+
+interface BasicTableProps<T> {
+  header: HeaderType<T>
+  data: T[]
+  handleRowClick: (row: T) => Promise<void>
+  page: number
+  pageSize: number
+  sorting: SortInfoType<T>
+  setSorting: Dispatch<SetStateAction<SortInfoType<T>>>
+  multiException?: Partial<Record<keyof T, Array<keyof T>>>
+  listException?: Array<keyof T>
+  loading: boolean
+  error: boolean
+  showCheckBox?: boolean
+  isChecked?: (item: T) => boolean
+  handleCheckItem?: (item: T) => void
+  handleCheckAllItems?: (checked: boolean) => void
+}
 
 /**
  * @param header
@@ -26,7 +46,6 @@ import type { HeaderType, SortInfoType } from '@/app/_type/types'
  * @returns
  */
 export default function BasicTable<T extends Record<keyof T, string | number | string[]>>({
-  headerTextSize,
   header,
   data,
   handleRowClick,
@@ -37,21 +56,12 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   multiException,
   listException,
   loading,
-  error
-}: {
-  headerTextSize?: string
-  header: HeaderType<T>
-  data: T[]
-  handleRowClick: (row: T) => Promise<void>
-  page: number
-  pageSize: number
-  sorting: SortInfoType<T>
-  setSorting: Dispatch<SetStateAction<SortInfoType<T>>>
-  multiException?: Partial<Record<keyof T, Array<keyof T>>>
-  listException?: Array<keyof T>
-  loading: boolean
-  error: boolean
-}) {
+  error,
+  showCheckBox = false,
+  isChecked,
+  handleCheckItem,
+  handleCheckAllItems
+}: BasicTableProps<T>) {
   function toggleOrder(key: string) {
     // 로딩이 끝나고 에러가 없으면 not disabled
     if (key !== sorting.target) {
@@ -78,11 +88,18 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
       <Table sx={{ minWidth: 650 }} aria-label='simple table' className='relative'>
         <TableHead className='select-none'>
           <TableRow>
-            <TableCell
-              align='center'
-              key='order'
-              className={`font-medium ${!headerTextSize ? 'text-base' : headerTextSize}`}
-            >
+            {showCheckBox && handleCheckAllItems && (
+              <TableCell padding='checkbox'>
+                <Checkbox
+                  onChange={e => {
+                    const checked = e.target.checked
+
+                    handleCheckAllItems(checked)
+                  }}
+                />
+              </TableCell>
+            )}
+            <TableCell align='center' key='order' className='font-medium text-base'>
               번호
             </TableCell>
             {Object.keys(header).map(key => {
@@ -92,7 +109,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 <TableCell
                   key={key}
                   align='center'
-                  className={classNames(`relative ${!headerTextSize ? 'text-base' : headerTextSize}`, {
+                  className={classNames('relative text-base', {
                     'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
                     'font-bold select-none': header[k].canSort,
                     'font-medium': !header[k].canSort
@@ -115,58 +132,72 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((info, index) => (
-            <TableRow
-              hover={true}
-              onClick={() => handleRowClick(info)}
-              key={index}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              className='cursor-pointer'
-            >
-              <TableCell align='center' key={'order'}>
-                {page * pageSize + index + 1}
-              </TableCell>
-              {Object.keys(header).map(property => {
-                const key = property as keyof T
+          {data.map((info, index) => {
+            return (
+              <TableRow
+                hover={true}
+                key={index}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                className='cursor-pointer'
+                onClick={() => {
+                  if (!showCheckBox) {
+                    handleRowClick(info)
+                  } else if (handleCheckItem) {
+                    handleCheckItem(info)
+                  }
+                }}
+              >
+                {showCheckBox && isChecked && (
+                  <TableCell padding='checkbox'>
+                    <Checkbox checked={isChecked(info)} />
+                  </TableCell>
+                )}
+                <TableCell align='center' key={'order'}>
+                  {page * pageSize + index + 1}
+                </TableCell>
 
-                // header 속성에 포함되지 않다면 출력 x & 예외 출력
-                if (!Object.keys(header).includes(property)) return null
-                else if (multiException && Object.keys(multiException).includes(property)) {
-                  const key = property as keyof typeof multiException
+                {Object.keys(header).map(property => {
+                  const key = property as keyof T
 
-                  const pieces = multiException[key]?.map(value =>
-                    value === 'latestProjectEndDate' ? info[value]?.toString().slice(5) : info[value]
-                  )
+                  // header 속성에 포함되지 않다면 출력 x & 예외 출력
+                  if (!Object.keys(header).includes(property)) return null
+                  else if (multiException && Object.keys(multiException).includes(property)) {
+                    const key = property as keyof typeof multiException
 
-                  return (
-                    <TableCell key={key.toString()} align='center'>
-                      {pieces?.join(key === 'age' ? '  ' : ' ~ ')}
-                    </TableCell>
-                  )
-                } else if (listException && listException.includes(key)) {
-                  const list = info[key] as string[]
+                    const pieces = multiException[key]?.map(value =>
+                      value === 'latestProjectEndDate' ? info[value]?.toString().slice(5) : info[value]
+                    )
 
-                  // 세 개 이상일 경우 외 ... 로 처리
-                  return (
-                    <TableCell key={key.toString()} align='center'>
-                      {list.length < 3 ? list.join(', ') : list.slice(0, 2).join(', ').concat(' 외 ...')}
-                    </TableCell>
-                  )
-                } else {
-                  return (
-                    <TableCell key={key.toString()} align='center'>
-                      {key === 'remark'
-                        ? info[key]
-                            ?.toString()
-                            .slice(0, 3)
-                            .concat(info[key]?.toString().length > 3 ? '..' : '')
-                        : info[key]}
-                    </TableCell>
-                  )
-                }
-              })}
-            </TableRow>
-          ))}
+                    return (
+                      <TableCell key={key.toString()} align='center'>
+                        {pieces?.join(key === 'age' ? '  ' : ' ~ ')}
+                      </TableCell>
+                    )
+                  } else if (listException && listException.includes(key)) {
+                    const list = info[key] as string[]
+
+                    // 세 개 이상일 경우 외 ... 로 처리
+                    return (
+                      <TableCell key={key.toString()} align='center'>
+                        {list.length < 3 ? list.join(', ') : list.slice(0, 2).join(', ').concat(' 외 ...')}
+                      </TableCell>
+                    )
+                  } else {
+                    return (
+                      <TableCell key={key.toString()} align='center'>
+                        {key === 'remark'
+                          ? info[key]
+                              ?.toString()
+                              .slice(0, 3)
+                              .concat(info[key]?.toString().length > 3 ? '..' : '')
+                          : info[key]}
+                      </TableCell>
+                    )
+                  }
+                })}
+              </TableRow>
+            )
+          })}
         </TableBody>
 
         {/* 전달된 데이터가 없을 때 */}

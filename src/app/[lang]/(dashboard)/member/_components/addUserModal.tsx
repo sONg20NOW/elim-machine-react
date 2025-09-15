@@ -6,15 +6,16 @@ import { useState } from 'react'
 // MUI Imports
 import Button from '@mui/material/Button'
 
-import { toast } from 'react-toastify'
-
 import { DialogContent, Grid2 } from '@mui/material'
+
+import axios from 'axios'
 
 import DefaultModal from '@/app/_components/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@/app/_type/types'
 import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
 import { MemberInitialData } from '@/app/_constants/MemberSeed'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 type AddUserModalProps = {
   open: boolean
@@ -27,38 +28,18 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
 
   const onSubmitHandler = async () => {
     try {
-      // 비고란을 제외한 칸이 하나라도 안 채워져있으면 경고 문구 표시 (basic만)
-      const NotAllFull = Object.keys(userData).some(key => {
-        if (key === 'note') {
-          return false
-        }
+      const response = await axios.post<{ data: MemberCreateRequestDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`,
+        userData
+      )
 
-        return !userData[key as keyof typeof userData]
-      })
+      console.log('new member added', response.data.data)
+      handleSuccess('새 직원이 추가되었습니다.')
 
-      if (NotAllFull) {
-        throw new Error(`비고를 제외한 모든 정보를 입력해주세요.`)
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        console.log('new member added', result.data)
-        toast.success('새 직원이 추가되었습니다.')
-
-        handlePageChange()
-        setOpen(false)
-      } else {
-        throw new Error(`${result.statusCode}:\n${result.message}`)
-      }
+      handlePageChange()
+      setOpen(false)
     } catch (error: any) {
-      toast.error(error.toString())
+      handleApiError(error)
     }
   }
 
@@ -66,10 +47,10 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
     <DefaultModal
       open={open}
       setOpen={setOpen}
-      title='사용자 정보 추가'
+      title='신규 직원 추가'
       primaryButton={
         <Button variant='contained' onClick={onSubmitHandler} type='submit'>
-          추가하기
+          추가
         </Button>
       }
       secondaryButton={

@@ -24,6 +24,12 @@ export type machineInputType = Partial<Record<keyof machineProjectResponseDtoTyp
 // machine-projects/[id]/schedule_tab 인풋 정보 형식
 export type machineScheduleInputType = Partial<Record<keyof MachineProjectScheduleAndEngineerDtoType, InputFieldType>>
 
+// engineers/[id] 인풋 정보 형식
+export type engineerInputType = Partial<Record<keyof EngineerResponseDtoType, InputFieldType>>
+
+// licenses/[id] 인풋 정보 형식
+export type licenseInputType = Partial<Record<keyof LicenseResponseDtoType, InputFieldType>>
+
 // -------- 직원관리 --------
 // POST api/members (필수: role)
 export interface MemberCreateRequestDtoType {
@@ -38,6 +44,7 @@ export interface MemberCreateRequestDtoType {
 // GET api/members (리스트)
 export type memberPageDtoType = {
   memberId: number
+  version: number
   roleDescription: string
   name: string
   staffNum: string
@@ -175,6 +182,7 @@ export interface MachineProjectCreateRequestDtoType {
 // GET api/machine-projects (리스트)
 export interface MachineProjectPageDtoType {
   machineProjectId: number
+  version: number
   projectStatusDescription: string
   region: string
   machineProjectName: string
@@ -287,6 +295,7 @@ export interface MachineEngineerOptionResponseDtoType {
 // GET api/engineers
 export interface MachineEngineerPageResponseDtoType {
   engineerId: number
+  version: number
   companyName: string
   name: string
   officeDepartmentName: string
@@ -338,6 +347,74 @@ export interface EngineerFilterType {
   companyName: string
   grade: string
   workStatus: string
+}
+
+// ----------- 라이선스 -----------
+// api/licenses 라이선스 목록 조회 응답 DTO
+export interface LicensePageResponseDtoType {
+  licenseId: number
+  version: number
+  region: string
+  bizno: string
+  companyName: string
+  ceoName: string
+  memberCount: number
+  machineEngineerCount: number
+  safetyEngineerCount: number
+  managerName: string
+  managerEmail: string
+  managerPhoneNumber: string
+  tel: string
+  contractDate: string
+  expireDate: string
+}
+
+// GET api/licenses/[licenseId] : 라이선스 단건 조회 응답 DTO
+// POST api/licneses : 라이선스 등록
+export interface LicenseResponseDtoType {
+  id: number
+  version: number
+  companyName: string
+  companyNameAbbr: string
+  bizno: string
+  ceoName: string
+  managerName: string
+  managerPhoneNumber: string
+  managerEmail: string
+  taxEmail: string
+  homepageAddr: string
+  tel: string
+  fax: string
+  roadAddress: string
+  jibunAddress: string
+  detailAddress: string
+  businessType: string
+  businessCategory: string
+  contractDate: string
+  expireDate: string
+  remark: string
+}
+
+export interface LicenseCreateRequestDto {
+  companyName: string
+  companyNameAbbr: string
+  bizno: string
+  ceoName: string
+  managerName: string
+  managerPhoneNumber: string
+  managerEmail: string
+  taxEmail: string
+  homepageAddr: string
+  tel: string
+  fax: string
+  roadAddress: string
+  jibunAddress: string
+  detailAddress: string
+  businessType: string
+  businessCategory: string
+  contractDate: string
+  expireDate: string
+  remark: string
 }
 
 // ----------- 공통 -----------

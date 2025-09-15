@@ -56,26 +56,12 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
     getMemberList()
   }, [getMemberList])
 
-  // 비고란을 제외한 칸이 하나라도 안 채워져있으면 경고
-  const NotAllFull = Object.keys(userData).some(key => {
-    if (key === 'remark') return false
-
-    return !userData[key as keyof typeof userData]
-  })
-
   // 추가 핸들러
   const onSubmitHandler = async () => {
     try {
-      if (NotAllFull) {
-        throw new Error()
-      }
-
       const response = await axios.post<{ data: MachineEngineerCreateRequestDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers`,
-        userData,
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
+        userData
       )
 
       console.log('new member added', response.data.data)
@@ -84,11 +70,7 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
       reloadPage()
       setOpen(false)
     } catch (error: any) {
-      if (NotAllFull) {
-        handleApiError(error, '비고를 제외한 모든 정보를 입력해주세요.')
-      } else {
-        handleApiError(error)
-      }
+      handleApiError(error)
     }
   }
 
@@ -97,10 +79,10 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
       size='sm'
       open={open}
       setOpen={setOpen}
-      title={'설비인력 추가'}
+      title={'신규 설비인력 추가'}
       primaryButton={
         <Button variant='contained' onClick={() => onSubmitHandler()} type='submit'>
-          저장
+          추가
         </Button>
       }
       secondaryButton={
@@ -178,7 +160,7 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
           </Table>
         </TableContainer>
         <div className='flex flex-col gap-1'>
-          <span className='font-extrabold'>{ENGINEER_INPUT_INFO.remark.label}</span>
+          <span className='font-extrabold'>{ENGINEER_INPUT_INFO.remark?.label}</span>
           <InputBox
             tabInfos={ENGINEER_INPUT_INFO}
             tabFieldKey={'remark'}

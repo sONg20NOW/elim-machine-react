@@ -77,6 +77,10 @@ export default function MachinePage() {
 
   const [engineers, setEngineers] = useState<string[]>()
 
+  // 선택 삭제 기능 관련
+  // const [showCheckBox, setShowCheckBox] = useState(false)
+  // const [checked, setChecked] = useState<Set<number>>(new Set([]))
+
   const getEngineers = useCallback(async () => {
     setLoading(true)
     setError(false)
@@ -197,6 +201,69 @@ export default function MachinePage() {
     ToggleDate()
   }
 
+  // // 설비현장 체크 핸들러 (다중선택)
+  // const handleCheckMachineProject = (user: MachineProjectPageDtoType) => {
+  //   const machineProjectId = user.machineProjectId
+  //   const checked = isChecked(user)
+
+  //   if (!checked) {
+  //     setChecked(prev => {
+  //       const newSet = new Set(prev)
+
+  //       newSet.add(machineProjectId)
+
+  //       return newSet
+  //     })
+  //   } else {
+  //     setChecked(prev => {
+  //       const newSet = new Set(prev)
+
+  //       newSet.delete(machineProjectId)
+
+  //       return newSet
+  //     })
+  //   }
+  // }
+
+  // const handleCheckAllMachineProjects = (checked: boolean) => {
+  //   if (checked) {
+  //     setChecked(prev => {
+  //       const newSet = new Set(prev)
+
+  //       data.forEach(machineProject => newSet.add(machineProject.machineProjectId))
+
+  //       return newSet
+  //     })
+  //   } else {
+  //     setChecked(new Set<number>())
+  //   }
+  // }
+
+  // const isChecked = (machineProject: MachineProjectPageDtoType) => {
+  //   return checked.has(machineProject.machineProjectId)
+  // }
+
+  // // 여러 프로젝트 한번에 삭제
+  // async function handleDeleteMachineProjects() {
+  //   try {
+  //     const list = Array.from(checked).map(machineProjectId => {
+  //       return {
+  //         machineProjectId: machineProjectId,
+  //         version: data.find(machineProject => machineProject.machineProjectId === machineProjectId)!.version
+  //       }
+  //     })
+
+  //     await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
+  //       //@ts-ignore
+  //       data: { memberDeleteRequestDtos: list }
+  //     })
+
+  //     handleSuccess('선택된 직원들이 성공적으로 삭제되었습니다.')
+  //   } catch (error) {
+  //     handleApiError(error)
+  //   }
+  // }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ko'>
       <Card>
@@ -284,6 +351,28 @@ export default function MachinePage() {
             </div>
           </div>
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+            {/* 한번에 삭제
+            {!showCheckBox ? (
+              <Button variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+                선택 삭제
+              </Button>
+            ) : (
+              <div className='flex gap-1'>
+                <Button variant='contained' color='error' onClick={() => handleDeleteMachineProjects()}>
+                  {`(${checked.size}) 삭제`}
+                </Button>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  onClick={() => {
+                    setShowCheckBox(prev => !prev)
+                    handleCheckAllMachineProjects(false)
+                  }}
+                >
+                  취소
+                </Button>
+              </div>
+            )} */}
             <div className='flex gap-3 itmes-center'>
               {/* 페이지당 행수 */}
               <span className='grid place-items-center'>페이지당 행 수 </span>
@@ -329,6 +418,11 @@ export default function MachinePage() {
           loading={loading}
           error={error}
           listException={['engineerNames']}
+
+          // showCheckBox={showCheckBox}
+          // isChecked={isChecked}
+          // handleCheckItem={handleCheckMachineProject}
+          // handleCheckAllItems={handleCheckAllMachineProjects}
         />
 
         <TablePagination

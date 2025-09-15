@@ -3,7 +3,8 @@ import type {
   MachineEngineerPageResponseDtoType,
   SortInfoType,
   MachineProjectPageDtoType,
-  memberPageDtoType
+  memberPageDtoType,
+  LicensePageResponseDtoType
 } from '../_type/types'
 
 export const BROWER_TAB_TITLE = 'ELIM'
@@ -54,7 +55,22 @@ export const HEADERS = {
     latestProjectName: { label: '마지막현장', canSort: false },
     latestProjectBeginDate: { label: '투입기간', canSort: false }, // latestProjectEndDate도 함께 표시
     remark: { label: '비고', canSort: false }
-  } as Record<keyof MachineEngineerPageResponseDtoType, HeaderInfoType>
+  } as Record<keyof MachineEngineerPageResponseDtoType, HeaderInfoType>,
+  licenses: {
+    region: { label: '지역', canSort: false },
+    bizno: { label: '사업자번호', canSort: false },
+    companyName: { label: '업체명', canSort: false },
+    ceoName: { label: '대표자명', canSort: false },
+    memberCount: { label: '직원', canSort: true },
+    machineEngineerCount: { label: '기계설비', canSort: true },
+    safetyEngineerCount: { label: '안전진단', canSort: true },
+    managerName: { label: '담당자명', canSort: false },
+    managerEmail: { label: '이메일', canSort: false },
+    managerPhoneNumber: { label: '휴대폰', canSort: false },
+    tel: { label: '전화번호', canSort: false },
+    contractDate: { label: '계약일', canSort: false },
+    expireDate: { label: '만료일', canSort: false }
+  } as Record<keyof LicensePageResponseDtoType, HeaderInfoType>
 }
 
 // 초기 정렬 생성

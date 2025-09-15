@@ -94,8 +94,13 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           <MenuItem href={`/${locale}/machine/engineer`} icon={<i className='tabler-users' />}>
             {'설비인력'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-clipboard' />}>
+          <MenuItem href={`/${locale}/machine/template`} icon={<i className='tabler-clipboard' />}>
             {'양식관리'}
+          </MenuItem>
+        </MenuSection>
+        <MenuSection label='안전진단전검'>
+          <MenuItem href={`/${locale}/safety`} icon={<i className='tabler-shield' />}>
+            {'안전진단현장'}
           </MenuItem>
         </MenuSection>
         <MenuSection label='문의'>

@@ -41,12 +41,19 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
   }, [isEditing])
 
   const engineerId = userData.id
+  const version = userData.version
 
   const handleDeleteUser = async () => {
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/${engineerId}`)
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers`, {
+        // @ts-ignore
+        data: { engineerDeleteRequestDtos: [{ engineerId: engineerId, version: version }] }
+      })
 
       handleSuccess('설비인력이 정상적으로 삭제되었습니다.')
+      setShowDeleteModal(false)
+      setOpen(false)
+      reloadData()
     } catch (error) {
       handleApiError(error)
     }
@@ -58,10 +65,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
 
       const response = await axios.put<{ data: EngineerResponseDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/${engineerId}`,
-        userData,
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
+        userData
       )
 
       const returnData = response.data.data
@@ -157,7 +161,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
           </Table>
         </TableContainer>
         <div className='flex flex-col gap-1'>
-          <span className='font-extrabold'>{ENGINEER_INPUT_INFO.remark.label}</span>
+          <span className='font-extrabold'>{ENGINEER_INPUT_INFO.remark?.label}</span>
           {isEditing ? (
             <InputBox
               tabInfos={ENGINEER_INPUT_INFO}

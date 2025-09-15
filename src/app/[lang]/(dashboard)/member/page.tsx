@@ -32,7 +32,7 @@ import SearchBar from '@/app/_components/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_schema/filter/MemberFilterInfo'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
-import { handleApiError } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 export default function MemberPage() {
   // 데이터 리스트
@@ -70,6 +70,10 @@ export default function MemberPage() {
 
   // 정렬 상태
   const [sorting, setSorting] = useState(createInitialSorting<memberPageDtoType>)
+
+  // 선택 삭제 기능 관련
+  const [showCheckBox, setShowCheckBox] = useState(false)
+  const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
@@ -125,7 +129,7 @@ export default function MemberPage() {
     getFilteredData()
   }, [filters, getFilteredData])
 
-  // 사용자 선택 핸들러
+  // 사용자 선택 핸들러 (디테일 모달)
   const handleUserClick = async (user: memberPageDtoType) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${user?.memberId}`, {
       method: 'GET'
@@ -138,6 +142,66 @@ export default function MemberPage() {
       setUserDetailModalOpen(true)
     } else {
       toast.error(data.message)
+    }
+  }
+
+  // 사용자 체크 핸들러 (다중선택)
+  const handleCheckUser = (user: memberPageDtoType) => {
+    const memberId = user.memberId
+    const checked = isChecked(user)
+
+    if (!checked) {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        newSet.add(memberId)
+
+        return newSet
+      })
+    } else {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        newSet.delete(memberId)
+
+        return newSet
+      })
+    }
+  }
+
+  const handleCheckAllUsers = (checked: boolean) => {
+    if (checked) {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        data.forEach(user => newSet.add(user.memberId))
+
+        return newSet
+      })
+    } else {
+      setChecked(new Set<number>())
+    }
+  }
+
+  const isChecked = (user: memberPageDtoType) => {
+    return checked.has(user.memberId)
+  }
+
+  // 여러 유저 한번에 삭제
+  async function handleDeleteUsers() {
+    try {
+      const list = Array.from(checked).map(memberId => {
+        return { memberId: memberId, version: data.find(user => user.memberId === memberId)!.version }
+      })
+
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
+        //@ts-ignore
+        data: { memberDeleteRequestDtos: list }
+      })
+
+      handleSuccess('선택된 직원들이 성공적으로 삭제되었습니다.')
+    } catch (error) {
+      handleApiError(error)
     }
   }
 
@@ -186,6 +250,28 @@ export default function MemberPage() {
           </div>
 
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+            {/* 한번에 삭제 */}
+            {!showCheckBox ? (
+              <Button variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+                선택 삭제
+              </Button>
+            ) : (
+              <div className='flex gap-1'>
+                <Button variant='contained' color='error' onClick={() => handleDeleteUsers()}>
+                  {`(${checked.size}) 삭제`}
+                </Button>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  onClick={() => {
+                    setShowCheckBox(prev => !prev)
+                    handleCheckAllUsers(false)
+                  }}
+                >
+                  취소
+                </Button>
+              </div>
+            )}
             <div className='flex gap-3 itmes-center'>
               {/* 페이지당 행수 */}
               <span className='grid place-items-center'>페이지당 행 수 </span>
@@ -233,6 +319,10 @@ export default function MemberPage() {
           setSorting={setSorting}
           loading={loading}
           error={error}
+          showCheckBox={showCheckBox}
+          isChecked={isChecked}
+          handleCheckItem={handleCheckUser}
+          handleCheckAllItems={handleCheckAllUsers}
         />
 
         {/* 페이지네이션 */}

@@ -30,7 +30,7 @@ import TableFilters from '@/app/_components/table/TableFilters'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { EngineerInitialFilters } from '@/app/_constants/EngineerSeed'
 import { ENGINEER_FILTER_INFO } from '@/app/_schema/filter/EngineerFilterInfo'
-import { handleApiError } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 /**
  * @type T
@@ -77,6 +77,10 @@ export default function EngineerPage() {
 
   // 정렬 상태
   const [sorting, setSorting] = useState(createInitialSorting<MachineEngineerPageResponseDtoType>)
+
+  // 선택 삭제 기능 관련
+  const [showCheckBox, setShowCheckBox] = useState(false)
+  const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
@@ -148,6 +152,69 @@ export default function EngineerPage() {
     }
   }
 
+  // 설비인력 체크 핸들러 (다중선택)
+  const handleCheckEngineer = (engineer: MachineEngineerPageResponseDtoType) => {
+    const engineerId = engineer.engineerId
+    const checked = isChecked(engineer)
+
+    if (!checked) {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        newSet.add(engineerId)
+
+        return newSet
+      })
+    } else {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        newSet.delete(engineerId)
+
+        return newSet
+      })
+    }
+  }
+
+  const handleCheckAllEngineers = (checked: boolean) => {
+    if (checked) {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        data.forEach(engineer => newSet.add(engineer.engineerId))
+
+        return newSet
+      })
+    } else {
+      setChecked(new Set<number>())
+    }
+  }
+
+  const isChecked = (engineer: MachineEngineerPageResponseDtoType) => {
+    return checked.has(engineer.engineerId)
+  }
+
+  // 여러 기술자 한번에 삭제
+  async function handleDeleteEngineers() {
+    try {
+      const list = Array.from(checked).map(engineerId => {
+        return {
+          engineerId: engineerId,
+          version: data.find(engineer => engineer.engineerId === engineerId)!.version
+        }
+      })
+
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers`, {
+        //@ts-ignore
+        data: { engineerDeleteRequestDtos: list }
+      })
+
+      handleSuccess('선택된 기계설비 기술자들이 성공적으로 삭제되었습니다.')
+    } catch (error) {
+      handleApiError(error)
+    }
+  }
+
   return (
     <>
       <Card>
@@ -197,6 +264,28 @@ export default function EngineerPage() {
           </div>
 
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+            {/* 한번에 삭제 */}
+            {!showCheckBox ? (
+              <Button variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+                선택 삭제
+              </Button>
+            ) : (
+              <div className='flex gap-1'>
+                <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
+                  {`(${checked.size}) 삭제`}
+                </Button>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  onClick={() => {
+                    setShowCheckBox(prev => !prev)
+                    handleCheckAllEngineers(false)
+                  }}
+                >
+                  취소
+                </Button>
+              </div>
+            )}
             <div className='flex gap-3 itmes-center'>
               {/* 페이지당 행수 */}
               <span className='grid place-items-center'>페이지당 행 수 </span>
@@ -234,7 +323,6 @@ export default function EngineerPage() {
 
         {/* 테이블 */}
         <BasicTable<MachineEngineerPageResponseDtoType>
-          headerTextSize={'text-sm'}
           multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
           header={HEADERS.engineers}
           data={data}
@@ -245,6 +333,10 @@ export default function EngineerPage() {
           setSorting={setSorting}
           loading={loading}
           error={error}
+          showCheckBox={showCheckBox}
+          isChecked={isChecked}
+          handleCheckItem={handleCheckEngineer}
+          handleCheckAllItems={handleCheckAllEngineers}
         />
 
         {/* 페이지네이션 */}
