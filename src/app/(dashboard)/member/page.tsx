@@ -14,7 +14,7 @@ import { toast } from 'react-toastify'
 // Component Imports
 import axios from 'axios'
 
-import TableFilters from '../../../_components/table/TableFilters'
+import TableFilters from '../../_components/table/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports

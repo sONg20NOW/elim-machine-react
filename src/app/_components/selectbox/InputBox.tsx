@@ -8,7 +8,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
-import { MemberIdContext } from '@/app/[lang]/(dashboard)/member/_components/UserModal'
+import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
 import { execDaumPostcode } from '@/app/_handler/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
 
