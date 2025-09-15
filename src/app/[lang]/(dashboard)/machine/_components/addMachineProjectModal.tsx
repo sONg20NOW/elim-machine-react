@@ -49,7 +49,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
       title='신규 기계설비현장 추가'
       primaryButton={
         <Button variant='contained' onClick={onSubmitHandler} type='submit'>
-          추가하기
+          추가
         </Button>
       }
       secondaryButton={

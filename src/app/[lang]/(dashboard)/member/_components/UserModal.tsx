@@ -196,7 +196,22 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
           )
         }
         secondaryButton={
-          <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
+          <Button
+            variant='tonal'
+            color='secondary'
+            type='reset'
+            onClick={() => {
+              if (isEditing) {
+                if (existChange) {
+                  setShowAlertModal(true)
+                } else {
+                  setIsEditing(false)
+                }
+              } else {
+                setOpen(false)
+              }
+            }}
+          >
             취소
           </Button>
         }

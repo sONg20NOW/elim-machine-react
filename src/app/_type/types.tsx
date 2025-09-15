@@ -44,6 +44,7 @@ export interface MemberCreateRequestDtoType {
 // GET api/members (리스트)
 export type memberPageDtoType = {
   memberId: number
+  version: number
   roleDescription: string
   name: string
   staffNum: string
@@ -181,6 +182,7 @@ export interface MachineProjectCreateRequestDtoType {
 // GET api/machine-projects (리스트)
 export interface MachineProjectPageDtoType {
   machineProjectId: number
+  version: number
   projectStatusDescription: string
   region: string
   machineProjectName: string
@@ -293,6 +295,7 @@ export interface MachineEngineerOptionResponseDtoType {
 // GET api/engineers
 export interface MachineEngineerPageResponseDtoType {
   engineerId: number
+  version: number
   companyName: string
   name: string
   officeDepartmentName: string
@@ -350,6 +353,7 @@ export interface EngineerFilterType {
 // api/licenses 라이선스 목록 조회 응답 DTO
 export interface LicensePageResponseDtoType {
   licenseId: number
+  version: number
   region: string
   bizno: string
   companyName: string

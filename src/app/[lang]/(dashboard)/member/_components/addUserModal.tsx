@@ -6,8 +6,6 @@ import { useState } from 'react'
 // MUI Imports
 import Button from '@mui/material/Button'
 
-import { toast } from 'react-toastify'
-
 import { DialogContent, Grid2 } from '@mui/material'
 
 import axios from 'axios'
@@ -52,7 +50,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
       title='신규 직원 추가'
       primaryButton={
         <Button variant='contained' onClick={onSubmitHandler} type='submit'>
-          추가하기
+          추가
         </Button>
       }
       secondaryButton={

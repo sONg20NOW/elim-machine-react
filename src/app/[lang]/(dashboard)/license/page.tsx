@@ -20,7 +20,7 @@ import { createInitialSorting, HEADERS } from '@/app/_schema/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
 import { PageSizeOptions } from '@/app/_constants/options'
-import { handleApiError } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AddModal from './_components/addModal'
 import DetailModal from './_components/DetailModal'
 
@@ -59,6 +59,10 @@ export default function Licensepage() {
 
   // 정렬 상태
   const [sorting, setSorting] = useState(createInitialSorting<LicensePageResponseDtoType>)
+
+  // 선택 삭제 기능 관련
+  const [showCheckBox, setShowCheckBox] = useState(false)
+  const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
   // 데이터 페치에 사용되는 쿼리 URL
   const queryParams = new URLSearchParams()
@@ -123,6 +127,69 @@ export default function Licensepage() {
     }
   }
 
+  // 설비인력 체크 핸들러 (다중선택)
+  const handleCheckLicense = (license: LicensePageResponseDtoType) => {
+    const licenseId = license.licenseId
+    const checked = isChecked(license)
+
+    if (!checked) {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        newSet.add(licenseId)
+
+        return newSet
+      })
+    } else {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        newSet.delete(licenseId)
+
+        return newSet
+      })
+    }
+  }
+
+  const handleCheckAllEngineers = (checked: boolean) => {
+    if (checked) {
+      setChecked(prev => {
+        const newSet = new Set(prev)
+
+        data.forEach(license => newSet.add(license.licenseId))
+
+        return newSet
+      })
+    } else {
+      setChecked(new Set<number>())
+    }
+  }
+
+  const isChecked = (license: LicensePageResponseDtoType) => {
+    return checked.has(license.licenseId)
+  }
+
+  // 여러 기술자 한번에 삭제
+  async function handleDeleteEngineers() {
+    try {
+      const list = Array.from(checked).map(licenseId => {
+        return {
+          licenseId: licenseId,
+          version: data.find(license => license.licenseId === licenseId)!.version
+        }
+      })
+
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses`, {
+        //@ts-ignore
+        data: { licenseDeleteRequestDtos: list }
+      })
+
+      handleSuccess('선택된 라이선스들이 성공적으로 삭제되었습니다.')
+    } catch (error) {
+      handleApiError(error)
+    }
+  }
+
   return (
     <>
       <Card>
@@ -167,6 +234,28 @@ export default function Licensepage() {
           </div>
 
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+            {/* 한번에 삭제 */}
+            {!showCheckBox ? (
+              <Button variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+                선택 삭제
+              </Button>
+            ) : (
+              <div className='flex gap-1'>
+                <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
+                  {`(${checked.size}) 삭제`}
+                </Button>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  onClick={() => {
+                    setShowCheckBox(prev => !prev)
+                    handleCheckAllEngineers(false)
+                  }}
+                >
+                  취소
+                </Button>
+              </div>
+            )}
             <div className='flex gap-3 itmes-center'>
               {/* 페이지당 행수 */}
               <span className='grid place-items-center'>페이지당 행 수 </span>
@@ -213,6 +302,10 @@ export default function Licensepage() {
           setSorting={setSorting}
           loading={loading}
           error={error}
+          showCheckBox={showCheckBox}
+          isChecked={isChecked}
+          handleCheckItem={handleCheckLicense}
+          handleCheckAllItems={handleCheckAllEngineers}
         />
 
         {/* 페이지네이션 */}

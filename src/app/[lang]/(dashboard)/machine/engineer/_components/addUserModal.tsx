@@ -82,7 +82,7 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
       title={'신규 설비인력 추가'}
       primaryButton={
         <Button variant='contained' onClick={() => onSubmitHandler()} type='submit'>
-          저장
+          추가
         </Button>
       }
       secondaryButton={
