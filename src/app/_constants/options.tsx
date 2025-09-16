@@ -138,6 +138,8 @@ export const buildingGradeOption = [
   { value: 'ADVANCED', label: '고급' }
 ]
 
+// machine - inspection
+
 // engineer
 export const engineersOption: { value: string | number; label: string }[] = []
 

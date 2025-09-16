@@ -176,10 +176,15 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   } else if (listException && listException.includes(key)) {
                     const list = info[key] as string[]
 
-                    // 세 개 이상일 경우 외 ... 로 처리
+                    // 세 개 이상일 경우 외 (length - 2) 로 처리
                     return (
                       <TableCell key={key.toString()} align='center'>
-                        {list.length < 3 ? list.join(', ') : list.slice(0, 2).join(', ').concat(' 외 ...')}
+                        {list.length < 3
+                          ? list.join(', ')
+                          : list
+                              .slice(0, 2)
+                              .join(', ')
+                              .concat(` 외 ${list.length - 2}`)}
                       </TableCell>
                     )
                   } else {

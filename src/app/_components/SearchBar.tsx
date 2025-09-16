@@ -40,7 +40,8 @@ export default function SearchBar({ placeholder, onClick, disabled }: SearchBarP
           borderTopRightRadius: 6,
           borderBottomRightRadius: 6,
           borderTopLeftRadius: 6,
-          borderBottomLeftRadius: 6
+          borderBottomLeftRadius: 6,
+          backgroundColor: 'white'
         }}
         disableUnderline={true}
       />

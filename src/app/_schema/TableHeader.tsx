@@ -4,7 +4,8 @@ import type {
   SortInfoType,
   MachineProjectPageDtoType,
   memberPageDtoType,
-  LicensePageResponseDtoType
+  LicensePageResponseDtoType,
+  MachineInspectionPageResponseDtoType
 } from '../_type/types'
 
 export const BROWER_TAB_TITLE = 'ELIM'
@@ -41,6 +42,16 @@ export const HEADERS = {
     grossArea: { label: '연면적(㎡)', canSort: true },
     tel: { label: '전화번호', canSort: false }
   } as Record<keyof MachineProjectPageDtoType, HeaderInfoType>,
+  machineInspection: {
+    machineParentCateName: { label: '분류', canSort: false },
+    machineInspectionName: { label: '설비명', canSort: false },
+    machinePicCount: { label: '사진', canSort: false },
+    purpose: { label: '용도', canSort: false },
+    location: { label: '위치', canSort: false },
+    engineerNames: { label: '점검자', canSort: false },
+    checkDate: { label: '점검일', canSort: false },
+    inspectionStatusDescription: { label: '결과', canSort: false }
+  } as Record<keyof MachineInspectionPageResponseDtoType, HeaderInfoType>,
   engineers: {
     companyName: { label: '회사명', canSort: false },
     gradeDescription: { label: '등급', canSort: true },

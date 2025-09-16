@@ -1,8 +1,15 @@
-import { buildingGradeOption, checkTypeOption, companyNameOption, projectStatusOption } from '@/app/_constants/options'
+import {
+  buildingGradeOption,
+  checkTypeOption,
+  companyNameOption,
+  gradeOption,
+  projectStatusOption
+} from '@/app/_constants/options'
 import type {
   InputFieldType,
   machineInputType,
   MachineProjectCreateRequestDtoType,
+  machineProjectEngineerInputType,
   machineScheduleInputType
 } from '../../_type/types'
 
@@ -55,27 +62,27 @@ export const MACHINE_INPUT_INFO: machineInputType = {
 export const MACHINE_SCHEDULE_INPUT_INFO: machineScheduleInputType = {
   fieldBeginDate: {
     type: 'date',
-    label: '현장점검시작일'
+    label: '현장점검시작'
   },
   fieldEndDate: {
     type: 'date',
-    label: '현장점검종료일'
+    label: '현장점검종료'
   },
   beginDate: {
     type: 'date',
-    label: '투입시작일'
+    label: '투입시작'
   },
   endDate: {
     type: 'date',
-    label: '투입종료일'
+    label: '투입종료'
   },
   reportDeadline: {
     type: 'date',
-    label: '보고서 마감일'
+    label: '보고서마감일'
   },
   projectEndDate: {
     type: 'date',
-    label: '프로젝트 종료'
+    label: '프로젝트종료'
   },
   checkType: {
     type: 'multi',
@@ -97,7 +104,7 @@ export const MACHINE_SCHEDULE_INPUT_INFO: machineScheduleInputType = {
   },
   engineers: {
     type: 'multi',
-    label: '참여 기술진',
+    label: '참여기술진',
 
     // ! engineer API
     options: []
@@ -119,4 +126,19 @@ export const MACHINE_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoTyp
     type: 'long text',
     label: '비고'
   }
+}
+
+// 점검일정/참여기술진 - 참여기술진 수정
+
+export const MACHINE_PROJECT_ENGINEER_INPUT_INFO: machineProjectEngineerInputType = {
+  engineerName: { type: 'text', label: '이름' },
+  grade: {
+    type: 'multi',
+    label: '등급',
+    options: gradeOption
+  },
+  engineerLicenseNum: { type: 'text', label: '수첩발급번호' },
+  beginDate: { type: 'date', label: '투입시작일' },
+  endDate: { type: 'date', label: '투입종료일' },
+  note: { type: 'text', label: '비고' }
 }

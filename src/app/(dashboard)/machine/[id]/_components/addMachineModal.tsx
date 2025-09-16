@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
 import axios from 'axios'
 
@@ -9,16 +9,18 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, MenuIt
 import DialogCloseButton from './DialogCloseButton'
 import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from '@/app/_components/selectbox/MultiSelectBox'
+import { EngineerOptionContext } from '../page'
 
 type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  engineerOptions: any
-  id: string
+  machineProjectId: string
   onSuccess?: () => void // 성공 후 콜백 함수 추가
 }
 
-const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: EditUserInfoProps) => {
+const AddMachineModal = ({ open, setOpen, machineProjectId, onSuccess }: EditUserInfoProps) => {
+  const engineerOption = useContext(EngineerOptionContext)
+
   const [formData, setFormData] = useState({
     category: '1', // MACHINE_CATE_SEQ
     type: '', // MACHINE_SUB_CATE_SEQ
@@ -87,7 +89,7 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
       console.log('전송할 데이터:', requestData)
 
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${id}/machine-inspections`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections`,
         requestData
       )
 
@@ -245,10 +247,10 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
           <Grid item xs={12}>
             <MultiSelectBox
               label='점검자 1'
-              id={'engineerNames'}
+              machineProjectId={'engineerNames'}
               value={formData.engineerId1 || ''}
               onChange={(e: any) => handleEngineerChange('engineerId1', e.target.value)}
-              options={engineerOptions.map((eng: any) => ({
+              options={engineerOption.map((eng: any) => ({
                 value: eng.engineerId,
                 label: `${eng.engineerName} (${eng.gradeDescription}/${eng.officePositionDescription})`
               }))}
@@ -258,10 +260,10 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
           <Grid item xs={12}>
             <MultiSelectBox
               label='점검자 2'
-              id={'engineerNames'}
+              machineProjectId={'engineerNames'}
               value={formData.engineerId2 || ''}
               onChange={(e: any) => handleEngineerChange('engineerId2', e.target.value)}
-              options={engineerOptions.map((eng: any) => ({
+              options={engineerOption.map((eng: any) => ({
                 value: eng.engineerId,
                 label: `${eng.engineerName} (${eng.gradeDescription}/${eng.officePositionDescription})`
               }))}
@@ -271,10 +273,10 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
           <Grid item xs={12}>
             <MultiSelectBox
               label='점검자 3'
-              id={'engineerNames'}
+              machineProjectId={'engineerNames'}
               value={formData.engineerId3 || ''}
               onChange={(e: any) => handleEngineerChange('engineerId3', e.target.value)}
-              options={engineerOptions.map((eng: any) => ({
+              options={engineerOption.map((eng: any) => ({
                 value: eng.engineerId,
                 label: `${eng.engineerName} (${eng.gradeDescription}/${eng.officePositionDescription})`
               }))}
@@ -284,10 +286,10 @@ const AddMachineModal = ({ open, setOpen, engineerOptions, id, onSuccess }: Edit
           <Grid item xs={12}>
             <MultiSelectBox
               label='점검자 4'
-              id={'engineerNames'}
+              machineProjectId={'engineerNames'}
               value={formData.engineerId4 || ''}
               onChange={(e: any) => handleEngineerChange('engineerId4', e.target.value)}
-              options={engineerOptions.map((eng: any) => ({
+              options={engineerOption.map((eng: any) => ({
                 value: eng.engineerId,
                 label: `${eng.engineerName} (${eng.gradeDescription}/${eng.officePositionDescription})`
               }))}

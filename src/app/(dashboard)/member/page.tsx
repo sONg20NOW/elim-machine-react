@@ -207,7 +207,7 @@ export default function MemberPage() {
 
   return (
     <>
-      <Card>
+      <Card className='relative'>
         {/* 탭 제목 */}
         <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
@@ -252,7 +252,7 @@ export default function MemberPage() {
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
-              <Button variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+              <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
                 선택 삭제
               </Button>
             ) : (

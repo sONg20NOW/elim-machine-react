@@ -1,6 +1,3 @@
-// Next Imports
-import { headers } from 'next/headers'
-
 import Script from 'next/script'
 
 // MUI Imports
@@ -11,15 +8,8 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // Type Imports
 import type { ChildrenType } from '@core/types'
-import type { Locale } from '@configs/i18n'
 
 // Component Imports
-
-// HOC Imports
-import TranslationWrapper from '@/hocs/TranslationWrapper'
-
-// Config Imports
-import { i18n } from '@configs/i18n'
 
 // Util Imports
 import { getSystemMode } from '@core/utils/serverHelpers'
@@ -42,7 +32,7 @@ const RootLayout = async (props: ChildrenType) => {
   const { children } = props
 
   // Vars
-  const headersList = await headers()
+  // const headersList = await headers()
   const systemMode = await getSystemMode()
 
   // const direction = i18n.langDirection[params.lang]

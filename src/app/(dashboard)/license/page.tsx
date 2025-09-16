@@ -236,7 +236,7 @@ export default function Licensepage() {
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
-              <Button variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+              <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
                 선택 삭제
               </Button>
             ) : (

@@ -1,16 +1,14 @@
 'use client'
 
-import type { MouseEvent, SyntheticEvent } from 'react'
-import { createContext, useEffect, useState } from 'react'
+import type { ReactNode, SyntheticEvent } from 'react'
+import { createContext, useCallback, useEffect, useState } from 'react'
 
-import { redirect, useParams } from 'next/navigation'
-
-import Grid from '@mui/material/Grid2'
+import { redirect, useParams, useRouter } from 'next/navigation'
 
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 
-import { CardContent, Tab, Typography } from '@mui/material'
+import { Button, CardContent, IconButton, Tab, Typography } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
@@ -25,59 +23,141 @@ import NoteContent from './_components/noteContent'
 import type {
   MachineEngineerOptionListResponseDtoType,
   MachineEngineerOptionResponseDtoType,
-  machineProjectResponseDtoType
+  MachineProjectResponseDtoType,
+  MachineProjectScheduleAndEngineerResponseDtoType
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import DefaultModal from '@/app/_components/DefaultModal'
+import CustomTextField from '@/@core/components/mui/TextField'
 
-export const ProjectDataContext = createContext(null)
+export const EngineerOptionContext = createContext<MachineEngineerOptionResponseDtoType[]>([])
+
+export const MachineProjectNameContext = createContext<string>('')
 
 const MachineUpdatePage = () => {
-  const params = useParams()
-  const id = params?.id as string
+  const router = useRouter()
 
-  const [projectData, setProjectData] = useState<machineProjectResponseDtoType | null>(null)
-  const [engineerOptions, setEngineerOptions] = useState<MachineEngineerOptionResponseDtoType[]>([])
+  const params = useParams()
+  const machineProjectId = params?.id as string
+
+  const [projectData, setProjectData] = useState<MachineProjectResponseDtoType>()
+  const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
+  const [engineerOption, setEngineerOption] = useState<MachineEngineerOptionResponseDtoType[]>()
   const [value, setValue] = useState<string>('1')
 
-  const getProjectData = async (machineId: string) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  // 현장정보 불러오기
+  const getProjectData = async () => {
     try {
-      const response = await axios.get<{ data: machineProjectResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineId}`
+      const response = await axios.get<{ data: MachineProjectResponseDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`
       )
 
       setProjectData(response.data.data)
 
-      handleSuccess('프로젝트 정보를 불러왔습니다.')
+      // handleSuccess('프로젝트 정보를 불러왔습니다.')
     } catch (error) {
       handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
     }
   }
 
+  // 점검일정/참여기술진 정보 불러오기
+  const getScheduleData = async () => {
+    try {
+      const response = await axios.get<{ data: MachineProjectScheduleAndEngineerResponseDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/schedule-tab`
+      )
+
+      setScheduleData(response.data.data)
+
+      // handleSuccess('점검일정/참여기술진 정보를 불러왔습니다.')
+    } catch (error) {
+      handleApiError(error, '점검일정/참여기술진 정보를 불러오는 데 실패했습니다.')
+    }
+  }
+
   // 엔지니어 목록 가져오기
   const getEngineerList = async () => {
-    const response = await axios.get<{ data: MachineEngineerOptionListResponseDtoType }>(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`
-    )
+    try {
+      const response = await axios.get<{ data: MachineEngineerOptionListResponseDtoType }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`
+      )
 
-    const options = response.data.data.engineers
+      const options = response.data.data.engineers
 
-    setEngineerOptions(options)
+      setEngineerOption(options)
+    } catch (error) {
+      handleApiError(error)
+    }
   }
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
     setValue(newValue)
   }
 
+  const handleChangeProjectName = useCallback(
+    async (projectName: string) => {
+      try {
+        await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/name`, {
+          version: projectData?.version,
+          name: projectName
+        })
+        getProjectData()
+        handleSuccess('프로젝트 이름이 변경되었습니다.')
+      } catch (error) {
+        handleApiError(error)
+      }
+    },
+    [machineProjectId, projectData?.version, getProjectData]
+  )
+
+  const handleDelete = async () => {
+    try {
+      if (!projectData) throw new Error()
+
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}?version=${projectData.version}`
+      )
+
+      handleSuccess('해당 프로젝트가 삭제되었습니다.')
+      router.push('/machine')
+    } catch (error) {
+      handleApiError(error)
+    }
+  }
+
   useEffect(() => {
-    if (id) getProjectData(id)
-    if (id) getEngineerList()
-  }, [id])
+    if (machineProjectId) {
+      if (!engineerOption) getEngineerList()
+
+      switch (value) {
+        case '1':
+          if (!projectData) getProjectData()
+          break
+        case '2':
+          if (!scheduleData) getScheduleData()
+          break
+        default:
+          break
+      }
+    }
+  }, [machineProjectId, value])
+
+  const Providers = ({ children }: { children: ReactNode }) => (
+    <EngineerOptionContext.Provider value={engineerOption ?? []}>
+      <MachineProjectNameContext.Provider value={projectData?.machineProjectName ?? ''}>
+        {children}
+      </MachineProjectNameContext.Provider>
+    </EngineerOptionContext.Provider>
+  )
 
   return (
-    <Grid container spacing={6}>
-      <Grid size={{ xs: 12 }}>
-        <Card>
-          <div className='flex gap-0 p-6 items-center'>
+    <Providers>
+      <Card>
+        <div className='flex px-6 py-5 items-center justify-between'>
+          <div className='flex gap-0 items-center'>
             <CardHeader
               title='기계설비현장'
               sx={{ cursor: 'pointer', padding: 0 }}
@@ -85,80 +165,102 @@ const MachineUpdatePage = () => {
               onClick={() => redirect('/machine')}
             />
             <i className='tabler-chevron-right' />
-            <CardHeader title={projectData?.machineProjectName ?? ''} sx={{ padding: 0 }} />
+            {!isEditing ? (
+              <CardHeader title={projectData?.machineProjectName ?? ''} sx={{ padding: 0 }} />
+            ) : (
+              <CustomTextField id={'projectNameInput'} defaultValue={projectData?.machineProjectName ?? ''} />
+            )}
+            <IconButton
+              onClick={() => {
+                if (isEditing) {
+                  const projectNameInputElement = document.getElementById('projectNameInput') as HTMLInputElement
+
+                  handleChangeProjectName(projectNameInputElement.value)
+                }
+
+                setIsEditing(prev => !prev)
+              }}
+            >
+              <i className='tabler-pencil' />
+            </IconButton>
           </div>
 
-          <CardContent>
-            <TabContext value={value}>
-              <TabList onChange={handleChange} aria-label='nav tabs example'>
-                <Tab
-                  value='1'
-                  component='a'
-                  label='현장정보'
-                  href='/site'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
+          <Button
+            variant='contained'
+            color='error'
+            onClick={() => {
+              setShowDeleteModal(true)
+            }}
+          >
+            삭제
+          </Button>
+        </div>
+
+        <CardContent>
+          <TabContext value={value}>
+            <TabList onChange={handleChange} aria-label='nav tabs example'>
+              <Tab value='1' label='현장정보' />
+              <Tab value='2' label='점검일정 / 참여기술진' />
+              <Tab value='3' label='설비목록' />
+              <Tab value='4' label='전체사진' />
+              <Tab value='5' label='특이사항' />
+            </TabList>
+            <TabPanel value='1'>
+              {projectData ? (
+                <SiteInfoContent projectData={projectData} reloadData={getProjectData} />
+              ) : (
+                <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
+              )}
+            </TabPanel>
+            <TabPanel value='2'>
+              {scheduleData && engineerOption ? (
+                <PlanContent
+                  scheduleData={scheduleData}
+                  reloadData={async () => {
+                    getEngineerList()
+                    getScheduleData()
+                  }}
                 />
-                <Tab
-                  value='2'
-                  component='a'
-                  label='점검일정 / 참여기술진'
-                  href='/plan'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-                <Tab
-                  value='3'
-                  component='a'
-                  label='설비목록'
-                  href='/list'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-                <Tab
-                  value='4'
-                  component='a'
-                  label='전체사진'
-                  href='/pictures'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-                <Tab
-                  value='5'
-                  component='a'
-                  label='특이사항'
-                  href='/memo'
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                />
-              </TabList>
-              <TabPanel value='1'>
-                {projectData ? (
-                  <SiteInfoContent projectData={projectData} />
-                ) : (
-                  <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
-                )}
-              </TabPanel>
-              <TabPanel value='2'>
-                {projectData ? (
-                  <PlanContent projectData={projectData} engineerOptions={engineerOptions} />
-                ) : (
-                  <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
-                )}
-              </TabPanel>
-              <TabPanel value='3'>
-                <MachineContent id={id} engineerOptions={engineerOptions} />
-              </TabPanel>
-              <TabPanel value='4'>
-                <MachinePictures id={id} />
-              </TabPanel>
-              <TabPanel value='5'>
-                {projectData ? (
-                  <NoteContent id={id} projectData={projectData} />
-                ) : (
-                  <Typography>특이사항 정보를 불러오는 중입니다.</Typography>
-                )}
-              </TabPanel>
-            </TabContext>
-          </CardContent>
-        </Card>
-      </Grid>
-    </Grid>
+              ) : (
+                <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
+              )}
+            </TabPanel>
+            <TabPanel value='3'>
+              <MachineContent id={machineProjectId} />
+            </TabPanel>
+            <TabPanel value='4'>
+              <MachinePictures id={machineProjectId} />
+            </TabPanel>
+            <TabPanel value='5'>
+              {projectData ? (
+                <NoteContent id={machineProjectId} projectData={projectData} />
+              ) : (
+                <Typography>특이사항 정보를 불러오는 중입니다.</Typography>
+              )}
+            </TabPanel>
+          </TabContext>
+        </CardContent>
+      </Card>
+      {showDeleteModal && (
+        <DefaultModal
+          size='xs'
+          open={showDeleteModal}
+          setOpen={setShowDeleteModal}
+          title={'정말 삭제하시겠습니까?'}
+          headerDescription='삭제 후에는 되돌리지 못합니다.'
+          primaryButton={
+            <Button variant='contained' color='error' onClick={handleDelete} type='submit'>
+              삭제
+            </Button>
+          }
+          secondaryButton={
+            <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
+              취소
+            </Button>
+          }
+        />
+      )}
+    </Providers>
   )
 }
 

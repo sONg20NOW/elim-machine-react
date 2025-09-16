@@ -26,6 +26,7 @@ import CustomTextField from '@core/components/mui/TextField'
 
 import type {
   MachineEngineerOptionListResponseDtoType,
+  MachineEngineerOptionResponseDtoType,
   MachineFilterType,
   MachineProjectPageDtoType,
   successResponseDtoType
@@ -75,7 +76,7 @@ export default function MachinePage() {
 
   const [sorting, setSorting] = useState(createInitialSorting<MachineProjectPageDtoType>)
 
-  const [engineers, setEngineers] = useState<string[]>()
+  const [engineers, setEngineers] = useState<MachineEngineerOptionResponseDtoType[]>()
 
   // 선택 삭제 기능 관련
   // const [showCheckBox, setShowCheckBox] = useState(false)
@@ -92,7 +93,7 @@ export default function MachinePage() {
 
       const data = response.data.data
 
-      setEngineers(data.engineers.map(engineer => engineer.engineerName))
+      setEngineers(data.engineers)
     } catch (error) {
       handleApiError(error, '엔지니어 옵션을 불러오는 데 실패했습니다.')
       setError(true)
@@ -110,7 +111,7 @@ export default function MachinePage() {
     engineerName: {
       ...MACHINE_FILTER_INFO.engineerName,
       options: engineers?.map(engineer => {
-        return { value: engineer, label: engineer }
+        return { value: engineer.engineerName, label: engineer.engineerName }
       })
     }
   }
@@ -266,7 +267,7 @@ export default function MachinePage() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ko'>
-      <Card>
+      <Card className='relative'>
         <CardHeader title={`기계설비현장 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
         <TableFilters<MachineFilterType>

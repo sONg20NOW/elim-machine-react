@@ -1,102 +1,78 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+
+import { useParams } from 'next/navigation'
 
 import axios from 'axios'
 
-import CustomTextField from '@/@core/components/mui/TextField'
-import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
-import MultiSelectBox from '@/app/_components/selectbox/MultiSelectBox'
+import { Box, Button, IconButton, MenuItem } from '@mui/material'
 
-const PlanContent = ({ projectData, engineerOptions }: any) => {
-  const [editData, setEditData] = useState(projectData || {})
+import type {
+  machineProjectEngineerDetailDtoType,
+  MachineProjectScheduleAndEngineerResponseDtoType
+} from '@/app/_type/types'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { InputBox } from '@/app/_components/selectbox/InputBox'
+import { MACHINE_PROJECT_ENGINEER_INPUT_INFO, MACHINE_SCHEDULE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
+import DefaultModal from '@/app/_components/DefaultModal'
+import CustomTextField from '@/@core/components/mui/TextField'
+import { EngineerOptionContext } from '../page'
+import { gradeOption } from '@/app/_constants/options'
+import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'
+
+const PlanContent = ({
+  scheduleData,
+  reloadData
+}: {
+  scheduleData: MachineProjectScheduleAndEngineerResponseDtoType
+  reloadData: () => Promise<void>
+}) => {
+  const engineerOption = useContext(EngineerOptionContext)
+
+  const params = useParams()
+  const machineProjectId = params?.id as string
+
+  const [editData, setEditData] = useState(() => ({
+    ...scheduleData,
+    engineers: scheduleData.engineers.map(e => ({ ...e })) // 배열 안 객체까지 복사
+  }))
+
   const [isEditing, setIsEditing] = useState(false)
 
+  const [showAlertModal, setShowAlertModal] = useState(false)
+
+  const existChange = JSON.stringify(editData) !== JSON.stringify(scheduleData)
+
+  const engineerMenuOption = engineerOption.map(engineer => {
+    return { value: engineer.engineerId, label: `${engineer.engineerName}` }
+  })
+
+  // 실제 API 호출 부분 (PUT/PATCH 등)
   const handleSave = async () => {
-    console.log('engineers', { engineers: editData.machineProjectScheduleAndEngineerResponseDto.engineers })
+    try {
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/schedule`,
+        editData
+      )
 
-    // 실제 API 호출 부분 (PUT/PATCH 등)
-    await axios.put(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${editData.machineProjectScheduleAndEngineerResponseDto.machineProjectId}/schedule`,
-      editData.machineProjectScheduleAndEngineerResponseDto
-    )
-
-    await axios.put(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${editData.machineProjectScheduleAndEngineerResponseDto.machineProjectId}/machine-project-engineers`,
-      { engineers: editData.machineProjectScheduleAndEngineerResponseDto.engineers }
-    )
-
-    alert('저장되었습니다.')
-  }
-
-  const handleEngineerChange = (idx: number, key: string, value: any) => {
-    setEditData((prev: any) => {
-      const engineers = prev.machineProjectScheduleAndEngineerResponseDto?.engineers
-        ? [...prev.machineProjectScheduleAndEngineerResponseDto.engineers]
-        : []
-
-      // engineerId가 변경될 때 전체 엔지니어 정보로 덮어쓰기
-      if (key === 'memberName' || key === 'engineerId') {
-        const selectedEngineer = engineerOptions.find((eng: any) => eng.engineerId === value)
-
-        if (selectedEngineer) {
-          engineers[idx] = {
-            ...engineers[idx],
-            engineerId: selectedEngineer.engineerId,
-            memberName: selectedEngineer.engineerName,
-            gradeDescription: selectedEngineer.gradeDescription,
-            officePositionDescription: selectedEngineer.officePositionDescription,
-            licenseNum: selectedEngineer.engineerLicenseNum
-          }
-        }
-      } else {
-        // 일반 필드 변경
-        engineers[idx] = {
-          ...engineers[idx],
-          [key]: value
-        }
-      }
-
-      return {
-        ...prev,
-        machineProjectScheduleAndEngineerResponseDto: {
-          ...prev.machineProjectScheduleAndEngineerResponseDto,
-          engineers
-        }
-      }
-    })
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-project-engineers`,
+        { engineers: editData.engineers.filter(value => value.engineerId > 0) }
+      )
+      reloadData()
+      handleSuccess('저장되었습니다.')
+    } catch (error) {
+      handleApiError(error)
+    }
   }
 
   const handleEngineerDelete = (idx: number) => {
-    setEditData((prev: any) => {
-      const prevEngineers = prev.machineProjectScheduleAndEngineerResponseDto?.engineers || []
-      const updatedEngineers = prevEngineers.filter((_: any, i: any) => i !== idx)
+    setEditData(prev => {
+      const prevEngineers = prev?.engineers || []
+      const updatedEngineers = prevEngineers.filter((_, i) => i !== idx)
 
       return {
         ...prev,
-        machineProjectScheduleAndEngineerResponseDto: {
-          ...prev.machineProjectScheduleAndEngineerResponseDto,
-          engineers: updatedEngineers
-        }
-      }
-    })
-  }
-
-  const handleEngineerDateChange = (idx: number, key: 'beginDate' | 'endDate', date: Date | null) => {
-    setEditData((prev: any) => {
-      const engineers = prev.machineProjectScheduleAndEngineerResponseDto?.engineers
-        ? [...prev.machineProjectScheduleAndEngineerResponseDto.engineers]
-        : []
-
-      engineers[idx] = {
-        ...engineers[idx],
-        [key]: date
-      }
-
-      return {
-        ...prev,
-        machineProjectScheduleAndEngineerResponseDto: {
-          ...prev.machineProjectScheduleAndEngineerResponseDto,
-          engineers
-        }
+        engineers: updatedEngineers
       }
     })
   }
@@ -114,373 +90,404 @@ const PlanContent = ({ projectData, engineerOptions }: any) => {
     >
       <div>
         {isEditing ? (
-          <div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <colgroup>
-                <col style={{ width: '18%' }} />
-                <col style={{ width: '32%' }} />
-                <col style={{ width: '18%' }} />
-                <col style={{ width: '32%' }} />
-              </colgroup>
-              <tbody>
-                <tr style={{ background: '#f3f4f6' }}>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    점검일정
-                  </th>
-                  <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
-                    <button
-                      style={{
-                        background: '#1976d2',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 4,
-                        padding: '4px 16px',
-                        marginRight: 8,
-                        cursor: 'pointer'
-                      }}
-                      type='button'
-                      onClick={() => {
-                        handleSave()
-                        setIsEditing(false)
-                      }}
-                    >
-                      저장
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    투입시작
-                  </td>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={editData?.machineProjectScheduleAndEngineerResponseDto.fieldBeginDate}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            fieldBeginDate: date
-                          }
-                        }))
-                      }
-                      placeholderText='Click to select a date'
-                      customInput={<CustomTextField fullWidth />}
-                    />
-                  </td>
-                  <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    현장점검시작
-                  </td>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={editData?.machineProjectScheduleAndEngineerResponseDto.fieldEndDate}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            fieldEndDate: date
-                          }
-                        }))
-                      }
-                      placeholderText='Click to select a date'
-                      customInput={<CustomTextField fullWidth />}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    투입종료
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={editData?.machineProjectScheduleAndEngineerResponseDto.fieldEndDate}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            fieldEndDate: date
-                          }
-                        }))
-                      }
-                      placeholderText='Click to select a date'
-                      customInput={<CustomTextField fullWidth />}
-                    />
-                  </td>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    현장점검종료
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={editData?.machineProjectScheduleAndEngineerResponseDto.endDate}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            endDate: date
-                          }
-                        }))
-                      }
-                      placeholderText='Click to select a date'
-                      customInput={<CustomTextField fullWidth />}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    보고서 마감일
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={editData?.machineProjectScheduleAndEngineerResponseDto.reportDeadline}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            reportDeadline: date
-                          }
-                        }))
-                      }
-                      placeholderText='Click to select a date'
-                      customInput={<CustomTextField fullWidth />}
-                    />
-                  </td>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    프로젝트 종료
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={editData?.machineProjectScheduleAndEngineerResponseDto.projectEndDate}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            projectEndDate: date
-                          }
-                        }))
-                      }
-                      placeholderText='Click to select a date'
-                      customInput={<CustomTextField fullWidth />}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    점검종류
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <MultiSelectBox
-                      id={'projectStatusDescription'}
-                      value={editData.machineProjectScheduleAndEngineerResponseDto.checkType || ''}
-                      loading={false}
-                      onChange={(e: any) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            checkType: e.target.value
-                          }
-                        }))
-                      }
-                      options={[
-                        { value: 'COOLING', label: '냉방 점검' },
-                        { value: 'HEATING', label: '난방 점검' }
-                      ]}
-                    />
-                  </td>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    건물등급
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <MultiSelectBox
-                      id={'projectStatusDescription'}
-                      value={editData.machineProjectScheduleAndEngineerResponseDto.buildingGrade || ''}
-                      loading={false}
-                      onChange={(e: any) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            buildingGrade: e.target.value
-                          }
-                        }))
-                      }
-                      options={[
-                        { value: 'BASIC', label: '초급' },
-                        { value: 'INTERMEDIATE', label: '중급' },
-                        { value: 'ADVANCED', label: '고급' }
-                      ]}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    담당자 이메일
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineProjectScheduleAndEngineerResponseDto.reportManagerEmail || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            reportManagerEmail: e.target.value
-                          }
-                        }))
-                      }
-                      fullWidth
-                    />
-                  </td>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    계산서 발급일
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={editData?.machineProjectScheduleAndEngineerResponseDto.tiIssueDate}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineProjectScheduleAndEngineerResponseDto: {
-                            ...prev.machineProjectScheduleAndEngineerResponseDto,
-                            tiIssueDate: date
-                          }
-                        }))
-                      }
-                      placeholderText='Click to select a date'
-                      customInput={<CustomTextField fullWidth />}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table>
-              <tbody>
-                <tr style={{ background: '#f3f4f6' }}>
-                  <th colSpan={7} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
-                    <div className='flex justify-between items-center'>
-                      <p>참여 기술진</p>
-                      <button
-                        style={{
-                          background: 'rgba(16, 52, 255, 1)',
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: '100%',
-                          padding: '5px 10px',
-                          marginRight: 8,
-                          cursor: 'pointer'
-                        }}
-                        type='button'
-                        onClick={() => {
-                          setEditData((prev: any) => {
-                            const prevEngineers = prev.machineProjectScheduleAndEngineerResponseDto?.engineers || []
-
-                            const newEngineer = {
-                              memberName: '',
-                              gradeDescription: '',
-                              licenseNum: '',
-                              beginDate: '',
-                              endDate: '',
-                              note: '',
-                              version: 0
-                            }
-
-                            return {
-                              ...prev,
-                              machineProjectScheduleAndEngineerResponseDto: {
-                                ...prev.machineProjectScheduleAndEngineerResponseDto,
-                                engineers: [...prevEngineers, newEngineer]
-                              }
-                            }
-                          })
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </th>
-                </tr>
-                <tr className='py-1'>
-                  <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>성명</th>
-                  <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>등급</th>
-                  <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>수첩발급번호</th>
-                  <th colSpan={2} style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                    참여기간
-                  </th>
-                  <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>비고</th>
-                </tr>
-                {(editData.machineProjectScheduleAndEngineerResponseDto.engineers || []).map(
-                  (eng: any, idx: number) => (
-                    <tr key={idx}>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }} className='flex items-center gap-1'>
-                        <MultiSelectBox
-                          id={'engineerNames'}
-                          value={eng.engineerId || ''}
-                          onChange={(e: any) => handleEngineerChange(idx, 'engineerId', e.target.value)}
-                          options={engineerOptions.map((eng: any) => ({
-                            value: eng.engineerId,
-                            label: `${eng.engineerName} (${eng.gradeDescription}/${eng.officePositionDescription})`
-                          }))}
-                        />
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }}>
-                        <CustomTextField value={eng.gradeDescription || ''} fullWidth />
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }}>
-                        <CustomTextField value={eng.engineerLicenseNum || eng.licenseNum} fullWidth />
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }}>
-                        <AppReactDatepicker
-                          selected={eng.beginDate}
-                          onChange={date => handleEngineerDateChange(idx, 'beginDate', date)}
-                          placeholderText='Click to select a date'
-                          customInput={<CustomTextField fullWidth />}
-                        />
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }}>
-                        <AppReactDatepicker
-                          selected={eng.endDate}
-                          onChange={date => handleEngineerDateChange(idx, 'endDate', date)}
-                          placeholderText='Click to select a date'
-                          customInput={<CustomTextField fullWidth />}
-                        />
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }} className='flex items-center gap-2'>
-                        <CustomTextField
-                          value={eng.note || ''}
-                          onChange={e => handleEngineerChange(idx, 'note', e.target.value)}
-                          fullWidth
-                        />
-                        <button
-                          style={{
-                            background: 'rgba(243, 0, 0, 1)',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '100%',
-                            padding: '5px 10px',
-                            marginRight: 8,
-                            cursor: 'pointer'
-                          }}
-                          onClick={() => {
-                            handleEngineerDelete(idx)
-                          }}
+          editData && (
+            <div className='flex flex-col gap-2'>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <colgroup>
+                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '32%' }} />
+                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '32%' }} />
+                </colgroup>
+                <tbody>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      점검일정
+                    </th>
+                    <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px', gap: '2px' }}>
+                      <div className='justify-end flex gap-2'>
+                        <Button
+                          variant='contained'
+                          color='success'
                           type='button'
+                          onClick={() => {
+                            handleSave()
+                            setIsEditing(false)
+                          }}
                         >
-                          x
-                        </button>
+                          저장
+                        </Button>
+                        <Button
+                          variant='contained'
+                          color='secondary'
+                          type='button'
+                          onClick={() => {
+                            if (existChange) {
+                              setShowAlertModal(true)
+                            } else {
+                              setEditData({ ...scheduleData, engineers: scheduleData.engineers.map(e => ({ ...e })) })
+                              setIsEditing(false)
+                            }
+                          }}
+                        >
+                          취소
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.beginDate?.label}
+                    </td>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='beginDate'
+                        value={editData?.beginDate ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            beginDate: value
+                          }))
+                        }
+                      />
+                    </td>
+                    <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.fieldBeginDate?.label}
+                    </td>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='fieldBeginDate'
+                        value={editData?.fieldBeginDate ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            fieldBeginDate: value
+                          }))
+                        }
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.endDate?.label}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='endDate'
+                        value={editData?.endDate ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            endDate: value
+                          }))
+                        }
+                      />
+                    </td>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.fieldEndDate?.label}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='fieldEndDate'
+                        value={editData?.fieldEndDate ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            fieldEndDate: value
+                          }))
+                        }
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.reportDeadline?.label}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='reportDeadline'
+                        value={editData?.reportDeadline ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            reportDeadline: value
+                          }))
+                        }
+                      />
+                    </td>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.projectEndDate?.label}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='projectEndDate'
+                        value={editData?.projectEndDate ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            projectEndDate: value
+                          }))
+                        }
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.checkType?.label}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='checkType'
+                        value={editData?.checkType ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            checkType: value
+                          }))
+                        }
+                      />
+                    </td>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.buildingGrade?.label}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='buildingGrade'
+                        value={editData?.buildingGrade ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            buildingGrade: value
+                          }))
+                        }
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.reportManagerEmail?.label}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='reportManagerEmail'
+                        value={editData?.reportManagerEmail ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            reportManagerEmail: value
+                          }))
+                        }
+                      />
+                    </td>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {MACHINE_SCHEDULE_INPUT_INFO.tiIssueDate?.label}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabInfos={MACHINE_SCHEDULE_INPUT_INFO}
+                        tabFieldKey='tiIssueDate'
+                        value={editData?.tiIssueDate ?? ''}
+                        onChange={value =>
+                          setEditData(prev => ({
+                            ...prev,
+                            tiIssueDate: value
+                          }))
+                        }
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <table className='border-collapse'>
+                <colgroup>
+                  <col style={{ width: '16.6%' }} />
+                  <col style={{ width: '16.6%' }} />
+                  <col style={{ width: '16.6%' }} />
+                  <col style={{ width: '16.6%' }} />
+                  <col style={{ width: '16.6%' }} />
+                  <col style={{ width: '16.6%' }} />
+                </colgroup>
+                <tbody>
+                  <tr style={{ background: '#f3f4f6' }}>
+                    <th colSpan={7} align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      <div className='flex justify-between items-center'>
+                        <p>참여기술진</p>
+                        <Button
+                          size='small'
+                          variant='contained'
+                          type='button'
+                          color='primary'
+                          onClick={() => {
+                            setEditData(prev => ({
+                              ...prev,
+                              engineers: [...prev.engineers, MachineProjectEngineerInitialData]
+                            }))
+                          }}
+                        >
+                          <i className='tabler-plus' />
+                          추가
+                        </Button>
+                      </div>
+                    </th>
+                  </tr>
+                  <tr className='py-1'>
+                    <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>성명</th>
+                    <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>등급</th>
+                    <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                      수첩발급번호
+                    </th>
+                    <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }} colSpan={2}>
+                      참여기간
+                    </th>
+                    <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>비고</th>
+                  </tr>
+                  {editData.engineers.map((engineer, idx) => (
+                    <tr key={idx}>
+                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }}>
+                        {/* 이름을 바꾸면 전체 정보 변경. beginDate, endDate, note 초기화.*/}
+                        {/* 이미 선택된 기술진이라면 선택 불가능하도록. */}
+                        <CustomTextField
+                          select
+                          fullWidth
+                          value={engineer.engineerId}
+                          onChange={e => {
+                            const newEngineerInfo = engineerOption.find(
+                              eng => eng.engineerId === Number(e.target.value)
+                            )
+
+                            const newEngineer: machineProjectEngineerDetailDtoType = {
+                              ...MachineProjectEngineerInitialData,
+                              ...newEngineerInfo,
+                              grade:
+                                gradeOption.find(value => value.label === newEngineerInfo?.gradeDescription)?.value ??
+                                ''
+                            }
+
+                            if (newEngineer) {
+                              setEditData(prev => {
+                                prev.engineers.splice(idx, 1, newEngineer)
+
+                                return {
+                                  ...editData,
+                                  engineers: prev.engineers
+                                }
+                              })
+                            }
+                          }}
+                          slotProps={{
+                            select: { displayEmpty: true },
+                            htmlInput: { name: name }
+                          }}
+                        >
+                          {/* 만약 이미 선택된 기술진이라면 선택 불가 */}
+                          {engineerMenuOption.map(option => (
+                            <MenuItem
+                              key={option.value}
+                              value={option.value}
+                              disabled={editData.engineers.map(value => value.engineerId).includes(option.value)}
+                            >
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </CustomTextField>
+                      </td>
+                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }}>
+                        <Box className={'my-[1px] relative text-[15px] p-[6px] '}>
+                          <span className='break-normal'>{engineer.gradeDescription}</span>
+                        </Box>
+                      </td>
+                      <td style={{ padding: '6px', border: '1px solid #d1d5db' }}>
+                        <Box className={'my-[1px] relative text-[15px] p-[6px] '}>
+                          <span className='break-normal'>{engineer.engineerLicenseNum}</span>
+                        </Box>{' '}
+                      </td>
+                      <td style={{ border: '1px solid #d1d5db' }} className='py-1 px-[6px]'>
+                        <InputBox
+                          showLabel={false}
+                          tabFieldKey='beginDate'
+                          value={engineer.beginDate ?? ''}
+                          onChange={value => {
+                            const newEngineers = editData.engineers
+
+                            newEngineers[idx].beginDate = value
+                            setEditData(prev => {
+                              return { ...prev, engineers: newEngineers }
+                            })
+                          }}
+                          tabInfos={MACHINE_PROJECT_ENGINEER_INPUT_INFO}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #d1d5db' }} className='px-[6px]'>
+                        <InputBox
+                          showLabel={false}
+                          tabFieldKey='endDate'
+                          value={engineer.endDate ?? ''}
+                          onChange={value => {
+                            const newEngineers = editData.engineers
+
+                            newEngineers[idx].endDate = value
+                            setEditData(prev => {
+                              return { ...prev, engineers: newEngineers }
+                            })
+                          }}
+                          tabInfos={MACHINE_PROJECT_ENGINEER_INPUT_INFO}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #d1d5db' }} className='px-[6px]'>
+                        <div className='flex justify-between'>
+                          <InputBox
+                            showLabel={false}
+                            tabFieldKey='note'
+                            value={engineer.note ?? ''}
+                            onChange={value => {
+                              const newEngineers = editData.engineers
+
+                              newEngineers[idx].note = value
+                              setEditData(prev => {
+                                return { ...prev, engineers: newEngineers }
+                              })
+                            }}
+                            tabInfos={MACHINE_PROJECT_ENGINEER_INPUT_INFO}
+                          />
+                          <IconButton
+                            size='small'
+                            color='error'
+                            onClick={() => {
+                              handleEngineerDelete(idx)
+                            }}
+                            type='button'
+                          >
+                            <i className='tabler-x' />
+                          </IconButton>
+                        </div>
                       </td>
                     </tr>
-                  )
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : (
-          <div>
+          <div className='flex flex-col gap-2'>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <colgroup>
                 <col style={{ width: '18%' }} />
@@ -494,94 +501,67 @@ const PlanContent = ({ projectData, engineerOptions }: any) => {
                     점검일정
                   </th>
                   <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
-                    <button
+                    <Button
                       type='button'
-                      style={{
-                        background: '#1976d2',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 4,
-                        padding: '4px 16px',
-                        marginRight: 8,
-                        cursor: 'pointer'
-                      }}
+                      variant='contained'
+                      color='success'
                       onClick={() => {
                         setIsEditing(true)
                       }}
                     >
                       수정
-                    </button>
+                    </Button>
                   </td>
                 </tr>
                 <tr>
                   <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     투입시작
                   </td>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.fieldBeginDate}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.fieldBeginDate}</td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     현장점검시작
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.fieldEndDate}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.fieldEndDate}</td>
                 </tr>
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     투입종료
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.fieldEndDate}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.fieldEndDate}</td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     현장점검종료
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.endDate}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.endDate}</td>
                 </tr>
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    보고서 마감일
+                    보고서마감일
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.reportDeadline}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.reportDeadline}</td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    프로젝트 종료
+                    프로젝트종료
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.projectEndDate}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.projectEndDate}</td>
                 </tr>
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     점검종류
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.checkTypeDescription}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.checkTypeDescription}</td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     건물등급
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.buildingGradeDescription}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.buildingGradeDescription}</td>
                 </tr>
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     담당자 이메일
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.reportManagerEmail}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.reportManagerEmail}</td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     계산서 발급일
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    {projectData.machineProjectScheduleAndEngineerResponseDto.tiIssueDate}
-                  </td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.tiIssueDate}</td>
                 </tr>
               </tbody>
             </table>
@@ -596,8 +576,8 @@ const PlanContent = ({ projectData, engineerOptions }: any) => {
               </colgroup>
               <tbody>
                 <tr style={{ background: '#f3f4f6' }}>
-                  <th colSpan={6} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
-                    참여 기술진
+                  <th colSpan={6} align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                    참여기술진
                   </th>
                 </tr>
                 <tr className='py-1'>
@@ -609,35 +589,61 @@ const PlanContent = ({ projectData, engineerOptions }: any) => {
                   </th>
                   <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>비고</th>
                 </tr>
-                {(editData.machineProjectScheduleAndEngineerResponseDto.engineers || []).map(
-                  (eng: any, idx: number) => (
-                    <tr key={eng.engineerId || idx}>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                        <p>{eng.memberName}</p>
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                        <p>{eng.gradeDescription}</p>
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                        <p>{eng.licenseNum}</p>
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                        <p>{eng.beginDate ? new Date(eng.beginDate).toLocaleDateString() : ''}</p>
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                        <p>{eng.endDate ? new Date(eng.endDate).toLocaleDateString() : ''}</p>
-                      </td>
-                      <td style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                        <p>{eng.note}</p>
-                      </td>
-                    </tr>
-                  )
-                )}
+                {(scheduleData.engineers || []).map((eng, idx) => (
+                  <tr key={eng.engineerId || idx}>
+                    <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                      <p>{eng.engineerName}</p>
+                    </td>
+                    <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                      <p>{eng.gradeDescription}</p>
+                    </td>
+                    <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                      <p>{eng.engineerLicenseNum}</p>
+                    </td>
+                    <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                      <p>{eng.beginDate}</p>
+                    </td>
+                    <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                      <p>{eng.endDate}</p>
+                    </td>
+                    <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                      <p>{eng.note}</p>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         )}
       </div>
+      {showAlertModal && (
+        <DefaultModal
+          size='xs'
+          open={showAlertModal}
+          setOpen={setShowAlertModal}
+          title={'저장하지 않고 나가시겠습니까?'}
+          headerDescription={`지금까지 수정한 내용이 저장되지 않습니다.\n그래도 나가시겠습니까?`}
+          primaryButton={
+            <Button
+              variant='contained'
+              className='bg-color-warning hover:bg-color-warning-light'
+              onClick={() => {
+                setEditData({ ...scheduleData, engineers: scheduleData.engineers.map(e => ({ ...e })) })
+                setShowAlertModal(false)
+                setIsEditing(false)
+              }}
+              type='submit'
+            >
+              저장하지 않음
+            </Button>
+          }
+          secondaryButton={
+            <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowAlertModal(false)}>
+              취소
+            </Button>
+          }
+        />
+      )}
     </div>
   )
 }

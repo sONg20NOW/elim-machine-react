@@ -6,31 +6,36 @@ import { Button } from '@mui/material'
 
 import axios from 'axios'
 
-import CustomTextField from '@/@core/components/mui/TextField'
-import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { MACHINE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
-import type { machineProjectResponseDtoType } from '@/app/_type/types'
+import type { MachineProjectResponseDtoType } from '@/app/_type/types'
+import DefaultModal from '@/app/_components/DefaultModal'
 
-const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseDtoType }) => {
+const SiteInfoContent = ({
+  projectData,
+  reloadData
+}: {
+  projectData: MachineProjectResponseDtoType
+  reloadData: () => Promise<void>
+}) => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
   // 초기값 세팅
-  const [editData, setEditData] = useState<machineProjectResponseDtoType>(projectData)
+  const [editData, setEditData] = useState<MachineProjectResponseDtoType>(projectData)
   const [isEditing, setIsEditing] = useState(false)
+  const [showAlertModal, setShowAlertModal] = useState(false)
+
+  const existChange = JSON.stringify(editData) !== JSON.stringify(projectData)
 
   if (!editData) {
     return <span>데이터를 찾을 수 없습니다.</span>
   }
 
   const handleSave = async () => {
-    console.log('editData는요!', editData)
-    console.log('Saving data...', machineProjectId)
-
     try {
-      const result = await axios.put<{ data: machineProjectResponseDtoType }>(
+      const result = await axios.put<{ data: MachineProjectResponseDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`,
         editData
       )
@@ -38,7 +43,7 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
       setIsEditing(false)
 
       setEditData(result.data.data)
-
+      reloadData()
       console.log('result:', result.data.data)
       handleSuccess('수정되었습니다.')
     } catch (error: any) {
@@ -55,6 +60,7 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
         <Button
           variant='contained'
           color='info'
+          disabled={true}
           onClick={() => {
             console.log('?')
           }}
@@ -64,6 +70,7 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
         <Button
           variant='contained'
           color='success'
+          disabled={true}
           onClick={() => {
             console.log('?')
           }}
@@ -73,6 +80,7 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
         <Button
           variant='contained'
           color='primary'
+          disabled={true}
           onClick={() => {
             console.log('?')
           }}
@@ -83,6 +91,7 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
         <Button
           variant='contained'
           color='warning'
+          disabled={true}
           onClick={() => {
             console.log('?')
           }}
@@ -93,21 +102,12 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
         <Button
           variant='contained'
           color='error'
+          disabled={true}
           onClick={() => {
             console.log('?')
           }}
         >
           보고서 다운로드
-        </Button>
-
-        <Button
-          variant='contained'
-          color='secondary'
-          onClick={() => {
-            console.log('?')
-          }}
-        >
-          삭제
         </Button>
       </div>
       <div
@@ -140,222 +140,200 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
                     관리주체 현황
                   </th>
                   <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
-                    <button
-                      style={{
-                        background: '#1976d2',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 4,
-                        padding: '4px 16px',
-                        marginRight: 8,
-                        cursor: 'pointer'
-                      }}
-                      type='submit'
-                    >
-                      저장
-                    </button>
+                    <div className='justify-end flex gap-2'>
+                      <Button color='success' variant='contained' type='submit'>
+                        저장
+                      </Button>
+                      <Button
+                        variant='contained'
+                        color='secondary'
+                        type='button'
+                        onClick={() => {
+                          if (existChange) {
+                            setShowAlertModal(true)
+                          } else {
+                            setEditData(projectData)
+                            setIsEditing(false)
+                          }
+                        }}
+                      >
+                        취소
+                      </Button>
+                    </div>
                   </td>
                 </tr>
+                {/* 기관명 */}
                 <tr>
                   <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     기관명
                   </td>
-                  <td style={{ padding: '10px 12px' }}>
+                  <td className='pe-4'>
                     <InputBox
                       showLabel={false}
-                      tabFieldKey={'institutionName'}
+                      tabFieldKey='institutionName'
                       value={editData?.institutionName ?? ''}
-                      onChange={value =>
-                        setEditData(prev => ({
-                          ...prev,
-                          institutionName: value
-                        }))
-                      }
-                      tabInfos={MACHINE_INPUT_INFO.project}
+                      onChange={value => setEditData(prev => ({ ...prev, institutionName: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
+
+                {/* 주소 */}
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     주소
                   </th>
-                  <td colSpan={3} style={{ padding: '10px 12px' }}>
+                  <td colSpan={2} className='pe-4'>
                     <InputBox
                       showLabel={false}
-                      tabFieldKey={'roadAddress'}
+                      tabFieldKey='roadAddress'
                       value={editData.roadAddress ?? ''}
-                      onChange={value =>
-                        setEditData(prev => ({
-                          ...prev,
-                          roadAddress: value
-                        }))
-                      }
-                      tabInfos={MACHINE_INPUT_INFO.project}
+                      onChange={value => setEditData(prev => ({ ...prev, roadAddress: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
+
+                {/* 대표자 / 연면적 */}
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     대표자
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.representative || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          representative: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='representative'
+                      value={editData.representative ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, representative: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     연면적(㎡)
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.grossArea || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          grossArea: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='grossArea'
+                      value={editData.grossArea?.toString() ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, grossArea: Number(value) }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
+
+                {/* 사업자번호 / 세대수 */}
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     사업자번호
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.bizno || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          bizno: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='bizno'
+                      value={editData.bizno ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, bizno: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     세대수
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.houseCnt || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          houseCnt: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='houseCnt'
+                      value={editData.houseCnt?.toString() ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, houseCnt: Number(value) }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
+
+                {/* 용도 / 담당자 */}
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     용도
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.purpose || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          purpose: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='purpose'
+                      value={editData.purpose ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, purpose: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     담당자
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.manager || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          manager: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='manager'
+                      value={editData.manager ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, manager: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
+
+                {/* 건물구조 / 연락처 */}
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     건물구조
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.structure || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          structure: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='structure'
+                      value={editData.structure ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, structure: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     연락처
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.managerPhone || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          managerPhone: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='managerPhone'
+                      value={editData.managerPhone ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, managerPhone: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
+
+                {/* 전화번호 / 준공일 */}
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     전화번호
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.tel || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          tel: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='tel'
+                      value={editData.tel ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, tel: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     준공일
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={new Date(editData?.completeDate ?? '')}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          completeDate: date
-                        }))
-                      }
-                      placeholderText='준공일을 선택하세요'
-                      customInput={<CustomTextField fullWidth />}
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='completeDate'
+                      value={editData.completeDate ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, completeDate: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
-                {/* 계약사항/책임자 */}
+                {/* 유지관리자/담당자 */}
                 <tr style={{ background: '#f3f4f6' }}>
                   <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
                     계약사항 및 책임자
@@ -365,34 +343,25 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     계약일
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <AppReactDatepicker
-                      selected={new Date(editData?.contractDate ?? '')}
-                      onChange={(date: Date | null) =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          contractDate: date
-                        }))
-                      }
-                      placeholderText='계약일을 선택하세요'
-                      customInput={<CustomTextField fullWidth />}
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='contractDate'
+                      value={editData.contractDate ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, contractDate: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    진행상태
+                    진행 상태
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
+                  <td className='pe-4'>
                     <InputBox
-                      tabInfos={MACHINE_INPUT_INFO.project}
-                      tabFieldKey={'projectStatusDescription'}
-                      value={editData.projectStatus || ''}
-                      disabled={false}
-                      onChange={value =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          projectStatus: value
-                        }))
-                      }
+                      showLabel={false}
+                      tabFieldKey='projectStatus'
+                      value={editData.projectStatus ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, projectStatus: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
@@ -400,308 +369,150 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     계약금액
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.contractPrice || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          contractPrice: e.target.value
-                        }))
-                      }
-                      fullWidth
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='contractPrice'
+                      value={editData.contractPrice?.toString() ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, contractPrice: Number(value) }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
-
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     점검 업체
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
+                  <td className='pe-4'>
                     <InputBox
-                      tabInfos={MACHINE_INPUT_INFO.project}
-                      tabFieldKey={'companyName'}
-                      value={editData?.companyName || ''}
-                      onChange={value =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          companyName: value
-                        }))
-                      }
+                      showLabel={false}
+                      tabFieldKey='companyName'
+                      value={editData.companyName ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, companyName: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
 
-                <tr>
+                {/* 계약담당자 */}
+                <tr className='border solid'>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     계약담당자
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData?.contractManager || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          contractManager: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      placeholder='이름'
-                      sx={{ mb: 1 }}
+                  <td className='pe-4 border-r solid'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='contractManager'
+                      value={editData.contractManager ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, contractManager: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
-                    <CustomTextField
-                      value={editData.contractManagerTel || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          contractManagerTel: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      placeholder='연락처'
-                      sx={{ mb: 1 }}
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='contractManagerTel'
+                      value={editData.contractManagerTel ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, contractManagerTel: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
-                    <CustomTextField
-                      value={editData.contractManagerEmail || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          contractManagerEmail: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      placeholder='이메일'
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='contractManagerEmail'
+                      value={editData.contractManagerEmail ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, contractManagerEmail: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
+
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     계약상대자
                   </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.contractPartner || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          contractPartner: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      placeholder='이름'
-                      sx={{ mb: 1 }}
+                  <td className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='contractPartner'
+                      value={editData.contractPartner ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, contractPartner: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
-                    <CustomTextField
-                      value={editData.contractPartnerTel || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          contractPartnerTel: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      placeholder='연락처'
-                      sx={{ mb: 1 }}
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='contractPartnerTel'
+                      value={editData.contractPartnerTel ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, contractPartnerTel: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
-                    <CustomTextField
-                      value={editData.contractPartnerEmail || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          contractPartnerEmail: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      placeholder='이메일'
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='contractPartnerEmail'
+                      value={editData.contractPartnerEmail ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, contractPartnerEmail: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
+
+                {/* 요구사항 */}
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     요구사항
                   </th>
-                  <td colSpan={3} style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      fullWidth
-                      rows={4}
-                      multiline
-                      label=''
-                      placeholder='참고 사항을 입력해 주세요'
-                      value={editData.requirement || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          requirement: e.target.value
-                        }))
-                      }
+                  <td colSpan={3} className='pe-4'>
+                    <InputBox
+                      showLabel={false}
+                      tabFieldKey='requirement'
+                      value={editData.requirement ?? ''}
+                      onChange={value => setEditData(prev => ({ ...prev, requirement: value }))}
+                      tabInfos={MACHINE_INPUT_INFO}
                     />
                   </td>
                 </tr>
+
                 {/* 유지관리자/담당자 */}
                 <tr style={{ background: '#f3f4f6' }}>
                   <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
                     유지관리자 및 담당자
                   </th>
                 </tr>
-                <tr>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    유지관리자1
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineMaintainer1Name || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineMaintainer1Name: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      sx={{ mb: 1 }}
-                    />
-                    <CustomTextField
-                      value={editData.machineMaintainer1Info || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineMaintainer1Info: e.target.value
-                        }))
-                      }
-                      fullWidth
-                    />
-                  </td>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    담당자1
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineManager1Name || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineManager1Name: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      sx={{ mb: 1 }}
-                    />
-                    <CustomTextField
-                      value={editData.machineManager1Info || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineManager1Info: e.target.value
-                        }))
-                      }
-                      fullWidth
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    유지관리자2
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineMaintainer2Name || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineMaintainer2Name: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      sx={{ mb: 1 }}
-                    />
-                    <CustomTextField
-                      value={editData.machineMaintainer2Info || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineMaintainer2Info: e.target.value
-                        }))
-                      }
-                      fullWidth
-                    />
-                  </td>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    담당자2
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineManager2Name || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineManager2Name: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      sx={{ mb: 1 }}
-                    />
-                    <CustomTextField
-                      value={editData.machineManager2Info || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineManager2Info: e.target.value
-                        }))
-                      }
-                      fullWidth
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    유지관리자3
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineMaintainer3Name || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineMaintainer3Name: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      sx={{ mb: 1 }}
-                    />
-                    <CustomTextField
-                      value={editData.machineMaintainer3Info || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineMaintainer3Info: e.target.value
-                        }))
-                      }
-                      fullWidth
-                    />
-                  </td>
-                  <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    담당자3
-                  </th>
-                  <td style={{ padding: '10px 12px' }}>
-                    <CustomTextField
-                      value={editData.machineManager3Name || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineManager3Name: e.target.value
-                        }))
-                      }
-                      fullWidth
-                      sx={{ mb: 1 }}
-                    />
-                    <CustomTextField
-                      value={editData.machineManager3Info || ''}
-                      onChange={e =>
-                        setEditData((prev: any) => ({
-                          ...prev,
-                          machineManager3Info: e.target.value
-                        }))
-                      }
-                      fullWidth
-                    />
-                  </td>
-                </tr>
+                {['1', '2', '3'].map(i => (
+                  <tr key={i} className='border solid '>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      유지관리자{i}
+                    </th>
+                    <td className='pe-4 border-r solid'>
+                      <InputBox
+                        showLabel={false}
+                        tabFieldKey={`machineMaintainer${i}Name`}
+                        value={editData[`machineMaintainer${i}Name` as keyof typeof editData]?.toString() ?? ''}
+                        onChange={value => setEditData(prev => ({ ...prev, [`machineMaintainer${i}Name`]: value }))}
+                        tabInfos={MACHINE_INPUT_INFO}
+                      />
+                      <InputBox
+                        showLabel={false}
+                        tabFieldKey={`machineMaintainer${i}Info`}
+                        value={editData[`machineMaintainer${i}Info` as keyof typeof editData]?.toString() ?? ''}
+                        onChange={value => setEditData(prev => ({ ...prev, [`machineMaintainer${i}Info`]: value }))}
+                        tabInfos={MACHINE_INPUT_INFO}
+                      />
+                    </td>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      담당자{i}
+                    </th>
+                    <td className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabFieldKey={`machineManager${i}Name`}
+                        value={editData[`machineManager${i}Name` as keyof typeof editData]?.toString() ?? ''}
+                        onChange={value => setEditData(prev => ({ ...prev, [`machineManager${i}Name`]: value }))}
+                        tabInfos={MACHINE_INPUT_INFO}
+                      />
+                      <InputBox
+                        showLabel={false}
+                        tabFieldKey={`machineManager${i}Info`}
+                        value={editData[`machineManager${i}Info` as keyof typeof editData]?.toString() ?? ''}
+                        onChange={value => setEditData(prev => ({ ...prev, [`machineManager${i}Info`]: value }))}
+                        tabInfos={MACHINE_INPUT_INFO}
+                      />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           ) : (
@@ -719,22 +530,15 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
                       관리주체 현황
                     </th>
                     <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
-                      <button
-                        style={{
-                          background: '#1976d2',
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: 4,
-                          padding: '4px 16px',
-                          marginRight: 8,
-                          cursor: 'pointer'
-                        }}
+                      <Button
+                        variant='contained'
+                        color='success'
                         onClick={() => {
                           setIsEditing(true)
                         }}
                       >
                         수정
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                   <tr>
@@ -939,6 +743,35 @@ const SiteInfoContent = ({ projectData }: { projectData: machineProjectResponseD
           )}
         </form>
       </div>
+
+      {showAlertModal && (
+        <DefaultModal
+          size='xs'
+          open={showAlertModal}
+          setOpen={setShowAlertModal}
+          title={'저장하지 않고 나가시겠습니까?'}
+          headerDescription={`지금까지 수정한 내용이 저장되지 않습니다.\n그래도 나가시겠습니까?`}
+          primaryButton={
+            <Button
+              variant='contained'
+              className='bg-color-warning hover:bg-color-warning-light'
+              onClick={() => {
+                setEditData(projectData)
+                setShowAlertModal(false)
+                setIsEditing(false)
+              }}
+              type='submit'
+            >
+              저장하지 않음
+            </Button>
+          }
+          secondaryButton={
+            <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowAlertModal(false)}>
+              취소
+            </Button>
+          }
+        />
+      )}
     </div>
   )
 }

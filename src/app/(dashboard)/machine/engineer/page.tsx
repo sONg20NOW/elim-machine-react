@@ -217,7 +217,7 @@ export default function EngineerPage() {
 
   return (
     <>
-      <Card>
+      <Card className='relative'>
         {/* 탭 제목 */}
         <CardHeader title={`기계설비 기술자 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
@@ -266,7 +266,7 @@ export default function EngineerPage() {
           <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
-              <Button variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+              <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
                 선택 삭제
               </Button>
             ) : (
