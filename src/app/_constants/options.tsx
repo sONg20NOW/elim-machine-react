@@ -139,6 +139,11 @@ export const buildingGradeOption = [
 ]
 
 // machine - inspection
+export const picCateInspectionStatusOption = [
+  { value: 'NONE', label: '-' },
+  { value: 'PASS', label: '○' },
+  { value: 'FAIL', label: '×' }
+]
 
 // engineer
 export const engineersOption: { value: string | number; label: string }[] = []

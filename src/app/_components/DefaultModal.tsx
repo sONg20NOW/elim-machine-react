@@ -60,10 +60,11 @@ export default function DefaultModal({
       open={open}
       onClose={(_, reason) => reason !== 'backdropClick' && handleClose()}
       maxWidth={size}
-      scroll='body'
+      scroll='paper' // ✅ DialogContent 안에서만 스크롤
       closeAfterTransition={false}
       sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
     >
+      {/* 닫기 버튼 */}
       <IconButton
         aria-label='close'
         onClick={handleClose}
@@ -76,11 +77,14 @@ export default function DefaultModal({
       >
         <i className='tabler-x' />
       </IconButton>
+
+      {/* 수정/삭제 버튼 */}
       <div className='absolute left-8 top-8 flex gap-2'>
         {modifyButton}
         {deleteButton}
       </div>
 
+      {/* 제목 */}
       <DialogTitle
         variant='h4'
         className='flex items-center gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'
@@ -92,21 +96,32 @@ export default function DefaultModal({
           </Typography>
         )}
       </DialogTitle>
-      {value ? (
-        children && <TabContext value={value}>{children}</TabContext>
-      ) : (
-        <div className='flex flex-col gap-10'>
-          <Divider variant='middle' /> {children}
-        </div>
-      )}
 
-      {primaryButton || secondaryButton ? (
+      {/* ✅ 스크롤 처리되는 본문 */}
+      <DialogContent
+        sx={{
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3
+        }}
+      >
+        {value ? (
+          children && <TabContext value={value}>{children}</TabContext>
+        ) : (
+          <>
+            <Divider variant='middle' />
+            {children}
+          </>
+        )}
+      </DialogContent>
+
+      {/* 하단 버튼 */}
+      {(primaryButton || secondaryButton) && (
         <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16 mt-[20px] lg:mt-[40px]'>
           {primaryButton}
           {secondaryButton}
         </DialogActions>
-      ) : (
-        <DialogContent />
       )}
     </Dialog>
   )

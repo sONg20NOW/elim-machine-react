@@ -46,7 +46,7 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
   // 수정할 때마다 unsavedUserData를 userData와 동기화
   useEffect(() => {
     setUnsavedData(data)
-  }, [isEditing])
+  }, [isEditing, data])
 
   const licenseId = data.id
 

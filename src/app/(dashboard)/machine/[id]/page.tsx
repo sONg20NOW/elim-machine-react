@@ -49,7 +49,7 @@ const MachineUpdatePage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // 현장정보 불러오기
-  const getProjectData = async () => {
+  const getProjectData = useCallback(async () => {
     try {
       const response = await axios.get<{ data: MachineProjectResponseDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`
@@ -61,10 +61,10 @@ const MachineUpdatePage = () => {
     } catch (error) {
       handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
     }
-  }
+  }, [machineProjectId])
 
   // 점검일정/참여기술진 정보 불러오기
-  const getScheduleData = async () => {
+  const getScheduleData = useCallback(async () => {
     try {
       const response = await axios.get<{ data: MachineProjectScheduleAndEngineerResponseDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/schedule-tab`
@@ -76,7 +76,7 @@ const MachineUpdatePage = () => {
     } catch (error) {
       handleApiError(error, '점검일정/참여기술진 정보를 불러오는 데 실패했습니다.')
     }
-  }
+  }, [machineProjectId])
 
   // 엔지니어 목록 가져오기
   const getEngineerList = async () => {
@@ -143,7 +143,7 @@ const MachineUpdatePage = () => {
           break
       }
     }
-  }, [machineProjectId, value])
+  }, [machineProjectId, value, getProjectData, getScheduleData, engineerOption, projectData, scheduleData])
 
   const Providers = ({ children }: { children: ReactNode }) => (
     <EngineerOptionContext.Provider value={engineerOption ?? []}>
@@ -226,7 +226,7 @@ const MachineUpdatePage = () => {
               )}
             </TabPanel>
             <TabPanel value='3'>
-              <MachineContent id={machineProjectId} />
+              <MachineContent machineProjectId={machineProjectId} />
             </TabPanel>
             <TabPanel value='4'>
               <MachinePictures id={machineProjectId} />

@@ -15,7 +15,7 @@ import axios from 'axios'
 
 // Component Imports
 import 'dayjs/locale/ko'
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers/'
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
@@ -120,13 +120,13 @@ export default function MachinePage() {
     setDateTrigger(prev => !prev)
   }
 
-  // 데이터 페치에 사용되는 쿼리 URL
-  const queryParams = new URLSearchParams()
-
   // 기계설비현장 리스트 호출 API 함수
   const getFilteredData = useCallback(async () => {
     setLoading(true)
     setError(false)
+
+    // 데이터 페치에 사용되는 쿼리 URL
+    const queryParams = new URLSearchParams()
 
     try {
       Object.keys(filters).map(prop => {
@@ -169,6 +169,7 @@ export default function MachinePage() {
     } finally {
       setLoading(false)
     }
+    // eslint-disable-next-line
   }, [filters, sorting, page, size, projectName, region, dateTrigger])
 
   // 필터 변경 시 API 호출
@@ -291,7 +292,7 @@ export default function MachinePage() {
         </Button>
         <div className='flex justify-between flex-col items-start  md:flex-row md:items-center p-6 border-bs gap-4'>
           <div className='flex gap-8 items-center'>
-            <div className='flex gap-2'>
+            <div className='flex gap-2 flex-wrap'>
               {/* 이름으로 검색 */}
               <SearchBar
                 placeholder='이름으로 검색'
@@ -341,11 +342,22 @@ export default function MachinePage() {
               </div>
               <div className='flex gap-2'>
                 {periodOptions.map(month => (
-                  <Button onClick={() => onClickMonth(month)} disabled={disabled} key={month} variant='contained'>
+                  <Button
+                    className='whitespace-nowrap'
+                    onClick={() => onClickMonth(month)}
+                    disabled={disabled}
+                    key={month}
+                    variant='contained'
+                  >
                     {month}개월
                   </Button>
                 ))}
-                <Button onClick={() => onClickMonth(0)} disabled={disabled} variant='contained'>
+                <Button
+                  className='whitespace-nowrap'
+                  onClick={() => onClickMonth(0)}
+                  disabled={disabled}
+                  variant='contained'
+                >
                   전체
                 </Button>
               </div>
@@ -374,7 +386,7 @@ export default function MachinePage() {
                 </Button>
               </div>
             )} */}
-            <div className='flex gap-3 itmes-center'>
+            <div className='flex gap-3 itmes-center whitespace-nowrap'>
               {/* 페이지당 행수 */}
               <span className='grid place-items-center'>페이지당 행 수 </span>
               <CustomTextField
@@ -399,7 +411,7 @@ export default function MachinePage() {
               variant='contained'
               startIcon={<i className='tabler-plus' />}
               onClick={() => setAddMachineModalOpen(!addMachineModalOpen)}
-              className='max-sm:is-full'
+              className='max-sm:is-full whitespace-nowrap'
               disabled={disabled}
             >
               추가

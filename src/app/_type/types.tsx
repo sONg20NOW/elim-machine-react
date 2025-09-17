@@ -379,8 +379,14 @@ export interface MachineInspectionPageResponseDtoType {
 
 // GET api/machine-projects/{machineProjectId}/machine-inspections/{machineInspectionId}: 점검 설비 상세 응답 DTO
 export interface MachineInspectionDetailResponseDtoType {
-  checklistExtensionType: string
+  checklistExtensionType:
+    | 'NONE'
+    | 'GAS_MEASUREMENT'
+    | 'WIND_MEASUREMENT'
+    | 'WIND_MEASUREMENT_SA_RA'
+    | 'PIPE_MEASUREMENT'
   machineInspectionResponseDto: MachineInspectionResponseDtoType
+  engineerIds: number[]
   picCates: MachinePicCateWithPicCountDtoType[]
   gasMeasurementResponseDto: GasMeasurementResponseDtoType
   pipeMeasurementResponseDtos: PipeMeasurementResponseDtoType[]

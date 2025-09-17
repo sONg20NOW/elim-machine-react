@@ -82,6 +82,17 @@ const CustomThemeProvider = (props: Props) => {
       },
       cssVariables: {
         colorSchemeSelector: 'data'
+      },
+
+      // 컴포넌트 설정
+      components: {
+        MuiButton: {
+          styleOverrides: {
+            root: {
+              whiteSpace: 'nowrap' // ✅ 모든 버튼 줄바꿈 방지
+            }
+          }
+        }
       }
     }
 

@@ -38,6 +38,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
   // 수정할 때마다 unsavedUserData를 userData와 동기화
   useEffect(() => {
     setUnsavedUserData(userData)
+    // eslint-disable-next-line
   }, [isEditing])
 
   const engineerId = userData.id

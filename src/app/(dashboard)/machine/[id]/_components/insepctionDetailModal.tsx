@@ -7,19 +7,19 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Card, 
 import axios from 'axios'
 
 type EditUserInfoProps = {
-  id: string
+  machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
-  selectedMachine: any
+  inspectionData: any
   clickedPicCate: any
   onPhotoUploadSuccess?: () => void // 사진 업로드 성공 콜백 추가
 }
 
 const InspectionDetailModal = ({
-  id,
+  machineProjectId,
   open,
   setOpen,
-  selectedMachine,
+  inspectionData,
   clickedPicCate,
   onPhotoUploadSuccess
 }: EditUserInfoProps) => {
@@ -59,7 +59,7 @@ const InspectionDetailModal = ({
 
     setIsUploading(true)
 
-    console.log('selectedMachine', selectedMachine)
+    console.log('inspectionData', inspectionData)
 
     try {
       // 1. 프리사인드 URL 요청
@@ -68,11 +68,11 @@ const InspectionDetailModal = ({
         {
           uploadType: 'INSPECTION_IMAGE',
           originalFileNames: uploadedFiles.map(file => file.name),
-          projectId: parseInt(id),
-          machineInspectionId: selectedMachine.machineInspectionId,
-          cateName: selectedMachine.cateName || '배관설비',
-          picCateName: selectedMachine.picCateName || '설비사진',
-          picSubCateName: selectedMachine.picSubCateName || '현황사진'
+          projectId: parseInt(machineProjectId),
+          machineInspectionId: inspectionData.machineInspectionId,
+          cateName: inspectionData.cateName || '배관설비',
+          picCateName: inspectionData.picCateName || '설비사진',
+          picSubCateName: inspectionData.picSubCateName || '현황사진'
         }
       )
 
@@ -123,7 +123,7 @@ const InspectionDetailModal = ({
       console.log('DB 기록 요청 데이터:', machinePicCreateRequestDtos)
 
       const dbResponse = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${id}/machine-inspections/${selectedMachine.machineInspectionId}/machine-pics`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionData.machineInspectionId}/machine-pics`,
         {
           machinePicCreateRequestDtos
         }
@@ -138,9 +138,9 @@ const InspectionDetailModal = ({
 
       // 업로드 후 목록 새로고침
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${id}/machine-pics?page=0&size=10`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=10`,
         {
-          machineInspectionId: selectedMachine.machineInspectionId,
+          machineInspectionId: inspectionData.machineInspectionId,
           machinePicCateId: clickedPicCate?.machinePicCateSeq || null
         }
       )
@@ -167,13 +167,13 @@ const InspectionDetailModal = ({
 
   useEffect(() => {
     if (!open) return
-    if (!selectedMachine || !selectedMachine.machineInspectionId) return
+    if (!inspectionData || !inspectionData.machineInspectionId) return
 
     const getData = async () => {
       const response = await axios.post<{ data: any }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${id}/machine-pics?page=0&size=10`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=10`,
         {
-          machineInspectionId: selectedMachine.machineInspectionId,
+          machineInspectionId: inspectionData.machineInspectionId,
           machinePicCateId: clickedPicCate?.machinePicCateSeq || null
         }
       )
@@ -183,7 +183,7 @@ const InspectionDetailModal = ({
     }
 
     getData()
-  }, [open, selectedMachine, id])
+  }, [open, inspectionData, machineProjectId, clickedPicCate?.machinePicCateSeq])
 
   return (
     <Dialog

@@ -83,12 +83,12 @@ export default function EngineerPage() {
   const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
   // 데이터 페치에 사용되는 쿼리 URL
-  const queryParams = new URLSearchParams()
 
   // 직원 리스트 호출 API 함수
   const getFilteredData = useCallback(async () => {
     setLoading(true)
     setError(false)
+    const queryParams = new URLSearchParams()
 
     try {
       // 필터링

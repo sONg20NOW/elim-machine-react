@@ -115,19 +115,22 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   }, [filters, getFilteredData, machineProjectId])
 
   // 행 클릭
-  const handleRowClick = async (machine: MachineInspectionPageResponseDtoType) => {
-    try {
-      const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${machine?.machineInspectionId}`
-      )
+  const handleRowClick = useCallback(
+    async (machine: MachineInspectionPageResponseDtoType) => {
+      try {
+        const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${machine?.machineInspectionId}`
+        )
 
-      setSelectedMachine(response.data.data)
-      console.log(response.data.data)
-      setOpen(true)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }
+        setSelectedMachine(response.data.data)
+        console.log(response.data.data)
+        setOpen(true)
+      } catch (error) {
+        handleApiError(error)
+      }
+    },
+    [machineProjectId]
+  )
 
   //  체크 핸들러 (다중선택)
   const handleCheckEngineer = (machine: MachineInspectionPageResponseDtoType) => {
@@ -197,7 +200,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   }
 
   return (
-    <>
+    <div className='relative'>
       {/* 필터바 */}
       <TableFilters<MachineInspectionFilterType>
         // ! 옵션 추가
@@ -272,7 +275,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
           )}
           <div className='flex gap-3 itmes-center'>
             {/* 페이지당 행수 */}
-            <span className='grid place-items-center'>페이지당 행 수 </span>
+            <span className='grid place-items-center whitespace-nowrap'>페이지당 행 수 </span>
             <CustomTextField
               select
               value={pageSize.toString()}
@@ -369,7 +372,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
           onSuccess={handleAddMachineSuccess}
         />
       )}
-    </>
+    </div>
   )
 }
 
