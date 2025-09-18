@@ -54,8 +54,8 @@ export default function Licensepage() {
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
 
-  // TODO restrict type
-  const [selectedData, setSelectedData] = useState<LicenseResponseDtoType | null>(null)
+  const [selectedData, setSelectedData] = useState<LicenseResponseDtoType>()
+  const [rowData, setRowData] = useState<LicensePageResponseDtoType>()
 
   // 정렬 상태
   const [sorting, setSorting] = useState(createInitialSorting<LicensePageResponseDtoType>)
@@ -98,13 +98,17 @@ export default function Licensepage() {
       setPage(result.page.number)
       setSize(result.page.size)
       setTotalCount(result.page.totalElements)
+
+      if (rowData) {
+        handleLicenseClick(rowData)
+      }
     } catch (error: any) {
       handleApiError(error, '데이터 조회에 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [sorting, page, size, companyName, region])
+  }, [sorting, page, size, companyName, region, rowData])
 
   // 함수 변경 시 API 호출
   useEffect(() => {
@@ -121,6 +125,7 @@ export default function Licensepage() {
       const licenseInfo = response.data.data
 
       setSelectedData(licenseInfo)
+      setRowData(licenseData)
       setDetailModalOpen(true)
     } catch (error) {
       handleApiError(error, '라이선스를 선택하는 데 실패했습니다.')

@@ -54,7 +54,7 @@ export default function MachinePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
 
-  const disabled = loading || error
+  const disabled = loading || error || data.length === 0
 
   const [totalCount, setTotalCount] = useState(0)
 

@@ -10,7 +10,7 @@ import { DialogContent, Grid2 } from '@mui/material'
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/DefaultModal'
+import DefaultModal from '@/app/_components/modal/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@/app/_type/types'
 import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
 import { MemberInitialData } from '@/app/_constants/MemberSeed'

@@ -10,7 +10,7 @@ import { DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } 
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/DefaultModal'
+import DefaultModal from '@/app/_components/modal/DefaultModal'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'

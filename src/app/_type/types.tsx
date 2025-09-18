@@ -398,8 +398,8 @@ export interface MachineInspectionResponseDtoType {
   version: number
   id: number
   machineInspectionName: string
-  machineCateId: number
-  machineCateName: string
+  machineCategoryId: number
+  machineCategoryName: string
   purpose: string
   location: string
   installedDate: string
@@ -411,17 +411,17 @@ export interface MachineInspectionResponseDtoType {
 
 // 점검 항목 + 사진 개수 등의 정보 목록
 export interface MachinePicCateWithPicCountDtoType {
-  machinePicCateId: number
-  machinePicCateName: string
-  subCates: MachinePicSubCateResponseDtoType[]
+  machineChecklistItemId: number
+  machineChecklistItemName: string
+  checklistSubItems: MachinePicSubCateResponseDtoType[]
   totalMachinePicCount: number
   picCateInspectionStatus: string
 }
 
 // 점검 항목의 하위 항목 및 사진 개수 응답 DTO
 export interface MachinePicSubCateResponseDtoType {
-  machinePicSubCateId: number
-  subCateName: string
+  machineChecklistSubItemId: number
+  checklistSubItemName: string
   machinePicCount: number
 }
 

@@ -9,17 +9,17 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, MenuIt
 import DialogCloseButton from './DialogCloseButton'
 import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from '@/app/_components/selectbox/MultiSelectBox'
-import { EngineerOptionContext } from '../page'
+import { EngineerListContext } from '../page'
 
 type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
   machineProjectId: string
-  onSuccess?: () => void // 성공 후 콜백 함수 추가
+  reloadData?: () => void // 성공 후 콜백 함수 추가
 }
 
-const AddMachineModal = ({ open, setOpen, machineProjectId, onSuccess }: EditUserInfoProps) => {
-  const engineerOption = useContext(EngineerOptionContext)
+const AddMachineModal = ({ open, setOpen, machineProjectId, reloadData: onSuccess }: EditUserInfoProps) => {
+  const engineerOption = useContext(EngineerListContext)
 
   const [formData, setFormData] = useState({
     category: '1', // MACHINE_CATE_SEQ

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode, SyntheticEvent } from 'react'
+import type { Dispatch, ReactNode, SetStateAction, SyntheticEvent } from 'react'
 import { createContext, useCallback, useEffect, useState } from 'react'
 
 import { redirect, useParams, useRouter } from 'next/navigation'
@@ -27,12 +27,24 @@ import type {
   MachineProjectScheduleAndEngineerResponseDtoType
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import DefaultModal from '@/app/_components/DefaultModal'
 import CustomTextField from '@/@core/components/mui/TextField'
+import DeleteModal from '@/app/_components/modal/DeleteModal'
+import DisabledTabWithTooltip from '@/app/_components/DisabledTabWithTooltip'
 
-export const EngineerOptionContext = createContext<MachineEngineerOptionResponseDtoType[]>([])
+export const EngineerListContext = createContext<MachineEngineerOptionResponseDtoType[]>([])
 
-export const MachineProjectNameContext = createContext<string>('')
+export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing: Dispatch<SetStateAction<boolean>> }>({
+  isEditing: false,
+  setIsEditing: () => null
+})
+
+const Tabs = [
+  { value: '현장정보', label: '현장정보' },
+  { value: '점검일정/참여기술진', label: '점검일정/참여기술진' },
+  { value: '설비목록', label: '설비목록' },
+  { value: '전체사진', label: '전체사진' },
+  { value: '특이사항', label: '특이사항' }
+]
 
 const MachineUpdatePage = () => {
   const router = useRouter()
@@ -42,9 +54,10 @@ const MachineUpdatePage = () => {
 
   const [projectData, setProjectData] = useState<MachineProjectResponseDtoType>()
   const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
-  const [engineerOption, setEngineerOption] = useState<MachineEngineerOptionResponseDtoType[]>()
-  const [value, setValue] = useState<string>('1')
+  const [engineerList, setEngineerList] = useState<MachineEngineerOptionResponseDtoType[]>()
+  const [tabValue, setTabValue] = useState<string>('현장정보')
 
+  const [isEditingProjectName, setIsEditingProjectName] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -85,16 +98,14 @@ const MachineUpdatePage = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`
       )
 
-      const options = response.data.data.engineers
-
-      setEngineerOption(options)
+      setEngineerList(response.data.data.engineers)
     } catch (error) {
       handleApiError(error)
     }
   }
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
-    setValue(newValue)
+    setTabValue(newValue)
   }
 
   const handleChangeProjectName = useCallback(
@@ -130,27 +141,25 @@ const MachineUpdatePage = () => {
 
   useEffect(() => {
     if (machineProjectId) {
-      if (!engineerOption) getEngineerList()
+      if (!engineerList) getEngineerList()
 
-      switch (value) {
-        case '1':
+      switch (tabValue) {
+        case '현장정보':
           if (!projectData) getProjectData()
           break
-        case '2':
+        case '점검일정/참여기술진':
           if (!scheduleData) getScheduleData()
           break
         default:
           break
       }
     }
-  }, [machineProjectId, value, getProjectData, getScheduleData, engineerOption, projectData, scheduleData])
+  }, [machineProjectId, tabValue, getProjectData, getScheduleData, engineerList, projectData, scheduleData])
 
   const Providers = ({ children }: { children: ReactNode }) => (
-    <EngineerOptionContext.Provider value={engineerOption ?? []}>
-      <MachineProjectNameContext.Provider value={projectData?.machineProjectName ?? ''}>
-        {children}
-      </MachineProjectNameContext.Provider>
-    </EngineerOptionContext.Provider>
+    <EngineerListContext.Provider value={engineerList ?? []}>
+      <IsEditingContext.Provider value={{ isEditing, setIsEditing }}>{children}</IsEditingContext.Provider>
+    </EngineerListContext.Provider>
   )
 
   return (
@@ -165,20 +174,20 @@ const MachineUpdatePage = () => {
               onClick={() => redirect('/machine')}
             />
             <i className='tabler-chevron-right' />
-            {!isEditing ? (
+            {!isEditingProjectName ? (
               <CardHeader title={projectData?.machineProjectName ?? ''} sx={{ padding: 0 }} />
             ) : (
               <CustomTextField id={'projectNameInput'} defaultValue={projectData?.machineProjectName ?? ''} />
             )}
             <IconButton
               onClick={() => {
-                if (isEditing) {
+                if (isEditingProjectName) {
                   const projectNameInputElement = document.getElementById('projectNameInput') as HTMLInputElement
 
                   handleChangeProjectName(projectNameInputElement.value)
                 }
 
-                setIsEditing(prev => !prev)
+                setIsEditingProjectName(prev => !prev)
               }}
             >
               <i className='tabler-pencil' />
@@ -197,23 +206,26 @@ const MachineUpdatePage = () => {
         </div>
 
         <CardContent>
-          <TabContext value={value}>
+          <TabContext value={tabValue}>
+            {/* 탭 목록 */}
             <TabList onChange={handleChange} aria-label='nav tabs example'>
-              <Tab value='1' label='현장정보' />
-              <Tab value='2' label='점검일정 / 참여기술진' />
-              <Tab value='3' label='설비목록' />
-              <Tab value='4' label='전체사진' />
-              <Tab value='5' label='특이사항' />
+              {Tabs.map(tab => {
+                return isEditing && tabValue !== tab.value ? (
+                  <DisabledTabWithTooltip value={tab.value} label={tab.label} />
+                ) : (
+                  <Tab key={tab.value} value={tab.value} label={tab.label} />
+                )
+              })}
             </TabList>
-            <TabPanel value='1'>
+            <TabPanel value='현장정보'>
               {projectData ? (
                 <SiteInfoContent projectData={projectData} reloadData={getProjectData} />
               ) : (
                 <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
               )}
             </TabPanel>
-            <TabPanel value='2'>
-              {scheduleData && engineerOption ? (
+            <TabPanel value='점검일정/참여기술진'>
+              {scheduleData && engineerList ? (
                 <PlanContent
                   scheduleData={scheduleData}
                   reloadData={async () => {
@@ -225,13 +237,13 @@ const MachineUpdatePage = () => {
                 <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
               )}
             </TabPanel>
-            <TabPanel value='3'>
+            <TabPanel value='설비목록'>
               <MachineContent machineProjectId={machineProjectId} />
             </TabPanel>
-            <TabPanel value='4'>
+            <TabPanel value='전체사진'>
               <MachinePictures id={machineProjectId} />
             </TabPanel>
-            <TabPanel value='5'>
+            <TabPanel value='특이사항'>
               {projectData ? (
                 <NoteContent id={machineProjectId} projectData={projectData} />
               ) : (
@@ -242,22 +254,10 @@ const MachineUpdatePage = () => {
         </CardContent>
       </Card>
       {showDeleteModal && (
-        <DefaultModal
-          size='xs'
-          open={showDeleteModal}
-          setOpen={setShowDeleteModal}
-          title={'정말 삭제하시겠습니까?'}
-          headerDescription='삭제 후에는 되돌리지 못합니다.'
-          primaryButton={
-            <Button variant='contained' color='error' onClick={handleDelete} type='submit'>
-              삭제
-            </Button>
-          }
-          secondaryButton={
-            <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
-              취소
-            </Button>
-          }
+        <DeleteModal
+          showDeleteModal={showDeleteModal}
+          setShowDeleteModal={setShowDeleteModal}
+          onDelete={handleDelete}
         />
       )}
     </Providers>

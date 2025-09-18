@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -10,7 +10,8 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { MACHINE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
 import type { MachineProjectResponseDtoType } from '@/app/_type/types'
-import DefaultModal from '@/app/_components/DefaultModal'
+import AlertModal from '@/app/_components/modal/AlertModal'
+import { IsEditingContext } from '../page'
 
 const SiteInfoContent = ({
   projectData,
@@ -19,12 +20,13 @@ const SiteInfoContent = ({
   projectData: MachineProjectResponseDtoType
   reloadData: () => Promise<void>
 }) => {
+  const { isEditing, setIsEditing } = useContext(IsEditingContext)
+
   const params = useParams()
   const machineProjectId = params?.id as string
 
   // 초기값 세팅
-  const [editData, setEditData] = useState<MachineProjectResponseDtoType>(projectData)
-  const [isEditing, setIsEditing] = useState(false)
+  const [editData, setEditData] = useState<MachineProjectResponseDtoType>(JSON.parse(JSON.stringify(projectData)))
   const [showAlertModal, setShowAlertModal] = useState(false)
 
   const existChange = JSON.stringify(editData) !== JSON.stringify(projectData)
@@ -152,7 +154,7 @@ const SiteInfoContent = ({
                           if (existChange) {
                             setShowAlertModal(true)
                           } else {
-                            setEditData(projectData)
+                            setEditData(JSON.parse(JSON.stringify(projectData)))
                             setIsEditing(false)
                           }
                         }}
@@ -745,31 +747,12 @@ const SiteInfoContent = ({
       </div>
 
       {showAlertModal && (
-        <DefaultModal
-          size='xs'
-          open={showAlertModal}
-          setOpen={setShowAlertModal}
-          title={'저장하지 않고 나가시겠습니까?'}
-          headerDescription={`지금까지 수정한 내용이 저장되지 않습니다.\n그래도 나가시겠습니까?`}
-          primaryButton={
-            <Button
-              variant='contained'
-              className='bg-color-warning hover:bg-color-warning-light'
-              onClick={() => {
-                setEditData(projectData)
-                setShowAlertModal(false)
-                setIsEditing(false)
-              }}
-              type='submit'
-            >
-              저장하지 않음
-            </Button>
-          }
-          secondaryButton={
-            <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowAlertModal(false)}>
-              취소
-            </Button>
-          }
+        <AlertModal<MachineProjectResponseDtoType>
+          showAlertModal={showAlertModal}
+          setShowAlertModal={setShowAlertModal}
+          setEditData={setEditData}
+          originalData={projectData}
+          setIsEditing={setIsEditing}
         />
       )}
     </div>

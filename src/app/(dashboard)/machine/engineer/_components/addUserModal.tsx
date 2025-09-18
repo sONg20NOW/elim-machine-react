@@ -19,7 +19,7 @@ import {
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/DefaultModal'
+import DefaultModal from '@/app/_components/modal/DefaultModal'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import type { memberLookupResponseDtoType, MachineEngineerCreateRequestDtoType } from '@/app/_type/types'
 

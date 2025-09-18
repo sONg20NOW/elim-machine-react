@@ -12,11 +12,13 @@ import { Box, DialogContent, Table, TableBody, TableCell, TableContainer, TableR
 import axios from 'axios'
 
 import { initialData } from '@/data/initialData/userInfo'
-import DefaultModal from '@/app/_components/DefaultModal'
+import DefaultModal from '@/app/_components/modal/DefaultModal'
 import type { EngineerResponseDtoType } from '@/app/_type/types'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { ENGINEER_INPUT_INFO } from '@/app/_schema/input/EngineerInputInfo'
+import DeleteModal from '@/app/_components/modal/DeleteModal'
+import AlertModal from '@/app/_components/modal/AlertModal'
 
 type UserModalProps = {
   open: boolean
@@ -28,21 +30,17 @@ type UserModalProps = {
 export const MemberIdContext = createContext<number>(0)
 
 const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
-  const [userData, setUserData] = useState(data)
+  const [editData, setEditData] = useState<EngineerResponseDtoType>(JSON.parse(JSON.stringify(data)))
 
   const [isEditing, setIsEditing] = useState(false)
-  const [unsavedUserData, setUnsavedUserData] = useState(data ?? initialData)
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showAlertModal, setShowAlertModal] = useState(false)
 
-  // 수정할 때마다 unsavedUserData를 userData와 동기화
-  useEffect(() => {
-    setUnsavedUserData(userData)
-    // eslint-disable-next-line
-  }, [isEditing])
+  const existChange = JSON.stringify(editData) !== JSON.stringify(data)
 
-  const engineerId = userData.id
-  const version = userData.version
+  const engineerId = editData.id
+  const version = editData.version
 
   const handleDeleteUser = async () => {
     try {
@@ -61,24 +59,34 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
   }
 
   const handleModifyUser = async () => {
-    try {
-      console.log(userData)
+    if (existChange) {
+      try {
+        const response = await axios.put<{ data: EngineerResponseDtoType }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/${engineerId}`,
+          editData
+        )
 
-      const response = await axios.put<{ data: EngineerResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/${engineerId}`,
-        userData
-      )
+        const returnData = response.data.data
 
-      const returnData = response.data.data
+        setEditData(returnData)
 
-      setUserData(returnData)
-
-      console.log(`info saved: `, returnData)
-      handleSuccess(`설비인력 정보가 수정되었습니다.`)
+        console.log(`info saved: `, returnData)
+        handleSuccess(`설비인력 정보가 수정되었습니다.`)
+        setIsEditing(false)
+        reloadData()
+      } catch (error: any) {
+        handleApiError(error)
+      }
+    } else {
       setIsEditing(false)
-      reloadData()
-    } catch (error: any) {
-      handleApiError(error)
+    }
+  }
+
+  const handleClose = () => {
+    if (existChange) {
+      setShowAlertModal(true)
+    } else {
+      setOpen(false)
     }
   }
 
@@ -87,8 +95,9 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
       size='sm'
       open={open}
       setOpen={setOpen}
-      title={unsavedUserData.name}
-      headerDescription={unsavedUserData.engineerLicenseNum}
+      title={data.name}
+      handleClose={handleClose}
+      headerDescription={data.engineerLicenseNum}
       primaryButton={
         !isEditing ? (
           <Button variant='contained' onClick={() => setIsEditing(true)} type='submit'>
@@ -103,12 +112,15 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
       secondaryButton={
         isEditing && (
           <Button
-            variant='tonal'
+            variant='contained'
             color='secondary'
             type='reset'
             onClick={() => {
-              setIsEditing(false)
-              setUserData(unsavedUserData)
+              if (existChange) {
+                setShowAlertModal(true)
+              } else {
+                setIsEditing(false)
+              }
             }}
           >
             취소
@@ -127,9 +139,9 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
         <TableContainer sx={{ border: 'solid 1px', borderColor: 'lightgray', borderRadius: '8px' }}>
           <Table size='small'>
             <TableBody>
-              {Object.keys(userData).map(value => {
+              {Object.keys(editData).map(value => {
                 if (['id', 'version', 'remark'].includes(value)) return null
-                const key = value as keyof typeof userData
+                const key = value as keyof typeof editData
 
                 return (
                   <TableRow key={key}>
@@ -150,8 +162,8 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
                         isEditing={isEditing}
                         tabInfos={ENGINEER_INPUT_INFO}
                         tabFieldKey={key}
-                        value={userData[key] as string}
-                        onChange={value => setUserData({ ...unsavedUserData, [key]: value })}
+                        value={editData[key] as string}
+                        onChange={value => setEditData({ ...editData, [key]: value })}
                         showLabel={false}
                       />
                     </TableCell>
@@ -167,8 +179,8 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
             <InputBox
               tabInfos={ENGINEER_INPUT_INFO}
               tabFieldKey={'remark'}
-              value={userData.remark}
-              onChange={value => setUserData({ ...userData, remark: value })}
+              value={editData.remark}
+              onChange={value => setEditData({ ...editData, remark: value })}
               showLabel={false}
             />
           ) : (
@@ -182,27 +194,24 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
                 minHeight: 110
               }}
             >
-              {userData.remark}
+              {editData.remark}
             </Box>
           )}
         </div>
         {showDeleteModal && (
-          <DefaultModal
-            size='xs'
-            open={showDeleteModal}
-            setOpen={setShowDeleteModal}
-            title={'정말 삭제하시겠습니까?'}
-            headerDescription='삭제 후에는 되돌리지 못합니다.'
-            primaryButton={
-              <Button variant='contained' color='error' onClick={handleDeleteUser} type='submit'>
-                삭제
-              </Button>
-            }
-            secondaryButton={
-              <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
-                취소
-              </Button>
-            }
+          <DeleteModal
+            showDeleteModal={showDeleteModal}
+            setShowDeleteModal={setShowDeleteModal}
+            onDelete={handleDeleteUser}
+          />
+        )}
+        {showAlertModal && (
+          <AlertModal<EngineerResponseDtoType>
+            showAlertModal={showAlertModal}
+            setShowAlertModal={setShowAlertModal}
+            setEditData={setEditData}
+            setIsEditing={setIsEditing}
+            originalData={data}
           />
         )}
       </DialogContent>

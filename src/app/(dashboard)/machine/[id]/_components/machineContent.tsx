@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useContext, createContext } from 'react'
 
 // MUI Imports
 import Button from '@mui/material/Button'
@@ -24,6 +24,7 @@ import type {
   MachineInspectionDetailResponseDtoType,
   MachineInspectionFilterType,
   MachineInspectionPageResponseDtoType,
+  machineProjectEngineerDetailDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
 import { createInitialSorting, HEADERS } from '@/app/_schema/TableHeader'
@@ -31,10 +32,11 @@ import SearchBar from '@/app/_components/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/app/_components/table/BasicTable'
 
+export const ParticipatedEngineersContext = createContext<machineProjectEngineerDetailDtoType[]>([])
+
 const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   // 모달 상태
   const [open, setOpen] = useState(false)
-  const [selectedMachine, setSelectedMachine] = useState<MachineInspectionDetailResponseDtoType>()
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
 
   // 데이터 상태
@@ -43,6 +45,12 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   const [error, setError] = useState(false)
 
   const disabled = loading || error
+
+  const [participatedEngineers, setParticipatedEngineers] = useState<machineProjectEngineerDetailDtoType[]>([])
+
+  // 테이블 행 선택
+  const [selectedMachine, setSelectedMachine] = useState<MachineInspectionDetailResponseDtoType>()
+  const [rowData, setRowData] = useState<MachineInspectionPageResponseDtoType>()
 
   // 페이지네이션 상태
   const [page, setPage] = useState(0)
@@ -62,10 +70,28 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
-  const queryParams = new URLSearchParams()
+  // 행 클릭
+  const handleRowClick = useCallback(
+    async (machine: MachineInspectionPageResponseDtoType) => {
+      try {
+        const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${machine?.machineInspectionId}`
+        )
+
+        setSelectedMachine(response.data.data)
+        setRowData(machine)
+        setOpen(true)
+      } catch (error) {
+        handleApiError(error)
+      }
+    },
+    [machineProjectId]
+  )
 
   // 데이터 불러오기
   const getFilteredData = useCallback(async () => {
+    const queryParams = new URLSearchParams()
+
     setLoading(true)
     setError(false)
 
@@ -102,35 +128,39 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
       setPage(result.page.number)
       setPageSize(result.page.size)
       setTotalCount(result.page.totalElements)
+
+      if (rowData) handleRowClick(rowData)
     } catch (error: any) {
       handleApiError(error, '데이터 조회에 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, pageSize, machineCateName, location])
+  }, [filters, sorting, page, pageSize, machineCateName, location, rowData, handleRowClick, machineProjectId])
 
   useEffect(() => {
     getFilteredData()
   }, [filters, getFilteredData, machineProjectId])
 
-  // 행 클릭
-  const handleRowClick = useCallback(
-    async (machine: MachineInspectionPageResponseDtoType) => {
-      try {
-        const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${machine?.machineInspectionId}`
-        )
+  // 해당 프로젝트에 참여 중인 기술진 목록 가져오기
+  // 참여기술진 목록 가져오기
+  const getParticipatedEngineers = useCallback(async () => {
+    try {
+      const response = await axios.get<{
+        data: { machineProjectEngineerResponseDtos: machineProjectEngineerDetailDtoType[] }
+      }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-project-engineers`
+      )
 
-        setSelectedMachine(response.data.data)
-        console.log(response.data.data)
-        setOpen(true)
-      } catch (error) {
-        handleApiError(error)
-      }
-    },
-    [machineProjectId]
-  )
+      setParticipatedEngineers(response.data.data.machineProjectEngineerResponseDtos)
+    } catch (error) {
+      handleApiError(error)
+    }
+  }, [machineProjectId])
+
+  useEffect(() => {
+    getParticipatedEngineers()
+  }, [getParticipatedEngineers])
 
   //  체크 핸들러 (다중선택)
   const handleCheckEngineer = (machine: MachineInspectionPageResponseDtoType) => {
@@ -200,179 +230,191 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   }
 
   return (
-    <div className='relative'>
-      {/* 필터바 */}
-      <TableFilters<MachineInspectionFilterType>
-        // ! 옵션 추가
-        filterInfo={{ engineerName: { label: '점검자', type: 'multi', options: [] } }}
-        filters={filters}
-        onFiltersChange={setFilters}
-        disabled={disabled}
-        setPage={setPage}
-      />
-      {/* 필터 초기화 버튼 */}
-      <Button
-        startIcon={<i className='tabler-reload' />}
-        onClick={() => {
-          setFilters({
-            engineerName: ''
-          })
-          setMachineCateName('')
-          setLocation('')
-        }}
-        className='max-sm:is-full absolute right-8 top-8'
-        disabled={disabled}
-      >
-        필터 초기화
-      </Button>
-      <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-        <div className='flex gap-2'>
-          {/* 이름으로 검색 */}
-          <SearchBar
-            placeholder='설비분류로 검색'
-            onClick={machineCateName => {
-              setMachineCateName(machineCateName)
-              setPage(0)
-            }}
-            disabled={disabled}
-          />
-          {/* 현장명으로 검색 */}
-          <SearchBar
-            placeholder='위치로 검색'
-            onClick={location => {
-              setLocation(location)
-              setPage(0)
-            }}
-            disabled={disabled}
-          />
-          <Button variant='contained' color='info' disabled={loading || error}>
-            점검대상 및 수량
-          </Button>
-        </div>
-
-        <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
-          {/* 한번에 삭제 */}
-          {!showCheckBox ? (
-            <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-              선택 삭제
-            </Button>
-          ) : (
-            <div className='flex gap-1'>
-              <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
-                {`(${checked.size}) 삭제`}
-              </Button>
-              <Button
-                variant='contained'
-                color='secondary'
-                onClick={() => {
-                  setShowCheckBox(prev => !prev)
-                  handleCheckAllEngineers(false)
-                }}
-              >
-                취소
-              </Button>
-            </div>
-          )}
-          <div className='flex gap-3 itmes-center'>
-            {/* 페이지당 행수 */}
-            <span className='grid place-items-center whitespace-nowrap'>페이지당 행 수 </span>
-            <CustomTextField
-              select
-              value={pageSize.toString()}
-              onChange={e => {
-                setPageSize(Number(e.target.value))
+    <ParticipatedEngineersContext.Provider value={participatedEngineers}>
+      <div className='relative'>
+        {/* 필터바 */}
+        <TableFilters<MachineInspectionFilterType>
+          // ! 옵션 추가
+          filterInfo={{
+            engineerName: {
+              label: '점검자',
+              type: 'multi',
+              options: participatedEngineers.map(engineer => ({
+                value: engineer.engineerName,
+                label: `${engineer.engineerName} (${engineer.gradeDescription})`
+              }))
+            }
+          }}
+          filters={filters}
+          onFiltersChange={setFilters}
+          disabled={disabled}
+          setPage={setPage}
+        />
+        {/* 필터 초기화 버튼 */}
+        <Button
+          startIcon={<i className='tabler-reload' />}
+          onClick={() => {
+            setFilters({
+              engineerName: ''
+            })
+            setMachineCateName('')
+            setLocation('')
+          }}
+          className='max-sm:is-full absolute right-8 top-8'
+          disabled={disabled}
+        >
+          필터 초기화
+        </Button>
+        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+          <div className='flex gap-2'>
+            {/* 이름으로 검색 */}
+            <SearchBar
+              placeholder='설비분류로 검색'
+              onClick={machineCateName => {
+                setMachineCateName(machineCateName)
                 setPage(0)
               }}
-              className='gap-[5px]'
               disabled={disabled}
-            >
-              {PageSizeOptions.map(pageSize => (
-                <MenuItem key={pageSize} value={pageSize}>
-                  {pageSize}
-                  {`\u00a0\u00a0`}
-                </MenuItem>
-              ))}
-            </CustomTextField>
+            />
+            {/* 현장명으로 검색 */}
+            <SearchBar
+              placeholder='위치로 검색'
+              onClick={location => {
+                setLocation(location)
+                setPage(0)
+              }}
+              disabled={disabled}
+            />
+            <Button variant='contained' color='info' disabled={loading || error}>
+              점검대상 및 수량
+            </Button>
           </div>
 
-          {/* 유저 추가 버튼 */}
-          <Button
-            variant='contained'
-            startIcon={<i className='tabler-plus' />}
-            onClick={() => setAddMachineModalOpen(true)}
-            className='max-sm:is-full'
-            disabled={disabled}
-          >
-            추가
-          </Button>
+          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+            {/* 한번에 삭제 */}
+            {!showCheckBox ? (
+              <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+                선택 삭제
+              </Button>
+            ) : (
+              <div className='flex gap-1'>
+                <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
+                  {`(${checked.size}) 삭제`}
+                </Button>
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  onClick={() => {
+                    setShowCheckBox(prev => !prev)
+                    handleCheckAllEngineers(false)
+                  }}
+                >
+                  취소
+                </Button>
+              </div>
+            )}
+            <div className='flex gap-3 itmes-center'>
+              {/* 페이지당 행수 */}
+              <span className='grid place-items-center whitespace-nowrap'>페이지당 행 수 </span>
+              <CustomTextField
+                select
+                value={pageSize.toString()}
+                onChange={e => {
+                  setPageSize(Number(e.target.value))
+                  setPage(0)
+                }}
+                className='gap-[5px]'
+                disabled={disabled}
+              >
+                {PageSizeOptions.map(pageSize => (
+                  <MenuItem key={pageSize} value={pageSize}>
+                    {pageSize}
+                    {`\u00a0\u00a0`}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            </div>
+
+            {/* 유저 추가 버튼 */}
+            <Button
+              variant='contained'
+              startIcon={<i className='tabler-plus' />}
+              onClick={() => setAddMachineModalOpen(true)}
+              className='max-sm:is-full'
+              disabled={disabled}
+            >
+              추가
+            </Button>
+          </div>
         </div>
+
+        {/* 테이블 */}
+        <BasicTable<MachineInspectionPageResponseDtoType>
+          listException={['engineerNames']}
+          header={HEADERS.machineInspection}
+          data={machineData}
+          handleRowClick={handleRowClick}
+          page={page}
+          pageSize={pageSize}
+          sorting={sorting}
+          setSorting={setSorting}
+          loading={loading}
+          error={error}
+          showCheckBox={showCheckBox}
+          isChecked={isChecked}
+          handleCheckItem={handleCheckEngineer}
+          handleCheckAllItems={handleCheckAllEngineers}
+        />
+
+        {/* 페이지네이션 */}
+        <TablePagination
+          rowsPerPageOptions={PageSizeOptions}
+          component='div'
+          count={totalCount}
+          rowsPerPage={pageSize}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={event => {
+            const newsize = parseInt(event.target.value, 10)
+
+            setPageSize(newsize)
+            setPage(0)
+          }}
+          disabled={disabled}
+          showFirstButton
+          showLastButton
+          labelRowsPerPage='페이지당 행 수:'
+          labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
+          sx={{
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            '.MuiTablePagination-toolbar': {
+              paddingLeft: 2,
+              paddingRight: 2
+            }
+          }}
+        />
+
+        {/* 모달 */}
+        {open && selectedMachine && (
+          <MachineDetailModal
+            machineProjectId={machineProjectId}
+            open={open}
+            setOpen={setOpen}
+            selectedMachineData={selectedMachine}
+            reloadData={getFilteredData}
+          />
+        )}
+        {addMachineModalOpen && (
+          <AddMachineModal
+            open={addMachineModalOpen}
+            setOpen={setAddMachineModalOpen}
+            machineProjectId={machineProjectId}
+            reloadData={getFilteredData}
+          />
+        )}
       </div>
-
-      {/* 테이블 */}
-      <BasicTable<MachineInspectionPageResponseDtoType>
-        listException={['engineerNames']}
-        header={HEADERS.machineInspection}
-        data={machineData}
-        handleRowClick={handleRowClick}
-        page={page}
-        pageSize={pageSize}
-        sorting={sorting}
-        setSorting={setSorting}
-        loading={loading}
-        error={error}
-        showCheckBox={showCheckBox}
-        isChecked={isChecked}
-        handleCheckItem={handleCheckEngineer}
-        handleCheckAllItems={handleCheckAllEngineers}
-      />
-
-      {/* 페이지네이션 */}
-      <TablePagination
-        rowsPerPageOptions={PageSizeOptions}
-        component='div'
-        count={totalCount}
-        rowsPerPage={pageSize}
-        page={page}
-        onPageChange={(_, newPage) => setPage(newPage)}
-        onRowsPerPageChange={event => {
-          const newsize = parseInt(event.target.value, 10)
-
-          setPageSize(newsize)
-          setPage(0)
-        }}
-        disabled={disabled}
-        showFirstButton
-        showLastButton
-        labelRowsPerPage='페이지당 행 수:'
-        labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
-        sx={{
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          '.MuiTablePagination-toolbar': {
-            paddingLeft: 2,
-            paddingRight: 2
-          }
-        }}
-      />
-
-      {/* 모달 */}
-      {open && selectedMachine && (
-        <MachineDetailModal
-          machineProjectId={machineProjectId}
-          open={open}
-          setOpen={setOpen}
-          selectedMachine={selectedMachine}
-        />
-      )}
-      {addMachineModalOpen && (
-        <AddMachineModal
-          open={addMachineModalOpen}
-          setOpen={setAddMachineModalOpen}
-          machineProjectId={machineProjectId}
-          onSuccess={handleAddMachineSuccess}
-        />
-      )}
-    </div>
+    </ParticipatedEngineersContext.Provider>
   )
 }
 

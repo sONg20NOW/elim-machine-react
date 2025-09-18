@@ -188,14 +188,14 @@ const MachineContent = ({ id }: any) => {
         }}
       />
       {/* 설비 중 하나 눌렀을 때 */}
-      <MachineDetailModal id={id} open={open} setOpen={setOpen} selectedMachine={selectedMachine} />
+      <MachineDetailModal id={id} open={open} setOpen={setOpen} selectedMachineData={selectedMachine} />
 
       {/* 설치 추가 눌렀을 때 */}
       <AddMachineModal
         open={addMachineModalOpen}
         setOpen={setAddMachineModalOpen}
         id={id}
-        onSuccess={handleAddMachineSuccess}
+        reloadData={handleAddMachineSuccess}
       />
     </div>
   )

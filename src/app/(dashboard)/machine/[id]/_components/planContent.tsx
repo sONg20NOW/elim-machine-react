@@ -13,11 +13,11 @@ import type {
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { MACHINE_PROJECT_ENGINEER_INPUT_INFO, MACHINE_SCHEDULE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
-import DefaultModal from '@/app/_components/DefaultModal'
 import CustomTextField from '@/@core/components/mui/TextField'
-import { EngineerOptionContext } from '../page'
+import { EngineerListContext, IsEditingContext } from '../page'
 import { gradeOption } from '@/app/_constants/options'
 import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'
+import AlertModal from '@/app/_components/modal/AlertModal'
 
 const PlanContent = ({
   scheduleData,
@@ -26,17 +26,16 @@ const PlanContent = ({
   scheduleData: MachineProjectScheduleAndEngineerResponseDtoType
   reloadData: () => Promise<void>
 }) => {
-  const engineerOption = useContext(EngineerOptionContext)
+  const { isEditing, setIsEditing } = useContext(IsEditingContext)
+
+  const engineerOption = useContext(EngineerListContext)
 
   const params = useParams()
   const machineProjectId = params?.id as string
 
-  const [editData, setEditData] = useState(() => ({
-    ...scheduleData,
-    engineers: scheduleData.engineers.map(e => ({ ...e })) // 배열 안 객체까지 복사
-  }))
-
-  const [isEditing, setIsEditing] = useState(false)
+  const [editData, setEditData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>(
+    JSON.parse(JSON.stringify(scheduleData))
+  )
 
   const [showAlertModal, setShowAlertModal] = useState(false)
 
@@ -125,7 +124,7 @@ const PlanContent = ({
                             if (existChange) {
                               setShowAlertModal(true)
                             } else {
-                              setEditData({ ...scheduleData, engineers: scheduleData.engineers.map(e => ({ ...e })) })
+                              setEditData(JSON.parse(JSON.stringify(scheduleData)))
                               setIsEditing(false)
                             }
                           }}
@@ -617,31 +616,12 @@ const PlanContent = ({
         )}
       </div>
       {showAlertModal && (
-        <DefaultModal
-          size='xs'
-          open={showAlertModal}
-          setOpen={setShowAlertModal}
-          title={'저장하지 않고 나가시겠습니까?'}
-          headerDescription={`지금까지 수정한 내용이 저장되지 않습니다.\n그래도 나가시겠습니까?`}
-          primaryButton={
-            <Button
-              variant='contained'
-              className='bg-color-warning hover:bg-color-warning-light'
-              onClick={() => {
-                setEditData({ ...scheduleData, engineers: scheduleData.engineers.map(e => ({ ...e })) })
-                setShowAlertModal(false)
-                setIsEditing(false)
-              }}
-              type='submit'
-            >
-              저장하지 않음
-            </Button>
-          }
-          secondaryButton={
-            <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowAlertModal(false)}>
-              취소
-            </Button>
-          }
+        <AlertModal<MachineProjectScheduleAndEngineerResponseDtoType>
+          showAlertModal={showAlertModal}
+          setShowAlertModal={setShowAlertModal}
+          setEditData={setEditData}
+          setIsEditing={setIsEditing}
+          originalData={scheduleData}
         />
       )}
     </div>

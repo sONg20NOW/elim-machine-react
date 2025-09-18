@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useState } from 'react'
 
 // MUI Imports
 
@@ -11,11 +11,12 @@ import { Box, DialogContent, Table, TableBody, TableCell, TableContainer, TableR
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/DefaultModal'
+import DefaultModal from '@/app/_components/modal/DefaultModal'
 import type { LicenseResponseDtoType } from '@/app/_type/types'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { LICENSE_INPUT_INFO } from '@/app/_schema/input/LicenseInputInfo'
+import DeleteModal from '@/app/_components/modal/DeleteModal'
 
 type DetailModalProps = {
   open: boolean
@@ -36,19 +37,13 @@ const groups = {
 }
 
 const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProps) => {
-  const [data, setUserData] = useState(initialData)
+  const [editData, setEditData] = useState<LicenseResponseDtoType>(JSON.parse(JSON.stringify(initialData)))
 
   const [isEditing, setIsEditing] = useState(false)
-  const [unsavedData, setUnsavedData] = useState(initialData)
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
-  // 수정할 때마다 unsavedUserData를 userData와 동기화
-  useEffect(() => {
-    setUnsavedData(data)
-  }, [isEditing, data])
-
-  const licenseId = data.id
+  const licenseId = editData.id
 
   const handleDeleteUser = async () => {
     try {
@@ -64,12 +59,12 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
     try {
       const response = await axios.put<{ data: LicenseResponseDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/${licenseId}`,
-        data
+        editData
       )
 
       const returnData = response.data.data
 
-      setUserData(returnData)
+      setEditData(returnData)
 
       handleSuccess(`라이선스 정보가 수정되었습니다.`)
       setIsEditing(false)
@@ -84,8 +79,8 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
       size='md'
       open={open}
       setOpen={setOpen}
-      title={unsavedData.companyName}
-      headerDescription={unsavedData.bizno}
+      title={initialData.companyName}
+      headerDescription={initialData.bizno}
       primaryButton={
         !isEditing ? (
           <Button variant='contained' onClick={() => setIsEditing(true)} type='submit'>
@@ -105,7 +100,7 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
             type='reset'
             onClick={() => {
               setIsEditing(false)
-              setUserData(unsavedData)
+              setEditData(JSON.parse(JSON.stringify(initialData)))
             }}
           >
             취소
@@ -126,7 +121,7 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
             <Table size='small'>
               <TableBody>
                 {groups.group1.map(value => {
-                  const key = value as keyof typeof data
+                  const key = value as keyof typeof editData
 
                   return (
                     <TableRow key={key}>
@@ -147,8 +142,8 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
                           isEditing={isEditing}
                           tabInfos={LICENSE_INPUT_INFO}
                           tabFieldKey={key}
-                          value={data[key] as string}
-                          onChange={value => setUserData({ ...unsavedData, [key]: value })}
+                          value={editData[key] as string}
+                          onChange={value => setEditData({ ...editData, [key]: value })}
                           showLabel={false}
                         />
                       </TableCell>
@@ -164,7 +159,7 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
             <Table size='small'>
               <TableBody>
                 {groups.group2.map(value => {
-                  const key = value as keyof typeof data
+                  const key = value as keyof typeof editData
 
                   return (
                     <TableRow key={key}>
@@ -185,8 +180,8 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
                           isEditing={isEditing}
                           tabInfos={LICENSE_INPUT_INFO}
                           tabFieldKey={key}
-                          value={data[key] as string}
-                          onChange={value => setUserData({ ...unsavedData, [key]: value })}
+                          value={editData[key] as string}
+                          onChange={value => setEditData({ ...editData, [key]: value })}
                           showLabel={false}
                         />
                       </TableCell>
@@ -201,7 +196,7 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
           <Table size='small'>
             <TableBody>
               {groups.addressGroup.map(value => {
-                const key = value as keyof typeof data
+                const key = value as keyof typeof editData
 
                 return (
                   <TableRow key={key}>
@@ -222,8 +217,8 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
                         isEditing={isEditing}
                         tabInfos={LICENSE_INPUT_INFO}
                         tabFieldKey={key}
-                        value={data[key] as string}
-                        onChange={value => setUserData({ ...unsavedData, [key]: value })}
+                        value={editData[key] as string}
+                        onChange={value => setEditData({ ...editData, [key]: value })}
                         showLabel={false}
                       />
                     </TableCell>
@@ -239,8 +234,8 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
             <InputBox
               tabInfos={LICENSE_INPUT_INFO}
               tabFieldKey={'remark'}
-              value={data.remark}
-              onChange={value => setUserData({ ...data, remark: value })}
+              value={editData.remark}
+              onChange={value => setEditData({ ...editData, remark: value })}
               showLabel={false}
             />
           ) : (
@@ -254,27 +249,15 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
                 minHeight: 110
               }}
             >
-              {data.remark}
+              {editData.remark}
             </Box>
           )}
         </div>
         {showDeleteModal && (
-          <DefaultModal
-            size='xs'
-            open={showDeleteModal}
-            setOpen={setShowDeleteModal}
-            title={'정말 삭제하시겠습니까?'}
-            headerDescription='삭제 후에는 되돌리지 못합니다.'
-            primaryButton={
-              <Button variant='contained' color='error' onClick={handleDeleteUser} type='submit'>
-                삭제
-              </Button>
-            }
-            secondaryButton={
-              <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
-                취소
-              </Button>
-            }
+          <DeleteModal
+            showDeleteModal={showDeleteModal}
+            setShowDeleteModal={setShowDeleteModal}
+            onDelete={handleDeleteUser}
           />
         )}
       </DialogContent>

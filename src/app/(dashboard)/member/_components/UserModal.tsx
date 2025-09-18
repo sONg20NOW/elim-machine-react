@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useState } from 'react'
 
 // MUI Imports
 
@@ -16,10 +16,13 @@ import { toast } from 'react-toastify'
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/DefaultModal'
+import DefaultModal from '@/app/_components/modal/DefaultModal'
 import MemberTabContent from './memberTabContent'
 import type { memberDetailDtoType } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import AlertModal from '@/app/_components/modal/AlertModal'
+import DeleteModal from '@/app/_components/modal/DeleteModal'
+import DisabledTabWithTooltip from '@/app/_components/DisabledTabWithTooltip'
 
 type requestRuleBodyType = {
   url: string
@@ -66,35 +69,28 @@ const requestRule: Record<tabType, requestRuleBodyType> = {
 type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  data: memberDetailDtoType
+  selectedUserData: memberDetailDtoType
   reloadData: () => void
 }
 
 export const MemberIdContext = createContext<number>(0)
 
-const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
+const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfoProps) => {
   const [value, setValue] = useState<tabType>('1')
-  const [userData, setUserData] = useState(data)
+  const [editData, setEditData] = useState<memberDetailDtoType>(JSON.parse(JSON.stringify(selectedUserData)))
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
 
   const [isEditing, setIsEditing] = useState(false)
-  const [unsavedUserData, setUnsavedUserData] = useState(data)
-
-  // 수정할 때마다 unsavedUserData를 userData와 동기화
-  useEffect(() => {
-    setUnsavedUserData(userData)
-    // eslint-disable-next-line
-  }, [isEditing])
 
   // 수정사항 여부
-  const existChange = JSON.stringify(userData) !== JSON.stringify(unsavedUserData)
+  const existChange = JSON.stringify(editData) !== JSON.stringify(selectedUserData)
 
-  const memberId = { ...userData?.memberBasicResponseDto }.memberId
-  const juminNum = { ...userData?.memberPrivacyResponseDto }.juminNum
+  const memberId = { ...editData?.memberBasicResponseDto }.memberId
+  const juminNum = { ...editData?.memberPrivacyResponseDto }.juminNum
 
   const handleDeleteUser = async () => {
-    const version = userData.memberBasicResponseDto?.version
+    const version = editData.memberBasicResponseDto?.version
 
     if (version !== undefined && memberId !== undefined) {
       try {
@@ -126,10 +122,10 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
   const onSubmitHandler = async () => {
     // 주민번호에 *이 있으면 빈 값으로 변경
     if (juminNum && juminNum.includes('*')) {
-      setUserData({
-        ...userData,
+      setEditData({
+        ...editData,
         memberPrivacyResponseDto: {
-          ...userData.memberPrivacyResponseDto,
+          ...editData.memberPrivacyResponseDto,
           juminNum: ''
         }
       })
@@ -138,13 +134,13 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
     try {
       const response = await axios.put<{ data: memberDetailDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${memberId}${requestRule[value].url}`,
-        { ...userData[requestRule[value].dtoKey] }
+        { ...editData[requestRule[value].dtoKey] }
       )
 
       const returnData = response.data.data
 
-      setUserData({
-        ...userData,
+      setEditData({
+        ...editData,
         [requestRule[value].dtoKey]: returnData
       })
       console.log(`${requestRule[value].value} info saved: `, returnData)
@@ -160,10 +156,17 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
     <MemberIdContext.Provider value={memberId ?? 0}>
       <DefaultModal
         value={value}
+        handleClose={() => {
+          if (existChange) {
+            setShowAlertModal(true)
+          } else {
+            setOpen(false)
+          }
+        }}
         open={open}
         setOpen={setOpen}
-        title={unsavedUserData?.memberBasicResponseDto?.name || '사용자 정보 수정'}
-        headerDescription={data?.memberBasicResponseDto?.companyName || '사용자 정보 수정'}
+        title={selectedUserData?.memberBasicResponseDto?.name || '사용자 정보 수정'}
+        headerDescription={selectedUserData?.memberBasicResponseDto?.companyName || '사용자 정보 수정'}
         primaryButton={
           isEditing ? (
             <Button variant='contained' onClick={onSubmitHandler} type='submit'>
@@ -197,26 +200,23 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
           )
         }
         secondaryButton={
-          <Button
-            variant='tonal'
-            color='secondary'
-            type='reset'
-            onClick={() => {
-              if (isEditing) {
+          isEditing && (
+            <Button
+              variant='contained'
+              color='secondary'
+              type='reset'
+              onClick={() => {
                 if (existChange) {
                   setShowAlertModal(true)
                 } else {
                   setIsEditing(false)
                 }
-              } else {
-                setOpen(false)
-              }
-            }}
-          >
-            취소
-          </Button>
+              }}
+            >
+              취소
+            </Button>
+          )
         }
-        handleClose={() => setOpen(false)}
       >
         <TabList
           centered
@@ -232,74 +232,42 @@ const UserModal = ({ open, setOpen, data, reloadData }: EditUserInfoProps) => {
           {Object.keys(requestRule).map(item => {
             const key = item as keyof typeof requestRule
 
-            return <Tab disabled={existChange && value !== key} key={key} value={key} label={requestRule[key].label} />
+            return existChange && value !== key ? (
+              <DisabledTabWithTooltip key={key} value={key} label={requestRule[key].label} />
+            ) : (
+              <Tab key={key} value={key} label={requestRule[key].label} />
+            )
           })}
         </TabList>
         <TabPanel value='1'>
-          <MemberTabContent isEditing={isEditing} tabName='basic' userData={userData} setUserData={setUserData} />
+          <MemberTabContent isEditing={isEditing} tabName='basic' userData={editData} setUserData={setEditData} />
         </TabPanel>
         <TabPanel value='2'>
-          <MemberTabContent isEditing={isEditing} tabName='privacy' userData={userData} setUserData={setUserData} />
+          <MemberTabContent isEditing={isEditing} tabName='privacy' userData={editData} setUserData={setEditData} />
         </TabPanel>
         <TabPanel value='3'>
-          <MemberTabContent isEditing={isEditing} tabName='office' userData={userData} setUserData={setUserData} />
+          <MemberTabContent isEditing={isEditing} tabName='office' userData={editData} setUserData={setEditData} />
         </TabPanel>
         <TabPanel value='4'>
-          <MemberTabContent isEditing={isEditing} tabName='career' userData={userData} setUserData={setUserData} />
+          <MemberTabContent isEditing={isEditing} tabName='career' userData={editData} setUserData={setEditData} />
         </TabPanel>
         <TabPanel value='5'>
-          <MemberTabContent isEditing={isEditing} tabName='etc' userData={userData} setUserData={setUserData} />
+          <MemberTabContent isEditing={isEditing} tabName='etc' userData={editData} setUserData={setEditData} />
         </TabPanel>
         {showDeleteModal && (
-          <DefaultModal
-            size='xs'
-            open={showDeleteModal}
-            setOpen={setShowDeleteModal}
-            title={'정말 삭제하시겠습니까?'}
-            headerDescription='삭제 후에는 되돌리지 못합니다.'
-            primaryButton={
-              <Button
-                variant='contained'
-                className='bg-color-warning hover:bg-color-warning-light'
-                onClick={onDeleteUserConfirm}
-                type='submit'
-              >
-                삭제
-              </Button>
-            }
-            secondaryButton={
-              <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowDeleteModal(false)}>
-                취소
-              </Button>
-            }
+          <DeleteModal
+            showDeleteModal={showDeleteModal}
+            setShowDeleteModal={setShowDeleteModal}
+            onDelete={onDeleteUserConfirm}
           />
         )}
         {showAlertModal && (
-          <DefaultModal
-            size='xs'
-            open={showAlertModal}
-            setOpen={setShowAlertModal}
-            title={'저장하지 않고 나가시겠습니까?'}
-            headerDescription='지금까지 수정한 내용이 저장되지 않습니다. 그래도 나가시겠습니까?'
-            primaryButton={
-              <Button
-                variant='contained'
-                className='bg-color-warning hover:bg-color-warning-light'
-                onClick={() => {
-                  setUserData(unsavedUserData)
-                  setShowAlertModal(false)
-                  setIsEditing(false)
-                }}
-                type='submit'
-              >
-                저장하지 않음
-              </Button>
-            }
-            secondaryButton={
-              <Button variant='tonal' color='secondary' type='reset' onClick={() => setShowAlertModal(false)}>
-                취소
-              </Button>
-            }
+          <AlertModal<memberDetailDtoType>
+            showAlertModal={showAlertModal}
+            setShowAlertModal={setShowAlertModal}
+            setEditData={setEditData}
+            setIsEditing={setIsEditing}
+            originalData={selectedUserData}
           />
         )}
       </DefaultModal>

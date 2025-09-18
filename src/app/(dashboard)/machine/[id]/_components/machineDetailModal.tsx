@@ -3,7 +3,7 @@
 // React Imports
 import { useCallback, useContext, useEffect, useState } from 'react'
 
-import { Button, Typography, Tooltip, Tab, Divider, TextField } from '@mui/material'
+import { Button, Typography, Tooltip, Tab, Divider, TextField, Card, MenuItem } from '@mui/material'
 import axios from 'axios'
 
 import TabList from '@mui/lab/TabList'
@@ -11,14 +11,16 @@ import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 
 import InspectionDetailModal from './insepctionDetailModal'
-import { EngineerOptionContext } from '../page'
-import type { MachineInspectionDetailResponseDtoType, machineProjectEngineerDetailDtoType } from '@/app/_type/types'
-import DefaultModal from '@/app/_components/DefaultModal'
-import { handleApiError } from '@/utils/errorHandler'
+import type { MachineInspectionDetailResponseDtoType } from '@/app/_type/types'
+import DefaultModal from '@/app/_components/modal/DefaultModal'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 // style
 import styles from '@/app/_style/Table.module.css'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
+import DisabledTabWithTooltip from '@/app/_components/DisabledTabWithTooltip'
+import AlertModal from '@/app/_components/modal/AlertModal'
+import { ParticipatedEngineersContext } from './machineContent'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -54,110 +56,120 @@ type EditUserInfoProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
-  selectedMachine: MachineInspectionDetailResponseDtoType
+  selectedMachineData: MachineInspectionDetailResponseDtoType
+  reloadData: () => Promise<void>
 }
 
-const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }: EditUserInfoProps) => {
-  const engineerOption = useContext(EngineerOptionContext)
+const MachineDetailModal = ({
+  machineProjectId,
+  open,
+  setOpen,
+  selectedMachineData,
+  reloadData
+}: EditUserInfoProps) => {
+  const participatedEngineers = useContext(ParticipatedEngineersContext)
 
-  // 데이터
-  const [unChangedData, setUnChangedData] = useState<MachineInspectionDetailResponseDtoType>(selectedMachine)
-
-  // 수정 시 변경되는 데이터 (저장되기 전)
-  const [machineInfo, setMachineInfo] = useState(selectedMachine.machineInspectionResponseDto)
-  const [picCates, setPicCates] = useState(selectedMachine.picCates)
-  const [gasInfo, setGasInfo] = useState(selectedMachine.gasMeasurementResponseDto)
-  const [windInfo, setWindInfo] = useState(selectedMachine.windMeasurementResponseDtos)
-  const [pipeInfo, setPipeInfo] = useState(selectedMachine.pipeMeasurementResponseDtos)
-  const [engineerIds, setEngineerIds] = useState(selectedMachine.engineerIds)
+  // 수정 시 변경되는 데이터 (저장되기 전) - 깊은 복사
+  const [editData, setEditData] = useState<MachineInspectionDetailResponseDtoType>(
+    JSON.parse(JSON.stringify(selectedMachineData))
+  )
 
   // 성능점검표 모달
   const [openPicModal, setOpenPicModal] = useState<boolean>(false)
   const [clickedPicCate, setClickedPicCate] = useState<any>(null)
 
+  const [showAlertModal, setShowAlertModal] = useState(false)
+
   // 탭
   const [tabValue, setTabValue] = useState('BASIC')
-  const thisTabInfo = TabInfo[selectedMachine.checklistExtensionType]
+  const thisTabInfo = TabInfo[selectedMachineData.checklistExtensionType]
 
   // 참여기술진 목록
-  const [participatedEngineers, setParticipatedEngineers] = useState<machineProjectEngineerDetailDtoType[]>([])
 
   const [isEditing, setIsEditing] = useState(false)
 
-  const handleClose = () => {
-    setOpen(false)
-  }
+  // 저장되었을 경우 최신화
+  useEffect(() => setEditData(JSON.parse(JSON.stringify(selectedMachineData))), [selectedMachineData])
 
-  // 사진 업로드 후 데이터 새로고침 함수
-  const handlePhotoUploadSuccess = async () => {
-    if (!selectedMachine || !selectedMachine.machineInspectionResponseDto.id) return
+  const existChange =
+    JSON.stringify(selectedMachineData) !==
+    JSON.stringify({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) })
 
-    try {
-      const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}`
-      )
-
-      setUnChangedData(response.data.data)
-      console.log('Data refreshed after photo upload - 점검결과 즉시 업데이트됨')
-    } catch (error) {
-      handleApiError(error)
+  const handleLeaveWithoutSave = () => {
+    if (existChange) {
+      setEditData(JSON.parse(JSON.stringify(selectedMachineData)))
     }
   }
-
-  // 참여기술진 목록 가져오기
-  const getParticipatedEngineers = useCallback(async () => {
-    try {
-      const response = await axios.get<{
-        data: { machineProjectEngineerResponseDtos: machineProjectEngineerDetailDtoType[] }
-      }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-project-engineers`
-      )
-
-      setParticipatedEngineers(response.data.data.machineProjectEngineerResponseDtos)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [machineProjectId])
-
-  useEffect(() => {
-    getParticipatedEngineers()
-  }, [getParticipatedEngineers])
 
   // 저장 시 각 탭에 따라 다르게 동작 (! 기본 정보 수정 시 )
   const handleSave = useCallback(async () => {
-    try {
-      let postURL = ''
+    if (existChange) {
+      // 1. POST를 보내고
+      try {
+        let postURL = ''
+        let requestBody = ''
 
-      switch (tabValue) {
-        case 'BASIC':
-          postURL = ''
-          break
-        case 'PIC':
-          postURL = ''
-          break
-        case 'GAS':
-          postURL = '/gasMeasurement'
-          break
-        case 'WIND':
-          postURL
-          break
-        case 'PIPE':
-          break
+        switch (tabValue) {
+          case 'BASIC':
+            postURL = ''
+            requestBody = JSON.stringify(editData.machineInspectionResponseDto)
+            break
 
-        default:
-          break
+          // ! 미흡사항 수정, 점검결과 수정
+          // case 'PIC':
+          //   postURL = ''
+          //   requestBody = JSON.stringify(editData.picCates)
+          //   break
+          case 'GAS':
+            postURL = '/gasMeasurements'
+            requestBody = JSON.stringify(editData.gasMeasurementResponseDto)
+            break
+          case 'WIND':
+            postURL = '/windMeasurements'
+            requestBody = JSON.stringify({ windMeasurementUpdateRequestDtos: editData.windMeasurementResponseDtos })
+            break
+          case 'PIPE':
+            postURL = '/pipeMeasurements'
+            requestBody = JSON.stringify({ pipeMeasurementUpdateRequestDtos: editData.pipeMeasurementResponseDtos })
+            break
+          default:
+            break
+        }
+
+        if (requestBody !== '') {
+          await axios.put(
+            `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}${postURL}`,
+            JSON.parse(requestBody)
+          )
+
+          // tabValue가 BASIC이라면 참여기술진 변경사항도 POST.
+          if (
+            tabValue === 'BASIC' &&
+            JSON.stringify(editData.engineerIds.filter(id => id > 0)) !==
+              JSON.stringify(selectedMachineData.engineerIds)
+          ) {
+            await axios.put<{ data: { engineerIds: number[] } }>(
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/machine-inspection-engineers`,
+              { engineerIds: editData.engineerIds.filter(id => id > 0) }
+            )
+          }
+        } else {
+          throw new Error()
+        }
+
+        // 2. 리스트 데이터를 새로 받기.
+        await reloadData()
+        handleSuccess(`${thisTabInfo.find(tabInfo => tabInfo.value === tabValue)?.label ?? ''}가 수정되었습니다.`)
+      } catch (error) {
+        handleApiError(error)
       }
-
-      const response = axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}${postURL}`
-      )
-    } catch (error) {
-      handleApiError(error)
     }
-  }, [])
+
+    setIsEditing(prev => !prev)
+  }, [editData, existChange, machineProjectId, reloadData, selectedMachineData, tabValue, thisTabInfo])
 
   return (
-    machineInfo && (
+    selectedMachineData && (
       <DefaultModal
         modifyButton={
           <Button variant='contained' color='error'>
@@ -167,44 +179,70 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
         value={tabValue}
         open={open}
         setOpen={setOpen}
-        title={`${unChangedData.machineInspectionResponseDto.machineInspectionName || ''}   성능점검표`}
+        title={`${selectedMachineData.machineInspectionResponseDto.machineInspectionName || ''}   성능점검표`}
         primaryButton={
           <div style={{ display: 'flex', gap: 1 }}>
-            <Button variant='contained' color='primary' onClick={() => setIsEditing(prev => !prev)}>
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={() => {
+                if (!isEditing) {
+                  setIsEditing(prev => !prev)
+                } else {
+                  handleSave()
+                }
+              }}
+            >
               {!isEditing ? '수정' : '저장'}
             </Button>
 
-            <Button variant='contained' color='secondary' onClick={handleClose}>
-              닫기
-            </Button>
+            {isEditing && (
+              <Button
+                variant='contained'
+                color='secondary'
+                onClick={() => {
+                  if (existChange) {
+                    setShowAlertModal(true)
+                  } else {
+                    setIsEditing(false)
+                    setEditData(prev => ({ ...prev, engineerIds: prev.engineerIds.filter(id => id > 0) }))
+                  }
+                }}
+              >
+                취소
+              </Button>
+            )}
           </div>
         }
       >
-        <div className={styles.container}>
+        <div className={`${styles.container} relative`}>
           <TabList
-            className='relative'
             onChange={(event, newValue) => {
-              // if (existChange) {
-              //   setShowAlertModal(true)
-              // } else {
-              //   setValue(newValue)
-              // }
-              setTabValue(newValue)
+              if (existChange) {
+                setShowAlertModal(true)
+              } else {
+                setTabValue(newValue)
+              }
             }}
           >
-            {unChangedData.checklistExtensionType === 'NONE'
+            {selectedMachineData.checklistExtensionType === 'NONE'
               ? null
-              : thisTabInfo.map(tab => <Tab key={tab.value} value={tab.value} label={tab.label} />)}
-            {}
-            <div className='flex gap-2 absolute right-0'>
-              <Button variant='contained' color='info'>
-                갤러리 ({picCates.reduce((sum, cate) => (sum += cate.totalMachinePicCount), 0)})
-              </Button>
-              <Button variant='contained' color='success'>
-                보고서
-              </Button>
-            </div>
+              : thisTabInfo.map(tab =>
+                  existChange && tabValue !== tab.value ? (
+                    <DisabledTabWithTooltip key={tab.value} value={tab.value} label={tab.label} />
+                  ) : (
+                    <Tab key={tab.value} value={tab.value} label={tab.label} />
+                  )
+                )}
           </TabList>
+          <div className='flex gap-2 absolute right-0 top-0'>
+            <Button variant='contained' color='info'>
+              갤러리 ({editData.picCates.reduce((sum, cate) => (sum += cate.totalMachinePicCount), 0)})
+            </Button>
+            <Button variant='contained' color='success'>
+              보고서
+            </Button>
+          </div>
           <TabPanel value={'BASIC'}>
             <div className='flex flex-col gap-5'>
               <table style={{ tableLayout: 'fixed' }}>
@@ -213,61 +251,226 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
                     <th>설비명</th>
                     <td colSpan={2}>
                       {!isEditing ? (
-                        machineInfo.machineInspectionName
+                        editData.machineInspectionResponseDto.machineInspectionName
                       ) : (
                         <TextField
                           size='small'
-                          slotProps={{
-                            htmlInput: { sx: { padding: 0 } }
-                          }}
-                          value={machineInfo.machineInspectionName}
-                          onChange={e => setMachineInfo(prev => ({ ...prev, machineInspectionName: e.target.value }))}
+                          value={editData.machineInspectionResponseDto.machineInspectionName}
+                          onChange={e =>
+                            setEditData(prev => ({
+                              ...prev,
+                              machineInspectionResponseDto: {
+                                ...prev.machineInspectionResponseDto,
+                                machineInspectionName: e.target.value
+                              }
+                            }))
+                          }
                           variant='standard'
                         />
                       )}
                     </td>
                     <th>설치일</th>
-                    <td colSpan={2}>{machineInfo.installedDate}</td>
+                    <td colSpan={2}>
+                      {!isEditing ? (
+                        editData.machineInspectionResponseDto.installedDate
+                      ) : (
+                        <TextField
+                          type='date'
+                          size='small'
+                          value={editData.machineInspectionResponseDto.installedDate}
+                          onChange={e =>
+                            setEditData(prev => ({
+                              ...prev,
+                              machineInspectionResponseDto: {
+                                ...prev.machineInspectionResponseDto,
+                                installedDate: e.target.value
+                              }
+                            }))
+                          }
+                          variant='standard'
+                        />
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <th>종류</th>
-                    <td colSpan={2}>{machineInfo.machineCateName}</td>
+                    <td colSpan={2}>
+                      <Tooltip arrow title='종류는 변경할 수 없습니다.'>
+                        <span>{editData.machineInspectionResponseDto.machineCategoryName}</span>
+                      </Tooltip>
+                    </td>
                     <th>점검일</th>
-                    <td colSpan={2}>{machineInfo.checkDate}</td>
+                    <td colSpan={2}>
+                      {!isEditing ? (
+                        editData.machineInspectionResponseDto.checkDate
+                      ) : (
+                        <TextField
+                          type='date'
+                          size='small'
+                          value={editData.machineInspectionResponseDto.checkDate}
+                          onChange={e =>
+                            setEditData(prev => ({
+                              ...prev,
+                              machineInspectionResponseDto: {
+                                ...prev.machineInspectionResponseDto,
+                                checkDate: e.target.value
+                              }
+                            }))
+                          }
+                          variant='standard'
+                        />
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <th>용도</th>
-                    <td colSpan={2}>{machineInfo.purpose}</td>
+                    <td colSpan={2}>
+                      {!isEditing ? (
+                        editData.machineInspectionResponseDto.purpose
+                      ) : (
+                        <TextField
+                          size='small'
+                          value={editData.machineInspectionResponseDto.purpose}
+                          onChange={e =>
+                            setEditData(prev => ({
+                              ...prev,
+                              machineInspectionResponseDto: {
+                                ...prev.machineInspectionResponseDto,
+                                purpose: e.target.value
+                              }
+                            }))
+                          }
+                          variant='standard'
+                        />
+                      )}
+                    </td>
                     <th>위치</th>
-                    <td colSpan={2}>{machineInfo.location}</td>
+                    <td colSpan={2}>
+                      {!isEditing ? (
+                        editData.machineInspectionResponseDto.location
+                      ) : (
+                        <TextField
+                          size='small'
+                          value={editData.machineInspectionResponseDto.location}
+                          onChange={e =>
+                            setEditData(prev => ({
+                              ...prev,
+                              machineInspectionResponseDto: {
+                                ...prev.machineInspectionResponseDto,
+                                location: e.target.value
+                              }
+                            }))
+                          }
+                          variant='standard'
+                        />
+                      )}
+                    </td>
                   </tr>
                 </tbody>
               </table>
-              <table>
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>이름 / 등급</th>
-                    <th>라이선스번호</th>
 
-                    <th>투입기간</th>
-                    <th>비고</th>
-                  </tr>
-                </thead>
+              <div>
+                <span className='font-bold ps-1'>점검자 목록</span>
+                <div className='grid grid-cols-4 gap-2'>
+                  {!isEditing
+                    ? (selectedMachineData.engineerIds || []).map((id, idx) => {
+                        const engineer = participatedEngineers.find(value => value.engineerId === id)
+
+                        return (
+                          <Card
+                            key={idx}
+                            variant='outlined'
+                            sx={{ px: 4, py: 2, border: '1px solid #d1d5db' }}
+                          >{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</Card>
+                        )
+                      })
+                    : editData.engineerIds
+                        .map((id, idx) => {
+                          const engineer = participatedEngineers.find(value => value.engineerId === id)
+
+                          return (
+                            <Card key={idx} variant='outlined' sx={{ px: 2, py: 2, border: '1px solid #d1d5db' }}>
+                              <TextField
+                                slotProps={{
+                                  htmlInput: { sx: { padding: 0 } }
+                                }}
+                                fullWidth
+                                SelectProps={{ IconComponent: () => null }}
+                                value={engineer?.engineerId ?? -1}
+                                select
+                                variant='standard'
+                                onChange={e => {
+                                  editData.engineerIds.splice(idx, 1, Number(e.target.value))
+
+                                  setEditData(prev => ({
+                                    ...prev,
+                                    engineerIds: prev.engineerIds
+                                  }))
+                                }}
+                              >
+                                {participatedEngineers.map(engineer => (
+                                  <MenuItem
+                                    key={engineer.engineerId}
+                                    value={engineer.engineerId}
+                                    disabled={editData.engineerIds.includes(engineer.engineerId)}
+                                  >{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</MenuItem>
+                                ))}
+                                <MenuItem
+                                  sx={{ color: 'white', bgcolor: 'error.light' }}
+                                  onClick={() =>
+                                    setEditData(prev => ({
+                                      ...prev,
+                                      engineerIds: prev.engineerIds.filter((id, index) => idx !== index)
+                                    }))
+                                  }
+                                >
+                                  삭제
+                                </MenuItem>
+                              </TextField>
+                            </Card>
+                          )
+                        })
+                        .concat(
+                          <Card
+                            key={'plus'}
+                            sx={{ bgcolor: 'primary.light', border: 'solid 2px', borderColor: 'primary.main' }}
+                            variant='outlined'
+                            component={Button}
+                            onClick={() =>
+                              setEditData(prev => ({ ...prev, engineerIds: editData.engineerIds.concat(0) }))
+                            }
+                          >
+                            <i className='tabler-plus text-white' />
+                          </Card>
+                        )}
+                </div>
+              </div>
+              <table style={{ tableLayout: 'fixed' }}>
                 <tbody>
-                  {(unChangedData.engineerIds || []).map((id, idx) => {
-                    const engineer = participatedEngineers.find(value => value.engineerId === id)
-
-                    return (
-                      <tr key={idx}>
-                        <th>점검자 {idx + 1}</th>
-                        <td>{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</td>
-                        <td>{`${engineer?.engineerLicenseNum}`}</td>
-                        <td>{`${engineer?.beginDate} ~ ${engineer?.endDate}`}</td>
-                        <td>{`${engineer?.note ?? ''}`}</td>
-                      </tr>
-                    )
-                  })}
+                  <tr>
+                    <th>비고</th>
+                    <td colSpan={8} height={100}>
+                      {!isEditing ? (
+                        editData.machineInspectionResponseDto.remark
+                      ) : (
+                        <TextField
+                          slotProps={{ input: { sx: { height: '100%' } } }}
+                          fullWidth
+                          multiline
+                          value={editData.machineInspectionResponseDto.remark}
+                          onChange={e =>
+                            setEditData(prev => ({
+                              ...prev,
+                              machineInspectionResponseDto: {
+                                ...prev.machineInspectionResponseDto,
+                                remark: e.target.value
+                              }
+                            }))
+                          }
+                        />
+                      )}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -282,11 +485,11 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
                 </tr>
               </thead>
               <tbody>
-                {picCates.map((cate, idx) => {
+                {editData.picCates.map((cate, idx) => {
                   return (
-                    <tr key={cate.machinePicCateId}>
+                    <tr key={cate.machineChecklistItemId}>
                       {idx === 0 && (
-                        <th rowSpan={picCates.length} style={{ verticalAlign: 'top' }}>
+                        <th rowSpan={editData.picCates.length} style={{ verticalAlign: 'top' }}>
                           점검항목
                         </th>
                       )}
@@ -308,9 +511,9 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
                           }}
                           arrow
                           placement='right'
-                          title={cate.subCates.map((subCate, index) => (
+                          title={cate.checklistSubItems.map((subCate, index) => (
                             <Typography sx={{ bgcolor: 'white' }} key={index}>
-                              {index + 1}. {subCate.subCateName}
+                              {index + 1}. {subCate.checklistSubItemName}
                               <Typography component={'span'} color='primary.main'>
                                 {subCate.machinePicCount ? ` (${subCate.machinePicCount})` : ''}
                               </Typography>
@@ -326,7 +529,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
                               width: 'fit-content'
                             }}
                           >
-                            {idx + 1}. {cate.machinePicCateName}
+                            {idx + 1}. {cate.machineChecklistItemName}
                             <Typography component={'span'} color='primary.main'>
                               {cate.totalMachinePicCount ? ` (${cate.totalMachinePicCount})` : ''}
                             </Typography>
@@ -346,16 +549,10 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
                     </tr>
                   )
                 })}
-                <tr>
-                  <th>비고</th>
-                  <td colSpan={2} rowSpan={4}>
-                    {machineInfo.remark ?? '　'}
-                  </td>
-                </tr>
               </tbody>
             </table>
           </TabPanel>
-          {gasInfo && (
+          {editData.gasMeasurementResponseDto && (
             <TabPanel value={'GAS'}>
               <div className='flex flex-col gap-5'>
                 <div className='flex flex-col gap-1'>
@@ -364,9 +561,9 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
                     <tbody>
                       <tr>
                         <th style={{ width: 80 }}>연료</th>
-                        <td>{gasInfo.fuelType}</td>
+                        <td>{editData.gasMeasurementResponseDto.fuelType}</td>
                         <th style={{ width: 100 }}>보일러용량</th>
-                        <td>{gasInfo.capacity}</td>
+                        <td>{editData.gasMeasurementResponseDto.capacity}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -383,26 +580,26 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
                       </tr>
                       <tr>
                         <th>O₂</th>
-                        <td>{gasInfo.o2}</td>
+                        <td>{editData.gasMeasurementResponseDto.o2}</td>
                         <th>CO</th>
-                        <td>{gasInfo.co}</td>
+                        <td>{editData.gasMeasurementResponseDto.co}</td>
                       </tr>
                       <tr>
                         <th>XAir</th>
-                        <td>{gasInfo.xair}</td>
+                        <td>{editData.gasMeasurementResponseDto.xair}</td>
                         <th>CO₂ Ratio</th>
-                        <td>{gasInfo.co2Ratio}</td>
+                        <td>{editData.gasMeasurementResponseDto.co2Ratio}</td>
                       </tr>
                       <tr>
                         <th>Eff.</th>
-                        <td>{gasInfo.eff}</td>
+                        <td>{editData.gasMeasurementResponseDto.eff}</td>
                         <th>NO</th>
-                        <td>{gasInfo.no}</td>
+                        <td>{editData.gasMeasurementResponseDto.no}</td>
                       </tr>
                       <tr>
                         <td style={{ borderLeft: 'none', borderBottom: 'none' }} colSpan={2}></td>
                         <th>NOx</th>
-                        <td>{gasInfo.nox}</td>
+                        <td>{editData.gasMeasurementResponseDto.nox}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -423,11 +620,11 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
                         <th>계량기 표시</th>
                       </tr>
                       <tr>
-                        <td>{gasInfo.standardUsage ?? '　'}</td>
-                        <td>{gasInfo.startTime}</td>
-                        <td>{gasInfo.startMeterValue}</td>
-                        <td>{gasInfo.endTime}</td>
-                        <td>{gasInfo.endMeterValue}</td>
+                        <td>{editData.gasMeasurementResponseDto.standardUsage ?? '　'}</td>
+                        <td>{editData.gasMeasurementResponseDto.startTime}</td>
+                        <td>{editData.gasMeasurementResponseDto.startMeterValue}</td>
+                        <td>{editData.gasMeasurementResponseDto.endTime}</td>
+                        <td>{editData.gasMeasurementResponseDto.endMeterValue}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -435,10 +632,10 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
               </div>
             </TabPanel>
           )}
-          {windInfo && (
+          {editData.windMeasurementResponseDtos && (
             <TabPanel value={'WIND'}>
               <div className='flex flex-col gap-8'>
-                {windInfo.map((info, idx) => (
+                {editData.windMeasurementResponseDtos.map((info, idx) => (
                   <div key={info.windMeasurementId} className='flex-col flex gap-4'>
                     {idx !== 0 && <Divider />}
                     <div className='flex flex-col gap-1' key={info.windMeasurementId * 2}>
@@ -509,10 +706,10 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
               </div>
             </TabPanel>
           )}
-          {pipeInfo && (
+          {editData.pipeMeasurementResponseDtos && (
             <TabPanel value={'PIPE'}>
               <div className='flex-col flex gap-5'>
-                {pipeInfo.map((info, idx) => (
+                {editData.pipeMeasurementResponseDtos.map((info, idx) => (
                   <div key={idx} className='flex-col flex gap-4'>
                     {idx !== 0 && <Divider />}
                     <div className='flex flex-col gap-1'>
@@ -550,10 +747,19 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen, selectedMachine }
           machineProjectId={machineProjectId}
           open={openPicModal}
           setOpen={setOpenPicModal}
-          inspectionData={unChangedData}
+          inspectionData={selectedMachineData}
           clickedPicCate={clickedPicCate}
-          onPhotoUploadSuccess={handlePhotoUploadSuccess}
+          onPhotoUploadSuccess={reloadData}
         />
+        {showAlertModal && (
+          <AlertModal<MachineInspectionDetailResponseDtoType>
+            showAlertModal={showAlertModal}
+            setShowAlertModal={setShowAlertModal}
+            setEditData={setEditData}
+            setIsEditing={setIsEditing}
+            originalData={selectedMachineData}
+          />
+        )}
       </DefaultModal>
     )
   )

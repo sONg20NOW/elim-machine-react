@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { useForm } from 'react-hook-form'
 
-import DefaultModal from '@/app/_components/DefaultModal'
+import DefaultModal from '@/app/_components/modal/DefaultModal'
 
 type ForgotForm = { email: string }
 type VerifyForm = { email: string; code: string }
