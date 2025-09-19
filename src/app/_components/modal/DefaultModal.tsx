@@ -25,7 +25,7 @@ type DefaultModalProps = {
   secondaryButton?: ReactNode
   modifyButton?: ReactNode
   deleteButton?: ReactNode
-  handleClose?: () => void
+  onClose?: () => void
 }
 
 /**
@@ -49,7 +49,7 @@ export default function DefaultModal({
   secondaryButton,
   modifyButton,
   deleteButton,
-  handleClose = () => {
+  onClose = () => {
     setOpen(false)
   }
 }: DefaultModalProps) {
@@ -58,7 +58,7 @@ export default function DefaultModal({
     <Dialog
       fullWidth
       open={open}
-      onClose={(_, reason) => reason !== 'backdropClick' && handleClose()}
+      onClose={(_, reason) => reason !== 'backdropClick' && onClose()}
       maxWidth={size}
       scroll='paper' // ✅ DialogContent 안에서만 스크롤
       closeAfterTransition={false}
@@ -67,7 +67,7 @@ export default function DefaultModal({
       {/* 닫기 버튼 */}
       <IconButton
         aria-label='close'
-        onClick={handleClose}
+        onClick={onClose}
         sx={theme => ({
           position: 'absolute',
           right: 8,

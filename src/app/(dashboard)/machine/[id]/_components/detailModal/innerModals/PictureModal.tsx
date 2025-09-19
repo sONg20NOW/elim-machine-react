@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Card, Box, Typography } from '@mui/material'
 import axios from 'axios'
 
-type EditUserInfoProps = {
+type PictureModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
@@ -15,14 +15,14 @@ type EditUserInfoProps = {
   onPhotoUploadSuccess?: () => void // 사진 업로드 성공 콜백 추가
 }
 
-const InspectionDetailModal = ({
+const PictureModal = ({
   machineProjectId,
   open,
   setOpen,
   inspectionData,
   clickedPicCate,
   onPhotoUploadSuccess
-}: EditUserInfoProps) => {
+}: PictureModalProps) => {
   // 사진 리스트
   const [selectedInspection, setSelectedInspection] = useState<any>(null)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
@@ -365,4 +365,4 @@ const InspectionDetailModal = ({
   )
 }
 
-export default InspectionDetailModal
+export default PictureModal

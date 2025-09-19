@@ -50,7 +50,7 @@ export const HEADERS = {
     location: { label: '위치', canSort: false },
     engineerNames: { label: '점검자', canSort: false },
     checkDate: { label: '점검일', canSort: false },
-    inspectionStatusDescription: { label: '결과', canSort: false }
+    inspectionStatus: { label: '결과', canSort: false }
   } as Record<keyof MachineInspectionPageResponseDtoType, HeaderInfoType>,
   engineers: {
     companyName: { label: '회사명', canSort: false },

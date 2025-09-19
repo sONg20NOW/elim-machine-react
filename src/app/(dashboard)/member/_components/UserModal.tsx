@@ -156,7 +156,7 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
     <MemberIdContext.Provider value={memberId ?? 0}>
       <DefaultModal
         value={value}
-        handleClose={() => {
+        onClose={() => {
           if (existChange) {
             setShowAlertModal(true)
           } else {
@@ -200,7 +200,7 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           )
         }
         secondaryButton={
-          isEditing && (
+          isEditing ? (
             <Button
               variant='contained'
               color='secondary'
@@ -214,6 +214,10 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
               }}
             >
               취소
+            </Button>
+          ) : (
+            <Button variant='contained' color='secondary' onClick={() => setOpen(false)}>
+              닫기
             </Button>
           )
         }

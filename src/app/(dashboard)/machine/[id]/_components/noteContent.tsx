@@ -1,14 +1,25 @@
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { Button } from '@mui/material'
 import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import type { MachineProjectResponseDtoType } from '@/app/_type/types'
+import { IsEditingContext } from '../page'
 
-const NoteContent = ({ id, projectData }: any) => {
-  const [note, setNote] = useState(projectData?.machineProjectScheduleAndEngineerResponseDto?.note || '')
+const NoteContent = ({ id, projectData }: { id: string; projectData: MachineProjectResponseDtoType }) => {
+  const { isEditing, setIsEditing } = useContext(IsEditingContext)
+  const [note, setNote] = useState(projectData?.note || '')
 
   const [isSaving, setIsSaving] = useState(false)
+
+  // ! 수정사항이 있다면 탭 변경 불가하도록.
+  useEffect(() => {
+    if (note) {
+      setIsEditing(note !== projectData.note)
+    }
+  }, [note, projectData, setIsEditing])
 
   console.log('projectData in NoteContent:', projectData)
 
@@ -17,20 +28,19 @@ const NoteContent = ({ id, projectData }: any) => {
       setIsSaving(true)
 
       const updatedData = {
-        ...projectData.machineProjectScheduleAndEngineerResponseDto,
+        version: projectData.version,
         note: note
       }
 
       const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${id}/schedule`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${id}/note`,
         updatedData
       )
 
       console.log('참고사항 저장 성공:', response.data)
-      alert('특이사항이 성공적으로 저장되었습니다.')
+      handleSuccess('특이사항이 성공적으로 저장되었습니다.')
     } catch (error) {
-      console.error('참고사항 저장 실패:', error)
-      alert('특이사항 저장에 실패했습니다.')
+      handleApiError(error)
     } finally {
       setIsSaving(false)
     }

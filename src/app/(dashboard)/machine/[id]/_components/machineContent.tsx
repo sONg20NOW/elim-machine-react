@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useContext, createContext } from 'react'
+import { useEffect, useState, useCallback, createContext } from 'react'
 
 // MUI Imports
 import Button from '@mui/material/Button'
@@ -11,7 +11,7 @@ import { MenuItem } from '@mui/material'
 
 import axios from 'axios'
 
-import MachineDetailModal from './machineDetailModal'
+import MachineDetailModal from './detailModal/machineDetailModal'
 import AddMachineModal from './addMachineModal'
 
 // Constants
@@ -234,7 +234,6 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
       <div className='relative'>
         {/* 필터바 */}
         <TableFilters<MachineInspectionFilterType>
-          // ! 옵션 추가
           filterInfo={{
             engineerName: {
               label: '점검자',

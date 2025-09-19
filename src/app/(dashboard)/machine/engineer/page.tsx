@@ -211,7 +211,7 @@ export default function EngineerPage() {
         //@ts-ignore
         data: { engineerDeleteRequestDtos: list }
       })
-
+      getFilteredData()
       handleSuccess('선택된 기계설비 기술자들이 성공적으로 삭제되었습니다.')
     } catch (error) {
       handleApiError(error)

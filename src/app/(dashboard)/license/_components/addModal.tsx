@@ -66,7 +66,7 @@ const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
         </Button>
       }
       secondaryButton={
-        <Button variant='tonal' color='secondary' type='reset' onClick={() => setOpen(false)}>
+        <Button variant='contained' color='secondary' type='reset' onClick={() => setOpen(false)}>
           취소
         </Button>
       }

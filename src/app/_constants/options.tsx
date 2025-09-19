@@ -140,9 +140,35 @@ export const buildingGradeOption = [
 
 // machine - inspection
 export const picCateInspectionStatusOption = [
-  { value: 'NONE', label: '-' },
-  { value: 'PASS', label: '○' },
-  { value: 'FAIL', label: '×' }
+  { value: 'NONE', label: <i className='tabler-backslash text-lg' /> },
+  { value: 'PASS', label: <i className='tabler-percentage-0 text-lg' /> },
+  { value: 'FAIL', label: <i className='tabler-x text-lg ' /> }
+]
+
+// machine-inspection - gas
+export const fuelTypeOption = [
+  { value: 'LNG', label: 'LNG' }, // 액화천연가스지만 LNG 그대로 많이 씀
+  { value: 'LPG', label: 'LPG' }, // 액화석유가스지만 LPG 그대로 씀
+  { value: 'LIQUID_FUEL', label: '액체연료' },
+  { value: 'SOLID_FUEL', label: '고체연료' },
+  { value: 'GASEOUS_FUEL', label: '기체연료' },
+  { value: 'PET_COKE', label: '석유코크스' },
+  { value: 'BIOGAS', label: '바이오가스' },
+  { value: 'GAS_HEATPUMP', label: '가스히트펌프' },
+  { value: 'ETC', label: '기타' }
+]
+
+// machine-inspection - gas
+export const fanTypeOption = [
+  { value: 'SA', label: '급기팬 (SA)' },
+  { value: 'RA', label: '환기팬 (RA)' }
+]
+
+// machine-inspection - pipe
+export const pipeTypeOption = [
+  { value: 'CARBON_STEEL', label: '탄소강관' },
+  { value: 'STAINLESS_STEEL', label: '스테인리스강관' },
+  { value: 'COPPER_PIPE', label: '구리관' }
 ]
 
 // engineer

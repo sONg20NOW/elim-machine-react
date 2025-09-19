@@ -9,7 +9,7 @@ import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
-import { execDaumPostcode } from '@/app/_handler/daumMapPostcode'
+import { execDaumPostcode } from '@/app/_util/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
 
 interface InputBoxProps {

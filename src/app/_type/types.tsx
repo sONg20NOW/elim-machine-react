@@ -243,6 +243,7 @@ export type MachineProjectResponseDtoType = {
   tel?: string | null
   vatIncludedYn?: string | null
   version?: number | null
+  note?: string | null
 }
 
 // GET /api/machine-projects/{machineProjectId}/schedule-tab : 일정 및 기술진 DTO
@@ -373,7 +374,7 @@ export interface MachineInspectionPageResponseDtoType {
   purpose: string
   location: string
   checkDate: string
-  inspectionStatusDescription: string
+  inspectionStatus: string
   engineerNames: string[]
 }
 
@@ -387,7 +388,7 @@ export interface MachineInspectionDetailResponseDtoType {
     | 'PIPE_MEASUREMENT'
   machineInspectionResponseDto: MachineInspectionResponseDtoType
   engineerIds: number[]
-  picCates: MachinePicCateWithPicCountDtoType[]
+  machineChecklistItemsWithPicCountDtos: MachinePicCateWithPicCountDtoType[]
   gasMeasurementResponseDto: GasMeasurementResponseDtoType
   pipeMeasurementResponseDtos: PipeMeasurementResponseDtoType[]
   windMeasurementResponseDtos: WindMeasurementResponseDtoType[]
@@ -415,7 +416,13 @@ export interface MachinePicCateWithPicCountDtoType {
   machineChecklistItemName: string
   checklistSubItems: MachinePicSubCateResponseDtoType[]
   totalMachinePicCount: number
-  picCateInspectionStatus: string
+  machineInspectionChecklistItemResultBasicResponseDto: machineInspectionChecklistItemResultBasicResponseDtoType
+}
+
+export interface machineInspectionChecklistItemResultBasicResponseDtoType {
+  id: number
+  version: number
+  inspectionResult: string
 }
 
 // 점검 항목의 하위 항목 및 사진 개수 응답 DTO
@@ -492,6 +499,15 @@ export interface MachineEngineerInfoResponseDtoType {
 
 export interface MachineInspectionFilterType {
   engineerName: string
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-inspections/{machineInspectionId}/machine-inspection-checklist-item-results
+// 점검 항목 결과 응답 DTO
+export interface MachineInspectionChecklistItemResultResponseDtoType {
+  id: number
+  version: number
+  deficiencies: string
+  actionRequired: string
 }
 
 // ----------- 라이선스 -----------

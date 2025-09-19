@@ -93,7 +93,7 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
         )
       }
       secondaryButton={
-        isEditing && (
+        isEditing ? (
           <Button
             variant='tonal'
             color='secondary'
@@ -104,6 +104,10 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
             }}
           >
             취소
+          </Button>
+        ) : (
+          <Button variant='contained' color='secondary' onClick={() => setOpen(false)}>
+            닫기
           </Button>
         )
       }

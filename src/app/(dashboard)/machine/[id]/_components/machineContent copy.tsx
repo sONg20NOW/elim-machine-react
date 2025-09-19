@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { Button, TablePagination } from '@mui/material'
 
-import MachineDetailModal from './machineDetailModal'
+import MachineDetailModal from './detailModal/machineDetailModal'
 import AddMachineModal from './addMachineModal'
 import { PageSizeOptions } from '@/app/_constants/options'
 

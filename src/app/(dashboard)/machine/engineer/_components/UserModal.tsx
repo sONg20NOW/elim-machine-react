@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useState } from 'react'
 
 // MUI Imports
 
@@ -11,7 +11,6 @@ import { Box, DialogContent, Table, TableBody, TableCell, TableContainer, TableR
 
 import axios from 'axios'
 
-import { initialData } from '@/data/initialData/userInfo'
 import DefaultModal from '@/app/_components/modal/DefaultModal'
 import type { EngineerResponseDtoType } from '@/app/_type/types'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
@@ -96,7 +95,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
       open={open}
       setOpen={setOpen}
       title={data.name}
-      handleClose={handleClose}
+      onClose={handleClose}
       headerDescription={data.engineerLicenseNum}
       primaryButton={
         !isEditing ? (
@@ -110,7 +109,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
         )
       }
       secondaryButton={
-        isEditing && (
+        isEditing ? (
           <Button
             variant='contained'
             color='secondary'
@@ -124,6 +123,10 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
             }}
           >
             취소
+          </Button>
+        ) : (
+          <Button variant='contained' color='secondary' onClick={() => setOpen(false)}>
+            닫기
           </Button>
         )
       }
