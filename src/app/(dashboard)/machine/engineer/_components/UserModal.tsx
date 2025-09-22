@@ -1,6 +1,7 @@
 'use client'
 
 // React Imports
+import type { Dispatch, SetStateAction } from 'react'
 import { createContext, useState } from 'react'
 
 // MUI Imports
@@ -23,12 +24,13 @@ type UserModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   data: EngineerResponseDtoType
+  setData: Dispatch<SetStateAction<EngineerResponseDtoType | undefined>>
   reloadData: () => void
 }
 
 export const MemberIdContext = createContext<number>(0)
 
-const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
+const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps) => {
   const [editData, setEditData] = useState<EngineerResponseDtoType>(JSON.parse(JSON.stringify(data)))
 
   const [isEditing, setIsEditing] = useState(false)
@@ -68,6 +70,7 @@ const UserModal = ({ open, setOpen, data, reloadData }: UserModalProps) => {
         const returnData = response.data.data
 
         setEditData(returnData)
+        setData(returnData)
 
         console.log(`info saved: `, returnData)
         handleSuccess(`설비인력 정보가 수정되었습니다.`)

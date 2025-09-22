@@ -64,7 +64,6 @@ export default function MemberPage() {
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<memberDetailDtoType>()
-  const [rowData, setRowData] = useState<memberPageDtoType>()
 
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(MemeberInitialFilters)
@@ -117,18 +116,13 @@ export default function MemberPage() {
       setPage(result.page.number)
       setSize(result.page.size)
       setTotalCount(result.page.totalElements)
-
-      // 선택된 유저가 있다면 selectedUser 데이터도 최신화
-      if (rowData) {
-        handleUserClick(rowData)
-      }
     } catch (error: any) {
       handleApiError(error, '데이터 조회에 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, size, name, region, rowData])
+  }, [filters, sorting, page, size, name, region])
 
   // 필터 변경 시 API 호출
   useEffect(() => {
@@ -145,7 +139,6 @@ export default function MemberPage() {
 
     if (response.ok) {
       setSelectedUser(data.data)
-      setRowData(user)
       setUserDetailModalOpen(true)
     } else {
       toast.error(data.message)
@@ -371,6 +364,7 @@ export default function MemberPage() {
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           selectedUserData={selectedUser}
+          setSelectedUserData={setSelectedUser}
           reloadData={() => getFilteredData()}
         />
       )}

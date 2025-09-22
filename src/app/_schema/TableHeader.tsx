@@ -68,19 +68,19 @@ export const HEADERS = {
     remark: { label: '비고', canSort: false }
   } as Record<keyof MachineEngineerPageResponseDtoType, HeaderInfoType>,
   licenses: {
-    region: { label: '지역', canSort: false },
-    bizno: { label: '사업자번호', canSort: false },
     companyName: { label: '업체명', canSort: false },
+    bizno: { label: '사업자번호', canSort: false, hideOnMobile: true },
+    region: { label: '지역', canSort: false },
     ceoName: { label: '대표자명', canSort: false },
-    memberCount: { label: '직원', canSort: true },
-    machineEngineerCount: { label: '기계설비', canSort: true },
-    safetyEngineerCount: { label: '안전진단', canSort: true },
-    managerName: { label: '담당자명', canSort: false },
-    managerEmail: { label: '이메일', canSort: false },
-    managerPhoneNumber: { label: '휴대폰', canSort: false },
+    memberCount: { label: '직원', canSort: true, hideOnMobile: true },
+    machineEngineerCount: { label: '기계설비', canSort: true, hideOnMobile: true },
+    safetyEngineerCount: { label: '안전진단', canSort: true, hideOnMobile: true },
+    managerName: { label: '담당자명', canSort: false, hideOnMobile: true },
+    managerEmail: { label: '이메일', canSort: false, hideOnMobile: true },
+    managerPhoneNumber: { label: '휴대폰', canSort: false, hideOnMobile: true },
     tel: { label: '전화번호', canSort: false },
-    contractDate: { label: '계약일', canSort: false },
-    expireDate: { label: '만료일', canSort: false }
+    contractDate: { label: '계약일', canSort: false, hideOnMobile: true },
+    expireDate: { label: '만료일', canSort: false, hideOnMobile: true }
   } as Record<keyof LicensePageResponseDtoType, HeaderInfoType>
 }
 

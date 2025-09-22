@@ -1,6 +1,7 @@
 'use client'
 
 // React Imports
+import type { Dispatch, SetStateAction } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Button, Tab } from '@mui/material'
@@ -10,7 +11,14 @@ import TabList from '@mui/lab/TabList'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import type { MachineInspectionDetailResponseDtoType } from '@/app/_type/types'
+import type {
+  GasMeasurementResponseDtoType,
+  machineInspectionChecklistItemResultBasicResponseDtoType,
+  MachineInspectionDetailResponseDtoType,
+  MachineInspectionResponseDtoType,
+  PipeMeasurementResponseDtoType,
+  WindMeasurementResponseDtoType
+} from '@/app/_type/types'
 import DefaultModal from '@/app/_components/modal/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
@@ -59,6 +67,7 @@ type MachineDetailModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   selectedMachineData: MachineInspectionDetailResponseDtoType
+  setSelectedMachineData: Dispatch<SetStateAction<MachineInspectionDetailResponseDtoType | undefined>>
   reloadData: () => Promise<void>
 }
 
@@ -67,6 +76,7 @@ const MachineDetailModal = ({
   open,
   setOpen,
   selectedMachineData,
+  setSelectedMachineData,
   reloadData
 }: MachineDetailModalProps) => {
   // 수정 시 변경되는 데이터 (저장되기 전) - 깊은 복사
@@ -95,24 +105,39 @@ const MachineDetailModal = ({
     if (existChange) {
       // 1. POST를 보내고
       try {
-        let postURL = ''
-        let requestBody = ''
-
         switch (tabValue) {
           case 'BASIC':
-            postURL = ''
-            requestBody = JSON.stringify(editData.machineInspectionResponseDto)
+            const basicResponse = await axios.put<{ data: MachineInspectionResponseDtoType }>(
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}`,
+              editData.machineInspectionResponseDto
+            )
+
+            setEditData(prev => ({ ...prev, machineInspectionResponseDto: basicResponse.data.data }))
+            setSelectedMachineData(prev => prev && { ...prev, machineInspectionResponseDto: basicResponse.data.data })
+
+            // 참여기술진 변경사항이 있다면 POST.
+            if (
+              JSON.stringify(editData.engineerIds.filter(id => id > 0)) !==
+              JSON.stringify(selectedMachineData.engineerIds)
+            ) {
+              const engineerResponse = await axios.put<{ data: { engineerIds: number[] } }>(
+                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/machine-inspection-engineers`,
+                { engineerIds: editData.engineerIds.filter(id => id > 0) }
+              )
+
+              setEditData(prev => ({ ...prev, engineerIds: engineerResponse.data.data.engineerIds }))
+              setSelectedMachineData(prev => prev && { ...prev, engineerIds: engineerResponse.data.data.engineerIds })
+            }
+
             break
 
-          // ! 미흡사항 수정, 점검결과 수정
           case 'PIC':
-            postURL = '/machine-inspection-checklist-item-results'
+            // 점검결과(machineChecklistItemInspectionResult)에 변경이 감지되었을 때만 requestBody에 포함시키기.
             const changedCates: { id: number; version: number; inspectionResult: string }[] = []
 
             editData.machineChecklistItemsWithPicCountDtos.map((cate, idx) => {
               const originalCate = selectedMachineData.machineChecklistItemsWithPicCountDtos[idx]
 
-              // 점검결과(machineChecklistItemInspectionResult)에 변경이 감지되었을 때만 requestBody에 포함시키기.
               if (
                 cate.machineInspectionChecklistItemResultBasicResponseDto !==
                 originalCate.machineInspectionChecklistItemResultBasicResponseDto
@@ -120,43 +145,112 @@ const MachineDetailModal = ({
                 changedCates.push(cate.machineInspectionChecklistItemResultBasicResponseDto)
               }
             })
-            requestBody = JSON.stringify({ machineInspectionChecklistItemResultUpdateRequestDtos: changedCates })
+
+            if (changedCates) {
+              const picResponse = await axios.put<{
+                data: {
+                  machineInspectionChecklistItemResultUpdateResponseDtos: machineInspectionChecklistItemResultBasicResponseDtoType[]
+                }
+              }>(
+                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
+                { machineInspectionChecklistItemResultUpdateRequestDtos: changedCates }
+              )
+
+              const responseResults = picResponse.data.data.machineInspectionChecklistItemResultUpdateResponseDtos
+
+              if (
+                responseResults.every(result =>
+                  editData.machineChecklistItemsWithPicCountDtos.find(
+                    v => v.machineInspectionChecklistItemResultBasicResponseDto.id === result.id
+                  )
+                )
+              ) {
+                setEditData(prev => ({
+                  ...prev,
+                  machineChecklistItemsWithPicCountDtos: prev.machineChecklistItemsWithPicCountDtos.map(picCate => ({
+                    ...picCate,
+                    machineInspectionChecklistItemResultBasicResponseDto: responseResults.find(
+                      result => result.id === picCate.machineInspectionChecklistItemResultBasicResponseDto.id
+                    )!
+                  }))
+                }))
+                setSelectedMachineData(
+                  prev =>
+                    prev && {
+                      ...prev,
+                      machineChecklistItemsWithPicCountDtos: prev.machineChecklistItemsWithPicCountDtos.map(
+                        picCate => ({
+                          ...picCate,
+                          machineInspectionChecklistItemResultBasicResponseDto: responseResults.find(
+                            result => result.id === picCate.machineInspectionChecklistItemResultBasicResponseDto.id
+                          )!
+                        })
+                      )
+                    }
+                )
+              } else {
+                throw new Error()
+              }
+            }
+
             break
           case 'GAS':
-            postURL = '/gasMeasurement'
-            requestBody = JSON.stringify(editData.gasMeasurementResponseDto)
+            const gasResponse = await axios.put<{
+              data: GasMeasurementResponseDtoType
+            }>(
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/gasMeasurement`,
+              editData.gasMeasurementResponseDto
+            )
+
+            setEditData(prev => ({ ...prev, gasMeasurementResponseDto: gasResponse.data.data }))
+            setSelectedMachineData(prev => prev && { ...prev, gasMeasurementResponseDto: gasResponse.data.data })
+
             break
           case 'WIND':
-            postURL = '/windMeasurements'
-            requestBody = JSON.stringify({ windMeasurementUpdateRequestDtos: editData.windMeasurementResponseDtos })
+            const windResponse = await axios.put<{
+              data: { windMeasurementUpdateResponseDtos: WindMeasurementResponseDtoType[] }
+            }>(
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/windMeasurements`,
+              { windMeasurementUpdateRequestDtos: editData.windMeasurementResponseDtos }
+            )
+
+            setEditData(prev => ({
+              ...prev,
+              windMeasurementResponseDtos: windResponse.data.data.windMeasurementUpdateResponseDtos
+            }))
+            setSelectedMachineData(
+              prev =>
+                prev && {
+                  ...prev,
+                  windMeasurementResponseDtos: windResponse.data.data.windMeasurementUpdateResponseDtos
+                }
+            )
             break
           case 'PIPE':
-            postURL = '/pipeMeasurements'
-            requestBody = JSON.stringify({ pipeMeasurementUpdateRequestDtos: editData.pipeMeasurementResponseDtos })
+            const pipeResponse = await axios.put<{
+              data: { pipeMeasurementUpdateResponseDtos: PipeMeasurementResponseDtoType[] }
+            }>(
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/pipeMeasurements`,
+              { pipeMeasurementUpdateRequestDtos: editData.pipeMeasurementResponseDtos }
+            )
+
+            console.log(pipeResponse.data.data.pipeMeasurementUpdateResponseDtos)
+
+            setEditData(prev => ({
+              ...prev,
+              pipeMeasurementResponseDtos: pipeResponse.data.data.pipeMeasurementUpdateResponseDtos
+            }))
+            setSelectedMachineData(
+              prev =>
+                prev && {
+                  ...prev,
+                  pipeMeasurementResponseDtos: pipeResponse.data.data.pipeMeasurementUpdateResponseDtos
+                }
+            )
+
             break
           default:
             break
-        }
-
-        if (requestBody !== '') {
-          await axios.put(
-            `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}${postURL}`,
-            JSON.parse(requestBody)
-          )
-
-          // tabValue가 BASIC이라면 참여기술진 변경사항도 POST.
-          if (
-            tabValue === 'BASIC' &&
-            JSON.stringify(editData.engineerIds.filter(id => id > 0)) !==
-              JSON.stringify(selectedMachineData.engineerIds)
-          ) {
-            await axios.put<{ data: { engineerIds: number[] } }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/machine-inspection-engineers`,
-              { engineerIds: editData.engineerIds.filter(id => id > 0) }
-            )
-          }
-        } else {
-          throw new Error()
         }
 
         // 2. 리스트 데이터를 새로 받기.
@@ -167,7 +261,16 @@ const MachineDetailModal = ({
         handleApiError(error)
       }
     }
-  }, [editData, existChange, machineProjectId, reloadData, selectedMachineData, tabValue, thisTabInfo])
+  }, [
+    editData,
+    existChange,
+    machineProjectId,
+    reloadData,
+    selectedMachineData,
+    setSelectedMachineData,
+    tabValue,
+    thisTabInfo
+  ])
 
   return (
     selectedMachineData && (

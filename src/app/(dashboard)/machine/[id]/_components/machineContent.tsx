@@ -50,7 +50,6 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
 
   // 테이블 행 선택
   const [selectedMachine, setSelectedMachine] = useState<MachineInspectionDetailResponseDtoType>()
-  const [rowData, setRowData] = useState<MachineInspectionPageResponseDtoType>()
 
   // 페이지네이션 상태
   const [page, setPage] = useState(0)
@@ -79,7 +78,6 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
         )
 
         setSelectedMachine(response.data.data)
-        setRowData(machine)
         setOpen(true)
       } catch (error) {
         handleApiError(error)
@@ -128,15 +126,13 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
       setPage(result.page.number)
       setPageSize(result.page.size)
       setTotalCount(result.page.totalElements)
-
-      if (rowData) handleRowClick(rowData)
     } catch (error: any) {
       handleApiError(error, '데이터 조회에 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, pageSize, machineCateName, location, rowData, handleRowClick, machineProjectId])
+  }, [filters, sorting, page, pageSize, machineCateName, location, machineProjectId])
 
   useEffect(() => {
     getFilteredData()
@@ -401,6 +397,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
             open={open}
             setOpen={setOpen}
             selectedMachineData={selectedMachine}
+            setSelectedMachineData={setSelectedMachine}
             reloadData={getFilteredData}
           />
         )}

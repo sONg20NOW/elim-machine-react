@@ -131,7 +131,7 @@ function InputBoxContent() {
           disabled={disabled}
           fullWidth
           label={showLabel && tabField.label}
-          value={value}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
@@ -143,7 +143,7 @@ function InputBoxContent() {
           id={tabFieldKey}
           label={showLabel && tabField.label}
           disabled={disabled}
-          value={value}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
@@ -154,7 +154,7 @@ function InputBoxContent() {
           id={tabFieldKey}
           disabled={disabled}
           label={showLabel && tabField.label}
-          value={value}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
@@ -166,7 +166,7 @@ function InputBoxContent() {
           disabled={disabled}
           fullWidth
           label={showLabel && tabField.label}
-          value={value}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
@@ -180,7 +180,7 @@ function InputBoxContent() {
           disabled={disabled}
           fullWidth
           label={showLabel && tabField.label}
-          value={value}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
@@ -193,7 +193,7 @@ function InputBoxContent() {
             disabled={disabled}
             fullWidth
             label={showLabel && tabField.label}
-            value={juminNum}
+            value={juminNum ?? ''}
             onChange={e => {
               setJuminNum(e.target.value)
               onChange(e.target.value)
@@ -214,7 +214,7 @@ function InputBoxContent() {
             disabled={disabled}
             fullWidth
             label={showLabel && tabField.label}
-            value={value}
+            value={value ?? ''}
             onChange={e => onChange(e.target.value)}
           />
 

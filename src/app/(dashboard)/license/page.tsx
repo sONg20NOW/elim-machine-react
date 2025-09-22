@@ -11,7 +11,6 @@ import MenuItem from '@mui/material/MenuItem'
 
 import axios from 'axios'
 
-// Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
@@ -55,7 +54,6 @@ export default function Licensepage() {
   const [detailModalOpen, setDetailModalOpen] = useState(false)
 
   const [selectedData, setSelectedData] = useState<LicenseResponseDtoType>()
-  const [rowData, setRowData] = useState<LicensePageResponseDtoType>()
 
   // 정렬 상태
   const [sorting, setSorting] = useState(createInitialSorting<LicensePageResponseDtoType>)
@@ -98,17 +96,13 @@ export default function Licensepage() {
       setPage(result.page.number)
       setSize(result.page.size)
       setTotalCount(result.page.totalElements)
-
-      if (rowData) {
-        handleLicenseClick(rowData)
-      }
     } catch (error: any) {
       handleApiError(error, '데이터 조회에 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [sorting, page, size, companyName, region, rowData])
+  }, [sorting, page, size, companyName, region])
 
   // 함수 변경 시 API 호출
   useEffect(() => {
@@ -125,7 +119,6 @@ export default function Licensepage() {
       const licenseInfo = response.data.data
 
       setSelectedData(licenseInfo)
-      setRowData(licenseData)
       setDetailModalOpen(true)
     } catch (error) {
       handleApiError(error, '라이선스를 선택하는 데 실패했습니다.')
@@ -199,7 +192,11 @@ export default function Licensepage() {
     <>
       <Card>
         {/* 탭 제목 */}
-        <CardHeader title={`라이선스관리 (${totalCount})`} className='pbe-4' />
+        <CardHeader
+          slotProps={{ title: { sx: { fontSize: 'clamp(1rem, 2vw, 1.5rem)' } } }}
+          title={`라이선스관리 (${totalCount})`}
+          className='pbe-4'
+        />
         {/* <TableFilters<EngineerFilterType>
           filterInfo={ENGINEER_FILTER_INFO}
           filters={filters}
@@ -218,7 +215,7 @@ export default function Licensepage() {
         >
           필터 초기화
         </Button>  */}
-        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+        <div className=' flex justify-between flex-col items-start sm:flex-row sm:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
           <div className='flex gap-2'>
             <SearchBar
               placeholder='업체명으로 검색'
@@ -229,6 +226,7 @@ export default function Licensepage() {
               disabled={disabled}
             />
             <SearchBar
+              className='hidden sm:flex'
               placeholder='지역으로 검색'
               onClick={region => {
                 setRegion(region)
@@ -238,7 +236,7 @@ export default function Licensepage() {
             />
           </div>
 
-          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-2 sm:gap-10'>
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
               <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
@@ -261,7 +259,7 @@ export default function Licensepage() {
                 </Button>
               </div>
             )}
-            <div className='flex gap-3 itmes-center'>
+            <div className=' gap-3 items-center hidden sm:flex'>
               {/* 페이지당 행수 */}
               <span className='grid place-items-center'>페이지당 행 수 </span>
               <CustomTextField
@@ -288,7 +286,6 @@ export default function Licensepage() {
               variant='contained'
               startIcon={<i className='tabler-plus' />}
               onClick={() => setAddModalOpen(!addModalOpen)}
-              className='max-sm:is-full'
               disabled={disabled}
             >
               추가
@@ -350,6 +347,7 @@ export default function Licensepage() {
           open={detailModalOpen}
           setOpen={setDetailModalOpen}
           initialData={selectedData}
+          setInitialData={setSelectedData}
           reloadData={() => getFilteredData()}
         />
       )}

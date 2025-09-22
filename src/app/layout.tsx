@@ -40,6 +40,7 @@ const RootLayout = async (props: ChildrenType) => {
   return (
     <html id='__next' suppressHydrationWarning>
       <head>
+        <meta name='viewport' content='width=device-width,initial-scale=1' />
         <link rel='icon' href='/images/elim_icon.png?v=2' />
       </head>
       <Script src='//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'></Script>

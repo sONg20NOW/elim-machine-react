@@ -4,6 +4,7 @@ interface SearchBarProps {
   placeholder: string
   onClick: (name: string) => void
   disabled?: boolean
+  className?: string
 }
 
 /**
@@ -12,9 +13,9 @@ interface SearchBarProps {
  * e.target.value를 인자로 넣는 함수
  * @returns
  */
-export default function SearchBar({ placeholder, onClick, disabled }: SearchBarProps) {
+export default function SearchBar({ placeholder, onClick, disabled, className }: SearchBarProps) {
   return (
-    <div className='relative'>
+    <div className={`relative ${className}`}>
       <Input
         id={placeholder}
         onKeyDown={(e: any) => {

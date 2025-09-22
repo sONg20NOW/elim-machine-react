@@ -1,6 +1,7 @@
 'use client'
 
 // React Imports
+import type { Dispatch, SetStateAction } from 'react'
 import { createContext, useState } from 'react'
 
 // MUI Imports
@@ -70,12 +71,13 @@ type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
   selectedUserData: memberDetailDtoType
+  setSelectedUserData: Dispatch<SetStateAction<memberDetailDtoType | undefined>>
   reloadData: () => void
 }
 
 export const MemberIdContext = createContext<number>(0)
 
-const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfoProps) => {
+const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloadData }: EditUserInfoProps) => {
   const [value, setValue] = useState<tabType>('1')
   const [editData, setEditData] = useState<memberDetailDtoType>(JSON.parse(JSON.stringify(selectedUserData)))
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -141,6 +143,10 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
 
       setEditData({
         ...editData,
+        [requestRule[value].dtoKey]: returnData
+      })
+      setSelectedUserData({
+        ...selectedUserData,
         [requestRule[value].dtoKey]: returnData
       })
       console.log(`${requestRule[value].value} info saved: `, returnData)

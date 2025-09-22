@@ -245,7 +245,7 @@ const MachineUpdatePage = () => {
             </TabPanel>
             <TabPanel value='특이사항'>
               {projectData ? (
-                <NoteContent id={machineProjectId} projectData={projectData} />
+                <NoteContent id={machineProjectId} projectData={projectData} reloadData={getProjectData} />
               ) : (
                 <Typography>특이사항 정보를 불러오는 중입니다.</Typography>
               )}

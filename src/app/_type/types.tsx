@@ -423,6 +423,8 @@ export interface machineInspectionChecklistItemResultBasicResponseDtoType {
   id: number
   version: number
   inspectionResult: string
+  deficiencies?: string
+  actionRequired?: string
 }
 
 // 점검 항목의 하위 항목 및 사진 개수 응답 DTO
@@ -621,6 +623,7 @@ export type InputFieldType = {
 export interface HeaderInfoType {
   label: string
   canSort: boolean
+  hideOnMobile?: boolean
 }
 
 export type HeaderType<T> = Record<keyof T, HeaderInfoType>

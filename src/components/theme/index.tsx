@@ -89,7 +89,76 @@ const CustomThemeProvider = (props: Props) => {
         MuiButton: {
           styleOverrides: {
             root: {
-              whiteSpace: 'nowrap' // ✅ 모든 버튼 줄바꿈 방지
+              whiteSpace: 'nowrap', // ✅ 모든 버튼 줄바꿈 방지
+              fontSize: '16px',
+              px: 0,
+              '@media (max-width:640px)': {
+                fontSize: '12px'
+              }
+            }
+          }
+        },
+        MuiCardHeader: {
+          styleOverrides: {
+            root: {
+              padding: 15,
+              '@media (max-width:640px)': {
+                padding: '5 !important'
+              }
+            }
+          }
+        },
+
+        // 테이블 관련
+        MuiTable: {
+          styleOverrides: {
+            root: {
+              '@media (max-width:640px)': {
+                minWidth: 0
+              }
+            }
+          }
+        },
+        MuiTableCell: {
+          styleOverrides: {
+            root: {
+              whiteSpace: 'nowrap',
+              fontSize: '16px',
+              '@media (max-width:640px)': {
+                fontSize: '12px',
+                paddingLeft: '8px !important',
+                paddingRight: '8px !important',
+                width: 'fit-content',
+                border: 'solid 1px silver !important'
+              }
+            }
+          }
+        },
+
+        // 페이지네이션 관련
+        MuiInputBase: {
+          styleOverrides: {
+            root: {
+              '@media (max-width:640px)': { margin: '0 !important' }
+            }
+          }
+        },
+        MuiTablePaginationActions: {
+          styleOverrides: {
+            root: {
+              '@media (max-width:640px)': { margin: '0 !important' }
+            }
+          }
+        },
+        MuiToolbar: {
+          styleOverrides: {
+            root: {
+              '& .MuiIconButton-root': {
+                // 모바일 반응형
+                '@media (max-width:640px)': {
+                  padding: 4 // 모바일에서는 작게
+                }
+              }
             }
           }
         }

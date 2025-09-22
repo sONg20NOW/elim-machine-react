@@ -1,6 +1,7 @@
 'use client'
 
 // React Imports
+import type { Dispatch, SetStateAction } from 'react'
 import { createContext, useState } from 'react'
 
 // MUI Imports
@@ -22,6 +23,7 @@ type DetailModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   initialData: LicenseResponseDtoType
+  setInitialData: Dispatch<SetStateAction<LicenseResponseDtoType | undefined>>
   reloadData: () => void
 }
 
@@ -30,13 +32,13 @@ export const MemberIdContext = createContext<number>(0)
 const groups = {
   dontShow: ['id', 'version', 'jibunAddress'],
   single: ['remark'],
-  group1: ['companyName', 'companyNameAbbr', 'bizno', 'ceoName', 'managerName', 'managerEmail', 'taxEmail'],
-  group2: ['contractDate', 'expireDate', 'homepageAddr', 'tel', 'fax'],
+  group1: ['companyName', 'companyNameAbbr', 'bizno', 'ceoName', 'managerName', 'managerEmail'],
+  group2: ['contractDate', 'expireDate', 'homepageAddr', 'tel', 'fax', 'taxEmail'],
 
   addressGroup: ['roadAddress', 'detailAddress', 'businessType', 'businessCategory']
 }
 
-const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProps) => {
+const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }: DetailModalProps) => {
   const [editData, setEditData] = useState<LicenseResponseDtoType>(JSON.parse(JSON.stringify(initialData)))
 
   const [isEditing, setIsEditing] = useState(false)
@@ -65,6 +67,7 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
       const returnData = response.data.data
 
       setEditData(returnData)
+      setInitialData(returnData)
 
       handleSuccess(`라이선스 정보가 수정되었습니다.`)
       setIsEditing(false)
@@ -120,8 +123,17 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
       }
     >
       <DialogContent className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
-        <div className='flex gap-4'>
-          <TableContainer sx={{ border: 'solid 1px', borderColor: 'lightgray', borderRadius: '8px', flex: 1 }}>
+        <div className='flex gap-0'>
+          <TableContainer
+            sx={{
+              border: 'solid 1px',
+              borderColor: 'lightgray',
+              borderRadius: '8px',
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              flex: 1
+            }}
+          >
             <Table size='small'>
               <TableBody>
                 {groups.group1.map(value => {
@@ -136,7 +148,10 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
                           borderColor: 'lightgray',
                           textAlign: 'center',
                           fontWeight: 'bold',
-                          fontSize: 'medium'
+                          fontSize: 'medium',
+
+                          // ! background color 주기
+                          backgroundColor: ''
                         }}
                       >
                         {LICENSE_INPUT_INFO[key]?.label}
@@ -158,7 +173,16 @@ const DetailModal = ({ open, setOpen, initialData, reloadData }: DetailModalProp
             </Table>
           </TableContainer>
           <TableContainer
-            sx={{ border: 'solid 1px', borderColor: 'lightgray', borderRadius: '8px', flex: 1, height: '100%' }}
+            sx={{
+              border: 'solid 1px',
+              borderColor: 'lightgray',
+              borderRadius: '8px',
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0,
+              borderLeft: 'none',
+              flex: 1,
+              height: '100%'
+            }}
           >
             <Table size='small'>
               <TableBody>

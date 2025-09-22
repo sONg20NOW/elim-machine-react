@@ -70,7 +70,6 @@ export default function EngineerPage() {
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
 
   const [selectedUser, setSelectedUser] = useState<EngineerResponseDtoType>()
-  const [rowData, setRowData] = useState<MachineEngineerPageResponseDtoType>()
 
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(EngineerInitialFilters)
@@ -123,15 +122,13 @@ export default function EngineerPage() {
       setPage(result.page.number)
       setSize(result.page.size)
       setTotalCount(result.page.totalElements)
-
-      if (rowData) handleEngineerClick(rowData)
     } catch (error: any) {
       handleApiError(error, '데이터 조회에 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [filters, sorting, page, size, name, projectName, rowData])
+  }, [filters, sorting, page, size, name, projectName])
 
   // 필터 변경 시 API 호출
   useEffect(() => {
@@ -148,7 +145,6 @@ export default function EngineerPage() {
       const engineerInfo = response.data.data
 
       setSelectedUser(engineerInfo)
-      setRowData(engineerData)
       setUserDetailModalOpen(true)
     } catch (error) {
       handleApiError(error, '엔지니어를 선택하는 데 실패했습니다.')
@@ -381,6 +377,7 @@ export default function EngineerPage() {
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           data={selectedUser}
+          setData={setSelectedUser}
           reloadData={() => getFilteredData()}
         />
       )}

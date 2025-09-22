@@ -99,7 +99,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 />
               </TableCell>
             )}
-            <TableCell align='center' key='order' className='font-medium text-base'>
+            <TableCell align='center' key='order' className='font-medium text-base hide-on-mobile'>
               번호
             </TableCell>
             {Object.keys(header).map(key => {
@@ -109,11 +109,15 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 <TableCell
                   key={key}
                   align='center'
-                  className={classNames('relative text-base', {
-                    'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
-                    'font-bold select-none': header[k].canSort,
-                    'font-medium': !header[k].canSort
-                  })}
+                  className={classNames(
+                    'relative',
+                    {
+                      'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
+                      'font-bold select-none': header[k].canSort,
+                      'font-medium': !header[k].canSort
+                    },
+                    { 'hide-on-mobile': header[k].hideOnMobile }
+                  )}
                   onClick={!(loading || error) && header[k].canSort ? () => toggleOrder(key) : undefined}
                 >
                   <div className='flex'></div>
@@ -152,12 +156,14 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     <Checkbox checked={isChecked(info)} />
                   </TableCell>
                 )}
-                <TableCell align='center' key={'order'}>
+                <TableCell align='center' key={'order'} className='hide-on-mobile'>
                   {page * pageSize + index + 1}
                 </TableCell>
 
                 {Object.keys(header).map(property => {
                   const key = property as keyof T
+
+                  let content: string | undefined = ''
 
                   // header 속성에 포함되지 않다면 출력 x & 예외 출력
                   if (!Object.keys(header).includes(property)) return null
@@ -168,37 +174,37 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                       value === 'latestProjectEndDate' ? info[value]?.toString().slice(5) : info[value]
                     )
 
-                    return (
-                      <TableCell key={key.toString()} align='center'>
-                        {pieces?.join(key === 'age' ? '  ' : ' ~ ')}
-                      </TableCell>
-                    )
+                    content = pieces?.join(key === 'age' ? '  ' : ' ~ ')
                   } else if (listException && listException.includes(key)) {
                     const list = info[key] as string[]
 
                     // 세 개 이상일 경우 외 (length - 2) 로 처리
-                    return (
-                      <TableCell key={key.toString()} align='center'>
-                        {list.length < 3
-                          ? list.join(', ')
-                          : list
-                              .slice(0, 2)
-                              .join(', ')
-                              .concat(` 외 ${list.length - 2}`)}
-                      </TableCell>
-                    )
+                    content =
+                      list.length < 3
+                        ? list.join(', ')
+                        : list
+                            .slice(0, 2)
+                            .join(', ')
+                            .concat(` 외 ${list.length - 2}`)
                   } else {
-                    return (
-                      <TableCell key={key.toString()} align='center'>
-                        {key === 'remark'
-                          ? info[key]
-                              ?.toString()
-                              .slice(0, 3)
-                              .concat(info[key]?.toString().length > 3 ? '..' : '')
-                          : info[key]}
-                      </TableCell>
-                    )
+                    content =
+                      key === 'remark'
+                        ? info[key]
+                            ?.toString()
+                            .slice(0, 3)
+                            .concat(info[key]?.toString().length > 3 ? '..' : '')
+                        : (info[key] as string)
                   }
+
+                  return (
+                    <TableCell
+                      key={key.toString()}
+                      align='center'
+                      className={classNames({ 'hide-on-mobile': header[key].hideOnMobile })}
+                    >
+                      {content}
+                    </TableCell>
+                  )
                 })}
               </TableRow>
             )

@@ -133,10 +133,7 @@ const Navigation = (props: Props) => {
         )}
       </NavHeader>
       <StyledBoxForShadow ref={shadowRef} />
-      <VerticalMenu
-        // dictionary={dictionary}
-        scrollMenu={scrollMenu}
-      />
+      <VerticalMenu scrollMenu={scrollMenu} />
     </VerticalNav>
   )
 }

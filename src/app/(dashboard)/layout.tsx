@@ -27,7 +27,7 @@ const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> 
 
   return (
     <Providers direction={direction}>
-      <div className={'flex flex- auto relative'}>
+      <div className='flex flex- auto relative h-full'>
         <Navigation mode={mode} />
         <div className='flex flex-col w-full pb-[10px] gap-[5px] h-full'>
           <Header />
