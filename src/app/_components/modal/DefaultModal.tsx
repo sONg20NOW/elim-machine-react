@@ -79,7 +79,7 @@ export default function DefaultModal({
       </IconButton>
 
       {/* 수정/삭제 버튼 */}
-      <div className='absolute left-8 top-8 flex gap-2'>
+      <div className='absolute left-4 top-4 sm:left-8 sm:top-8 flex gap-2'>
         {modifyButton}
         {deleteButton}
       </div>
@@ -87,7 +87,7 @@ export default function DefaultModal({
       {/* 제목 */}
       <DialogTitle
         variant='h4'
-        className='flex items-center gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'
+        className='text-xl sm:text-3xl flex items-center gap-0 sm:gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'
       >
         {title}
         {headerDescription && (

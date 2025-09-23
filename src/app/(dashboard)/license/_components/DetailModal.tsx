@@ -8,7 +8,7 @@ import { createContext, useState } from 'react'
 
 import Button from '@mui/material/Button'
 
-import { Box, DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
+import { Box, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
 
 import axios from 'axios'
 
@@ -98,7 +98,7 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
       secondaryButton={
         isEditing ? (
           <Button
-            variant='tonal'
+            variant='contained'
             color='secondary'
             type='reset'
             onClick={() => {
@@ -116,21 +116,27 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
       }
       modifyButton={
         isEditing && (
-          <Button variant='contained' color='error' type='reset' onClick={() => setShowDeleteModal(true)}>
+          <Button
+            sx={{ boxShadow: 'none' }}
+            variant='contained'
+            color='error'
+            type='reset'
+            onClick={() => setShowDeleteModal(true)}
+          >
             삭제
           </Button>
         )
       }
     >
-      <DialogContent className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
-        <div className='flex gap-0'>
+      <div className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
+        <div className='flex sm:gap-0 gap-2 sm:flex-row flex-col'>
           <TableContainer
             sx={{
               border: 'solid 1px',
               borderColor: 'lightgray',
-              borderRadius: '8px',
-              borderTopRightRadius: 0,
-              borderBottomRightRadius: 0,
+              borderRadius: { xs: 0, sm: '8px' },
+              borderTopRightRadius: '0 !important',
+              borderBottomRightRadius: '0 !important',
               flex: 1
             }}
           >
@@ -149,9 +155,7 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
                           textAlign: 'center',
                           fontWeight: 'bold',
                           fontSize: 'medium',
-
-                          // ! background color 주기
-                          backgroundColor: ''
+                          backgroundColor: 'customColors.tableHeaderBg'
                         }}
                       >
                         {LICENSE_INPUT_INFO[key]?.label}
@@ -176,9 +180,9 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
             sx={{
               border: 'solid 1px',
               borderColor: 'lightgray',
-              borderRadius: '8px',
-              borderTopLeftRadius: 0,
-              borderBottomLeftRadius: 0,
+              borderRadius: { xs: 0, sm: '8px' },
+              borderTopLeftRadius: '0 !important',
+              borderBottomLeftRadius: '0 !important',
               borderLeft: 'none',
               flex: 1,
               height: '100%'
@@ -198,7 +202,8 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
                           borderColor: 'lightgray',
                           textAlign: 'center',
                           fontWeight: 'bold',
-                          fontSize: 'medium'
+                          fontSize: 'medium',
+                          backgroundColor: 'customColors.tableHeaderBg'
                         }}
                       >
                         {LICENSE_INPUT_INFO[key]?.label}
@@ -220,7 +225,7 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
             </Table>
           </TableContainer>
         </div>
-        <TableContainer sx={{ border: 'solid 1px', borderColor: 'lightgray', borderRadius: '8px' }}>
+        <TableContainer sx={{ border: 'solid 1px', borderColor: 'lightgray', borderRadius: { sx: 0, sm: '8px' } }}>
           <Table size='small'>
             <TableBody>
               {groups.addressGroup.map(value => {
@@ -229,13 +234,14 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
                 return (
                   <TableRow key={key}>
                     <TableCell
-                      width={'30%'}
+                      width={'15%'}
                       sx={{
                         borderRight: '1px solid',
                         borderColor: 'lightgray',
                         textAlign: 'center',
                         fontWeight: 'bold',
-                        fontSize: 'medium'
+                        fontSize: 'medium',
+                        backgroundColor: 'customColors.tableHeaderBg'
                       }}
                     >
                       {LICENSE_INPUT_INFO[key]?.label}
@@ -257,7 +263,7 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
           </Table>
         </TableContainer>
         <div className='flex flex-col gap-0'>
-          <span className='font-extrabold'>{LICENSE_INPUT_INFO.remark?.label}</span>
+          <span className='font-extrabold text-xs sm:text-base'>{LICENSE_INPUT_INFO.remark?.label}</span>
           {isEditing ? (
             <InputBox
               tabInfos={LICENSE_INPUT_INFO}
@@ -274,7 +280,8 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
                 borderRadius: '8px',
                 padding: 3,
                 whiteSpace: 'pre-wrap',
-                minHeight: 110
+                minHeight: 110,
+                fontSize: { xs: '13px', sm: '15px' }
               }}
             >
               {editData.remark}
@@ -288,7 +295,7 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
             onDelete={handleDeleteUser}
           />
         )}
-      </DialogContent>
+      </div>
     </DefaultModal>
   )
 }

@@ -57,7 +57,7 @@ export default function BasicTabContent({
                 <TextField
                   type='date'
                   size='small'
-                  value={editData.machineInspectionResponseDto.installedDate}
+                  value={editData.machineInspectionResponseDto.installedDate ?? ''}
                   onChange={e =>
                     setEditData(prev => ({
                       ...prev,
@@ -87,7 +87,7 @@ export default function BasicTabContent({
                 <TextField
                   type='date'
                   size='small'
-                  value={editData.machineInspectionResponseDto.checkDate}
+                  value={editData.machineInspectionResponseDto.checkDate ?? ''}
                   onChange={e =>
                     setEditData(prev => ({
                       ...prev,
@@ -176,7 +176,7 @@ export default function BasicTabContent({
                         }}
                         fullWidth
                         SelectProps={{ IconComponent: () => null }}
-                        value={engineer?.engineerId ?? -1}
+                        value={engineer?.engineerId ?? ''}
                         select
                         variant='standard'
                         onChange={e => {

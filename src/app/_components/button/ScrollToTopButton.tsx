@@ -19,7 +19,10 @@ export default function ScrollToTopButton() {
   return (
     <Fade in={trigger}>
       <Box onClick={handleClick} role='presentation' sx={{ position: 'fixed', bottom: 16, right: 16 }}>
-        <Button variant='contained' className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'>
+        <Button
+          variant='contained'
+          className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center hidden sm:flex'
+        >
           <i className='tabler-arrow-up' />
         </Button>
       </Box>

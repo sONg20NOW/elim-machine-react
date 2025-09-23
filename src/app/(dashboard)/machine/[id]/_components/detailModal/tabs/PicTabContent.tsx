@@ -35,7 +35,7 @@ export default function PicTabContent({
 }: PicTabContentProps<MachineInspectionDetailResponseDtoType>) {
   const machineInspectionId = selectedMachineData.machineInspectionResponseDto.id
 
-  // 성능점검표 모달
+  // 점검사진 모달
   const [openPicModal, setOpenPicModal] = useState<boolean>(false)
   const [clickedPicCate, setClickedPicCate] = useState<MachinePicCateWithPicCountDtoType>()
 
@@ -45,7 +45,7 @@ export default function PicTabContent({
   // 선택된 점검항목의 result ID (기본적으로 0 - 아무 동작 X)
   const [selectedDfId, setSelectedDfId] = useState<number>(0)
 
-  // 한 번 이상 방문한 점검항목결과
+  // 한 번 이상 방문한 점검항목결과 (GET을 최소화하기 위한 상태)
   const [knownDfs, setKnownDfs] = useState<MachineInspectionChecklistItemResultResponseDtoType[]>([])
 
   // 한 번 이상 수정된 점검항목결과에서 선택된 점검항목

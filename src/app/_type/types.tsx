@@ -512,6 +512,22 @@ export interface MachineInspectionChecklistItemResultResponseDtoType {
   actionRequired: string
 }
 
+// POST 설비추가 형식
+export interface MachineInspectionCreateRequestDtoType {
+  machineCategoryId: number
+  purpose: string
+  location: string
+  cnt: number
+}
+
+// MachineCategory
+// GET /api/machine-categories 기계설비 카테고리 전체 조회
+export interface MachineCategoryResponseDtoType {
+  id: number
+  parentId: number
+  name: string
+}
+
 // ----------- 라이선스 -----------
 // api/licenses 라이선스 목록 조회 응답 DTO
 export interface LicensePageResponseDtoType {

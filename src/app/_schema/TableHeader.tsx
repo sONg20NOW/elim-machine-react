@@ -18,16 +18,16 @@ export const HEADERS = {
   member: {
     roleDescription: { label: '권한', canSort: true },
     name: { label: '이름', canSort: true },
-    staffNum: { label: '사번', canSort: false },
+    staffNum: { label: '사번', canSort: false, hideOnMobile: true },
     companyName: { label: '소속', canSort: true },
-    officeDepartmentName: { label: '부서', canSort: true },
+    officeDepartmentName: { label: '부서', canSort: true, hideOnMobile: true },
     officePositionDescription: { label: '직위', canSort: false },
     age: { label: '나이', canSort: true }, //gender도 함께 표시
-    email: { label: '이메일', canSort: true },
-    phoneNumber: { label: '휴대폰', canSort: false },
-    joinDate: { label: '입사일', canSort: true },
-    careerYear: { label: '근속년수', canSort: true },
-    memberStatusDescription: { label: '상태', canSort: false }
+    email: { label: '이메일', canSort: true, hideOnMobile: true },
+    phoneNumber: { label: '휴대폰', canSort: false, hideOnMobile: true },
+    joinDate: { label: '입사일', canSort: true, hideOnMobile: true },
+    careerYear: { label: '근속년수', canSort: true, hideOnMobile: true },
+    memberStatusDescription: { label: '상태', canSort: false, hideOnMobile: true }
   } as Record<keyof memberPageDtoType, HeaderInfoType>,
   machine: {
     projectStatusDescription: { label: '상태', canSort: false },

@@ -192,11 +192,7 @@ export default function Licensepage() {
     <>
       <Card>
         {/* 탭 제목 */}
-        <CardHeader
-          slotProps={{ title: { sx: { fontSize: 'clamp(1rem, 2vw, 1.5rem)' } } }}
-          title={`라이선스관리 (${totalCount})`}
-          className='pbe-4'
-        />
+        <CardHeader title={`라이선스관리 (${totalCount})`} className='pbe-4' />
         {/* <TableFilters<EngineerFilterType>
           filterInfo={ENGINEER_FILTER_INFO}
           filters={filters}

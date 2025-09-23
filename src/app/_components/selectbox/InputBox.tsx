@@ -94,9 +94,9 @@ function InputBoxContent() {
 
     return (
       <div className='flex flex-col p-0'>
-        {showLabel && <span className=' text-[13px] p-0 mb-[1px] w-fit'>{tabField.label}</span>}
+        {showLabel && <span className=' text-[10px] sm:text-[13px] p-0 mb-[1px] w-fit'>{tabField.label}</span>}
         <Box
-          className={'my-[1px] relative text-[15px] border-color-border rounded-lg px-[14px] py-[7.25px]'.concat(
+          className={'my-[1px] relative text-[13px] sm:text-[15px] border-color-border rounded-lg sm:px-[14px] sm:py-[7.25px]'.concat(
             showLabel ? ' border' : ''
           )}
         >
@@ -212,7 +212,7 @@ function InputBoxContent() {
             slotProps={{ htmlInput: { name: tabFieldKey } }}
             id={tabFieldKey}
             disabled={disabled}
-            fullWidth
+            sx={{ width: { xs: '75%', sm: '100%' } }}
             label={showLabel && tabField.label}
             value={value ?? ''}
             onChange={e => onChange(e.target.value)}
@@ -224,7 +224,7 @@ function InputBoxContent() {
             }}
             variant='contained'
             size='small'
-            className='absolute bottom-[10%] right-1 p-1'
+            className='absolute top-[50%] -translate-y-1/2 right-1 p-1'
           >
             검색
           </Button>

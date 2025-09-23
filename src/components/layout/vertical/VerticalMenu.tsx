@@ -1,6 +1,3 @@
-// Next Imports
-import { useParams } from 'next/navigation'
-
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
 
@@ -39,7 +36,6 @@ type RenderExpandIconProps = {
 }
 
 type Props = {
-  // dictionary: Awaited<ReturnType<typeof getDictionary>>
   scrollMenu: (container: any, isPerfectScrollbar: boolean) => void
 }
 

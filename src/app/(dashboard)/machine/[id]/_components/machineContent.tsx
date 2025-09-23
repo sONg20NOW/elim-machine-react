@@ -219,6 +219,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
         }
       )
 
+      getFilteredData()
       handleSuccess('선택된 설비목록이 성공적으로 삭제되었습니다.')
     } catch (error) {
       handleApiError(error)

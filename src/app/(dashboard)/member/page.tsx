@@ -211,23 +211,25 @@ export default function MemberPage() {
         {/* 탭 제목 */}
         <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        <TableFilters<MemberFilterType>
-          filterInfo={MEMBER_FILTER_INFO}
-          filters={filters}
-          onFiltersChange={setFilters}
-          disabled={disabled}
-          setPage={setPage}
-        />
+        <div className='hide-on-mobile'>
+          <TableFilters<MemberFilterType>
+            filterInfo={MEMBER_FILTER_INFO}
+            filters={filters}
+            onFiltersChange={setFilters}
+            disabled={disabled}
+            setPage={setPage}
+          />
+        </div>
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<i className='tabler-reload' />}
           onClick={() => setFilters(MemeberInitialFilters)}
-          className='max-sm:is-full absolute right-8 top-8'
+          className='max-sm:is-full absolute right-8 top-8 hide-on-mobile'
           disabled={disabled}
         >
           필터 초기화
         </Button>
-        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
           <div className='flex gap-2'>
             {/* 이름으로 검색 */}
             <SearchBar
@@ -240,6 +242,7 @@ export default function MemberPage() {
             />
             {/* 지역으로 검색 */}
             <SearchBar
+              className='hide-on-mobile'
               placeholder='지역으로 검색'
               onClick={region => {
                 setRegion(region)
@@ -249,7 +252,7 @@ export default function MemberPage() {
             />
           </div>
 
-          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-2 sm:gap-10'>
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
               <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
@@ -272,7 +275,7 @@ export default function MemberPage() {
                 </Button>
               </div>
             )}
-            <div className='flex gap-3 itmes-center'>
+            <div className='flex gap-3 itmes-center hidden sm:flex '>
               {/* 페이지당 행수 */}
               <span className='grid place-items-center'>페이지당 행 수 </span>
               <CustomTextField
@@ -299,7 +302,6 @@ export default function MemberPage() {
               variant='contained'
               startIcon={<i className='tabler-plus' />}
               onClick={() => setAddUserModalOpen(!addUserModalOpen)}
-              className='max-sm:is-full'
               disabled={disabled}
             >
               추가
