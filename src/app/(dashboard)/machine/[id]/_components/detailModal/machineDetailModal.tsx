@@ -68,7 +68,7 @@ type MachineDetailModalProps = {
   setOpen: (open: boolean) => void
   selectedMachineData: MachineInspectionDetailResponseDtoType
   setSelectedMachineData: Dispatch<SetStateAction<MachineInspectionDetailResponseDtoType | undefined>>
-  reloadData: () => Promise<void>
+  reloadTable: () => Promise<void>
 }
 
 const MachineDetailModal = ({
@@ -77,7 +77,7 @@ const MachineDetailModal = ({
   setOpen,
   selectedMachineData,
   setSelectedMachineData,
-  reloadData
+  reloadTable
 }: MachineDetailModalProps) => {
   // 수정 시 변경되는 데이터 (저장되기 전) - 깊은 복사
   const [editData, setEditData] = useState<MachineInspectionDetailResponseDtoType>(
@@ -100,10 +100,17 @@ const MachineDetailModal = ({
     JSON.stringify(stripVersion(selectedMachineData)) !==
     JSON.stringify(stripVersion({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) }))
 
+  // 창을 닫을 때마다 테이블 데이터 최신화
+  useEffect(() => {
+    if (!open) {
+      reloadTable()
+    }
+  }, [open, reloadTable])
+
   // 저장 시 각 탭에 따라 다르게 동작 (! 기본 정보 수정 시 )
+  // 1. PUT 보내고 -> 2. PUT response로 데이터 최신화 -> 3. 해당 데이터로 editData도 최신화
   const handleSave = useCallback(async () => {
     if (existChange) {
-      // 1. POST를 보내고
       try {
         switch (tabValue) {
           case 'BASIC':
@@ -254,7 +261,7 @@ const MachineDetailModal = ({
         }
 
         // 2. 리스트 데이터를 새로 받기.
-        await reloadData()
+        await reloadTable()
         setIsEditing(prev => !prev)
         handleSuccess(`${thisTabInfo.find(tabInfo => tabInfo.value === tabValue)?.label ?? ''}이(가) 수정되었습니다.`)
       } catch (error) {
@@ -265,7 +272,7 @@ const MachineDetailModal = ({
     editData,
     existChange,
     machineProjectId,
-    reloadData,
+    reloadTable,
     selectedMachineData,
     setSelectedMachineData,
     tabValue,
@@ -385,7 +392,6 @@ const MachineDetailModal = ({
               setEditData={setEditData}
               isEditing={isEditing}
               machineProjectId={machineProjectId}
-              reloadData={reloadData}
             />
           </TabPanel>
           {editData.gasMeasurementResponseDto && (

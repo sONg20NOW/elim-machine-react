@@ -22,7 +22,6 @@ interface PicTabContentProps<T> {
   setEditData: Dispatch<SetStateAction<T>>
   isEditing: boolean
   machineProjectId: string
-  reloadData: () => Promise<void>
 }
 
 export default function PicTabContent({
@@ -30,8 +29,7 @@ export default function PicTabContent({
   editData,
   setEditData,
   isEditing,
-  machineProjectId,
-  reloadData
+  machineProjectId
 }: PicTabContentProps<MachineInspectionDetailResponseDtoType>) {
   const machineInspectionId = selectedMachineData.machineInspectionResponseDto.id
 
@@ -243,11 +241,14 @@ export default function PicTabContent({
         </tr>
       </thead>
       <tbody>
-        {editData.machineChecklistItemsWithPicCountDtos.map((cate, idx) => {
+        {selectedMachineData.machineChecklistItemsWithPicCountDtos.map((cate, idx) => {
           return (
             <tr key={cate.machineChecklistItemId}>
               {idx === 0 && (
-                <th rowSpan={editData.machineChecklistItemsWithPicCountDtos.length} style={{ verticalAlign: 'top' }}>
+                <th
+                  rowSpan={selectedMachineData.machineChecklistItemsWithPicCountDtos.length}
+                  style={{ verticalAlign: 'top' }}
+                >
                   점검항목
                 </th>
               )}
@@ -365,14 +366,15 @@ export default function PicTabContent({
         })}
       </tbody>
       {showDfModal && selectedDf && <DeficiencyModal />}
-      <PictureModal
-        machineProjectId={machineProjectId}
-        open={openPicModal}
-        setOpen={setOpenPicModal}
-        inspectionData={selectedMachineData}
-        clickedPicCate={clickedPicCate}
-        onPhotoUploadSuccess={reloadData}
-      />
+      {openPicModal && clickedPicCate && (
+        <PictureModal
+          machineProjectId={machineProjectId}
+          open={openPicModal}
+          setOpen={setOpenPicModal}
+          selectedMachineData={selectedMachineData}
+          clickedPicCate={clickedPicCate}
+        />
+      )}
     </table>
   )
 }

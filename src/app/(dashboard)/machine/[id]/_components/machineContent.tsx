@@ -33,6 +33,10 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/app/_components/table/BasicTable'
 
 export const ParticipatedEngineersContext = createContext<machineProjectEngineerDetailDtoType[]>([])
+export const SelectedMachineContext = createContext<{
+  selectedMachine?: MachineInspectionDetailResponseDtoType
+  getgetLatestSelectedMachine?: () => Promise<void>
+} | null>(null)
 
 const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   // 모달 상태
@@ -70,7 +74,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
   // 행 클릭
-  const handleRowClick = useCallback(
+  const getLatestSelectedMachine = useCallback(
     async (machine: MachineInspectionPageResponseDtoType) => {
       try {
         const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
@@ -87,7 +91,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   )
 
   // 데이터 불러오기
-  const getFilteredData = useCallback(async () => {
+  const getFilteredDataList = useCallback(async () => {
     const queryParams = new URLSearchParams()
 
     setLoading(true)
@@ -135,8 +139,8 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   }, [filters, sorting, page, pageSize, machineCateName, location, machineProjectId])
 
   useEffect(() => {
-    getFilteredData()
-  }, [filters, getFilteredData, machineProjectId])
+    getFilteredDataList()
+  }, [filters, getFilteredDataList, machineProjectId])
 
   // 해당 프로젝트에 참여 중인 기술진 목록 가져오기
   // 참여기술진 목록 가져오기
@@ -219,7 +223,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
         }
       )
 
-      getFilteredData()
+      getFilteredDataList()
       handleSuccess('선택된 설비목록이 성공적으로 삭제되었습니다.')
     } catch (error) {
       handleApiError(error)
@@ -228,6 +232,8 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
 
   return (
     <ParticipatedEngineersContext.Provider value={participatedEngineers}>
+      //! context 완성
+      <SelectedMachineContext.Provider value={{selectedMachine: selectedMachine, getgetLatestSelectedMachine: getLatestSelectedMachine}}
       <div className='relative'>
         {/* 필터바 */}
         <TableFilters<MachineInspectionFilterType>
@@ -349,7 +355,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
           listException={['engineerNames']}
           header={HEADERS.machineInspection}
           data={machineData}
-          handleRowClick={handleRowClick}
+          handleRowClick={getLatestSelectedMachine}
           page={page}
           pageSize={pageSize}
           sorting={sorting}
@@ -399,7 +405,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
             setOpen={setOpen}
             selectedMachineData={selectedMachine}
             setSelectedMachineData={setSelectedMachine}
-            reloadData={getFilteredData}
+            reloadTable={getFilteredDataList}
           />
         )}
         {addMachineModalOpen && (
@@ -407,7 +413,7 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
             open={addMachineModalOpen}
             setOpen={setAddMachineModalOpen}
             machineProjectId={machineProjectId}
-            reloadData={getFilteredData}
+            reloadTable={getFilteredDataList}
           />
         )}
       </div>

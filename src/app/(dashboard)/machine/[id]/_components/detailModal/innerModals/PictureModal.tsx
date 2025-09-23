@@ -3,42 +3,51 @@
 // React Imports
 import { useEffect, useState } from 'react'
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Card, Box, Typography } from '@mui/material'
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Grid,
+  Card,
+  Box,
+  Typography,
+  TextField,
+  MenuItem,
+  Divider,
+  IconButton
+} from '@mui/material'
 import axios from 'axios'
+
+import { toast } from 'react-toastify'
+
+import type {
+  MachineInspectionDetailResponseDtoType,
+  MachinePicCateWithPicCountDtoType,
+  MachinePicSubCateResponseDtoType
+} from '@/app/_type/types'
+import { handleSuccess } from '@/utils/errorHandler'
 
 type PictureModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
-  inspectionData: any
-  clickedPicCate: any
-  onPhotoUploadSuccess?: () => void // 사진 업로드 성공 콜백 추가
+  selectedMachineData: MachineInspectionDetailResponseDtoType
+  clickedPicCate: MachinePicCateWithPicCountDtoType
 }
 
-const PictureModal = ({
-  machineProjectId,
-  open,
-  setOpen,
-  inspectionData,
-  clickedPicCate,
-  onPhotoUploadSuccess
-}: PictureModalProps) => {
+const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, clickedPicCate }: PictureModalProps) => {
   // 사진 리스트
-  const [selectedInspection, setSelectedInspection] = useState<any>(null)
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [pictures, setPictures] = useState<any[]>([])
+  const [filesToUpload, setFilesToUpload] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  const [selectedSubCate, setSelectedSubCate] = useState<number | null>(null)
+  const [selectedSubCate, setSelectedSubCate] = useState<MachinePicSubCateResponseDtoType>()
 
   const handleClose = () => {
     setOpen(false)
-    setUploadedFiles([])
+    setFilesToUpload([])
   }
-
-  useEffect(() => {
-    if (open && clickedPicCate?.subCates?.length > 0) {
-      setSelectedSubCate(clickedPicCate.subCates[0].machinePicSubCateSeq)
-    }
-  }, [open, clickedPicCate])
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -46,40 +55,44 @@ const PictureModal = ({
     if (files) {
       const newFiles = Array.from(files)
 
-      setUploadedFiles(prev => [...prev, ...newFiles])
+      setFilesToUpload(prev => [...prev, ...newFiles])
     }
   }
 
   const handleFileUpload = async () => {
-    if (uploadedFiles.length === 0) {
-      alert('업로드할 파일을 선택하세요.')
+    if (filesToUpload.length === 0) {
+      toast.error('업로드할 파일을 선택하세요.')
+
+      return
+    } else if (!selectedSubCate) {
+      toast.error('소분류를 선택하세요.')
 
       return
     }
 
     setIsUploading(true)
 
-    console.log('inspectionData', inspectionData)
-
     try {
-      // 1. 프리사인드 URL 요청
-      const presignedResponse = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/presigned-urls/upload`,
-        {
-          uploadType: 'INSPECTION_IMAGE',
-          originalFileNames: uploadedFiles.map(file => file.name),
-          projectId: parseInt(machineProjectId),
-          machineInspectionId: inspectionData.machineInspectionId,
-          cateName: inspectionData.cateName || '배관설비',
-          picCateName: inspectionData.picCateName || '설비사진',
-          picSubCateName: inspectionData.picSubCateName || '현황사진'
-        }
-      )
+      // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
+      const presignedResponse = await axios.post<{
+        data: { presignedUrlResponseDtos: { objectKey: string; presignedUrl: string }[] }
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/presigned-urls/upload`, {
+        uploadType: 'INSPECTION_IMAGE',
+        originalFileNames: filesToUpload.map(file => file.name),
+        projectId: parseInt(machineProjectId),
+        machineInspectionId: selectedMachineData.machineInspectionResponseDto.id,
+        cateName: selectedMachineData.machineInspectionResponseDto.machineCategoryName ?? '배관설비',
+        picCateName: clickedPicCate.machineChecklistItemName ?? '설비사진',
+        picSubCateName: selectedSubCate?.checklistSubItemName ?? '현황사진',
+
+        // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
+        memberId: 1
+      })
 
       const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
 
-      // 2. 각 파일을 S3에 직접 업로드
-      const uploadPromises = uploadedFiles.map(async (file, index) => {
+      // 2. 각 파일을 S3에 직접 업로드 (AWS S3로 POST)
+      const uploadPromises = filesToUpload.map(async (file, index) => {
         const presignedData = presignedUrls[index]
 
         if (!presignedData) {
@@ -99,7 +112,7 @@ const PictureModal = ({
 
         return {
           fileName: file.name,
-          s3Key: presignedData.s3Key,
+          s3Key: presignedData.objectKey,
           uploadSuccess: true
         }
       })
@@ -109,51 +122,38 @@ const PictureModal = ({
 
       console.log('업로드 완료:', uploadResults)
 
-      console.log('clickedPicCate는요!', clickedPicCate)
-
-      // 3. DB에 사진 정보 기록
+      // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
       const machinePicCreateRequestDtos = uploadResults.map(result => ({
-        machinePicSubCateId: selectedSubCate || 1, // 기본값 또는 selectedMachine에서 가져오기
+        machineChecklistSubItemId: selectedSubCate?.machineChecklistSubItemId || 1, // 기본값 또는 selectedMachine에서 가져오기
         originalFileName: result.fileName,
         s3Key: result.s3Key
 
-        // cdnPath는 선택사항이므로 필요시 추가
+        // cdnPath는 추후 확장사항
       }))
 
-      console.log('DB 기록 요청 데이터:', machinePicCreateRequestDtos)
-
       const dbResponse = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionData.machineInspectionId}/machine-pics`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/machine-pics`,
         {
           machinePicCreateRequestDtos
         }
       )
 
       console.log('DB 기록 완료:', dbResponse.data)
-      alert(`${uploadResults.length}개 사진이 성공적으로 업로드되었습니다.`)
+      handleSuccess(`${uploadResults.length}개 사진이 성공적으로 업로드되었습니다.`)
 
-      setUploadedFiles([])
-
-      // 업로드 후 목록 새로고침
+      setFilesToUpload([])
 
       // 업로드 후 목록 새로고침
-      const response = await axios.post(
+      const response = await axios.post<{ data: { content: any[] } }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=10`,
         {
-          machineInspectionId: inspectionData.machineInspectionId,
-          machinePicCateId: clickedPicCate?.machinePicCateSeq || null
+          machineProjectId: parseInt(machineProjectId),
+          machineInspectionId: selectedMachineData.machineInspectionResponseDto.id,
+          machineChecklistItemId: clickedPicCate.machineChecklistItemId
         }
       )
 
-      setSelectedInspection(response.data.data)
-
-      // 🔥 여기가 누락되어 있었습니다!
-      console.log('🎯 사진 업로드 완료! 부모 콜백 호출 중...')
-
-      if (onPhotoUploadSuccess) {
-        onPhotoUploadSuccess()
-        console.log('📞 onPhotoUploadSuccess 콜백 실행')
-      }
+      setPictures(response.data.data.content)
     } catch (error) {
       console.error('Upload error:', error)
     } finally {
@@ -162,148 +162,60 @@ const PictureModal = ({
   }
 
   const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index))
+    setFilesToUpload(prev => prev.filter((_, i) => i !== index))
   }
 
   useEffect(() => {
-    if (!open) return
-    if (!inspectionData || !inspectionData.machineInspectionId) return
-
     const getData = async () => {
-      const response = await axios.post<{ data: any }>(
+      const response = await axios.post<{ data: { content: any[] } }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=10`,
         {
-          machineInspectionId: inspectionData.machineInspectionId,
-          machinePicCateId: clickedPicCate?.machinePicCateSeq || null
+          machineProjectId: parseInt(machineProjectId),
+          machineInspectionId: selectedMachineData.machineInspectionResponseDto.id,
+          machineChecklistItemId: clickedPicCate.machineChecklistItemId
         }
       )
 
-      setSelectedInspection(response.data.data)
-      console.log('response', response.data.data)
+      setPictures(response.data.data.content)
+      console.log('response', response.data.data.content)
     }
 
     getData()
-  }, [open, inspectionData, machineProjectId, clickedPicCate?.machinePicCateSeq])
+  }, [open, selectedMachineData, machineProjectId, clickedPicCate])
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth='md'
-      fullWidth
-      style={{ zIndex: 1400 }}
-      disableEnforceFocus
-      disableAutoFocus
-    >
-      <DialogTitle>
-        <span style={{ color: '#1976d2', fontWeight: 700, fontSize: 20 }}>점검 사진</span>
+    <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth disableEnforceFocus disableAutoFocus>
+      <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div className='ps-1 flex flex-col gap-1'>
+          <span style={{ fontWeight: 700, fontSize: 24 }}>사진 목록</span>
+          <span>{clickedPicCate.machineChecklistItemName}</span>
+        </div>
         <Grid item xs={12}>
           <Card sx={{ p: 2 }}>
             <Typography sx={{ fontWeight: 600, mb: 1 }}>소분류 선택</Typography>
-
-            <select
-              value={selectedSubCate ?? ''}
-              onChange={e => setSelectedSubCate(Number(e.target.value))}
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #ccc'
-              }}
+            <TextField
+              size='small'
+              fullWidth
+              select
+              value={selectedSubCate ? JSON.stringify(selectedSubCate) : JSON.stringify({})}
+              onChange={e => setSelectedSubCate(JSON.parse(e.target.value))}
             >
-              <option value=''>-- 소분류를 선택하세요 --</option>
-              {clickedPicCate?.subCates?.map((sub: any) => (
-                <option key={sub.machinePicSubCateSeq} value={sub.machinePicSubCateSeq}>
-                  {sub.subCateName}
-                </option>
+              <MenuItem value={JSON.stringify({})} disabled>
+                -- 소분류를 선택하세요 --
+              </MenuItem>
+              {clickedPicCate?.checklistSubItems?.map(sub => (
+                <MenuItem key={sub.machineChecklistSubItemId} value={JSON.stringify(sub)}>
+                  {sub.checklistSubItemName}
+                  <Typography color='primary.main'>{sub.machinePicCount ? `(${sub.machinePicCount})` : ''}</Typography>
+                </MenuItem>
               ))}
-            </select>
+            </TextField>
           </Card>
         </Grid>
       </DialogTitle>
+      <Divider />
       <DialogContent>
         <Grid container spacing={3}>
-          {/* 사진 업로드 영역 */}
-          <Grid item xs={12}>
-            <Card sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <input
-                  type='file'
-                  multiple
-                  accept='image/*'
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                  id='photo-upload-input'
-                />
-                <label htmlFor='photo-upload-input'>
-                  <Button variant='outlined' component='span' startIcon={<i className='ri-upload-2-line' />}>
-                    파일 선택
-                  </Button>
-                </label>
-
-                <Button
-                  variant='contained'
-                  onClick={handleFileUpload}
-                  disabled={uploadedFiles.length === 0 || isUploading}
-                  startIcon={<i className='ri-image-add-line' />}
-                >
-                  {isUploading ? '업로드 중...' : '사진 추가'}
-                </Button>
-
-                <Typography variant='body2' color='text.secondary'>
-                  {uploadedFiles.length}개 파일 선택됨
-                </Typography>
-              </Box>
-
-              {/* 선택된 파일 미리보기 */}
-              {uploadedFiles.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant='subtitle2' gutterBottom>
-                    미리보기
-                  </Typography>
-                  <Grid container spacing={1}>
-                    {uploadedFiles.map((file, index) => (
-                      <Grid item xs={6} sm={4} md={3} key={index}>
-                        <Card sx={{ position: 'relative' }}>
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            style={{
-                              width: '100%',
-                              height: '120px',
-                              objectFit: 'cover'
-                            }}
-                          />
-                          <Box sx={{ p: 1 }}>
-                            <Typography variant='caption' noWrap>
-                              {file.name}
-                            </Typography>
-                          </Box>
-                          <Button
-                            size='small'
-                            onClick={() => removeFile(index)}
-                            sx={{
-                              position: 'absolute',
-                              top: 4,
-                              right: 4,
-                              minWidth: 'auto',
-                              width: 24,
-                              height: 24,
-                              bgcolor: 'rgba(255,255,255,0.8)',
-                              '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
-                            }}
-                          >
-                            <i className='ri-close-line' style={{ fontSize: '14px' }} />
-                          </Button>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              )}
-            </Card>
-          </Grid>
-
           {/* 기존 사진 목록 */}
           <Grid item xs={12}>
             <Card sx={{ p: 2 }}>
@@ -311,9 +223,9 @@ const PictureModal = ({
                 검사 사진 목록
               </Typography>
 
-              {selectedInspection?.content && selectedInspection.content.length > 0 ? (
+              {pictures && pictures.length > 0 ? (
                 <Grid container spacing={2}>
-                  {selectedInspection.content.map((inspe: any, idx: number) => (
+                  {pictures.map((inspe: any, idx: number) => (
                     <Grid item xs={6} sm={4} md={3} key={idx}>
                       <Card>
                         <img
@@ -349,6 +261,89 @@ const PictureModal = ({
                 >
                   <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
                   <Typography>등록된 검사 사진이 없습니다.</Typography>
+                </Box>
+              )}
+            </Card>
+          </Grid>
+          {/* 사진 업로드 영역 */}
+          <Grid item xs={12}>
+            <Card sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <input
+                  type='file'
+                  multiple
+                  accept='image/*'
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                  id='photo-upload-input'
+                />
+                <label htmlFor='photo-upload-input'>
+                  <Button variant='outlined' component='span' startIcon={<i className='ri-upload-2-line' />}>
+                    파일 선택
+                  </Button>
+                </label>
+
+                <Button
+                  variant='contained'
+                  onClick={handleFileUpload}
+                  disabled={filesToUpload.length === 0 || isUploading}
+                  startIcon={<i className='ri-image-add-line' />}
+                >
+                  {isUploading ? '업로드 중...' : '사진 업로드'}
+                </Button>
+
+                <Typography variant='body2' color='text.secondary'>
+                  {filesToUpload.length}개 파일 선택됨
+                </Typography>
+              </Box>
+
+              {/* 선택된 파일 미리보기 */}
+              {filesToUpload.length > 0 && (
+                <Box
+                  sx={{
+                    border: 'solid 1px',
+                    borderColor: '#dbdbdbff',
+                    borderRadius: 1,
+                    mb: 2,
+                    padding: 2,
+                    grid: 'initial'
+                  }}
+                >
+                  <Typography variant='subtitle1' gutterBottom>
+                    미리보기
+                  </Typography>
+                  <Grid container spacing={1}>
+                    {filesToUpload.map((file, index) => (
+                      <Grid item xs={6} sm={4} md={3} key={index}>
+                        <Card sx={{ position: 'relative' }}>
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={file.name}
+                            style={{
+                              width: '100%',
+                              height: '120px',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <Box sx={{ p: 1 }}>
+                            <Typography variant='caption' noWrap>
+                              {file.name}
+                            </Typography>
+                          </Box>
+                          <IconButton
+                            sx={{
+                              position: 'absolute',
+                              top: 0,
+                              right: 0
+                            }}
+                            onClick={() => removeFile(index)}
+                          >
+                            <i className='tabler-x text-xl text-error' />
+                          </IconButton>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
                 </Box>
               )}
             </Card>
