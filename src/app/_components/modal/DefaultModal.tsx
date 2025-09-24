@@ -12,6 +12,8 @@ import DialogActions from '@mui/material/DialogActions'
 import TabContext from '@mui/lab/TabContext'
 
 import { DialogContent, Divider, IconButton, Typography } from '@mui/material'
+import classNames from 'classnames'
+import type { TransitionProps } from '@mui/material/transitions'
 
 type DefaultModalProps = {
   size?: 'xs' | 'sm' | 'md' | 'lg'
@@ -26,6 +28,7 @@ type DefaultModalProps = {
   modifyButton?: ReactNode
   deleteButton?: ReactNode
   onClose?: () => void
+  TransitionProps?: TransitionProps
 }
 
 /**
@@ -51,7 +54,8 @@ export default function DefaultModal({
   deleteButton,
   onClose = () => {
     setOpen(false)
-  }
+  },
+  TransitionProps
 }: DefaultModalProps) {
   // States
   return (
@@ -63,6 +67,7 @@ export default function DefaultModal({
       scroll='paper' // ✅ DialogContent 안에서만 스크롤
       closeAfterTransition={false}
       sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+      TransitionProps={TransitionProps}
     >
       {/* 닫기 버튼 */}
       <IconButton
@@ -87,7 +92,13 @@ export default function DefaultModal({
       {/* 제목 */}
       <DialogTitle
         variant='h4'
-        className='text-xl sm:text-3xl flex items-center gap-0 sm:gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'
+        className={classNames(
+          ' flex items-center gap-0 sm:gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16',
+          {
+            'text-xl sm:text-3xl': size !== 'sm',
+            'text-lg sm:text-xl': size === 'sm'
+          }
+        )}
       >
         {title}
         {headerDescription && (

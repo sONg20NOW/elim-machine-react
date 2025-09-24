@@ -2,14 +2,14 @@ import { createContext, useContext, useState } from 'react'
 
 import Grid from '@mui/material/Grid2'
 
-import { Box, Button } from '@mui/material'
+import { Box, Button, InputAdornment } from '@mui/material'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
-import { execDaumPostcode } from '@/app/_util/daumMapPostcode'
+import PostCodeDialog from '@/app/_util/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
 
 interface InputBoxProps {
@@ -63,6 +63,9 @@ function InputBoxContent() {
   const { isEditing, tabInfos, tabFieldKey, value, onChange, showLabel } = props!
   const tabField = tabInfos[tabFieldKey]
   const disabled = props?.disabled ?? tabField?.disabled ?? false
+
+  // 주소 모달 상태
+  const [showMapModal, setShowMapModal] = useState(false)
 
   // 주민번호 핸들링
   const [juminNum, setJuminNum] = useState(value)
@@ -216,18 +219,17 @@ function InputBoxContent() {
             label={showLabel && tabField.label}
             value={value ?? ''}
             onChange={e => onChange(e.target.value)}
-          />
-
-          <Button
-            onClick={() => {
-              execDaumPostcode(tabFieldKey, onChange)
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position='end'>
+                  <Button onClick={() => setShowMapModal(true)} variant='contained' size='small'>
+                    검색
+                  </Button>
+                </InputAdornment>
+              )
             }}
-            variant='contained'
-            size='small'
-            className='absolute top-[50%] -translate-y-1/2 right-1 p-1'
-          >
-            검색
-          </Button>
+          />
+          {<PostCodeDialog open={showMapModal} setOpen={setShowMapModal} ElementId={tabFieldKey} onChange={onChange} />}
         </div>
       )
     default:

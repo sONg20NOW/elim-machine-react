@@ -16,10 +16,9 @@ type AddMachineModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   machineProjectId: string
-  reloadTable: () => void
 }
 
-const AddMachineModal = ({ open, setOpen, machineProjectId, reloadTable: reloadData }: AddMachineModalProps) => {
+const AddMachineModal = ({ open, setOpen, machineProjectId }: AddMachineModalProps) => {
   const [newData, setNewData] = useState<MachineInspectionCreateRequestDtoType>({
     machineCategoryId: 0,
     purpose: '',
@@ -73,7 +72,6 @@ const AddMachineModal = ({ open, setOpen, machineProjectId, reloadTable: reloadD
         { inspections: [newData] }
       )
 
-      reloadData()
       setOpen(false)
     } catch (error) {
       handleApiError(error)

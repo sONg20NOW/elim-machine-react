@@ -1,8 +1,7 @@
 'use client'
 
 // React Imports
-import type { Dispatch, SetStateAction } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import { Button, Tab } from '@mui/material'
 import axios from 'axios'
@@ -31,6 +30,7 @@ import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
 import PipeTabContent from './tabs/PipeTabContent'
 import PicTabContent from './tabs/PicTabContent'
+import { SelectedMachineContext } from '../machineContent'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -66,74 +66,68 @@ type MachineDetailModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
-  selectedMachineData: MachineInspectionDetailResponseDtoType
-  setSelectedMachineData: Dispatch<SetStateAction<MachineInspectionDetailResponseDtoType | undefined>>
-  reloadTable: () => Promise<void>
 }
 
-const MachineDetailModal = ({
-  machineProjectId,
-  open,
-  setOpen,
-  selectedMachineData,
-  setSelectedMachineData,
-  reloadTable
-}: MachineDetailModalProps) => {
+const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailModalProps) => {
+  const context = useContext(SelectedMachineContext)
+
+  if (!context) {
+    throw new Error('SelectedMachineContext is null')
+  }
+
+  const { selectedMachine, setSelectedMachine } = context
+
+  if (!selectedMachine) {
+    throw new Error('selecteMachine is undefined')
+  }
+
   // 수정 시 변경되는 데이터 (저장되기 전) - 깊은 복사
   const [editData, setEditData] = useState<MachineInspectionDetailResponseDtoType>(
-    JSON.parse(JSON.stringify(selectedMachineData))
+    JSON.parse(JSON.stringify(selectedMachine))
   )
 
   const [showAlertModal, setShowAlertModal] = useState(false)
 
   // 탭
   const [tabValue, setTabValue] = useState('BASIC')
-  const thisTabInfo = TabInfo[selectedMachineData.checklistExtensionType]
+  const thisTabInfo = TabInfo[selectedMachine.checklistExtensionType]
 
   const [isEditing, setIsEditing] = useState(false)
 
   // 저장되었을 경우(selectedMachineData가 바뀐 경우) 최신화
-  useEffect(() => setEditData(JSON.parse(JSON.stringify(selectedMachineData))), [selectedMachineData])
+  useEffect(() => setEditData(JSON.parse(JSON.stringify(selectedMachine))), [selectedMachine])
 
   // ? 미흡사항이 변경되었을 때도 version이 달라서 차이가 발생하므로 version 제외하고 비교.
   const existChange =
-    JSON.stringify(stripVersion(selectedMachineData)) !==
+    JSON.stringify(stripVersion(selectedMachine)) !==
     JSON.stringify(stripVersion({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) }))
 
-  // 창을 닫을 때마다 테이블 데이터 최신화
-  useEffect(() => {
-    if (!open) {
-      reloadTable()
-    }
-  }, [open, reloadTable])
-
   // 저장 시 각 탭에 따라 다르게 동작 (! 기본 정보 수정 시 )
-  // 1. PUT 보내고 -> 2. PUT response로 데이터 최신화 -> 3. 해당 데이터로 editData도 최신화
+  // 1. PUT 보내고 -> 2. PUT response로 editData, original data(selectedMachine) 최신화
   const handleSave = useCallback(async () => {
     if (existChange) {
       try {
         switch (tabValue) {
           case 'BASIC':
             const basicResponse = await axios.put<{ data: MachineInspectionResponseDtoType }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}`,
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}`,
               editData.machineInspectionResponseDto
             )
 
             setEditData(prev => ({ ...prev, machineInspectionResponseDto: basicResponse.data.data }))
-            setSelectedMachineData(prev => prev && { ...prev, machineInspectionResponseDto: basicResponse.data.data })
+            setSelectedMachine(prev => prev && { ...prev, machineInspectionResponseDto: basicResponse.data.data })
 
             // 참여기술진 변경사항이 있다면 POST.
             if (
-              JSON.stringify(editData.engineerIds.filter(id => id > 0)) !==
-              JSON.stringify(selectedMachineData.engineerIds)
+              JSON.stringify(editData.engineerIds.filter(id => id > 0)) !== JSON.stringify(selectedMachine.engineerIds)
             ) {
               const engineerResponse = await axios.put<{ data: { engineerIds: number[] } }>(
-                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/machine-inspection-engineers`,
+                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/machine-inspection-engineers`,
                 { engineerIds: editData.engineerIds.filter(id => id > 0) }
               )
 
               setEditData(prev => ({ ...prev, engineerIds: engineerResponse.data.data.engineerIds }))
-              setSelectedMachineData(prev => prev && { ...prev, engineerIds: engineerResponse.data.data.engineerIds })
+              setSelectedMachine(prev => prev && { ...prev, engineerIds: engineerResponse.data.data.engineerIds })
             }
 
             break
@@ -143,7 +137,7 @@ const MachineDetailModal = ({
             const changedCates: { id: number; version: number; inspectionResult: string }[] = []
 
             editData.machineChecklistItemsWithPicCountDtos.map((cate, idx) => {
-              const originalCate = selectedMachineData.machineChecklistItemsWithPicCountDtos[idx]
+              const originalCate = selectedMachine.machineChecklistItemsWithPicCountDtos[idx]
 
               if (
                 cate.machineInspectionChecklistItemResultBasicResponseDto !==
@@ -159,7 +153,7 @@ const MachineDetailModal = ({
                   machineInspectionChecklistItemResultUpdateResponseDtos: machineInspectionChecklistItemResultBasicResponseDtoType[]
                 }
               }>(
-                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
+                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
                 { machineInspectionChecklistItemResultUpdateRequestDtos: changedCates }
               )
 
@@ -181,7 +175,7 @@ const MachineDetailModal = ({
                     )!
                   }))
                 }))
-                setSelectedMachineData(
+                setSelectedMachine(
                   prev =>
                     prev && {
                       ...prev,
@@ -205,19 +199,19 @@ const MachineDetailModal = ({
             const gasResponse = await axios.put<{
               data: GasMeasurementResponseDtoType
             }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/gasMeasurement`,
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/gasMeasurement`,
               editData.gasMeasurementResponseDto
             )
 
             setEditData(prev => ({ ...prev, gasMeasurementResponseDto: gasResponse.data.data }))
-            setSelectedMachineData(prev => prev && { ...prev, gasMeasurementResponseDto: gasResponse.data.data })
+            setSelectedMachine(prev => prev && { ...prev, gasMeasurementResponseDto: gasResponse.data.data })
 
             break
           case 'WIND':
             const windResponse = await axios.put<{
               data: { windMeasurementUpdateResponseDtos: WindMeasurementResponseDtoType[] }
             }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/windMeasurements`,
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/windMeasurements`,
               { windMeasurementUpdateRequestDtos: editData.windMeasurementResponseDtos }
             )
 
@@ -225,7 +219,7 @@ const MachineDetailModal = ({
               ...prev,
               windMeasurementResponseDtos: windResponse.data.data.windMeasurementUpdateResponseDtos
             }))
-            setSelectedMachineData(
+            setSelectedMachine(
               prev =>
                 prev && {
                   ...prev,
@@ -237,7 +231,7 @@ const MachineDetailModal = ({
             const pipeResponse = await axios.put<{
               data: { pipeMeasurementUpdateResponseDtos: PipeMeasurementResponseDtoType[] }
             }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/pipeMeasurements`,
+              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/pipeMeasurements`,
               { pipeMeasurementUpdateRequestDtos: editData.pipeMeasurementResponseDtos }
             )
 
@@ -247,7 +241,7 @@ const MachineDetailModal = ({
               ...prev,
               pipeMeasurementResponseDtos: pipeResponse.data.data.pipeMeasurementUpdateResponseDtos
             }))
-            setSelectedMachineData(
+            setSelectedMachine(
               prev =>
                 prev && {
                   ...prev,
@@ -260,27 +254,16 @@ const MachineDetailModal = ({
             break
         }
 
-        // 2. 리스트 데이터를 새로 받기.
-        await reloadTable()
         setIsEditing(prev => !prev)
         handleSuccess(`${thisTabInfo.find(tabInfo => tabInfo.value === tabValue)?.label ?? ''}이(가) 수정되었습니다.`)
       } catch (error) {
         handleApiError(error)
       }
     }
-  }, [
-    editData,
-    existChange,
-    machineProjectId,
-    reloadTable,
-    selectedMachineData,
-    setSelectedMachineData,
-    tabValue,
-    thisTabInfo
-  ])
+  }, [editData, existChange, machineProjectId, selectedMachine, setSelectedMachine, tabValue, thisTabInfo])
 
   return (
-    selectedMachineData && (
+    selectedMachine && (
       <DefaultModal
         modifyButton={
           <Button variant='contained' color='error'>
@@ -290,7 +273,7 @@ const MachineDetailModal = ({
         value={tabValue}
         open={open}
         setOpen={setOpen}
-        title={`${selectedMachineData.machineInspectionResponseDto.machineInspectionName || ''}   성능점검표`}
+        title={`${selectedMachine.machineInspectionResponseDto.machineInspectionName || ''}   성능점검표`}
         primaryButton={
           <div style={{ display: 'flex', gap: 1 }}>
             <Button
@@ -354,7 +337,7 @@ const MachineDetailModal = ({
               }
             }}
           >
-            {selectedMachineData.checklistExtensionType === 'NONE'
+            {selectedMachine.checklistExtensionType === 'NONE'
               ? null
               : thisTabInfo.map(tab =>
                   existChange && tabValue !== tab.value ? (
@@ -379,7 +362,7 @@ const MachineDetailModal = ({
           </div>
           <TabPanel value={'BASIC'}>
             <BasicTabContent
-              selectedMachineData={selectedMachineData}
+              selectedMachineData={selectedMachine}
               editData={editData}
               setEditData={setEditData}
               isEditing={isEditing}
@@ -387,7 +370,6 @@ const MachineDetailModal = ({
           </TabPanel>
           <TabPanel value={'PIC'}>
             <PicTabContent
-              selectedMachineData={selectedMachineData}
               editData={editData}
               setEditData={setEditData}
               isEditing={isEditing}
@@ -397,7 +379,7 @@ const MachineDetailModal = ({
           {editData.gasMeasurementResponseDto && (
             <TabPanel value={'GAS'}>
               <GasTabContent
-                selectedMachineData={selectedMachineData}
+                selectedMachineData={selectedMachine}
                 editData={editData}
                 setEditData={setEditData}
                 isEditing={isEditing}
@@ -407,7 +389,7 @@ const MachineDetailModal = ({
           {editData.windMeasurementResponseDtos && (
             <TabPanel value={'WIND'}>
               <WindTabContent
-                selectedMachineData={selectedMachineData}
+                selectedMachineData={selectedMachine}
                 editData={editData}
                 setEditData={setEditData}
                 isEditing={isEditing}
@@ -417,7 +399,7 @@ const MachineDetailModal = ({
           {editData.pipeMeasurementResponseDtos && (
             <TabPanel value={'PIPE'}>
               <PipeTabContent
-                selectedMachineData={selectedMachineData}
+                selectedMachineData={selectedMachine}
                 editData={editData}
                 setEditData={setEditData}
                 isEditing={isEditing}
@@ -432,7 +414,7 @@ const MachineDetailModal = ({
             setShowAlertModal={setShowAlertModal}
             setEditData={setEditData}
             setIsEditing={setIsEditing}
-            originalData={selectedMachineData}
+            originalData={selectedMachine}
           />
         )}
       </DefaultModal>

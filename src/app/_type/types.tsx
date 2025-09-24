@@ -414,7 +414,7 @@ export interface MachineInspectionResponseDtoType {
 export interface MachinePicCateWithPicCountDtoType {
   machineChecklistItemId: number
   machineChecklistItemName: string
-  checklistSubItems: MachinePicSubCateResponseDtoType[]
+  checklistSubItems: MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType[]
   totalMachinePicCount: number
   machineInspectionChecklistItemResultBasicResponseDto: machineInspectionChecklistItemResultBasicResponseDtoType
 }
@@ -428,7 +428,7 @@ export interface machineInspectionChecklistItemResultBasicResponseDtoType {
 }
 
 // 점검 항목의 하위 항목 및 사진 개수 응답 DTO
-export interface MachinePicSubCateResponseDtoType {
+export interface MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType {
   machineChecklistSubItemId: number
   checklistSubItemName: string
   machinePicCount: number
@@ -526,6 +526,37 @@ export interface MachineCategoryResponseDtoType {
   id: number
   parentId: number
   name: string
+}
+
+// ----------- presignedURL 관련 -----------
+
+// POST /api/machine-projects/{machineProjectId}/machine-pics 프로젝트 내 전체 사진 조회 (Presigned URL 포함)
+export interface MachinePicPresignedUrlResponseDtoType {
+  machineInspectionId: number
+  machinePicId: number
+  version: number
+  machineCategoryId: number
+  machineChecklistItemId: number
+  machineChecklistSubItemId: number
+  machineCategoryName: string
+  machineChecklistItemName: string
+  machineChecklistSubItemName: string
+  originalFileName: string
+  measuredValue: string
+  alternativeSubTitle: string
+  s3Key: string
+  presignedUrl: string
+  remark: string
+}
+
+// ----------- 무한스크롤 사진 관련 -----------
+// 무한스크롤 커서 정보 (사진 조회용)
+export interface MachinePicCursorType {
+  lastMachineCateSortOrder: number
+  lastMachinePicCateSortOrder: number
+  lastMachineChecklistSubItemSortOrder: number
+  lastMachineInspectionId: number
+  lastMachinePicId: number
 }
 
 // ----------- 라이선스 -----------

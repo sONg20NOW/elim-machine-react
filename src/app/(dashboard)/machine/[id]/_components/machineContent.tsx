@@ -1,5 +1,6 @@
 'use client'
 
+import type { Dispatch, SetStateAction } from 'react'
 import { useEffect, useState, useCallback, createContext } from 'react'
 
 // MUI Imports
@@ -35,7 +36,7 @@ import BasicTable from '@/app/_components/table/BasicTable'
 export const ParticipatedEngineersContext = createContext<machineProjectEngineerDetailDtoType[]>([])
 export const SelectedMachineContext = createContext<{
   selectedMachine?: MachineInspectionDetailResponseDtoType
-  getgetLatestSelectedMachine?: () => Promise<void>
+  setSelectedMachine: Dispatch<SetStateAction<MachineInspectionDetailResponseDtoType | undefined>>
 } | null>(null)
 
 const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
@@ -73,8 +74,8 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
-  // 행 클릭
-  const getLatestSelectedMachine = useCallback(
+  // 테이블 행 클릭 시 초기 동작하는 함수
+  const getInitialSelectedMachine = useCallback(
     async (machine: MachineInspectionPageResponseDtoType) => {
       try {
         const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
@@ -89,6 +90,22 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
     },
     [machineProjectId]
   )
+
+  // GET selectedMachine data -> GET 대신 put으로 받은 정보로 selectedMachine을 변경하는 게 더 효율적일 듯.
+  // const reloadSelectedMachine = useCallback(async () => {
+  //   if (selectedMachine) {
+  //     try {
+  //       const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
+  //         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto}`
+  //       )
+
+  //       setSelectedMachine(response.data.data)
+  //       setOpen(true)
+  //     } catch (error) {
+  //       handleApiError(error)
+  //     }
+  //   }
+  // }, [selectedMachine, machineProjectId])
 
   // 데이터 불러오기
   const getFilteredDataList = useCallback(async () => {
@@ -139,8 +156,10 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
   }, [filters, sorting, page, pageSize, machineCateName, location, machineProjectId])
 
   useEffect(() => {
-    getFilteredDataList()
-  }, [filters, getFilteredDataList, machineProjectId])
+    if (!open && !addMachineModalOpen) {
+      getFilteredDataList()
+    }
+  }, [filters, getFilteredDataList, machineProjectId, open, addMachineModalOpen])
 
   // 해당 프로젝트에 참여 중인 기술진 목록 가져오기
   // 참여기술진 목록 가져오기
@@ -232,191 +251,185 @@ const MachineContent = ({ machineProjectId }: { machineProjectId: string }) => {
 
   return (
     <ParticipatedEngineersContext.Provider value={participatedEngineers}>
-      //! context 완성
-      <SelectedMachineContext.Provider value={{selectedMachine: selectedMachine, getgetLatestSelectedMachine: getLatestSelectedMachine}}
-      <div className='relative'>
-        {/* 필터바 */}
-        <TableFilters<MachineInspectionFilterType>
-          filterInfo={{
-            engineerName: {
-              label: '점검자',
-              type: 'multi',
-              options: participatedEngineers.map(engineer => ({
-                value: engineer.engineerName,
-                label: `${engineer.engineerName} (${engineer.gradeDescription})`
-              }))
-            }
-          }}
-          filters={filters}
-          onFiltersChange={setFilters}
-          disabled={disabled}
-          setPage={setPage}
-        />
-        {/* 필터 초기화 버튼 */}
-        <Button
-          startIcon={<i className='tabler-reload' />}
-          onClick={() => {
-            setFilters({
-              engineerName: ''
-            })
-            setMachineCateName('')
-            setLocation('')
-          }}
-          className='max-sm:is-full absolute right-8 top-8'
-          disabled={disabled}
-        >
-          필터 초기화
-        </Button>
-        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <div className='flex gap-2'>
-            {/* 이름으로 검색 */}
-            <SearchBar
-              placeholder='설비분류로 검색'
-              onClick={machineCateName => {
-                setMachineCateName(machineCateName)
-                setPage(0)
-              }}
-              disabled={disabled}
-            />
-            {/* 현장명으로 검색 */}
-            <SearchBar
-              placeholder='위치로 검색'
-              onClick={location => {
-                setLocation(location)
-                setPage(0)
-              }}
-              disabled={disabled}
-            />
-            <Button variant='contained' color='info' disabled={loading || error}>
-              점검대상 및 수량
-            </Button>
-          </div>
-
-          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
-            {/* 한번에 삭제 */}
-            {!showCheckBox ? (
-              <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-                선택 삭제
-              </Button>
-            ) : (
-              <div className='flex gap-1'>
-                <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
-                  {`(${checked.size}) 삭제`}
-                </Button>
-                <Button
-                  variant='contained'
-                  color='secondary'
-                  onClick={() => {
-                    setShowCheckBox(prev => !prev)
-                    handleCheckAllEngineers(false)
-                  }}
-                >
-                  취소
-                </Button>
-              </div>
-            )}
-            <div className='flex gap-3 itmes-center'>
-              {/* 페이지당 행수 */}
-              <span className='grid place-items-center whitespace-nowrap'>페이지당 행 수 </span>
-              <CustomTextField
-                select
-                value={pageSize.toString()}
-                onChange={e => {
-                  setPageSize(Number(e.target.value))
+      <SelectedMachineContext.Provider
+        value={{ selectedMachine: selectedMachine, setSelectedMachine: setSelectedMachine }}
+      >
+        <div className='relative'>
+          {/* 필터바 */}
+          <TableFilters<MachineInspectionFilterType>
+            filterInfo={{
+              engineerName: {
+                label: '점검자',
+                type: 'multi',
+                options: participatedEngineers.map(engineer => ({
+                  value: engineer.engineerName,
+                  label: `${engineer.engineerName} (${engineer.gradeDescription})`
+                }))
+              }
+            }}
+            filters={filters}
+            onFiltersChange={setFilters}
+            disabled={disabled}
+            setPage={setPage}
+          />
+          {/* 필터 초기화 버튼 */}
+          <Button
+            startIcon={<i className='tabler-reload' />}
+            onClick={() => {
+              setFilters({
+                engineerName: ''
+              })
+              setMachineCateName('')
+              setLocation('')
+            }}
+            className='max-sm:is-full absolute right-8 top-8'
+            disabled={disabled}
+          >
+            필터 초기화
+          </Button>
+          <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+            <div className='flex gap-2'>
+              {/* 이름으로 검색 */}
+              <SearchBar
+                placeholder='설비분류로 검색'
+                onClick={machineCateName => {
+                  setMachineCateName(machineCateName)
                   setPage(0)
                 }}
-                className='gap-[5px]'
                 disabled={disabled}
-              >
-                {PageSizeOptions.map(pageSize => (
-                  <MenuItem key={pageSize} value={pageSize}>
-                    {pageSize}
-                    {`\u00a0\u00a0`}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
+              />
+              {/* 현장명으로 검색 */}
+              <SearchBar
+                placeholder='위치로 검색'
+                onClick={location => {
+                  setLocation(location)
+                  setPage(0)
+                }}
+                disabled={disabled}
+              />
+              <Button variant='contained' color='info' disabled={loading || error}>
+                점검대상 및 수량
+              </Button>
             </div>
 
-            {/* 유저 추가 버튼 */}
-            <Button
-              variant='contained'
-              startIcon={<i className='tabler-plus' />}
-              onClick={() => setAddMachineModalOpen(true)}
-              className='max-sm:is-full'
-              disabled={disabled}
-            >
-              추가
-            </Button>
+            <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+              {/* 한번에 삭제 */}
+              {!showCheckBox ? (
+                <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+                  선택 삭제
+                </Button>
+              ) : (
+                <div className='flex gap-1'>
+                  <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
+                    {`(${checked.size}) 삭제`}
+                  </Button>
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    onClick={() => {
+                      setShowCheckBox(prev => !prev)
+                      handleCheckAllEngineers(false)
+                    }}
+                  >
+                    취소
+                  </Button>
+                </div>
+              )}
+              <div className='flex gap-3 itmes-center'>
+                {/* 페이지당 행수 */}
+                <span className='grid place-items-center whitespace-nowrap'>페이지당 행 수 </span>
+                <CustomTextField
+                  select
+                  value={pageSize.toString()}
+                  onChange={e => {
+                    setPageSize(Number(e.target.value))
+                    setPage(0)
+                  }}
+                  className='gap-[5px]'
+                  disabled={disabled}
+                >
+                  {PageSizeOptions.map(pageSize => (
+                    <MenuItem key={pageSize} value={pageSize}>
+                      {pageSize}
+                      {`\u00a0\u00a0`}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+              </div>
+
+              {/* 유저 추가 버튼 */}
+              <Button
+                variant='contained'
+                startIcon={<i className='tabler-plus' />}
+                onClick={() => setAddMachineModalOpen(true)}
+                className='max-sm:is-full'
+                disabled={disabled}
+              >
+                추가
+              </Button>
+            </div>
           </div>
+
+          {/* 테이블 */}
+          <BasicTable<MachineInspectionPageResponseDtoType>
+            listException={['engineerNames']}
+            header={HEADERS.machineInspection}
+            data={machineData}
+            handleRowClick={getInitialSelectedMachine}
+            page={page}
+            pageSize={pageSize}
+            sorting={sorting}
+            setSorting={setSorting}
+            loading={loading}
+            error={error}
+            showCheckBox={showCheckBox}
+            isChecked={isChecked}
+            handleCheckItem={handleCheckEngineer}
+            handleCheckAllItems={handleCheckAllEngineers}
+          />
+
+          {/* 페이지네이션 */}
+          <TablePagination
+            rowsPerPageOptions={PageSizeOptions}
+            component='div'
+            count={totalCount}
+            rowsPerPage={pageSize}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            onRowsPerPageChange={event => {
+              const newsize = parseInt(event.target.value, 10)
+
+              setPageSize(newsize)
+              setPage(0)
+            }}
+            disabled={disabled}
+            showFirstButton
+            showLastButton
+            labelRowsPerPage='페이지당 행 수:'
+            labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
+            sx={{
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              '.MuiTablePagination-toolbar': {
+                paddingLeft: 2,
+                paddingRight: 2
+              }
+            }}
+          />
+
+          {/* 모달 */}
+          {open && selectedMachine && (
+            <MachineDetailModal machineProjectId={machineProjectId} open={open} setOpen={setOpen} />
+          )}
+          {addMachineModalOpen && (
+            <AddMachineModal
+              open={addMachineModalOpen}
+              setOpen={setAddMachineModalOpen}
+              machineProjectId={machineProjectId}
+            />
+          )}
         </div>
-
-        {/* 테이블 */}
-        <BasicTable<MachineInspectionPageResponseDtoType>
-          listException={['engineerNames']}
-          header={HEADERS.machineInspection}
-          data={machineData}
-          handleRowClick={getLatestSelectedMachine}
-          page={page}
-          pageSize={pageSize}
-          sorting={sorting}
-          setSorting={setSorting}
-          loading={loading}
-          error={error}
-          showCheckBox={showCheckBox}
-          isChecked={isChecked}
-          handleCheckItem={handleCheckEngineer}
-          handleCheckAllItems={handleCheckAllEngineers}
-        />
-
-        {/* 페이지네이션 */}
-        <TablePagination
-          rowsPerPageOptions={PageSizeOptions}
-          component='div'
-          count={totalCount}
-          rowsPerPage={pageSize}
-          page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={event => {
-            const newsize = parseInt(event.target.value, 10)
-
-            setPageSize(newsize)
-            setPage(0)
-          }}
-          disabled={disabled}
-          showFirstButton
-          showLastButton
-          labelRowsPerPage='페이지당 행 수:'
-          labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
-          sx={{
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            '.MuiTablePagination-toolbar': {
-              paddingLeft: 2,
-              paddingRight: 2
-            }
-          }}
-        />
-
-        {/* 모달 */}
-        {open && selectedMachine && (
-          <MachineDetailModal
-            machineProjectId={machineProjectId}
-            open={open}
-            setOpen={setOpen}
-            selectedMachineData={selectedMachine}
-            setSelectedMachineData={setSelectedMachine}
-            reloadTable={getFilteredDataList}
-          />
-        )}
-        {addMachineModalOpen && (
-          <AddMachineModal
-            open={addMachineModalOpen}
-            setOpen={setAddMachineModalOpen}
-            machineProjectId={machineProjectId}
-            reloadTable={getFilteredDataList}
-          />
-        )}
-      </div>
+      </SelectedMachineContext.Provider>
     </ParticipatedEngineersContext.Provider>
   )
 }

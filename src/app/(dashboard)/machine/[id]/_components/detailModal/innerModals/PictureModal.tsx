@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import {
   Dialog,
@@ -16,38 +16,135 @@ import {
   TextField,
   MenuItem,
   Divider,
-  IconButton
+  IconButton,
+  Checkbox
 } from '@mui/material'
+
+// @ts-ignore
+import type { AxiosRequestConfig } from 'axios'
 import axios from 'axios'
 
 import { toast } from 'react-toastify'
 
 import type {
-  MachineInspectionDetailResponseDtoType,
   MachinePicCateWithPicCountDtoType,
-  MachinePicSubCateResponseDtoType
+  MachinePicPresignedUrlResponseDtoType,
+  MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType,
+  MachinePicCursorType
 } from '@/app/_type/types'
-import { handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { SelectedMachineContext } from '../../machineContent'
 
 type PictureModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
-  selectedMachineData: MachineInspectionDetailResponseDtoType
   clickedPicCate: MachinePicCateWithPicCountDtoType
 }
 
-const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, clickedPicCate }: PictureModalProps) => {
+const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: PictureModalProps) => {
+  const context = useContext(SelectedMachineContext)
+
+  if (!context) {
+    throw new Error('SelectedMachineContext is null')
+  }
+
+  const { selectedMachine, setSelectedMachine } = context
+
+  if (!selectedMachine) {
+    throw new Error('selectedMachine is undefined')
+  }
+
   // 사진 리스트
-  const [pictures, setPictures] = useState<any[]>([])
+  const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  const [selectedSubCate, setSelectedSubCate] = useState<MachinePicSubCateResponseDtoType>()
+
+  const [selectedSubItem, setSelectedSubItem] =
+    useState<MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType>()
+
+  const [picturesToDelete, setPicturesToDelete] = useState<{ machinePicId: number; version: number }[]>([])
+  const [showCheck, setShowCheck] = useState(false)
+
+  // 무한스크롤 관련 Ref들
+  const isLoadingRef = useRef(false)
+  const hasNextRef = useRef(true)
+  const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
+
+  const resetCursor = () => {
+    hasNextRef.current = true
+    nextCursorRef.current = undefined
+    setPictures([])
+  }
+
+  // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
+  const getPictures = useCallback(async () => {
+    if (!hasNextRef.current || isLoadingRef.current) return
+
+    isLoadingRef.current = true
+
+    const requestBody = {
+      machineInspectionId: selectedMachine.machineInspectionResponseDto.id,
+      machineChecklistItemId: clickedPicCate.machineChecklistItemId,
+      ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
+    }
+
+    try {
+      const response = await axios.post<{
+        data: {
+          content: MachinePicPresignedUrlResponseDtoType[]
+          hasNext: boolean
+          nextCursor: MachinePicCursorType | null
+        }
+      }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=10`,
+        requestBody
+      )
+
+      console.log('get pictures: ', response.data.data.content)
+      setPictures(prev => prev.concat(response.data.data.content))
+      hasNextRef.current = response.data.data.hasNext
+      nextCursorRef.current = response.data.data.nextCursor
+    } catch (err) {
+      handleApiError(err)
+    } finally {
+      isLoadingRef.current = false
+    }
+  }, [clickedPicCate, machineProjectId, selectedMachine])
+
+  useEffect(() => {
+    // 정보에 있는 사진 개수(selectedSubItem)보다 실제로 있는 사진 개수(pictures)가 적다면 getPictures.
+    if (
+      !isUploading &&
+      selectedSubItem &&
+      selectedSubItem.machinePicCount !==
+        pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId).length
+    ) {
+      getPictures()
+    }
+  }, [
+    isUploading,
+    selectedSubItem,
+    pictures,
+    selectedMachine.machineInspectionResponseDto.id,
+    clickedPicCate.machineChecklistItemId,
+    machineProjectId,
+    getPictures
+  ])
+
+  // clickedPicCate 변경 시에(사진 추가 혹은 삭제의 경우) selectedSubItem이 선택되어있다면 selectedSubItem 정보 최신화
+  useEffect(() => {
+    if (selectedSubItem)
+      setSelectedSubItem(prev =>
+        clickedPicCate.checklistSubItems.find(sub => sub.machineChecklistSubItemId === prev?.machineChecklistSubItemId)
+      )
+  }, [clickedPicCate, selectedSubItem])
 
   const handleClose = () => {
     setOpen(false)
-    setFilesToUpload([])
   }
+
+  useEffect(() => setShowCheck(false), [selectedSubItem])
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -64,7 +161,7 @@ const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, cl
       toast.error('업로드할 파일을 선택하세요.')
 
       return
-    } else if (!selectedSubCate) {
+    } else if (!selectedSubItem) {
       toast.error('소분류를 선택하세요.')
 
       return
@@ -80,10 +177,10 @@ const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, cl
         uploadType: 'INSPECTION_IMAGE',
         originalFileNames: filesToUpload.map(file => file.name),
         projectId: parseInt(machineProjectId),
-        machineInspectionId: selectedMachineData.machineInspectionResponseDto.id,
-        cateName: selectedMachineData.machineInspectionResponseDto.machineCategoryName ?? '배관설비',
+        machineInspectionId: selectedMachine.machineInspectionResponseDto.id,
+        cateName: selectedMachine.machineInspectionResponseDto.machineCategoryName ?? '배관설비',
         picCateName: clickedPicCate.machineChecklistItemName ?? '설비사진',
-        picSubCateName: selectedSubCate?.checklistSubItemName ?? '현황사진',
+        picSubCateName: selectedSubItem?.checklistSubItemName ?? '현황사진',
 
         // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
         memberId: 1
@@ -91,7 +188,7 @@ const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, cl
 
       const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
 
-      // 2. 각 파일을 S3에 직접 업로드 (AWS S3로 POST)
+      // 2. 앞서 가져온 presignedURL로 각 파일을 S3에 직접 업로드 (AWS S3로 POST)
       const uploadPromises = filesToUpload.map(async (file, index) => {
         const presignedData = presignedUrls[index]
 
@@ -124,36 +221,54 @@ const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, cl
 
       // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
       const machinePicCreateRequestDtos = uploadResults.map(result => ({
-        machineChecklistSubItemId: selectedSubCate?.machineChecklistSubItemId || 1, // 기본값 또는 selectedMachine에서 가져오기
+        machineChecklistSubItemId: selectedSubItem?.machineChecklistSubItemId || 1, // 기본값 또는 selectedMachine에서 가져오기
         originalFileName: result.fileName,
         s3Key: result.s3Key
 
         // cdnPath는 추후 확장사항
       }))
 
-      const dbResponse = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachineData.machineInspectionResponseDto.id}/machine-pics`,
+      const dbResponse = await axios.post<{ data: { machinePicIds: number[] } }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/machine-pics`,
         {
           machinePicCreateRequestDtos
         }
       )
 
-      console.log('DB 기록 완료:', dbResponse.data)
-      handleSuccess(`${uploadResults.length}개 사진이 성공적으로 업로드되었습니다.`)
+      const uploadedPicIds = dbResponse.data.data.machinePicIds
+
+      console.log('DB 기록 완료:', uploadedPicIds)
+      handleSuccess(`${uploadedPicIds.length}개 사진이 성공적으로 업로드되었습니다.`)
 
       setFilesToUpload([])
 
-      // 업로드 후 목록 새로고침
-      const response = await axios.post<{ data: { content: any[] } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=10`,
-        {
-          machineProjectId: parseInt(machineProjectId),
-          machineInspectionId: selectedMachineData.machineInspectionResponseDto.id,
-          machineChecklistItemId: clickedPicCate.machineChecklistItemId
+      // 디테일 모달 테이블의 해당 목록 정보 최신화 - selcetedMachine 최신화
+      const newChecklistItems = selectedMachine.machineChecklistItemsWithPicCountDtos.map(v => {
+        if (v.machineChecklistItemId === clickedPicCate.machineChecklistItemId) {
+          return {
+            ...v,
+            totalMachinePicCount: v.totalMachinePicCount + uploadedPicIds.length,
+            checklistSubItems: v.checklistSubItems.map(subitem =>
+              subitem.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId
+                ? { ...subitem, machinePicCount: subitem.machinePicCount + uploadedPicIds.length }
+                : subitem
+            )
+          }
+        } else {
+          return v
         }
+      })
+
+      setSelectedMachine(
+        prev =>
+          prev && {
+            ...prev,
+            machineChecklistItemsWithPicCountDtos: newChecklistItems
+          }
       )
 
-      setPictures(response.data.data.content)
+      // 커서 리셋
+      resetCursor()
     } catch (error) {
       console.error('Upload error:', error)
     } finally {
@@ -165,23 +280,51 @@ const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, cl
     setFilesToUpload(prev => prev.filter((_, i) => i !== index))
   }
 
-  useEffect(() => {
-    const getData = async () => {
-      const response = await axios.post<{ data: { content: any[] } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=10`,
-        {
-          machineProjectId: parseInt(machineProjectId),
-          machineInspectionId: selectedMachineData.machineInspectionResponseDto.id,
-          machineChecklistItemId: clickedPicCate.machineChecklistItemId
-        }
+  const handleDeletePics = useCallback(async () => {
+    if (!selectedSubItem) return
+
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/machine-pics`,
+        { data: { machinePicDeleteRequestDtos: picturesToDelete } } as AxiosRequestConfig
       )
 
-      setPictures(response.data.data.content)
-      console.log('response', response.data.data.content)
-    }
+      // 성공했다면 업로드 때와 마찬가지로 selectedMachine 최신화.
+      const newChecklistItems = selectedMachine.machineChecklistItemsWithPicCountDtos.map(v => {
+        if (v.machineChecklistItemId === clickedPicCate.machineChecklistItemId) {
+          return {
+            ...v,
+            totalMachinePicCount: v.totalMachinePicCount - picturesToDelete.length,
+            checklistSubItems: v.checklistSubItems.map(subitem =>
+              subitem.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId
+                ? { ...subitem, machinePicCount: subitem.machinePicCount - picturesToDelete.length }
+                : subitem
+            )
+          }
+        } else {
+          return v
+        }
+      })
 
-    getData()
-  }, [open, selectedMachineData, machineProjectId, clickedPicCate])
+      setSelectedMachine(
+        prev =>
+          prev && {
+            ...prev,
+            machineChecklistItemsWithPicCountDtos: newChecklistItems
+          }
+      )
+
+      // 커서 리셋
+      resetCursor()
+
+      // 삭제 예정 리스트 리셋
+      setPicturesToDelete([])
+
+      handleSuccess('선택된 사진들이 일괄삭제되었습니다.')
+    } catch (error) {
+      handleApiError(error)
+    }
+  }, [machineProjectId, selectedMachine, picturesToDelete, clickedPicCate, selectedSubItem, setSelectedMachine])
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth disableEnforceFocus disableAutoFocus>
@@ -194,11 +337,12 @@ const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, cl
           <Card sx={{ p: 2 }}>
             <Typography sx={{ fontWeight: 600, mb: 1 }}>소분류 선택</Typography>
             <TextField
+              inputProps={{ sx: { display: 'flex', alignItems: 'center', gap: 1 } }}
               size='small'
               fullWidth
               select
-              value={selectedSubCate ? JSON.stringify(selectedSubCate) : JSON.stringify({})}
-              onChange={e => setSelectedSubCate(JSON.parse(e.target.value))}
+              value={selectedSubItem ? JSON.stringify(selectedSubItem) : JSON.stringify({})}
+              onChange={e => setSelectedSubItem(JSON.parse(e.target.value))}
             >
               <MenuItem value={JSON.stringify({})} disabled>
                 -- 소분류를 선택하세요 --
@@ -218,36 +362,94 @@ const PictureModal = ({ machineProjectId, open, setOpen, selectedMachineData, cl
         <Grid container spacing={3}>
           {/* 기존 사진 목록 */}
           <Grid item xs={12}>
-            <Card sx={{ p: 2 }}>
+            <Card sx={{ p: 2, position: 'relative' }}>
               <Typography variant='h6' gutterBottom>
                 검사 사진 목록
               </Typography>
 
-              {pictures && pictures.length > 0 ? (
+              {pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId) &&
+              pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
+                .length > 0 ? (
                 <Grid container spacing={2}>
-                  {pictures.map((inspe: any, idx: number) => (
-                    <Grid item xs={6} sm={4} md={3} key={idx}>
-                      <Card>
-                        <img
-                          src={inspe.presignedUrl}
-                          alt={`검사 사진 ${idx + 1}`}
-                          style={{
-                            width: '100%',
-                            height: '150px',
-                            objectFit: 'cover'
+                  {pictures
+                    .filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
+                    .map((pic, idx) => (
+                      <Grid item xs={6} sm={4} md={3} key={idx}>
+                        <Card
+                          sx={{ position: 'relative', cursor: 'pointer' }}
+                          onClick={() => {
+                            if (showCheck) {
+                              if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+                                setPicturesToDelete(prev => {
+                                  const newList = prev.map(v => ({ ...v }))
+
+                                  return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
+                                })
+                              } else {
+                                setPicturesToDelete(prev => {
+                                  const newList = prev.map(v => ({ ...v }))
+
+                                  return newList.filter(v => v.machinePicId !== pic.machinePicId)
+                                })
+                              }
+                            } else {
+                            }
                           }}
-                        />
-                        <Box sx={{ p: 1 }}>
-                          <Typography variant='caption'>사진 {idx + 1}</Typography>
-                          {inspe.uploadDate && (
-                            <Typography variant='caption' color='text.secondary' display='block'>
-                              {new Date(inspe.uploadDate).toLocaleDateString()}
+                        >
+                          <img
+                            src={pic.presignedUrl}
+                            alt={`검사 사진 ${idx + 1}`}
+                            style={{
+                              width: '100%',
+                              height: '120px',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <Box sx={{ p: 1 }}>
+                            <Typography sx={{ display: 'block' }} variant='caption' noWrap>
+                              {pic.originalFileName}
                             </Typography>
+                            {/* 날짜 추가? */}
+                            {/* {pic.uploadDate && (
+                            <Typography variant='caption' color='text.secondary' display='block'>
+                              {new Date(pic.uploadDate).toLocaleDateString()}
+                            </Typography>
+                          )} */}
+                          </Box>
+                          {showCheck && (
+                            <Checkbox
+                              color='error'
+                              sx={{
+                                position: 'absolute',
+                                left: 0,
+                                top: 0
+                              }}
+                              checked={picturesToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
+                            />
                           )}
-                        </Box>
-                      </Card>
-                    </Grid>
-                  ))}
+                        </Card>
+                      </Grid>
+                    ))}
+                  <div className='flex gap-1 absolute top-2 right-1'>
+                    {showCheck && (
+                      <Button size='small' color='error' onClick={() => handleDeletePics()}>
+                        일괄삭제({picturesToDelete.length})
+                      </Button>
+                    )}
+                    <Button
+                      color={showCheck ? 'secondary' : 'primary'}
+                      size='small'
+                      onClick={() => {
+                        if (showCheck) {
+                          setPicturesToDelete([])
+                        }
+
+                        setShowCheck(prev => !prev)
+                      }}
+                    >
+                      {showCheck ? '취소' : '선택삭제'}
+                    </Button>
+                  </div>
                 </Grid>
               ) : (
                 <Box

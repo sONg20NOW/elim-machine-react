@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import { Button, IconButton, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
 
@@ -15,9 +15,9 @@ import AlertModal from '@/app/_components/modal/AlertModal'
 import DefaultModal from '@/app/_components/modal/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
+import { SelectedMachineContext } from '../../machineContent'
 
 interface PicTabContentProps<T> {
-  selectedMachineData: T
   editData: T
   setEditData: Dispatch<SetStateAction<T>>
   isEditing: boolean
@@ -25,13 +25,24 @@ interface PicTabContentProps<T> {
 }
 
 export default function PicTabContent({
-  selectedMachineData,
   editData,
   setEditData,
   isEditing,
   machineProjectId
 }: PicTabContentProps<MachineInspectionDetailResponseDtoType>) {
-  const machineInspectionId = selectedMachineData.machineInspectionResponseDto.id
+  const context = useContext(SelectedMachineContext)
+
+  if (!context) {
+    throw new Error('SelectedMachineContext is null')
+  }
+
+  const { selectedMachine } = context
+
+  if (!selectedMachine) {
+    throw new Error('selectedMachine is undefined')
+  }
+
+  const machineInspectionId = selectedMachine.machineInspectionResponseDto.id
 
   // 점검사진 모달
   const [openPicModal, setOpenPicModal] = useState<boolean>(false)
@@ -48,6 +59,17 @@ export default function PicTabContent({
 
   // 한 번 이상 수정된 점검항목결과에서 선택된 점검항목
   const selectedDf = knownDfs.find(df => df.id === selectedDfId)
+
+  // clickedPicCate가 존재한다면, selectedMachine이 변경될 때마다 clickedPicCate도 최신화.
+  useEffect(() => {
+    if (clickedPicCate) {
+      setClickedPicCate(prev =>
+        selectedMachine.machineChecklistItemsWithPicCountDtos.find(
+          v => prev?.machineChecklistItemId === v.machineChecklistItemId
+        )
+      )
+    }
+  }, [selectedMachine, clickedPicCate])
 
   useEffect(() => {
     // 미흡사항 버튼이 클릭됐을 때(selectedDfId가 변경될 때) 해당 id에 대한 정보가 없는 경우 GET.
@@ -133,7 +155,7 @@ export default function PicTabContent({
       <DefaultModal
         size='sm'
         title={
-          selectedMachineData?.machineChecklistItemsWithPicCountDtos.find(
+          selectedMachine!.machineChecklistItemsWithPicCountDtos.find(
             cate => cate.machineInspectionChecklistItemResultBasicResponseDto.id === selectedDfId
           )?.machineChecklistItemName ?? '미흡사항'
         }
@@ -241,12 +263,12 @@ export default function PicTabContent({
         </tr>
       </thead>
       <tbody>
-        {selectedMachineData.machineChecklistItemsWithPicCountDtos.map((cate, idx) => {
+        {selectedMachine.machineChecklistItemsWithPicCountDtos.map((cate, idx) => {
           return (
             <tr key={cate.machineChecklistItemId}>
               {idx === 0 && (
                 <th
-                  rowSpan={selectedMachineData.machineChecklistItemsWithPicCountDtos.length}
+                  rowSpan={selectedMachine.machineChecklistItemsWithPicCountDtos.length}
                   style={{ verticalAlign: 'top' }}
                 >
                   점검항목
@@ -371,7 +393,6 @@ export default function PicTabContent({
           machineProjectId={machineProjectId}
           open={openPicModal}
           setOpen={setOpenPicModal}
-          selectedMachineData={selectedMachineData}
           clickedPicCate={clickedPicCate}
         />
       )}

@@ -241,7 +241,7 @@ const MachineUpdatePage = () => {
               <MachineContent machineProjectId={machineProjectId} />
             </TabPanel>
             <TabPanel value='전체사진'>
-              <MachinePictures id={machineProjectId} />
+              <MachinePictures machineProjectId={machineProjectId} />
             </TabPanel>
             <TabPanel value='특이사항'>
               {projectData ? (
