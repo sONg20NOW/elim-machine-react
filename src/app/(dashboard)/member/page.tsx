@@ -234,7 +234,7 @@ export default function MemberPage() {
             {/* 이름으로 검색 */}
             <SearchBar
               placeholder='이름으로 검색'
-              onClick={name => {
+              setSearchKeyword={name => {
                 setName(name)
                 setPage(0)
               }}
@@ -244,7 +244,7 @@ export default function MemberPage() {
             <SearchBar
               className='hide-on-mobile'
               placeholder='지역으로 검색'
-              onClick={region => {
+              setSearchKeyword={region => {
                 setRegion(region)
                 setPage(0)
               }}

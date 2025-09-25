@@ -388,7 +388,7 @@ export interface MachineInspectionDetailResponseDtoType {
     | 'PIPE_MEASUREMENT'
   machineInspectionResponseDto: MachineInspectionResponseDtoType
   engineerIds: number[]
-  machineChecklistItemsWithPicCountDtos: MachinePicCateWithPicCountDtoType[]
+  machineChecklistItemsWithPicCountResponseDtos: MachinePicCateWithPicCountDtoType[]
   gasMeasurementResponseDto: GasMeasurementResponseDtoType
   pipeMeasurementResponseDtos: PipeMeasurementResponseDtoType[]
   windMeasurementResponseDtos: WindMeasurementResponseDtoType[]

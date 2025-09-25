@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Button, Tab } from '@mui/material'
 import axios from 'axios'
@@ -30,7 +30,7 @@ import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
 import PipeTabContent from './tabs/PipeTabContent'
 import PicTabContent from './tabs/PicTabContent'
-import { SelectedMachineContext } from '../machineContent'
+import { useSelectedMachineContext } from '../machineContent'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -69,13 +69,7 @@ type MachineDetailModalProps = {
 }
 
 const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailModalProps) => {
-  const context = useContext(SelectedMachineContext)
-
-  if (!context) {
-    throw new Error('SelectedMachineContext is null')
-  }
-
-  const { selectedMachine, setSelectedMachine } = context
+  const { selectedMachine, refetchSelectMachine } = useSelectedMachineContext()
 
   if (!selectedMachine) {
     throw new Error('selecteMachine is undefined')
@@ -103,32 +97,28 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
     JSON.stringify(stripVersion({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) }))
 
   // 저장 시 각 탭에 따라 다르게 동작 (! 기본 정보 수정 시 )
-  // 1. PUT 보내고 -> 2. PUT response로 editData, original data(selectedMachine) 최신화
+  // 1. PUT 보내고 -> 2. selectedMachine, editData 최신화
   const handleSave = useCallback(async () => {
     if (existChange) {
       try {
         switch (tabValue) {
           case 'BASIC':
-            const basicResponse = await axios.put<{ data: MachineInspectionResponseDtoType }>(
+            await axios.put<{ data: MachineInspectionResponseDtoType }>(
               `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}`,
               editData.machineInspectionResponseDto
             )
-
-            setEditData(prev => ({ ...prev, machineInspectionResponseDto: basicResponse.data.data }))
-            setSelectedMachine(prev => prev && { ...prev, machineInspectionResponseDto: basicResponse.data.data })
 
             // 참여기술진 변경사항이 있다면 POST.
             if (
               JSON.stringify(editData.engineerIds.filter(id => id > 0)) !== JSON.stringify(selectedMachine.engineerIds)
             ) {
-              const engineerResponse = await axios.put<{ data: { engineerIds: number[] } }>(
+              await axios.put<{ data: { engineerIds: number[] } }>(
                 `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/machine-inspection-engineers`,
                 { engineerIds: editData.engineerIds.filter(id => id > 0) }
               )
-
-              setEditData(prev => ({ ...prev, engineerIds: engineerResponse.data.data.engineerIds }))
-              setSelectedMachine(prev => prev && { ...prev, engineerIds: engineerResponse.data.data.engineerIds })
             }
+
+            refetchSelectMachine()
 
             break
 
@@ -136,8 +126,8 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
             // 점검결과(machineChecklistItemInspectionResult)에 변경이 감지되었을 때만 requestBody에 포함시키기.
             const changedCates: { id: number; version: number; inspectionResult: string }[] = []
 
-            editData.machineChecklistItemsWithPicCountDtos.map((cate, idx) => {
-              const originalCate = selectedMachine.machineChecklistItemsWithPicCountDtos[idx]
+            editData.machineChecklistItemsWithPicCountResponseDtos?.map((cate, idx) => {
+              const originalCate = selectedMachine.machineChecklistItemsWithPicCountResponseDtos[idx]
 
               if (
                 cate.machineInspectionChecklistItemResultBasicResponseDto !==
@@ -148,7 +138,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
             })
 
             if (changedCates) {
-              const picResponse = await axios.put<{
+              await axios.put<{
                 data: {
                   machineInspectionChecklistItemResultUpdateResponseDtos: machineInspectionChecklistItemResultBasicResponseDtoType[]
                 }
@@ -156,99 +146,37 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
                 `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
                 { machineInspectionChecklistItemResultUpdateRequestDtos: changedCates }
               )
-
-              const responseResults = picResponse.data.data.machineInspectionChecklistItemResultUpdateResponseDtos
-
-              if (
-                responseResults.every(result =>
-                  editData.machineChecklistItemsWithPicCountDtos.find(
-                    v => v.machineInspectionChecklistItemResultBasicResponseDto.id === result.id
-                  )
-                )
-              ) {
-                setEditData(prev => ({
-                  ...prev,
-                  machineChecklistItemsWithPicCountDtos: prev.machineChecklistItemsWithPicCountDtos.map(picCate => ({
-                    ...picCate,
-                    machineInspectionChecklistItemResultBasicResponseDto: responseResults.find(
-                      result => result.id === picCate.machineInspectionChecklistItemResultBasicResponseDto.id
-                    )!
-                  }))
-                }))
-                setSelectedMachine(
-                  prev =>
-                    prev && {
-                      ...prev,
-                      machineChecklistItemsWithPicCountDtos: prev.machineChecklistItemsWithPicCountDtos.map(
-                        picCate => ({
-                          ...picCate,
-                          machineInspectionChecklistItemResultBasicResponseDto: responseResults.find(
-                            result => result.id === picCate.machineInspectionChecklistItemResultBasicResponseDto.id
-                          )!
-                        })
-                      )
-                    }
-                )
-              } else {
-                throw new Error()
-              }
+              refetchSelectMachine()
             }
 
             break
           case 'GAS':
-            const gasResponse = await axios.put<{
+            await axios.put<{
               data: GasMeasurementResponseDtoType
             }>(
               `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/gasMeasurement`,
               editData.gasMeasurementResponseDto
             )
 
-            setEditData(prev => ({ ...prev, gasMeasurementResponseDto: gasResponse.data.data }))
-            setSelectedMachine(prev => prev && { ...prev, gasMeasurementResponseDto: gasResponse.data.data })
-
+            refetchSelectMachine()
             break
           case 'WIND':
-            const windResponse = await axios.put<{
+            await axios.put<{
               data: { windMeasurementUpdateResponseDtos: WindMeasurementResponseDtoType[] }
             }>(
               `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/windMeasurements`,
               { windMeasurementUpdateRequestDtos: editData.windMeasurementResponseDtos }
             )
-
-            setEditData(prev => ({
-              ...prev,
-              windMeasurementResponseDtos: windResponse.data.data.windMeasurementUpdateResponseDtos
-            }))
-            setSelectedMachine(
-              prev =>
-                prev && {
-                  ...prev,
-                  windMeasurementResponseDtos: windResponse.data.data.windMeasurementUpdateResponseDtos
-                }
-            )
+            refetchSelectMachine()
             break
           case 'PIPE':
-            const pipeResponse = await axios.put<{
+            await axios.put<{
               data: { pipeMeasurementUpdateResponseDtos: PipeMeasurementResponseDtoType[] }
             }>(
               `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/pipeMeasurements`,
               { pipeMeasurementUpdateRequestDtos: editData.pipeMeasurementResponseDtos }
             )
-
-            console.log(pipeResponse.data.data.pipeMeasurementUpdateResponseDtos)
-
-            setEditData(prev => ({
-              ...prev,
-              pipeMeasurementResponseDtos: pipeResponse.data.data.pipeMeasurementUpdateResponseDtos
-            }))
-            setSelectedMachine(
-              prev =>
-                prev && {
-                  ...prev,
-                  pipeMeasurementResponseDtos: pipeResponse.data.data.pipeMeasurementUpdateResponseDtos
-                }
-            )
-
+            refetchSelectMachine()
             break
           default:
             break
@@ -260,7 +188,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
         handleApiError(error)
       }
     }
-  }, [editData, existChange, machineProjectId, selectedMachine, setSelectedMachine, tabValue, thisTabInfo])
+  }, [editData, existChange, machineProjectId, selectedMachine, refetchSelectMachine, tabValue, thisTabInfo])
 
   return (
     selectedMachine && (
@@ -350,7 +278,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
           <div className='flex gap-2 absolute right-0 top-0'>
             <Button variant='contained' color='info'>
               갤러리 (
-              {editData.machineChecklistItemsWithPicCountDtos.reduce(
+              {editData.machineChecklistItemsWithPicCountResponseDtos?.reduce(
                 (sum, cate) => (sum += cate.totalMachinePicCount),
                 0
               )}
@@ -428,7 +356,7 @@ export default MachineDetailModal
 const stripVersion = (data: MachineInspectionDetailResponseDtoType) => {
   return {
     ...data,
-    machineChecklistItemsWithPicCountDtos: data.machineChecklistItemsWithPicCountDtos.map(
+    machineChecklistItemsWithPicCountDtos: data.machineChecklistItemsWithPicCountResponseDtos?.map(
       v => ({
         ...v,
         machineInspectionChecklistItemResultBasicResponseDto: {

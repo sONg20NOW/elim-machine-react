@@ -2,7 +2,7 @@ import { IconButton, Input } from '@mui/material'
 
 interface SearchBarProps {
   placeholder: string
-  onClick: (name: string) => void
+  setSearchKeyword: (name: string) => void
   disabled?: boolean
   className?: string
 }
@@ -13,14 +13,14 @@ interface SearchBarProps {
  * e.target.value를 인자로 넣는 함수
  * @returns
  */
-export default function SearchBar({ placeholder, onClick, disabled, className }: SearchBarProps) {
+export default function SearchBar({ placeholder, setSearchKeyword, disabled = false, className }: SearchBarProps) {
   return (
     <div className={`relative ${className}`}>
       <Input
         id={placeholder}
         onKeyDown={(e: any) => {
           if (e.key === 'Enter') {
-            onClick(e.target.value)
+            setSearchKeyword(e.target.value)
           }
         }}
         placeholder={placeholder}
@@ -50,7 +50,7 @@ export default function SearchBar({ placeholder, onClick, disabled, className }:
         onClick={() => {
           const searchInput = document.getElementById(placeholder) as HTMLInputElement
 
-          onClick(searchInput?.value ?? '')
+          setSearchKeyword(searchInput?.value ?? '')
         }}
         disabled={disabled}
         color='primary'

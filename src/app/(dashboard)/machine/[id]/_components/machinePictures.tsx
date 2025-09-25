@@ -2,64 +2,127 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 
 import {
   Box,
-  Button,
-  Card,
-  Grid,
   Typography,
   CircularProgress,
   ImageList,
   ImageListItem,
-  ImageListItemBar
+  ImageListItemBar,
+  useMediaQuery,
+  Button,
+  Checkbox
 } from '@mui/material'
+
+// @ts-ignore
+import type { AxiosRequestConfig } from 'axios'
 import axios from 'axios'
 
-import { handleApiError } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/app/_type/types'
+import SearchBar from '@/app/_components/SearchBar'
+import PictureZoomModal from './PictureZoomModal'
 
 const MachinePictures = ({ machineProjectId }: { machineProjectId: string }) => {
+  // 이름으로 검색 필터 (파일 이름, 카테고리 이름, 체크 아이템, 섭아이템 이름에 포함된 것만 필터링 하기.)
+  const [keyword, setKeyword] = useState('')
+
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
-  const pageSize = 5
+  const defaultPageSize = 4
+
+  const [picturesToDelete, setPicturesToDelete] = useState<{ machinePicId: number; version: number }[]>([])
+  const [showCheck, setShowCheck] = useState(false)
 
   // 무한스크롤 관련 Ref들
   const isLoadingRef = useRef(false)
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
+  // 반응형을 위한 미디어쿼리
+  const isMobile = useMediaQuery('(max-width:600px)')
+
+  // 사진 클릭 기능 구현을 위한 상태
+  const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
+  const [showPicModal, setShowPicModal] = useState(false)
+
   // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
-  const getPictures = useCallback(async () => {
-    if (!hasNextRef.current || isLoadingRef.current) return
+  const getPictures = useCallback(
+    async (pageSize: number) => {
+      if (!hasNextRef.current || isLoadingRef.current) return
 
-    isLoadingRef.current = true
+      isLoadingRef.current = true
 
-    const requestBody = {
-      ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
-    }
+      const requestBody = {
+        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
+      }
 
-    try {
-      const response = await axios.post<{
-        data: {
-          content: MachinePicPresignedUrlResponseDtoType[]
-          hasNext: boolean
-          nextCursor: MachinePicCursorType | null
-        }
-      }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
-        requestBody
+      try {
+        const response = await axios.post<{
+          data: {
+            content: MachinePicPresignedUrlResponseDtoType[]
+            hasNext: boolean
+            nextCursor: MachinePicCursorType | null
+          }
+        }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
+          requestBody
+        )
+
+        console.log('get pictures: ', response.data.data.content)
+        setPictures(prev => prev.concat(response.data.data.content))
+        hasNextRef.current = response.data.data.hasNext
+        nextCursorRef.current = response.data.data.nextCursor
+
+        return response.data.data
+      } catch (err) {
+        handleApiError(err)
+      } finally {
+        isLoadingRef.current = false
+      }
+    },
+    [machineProjectId]
+  )
+
+  const filterPics = useCallback(
+    (pictures: MachinePicPresignedUrlResponseDtoType[]) => {
+      const picturesFilterdWithKeyword = pictures.filter(
+        pic =>
+          pic.machineCategoryName.includes(keyword) ||
+          pic.originalFileName.includes(keyword) ||
+          pic.machineChecklistItemName.includes(keyword) ||
+          pic.machineChecklistSubItemName.includes(keyword)
       )
 
-      console.log('get pictures: ', response.data.data.content)
-      setPictures(prev => prev.concat(response.data.data.content))
-      hasNextRef.current = response.data.data.hasNext
-      nextCursorRef.current = response.data.data.nextCursor
-    } catch (err) {
-      handleApiError(err)
-    } finally {
-      isLoadingRef.current = false
+      return picturesFilterdWithKeyword
+    },
+    [keyword]
+  )
+
+  const resetCursor = () => {
+    hasNextRef.current = true
+    nextCursorRef.current = undefined
+    setPictures([])
+  }
+
+  const handleDeletePics = useCallback(async () => {
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics`,
+        { data: { machinePicDeleteRequestDtos: picturesToDelete } } as AxiosRequestConfig
+      )
+
+      // 성공했다면 pictures 최신화.
+      resetCursor()
+
+      // 삭제 예정 리스트 리셋
+      setPicturesToDelete([])
+
+      handleSuccess('선택된 사진들이 일괄삭제되었습니다.')
+    } catch (error) {
+      handleApiError(error)
     }
-  }, [machineProjectId])
+  }, [machineProjectId, picturesToDelete])
 
   useEffect(() => {
-    getPictures()
+    getPictures(defaultPageSize)
   }, [getPictures])
 
   // 스크롤 이벤트 핸들러
@@ -70,7 +133,7 @@ const MachinePictures = ({ machineProjectId }: { machineProjectId: string }) => 
 
     // 스크롤이 하단에서 100px 이내에 도달했을 때 다음 페이지 로드
     if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoadingRef.current && hasNextRef.current) {
-      getPictures()
+      getPictures(defaultPageSize)
     }
   }, [getPictures])
 
@@ -81,7 +144,7 @@ const MachinePictures = ({ machineProjectId }: { machineProjectId: string }) => 
 
       // 스크롤이 아예 없거나 화면보다 내용이 적을 때
       if (scrollHeight <= clientHeight && hasNextRef.current && !isLoadingRef.current) {
-        getPictures()
+        getPictures(defaultPageSize)
       }
     }
 
@@ -93,23 +156,78 @@ const MachinePictures = ({ machineProjectId }: { machineProjectId: string }) => 
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll, getPictures, pictures])
 
-  console.log('pictures', pictures)
-
-  const removeFile = (index: number) => {
-    console.log(index)
-  }
+  // 검색 시 자동으로 fetch 시도.
+  useEffect(() => {
+    if (hasNextRef.current && !isLoadingRef.current) {
+      getPictures(defaultPageSize)
+    }
+  }, [filterPics, getPictures])
 
   return (
-    <div style={{ marginTop: 16 }}>
-      {pictures?.length > 0 && (
+    <div className='flex flex-col gap-5'>
+      {/* 상단 필터링, 검색, 선택 삭제 등 */}
+      <div className='flex justify-between'>
+        <SearchBar placeholder='검색' setSearchKeyword={name => setKeyword(name)} />
+        <div className='flex gap-1'>
+          {showCheck && [
+            <Button
+              key={1}
+              color='warning'
+              onClick={async () => {
+                setPicturesToDelete(filterPics(pictures.concat(await getPictures(1000).then(v => v?.content ?? []))))
+              }}
+            >
+              전체선택
+            </Button>,
+            <Button key={2} color='error' onClick={() => handleDeletePics()}>
+              일괄삭제({picturesToDelete.length})
+            </Button>
+          ]}
+          <Button
+            color={showCheck ? 'secondary' : 'primary'}
+            variant='contained'
+            onClick={() => {
+              if (showCheck) {
+                setPicturesToDelete([])
+              }
+
+              setShowCheck(prev => !prev)
+            }}
+          >
+            {showCheck ? '취소' : '선택삭제'}
+          </Button>
+        </div>
+      </div>
+      {filterPics(pictures)?.length > 0 ? (
         <Box sx={{ mb: 2 }}>
           {/* ! 더 예쁘게 */}
-          <ImageList cols={3} rowHeight={400}>
-            {pictures.map((pic, index: number) => {
-              console.log('pic', pic)
-
+          <ImageList cols={isMobile ? 1 : 4} rowHeight={isMobile ? 180 : 300} gap={15}>
+            {filterPics(pictures).map((pic, index: number) => {
               return (
-                <ImageListItem key={`${pic.machinePicId}-${index}`}>
+                <ImageListItem
+                  onClick={() => {
+                    if (showCheck) {
+                      if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+                        setPicturesToDelete(prev => {
+                          const newList = prev.map(v => ({ ...v }))
+
+                          return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
+                        })
+                      } else {
+                        setPicturesToDelete(prev => {
+                          const newList = prev.map(v => ({ ...v }))
+
+                          return newList.filter(v => v.machinePicId !== pic.machinePicId)
+                        })
+                      }
+                    } else {
+                      setSelectedPic(pic)
+                      setShowPicModal(true)
+                    }
+                  }}
+                  key={`${pic.machinePicId}-${index}`}
+                  sx={{ cursor: 'pointer', position: 'relative' }}
+                >
                   <img
                     src={pic.presignedUrl}
                     alt={pic.originalFileName}
@@ -121,30 +239,33 @@ const MachinePictures = ({ machineProjectId }: { machineProjectId: string }) => 
                   />
                   <ImageListItemBar
                     title={pic.originalFileName}
-                    subtitle={`${pic.machineCategoryName} - ${pic.machineChecklistItemName} - ${pic.machineChecklistSubItemName}`}
-                    position='below'
+                    subtitle={`[${pic.machineCategoryName}] ${pic.machineChecklistItemName} - ${pic.machineChecklistSubItemName}`}
                   />
-
-                  {/* <Button
-                      size='small'
-                      onClick={() => removeFile(index)}
+                  {showCheck && (
+                    <Checkbox
+                      color='error'
                       sx={{
                         position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        minWidth: 'auto',
-                        width: 24,
-                        height: 24,
-                        bgcolor: 'rgba(255,255,255,0.8)',
-                        '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
+                        left: 0,
+                        top: 0
                       }}
-                    >
-                      <i className='ri-close-line' style={{ fontSize: '14px' }} />
-                    </Button> */}
+                      checked={picturesToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
+                    />
+                  )}
                 </ImageListItem>
               )
             })}
-          </ImageList>
+          </ImageList>{' '}
+          {/* 더 이상 데이터가 없을 때 메시지 */}
+          {!hasNextRef.current && (
+            <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
+              <Typography variant='body1'>모든 이미지를 불러왔습니다.</Typography>
+            </Box>
+          )}
+        </Box>
+      ) : (
+        <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
+          <Typography variant='body1'>사진 데이터가 존재하지 않습니다..</Typography>
         </Box>
       )}
 
@@ -154,13 +275,7 @@ const MachinePictures = ({ machineProjectId }: { machineProjectId: string }) => 
           <CircularProgress size={24} />
         </Box>
       )}
-
-      {/* 더 이상 데이터가 없을 때 메시지 */}
-      {!hasNextRef.current && pictures.length > 0 && (
-        <Box sx={{ textAlign: 'center', mt: 2, color: 'text.secondary' }}>
-          <Typography variant='body2'>모든 이미지를 불러왔습니다.</Typography>
-        </Box>
-      )}
+      {selectedPic && <PictureZoomModal open={showPicModal} setOpen={setShowPicModal} selectedPic={selectedPic} />}
     </div>
   )
 }

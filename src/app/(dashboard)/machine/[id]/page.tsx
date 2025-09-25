@@ -201,7 +201,7 @@ const MachineUpdatePage = () => {
               setShowDeleteModal(true)
             }}
           >
-            삭제
+            설비현장 삭제
           </Button>
         </div>
 

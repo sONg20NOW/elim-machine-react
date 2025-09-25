@@ -215,7 +215,7 @@ export default function Licensepage() {
           <div className='flex gap-2'>
             <SearchBar
               placeholder='업체명으로 검색'
-              onClick={companyName => {
+              setSearchKeyword={companyName => {
                 setCompanyName(companyName)
                 setPage(0)
               }}
@@ -224,7 +224,7 @@ export default function Licensepage() {
             <SearchBar
               className='hidden sm:flex'
               placeholder='지역으로 검색'
-              onClick={region => {
+              setSearchKeyword={region => {
                 setRegion(region)
                 setPage(0)
               }}

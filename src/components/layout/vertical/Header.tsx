@@ -38,7 +38,7 @@ export default function Header() {
               <i className='tabler-menu-2 text-white' />
             </IconButton>
           )}
-          <SearchBar placeholder='검색어를 입력하세요' onClick={() => null} />
+          <SearchBar placeholder='검색어를 입력하세요' setSearchKeyword={() => null} />
         </div>
         <Button color='inherit' onClick={() => handleLogout()}>
           Logout

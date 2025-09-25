@@ -54,7 +54,7 @@ export default function MachinePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
 
-  const disabled = loading || error || data.length === 0
+  const disabled = loading || error
 
   const [totalCount, setTotalCount] = useState(0)
 
@@ -296,7 +296,7 @@ export default function MachinePage() {
               {/* 이름으로 검색 */}
               <SearchBar
                 placeholder='이름으로 검색'
-                onClick={projectName => {
+                setSearchKeyword={projectName => {
                   setProjectName(projectName)
                   setPage(0)
                 }}
@@ -305,7 +305,7 @@ export default function MachinePage() {
               {/* 지역으로 검색 */}
               <SearchBar
                 placeholder='지역으로 검색'
-                onClick={region => {
+                setSearchKeyword={region => {
                   setRegion(region)
                   setPage(0)
                 }}

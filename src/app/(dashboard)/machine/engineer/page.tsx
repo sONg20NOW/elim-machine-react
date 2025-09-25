@@ -245,7 +245,7 @@ export default function EngineerPage() {
             {/* 이름으로 검색 */}
             <SearchBar
               placeholder='이름으로 검색'
-              onClick={name => {
+              setSearchKeyword={name => {
                 setName(name)
                 setPage(0)
               }}
@@ -254,7 +254,7 @@ export default function EngineerPage() {
             {/* 현장명으로 검색 */}
             <SearchBar
               placeholder='현장명으로 검색'
-              onClick={projectName => {
+              setSearchKeyword={projectName => {
                 setProjectName(projectName)
                 setPage(0)
               }}

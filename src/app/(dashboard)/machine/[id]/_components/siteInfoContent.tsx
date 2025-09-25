@@ -57,7 +57,6 @@ const SiteInfoContent = ({
 
   return (
     <div>
-      <div className='text-red-600 sm:text-white'>hi</div>
       <div className='flex mb-4 gap-[4px]'>
         {/* TODO: 버튼 구현 */}
         <Button

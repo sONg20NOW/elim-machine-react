@@ -1,9 +1,12 @@
-import type { ChangeEventHandler } from 'react'
+import { useCallback, useEffect, useState, type ChangeEventHandler } from 'react'
 
 import { MenuItem } from '@mui/material'
 
+import axios from 'axios'
+
 import CustomTextField from '@/@core/components/mui/TextField'
 import type { InputFieldType } from '@/app/_type/types'
+import { handleApiError } from '@/utils/errorHandler'
 
 interface MultiSelectBoxProps {
   tabField: InputFieldType
@@ -36,6 +39,28 @@ interface MultiSelectBoxProps {
  * @returns
  */
 const MultiSelectBox = ({ label, name, tabField, id, disabled = false, value, onChange }: MultiSelectBoxProps) => {
+  const [companyNameOption, setCompanyNameOption] = useState<{ value: string; label: string }[]>([])
+
+  const getCompanyNameOption = useCallback(async () => {
+    try {
+      const response = await axios.get<{
+        data: { licenseIdAndNameResponseDtos: { id: number; companyName: string }[] }
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/names`)
+
+      setCompanyNameOption(
+        response.data.data.licenseIdAndNameResponseDtos.map(v => ({ value: v.companyName, label: v.companyName }))
+      )
+    } catch (error) {
+      handleApiError(error)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (id === 'companyName') {
+      getCompanyNameOption()
+    }
+  }, [id, getCompanyNameOption])
+
   return (
     <CustomTextField
       id={id}
@@ -51,7 +76,7 @@ const MultiSelectBox = ({ label, name, tabField, id, disabled = false, value, on
       }}
     >
       <MenuItem value=''>전체</MenuItem>
-      {tabField?.options?.map(option => (
+      {(id === 'companyName' ? companyNameOption : tabField?.options)?.map(option => (
         <MenuItem key={option.value} value={option.value}>
           {option.label}
         </MenuItem>

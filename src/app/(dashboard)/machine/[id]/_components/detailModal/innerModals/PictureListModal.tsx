@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   Dialog,
@@ -17,7 +17,11 @@ import {
   MenuItem,
   Divider,
   IconButton,
-  Checkbox
+  Checkbox,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
+  useMediaQuery
 } from '@mui/material'
 
 // @ts-ignore
@@ -33,27 +37,18 @@ import type {
   MachinePicCursorType
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { SelectedMachineContext } from '../../machineContent'
+import { useSelectedMachineContext } from '../../machineContent'
+import PictureZoomModal from '../../PictureZoomModal'
 
-type PictureModalProps = {
+type PictureListModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
   clickedPicCate: MachinePicCateWithPicCountDtoType
 }
 
-const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: PictureModalProps) => {
-  const context = useContext(SelectedMachineContext)
-
-  if (!context) {
-    throw new Error('SelectedMachineContext is null')
-  }
-
-  const { selectedMachine, setSelectedMachine } = context
-
-  if (!selectedMachine) {
-    throw new Error('selectedMachine is undefined')
-  }
+const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: PictureListModalProps) => {
+  const { selectedMachine, refetchSelectMachine } = useSelectedMachineContext()
 
   // 사진 리스트
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
@@ -71,6 +66,13 @@ const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: Pictu
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
+  // 사진 클릭 기능 구현을 위한 상태
+  const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
+  const [showPicModal, setShowPicModal] = useState(false)
+
+  // 반응형을 위한 미디어쿼리
+  const isMobile = useMediaQuery('(max-width:600px)')
+
   const resetCursor = () => {
     hasNextRef.current = true
     nextCursorRef.current = undefined
@@ -78,39 +80,44 @@ const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: Pictu
   }
 
   // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
-  const getPictures = useCallback(async () => {
-    if (!hasNextRef.current || isLoadingRef.current) return
+  const getPictures = useCallback(
+    async (pageSize = 10) => {
+      if (!hasNextRef.current || isLoadingRef.current) return
 
-    isLoadingRef.current = true
+      isLoadingRef.current = true
 
-    const requestBody = {
-      machineInspectionId: selectedMachine.machineInspectionResponseDto.id,
-      machineChecklistItemId: clickedPicCate.machineChecklistItemId,
-      ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
-    }
+      const requestBody = {
+        machineInspectionId: selectedMachine.machineInspectionResponseDto.id,
+        machineChecklistItemId: clickedPicCate.machineChecklistItemId,
+        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
+      }
 
-    try {
-      const response = await axios.post<{
-        data: {
-          content: MachinePicPresignedUrlResponseDtoType[]
-          hasNext: boolean
-          nextCursor: MachinePicCursorType | null
-        }
-      }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=10`,
-        requestBody
-      )
+      try {
+        const response = await axios.post<{
+          data: {
+            content: MachinePicPresignedUrlResponseDtoType[]
+            hasNext: boolean
+            nextCursor: MachinePicCursorType | null
+          }
+        }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
+          requestBody
+        )
 
-      console.log('get pictures: ', response.data.data.content)
-      setPictures(prev => prev.concat(response.data.data.content))
-      hasNextRef.current = response.data.data.hasNext
-      nextCursorRef.current = response.data.data.nextCursor
-    } catch (err) {
-      handleApiError(err)
-    } finally {
-      isLoadingRef.current = false
-    }
-  }, [clickedPicCate, machineProjectId, selectedMachine])
+        console.log('get pictures: ', response.data.data.content)
+        setPictures(prev => prev.concat(response.data.data.content))
+        hasNextRef.current = response.data.data.hasNext
+        nextCursorRef.current = response.data.data.nextCursor
+
+        return response.data.data
+      } catch (err) {
+        handleApiError(err)
+      } finally {
+        isLoadingRef.current = false
+      }
+    },
+    [clickedPicCate, machineProjectId, selectedMachine]
+  )
 
   useEffect(() => {
     // 정보에 있는 사진 개수(selectedSubItem)보다 실제로 있는 사진 개수(pictures)가 적다면 getPictures.
@@ -243,29 +250,7 @@ const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: Pictu
       setFilesToUpload([])
 
       // 디테일 모달 테이블의 해당 목록 정보 최신화 - selcetedMachine 최신화
-      const newChecklistItems = selectedMachine.machineChecklistItemsWithPicCountDtos.map(v => {
-        if (v.machineChecklistItemId === clickedPicCate.machineChecklistItemId) {
-          return {
-            ...v,
-            totalMachinePicCount: v.totalMachinePicCount + uploadedPicIds.length,
-            checklistSubItems: v.checklistSubItems.map(subitem =>
-              subitem.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId
-                ? { ...subitem, machinePicCount: subitem.machinePicCount + uploadedPicIds.length }
-                : subitem
-            )
-          }
-        } else {
-          return v
-        }
-      })
-
-      setSelectedMachine(
-        prev =>
-          prev && {
-            ...prev,
-            machineChecklistItemsWithPicCountDtos: newChecklistItems
-          }
-      )
+      refetchSelectMachine()
 
       // 커서 리셋
       resetCursor()
@@ -285,34 +270,12 @@ const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: Pictu
 
     try {
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/machine-pics`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics`,
         { data: { machinePicDeleteRequestDtos: picturesToDelete } } as AxiosRequestConfig
       )
 
       // 성공했다면 업로드 때와 마찬가지로 selectedMachine 최신화.
-      const newChecklistItems = selectedMachine.machineChecklistItemsWithPicCountDtos.map(v => {
-        if (v.machineChecklistItemId === clickedPicCate.machineChecklistItemId) {
-          return {
-            ...v,
-            totalMachinePicCount: v.totalMachinePicCount - picturesToDelete.length,
-            checklistSubItems: v.checklistSubItems.map(subitem =>
-              subitem.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId
-                ? { ...subitem, machinePicCount: subitem.machinePicCount - picturesToDelete.length }
-                : subitem
-            )
-          }
-        } else {
-          return v
-        }
-      })
-
-      setSelectedMachine(
-        prev =>
-          prev && {
-            ...prev,
-            machineChecklistItemsWithPicCountDtos: newChecklistItems
-          }
-      )
+      refetchSelectMachine()
 
       // 커서 리셋
       resetCursor()
@@ -324,18 +287,22 @@ const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: Pictu
     } catch (error) {
       handleApiError(error)
     }
-  }, [machineProjectId, selectedMachine, picturesToDelete, clickedPicCate, selectedSubItem, setSelectedMachine])
+  }, [machineProjectId, picturesToDelete, selectedSubItem, refetchSelectMachine])
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth disableEnforceFocus disableAutoFocus>
+    <Dialog open={open} onClose={handleClose} maxWidth='lg' fullWidth disableEnforceFocus disableAutoFocus>
       <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div className='ps-1 flex flex-col gap-1'>
-          <span style={{ fontWeight: 700, fontSize: 24 }}>사진 목록</span>
-          <span>{clickedPicCate.machineChecklistItemName}</span>
+        <div className='ps-1 flex flex-col gap-0'>
+          <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 } }}>사진 목록</Typography>
+          <Typography sx={{ fontWeight: 600, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
+            {clickedPicCate.machineChecklistItemName}
+          </Typography>
         </div>
         <Grid item xs={12}>
           <Card sx={{ p: 2 }}>
-            <Typography sx={{ fontWeight: 600, mb: 1 }}>소분류 선택</Typography>
+            <Typography sx={{ fontWeight: 600, mb: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
+              소분류 선택
+            </Typography>
             <TextField
               inputProps={{ sx: { display: 'flex', alignItems: 'center', gap: 1 } }}
               size='small'
@@ -349,8 +316,12 @@ const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: Pictu
               </MenuItem>
               {clickedPicCate?.checklistSubItems?.map(sub => (
                 <MenuItem key={sub.machineChecklistSubItemId} value={JSON.stringify(sub)}>
-                  {sub.checklistSubItemName}
-                  <Typography color='primary.main'>{sub.machinePicCount ? `(${sub.machinePicCount})` : ''}</Typography>
+                  <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {sub.checklistSubItemName}
+                  </Typography>
+                  <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
+                    {sub.machinePicCount ? `(${sub.machinePicCount})` : ''}
+                  </Typography>
                 </MenuItem>
               ))}
             </TextField>
@@ -362,95 +333,106 @@ const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: Pictu
         <Grid container spacing={3}>
           {/* 기존 사진 목록 */}
           <Grid item xs={12}>
-            <Card sx={{ p: 2, position: 'relative' }}>
-              <Typography variant='h6' gutterBottom>
-                검사 사진 목록
-              </Typography>
+            <Card sx={{ p: 2 }}>
+              <div className='flex justify-between'>
+                <Typography sx={{ fontWeight: 600, mb: 5, fontSize: { xs: 14, sm: 18 } }} variant='h6' gutterBottom>
+                  검사 사진 목록
+                </Typography>
+                <div className='flex gap-1 top-2 right-1'>
+                  {showCheck && [
+                    <Button
+                      key={1}
+                      size='small'
+                      color='warning'
+                      onClick={async () => {
+                        setPicturesToDelete(
+                          pictures
+                            .concat(await getPictures(1000).then(v => v?.content ?? []))
+                            .filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
+                        )
+                      }}
+                    >
+                      전체선택
+                    </Button>,
+                    <Button key={2} size='small' color='error' onClick={() => handleDeletePics()}>
+                      일괄삭제({picturesToDelete.length})
+                    </Button>
+                  ]}
+                  <Button
+                    color={showCheck ? 'secondary' : 'primary'}
+                    size='small'
+                    onClick={() => {
+                      if (showCheck) {
+                        setPicturesToDelete([])
+                      }
+
+                      setShowCheck(prev => !prev)
+                    }}
+                  >
+                    {showCheck ? '취소' : '선택삭제'}
+                  </Button>
+                </div>
+              </div>
 
               {pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId) &&
               pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
                 .length > 0 ? (
-                <Grid container spacing={2}>
+                <ImageList cols={isMobile ? 1 : 4} gap={15} rowHeight={isMobile ? 150 : 250}>
                   {pictures
                     .filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
                     .map((pic, idx) => (
-                      <Grid item xs={6} sm={4} md={3} key={idx}>
-                        <Card
-                          sx={{ position: 'relative', cursor: 'pointer' }}
-                          onClick={() => {
-                            if (showCheck) {
-                              if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                                setPicturesToDelete(prev => {
-                                  const newList = prev.map(v => ({ ...v }))
+                      <ImageListItem
+                        onClick={() => {
+                          if (showCheck) {
+                            if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+                              setPicturesToDelete(prev => {
+                                const newList = prev.map(v => ({ ...v }))
 
-                                  return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
-                                })
-                              } else {
-                                setPicturesToDelete(prev => {
-                                  const newList = prev.map(v => ({ ...v }))
-
-                                  return newList.filter(v => v.machinePicId !== pic.machinePicId)
-                                })
-                              }
+                                return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
+                              })
                             } else {
-                            }
-                          }}
-                        >
-                          <img
-                            src={pic.presignedUrl}
-                            alt={`검사 사진 ${idx + 1}`}
-                            style={{
-                              width: '100%',
-                              height: '120px',
-                              objectFit: 'cover'
-                            }}
-                          />
-                          <Box sx={{ p: 1 }}>
-                            <Typography sx={{ display: 'block' }} variant='caption' noWrap>
-                              {pic.originalFileName}
-                            </Typography>
-                            {/* 날짜 추가? */}
-                            {/* {pic.uploadDate && (
-                            <Typography variant='caption' color='text.secondary' display='block'>
-                              {new Date(pic.uploadDate).toLocaleDateString()}
-                            </Typography>
-                          )} */}
-                          </Box>
-                          {showCheck && (
-                            <Checkbox
-                              color='error'
-                              sx={{
-                                position: 'absolute',
-                                left: 0,
-                                top: 0
-                              }}
-                              checked={picturesToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
-                            />
-                          )}
-                        </Card>
-                      </Grid>
-                    ))}
-                  <div className='flex gap-1 absolute top-2 right-1'>
-                    {showCheck && (
-                      <Button size='small' color='error' onClick={() => handleDeletePics()}>
-                        일괄삭제({picturesToDelete.length})
-                      </Button>
-                    )}
-                    <Button
-                      color={showCheck ? 'secondary' : 'primary'}
-                      size='small'
-                      onClick={() => {
-                        if (showCheck) {
-                          setPicturesToDelete([])
-                        }
+                              setPicturesToDelete(prev => {
+                                const newList = prev.map(v => ({ ...v }))
 
-                        setShowCheck(prev => !prev)
-                      }}
-                    >
-                      {showCheck ? '취소' : '선택삭제'}
-                    </Button>
-                  </div>
-                </Grid>
+                                return newList.filter(v => v.machinePicId !== pic.machinePicId)
+                              })
+                            }
+                          } else {
+                            setSelectedPic(pic)
+                            setShowPicModal(true)
+                          }
+                        }}
+                        key={`${pic.machinePicId}-${idx}`}
+                        sx={{ position: 'relative', cursor: 'pointer' }}
+                      >
+                        <img
+                          src={pic.presignedUrl}
+                          alt={pic.originalFileName}
+                          style={{
+                            width: '100%',
+                            height: '50%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                        <ImageListItemBar
+                          title={pic.originalFileName}
+                          subtitle={`[${pic.machineCategoryName}] ${pic.machineChecklistItemName} - ${pic.machineChecklistSubItemName}`}
+                        />
+
+                        {showCheck && (
+                          <Checkbox
+                            color='error'
+                            sx={{
+                              position: 'absolute',
+                              left: 0,
+                              top: 0
+                            }}
+                            checked={picturesToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
+                          />
+                        )}
+                      </ImageListItem>
+                    ))}
+                </ImageList>
               ) : (
                 <Box
                   sx={{
@@ -558,8 +540,9 @@ const PictureModal = ({ machineProjectId, open, setOpen, clickedPicCate }: Pictu
           닫기
         </Button>
       </DialogActions>
+      {selectedPic && <PictureZoomModal open={showPicModal} setOpen={setShowPicModal} selectedPic={selectedPic} />}
     </Dialog>
   )
 }
 
-export default PictureModal
+export default PictureListModal
