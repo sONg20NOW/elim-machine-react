@@ -56,9 +56,6 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
 
   const [selectedSubItemId, setSelectedSubItemId] = useState<number>()
 
-  // ! 지우기
-  useEffect(() => console.log(selectedSubItemId), [selectedSubItemId])
-
   const selectedSubItem = clickedPicCate.checklistSubItems.find(
     sub => sub.machineChecklistSubItemId === selectedSubItemId
   )
