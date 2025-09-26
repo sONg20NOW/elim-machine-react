@@ -24,7 +24,7 @@ export default function AlertModal<T>({
       size='xs'
       open={showAlertModal}
       setOpen={setShowAlertModal}
-      title={'저장하지 않고 나가시겠습니까?'}
+      title={'변경사항이\n저장되지 않았습니다'}
       headerDescription={`지금까지 수정한 내용이 저장되지 않습니다.\n그래도 나가시겠습니까?`}
       primaryButton={
         <Button

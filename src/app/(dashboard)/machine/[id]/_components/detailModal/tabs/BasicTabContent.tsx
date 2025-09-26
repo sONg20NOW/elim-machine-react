@@ -1,12 +1,11 @@
 'use client'
 
 import type { Dispatch, SetStateAction } from 'react'
-import { useContext } from 'react'
 
 import { Button, Card, MenuItem, TextField, Tooltip } from '@mui/material'
 
-import { ParticipatedEngineersContext } from '../../machineContent'
 import type { MachineInspectionDetailResponseDtoType } from '@/app/_type/types'
+import { UseListsContext } from '../../../page'
 
 interface basicTabContentProps<T> {
   selectedMachineData: T
@@ -21,7 +20,7 @@ export default function BasicTabContent({
   setEditData,
   isEditing
 }: basicTabContentProps<MachineInspectionDetailResponseDtoType>) {
-  const participatedEngineers = useContext(ParticipatedEngineersContext)
+  const { participatedEngineerList } = UseListsContext()
 
   return (
     <div className='flex flex-col gap-5'>
@@ -154,7 +153,7 @@ export default function BasicTabContent({
         <div className='grid grid-cols-4 gap-2'>
           {!isEditing
             ? (selectedMachineData.engineerIds || []).map((id, idx) => {
-                const engineer = participatedEngineers.find(value => value.engineerId === id)
+                const engineer = participatedEngineerList.find(value => value.engineerId === id)
 
                 return (
                   <Card
@@ -166,7 +165,7 @@ export default function BasicTabContent({
               })
             : editData.engineerIds
                 .map((id, idx) => {
-                  const engineer = participatedEngineers.find(value => value.engineerId === id)
+                  const engineer = participatedEngineerList.find(value => value.engineerId === id)
 
                   return (
                     <Card key={idx} variant='outlined' sx={{ px: 2, py: 2, border: '1px solid #d1d5db' }}>
@@ -188,7 +187,7 @@ export default function BasicTabContent({
                           }))
                         }}
                       >
-                        {participatedEngineers.map(engineer => (
+                        {participatedEngineerList.map(engineer => (
                           <MenuItem
                             key={engineer.engineerId}
                             value={engineer.engineerId}

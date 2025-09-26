@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import axios from 'axios'
 import { Grid, MenuItem, Button } from '@mui/material'
@@ -11,14 +11,23 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import DefaultModal from '@/app/_components/modal/DefaultModal'
 import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/app/_type/types'
 import { handleApiError } from '@/utils/errorHandler'
+import { UseListsContext } from '../page'
 
-type AddMachineModalProps = {
+type AddInspectionModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   machineProjectId: string
+  getFilteredInspectionList: () => void
 }
 
-const AddMachineModal = ({ open, setOpen, machineProjectId }: AddMachineModalProps) => {
+const AddInspectionModal = ({
+  getFilteredInspectionList,
+  open,
+  setOpen,
+  machineProjectId
+}: AddInspectionModalProps) => {
+  const categoryList = UseListsContext().categoryList
+
   const [newData, setNewData] = useState<MachineInspectionCreateRequestDtoType>({
     machineCategoryId: 0,
     purpose: '',
@@ -28,24 +37,6 @@ const AddMachineModal = ({ open, setOpen, machineProjectId }: AddMachineModalPro
 
   const [parentCategory, setParentCategory] = useState<MachineCategoryResponseDtoType>()
   const [showSubCategory, setShowSubCategory] = useState(false)
-  const [categoryList, setCategoryList] = useState<MachineCategoryResponseDtoType[]>([])
-
-  // 카테고리 리스트 정보 가져오기
-  const getCategoryList = useCallback(async () => {
-    try {
-      const response = await axios.get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-categories`
-      )
-
-      setCategoryList(response.data.data.machineCategoryResponseDtos)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [])
-
-  useEffect(() => {
-    getCategoryList()
-  }, [getCategoryList])
 
   useEffect(() => {
     // 해당 분류의 자식이 없다면 newData의 categoryId로
@@ -73,6 +64,7 @@ const AddMachineModal = ({ open, setOpen, machineProjectId }: AddMachineModalPro
       )
 
       setOpen(false)
+      getFilteredInspectionList()
     } catch (error) {
       handleApiError(error)
     }
@@ -123,7 +115,7 @@ const AddMachineModal = ({ open, setOpen, machineProjectId }: AddMachineModalPro
               select
               fullWidth
               label='종류'
-              value={newData.machineCategoryId ? newData.machineCategoryId : ''}
+              value={newData.machineCategoryId ?? ''}
               onChange={e => setNewData(prev => ({ ...prev, machineCategoryId: Number(e.target.value) }))}
             >
               {categoryList
@@ -171,4 +163,4 @@ const AddMachineModal = ({ open, setOpen, machineProjectId }: AddMachineModalPro
   )
 }
 
-export default AddMachineModal
+export default AddInspectionModal

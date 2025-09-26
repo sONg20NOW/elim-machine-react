@@ -9,13 +9,13 @@ import type { MachineProjectResponseDtoType } from '@/app/_type/types'
 import { IsEditingContext } from '../page'
 import AlertModal from '@/app/_components/modal/AlertModal'
 
-interface NoteContentProps {
+interface NoteTabContentProps {
   id: string
   projectData: MachineProjectResponseDtoType
   reloadData: () => Promise<void>
 }
 
-const NoteContent = ({ id, projectData, reloadData }: NoteContentProps) => {
+const NoteTabContent = ({ id, projectData, reloadData }: NoteTabContentProps) => {
   const { isEditing, setIsEditing } = useContext(IsEditingContext)
   const [note, setNote] = useState(projectData?.note || '')
 
@@ -135,4 +135,4 @@ const NoteContent = ({ id, projectData, reloadData }: NoteContentProps) => {
   )
 }
 
-export default NoteContent
+export default NoteTabContent

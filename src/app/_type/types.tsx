@@ -533,11 +533,12 @@ export interface MachineCategoryResponseDtoType {
 // POST /api/machine-projects/{machineProjectId}/machine-pics 프로젝트 내 전체 사진 조회 (Presigned URL 포함)
 export interface MachinePicPresignedUrlResponseDtoType {
   machineInspectionId: number
+  machineInspectionName: string
   machinePicId: number
   version: number
   machineCategoryId: number
-  machineChecklistItemId: number
-  machineChecklistSubItemId: number
+  machineChecklistItemId: number | null
+  machineChecklistSubItemId: number | null
   machineCategoryName: string
   machineChecklistItemName: string
   machineChecklistSubItemName: string
@@ -557,6 +558,19 @@ export interface MachinePicCursorType {
   lastMachineChecklistSubItemSortOrder: number
   lastMachineInspectionId: number
   lastMachinePicId: number
+}
+
+// PUT /api/machine-projects/{machineProjectId}/machine-inspections/{machineInspectionId}/machine-pics/{machinePicId}
+export interface MachinePicUpdateResponseDtoType {
+  machinePicId: number
+  version: number
+  machineChecklistSubItemId: number
+  originalFileName: string
+  s3Key: string
+  cdnPath?: string
+  alternativeSubTitle: string
+  measuredValue: string
+  remark: string
 }
 
 // ----------- 라이선스 -----------

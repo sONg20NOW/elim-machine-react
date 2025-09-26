@@ -14,12 +14,12 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { MACHINE_PROJECT_ENGINEER_INPUT_INFO, MACHINE_SCHEDULE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
 import CustomTextField from '@/@core/components/mui/TextField'
-import { EngineerListContext, IsEditingContext } from '../page'
+import { IsEditingContext, UseListsContext } from '../page'
 import { gradeOption } from '@/app/_constants/options'
 import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'
 import AlertModal from '@/app/_components/modal/AlertModal'
 
-const PlanContent = ({
+const ScheduleAndEngineerTabContent = ({
   scheduleData,
   reloadData
 }: {
@@ -28,7 +28,7 @@ const PlanContent = ({
 }) => {
   const { isEditing, setIsEditing } = useContext(IsEditingContext)
 
-  const engineerOption = useContext(EngineerListContext)
+  const { engineerList, getParticipatedEngineerList } = UseListsContext()
 
   const params = useParams()
   const machineProjectId = params?.id as string
@@ -41,7 +41,7 @@ const PlanContent = ({
 
   const existChange = JSON.stringify(editData) !== JSON.stringify(scheduleData)
 
-  const engineerMenuOption = engineerOption.map(engineer => {
+  const engineerMenuOption = engineerList.map(engineer => {
     return { value: engineer.engineerId, label: `${engineer.engineerName}` }
   })
 
@@ -58,6 +58,7 @@ const PlanContent = ({
         { engineers: editData.engineers.filter(value => value.engineerId > 0) }
       )
       reloadData()
+      getParticipatedEngineerList()
       handleSuccess('저장되었습니다.')
     } catch (error) {
       handleApiError(error)
@@ -369,9 +370,7 @@ const PlanContent = ({
                           fullWidth
                           value={engineer.engineerId}
                           onChange={e => {
-                            const newEngineerInfo = engineerOption.find(
-                              eng => eng.engineerId === Number(e.target.value)
-                            )
+                            const newEngineerInfo = engineerList.find(eng => eng.engineerId === Number(e.target.value))
 
                             const newEngineer: machineProjectEngineerDetailDtoType = {
                               ...MachineProjectEngineerInitialData,
@@ -628,4 +627,4 @@ const PlanContent = ({
   )
 }
 
-export default PlanContent
+export default ScheduleAndEngineerTabContent

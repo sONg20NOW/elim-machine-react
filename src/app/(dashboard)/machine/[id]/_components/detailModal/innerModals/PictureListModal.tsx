@@ -33,12 +33,11 @@ import { toast } from 'react-toastify'
 import type {
   MachinePicCateWithPicCountDtoType,
   MachinePicPresignedUrlResponseDtoType,
-  MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType,
   MachinePicCursorType
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { useSelectedMachineContext } from '../../machineContent'
 import PictureZoomModal from '../../PictureZoomModal'
+import { useSelectedInspectionContext } from '../../InspectionListContent'
 
 type PictureListModalProps = {
   machineProjectId: string
@@ -48,15 +47,21 @@ type PictureListModalProps = {
 }
 
 const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: PictureListModalProps) => {
-  const { selectedMachine, refetchSelectMachine } = useSelectedMachineContext()
+  const { selectedInspection, refetchSelectedInspection } = useSelectedInspectionContext()
 
   // 사진 리스트
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
 
-  const [selectedSubItem, setSelectedSubItem] =
-    useState<MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType>()
+  const [selectedSubItemId, setSelectedSubItemId] = useState<number>()
+
+  // ! 지우기
+  useEffect(() => console.log(selectedSubItemId), [selectedSubItemId])
+
+  const selectedSubItem = clickedPicCate.checklistSubItems.find(
+    sub => sub.machineChecklistSubItemId === selectedSubItemId
+  )
 
   const [picturesToDelete, setPicturesToDelete] = useState<{ machinePicId: number; version: number }[]>([])
   const [showCheck, setShowCheck] = useState(false)
@@ -87,7 +92,7 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
       isLoadingRef.current = true
 
       const requestBody = {
-        machineInspectionId: selectedMachine.machineInspectionResponseDto.id,
+        machineInspectionId: selectedInspection.machineInspectionResponseDto.id,
         machineChecklistItemId: clickedPicCate.machineChecklistItemId,
         ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
       }
@@ -116,7 +121,7 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
         isLoadingRef.current = false
       }
     },
-    [clickedPicCate, machineProjectId, selectedMachine]
+    [clickedPicCate, machineProjectId, selectedInspection]
   )
 
   useEffect(() => {
@@ -133,25 +138,19 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
     isUploading,
     selectedSubItem,
     pictures,
-    selectedMachine.machineInspectionResponseDto.id,
+    selectedInspection.machineInspectionResponseDto.id,
     clickedPicCate.machineChecklistItemId,
     machineProjectId,
     getPictures
   ])
-
-  // clickedPicCate 변경 시에(사진 추가 혹은 삭제의 경우) selectedSubItem이 선택되어있다면 selectedSubItem 정보 최신화
-  useEffect(() => {
-    if (selectedSubItem)
-      setSelectedSubItem(prev =>
-        clickedPicCate.checklistSubItems.find(sub => sub.machineChecklistSubItemId === prev?.machineChecklistSubItemId)
-      )
-  }, [clickedPicCate, selectedSubItem])
 
   const handleClose = () => {
     setOpen(false)
   }
 
   useEffect(() => setShowCheck(false), [selectedSubItem])
+
+  // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -169,7 +168,7 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
 
       return
     } else if (!selectedSubItem) {
-      toast.error('소분류를 선택하세요.')
+      toast.error('하위항목을 선택하세요.')
 
       return
     }
@@ -184,8 +183,8 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
         uploadType: 'INSPECTION_IMAGE',
         originalFileNames: filesToUpload.map(file => file.name),
         projectId: parseInt(machineProjectId),
-        machineInspectionId: selectedMachine.machineInspectionResponseDto.id,
-        cateName: selectedMachine.machineInspectionResponseDto.machineCategoryName ?? '배관설비',
+        machineInspectionId: selectedInspection.machineInspectionResponseDto.id,
+        cateName: selectedInspection.machineInspectionResponseDto.machineCategoryName ?? '배관설비',
         picCateName: clickedPicCate.machineChecklistItemName ?? '설비사진',
         picSubCateName: selectedSubItem?.checklistSubItemName ?? '현황사진',
 
@@ -236,7 +235,7 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
       }))
 
       const dbResponse = await axios.post<{ data: { machinePicIds: number[] } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedMachine.machineInspectionResponseDto.id}/machine-pics`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-pics`,
         {
           machinePicCreateRequestDtos
         }
@@ -250,7 +249,7 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
       setFilesToUpload([])
 
       // 디테일 모달 테이블의 해당 목록 정보 최신화 - selcetedMachine 최신화
-      refetchSelectMachine()
+      refetchSelectedInspection()
 
       // 커서 리셋
       resetCursor()
@@ -275,7 +274,7 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
       )
 
       // 성공했다면 업로드 때와 마찬가지로 selectedMachine 최신화.
-      refetchSelectMachine()
+      refetchSelectedInspection()
 
       // 커서 리셋
       resetCursor()
@@ -287,7 +286,7 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
     } catch (error) {
       handleApiError(error)
     }
-  }, [machineProjectId, picturesToDelete, selectedSubItem, refetchSelectMachine])
+  }, [machineProjectId, picturesToDelete, selectedSubItem, refetchSelectedInspection])
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='lg' fullWidth disableEnforceFocus disableAutoFocus>
@@ -301,21 +300,21 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
         <Grid item xs={12}>
           <Card sx={{ p: 2 }}>
             <Typography sx={{ fontWeight: 600, mb: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
-              소분류 선택
+              하위항목 선택
             </Typography>
             <TextField
               inputProps={{ sx: { display: 'flex', alignItems: 'center', gap: 1 } }}
               size='small'
               fullWidth
               select
-              value={selectedSubItem ? JSON.stringify(selectedSubItem) : JSON.stringify({})}
-              onChange={e => setSelectedSubItem(JSON.parse(e.target.value))}
+              value={selectedSubItemId ?? 0}
+              onChange={e => setSelectedSubItemId(Number(e.target.value))}
             >
-              <MenuItem value={JSON.stringify({})} disabled>
-                -- 소분류를 선택하세요 --
+              <MenuItem value={0} disabled>
+                -- 하위항목을 선택하세요 --
               </MenuItem>
               {clickedPicCate?.checklistSubItems?.map(sub => (
-                <MenuItem key={sub.machineChecklistSubItemId} value={JSON.stringify(sub)}>
+                <MenuItem key={sub.machineChecklistSubItemId} value={sub.machineChecklistSubItemId}>
                   <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {sub.checklistSubItemName}
                   </Typography>
@@ -416,7 +415,14 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
                         />
                         <ImageListItemBar
                           title={pic.originalFileName}
-                          subtitle={`[${pic.machineCategoryName}] ${pic.machineChecklistItemName} - ${pic.machineChecklistSubItemName}`}
+                          subtitle={
+                            <div className='flex flex-col'>
+                              <Typography
+                                color='lightgray'
+                                fontSize={'small'}
+                              >{`${pic.machineChecklistItemName} - ${pic.machineChecklistSubItemName}`}</Typography>
+                            </div>
+                          }
                         />
 
                         {showCheck && (
@@ -540,7 +546,20 @@ const PictureListModal = ({ machineProjectId, open, setOpen, clickedPicCate }: P
           닫기
         </Button>
       </DialogActions>
-      {selectedPic && <PictureZoomModal open={showPicModal} setOpen={setShowPicModal} selectedPic={selectedPic} />}
+      {selectedPic && (
+        <PictureZoomModal
+          open={showPicModal}
+          setOpen={setShowPicModal}
+          selectedPic={selectedPic}
+          reloadPics={() => {
+            resetCursor()
+            getPictures()
+          }}
+          machineProjectId={machineProjectId}
+          selectedInspection={selectedInspection}
+          refetchSelectedInspection={refetchSelectedInspection}
+        />
+      )}
     </Dialog>
   )
 }

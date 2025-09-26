@@ -30,7 +30,7 @@ import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
 import PipeTabContent from './tabs/PipeTabContent'
 import PicTabContent from './tabs/PicTabContent'
-import { useSelectedMachineContext } from '../machineContent'
+import { useSelectedInspectionContext } from '../InspectionListContent'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -69,7 +69,8 @@ type MachineDetailModalProps = {
 }
 
 const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailModalProps) => {
-  const { selectedMachine, refetchSelectMachine } = useSelectedMachineContext()
+  const { selectedInspection: selectedMachine, refetchSelectedInspection: refetchSelectMachine } =
+    useSelectedInspectionContext()
 
   if (!selectedMachine) {
     throw new Error('selecteMachine is undefined')
@@ -265,15 +266,13 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
               }
             }}
           >
-            {selectedMachine.checklistExtensionType === 'NONE'
-              ? null
-              : thisTabInfo.map(tab =>
-                  existChange && tabValue !== tab.value ? (
-                    <DisabledTabWithTooltip key={tab.value} value={tab.value} label={tab.label} />
-                  ) : (
-                    <Tab key={tab.value} value={tab.value} label={tab.label} />
-                  )
-                )}
+            {thisTabInfo.map(tab =>
+              existChange && tabValue !== tab.value ? (
+                <DisabledTabWithTooltip key={tab.value} value={tab.value} label={tab.label} />
+              ) : (
+                <Tab key={tab.value} value={tab.value} label={tab.label} />
+              )
+            )}
           </TabList>
           <div className='flex gap-2 absolute right-0 top-0'>
             <Button variant='contained' color='info'>

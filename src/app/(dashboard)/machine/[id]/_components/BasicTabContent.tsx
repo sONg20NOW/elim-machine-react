@@ -13,7 +13,7 @@ import type { MachineProjectResponseDtoType } from '@/app/_type/types'
 import AlertModal from '@/app/_components/modal/AlertModal'
 import { IsEditingContext } from '../page'
 
-const SiteInfoContent = ({
+const BasicTabContent = ({
   projectData,
   reloadData
 }: {
@@ -23,6 +23,7 @@ const SiteInfoContent = ({
   const { isEditing, setIsEditing } = useContext(IsEditingContext)
 
   const params = useParams()
+
   const machineProjectId = params?.id as string
 
   // 초기값 세팅
@@ -759,4 +760,4 @@ const SiteInfoContent = ({
   )
 }
 
-export default SiteInfoContent
+export default BasicTabContent

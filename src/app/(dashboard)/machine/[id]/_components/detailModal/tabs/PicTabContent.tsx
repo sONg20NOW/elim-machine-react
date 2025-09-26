@@ -15,7 +15,7 @@ import AlertModal from '@/app/_components/modal/AlertModal'
 import DefaultModal from '@/app/_components/modal/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
-import { useSelectedMachineContext } from '../../machineContent'
+import { useSelectedInspectionContext } from '../../InspectionListContent'
 
 interface PicTabContentProps<T> {
   editData: T
@@ -30,8 +30,9 @@ export default function PicTabContent({
   isEditing,
   machineProjectId
 }: PicTabContentProps<MachineInspectionDetailResponseDtoType>) {
-  const { selectedMachine } = useSelectedMachineContext()
-  const machineInspectionId = selectedMachine.machineInspectionResponseDto.id
+  const { selectedInspection, refetchSelectedInspection } = useSelectedInspectionContext()
+
+  const machineInspectionId = selectedInspection.machineInspectionResponseDto.id
 
   // 점검사진 모달
   const [openPicModal, setOpenPicModal] = useState<boolean>(false)
@@ -53,12 +54,12 @@ export default function PicTabContent({
   useEffect(() => {
     if (clickedPicCate) {
       setClickedPicCate(prev =>
-        selectedMachine.machineChecklistItemsWithPicCountResponseDtos.find(
+        selectedInspection.machineChecklistItemsWithPicCountResponseDtos.find(
           v => prev?.machineChecklistItemId === v.machineChecklistItemId
         )
       )
     }
-  }, [selectedMachine, clickedPicCate])
+  }, [selectedInspection, clickedPicCate])
 
   useEffect(() => {
     // 미흡사항 버튼이 클릭됐을 때(selectedDfId가 변경될 때) 해당 id에 대한 정보가 없는 경우 GET.
@@ -89,7 +90,9 @@ export default function PicTabContent({
           }
         }>(
           `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-inspection-checklist-item-results`,
-          { machineInspectionChecklistItemResultUpdateRequestDtos: dfs }
+          {
+            machineInspectionChecklistItemResultUpdateRequestDtos: dfs.map(df => ({ ...df, inspectionResult: 'FAIL' }))
+          }
         )
 
         const resDfs = response.data.data.machineInspectionChecklistItemResultUpdateResponseDtos
@@ -104,30 +107,30 @@ export default function PicTabContent({
         })
         setKnownDfs(newKnownDfs)
 
-        // editData 버전 최신화
-        const newEditDataResultList = Array.from(editData.machineChecklistItemsWithPicCountResponseDtos)
+        // // editData 버전 최신화
+        // const newEditDataResultList = Array.from(editData.machineChecklistItemsWithPicCountResponseDtos)
 
-        resDfs.map(df => {
-          const idx = editData.machineChecklistItemsWithPicCountResponseDtos.findIndex(
-            checklist => checklist.machineInspectionChecklistItemResultBasicResponseDto.id === df.id
-          )
+        // resDfs.map(df => {
+        //   const idx = editData.machineChecklistItemsWithPicCountResponseDtos.findIndex(
+        //     checklist => checklist.machineInspectionChecklistItemResultBasicResponseDto.id === df.id
+        //   )
 
-          newEditDataResultList.splice(idx, 1, {
-            ...newEditDataResultList[idx],
-            machineInspectionChecklistItemResultBasicResponseDto: {
-              ...newEditDataResultList[idx].machineInspectionChecklistItemResultBasicResponseDto,
-              version: df.version
-            }
-          })
-        })
-        setEditData(prev => ({ ...prev, machineChecklistItemsWithPicCountResponseDtos: newEditDataResultList }))
-
+        //   newEditDataResultList.splice(idx, 1, {
+        //     ...newEditDataResultList[idx],
+        //     machineInspectionChecklistItemResultBasicResponseDto: {
+        //       ...newEditDataResultList[idx].machineInspectionChecklistItemResultBasicResponseDto,
+        //       version: df.version
+        //     }
+        //   })
+        // })
+        // setEditData(prev => ({ ...prev, machineChecklistItemsWithPicCountResponseDtos: newEditDataResultList }))
+        refetchSelectedInspection()
         handleSuccess('미흡사항이 반영되었습니다.')
       } catch (error) {
         handleApiError(error)
       }
     },
-    [machineProjectId, machineInspectionId, knownDfs, editData, setEditData]
+    [machineProjectId, machineInspectionId, knownDfs, refetchSelectedInspection]
   )
 
   function DeficiencyModal() {
@@ -144,7 +147,7 @@ export default function PicTabContent({
       <DefaultModal
         size='sm'
         title={
-          selectedMachine!.machineChecklistItemsWithPicCountResponseDtos.find(
+          selectedInspection!.machineChecklistItemsWithPicCountResponseDtos.find(
             cate => cate.machineInspectionChecklistItemResultBasicResponseDto.id === selectedDfId
           )?.machineChecklistItemName ?? '미흡사항'
         }
@@ -252,12 +255,14 @@ export default function PicTabContent({
         </tr>
       </thead>
       <tbody>
-        {selectedMachine.machineChecklistItemsWithPicCountResponseDtos.map((cate, idx) => {
+        {(!isEditing ? selectedInspection : editData).machineChecklistItemsWithPicCountResponseDtos.map((cate, idx) => {
           return (
             <tr key={cate.machineChecklistItemId}>
               {idx === 0 && (
                 <th
-                  rowSpan={selectedMachine.machineChecklistItemsWithPicCountResponseDtos.length}
+                  rowSpan={
+                    (!isEditing ? selectedInspection : editData).machineChecklistItemsWithPicCountResponseDtos.length
+                  }
                   style={{ verticalAlign: 'top' }}
                 >
                   점검항목
@@ -332,7 +337,11 @@ export default function PicTabContent({
                 ) : (
                   <TextField
                     fullWidth
-                    value={cate.machineInspectionChecklistItemResultBasicResponseDto.inspectionResult ?? 'NONE'}
+                    value={
+                      editData.machineChecklistItemsWithPicCountResponseDtos.find(
+                        v => cate.machineChecklistItemId === v.machineChecklistItemId
+                      )?.machineInspectionChecklistItemResultBasicResponseDto.inspectionResult ?? 'NONE'
+                    }
                     size='small'
                     onChange={e => {
                       // picCates는 리스트, 리스트 중 idx번째 객체의 machineChecklistItemInspectionResult.status 값을 변경.
