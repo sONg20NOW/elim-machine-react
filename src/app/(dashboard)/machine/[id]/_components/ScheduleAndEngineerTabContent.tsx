@@ -339,7 +339,14 @@ const ScheduleAndEngineerTabContent = ({
                           onClick={() => {
                             setEditData(prev => ({
                               ...prev,
-                              engineers: [...prev.engineers, MachineProjectEngineerInitialData]
+                              engineers: [
+                                ...prev.engineers,
+                                {
+                                  ...MachineProjectEngineerInitialData,
+                                  beginDate: editData.beginDate,
+                                  endDate: editData.endDate
+                                }
+                              ]
                             }))
                           }}
                         >
@@ -374,6 +381,8 @@ const ScheduleAndEngineerTabContent = ({
 
                             const newEngineer: machineProjectEngineerDetailDtoType = {
                               ...MachineProjectEngineerInitialData,
+                              beginDate: editData.beginDate,
+                              endDate: editData.endDate,
                               ...newEngineerInfo,
                               grade:
                                 gradeOption.find(value => value.label === newEngineerInfo?.gradeDescription)?.value ??
@@ -515,21 +524,21 @@ const ScheduleAndEngineerTabContent = ({
                   <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     투입시작
                   </td>
-                  <td style={{ padding: '10px 12px' }}>{scheduleData.fieldBeginDate}</td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.beginDate}</td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     현장점검시작
                   </th>
-                  <td style={{ padding: '10px 12px' }}>{scheduleData.fieldEndDate}</td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.fieldBeginDate}</td>
                 </tr>
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     투입종료
                   </th>
-                  <td style={{ padding: '10px 12px' }}>{scheduleData.fieldEndDate}</td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.endDate}</td>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                     현장점검종료
                   </th>
-                  <td style={{ padding: '10px 12px' }}>{scheduleData.endDate}</td>
+                  <td style={{ padding: '10px 12px' }}>{scheduleData.fieldEndDate}</td>
                 </tr>
                 <tr>
                   <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>

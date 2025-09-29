@@ -10,6 +10,7 @@ interface AlertModalProps<T> {
   setEditData: Dispatch<SetStateAction<T>>
   setIsEditing: Dispatch<SetStateAction<boolean>>
   originalData: T
+  onQuit?: () => void
 }
 
 export default function AlertModal<T>({
@@ -17,7 +18,8 @@ export default function AlertModal<T>({
   setShowAlertModal,
   setEditData,
   setIsEditing,
-  originalData
+  originalData,
+  onQuit
 }: AlertModalProps<T>) {
   return (
     <DefaultModal
@@ -34,6 +36,7 @@ export default function AlertModal<T>({
             setEditData(JSON.parse(JSON.stringify(originalData)))
             setShowAlertModal(false)
             setIsEditing(false)
+            onQuit && onQuit()
           }}
           type='submit'
         >

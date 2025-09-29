@@ -392,6 +392,11 @@ export default function PicTabContent({
           open={openPicModal}
           setOpen={setOpenPicModal}
           clickedPicCate={clickedPicCate}
+          checklistItems={selectedInspection.machineChecklistItemsWithPicCountResponseDtos}
+          totalPicCount={selectedInspection.machineChecklistItemsWithPicCountResponseDtos.reduce(
+            (sum, prev) => sum + prev.totalMachinePicCount,
+            0
+          )}
         />
       )}
     </table>

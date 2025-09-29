@@ -4,13 +4,14 @@ export const MemberInitialData: MemberCreateRequestDtoType = {
   name: '',
   email: '',
   companyName: '',
-  role: '',
+
+  // role: '',
   memberStatus: '',
   note: ''
 }
 
 export const MemeberInitialFilters: MemberFilterType = {
-  role: '',
+  // role: '',
   companyName: '',
   officeDepartmentName: '',
   officePosition: '',

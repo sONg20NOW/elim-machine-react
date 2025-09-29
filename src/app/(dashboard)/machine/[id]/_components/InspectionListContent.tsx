@@ -299,7 +299,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
             }}
             disabled={disabled}
           />
-          <Button variant='contained' color='info' disabled={loading || error}>
+          <Button variant='contained' color='info' disabled={true || loading || error}>
             점검대상 및 수량
           </Button>
         </div>

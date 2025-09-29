@@ -2,12 +2,12 @@ import { MEMBER_INPUT_INFO } from '../input/MemberInputInfo'
 import type { InputFieldType, MemberFilterType } from '../../_type/types'
 import { careerYearOption, genderOption } from '@/app/_constants/options'
 
-const { role, companyName, memberStatus } = MEMBER_INPUT_INFO.basic
+const { companyName, memberStatus } = MEMBER_INPUT_INFO.basic
 const { officePosition, officeDepartmentName, contractType, laborForm, workForm } = MEMBER_INPUT_INFO.office
 const { foreignYn } = MEMBER_INPUT_INFO.privacy
 
 export const MEMBER_FILTER_INFO: Record<keyof MemberFilterType, InputFieldType> = {
-  role: role!,
+  // role: role!,
   companyName: companyName!,
   officeDepartmentName: officeDepartmentName!,
   officePosition: officePosition!,

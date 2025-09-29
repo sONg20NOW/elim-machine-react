@@ -40,7 +40,8 @@ export type licenseInputType = Partial<Record<keyof LicenseResponseDtoType, Inpu
 export interface MemberCreateRequestDtoType {
   companyName: string
   name: string
-  role: string
+
+  // role: string
   memberStatus: string
   email: string
   note: string
@@ -159,7 +160,6 @@ export type memberLookupResponseDtoType = {
 
 // 직원관리 필터
 export interface MemberFilterType {
-  role: string
   companyName: string
   officeDepartmentName: string
   officePosition: string

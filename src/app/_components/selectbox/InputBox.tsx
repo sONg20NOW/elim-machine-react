@@ -96,7 +96,7 @@ function InputBoxContent() {
   const [juminNum, setJuminNum] = useState(value)
   const memberId = useContext(MemberIdContext)
 
-  const label = showLabel && tabField.label
+  const label = (showLabel && tabField?.label) ?? ''
 
   async function getJuminNum() {
     try {
@@ -178,8 +178,7 @@ function InputBoxContent() {
           onChange={e => onChange(e.target.value)}
           required={showLabel && required}
           slotProps={{
-            select: { displayEmpty: true },
-            htmlInput: { name: name }
+            select: { displayEmpty: true }
           }}
         >
           <MenuItem value=''>전체</MenuItem>

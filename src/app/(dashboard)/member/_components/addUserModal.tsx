@@ -54,7 +54,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
         </Button>
       }
       secondaryButton={
-        <Button variant='tonal' color='secondary' type='reset' onClick={() => setOpen(false)}>
+        <Button variant='contained' color='secondary' type='reset' onClick={() => setOpen(false)}>
           취소
         </Button>
       }
@@ -66,7 +66,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
 
             return (
               <InputBox
-                required={key === 'name' || key === 'role'}
+                required={key === 'name' || key === 'email'}
                 key={key}
                 tabInfos={MEMBER_INPUT_INFO.basic}
                 tabFieldKey={key}

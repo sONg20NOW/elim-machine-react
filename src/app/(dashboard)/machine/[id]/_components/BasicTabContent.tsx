@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 import { Button } from '@mui/material'
 
@@ -12,6 +12,7 @@ import { MACHINE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
 import type { MachineProjectResponseDtoType } from '@/app/_type/types'
 import AlertModal from '@/app/_components/modal/AlertModal'
 import { IsEditingContext } from '../page'
+import DeleteModal from '@/app/_components/modal/DeleteModal'
 
 const BasicTabContent = ({
   projectData,
@@ -20,6 +21,8 @@ const BasicTabContent = ({
   projectData: MachineProjectResponseDtoType
   reloadData: () => Promise<void>
 }) => {
+  const router = useRouter()
+
   const { isEditing, setIsEditing } = useContext(IsEditingContext)
 
   const params = useParams()
@@ -29,6 +32,7 @@ const BasicTabContent = ({
   // 초기값 세팅
   const [editData, setEditData] = useState<MachineProjectResponseDtoType>(JSON.parse(JSON.stringify(projectData)))
   const [showAlertModal, setShowAlertModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const existChange = JSON.stringify(editData) !== JSON.stringify(projectData)
 
@@ -56,63 +60,90 @@ const BasicTabContent = ({
     }
   }
 
+  const handleDelete = async () => {
+    try {
+      if (!projectData) throw new Error()
+
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}?version=${projectData.version}`
+      )
+
+      handleSuccess('해당 프로젝트가 삭제되었습니다.')
+      router.push('/machine')
+    } catch (error) {
+      handleApiError(error)
+    }
+  }
+
   return (
     <div>
-      <div className='flex mb-4 gap-[4px]'>
-        {/* TODO: 버튼 구현 */}
-        <Button
-          variant='contained'
-          color='info'
-          disabled={true}
-          onClick={() => {
-            console.log('?')
-          }}
-        >
-          입수자료
-        </Button>
-        <Button
-          variant='contained'
-          color='success'
-          disabled={true}
-          onClick={() => {
-            console.log('?')
-          }}
-        >
-          점검의견서
-        </Button>
-        <Button
-          variant='contained'
-          color='primary'
-          disabled={true}
-          onClick={() => {
-            console.log('?')
-          }}
-        >
-          성능점검시 검토사항
-        </Button>
+      <div className='flex mb-4 justify-between'>
+        <div className='flex gap-[4px]'>
+          {/* TODO: 버튼 구현 */}
+          <Button
+            variant='contained'
+            color='info'
+            disabled={true}
+            onClick={() => {
+              console.log('?')
+            }}
+          >
+            입수자료
+          </Button>
+          <Button
+            variant='contained'
+            color='success'
+            disabled={true}
+            onClick={() => {
+              console.log('?')
+            }}
+          >
+            점검의견서
+          </Button>
+          <Button
+            variant='contained'
+            color='primary'
+            disabled={true}
+            onClick={() => {
+              console.log('?')
+            }}
+          >
+            성능점검시 검토사항
+          </Button>
 
-        <Button
-          variant='contained'
-          color='warning'
-          disabled={true}
-          onClick={() => {
-            console.log('?')
-          }}
-        >
-          에너지 사용량
-        </Button>
+          <Button
+            variant='contained'
+            color='warning'
+            disabled={true}
+            onClick={() => {
+              console.log('?')
+            }}
+          >
+            에너지 사용량
+          </Button>
 
+          <Button
+            variant='contained'
+            color='error'
+            disabled={true}
+            onClick={() => {
+              console.log('?')
+            }}
+          >
+            보고서 다운로드
+          </Button>
+        </div>
         <Button
           variant='contained'
           color='error'
-          disabled={true}
           onClick={() => {
-            console.log('?')
+            setShowDeleteModal(true)
           }}
         >
-          보고서 다운로드
+          설비현장 삭제
         </Button>
       </div>
+
       <div
         style={{
           border: '1px solid #d1d5db',
@@ -754,6 +785,13 @@ const BasicTabContent = ({
           setEditData={setEditData}
           originalData={projectData}
           setIsEditing={setIsEditing}
+        />
+      )}
+      {showDeleteModal && (
+        <DeleteModal
+          showDeleteModal={showDeleteModal}
+          setShowDeleteModal={setShowDeleteModal}
+          onDelete={handleDelete}
         />
       )}
     </div>

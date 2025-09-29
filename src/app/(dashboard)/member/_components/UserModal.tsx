@@ -85,6 +85,8 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
 
   const [isEditing, setIsEditing] = useState(false)
 
+  const [onQuit, setOnQuit] = useState<() => void>()
+
   // 수정사항 여부
   const existChange = JSON.stringify(editData) !== JSON.stringify(selectedUserData)
 
@@ -164,6 +166,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
         value={value}
         onClose={() => {
           if (existChange) {
+            setOnQuit(() => () => setOpen(false))
             setShowAlertModal(true)
           } else {
             setOpen(false)
@@ -213,6 +216,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
               type='reset'
               onClick={() => {
                 if (existChange) {
+                  setOnQuit(undefined)
                   setShowAlertModal(true)
                 } else {
                   setIsEditing(false)
@@ -278,6 +282,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
             setEditData={setEditData}
             setIsEditing={setIsEditing}
             originalData={selectedUserData}
+            onQuit={onQuit}
           />
         )}
       </DefaultModal>

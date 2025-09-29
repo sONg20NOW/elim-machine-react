@@ -3,12 +3,12 @@
 import type { Dispatch, ReactNode, SetStateAction, SyntheticEvent } from 'react'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-import { redirect, useParams, useRouter } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 
-import { Button, CardContent, IconButton, Tab, Typography, useMediaQuery } from '@mui/material'
+import { CardContent, IconButton, Tab, Typography, useMediaQuery } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
@@ -28,7 +28,6 @@ import type {
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import CustomTextField from '@/@core/components/mui/TextField'
-import DeleteModal from '@/app/_components/modal/DeleteModal'
 import DisabledTabWithTooltip from '@/app/_components/DisabledTabWithTooltip'
 import BasicTabContent from './_components/BasicTabContent'
 import ScheduleAndEngineerTabContent from './_components/ScheduleAndEngineerTabContent'
@@ -74,7 +73,6 @@ const Tabs = [
 
 const MachineUpdatePage = () => {
   const isMobile = useMediaQuery('(max-width:600px)')
-  const router = useRouter()
 
   const params = useParams()
   const machineProjectId = params?.id as string
@@ -89,7 +87,6 @@ const MachineUpdatePage = () => {
 
   const [isEditingProjectName, setIsEditingProjectName] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // 현장정보 불러오기
   const getProjectData = useCallback(async () => {
@@ -194,21 +191,6 @@ const MachineUpdatePage = () => {
     [machineProjectId, projectData?.version, getProjectData]
   )
 
-  const handleDelete = async () => {
-    try {
-      if (!projectData) throw new Error()
-
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}?version=${projectData.version}`
-      )
-
-      handleSuccess('해당 프로젝트가 삭제되었습니다.')
-      router.push('/machine')
-    } catch (error) {
-      handleApiError(error)
-    }
-  }
-
   useEffect(() => {
     if (machineProjectId) {
       switch (tabValue) {
@@ -289,16 +271,6 @@ const MachineUpdatePage = () => {
             }
             sx={{ cursor: 'pointer', padding: 0 }}
           />
-
-          <Button
-            variant='contained'
-            color='error'
-            onClick={() => {
-              setShowDeleteModal(true)
-            }}
-          >
-            설비현장 삭제
-          </Button>
         </div>
 
         <CardContent>
@@ -349,13 +321,6 @@ const MachineUpdatePage = () => {
           </TabContext>
         </CardContent>
       </Card>
-      {showDeleteModal && (
-        <DeleteModal
-          showDeleteModal={showDeleteModal}
-          setShowDeleteModal={setShowDeleteModal}
-          onDelete={handleDelete}
-        />
-      )}
     </Providers>
   )
 }

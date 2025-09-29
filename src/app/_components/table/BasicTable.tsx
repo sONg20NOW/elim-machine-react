@@ -84,7 +84,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   }
 
   return (
-    <TableContainer className='px-2'>
+    <TableContainer sx={{ overflowX: 'auto' }} className='px-2'>
       <Table sx={{ minWidth: 650 }} aria-label='simple table' className='relative'>
         <TableHead className='select-none'>
           <TableRow>

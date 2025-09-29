@@ -18,6 +18,7 @@ import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { LICENSE_INPUT_INFO } from '@/app/_schema/input/LicenseInputInfo'
 import DeleteModal from '@/app/_components/modal/DeleteModal'
+import AlertModal from '@/app/_components/modal/AlertModal'
 
 type DetailModalProps = {
   open: boolean
@@ -44,8 +45,13 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
   const [isEditing, setIsEditing] = useState(false)
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showAlertModal, setShowAlertModal] = useState(false)
+
+  const [onQuit, setOnQuit] = useState<() => void>()
 
   const licenseId = editData.id
+
+  const existChange = JSON.stringify(editData) !== JSON.stringify(initialData)
 
   const handleDeleteUser = async () => {
     try {
@@ -58,22 +64,26 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
   }
 
   const handleModifyData = async () => {
-    try {
-      const response = await axios.put<{ data: LicenseResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/${licenseId}`,
-        editData
-      )
+    if (existChange) {
+      try {
+        const response = await axios.put<{ data: LicenseResponseDtoType }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/${licenseId}`,
+          editData
+        )
 
-      const returnData = response.data.data
+        const returnData = response.data.data
 
-      setEditData(returnData)
-      setInitialData(returnData)
+        setEditData(returnData)
+        setInitialData(returnData)
 
-      handleSuccess(`라이선스 정보가 수정되었습니다.`)
+        handleSuccess(`라이선스 정보가 수정되었습니다.`)
+        setIsEditing(false)
+        reloadData()
+      } catch (error: any) {
+        handleApiError(error)
+      }
+    } else {
       setIsEditing(false)
-      reloadData()
-    } catch (error: any) {
-      handleApiError(error)
     }
   }
 
@@ -83,6 +93,14 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
       open={open}
       setOpen={setOpen}
       title={initialData.companyName}
+      onClose={() => {
+        if (existChange) {
+          setOnQuit(() => () => setOpen(false))
+          setShowAlertModal(true)
+        } else {
+          setOpen(false)
+        }
+      }}
       headerDescription={initialData.bizno}
       primaryButton={
         !isEditing ? (
@@ -102,8 +120,12 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
             color='secondary'
             type='reset'
             onClick={() => {
-              setIsEditing(false)
-              setEditData(JSON.parse(JSON.stringify(initialData)))
+              if (existChange) {
+                setOnQuit(undefined)
+                setShowAlertModal(true)
+              } else {
+                setIsEditing(false)
+              }
             }}
           >
             취소
@@ -293,6 +315,16 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
             showDeleteModal={showDeleteModal}
             setShowDeleteModal={setShowDeleteModal}
             onDelete={handleDeleteUser}
+          />
+        )}
+        {showAlertModal && (
+          <AlertModal<LicenseResponseDtoType>
+            showAlertModal={showAlertModal}
+            setShowAlertModal={setShowAlertModal}
+            setEditData={setEditData}
+            setIsEditing={setIsEditing}
+            originalData={initialData}
+            onQuit={onQuit}
           />
         )}
       </div>

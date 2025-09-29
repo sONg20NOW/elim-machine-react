@@ -11,7 +11,8 @@ import {
   Button,
   Checkbox,
   TextField,
-  MenuItem
+  MenuItem,
+  Paper
 } from '@mui/material'
 
 // @ts-ignore
@@ -46,7 +47,9 @@ const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string 
   const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
   const [inspectionId, setInspectionId] = useState(0)
   const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
-  const [machineChecklistSubItemId, setMachineChecklistSubItemId] = useState(0)
+
+  // ! 추후 세부 필터링 추가
+  // const [machineChecklistSubItemId, setMachineChecklistSubItemId] = useState(0)
 
   // 무한스크롤 관련 Ref들
   const isLoadingRef = useRef(false)
@@ -241,27 +244,30 @@ const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string 
               </MenuItem>
             ))}
           </TextField>
-          {/* ! 이 부분 구현! */}
-          {inspectionId !== 0 && filterPics(pictures).length !== 0 && (
-            <TextField
-              label='점검항목으로 검색'
-              sx={{ width: { sx: 'full', sm: 250 } }}
-              select
-              size='small'
-              value={machineChecklistItemId}
-              onChange={e => setMachineChecklistItemId(Number(e.target.value))}
-              fullWidth
-            >
-              <MenuItem key={0} value={0}>
-                전체
-              </MenuItem>
-              {/* {[].map(v => (
-                <MenuItem key={v.mach} value={v.machineInspectionId}>
-                  {v.machineInspectionName}
-                </MenuItem>
-              ))} */}
-            </TextField>
-          )}
+          {
+            // ! 추후 구현
+            // inspectionId !== 0 && filterPics(pictures).length !== 0
+            // && (
+            //   <TextField
+            //     label='점검항목으로 검색'
+            //     sx={{ width: { sx: 'full', sm: 250 } }}
+            //     select
+            //     size='small'
+            //     value={machineChecklistItemId}
+            //     onChange={e => setMachineChecklistItemId(Number(e.target.value))}
+            //     fullWidth
+            //   >
+            //     <MenuItem key={0} value={0}>
+            //       전체
+            //     </MenuItem>
+            //     {/* {[].map(v => (
+            //       <MenuItem key={v.mach} value={v.machineInspectionId}>
+            //         {v.machineInspectionName}
+            //       </MenuItem>
+            //     ))} */}
+            //   </TextField>
+            // )
+          }
         </div>
 
         <div className={classNames('flex gap-1', { 'flex-col': isMobile })}>
@@ -308,53 +314,69 @@ const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string 
                 <ImageList cols={isMobile ? 1 : 4} rowHeight={isMobile ? 180 : 300} gap={15}>
                   {filterPics(inspectionsPic).map((pic, index: number) => {
                     return (
-                      <ImageListItem
-                        onClick={() => {
-                          // 일괄선택 활성화 시 클릭 동작
-                          if (showCheck) {
-                            if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                              setPicturesToDelete(prev => {
-                                const newList = prev.map(v => ({ ...v }))
-
-                                return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
-                              })
-                            } else {
-                              setPicturesToDelete(prev => {
-                                const newList = prev.map(v => ({ ...v }))
-
-                                return newList.filter(v => v.machinePicId !== pic.machinePicId)
-                              })
-                            }
-                          }
-
-                          // 일괄선택 비활성화 시 클릭 동작
-                          else {
-                            getInspectionByPic(pic)
-                            setSelectedPic(pic)
-                            setShowPicModal(true)
-                          }
+                      <Paper
+                        sx={{
+                          paddingTop: 9,
+                          position: 'relative',
+                          cursor: 'pointer',
+                          borderColor: 'lightgray',
+                          borderWidth: '1px'
                         }}
+                        variant='outlined'
                         key={`${pic.machinePicId}-${index}`}
-                        sx={{ cursor: 'pointer', position: 'relative' }}
                       >
-                        <img
-                          src={pic.presignedUrl}
-                          alt={pic.originalFileName}
-                          style={{
-                            width: '100%',
-                            height: '50%',
-                            objectFit: 'cover'
+                        <ImageListItem
+                          onClick={() => {
+                            // 일괄선택 활성화 시 클릭 동작
+                            if (showCheck) {
+                              if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+                                setPicturesToDelete(prev => {
+                                  const newList = prev.map(v => ({ ...v }))
+
+                                  return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
+                                })
+                              } else {
+                                setPicturesToDelete(prev => {
+                                  const newList = prev.map(v => ({ ...v }))
+
+                                  return newList.filter(v => v.machinePicId !== pic.machinePicId)
+                                })
+                              }
+                            }
+
+                            // 일괄선택 비활성화 시 클릭 동작
+                            else {
+                              getInspectionByPic(pic)
+                              setSelectedPic(pic)
+                              setShowPicModal(true)
+                            }
                           }}
-                        />
-                        <ImageListItemBar
-                          title={pic.originalFileName}
-                          subtitle={
-                            <Typography
-                              fontSize={'small'}
-                              color='lightGray'
-                            >{`${pic.machineChecklistItemName} - ${pic.machineChecklistSubItemName}`}</Typography>
-                          }
-                        />
+                        >
+                          <img
+                            src={pic.presignedUrl}
+                            alt={pic.originalFileName}
+                            style={{
+                              width: '100%',
+                              height: '50%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
+                        </ImageListItem>
+
+                        <div className='p-1'>
+                          <Typography
+                            fontSize={'medium'}
+                            fontWeight={600}
+                            color='primary.dark'
+                            textAlign={'center'}
+                          >{`${pic.machineChecklistItemName}`}</Typography>
+                          <Typography
+                            fontSize={'medium'}
+                            color='black'
+                            textAlign={'center'}
+                          >{`${pic.machineChecklistSubItemName}`}</Typography>
+                        </div>
                         {showCheck && (
                           <Checkbox
                             color='error'
@@ -366,7 +388,7 @@ const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string 
                             checked={picturesToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
                           />
                         )}
-                      </ImageListItem>
+                      </Paper>
                     )
                   })}
                 </ImageList>

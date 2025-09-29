@@ -8,7 +8,7 @@ import Navigation from '@components/layout/vertical/Navigation'
 import VerticalFooter from '@components/layout/vertical/Footer'
 
 // Config Imports
-import { i18n } from '@configs/i18n'
+// import { i18n } from '@configs/i18n'
 
 // Util Imports
 import { getMode } from '@core/utils/serverHelpers'
@@ -17,16 +17,16 @@ import ScrollToTopButton from '@/app/_components/button/ScrollToTopButton'
 import Header from '@/components/layout/vertical/Header'
 
 const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
-  const params = await props.params
+  // const params = await props.params
 
   const { children } = props
 
   // Vars
-  const direction = i18n.langDirection[params.lang]
+  // const direction = i18n.langDirection[params.lang]
   const mode = await getMode()
 
   return (
-    <Providers direction={direction}>
+    <Providers>
       <div className='flex flex- auto relative h-full'>
         <Navigation mode={mode} />
         <div className='flex flex-col w-full pb-[10px] gap-[5px] h-full'>

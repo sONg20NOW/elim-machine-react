@@ -38,6 +38,8 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
 
+  const [onQuit, setOnQuit] = useState<() => void>()
+
   const existChange = JSON.stringify(editData) !== JSON.stringify(data)
 
   const engineerId = editData.id
@@ -84,21 +86,20 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
     }
   }
 
-  const handleClose = () => {
-    if (existChange) {
-      setShowAlertModal(true)
-    } else {
-      setOpen(false)
-    }
-  }
-
   return (
     <DefaultModal
       size='sm'
       open={open}
       setOpen={setOpen}
       title={data.name}
-      onClose={handleClose}
+      onClose={() => {
+        if (existChange) {
+          setOnQuit(() => () => setOpen(false))
+          setShowAlertModal(true)
+        } else {
+          setOpen(false)
+        }
+      }}
       headerDescription={data.engineerLicenseNum}
       primaryButton={
         !isEditing ? (
@@ -119,6 +120,7 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
             type='reset'
             onClick={() => {
               if (existChange) {
+                setOnQuit(undefined)
                 setShowAlertModal(true)
               } else {
                 setIsEditing(false)
@@ -218,6 +220,7 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
             setEditData={setEditData}
             setIsEditing={setIsEditing}
             originalData={data}
+            onQuit={onQuit}
           />
         )}
       </DialogContent>

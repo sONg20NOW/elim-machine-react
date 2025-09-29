@@ -16,7 +16,7 @@ export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
 export const HEADERS = {
   // 직원관리 탭 테이블
   member: {
-    roleDescription: { label: '권한', canSort: true },
+    // roleDescription: { label: '권한', canSort: true },
     name: { label: '이름', canSort: true },
     staffNum: { label: '사번', canSort: false, hideOnMobile: true },
     companyName: { label: '소속', canSort: true },
