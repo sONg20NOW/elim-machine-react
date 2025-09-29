@@ -5,7 +5,7 @@ import { Button, IconButton, MenuItem, TextField, Tooltip, Typography } from '@m
 
 import axios from 'axios'
 
-import PictureListModal from '../innerModals/PictureListModal'
+import PictureListModal from './PictureListModal'
 import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
@@ -15,7 +15,7 @@ import AlertModal from '@/app/_components/modal/AlertModal'
 import DefaultModal from '@/app/_components/modal/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
-import { useSelectedInspectionContext } from '../../InspectionListContent'
+import { useSelectedInspectionContext } from '../InspectionListContent'
 
 interface PicTabContentProps<T> {
   editData: T

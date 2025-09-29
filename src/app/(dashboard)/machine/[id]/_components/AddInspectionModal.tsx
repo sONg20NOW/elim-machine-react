@@ -90,6 +90,7 @@ const AddInspectionModal = ({
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <CustomTextField
+            required
             select
             fullWidth
             label='분류'
@@ -111,6 +112,7 @@ const AddInspectionModal = ({
         {showSubCategory && (
           <Grid item xs={12}>
             <CustomTextField
+              required
               placeholder='종류를 선택해주세요'
               select
               fullWidth

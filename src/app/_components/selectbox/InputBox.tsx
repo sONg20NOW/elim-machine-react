@@ -1,11 +1,12 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import Grid from '@mui/material/Grid2'
 
-import { Box, Button, InputAdornment } from '@mui/material'
+import { Box, Button, InputAdornment, MenuItem } from '@mui/material'
+
+import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
@@ -21,6 +22,7 @@ interface InputBoxProps {
   onChange: (value: string) => void
   tabInfos: Record<string, InputFieldType>
   showLabel?: boolean
+  required?: boolean
 }
 
 const InputBoxContext = createContext<InputBoxProps | null>(null)
@@ -60,9 +62,32 @@ export function InputBox(props: InputBoxProps) {
 
 function InputBoxContent() {
   const props = useContext(InputBoxContext)
-  const { isEditing, tabInfos, tabFieldKey, value, onChange, showLabel } = props!
+  const { isEditing, tabInfos, tabFieldKey, value, onChange, showLabel, required } = props!
   const tabField = tabInfos[tabFieldKey]
   const disabled = props?.disabled ?? tabField?.disabled ?? false
+
+  // 회사명 옵션
+  const [companyNameOption, setCompanyNameOption] = useState<{ value: string; label: string }[]>([])
+
+  const getCompanyNameOption = useCallback(async () => {
+    try {
+      const response = await axios.get<{
+        data: { licenseIdAndNameResponseDtos: { id: number; companyName: string }[] }
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/names`)
+
+      setCompanyNameOption(
+        response.data.data.licenseIdAndNameResponseDtos.map(v => ({ value: v.companyName, label: v.companyName }))
+      )
+    } catch (error) {
+      handleApiError(error)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (tabFieldKey === 'companyName') {
+      getCompanyNameOption()
+    }
+  }, [tabFieldKey, getCompanyNameOption])
 
   // 주소 모달 상태
   const [showMapModal, setShowMapModal] = useState(false)
@@ -70,6 +95,8 @@ function InputBoxContent() {
   // 주민번호 핸들링
   const [juminNum, setJuminNum] = useState(value)
   const memberId = useContext(MemberIdContext)
+
+  const label = showLabel && tabField.label
 
   async function getJuminNum() {
     try {
@@ -128,35 +155,49 @@ function InputBoxContent() {
     case 'number':
       return (
         <CustomTextField
+          required={showLabel && required}
           slotProps={{ htmlInput: { name: tabFieldKey } }}
           type={tabField.type}
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={showLabel && tabField.label}
+          label={label}
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
     case 'multi':
       return (
-        <MultiSelectBox
-          name={tabFieldKey}
-          tabField={tabField}
+        <CustomTextField
           id={tabFieldKey}
-          label={showLabel && tabField.label}
           disabled={disabled}
+          select
+          fullWidth
+          label={label}
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
-        />
+          required={showLabel && required}
+          slotProps={{
+            select: { displayEmpty: true },
+            htmlInput: { name: name }
+          }}
+        >
+          <MenuItem value=''>전체</MenuItem>
+          {(tabFieldKey === 'companyName' ? companyNameOption : tabField?.options)?.map(option => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </CustomTextField>
       )
     case 'yn':
       return (
         <YNSelectBox
+          required={showLabel && required}
           name={tabFieldKey}
           id={tabFieldKey}
           disabled={disabled}
-          label={showLabel && tabField.label}
+          label={label}
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
@@ -164,11 +205,14 @@ function InputBoxContent() {
     case 'text':
       return (
         <CustomTextField
-          slotProps={{ htmlInput: { name: tabFieldKey } }}
+          required={showLabel && required}
+          slotProps={{
+            htmlInput: { name: tabFieldKey }
+          }}
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={showLabel && tabField.label}
+          label={label}
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
@@ -176,13 +220,14 @@ function InputBoxContent() {
     case 'long text':
       return (
         <CustomTextField
+          required={showLabel && required}
           multiline
           rows={4}
           slotProps={{ htmlInput: { name: tabFieldKey } }}
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={showLabel && tabField.label}
+          label={label}
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
@@ -191,11 +236,12 @@ function InputBoxContent() {
       return (
         <div className='relative'>
           <CustomTextField
+            required={showLabel && required}
             slotProps={{ htmlInput: { name: tabFieldKey } }}
             id={tabFieldKey}
             disabled={disabled}
             fullWidth
-            label={showLabel && tabField.label}
+            label={label}
             value={juminNum ?? ''}
             onChange={e => {
               setJuminNum(e.target.value)
@@ -212,11 +258,12 @@ function InputBoxContent() {
       return (
         <div className='relative'>
           <CustomTextField
+            required={showLabel && required}
             slotProps={{ htmlInput: { name: tabFieldKey } }}
             id={tabFieldKey}
             disabled={disabled}
             sx={{ width: { xs: '75%', sm: '100%' } }}
-            label={showLabel && tabField.label}
+            label={label}
             value={value ?? ''}
             onChange={e => onChange(e.target.value)}
             InputProps={{

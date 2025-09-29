@@ -66,6 +66,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
 
             return (
               <InputBox
+                required={key === 'name' || key === 'role'}
                 key={key}
                 tabInfos={MEMBER_INPUT_INFO.basic}
                 tabFieldKey={key}

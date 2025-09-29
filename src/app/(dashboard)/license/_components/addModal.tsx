@@ -91,7 +91,10 @@ const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
                           fontSize: 'medium'
                         }}
                       >
-                        {LICENSE_INPUT_INFO[key]?.label}
+                        <span>
+                          {LICENSE_INPUT_INFO[key]?.label}
+                          {key === 'companyName' && <sup style={{ color: 'red' }}>*</sup>}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <InputBox

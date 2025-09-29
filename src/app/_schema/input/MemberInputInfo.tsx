@@ -43,7 +43,7 @@ export const MEMBER_INPUT_INFO: memberInputType = {
     },
     note: {
       size: 'lg',
-      type: 'text',
+      type: 'long text',
       label: '비고'
     }
   },

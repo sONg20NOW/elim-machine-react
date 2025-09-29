@@ -16,6 +16,7 @@ interface MultiSelectBoxProps {
   value: string
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  required?: boolean
 }
 
 /**
@@ -38,7 +39,16 @@ interface MultiSelectBoxProps {
  * 속성의 영어 이름 (ex. companyName, officePosition, ...)
  * @returns
  */
-const MultiSelectBox = ({ label, name, tabField, id, disabled = false, value, onChange }: MultiSelectBoxProps) => {
+const MultiSelectBox = ({
+  label,
+  name,
+  tabField,
+  id,
+  disabled = false,
+  value,
+  onChange,
+  required
+}: MultiSelectBoxProps) => {
   const [companyNameOption, setCompanyNameOption] = useState<{ value: string; label: string }[]>([])
 
   const getCompanyNameOption = useCallback(async () => {
@@ -70,6 +80,7 @@ const MultiSelectBox = ({ label, name, tabField, id, disabled = false, value, on
       label={label}
       value={value ?? ''}
       onChange={onChange}
+      required={required ?? false}
       slotProps={{
         select: { displayEmpty: true },
         htmlInput: { name: name }

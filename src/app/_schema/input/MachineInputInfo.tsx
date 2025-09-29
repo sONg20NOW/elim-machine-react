@@ -116,7 +116,7 @@ const { companyName, machineProjectName } = MACHINE_INPUT_INFO
 const { beginDate, endDate, fieldBeginDate, fieldEndDate } = MACHINE_SCHEDULE_INPUT_INFO
 
 export const MACHINE_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoType, InputFieldType> = {
-  companyName: companyName!,
+  companyName: { ...companyName!, required: true },
   machineProjectName: machineProjectName!,
   beginDate: beginDate!,
   endDate: endDate!,

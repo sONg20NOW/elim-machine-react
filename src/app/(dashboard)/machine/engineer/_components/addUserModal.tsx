@@ -113,7 +113,9 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
                             fontSize: 'medium'
                           }}
                         >
-                          <span>이름</span>
+                          <span>
+                            이름<sup style={{ color: 'red' }}>*</sup>
+                          </span>
                         </TableCell>
                         <TableCell>
                           <Autocomplete

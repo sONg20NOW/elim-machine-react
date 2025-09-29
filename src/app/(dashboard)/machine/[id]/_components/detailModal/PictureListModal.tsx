@@ -36,8 +36,8 @@ import type {
   MachinePicCursorType
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import PictureZoomModal from '../../PictureZoomModal'
-import { useSelectedInspectionContext } from '../../InspectionListContent'
+import PictureZoomModal from '../PictureZoomModal'
+import { useSelectedInspectionContext } from '../InspectionListContent'
 
 type PictureListModalProps = {
   machineProjectId: string

@@ -274,7 +274,15 @@ const CustomTextField = forwardRef((props: TextFieldProps, ref) => {
       variant='filled'
       slotProps={{
         ...slotProps,
-        inputLabel: { ...slotProps?.inputLabel, shrink: true } as InputLabelProps
+        inputLabel: {
+          ...slotProps?.inputLabel,
+          shrink: true,
+
+          // required 별표 색 바꾸기
+          sx: {
+            '& .MuiFormLabel-asterisk': { color: 'red' }
+          }
+        } as InputLabelProps
       }}
     />
   )

@@ -53,7 +53,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
         </Button>
       }
       secondaryButton={
-        <Button variant='tonal' color='secondary' type='reset' onClick={() => setOpen(false)}>
+        <Button variant='contained' color='secondary' type='reset' onClick={() => setOpen(false)}>
           취소
         </Button>
       }
@@ -77,7 +77,10 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
                         fontSize: 'medium'
                       }}
                     >
-                      {MACHINE_CREATE_INFO[key]?.label}
+                      <span>
+                        {MACHINE_CREATE_INFO[key]?.label}
+                        {key === 'companyName' && <sup style={{ fontSize: '16px', color: 'red' }}>*</sup>}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <InputBox
