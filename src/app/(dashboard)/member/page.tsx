@@ -44,7 +44,7 @@ export default function MemberPage() {
   const [error, setError] = useState(false)
 
   // 로딩이 끝나고 에러가 없으면 not disabled
-  const disabled = loading || error || data.length === 0
+  const disabled = loading || error
 
   // 전체 데이터 개수 => fetching한 데이터에서 추출
   const [totalCount, setTotalCount] = useState(0)
@@ -233,7 +233,11 @@ export default function MemberPage() {
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<i className='tabler-reload' />}
-          onClick={() => setFilters(MemeberInitialFilters)}
+          onClick={() => {
+            setFilters(MemeberInitialFilters)
+            setName('')
+            setRegion('')
+          }}
           className='max-sm:is-full absolute right-8 top-8 hide-on-mobile'
           disabled={disabled}
         >

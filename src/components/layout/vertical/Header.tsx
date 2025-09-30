@@ -10,6 +10,7 @@ import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 import SearchBar from '@/app/_components/SearchBar'
 import { auth } from '@/lib/auth'
+import { handleApiError } from '@/utils/errorHandler'
 
 export default function Header() {
   const router = useRouter()
@@ -20,9 +21,10 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
+      // ! CSRF token 같이 넣어서 POST
       await auth.post(`/api/authentication/web/logout`)
     } catch (e) {
-      console.error('로그아웃 실패', e)
+      handleApiError(e)
     } finally {
       localStorage.removeItem('accessToken')
       router.push('/login')
@@ -110,7 +112,7 @@ export default function Header() {
               </MenuSection>
               <MenuSection label='문의'>
                 <MenuItem
-                  href={``}
+                  href={`/board/notice`}
                   icon={<i className='tabler-speakerphone' />}
                   className='ps-2 pe-3 bg-white '
                   style={{
@@ -121,7 +123,7 @@ export default function Header() {
                   {'공지사항'}
                 </MenuItem>
                 <MenuItem
-                  href={``}
+                  href={`/board/files`}
                   icon={<i className='tabler-paperclip' />}
                   className='ps-2 pe-3 bg-white '
                   style={{
@@ -132,7 +134,7 @@ export default function Header() {
                   {'자료실'}
                 </MenuItem>
                 <MenuItem
-                  href={``}
+                  href={`/board/faq`}
                   icon={<i className='tabler-clipboard-check' />}
                   className='ps-2 pe-3 bg-white '
                   style={{
@@ -143,7 +145,7 @@ export default function Header() {
                   {'FAQ'}
                 </MenuItem>
                 <MenuItem
-                  href={``}
+                  href={`/board/qna`}
                   icon={<i className='tabler-zoom-question' />}
                   className='ps-2 pe-3 bg-white '
                   style={{
@@ -167,7 +169,7 @@ export default function Header() {
                   {'직원관리'}
                 </MenuItem>
                 <MenuItem
-                  href={``}
+                  href={`/loginlog`}
                   icon={<i className='tabler-history' />}
                   className='ps-2 pe-3 bg-white '
                   style={{

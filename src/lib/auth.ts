@@ -13,7 +13,8 @@ export async function login(email: string, password: string) {
   try {
     const res = await axios.post<{ data: LoginResponseDtoType; code: number }>(
       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/login`,
-      { email, password }
+      { email, password },
+      { withCredentials: true }
     )
 
     if (res.data.code === 200) {

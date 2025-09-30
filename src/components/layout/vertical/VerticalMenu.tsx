@@ -103,16 +103,16 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           </MenuItem>
         </MenuSection>
         <MenuSection label='문의'>
-          <MenuItem href={``} icon={<i className='tabler-speakerphone' />}>
+          <MenuItem href={`/board/notice`} icon={<i className='tabler-speakerphone' />}>
             {'공지사항'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-paperclip' />}>
+          <MenuItem href={`/board/files`} icon={<i className='tabler-paperclip' />}>
             {'자료실'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-clipboard-check' />}>
+          <MenuItem href={`/board/faq`} icon={<i className='tabler-clipboard-check' />}>
             {'FAQ'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-zoom-question' />}>
+          <MenuItem href={`/board/qna`} icon={<i className='tabler-zoom-question' />}>
             {'일대일 문의'}
           </MenuItem>
         </MenuSection>
@@ -120,7 +120,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           <MenuItem href={`/member`} icon={<i className='tabler-users-plus' />}>
             {'직원관리'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-history' />}>
+          <MenuItem href={`/loginlog`} icon={<i className='tabler-history' />}>
             {'로그인 기록'}
           </MenuItem>
         </MenuSection>
