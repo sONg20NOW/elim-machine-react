@@ -133,6 +133,7 @@ export default function PicTabContent({
     [machineProjectId, machineInspectionId, knownDfs, refetchSelectedInspection]
   )
 
+  // 미흡사항 클립보드 클릭 시 나오는 모달
   function DeficiencyModal() {
     const [isEditingDf, setIsEditingDf] = useState(false)
     const [showDfAlertModal, setShowDfAlertModal] = useState(false)
@@ -147,9 +148,11 @@ export default function PicTabContent({
       <DefaultModal
         size='sm'
         title={
-          selectedInspection!.machineChecklistItemsWithPicCountResponseDtos.find(
-            cate => cate.machineInspectionChecklistItemResultBasicResponseDto.id === selectedDfId
-          )?.machineChecklistItemName ?? '미흡사항'
+          <Typography variant='h3' fontWeight={600}>
+            {selectedInspection!.machineChecklistItemsWithPicCountResponseDtos.find(
+              cate => cate.machineInspectionChecklistItemResultBasicResponseDto.id === selectedDfId
+            )?.machineChecklistItemName ?? '미흡사항'}
+          </Typography>
         }
         open={showDfModal}
         setOpen={setShowDfModal}
@@ -201,31 +204,43 @@ export default function PicTabContent({
         {selectedDfId && knownDfs.find(d => d.id === selectedDfId) ? (
           <div className='flex flex-col gap-4'>
             <div className='flex flex-col gap-1'>
-              <span className='font-bold text-base ps-1'>미흡사항</span>
+              <Typography variant='h5'>미흡사항</Typography>
               {isEditingDf ? (
                 <TextField
-                  minRows={5}
+                  minRows={3}
                   multiline
                   slotProps={{ input: { sx: { padding: 4 } } }}
                   value={dfEditData?.deficiencies ?? ''}
                   onChange={e => setDfEditData(prev => ({ ...prev, deficiencies: e.target.value }))}
                 />
               ) : (
-                <span className='border solid min-h-40 rounded-lg p-4'>{selectedDf?.deficiencies ?? ''}</span>
+                <Typography sx={{ border: 'solid 1px lightgray', borderRadius: 1, padding: 3, whiteSpace: 'pre-line' }}>
+                  {selectedDf?.deficiencies ?? ''}
+                </Typography>
               )}
             </div>
             <div className='flex flex-col gap-1'>
-              <span className='font-bold text-base ps-1'>조치필요사항</span>
+              <Typography variant='h5'>조치필요사항</Typography>
               {isEditingDf ? (
                 <TextField
-                  minRows={5}
+                  minRows={3}
                   multiline
                   slotProps={{ input: { sx: { padding: 4 } } }}
                   value={dfEditData?.actionRequired ?? ''}
                   onChange={e => setDfEditData(prev => ({ ...prev, actionRequired: e.target.value }))}
                 />
               ) : (
-                <span className='border solid min-h-40 rounded-lg p-4'>{selectedDf?.actionRequired ?? ''}</span>
+                <Typography
+                  sx={{
+                    border: 'solid 1px lightgray',
+                    borderRadius: 1,
+                    padding: 3,
+                    whiteSpace: 'pre-line',
+                    color: selectedDf?.actionRequired ? '' : 'lightgray'
+                  }}
+                >
+                  {selectedDf?.actionRequired ?? '내용 없음'}
+                </Typography>
               )}
             </div>
             {showDfAlertModal && selectedDf && (
@@ -363,14 +378,16 @@ export default function PicTabContent({
                     }}
                     variant='standard'
                     select
-                    SelectProps={{
-                      sx: {
-                        '.MuiSelect-select': {
-                          py: '1px', // 여기서 padding 제거
-                          px: '0 !important'
-                        }
-                      },
-                      IconComponent: () => null
+                    slotProps={{
+                      select: {
+                        sx: {
+                          '.MuiSelect-select': {
+                            py: '1px', // 여기서 padding 제거
+                            px: '0 !important'
+                          }
+                        },
+                        IconComponent: () => null
+                      }
                     }}
                   >
                     {picCateInspectionStatusOption.map(option => (

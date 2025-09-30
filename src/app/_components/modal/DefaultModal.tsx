@@ -4,6 +4,8 @@
 import type { ReactNode } from 'react'
 
 // MUI Imports
+import React from 'react'
+
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogActions from '@mui/material/DialogActions'
@@ -20,7 +22,7 @@ type DefaultModalProps = {
   value?: string
   open: boolean
   setOpen: (open: boolean) => void
-  title: string
+  title: string | React.ReactElement
   headerDescription?: string
   children?: ReactNode
   primaryButton?: ReactNode
@@ -100,12 +102,14 @@ export default function DefaultModal({
           }
         )}
       >
-        {title}
-        {headerDescription && (
-          <Typography component='span' className='flex flex-col text-center'>
-            {headerDescription}
-          </Typography>
-        )}
+        <div>
+          {title}
+          {headerDescription && (
+            <Typography component='span' className='flex flex-col text-center'>
+              {headerDescription}
+            </Typography>
+          )}
+        </div>
       </DialogTitle>
 
       {/* ✅ 스크롤 처리되는 본문 */}
