@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { useForm } from 'react-hook-form'
 
-import { Button, Divider, TextField, Typography } from '@mui/material'
+import { Button, Divider, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import { ToastContainer } from 'react-toastify'
 
@@ -25,6 +25,9 @@ export default function LoginPage() {
 
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
 
+  const theme = useTheme()
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
+
   const {
     register,
     handleSubmit,
@@ -37,7 +40,11 @@ export default function LoginPage() {
     const response = await login(email, password)
 
     if (response === 200) {
-      router.push('/')
+      if (isTablet) {
+        router.push('/check')
+      } else {
+        router.push('/')
+      }
     }
   }
 

@@ -1,23 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Drawer, IconButton, AppBar, Button, Toolbar, useMediaQuery, Box, useTheme } from '@mui/material'
+import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography } from '@mui/material'
 
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 import SearchBar from '@/app/_components/SearchBar'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
+import { isTabletContext } from '@/app/_components/ProtectedPage'
 
 export default function Header() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const theme = useTheme()
+  const [keyword, setKeyword] = useState<string>()
 
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useContext(isTabletContext)
+
+  const username = '나중에이거진짜유저이름으로바꿔야돼요'
 
   const handleLogout = async () => {
     try {
@@ -31,25 +34,89 @@ export default function Header() {
     }
   }
 
+  useEffect(() => {
+    if (keyword) {
+      localStorage.setItem('headerKeyword', keyword)
+      const searchBar = document.getElementById('검색어를 입력하세요') as HTMLInputElement
+
+      searchBar.value = ''
+      setKeyword(undefined)
+
+      router.push('/machine')
+    }
+  }, [keyword, router])
+
   return (
     <AppBar position='static'>
-      <Toolbar className='flex  justify-between'>
+      <Toolbar className='flex justify-between'>
         <div className='flex gap-4'>
-          {isMobile && (
+          {isTablet && (
             <IconButton edge='end' onClick={() => setOpen(true)}>
               <i className='tabler-menu-2 text-white' />
             </IconButton>
           )}
-          <SearchBar placeholder='검색어를 입력하세요' setSearchKeyword={() => null} />
+          <SearchBar placeholder='검색어를 입력하세요' setSearchKeyword={name => setKeyword(name)} />
         </div>
-        <Button color='inherit' onClick={() => handleLogout()}>
-          Logout
-        </Button>
+        {!isTablet && (
+          <div className='flex gap-5 items-center overflow-visible'>
+            <Typography color='white' onClick={() => console.log(document.cookie.split(';'))}>
+              반갑습니다, {username}
+            </Typography>
+            <Button
+              size='small'
+              sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
+              variant='contained'
+              onClick={() => handleLogout()}
+            >
+              <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
+            </Button>
+          </div>
+        )}
       </Toolbar>
       {/* 모바일: Drawer 안에 Navigation */}
-      {isMobile && (
-        <Drawer anchor='left' open={open} onClose={() => setOpen(false)} ModalProps={{ keepMounted: true }}>
-          <Box sx={{ width: 280, paddingTop: 5, paddingBottom: 5 }}>
+      {isTablet && (
+        <Drawer
+          slotProps={{ paper: { sx: { width: '30%' } } }}
+          anchor='left'
+          open={open}
+          onClose={() => setOpen(false)}
+          ModalProps={{ keepMounted: true }}
+        >
+          <Box sx={{ paddingBottom: 5 }}>
+            {isTablet && (
+              <Box
+                sx={{ backgroundColor: 'primary.dark', mb: 5 }}
+                className='flex justify-between items-center overflow-visible p-3'
+              >
+                <div className='flex flex-col gap-1'>
+                  <Typography color='white' onClick={() => console.log(document.cookie.split(';'))}>
+                    반갑습니다,
+                  </Typography>
+                  <Typography
+                    maxWidth={3}
+                    sx={{
+                      overflow: 'hidden', // width 넘으면 숨김
+                      textOverflow: 'ellipsis', // 넘는 텍스트는 ... 처리
+                      whiteSpace: 'nowrap', // 줄바꿈 방지
+                      maxWidth: 120
+                    }}
+                    color='white'
+                    onClick={() => console.log(document.cookie.split(';'))}
+                  >
+                    {username}
+                  </Typography>
+                </div>
+
+                <Button
+                  size='small'
+                  sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
+                  variant='contained'
+                  onClick={() => handleLogout()}
+                >
+                  <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
+                </Button>
+              </Box>
+            )}
             <Menu renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}>
               <MenuItem
                 href={`/calendar`}

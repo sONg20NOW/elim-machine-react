@@ -1,14 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { CircularProgress, Paper } from '@mui/material'
+import { CircularProgress, Paper, useMediaQuery, useTheme } from '@mui/material'
 
-export default function ProtectedPage({ children }: { children: React.ReactNode }) {
+export const isTabletContext = createContext<boolean | null>(null)
+
+export default function ProtectedPage({ children, isNotWeb }: { children: React.ReactNode; isNotWeb?: boolean }) {
   const router = useRouter()
   const [hasToken, setHasToken] = useState(false)
+
+  const theme = useTheme()
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
@@ -21,8 +26,14 @@ export default function ProtectedPage({ children }: { children: React.ReactNode 
     }
   }, [router])
 
+  useEffect(() => {
+    if (isNotWeb) {
+      router.replace('/check')
+    }
+  }, [isNotWeb, router])
+
   return (
-    <>
+    <isTabletContext.Provider value={isTablet}>
       {hasToken ? (
         children
       ) : (
@@ -41,6 +52,6 @@ export default function ProtectedPage({ children }: { children: React.ReactNode 
           <CircularProgress />
         </Paper>
       )}
-    </>
+    </isTabletContext.Provider>
   )
 }
