@@ -20,7 +20,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      await auth.post('/api/auth/web/logout')
+      await auth.post(`/api/authentication/web/logout`)
     } catch (e) {
       console.error('로그아웃 실패', e)
     } finally {

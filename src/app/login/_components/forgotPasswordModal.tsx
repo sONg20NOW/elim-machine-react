@@ -5,7 +5,12 @@ import { useState } from 'react'
 
 import { useForm } from 'react-hook-form'
 
+import { Button, TextField, Typography } from '@mui/material'
+
+import axios from 'axios'
+
 import DefaultModal from '@/app/_components/modal/DefaultModal'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 type ForgotForm = { email: string }
 type VerifyForm = { email: string; code: string }
@@ -25,89 +30,121 @@ export default function ForgotPasswordPage({
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<any>()
+  } = useForm<{ email: string; code: string; password: string }>()
 
   // 1단계: 이메일 입력
   const handleForgot = async (data: ForgotForm) => {
     try {
-      await axios.post('/api/auth/forgot-password', { email: data.email })
+      await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/forgot-password`, {
+        email: data.email
+      })
       setEmail(data.email)
       setStep('verify')
-      alert('인증 코드가 이메일로 발송되었습니다.')
-    } catch (e: any) {
-      alert(e.response?.data?.message || '비밀번호 찾기 실패')
+      handleSuccess('인증 코드가 이메일로 발송되었습니다.')
+    } catch (e) {
+      handleApiError(e)
     }
   }
 
   // 2단계: 코드 검증
   const handleVerify = async (data: VerifyForm) => {
     try {
-      await axios.post('/api/auth/verify-code', { email, code: data.code })
+      await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/verify-code`, {
+        email,
+        code: data.code
+      })
       setStep('reset')
-      alert('인증 코드가 확인되었습니다. 새 비밀번호를 입력하세요.')
-    } catch (e: any) {
-      alert(e.response?.data?.message || '코드 검증 실패')
+      handleSuccess('인증 코드가 확인되었습니다. 새 비밀번호를 입력하세요.')
+    } catch (e) {
+      handleApiError(e)
     }
   }
 
   // 3단계: 비밀번호 재설정
   const handleReset = async (data: ResetForm) => {
     try {
-      await axios.post('/api/auth/reset-password', { email, password: data.password })
-      alert('비밀번호가 성공적으로 변경되었습니다. 로그인해주세요.')
+      await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/reset-password`, {
+        email,
+        password: data.password
+      })
+      handleSuccess('비밀번호가 성공적으로 변경되었습니다. 로그인해주세요.')
       window.location.href = '/login'
-    } catch (e: any) {
-      alert(e.response?.data?.message || '비밀번호 재설정 실패')
+    } catch (e) {
+      handleApiError(e)
     }
   }
 
   return (
-    <DefaultModal size='xs' open={open} setOpen={setOpen} title='비밀번호 찾기'>
+    <DefaultModal
+      size='xs'
+      open={open}
+      setOpen={setOpen}
+      title={
+        <Typography variant='h5' sx={{ fontWeight: 600 }}>
+          {{ forgot: '비밀번호 찾기', verify: '인증 코드 확인', reset: '새 비밀번호 설정' }[step]}
+        </Typography>
+      }
+    >
       <div className='flex justify-center items-center'>
         {step === 'forgot' && (
-          <form onSubmit={handleSubmit(handleForgot)}>
-            <input
-              type='email'
-              placeholder='이메일'
-              {...register('email', { required: '이메일을 입력하세요' })}
-              className='border p-2 w-full mb-2'
-            />
-            {errors.email && <p className='text-red-500'>{errors.email.message}</p>}
-            <button type='submit' disabled={isSubmitting} className='bg-blue-500 text-white w-full py-2 rounded'>
-              인증 코드 받기
-            </button>
+          <form onSubmit={handleSubmit(handleForgot)} className='flex flex-col gap-3 items-start'>
+            <div className='flex flex-col gap-1'>
+              <TextField
+                type='email'
+                placeholder='이메일'
+                {...register('email', { required: '이메일을 입력하세요' })}
+                slotProps={{ root: { sx: { minWidth: '300px' } }, htmlInput: { sx: { py: 1.5 } } }}
+              />
+              {errors.email && <Typography className='text-red-500'>{errors.email.message?.toString()}</Typography>}
+            </div>
+
+            <Button type='submit' disabled={isSubmitting} variant='contained' sx={{ width: 'fit-content' }}>
+              {!isSubmitting ? '인증 코드 받기' : '코드 받는 중...'}
+            </Button>
           </form>
         )}
 
         {step === 'verify' && (
-          <form onSubmit={handleSubmit(handleVerify)}>
-            <h1 className='text-lg font-bold mb-4'>인증 코드 확인</h1>
-            <input
-              type='text'
-              placeholder='인증 코드'
-              {...register('code', { required: '코드를 입력하세요' })}
-              className='border p-2 w-full mb-2'
-            />
-            {errors.code && <p className='text-red-500'>{errors.code.message}</p>}
-            <button type='submit' disabled={isSubmitting} className='bg-green-500 text-white w-full py-2 rounded'>
+          <form onSubmit={handleSubmit(handleVerify)} className='flex flex-col gap-3 items-start'>
+            <div className='flex flex-col gap-1'>
+              <TextField
+                type='text'
+                placeholder='인증 코드'
+                {...register('code', { required: '코드를 입력하세요' })}
+                slotProps={{ root: { sx: { minWidth: '300px' } }, htmlInput: { sx: { py: 1.5 } } }}
+              />
+              {errors.code && <Typography className='text-red-500'>{errors.code.message?.toString()}</Typography>}
+            </div>
+            <Button
+              type='submit'
+              disabled={isSubmitting}
+              variant='contained'
+              sx={{ width: 'fit-content', backgroundColor: 'green' }}
+            >
               확인
-            </button>
+            </Button>
           </form>
         )}
 
         {step === 'reset' && (
-          <form onSubmit={handleSubmit(handleReset)}>
-            <h1 className='text-lg font-bold mb-4'>새 비밀번호 설정</h1>
-            <input
-              type='password'
-              placeholder='새 비밀번호'
-              {...register('password', { required: '비밀번호를 입력하세요' })}
-              className='border p-2 w-full mb-2'
-            />
-            {errors.password && <p className='text-red-500'>{errors.password.message}</p>}
-            <button type='submit' disabled={isSubmitting} className='bg-purple-500 text-white w-full py-2 rounded'>
+          <form onSubmit={handleSubmit(handleReset)} className='flex flex-col gap-3 items-start'>
+            <div className='flex flex-col gap-1'>
+              <TextField
+                type='password'
+                placeholder='새 비밀번호'
+                {...register('password', { required: '비밀번호를 입력하세요' })}
+                slotProps={{ root: { sx: { minWidth: '300px' } }, htmlInput: { sx: { py: 1.5 } } }}
+              />
+              {errors.password && <p className='text-red-500'>{errors.password.message?.toString()}</p>}
+            </div>
+            <Button
+              type='submit'
+              disabled={isSubmitting}
+              variant='contained'
+              sx={{ width: 'fit-content', backgroundColor: 'purple' }}
+            >
               비밀번호 변경
-            </button>
+            </Button>
           </form>
         )}
       </div>

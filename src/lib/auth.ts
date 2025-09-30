@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-
 import axios from 'axios'
 
 import type { LoginResponseDtoType } from '@/app/_type/types'
@@ -10,19 +8,23 @@ export const auth = axios.create({
   withCredentials: true // 👈 쿠키(RefreshToken) 주고받기 위해 필요
 })
 
-// 로그인 함수 (로컬 스토리지에 accesstoken 저장)
+// 로그인 함수 (클라이언트 컴포넌트) (로컬 스토리지에 accesstoken 저장)
 export async function login(email: string, password: string) {
   try {
-    const res = await axios.post<{ data: LoginResponseDtoType; code: number }>('/auth/web/login', { email, password })
-
-    console.log(res)
+    const res = await axios.post<{ data: LoginResponseDtoType; code: number }>(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/login`,
+      { email, password }
+    )
 
     if (res.data.code === 200) {
       const accessToken = res.data.data.tokenResponseDto.accessToken // JSON body에서 가져옴
 
+      // console.log(atob(accessToken))
+
       localStorage.setItem('accessToken', accessToken)
       handleSuccess('로그인에 성공했습니다.')
-      redirect('/')
+
+      return res.data.code
     } else {
       throw new Error()
     }
@@ -37,6 +39,8 @@ auth.interceptors.request.use(config => {
 
   if (token) {
     config.headers!.Authorization = `Bearer ${token}`
+  } else {
+    throw new Error('there is no access token!')
   }
 
   return config

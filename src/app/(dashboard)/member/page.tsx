@@ -9,8 +9,6 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import { toast } from 'react-toastify'
-
 // Component Imports
 import axios from 'axios'
 
@@ -26,13 +24,14 @@ import type {
   memberPageDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
-import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { auth } from '@/lib/auth'
+import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 
 export default function MemberPage() {
   // 데이터 리스트
@@ -105,8 +104,11 @@ export default function MemberPage() {
       queryParams.set('size', size.toString())
 
       // axios GET 요청
-      const response = await axios.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members?${queryParams.toString()}`
+      // const response = await axios.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
+      //   `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members?${queryParams.toString()}`
+      // )
+      const response = await auth.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
+        `/api/members?${queryParams.toString()}`
       )
 
       const result = response.data.data
@@ -131,17 +133,25 @@ export default function MemberPage() {
 
   // 사용자 선택 핸들러 (디테일 모달)
   const handleUserClick = async (user: memberPageDtoType) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${user?.memberId}`, {
-      method: 'GET'
-    })
+    // const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${user?.memberId}`, {
+    //   method: 'GET'
+    // })
 
-    const data = await response.json()
+    // const data = await response.json()
 
-    if (response.ok) {
-      setSelectedUser(data.data)
+    // if (response.ok) {
+    //   setSelectedUser(data.data)
+    //   setUserDetailModalOpen(true)
+    // } else {
+    //   toast.error(data.message)
+    // }
+    try {
+      const response = await auth.get<{ data: memberDetailDtoType }>(`/api/members/${user?.memberId}`)
+
+      setSelectedUser(response.data.data)
       setUserDetailModalOpen(true)
-    } else {
-      toast.error(data.message)
+    } catch (error) {
+      handleApiError(error)
     }
   }
 
