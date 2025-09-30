@@ -31,6 +31,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/app/_components/table/BasicTable'
 import AddInspectionModal from './AddInspectionModal'
 import { ListsContext } from '../page'
+import PictureListModal from './detailModal/PictureListModal'
 
 export const SelectedInspectionContext = createContext<{
   selectedInspection: MachineInspectionDetailResponseDtoType
@@ -56,7 +57,8 @@ export const useSelectedInspectionContext = () => {
 const InspectionListContent = ({ machineProjectId }: { machineProjectId: string }) => {
   // 모달 상태
   const [open, setOpen] = useState(false)
-  const [addInspectionModalOpen, setAddInspectionModalOpen] = useState(false)
+  const [showAddModalOpen, setShowAddModalOpen] = useState(false)
+  const [showPictureListModal, setShowPictureListModal] = useState(false)
 
   // 데이터 상태
   const [filteredInspectionList, setFilteredInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
@@ -91,13 +93,14 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   // 테이블 행 클릭 시 초기 동작하는 함수
   const handleSelectInspection = useCallback(
-    async (machine: MachineInspectionPageResponseDtoType) => {
+    async (machine: MachineInspectionPageResponseDtoType, pictureClick?: boolean) => {
       try {
         const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
           `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${machine?.machineInspectionId}`
         )
 
         setSelectedInspection(response.data.data)
+        if (pictureClick) return
         setOpen(true)
       } catch (error) {
         handleApiError(error)
@@ -172,7 +175,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   useEffect(() => {
     getFilteredInspectionList()
-  }, [getFilteredInspectionList, open, addInspectionModalOpen])
+  }, [getFilteredInspectionList, open, showAddModalOpen])
 
   //  체크 핸들러 (다중선택)
   const handleCheckEngineer = (machine: MachineInspectionPageResponseDtoType) => {
@@ -353,7 +356,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           <Button
             variant='contained'
             startIcon={<i className='tabler-plus' />}
-            onClick={() => setAddInspectionModalOpen(true)}
+            onClick={() => setShowAddModalOpen(true)}
             className='max-sm:is-full'
             disabled={disabled}
           >
@@ -378,6 +381,10 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
         isChecked={isChecked}
         handleCheckItem={handleCheckEngineer}
         handleCheckAllItems={handleCheckAllEngineers}
+        onClickPicCount={(machine: MachineInspectionPageResponseDtoType) => {
+          handleSelectInspection(machine, true)
+          setShowPictureListModal(true)
+        }}
       />
 
       {/* 페이지네이션 */}
@@ -415,13 +422,29 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           <MachineDetailModal machineProjectId={machineProjectId} open={open} setOpen={setOpen} />
         </SelectedInspectionContext.Provider>
       )}
-      {addInspectionModalOpen && (
+      {showAddModalOpen && (
         <AddInspectionModal
           getFilteredInspectionList={getFilteredInspectionList}
-          open={addInspectionModalOpen}
-          setOpen={setAddInspectionModalOpen}
+          open={showAddModalOpen}
+          setOpen={setShowAddModalOpen}
           machineProjectId={machineProjectId}
         />
+      )}
+      {selectedInspection && (
+        <SelectedInspectionContext.Provider value={{ selectedInspection, refetchSelectedInspection }}>
+          <PictureListModal
+            machineProjectId={machineProjectId}
+            open={showPictureListModal}
+            setOpen={setShowPictureListModal}
+            checklistItems={selectedInspection?.machineChecklistItemsWithPicCountResponseDtos ?? []}
+            totalPicCount={
+              selectedInspection?.machineChecklistItemsWithPicCountResponseDtos.reduce(
+                (sum, value) => sum + value.totalMachinePicCount,
+                0
+              ) ?? 0
+            }
+          />
+        </SelectedInspectionContext.Provider>
       )}
     </div>
   )

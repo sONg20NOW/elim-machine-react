@@ -29,7 +29,7 @@ interface BasicTableProps<T> {
   isChecked?: (item: T) => boolean
   handleCheckItem?: (item: T) => void
   handleCheckAllItems?: (checked: boolean) => void
-  onClickPicCount?: () => void
+  onClickPicCount?: (row: T) => void
 }
 
 /**
@@ -210,8 +210,11 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     >
                       {/* 사진의 경우 클릭 가능하도록 */}
                       <Typography
-                        onClick={() => {
-                          if (key === 'machinePicCount' && onClickPicCount) onClickPicCount()
+                        onClick={e => {
+                          if (key === 'machinePicCount' && onClickPicCount) {
+                            e.stopPropagation()
+                            onClickPicCount(info)
+                          }
                         }}
                         sx={{
                           ...(key === 'machinePicCount' && {
