@@ -309,6 +309,81 @@ const PictureListModal = ({
     }
   }, [machineProjectId, picturesToDelete, selectedSubItem, refetchSelectedInspection])
 
+  // 사진 카드 컴포넌트
+  function PictureCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
+    return (
+      <Paper
+        key={pic.machinePicId}
+        elevation={3}
+        sx={{
+          p: 1,
+          position: 'relative',
+          cursor: 'pointer',
+          border: '1px solid lightgray',
+          m: 1,
+          ':hover': { boxShadow: 4 }
+        }}
+      >
+        <ImageListItem
+          onClick={() => {
+            if (showCheck) {
+              if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+                setPicturesToDelete(prev => [...prev, { machinePicId: pic.machinePicId, version: pic.version }])
+              } else {
+                setPicturesToDelete(prev => prev.filter(v => v.machinePicId !== pic.machinePicId))
+              }
+            } else {
+              setSelectedPic(pic)
+              setShowPicModal(true)
+            }
+          }}
+        >
+          <img
+            src={pic.presignedUrl}
+            alt={pic.originalFileName}
+            style={{ width: '100%', height: '50%', objectFit: 'cover' }}
+          />
+          <ImageListItemBar title={pic.originalFileName} sx={{ textAlign: 'center' }} />
+        </ImageListItem>
+        {showCheck && (
+          <Checkbox
+            color='error'
+            sx={{ position: 'absolute', left: 0, top: 0 }}
+            checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
+          />
+        )}
+      </Paper>
+    )
+  }
+
+  // 미리보기 사진 카드 컴포넌트
+  function PicturePreviewCard({ file, index }: { file: File; index: number }) {
+    return (
+      <Paper
+        elevation={3}
+        sx={{
+          p: 1,
+          position: 'relative',
+          border: '1px solid lightgray',
+          m: 1,
+          ':hover': { boxShadow: 4 }
+        }}
+      >
+        <ImageListItem>
+          <img
+            src={URL.createObjectURL(file)}
+            alt={file.name}
+            style={{ width: '100%', height: '50%', objectFit: 'cover' }}
+          />
+          <ImageListItemBar title={file.name} sx={{ textAlign: 'center' }} />
+        </ImageListItem>
+        <IconButton sx={{ position: 'absolute', right: 0, top: 0 }} onClick={() => removeFile(index)}>
+          <i className='tabler-x text-xl text-error' />
+        </IconButton>
+      </Paper>
+    )
+  }
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth disableEnforceFocus disableAutoFocus>
       <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -318,7 +393,7 @@ const PictureListModal = ({
             점검항목 선택
           </Typography>
           <TextField
-            inputProps={{ sx: { display: 'flex', alignItems: 'center', gap: 1 } }}
+            slotProps={{ htmlInput: { sx: { display: 'flex', alignItems: 'center', gap: 1 } } }}
             size='small'
             fullWidth
             select
@@ -332,7 +407,7 @@ const PictureListModal = ({
             <MenuItem value={0}>
               <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>전체</Typography>
               <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
-                {totalPicCount && `(${totalPicCount})`}
+                {totalPicCount ? `(${totalPicCount})` : ''}
               </Typography>
             </MenuItem>
             {checklistItems.map(item => (
@@ -352,7 +427,7 @@ const PictureListModal = ({
             하위항목 선택
           </Typography>
           <TextField
-            inputProps={{ sx: { display: 'flex', alignItems: 'center', gap: 1 } }}
+            slotProps={{ htmlInput: { sx: { display: 'flex', alignItems: 'center', gap: 1 } } }}
             size='small'
             fullWidth
             select
@@ -451,53 +526,8 @@ const PictureListModal = ({
                             # {item.machineChecklistItemName}
                           </Typography>
                           <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
-                            {picsByItem.map(pic => (
-                              <Paper
-                                key={pic.machinePicId}
-                                elevation={3}
-                                sx={{
-                                  p: 1,
-                                  position: 'relative',
-                                  cursor: 'pointer',
-                                  border: '1px solid lightgray',
-                                  m: 1,
-                                  ':hover': { boxShadow: 4 }
-                                }}
-                              >
-                                <ImageListItem
-                                  onClick={() => {
-                                    if (showCheck) {
-                                      if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                                        setPicturesToDelete(prev => [
-                                          ...prev,
-                                          { machinePicId: pic.machinePicId, version: pic.version }
-                                        ])
-                                      } else {
-                                        setPicturesToDelete(prev =>
-                                          prev.filter(v => v.machinePicId !== pic.machinePicId)
-                                        )
-                                      }
-                                    } else {
-                                      setSelectedPic(pic)
-                                      setShowPicModal(true)
-                                    }
-                                  }}
-                                >
-                                  <img
-                                    src={pic.presignedUrl}
-                                    alt={pic.originalFileName}
-                                    style={{ width: '100%', height: '50%', objectFit: 'cover' }}
-                                  />
-                                  <ImageListItemBar title={pic.originalFileName} sx={{ textAlign: 'center' }} />
-                                </ImageListItem>
-                                {showCheck && (
-                                  <Checkbox
-                                    color='error'
-                                    sx={{ position: 'absolute', left: 0, top: 0 }}
-                                    checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
-                                  />
-                                )}
-                              </Paper>
+                            {picsByItem.map((pic, idx) => (
+                              <PictureCard key={idx} pic={pic} />
                             ))}
                           </ImageList>
                         </Box>
@@ -546,74 +576,7 @@ const PictureListModal = ({
                           </Typography>
                           <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
                             {picBySubItems.map((pic, idx) => (
-                              <Paper
-                                sx={{
-                                  paddingTop: 9,
-                                  position: 'relative',
-                                  cursor: 'pointer',
-                                  borderColor: 'lightgray',
-                                  borderWidth: '1px',
-                                  margin: 2,
-                                  ':hover': {
-                                    boxShadow: '24'
-                                  }
-                                }}
-                                elevation={3}
-                                key={`${pic.machinePicId}`}
-                              >
-                                <ImageListItem
-                                  onClick={() => {
-                                    if (showCheck) {
-                                      if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                                        setPicturesToDelete(prev => {
-                                          const newList = prev.map(v => ({ ...v }))
-
-                                          return newList.concat({
-                                            machinePicId: pic.machinePicId,
-                                            version: pic.version
-                                          })
-                                        })
-                                      } else {
-                                        setPicturesToDelete(prev => {
-                                          const newList = prev.map(v => ({ ...v }))
-
-                                          return newList.filter(v => v.machinePicId !== pic.machinePicId)
-                                        })
-                                      }
-                                    } else {
-                                      setSelectedPic(pic)
-                                      setShowPicModal(true)
-                                    }
-                                  }}
-                                  key={`${pic.machinePicId}-${idx}`}
-                                  sx={{ mb: 2 }}
-                                >
-                                  <img
-                                    src={pic.presignedUrl}
-                                    alt={pic.originalFileName}
-                                    style={{
-                                      width: '100%',
-                                      height: '50%',
-                                      objectFit: 'cover'
-                                    }}
-                                  />
-                                  <ImageListItemBar sx={{ textAlign: 'center' }} slot='' title={pic.originalFileName} />
-                                </ImageListItem>
-
-                                {showCheck && (
-                                  <Checkbox
-                                    color='error'
-                                    sx={{
-                                      position: 'absolute',
-                                      left: 0,
-                                      top: 0
-                                    }}
-                                    checked={
-                                      picturesToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false
-                                    }
-                                  />
-                                )}
-                              </Paper>
+                              <PictureCard key={idx} pic={pic} />
                             ))}
                           </ImageList>
                         </Box>
@@ -638,69 +601,7 @@ const PictureListModal = ({
                 //해당 하위항목의 사진이 존재하는 경우
                 <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
                   {filteredPics.map((pic, idx) => (
-                    <Paper
-                      sx={{
-                        paddingTop: 9,
-                        position: 'relative',
-                        cursor: 'pointer',
-                        borderColor: 'lightgray',
-                        borderWidth: '1px',
-                        margin: 2,
-                        ':hover': {
-                          boxShadow: '24'
-                        }
-                      }}
-                      elevation={3}
-                      key={`${pic.machinePicId}`}
-                    >
-                      <ImageListItem
-                        onClick={() => {
-                          if (showCheck) {
-                            if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                              setPicturesToDelete(prev => {
-                                const newList = prev.map(v => ({ ...v }))
-
-                                return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
-                              })
-                            } else {
-                              setPicturesToDelete(prev => {
-                                const newList = prev.map(v => ({ ...v }))
-
-                                return newList.filter(v => v.machinePicId !== pic.machinePicId)
-                              })
-                            }
-                          } else {
-                            setSelectedPic(pic)
-                            setShowPicModal(true)
-                          }
-                        }}
-                        key={`${pic.machinePicId}-${idx}`}
-                        sx={{ mb: 2 }}
-                      >
-                        <img
-                          src={pic.presignedUrl}
-                          alt={pic.originalFileName}
-                          style={{
-                            width: '100%',
-                            height: '50%',
-                            objectFit: 'cover'
-                          }}
-                        />
-                        <ImageListItemBar sx={{ textAlign: 'center' }} slot='' title={pic.originalFileName} />
-                      </ImageListItem>
-
-                      {showCheck && (
-                        <Checkbox
-                          color='error'
-                          sx={{
-                            position: 'absolute',
-                            left: 0,
-                            top: 0
-                          }}
-                          checked={picturesToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
-                        />
-                      )}
-                    </Paper>
+                    <PictureCard key={idx} pic={pic} />
                   ))}
                 </ImageList>
               ) : (
@@ -736,32 +637,11 @@ const PictureListModal = ({
                   <Typography color='black' variant='subtitle1' gutterBottom>
                     미리보기
                   </Typography>
-                  <Grid container spacing={2}>
+                  <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
                     {filesToUpload.map((file, index) => (
-                      <Grid item xs={6} sm={4} md={3} key={index}>
-                        <Paper elevation={3} sx={{ position: 'relative', borderColor: 'lightgray' }}>
-                          <div className='flex justify-between items-center'>
-                            <Typography variant='h6' noWrap sx={{ px: 2, color: 'darkslategray' }}>
-                              {file.name}
-                            </Typography>
-                            <IconButton onClick={() => removeFile(index)}>
-                              <i className='tabler-x text-xl text-error' />
-                            </IconButton>
-                          </div>
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            style={{
-                              width: '100%',
-                              height: '180px',
-                              objectFit: 'cover'
-                            }}
-                          />
-                          <Box sx={{ p: 1 }}></Box>
-                        </Paper>
-                      </Grid>
+                      <PicturePreviewCard key={index} file={file} index={index} />
                     ))}
-                  </Grid>
+                  </ImageList>
                 </div>
               )}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 5 }}>
