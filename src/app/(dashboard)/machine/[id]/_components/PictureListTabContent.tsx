@@ -46,9 +46,9 @@ const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string 
   // inspection으로 필터링하기 위한 옵션
   const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
   const [inspectionId, setInspectionId] = useState(0)
-  const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
 
   // ! 추후 세부 필터링 추가
+  // const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
   // const [machineChecklistSubItemId, setMachineChecklistSubItemId] = useState(0)
 
   // 무한스크롤 관련 Ref들
@@ -311,54 +311,60 @@ const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string 
                   <Typography variant='h3'>{insp.machineInspectionName}</Typography>
                   <Typography variant='h6' sx={{ marginBottom: 1 }}>{`[${insp.machineParentCateName}]`}</Typography>
                 </div>
-                <ImageList cols={isMobile ? 1 : 4} rowHeight={isMobile ? 180 : 300} gap={15}>
+                <ImageList
+                  sx={{ overflow: 'visible' }}
+                  cols={isMobile ? 1 : 4}
+                  rowHeight={isMobile ? 180 : 300}
+                  gap={15}
+                >
                   {filterPics(inspectionsPic).map((pic, index: number) => {
                     return (
                       <Paper
                         sx={{
-                          paddingTop: 9,
                           position: 'relative',
                           cursor: 'pointer',
                           borderColor: 'lightgray',
-                          borderWidth: '1px'
+                          borderWidth: '1px',
+                          ':hover': { boxShadow: 10 }
                         }}
                         variant='outlined'
                         key={`${pic.machinePicId}-${index}`}
+                        onClick={() => {
+                          // 일괄선택 활성화 시 클릭 동작
+                          if (showCheck) {
+                            if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+                              setPicturesToDelete(prev => {
+                                const newList = prev.map(v => ({ ...v }))
+
+                                return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
+                              })
+                            } else {
+                              setPicturesToDelete(prev => {
+                                const newList = prev.map(v => ({ ...v }))
+
+                                return newList.filter(v => v.machinePicId !== pic.machinePicId)
+                              })
+                            }
+                          }
+
+                          // 일괄선택 비활성화 시 클릭 동작
+                          else {
+                            getInspectionByPic(pic)
+                            setSelectedPic(pic)
+                            setShowPicModal(true)
+                          }
+                        }}
                       >
-                        <ImageListItem
-                          onClick={() => {
-                            // 일괄선택 활성화 시 클릭 동작
-                            if (showCheck) {
-                              if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                                setPicturesToDelete(prev => {
-                                  const newList = prev.map(v => ({ ...v }))
-
-                                  return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
-                                })
-                              } else {
-                                setPicturesToDelete(prev => {
-                                  const newList = prev.map(v => ({ ...v }))
-
-                                  return newList.filter(v => v.machinePicId !== pic.machinePicId)
-                                })
-                              }
-                            }
-
-                            // 일괄선택 비활성화 시 클릭 동작
-                            else {
-                              getInspectionByPic(pic)
-                              setSelectedPic(pic)
-                              setShowPicModal(true)
-                            }
-                          }}
-                        >
+                        <ImageListItem>
                           <img
                             src={pic.presignedUrl}
                             alt={pic.originalFileName}
                             style={{
                               width: '100%',
                               height: '50%',
-                              objectFit: 'cover'
+                              objectFit: 'cover',
+                              borderTopLeftRadius: 5,
+                              borderTopRightRadius: 5
                             }}
                           />
                           <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
