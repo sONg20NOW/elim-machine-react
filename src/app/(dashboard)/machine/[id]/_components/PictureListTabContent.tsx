@@ -244,30 +244,30 @@ const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string 
               </MenuItem>
             ))}
           </TextField>
-          {
-            // ! 추후 구현
-            // inspectionId !== 0 && filterPics(pictures).length !== 0
-            // && (
-            //   <TextField
-            //     label='점검항목으로 검색'
-            //     sx={{ width: { sx: 'full', sm: 250 } }}
-            //     select
-            //     size='small'
-            //     value={machineChecklistItemId}
-            //     onChange={e => setMachineChecklistItemId(Number(e.target.value))}
-            //     fullWidth
-            //   >
-            //     <MenuItem key={0} value={0}>
-            //       전체
-            //     </MenuItem>
-            //     {/* {[].map(v => (
-            //       <MenuItem key={v.mach} value={v.machineInspectionId}>
-            //         {v.machineInspectionName}
-            //       </MenuItem>
-            //     ))} */}
-            //   </TextField>
-            // )
-          }
+          {/* ! 추후구현
+           {
+            inspectionId !== 0 && filterPics(pictures).length !== 0
+            && (
+              <TextField
+                label='점검항목으로 검색'
+                sx={{ width: { sx: 'full', sm: 250 } }}
+                select
+                size='small'
+                value={machineChecklistItemId}
+                onChange={e => setMachineChecklistItemId(Number(e.target.value))}
+                fullWidth
+              >
+                <MenuItem key={0} value={0}>
+                  전체
+                </MenuItem>
+                {[].map(v => (
+                  <MenuItem key={v.mach} value={v.machineInspectionId}>
+                    {v.machineInspectionName}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )
+          } */}
         </div>
 
         <div className={classNames('flex gap-1', { 'flex-col': isMobile })}>

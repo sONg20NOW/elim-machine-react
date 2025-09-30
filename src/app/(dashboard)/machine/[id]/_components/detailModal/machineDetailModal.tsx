@@ -31,6 +31,7 @@ import { WindTabContent } from './WindTabContent'
 import PipeTabContent from './PipeTabContent'
 import PicTabContent from './PicTabContent'
 import { useSelectedInspectionContext } from '../InspectionListContent'
+import PictureListModal from './PictureListModal'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -82,6 +83,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
   )
 
   const [showAlertModal, setShowAlertModal] = useState(false)
+  const [showPictureListModal, setShowPictureListModal] = useState(false)
 
   // 탭
   const [tabValue, setTabValue] = useState('BASIC')
@@ -275,7 +277,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
             )}
           </TabList>
           <div className='flex gap-2 absolute right-0 top-0'>
-            <Button variant='contained' color='info'>
+            <Button variant='contained' color='info' onClick={() => setShowPictureListModal(true)}>
               갤러리 (
               {editData.machineChecklistItemsWithPicCountResponseDtos?.reduce(
                 (sum, cate) => (sum += cate.totalMachinePicCount),
@@ -342,6 +344,18 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
             setEditData={setEditData}
             setIsEditing={setIsEditing}
             originalData={selectedMachine}
+          />
+        )}
+        {showPictureListModal && (
+          <PictureListModal
+            machineProjectId={machineProjectId}
+            open={showPictureListModal}
+            setOpen={setShowPictureListModal}
+            checklistItems={selectedMachine.machineChecklistItemsWithPicCountResponseDtos}
+            totalPicCount={selectedMachine.machineChecklistItemsWithPicCountResponseDtos.reduce(
+              (sum, value) => sum + value.totalMachinePicCount,
+              0
+            )}
           />
         )}
       </DefaultModal>
