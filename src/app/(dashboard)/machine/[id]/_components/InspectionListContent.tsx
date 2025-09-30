@@ -25,7 +25,7 @@ import type {
   MachineInspectionPageResponseDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
-import { createInitialSorting, HEADERS } from '@/app/_schema/TableHeader'
+import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import SearchBar from '@/app/_components/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/app/_components/table/BasicTable'

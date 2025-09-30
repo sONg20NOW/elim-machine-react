@@ -24,7 +24,7 @@ import { InputBox } from '@/app/_components/selectbox/InputBox'
 import type { memberLookupResponseDtoType, MachineEngineerCreateRequestDtoType } from '@/app/_type/types'
 
 import { EngineerInitialData } from '@/app/_constants/EngineerSeed'
-import { ENGINEER_INPUT_INFO } from '@/app/_schema/input/EngineerInputInfo'
+import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/EngineerInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 type AddUserModalProps = {

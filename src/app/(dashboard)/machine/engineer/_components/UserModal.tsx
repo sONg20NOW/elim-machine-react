@@ -16,7 +16,7 @@ import DefaultModal from '@/app/_components/modal/DefaultModal'
 import type { EngineerResponseDtoType } from '@/app/_type/types'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { ENGINEER_INPUT_INFO } from '@/app/_schema/input/EngineerInputInfo'
+import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/EngineerInputInfo'
 import DeleteModal from '@/app/_components/modal/DeleteModal'
 import AlertModal from '@/app/_components/modal/AlertModal'
 

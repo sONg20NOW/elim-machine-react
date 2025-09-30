@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow'
 
 import classNames from 'classnames'
 
-import { Checkbox } from '@mui/material'
+import { Checkbox, Typography } from '@mui/material'
 
 import type { HeaderType, SortInfoType } from '@/app/_type/types'
 
@@ -29,6 +29,7 @@ interface BasicTableProps<T> {
   isChecked?: (item: T) => boolean
   handleCheckItem?: (item: T) => void
   handleCheckAllItems?: (checked: boolean) => void
+  onClickPicCount?: () => void
 }
 
 /**
@@ -60,7 +61,8 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   showCheckBox = false,
   isChecked,
   handleCheckItem,
-  handleCheckAllItems
+  handleCheckAllItems,
+  onClickPicCount
 }: BasicTableProps<T>) {
   function toggleOrder(key: string) {
     // 로딩이 끝나고 에러가 없으면 not disabled
@@ -157,7 +159,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   </TableCell>
                 )}
                 <TableCell align='center' key={'order'} className='hide-on-mobile'>
-                  {page * pageSize + index + 1}
+                  <Typography>{page * pageSize + index + 1}</Typography>
                 </TableCell>
 
                 {Object.keys(header).map(property => {
@@ -165,9 +167,11 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
 
                   let content: string | undefined = ''
 
-                  // header 속성에 포함되지 않다면 출력 x & 예외 출력
-                  if (!Object.keys(header).includes(property)) return null
-                  else if (multiException && Object.keys(multiException).includes(property)) {
+                  if (!Object.keys(header).includes(property)) {
+                    // header 속성에 포함되지 않다면 출력 x & 예외 출력
+                    return null
+                  } else if (multiException && Object.keys(multiException).includes(property)) {
+                    // MultiException 예외 처리
                     const key = property as keyof typeof multiException
 
                     const pieces = multiException[key]?.map(value =>
@@ -176,6 +180,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
 
                     content = pieces?.join(key === 'age' ? '  ' : ' ~ ')
                   } else if (listException && listException.includes(key)) {
+                    // ListException 처리
                     const list = info[key] as string[]
 
                     // 세 개 이상일 경우 외 (length - 2) 로 처리
@@ -187,13 +192,14 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                             .join(', ')
                             .concat(` 외 ${list.length - 2}`)
                   } else {
-                    content =
-                      key === 'remark'
-                        ? info[key]
-                            ?.toString()
-                            .slice(0, 3)
-                            .concat(info[key]?.toString().length > 3 ? '..' : '')
-                        : (info[key] as string)
+                    if (key === 'remark') {
+                      content = info[key]
+                        ?.toString()
+                        .slice(0, 3)
+                        .concat(info[key]?.toString().length > 3 ? '..' : '')
+                    } else {
+                      content = info[key] as string
+                    }
                   }
 
                   return (
@@ -202,7 +208,20 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                       align='center'
                       className={classNames({ 'hide-on-mobile': header[key].hideOnMobile })}
                     >
-                      {content}
+                      {/* 사진의 경우 클릭 가능하도록 */}
+                      <Typography
+                        onClick={() => {
+                          if (key === 'machinePicCount' && onClickPicCount) onClickPicCount()
+                        }}
+                        sx={{
+                          ...(key === 'machinePicCount' && {
+                            color: 'primary.main',
+                            ':hover': { textDecoration: 'underline' }
+                          })
+                        }}
+                      >
+                        {content}
+                      </Typography>
                     </TableCell>
                   )
                 })}

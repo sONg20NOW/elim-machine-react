@@ -6,7 +6,7 @@ import type {
   memberPageDtoType,
   LicensePageResponseDtoType,
   MachineInspectionPageResponseDtoType
-} from '../_type/types'
+} from '../../_type/types'
 
 export const BROWER_TAB_TITLE = 'ELIM'
 export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'

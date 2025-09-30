@@ -26,10 +26,10 @@ import type {
   memberPageDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
-import { createInitialSorting, HEADERS } from '@/app/_schema/TableHeader'
+import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
-import { MEMBER_FILTER_INFO } from '@/app/_schema/filter/MemberFilterInfo'
+import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'

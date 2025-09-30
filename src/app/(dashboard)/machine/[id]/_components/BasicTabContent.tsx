@@ -8,7 +8,7 @@ import axios from 'axios'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
-import { MACHINE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
+import { MACHINE_INPUT_INFO } from '@/app/_constants/input/MachineInputInfo'
 import type { MachineProjectResponseDtoType } from '@/app/_type/types'
 import AlertModal from '@/app/_components/modal/AlertModal'
 import { IsEditingContext } from '../page'

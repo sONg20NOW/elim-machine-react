@@ -16,7 +16,7 @@ import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { LicenseInitialData } from '@/app/_constants/LicenseSeed'
 import type { LicenseCreateRequestDto } from '@/app/_type/types'
-import { LICENSE_INPUT_INFO } from '@/app/_schema/input/LicenseInputInfo'
+import { LICENSE_INPUT_INFO } from '@/app/_constants/input/LicenseInputInfo'
 
 type AddModalProps = {
   open: boolean

@@ -15,7 +15,7 @@ import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import type { LicensePageResponseDtoType, LicenseResponseDtoType, successResponseDtoType } from '@/app/_type/types'
-import { createInitialSorting, HEADERS } from '@/app/_schema/TableHeader'
+import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/app/_components/table/BasicTable'
 import SearchBar from '@/app/_components/SearchBar'
 import { PageSizeOptions } from '@/app/_constants/options'

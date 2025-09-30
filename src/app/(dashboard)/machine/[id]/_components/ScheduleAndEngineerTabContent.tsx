@@ -12,7 +12,10 @@ import type {
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
-import { MACHINE_PROJECT_ENGINEER_INPUT_INFO, MACHINE_SCHEDULE_INPUT_INFO } from '@/app/_schema/input/MachineInputInfo'
+import {
+  MACHINE_PROJECT_ENGINEER_INPUT_INFO,
+  MACHINE_SCHEDULE_INPUT_INFO
+} from '@/app/_constants/input/MachineInputInfo'
 import CustomTextField from '@/@core/components/mui/TextField'
 import { IsEditingContext, UseListsContext } from '../page'
 import { gradeOption } from '@/app/_constants/options'

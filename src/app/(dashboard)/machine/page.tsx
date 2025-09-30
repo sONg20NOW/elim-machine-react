@@ -31,9 +31,9 @@ import type {
   MachineProjectPageDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
-import { HEADERS, createInitialSorting } from '@/app/_schema/TableHeader'
+import { HEADERS, createInitialSorting } from '@/app/_constants/table/TableHeader'
 import TableFilters from '@/app/_components/table/TableFilters'
-import { MACHINE_FILTER_INFO } from '@/app/_schema/filter/MachineFilterInfo'
+import { MACHINE_FILTER_INFO } from '@/app/_constants/filter/MachineFilterInfo'
 import SearchBar from '@/app/_components/SearchBar'
 import BasicTable from '@/app/_components/table/BasicTable'
 import AddMachineProjectModal from './_components/addMachineProjectModal'

@@ -12,7 +12,7 @@ import type { MachineProjectCreateRequestDtoType } from '@/app/_type/types'
 import { MachineProjectInitialData } from '@/app/_constants/MachineProjectSeed'
 import DefaultModal from '@/app/_components/modal/DefaultModal'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
-import { MACHINE_CREATE_INFO } from '@/app/_schema/input/MachineInputInfo'
+import { MACHINE_CREATE_INFO } from '@/app/_constants/input/MachineInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 type AddMachineProjectModalProps = {

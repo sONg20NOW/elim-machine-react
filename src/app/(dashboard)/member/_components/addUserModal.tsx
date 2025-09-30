@@ -12,7 +12,7 @@ import axios from 'axios'
 
 import DefaultModal from '@/app/_components/modal/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@/app/_type/types'
-import { MEMBER_INPUT_INFO } from '@/app/_schema/input/MemberInputInfo'
+import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
 import { MemberInitialData } from '@/app/_constants/MemberSeed'
 import { InputBox } from '@/app/_components/selectbox/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
