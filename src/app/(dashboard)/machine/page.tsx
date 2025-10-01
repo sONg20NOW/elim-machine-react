@@ -458,6 +458,7 @@ export default function MachinePage() {
           onRowsPerPageChange={event => {
             const newPageSize = parseInt(event.target.value, 10)
 
+            setPage(0)
             setSize(newPageSize)
           }}
           disabled={disabled}
