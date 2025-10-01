@@ -6,54 +6,27 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
-import TablePagination from '@mui/material/TablePagination'
-import MenuItem from '@mui/material/MenuItem'
 
 import axios from 'axios'
 
 // Component Imports
 import 'dayjs/locale/ko'
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+import { LocalizationProvider } from '@mui/x-date-pickers'
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
-import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 
-import {
-  AppBar,
-  Box,
-  ButtonGroup,
-  Chip,
-  Drawer,
-  IconButton,
-  ToggleButton,
-  ToggleButtonGroup,
-  Toolbar,
-  Typography,
-  useMediaQuery,
-  useTheme
-} from '@mui/material'
+import { Box, Drawer, IconButton, Pagination, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import classNames from 'classnames'
 
-import type {
-  MachineEngineerOptionListResponseDtoType,
-  MachineEngineerOptionResponseDtoType,
-  MachineFilterType,
-  MachineProjectPageDtoType,
-  successResponseDtoType
-} from '@/app/_type/types'
-import { HEADERS, createInitialSorting } from '@/app/_constants/table/TableHeader'
-import { MACHINE_FILTER_INFO } from '@/app/_constants/filter/MachineFilterInfo'
-import SearchBar from '@/app/_components/SearchBar'
-import BasicTable from '@/app/_components/table/BasicTable'
-import AddMachineProjectModal from './_components/addMachineProjectModal'
+import type { MachineProjectPageDtoType, successResponseDtoType } from '@/app/_type/types'
 import { handleApiError } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
-import Footer from '../_components/Footer'
+import MobileFooter from '../_components/MobileFooter'
+import MobileHeader from '../_components/MobileHeader'
 
 // datepicker 한글화
 dayjs.locale('ko')
@@ -69,12 +42,13 @@ export default function MachinePage() {
 
   const [open, setOpen] = useState(false)
 
-  const [totalCount, setTotalCount] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
 
   const [projectName, setProjectName] = useState('')
 
   const [page, setPage] = useState(0)
-  const [size, setSize] = useState(10)
+  const [size, setSize] = useState(5)
 
   const [myProject, setMyProject] = useState(false)
 
@@ -123,7 +97,8 @@ export default function MachinePage() {
       setData(result.content ?? [])
       setPage(result.page.number)
       setSize(result.page.size)
-      setTotalCount(result.page.totalElements)
+      setTotalElements(result.page.totalElements)
+      setTotalPages(result.page.totalPages)
     } catch (error) {
       handleApiError(error, '필터링된 데이터를 불러오는 데 실패했습니다.')
       setError(true)
@@ -143,7 +118,7 @@ export default function MachinePage() {
     if (!machineProject?.machineProjectId) return
 
     try {
-      router.push(`/machine/${machineProject.machineProjectId}`)
+      router.push(`/check/${machineProject.machineProjectId}`)
     } catch (error) {
       handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
     }
@@ -161,131 +136,15 @@ export default function MachinePage() {
     }
   }
 
-  function Header() {
-    return !isMobile ? (
-      <Box className='p-4 border-b items-center grid grid-cols-3' sx={{ backgroundColor: 'primary.light' }}>
-        <div className='flex gap-2  overflow-visible items-center'>
-          <IconButton sx={{ boxShadow: 3, backgroundColor: 'white' }} onClick={() => setOpen(true)}>
-            <i className='tabler-user' />
-          </IconButton>
-          <Box
-            sx={{
-              border: '1px solid lightgray',
-              borderRadius: 10,
-              p: 1,
-              display: 'flex',
-              position: 'relative',
-              backgroundColor: 'white'
-            }}
-          >
-            <Card
-              sx={{
-                position: 'absolute',
-                backgroundColor: 'primary.main',
-                borderRadius: 10,
-                width: '47%',
-                height: '80%'
-              }}
-              className={`transition-transform duration-300 ease-in-out left-[50%] top-[50%] -translate-y-1/2 ${!myProject ? '-translate-x-full' : '-translate-x-0'}`}
-            ></Card>
-            <Button
-              onClick={() => setMyProject(false)}
-              sx={{
-                ...(!myProject ? { color: 'white', boxShadow: 2, borderRadius: 10 } : { color: 'primary.main' })
-              }}
-            >
-              전체 현장
-            </Button>
-            <Button
-              onClick={() => setMyProject(true)}
-              sx={{
-                ...(myProject ? { color: 'white', boxShadow: 2, borderRadius: 10 } : { color: 'primary.main' })
-              }}
-            >
-              나의 현장
-            </Button>
-          </Box>
-        </div>
-        <div className='flex gap-1 items-center justify-center relative'>
-          <Typography color='white' variant='h4'>
-            {`기계설비현장(${totalCount})`}{' '}
-          </Typography>
-        </div>
-        {!isMobile && (
-          <div className='flex justify-end'>
-            <SearchBar
-              placeholder='이름으로 검색'
-              setSearchKeyword={projectName => {
-                setProjectName(projectName)
-                setPage(0)
-              }}
-              disabled={disabled}
-            />
-          </div>
-        )}
-      </Box>
-    ) : (
-      <Box className='p-4 border-b items-center grid grid-cols-4' sx={{ backgroundColor: 'primary.light' }}>
-        <div className='flex gap-2 overflow-visible flex-col items-start'>
-          <IconButton sx={{ boxShadow: 3, backgroundColor: 'white' }} onClick={() => setOpen(true)}>
-            <i className='tabler-user' />
-          </IconButton>
-        </div>
-        <div className='flex gap-1 items-center justify-center relative col-span-2'>
-          <Typography color='white' variant='h4'>
-            {`기계설비현장(${totalCount})`}
-          </Typography>
-        </div>
-        <div className='flex justify-end'>
-          <Box
-            sx={{
-              width: 'fit-content',
-              border: '1px solid lightgray',
-              borderRadius: 1,
-              p: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'relative',
-              backgroundColor: 'white'
-            }}
-          >
-            <Card
-              sx={{
-                position: 'absolute',
-                backgroundColor: 'primary.main',
-                borderRadius: 1,
-                width: '90%',
-                height: '45%'
-              }}
-              className={`left-1 top-[50%] -translate-y-1/2 ${!myProject ? '-translate-y-full' : '-translate-y-0'}`}
-            ></Card>
-            <Button
-              onClick={() => setMyProject(false)}
-              sx={{
-                ...(!myProject ? { color: 'white', boxShadow: 2, borderRadius: 1 } : { color: 'primary.main' })
-              }}
-            >
-              전체 현장
-            </Button>
-            <Button
-              onClick={() => setMyProject(true)}
-              sx={{
-                ...(myProject ? { color: 'white', boxShadow: 2, borderRadius: 1 } : { color: 'primary.main' })
-              }}
-            >
-              나의 현장
-            </Button>
-          </Box>
-        </div>
-      </Box>
-    )
-  }
-
   function MachineProjectCard({ machineProject }: { machineProject: MachineProjectPageDtoType }) {
     const engineerCnt = machineProject.engineerNames.length
 
     return (
-      <Card sx={{ mb: 5, display: 'flex', gap: 5 }} elevation={10}>
+      <Card
+        sx={{ mb: 5, display: 'flex', gap: 5 }}
+        elevation={10}
+        onClick={() => handleMachineProjectClick(machineProject)}
+      >
         <i className={classNames('tabler-photo', { 'text-[180px]': !isMobile, 'text-[130px]': isMobile })} />
         <Box sx={{ display: 'flex', flexDirection: 'column', px: 5, py: 10, gap: 3 }}>
           <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
@@ -318,7 +177,7 @@ export default function MachinePage() {
         open={open}
         onClose={() => setOpen(false)}
         slotProps={{
-          paper: { sx: { width: '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
+          paper: { sx: { width: isMobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
           root: { sx: { position: 'relative' } }
         }}
         anchor='left'
@@ -348,7 +207,7 @@ export default function MachinePage() {
         <Box sx={{ p: 5, mt: 5 }}>
           <Button
             fullWidth
-            sx={{ display: 'flex', justifyContent: 'start', gap: 2, fontSize: 'large', color: 'dimgray' }}
+            sx={{ display: 'flex', justifyContent: 'start', gap: 4, fontSize: 'large', color: 'dimgray' }}
             onClick={() => handleLogout()}
           >
             <i className='tabler-logout' />
@@ -360,7 +219,17 @@ export default function MachinePage() {
       </Drawer>
       {/* 렌더링 될 화면 */}
       <Box className='flex flex-col w-full' sx={{ height: '100vh' }}>
-        <Header />
+        <MobileHeader
+          currentPage='machine_main'
+          isMobile={isMobile}
+          myProject={myProject}
+          setMyProject={setMyProject}
+          setOpenDrawer={setOpen}
+          totalCount={totalElements}
+          setProjectName={setProjectName}
+          setPage={setPage}
+          disabled={disabled}
+        />
         {/* 카드 리스트 */}
         <Box
           sx={{
@@ -374,34 +243,15 @@ export default function MachinePage() {
           ))}
         </Box>
 
-        <TablePagination
-          rowsPerPageOptions={[1, 10, 30, 50]} // 1 추가 (테스트용)
-          component='div'
-          count={totalCount}
-          rowsPerPage={size}
-          page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={event => {
-            const newPageSize = parseInt(event.target.value, 10)
-
-            setPage(0)
-            setSize(newPageSize)
-          }}
-          disabled={disabled}
+        <Pagination
+          sx={{ alignSelf: 'center' }}
+          count={totalPages}
+          page={page + 1}
+          onChange={(_, value) => setPage(value - 1)}
           showFirstButton
           showLastButton
-          labelRowsPerPage='페이지당 행 수:'
-          labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
-          sx={{
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            '.MuiTablePagination-toolbar': {
-              paddingLeft: 2,
-              paddingRight: 2
-            }
-          }}
         />
-        <Footer />
+        <MobileFooter />
       </Box>
     </LocalizationProvider>
   )
