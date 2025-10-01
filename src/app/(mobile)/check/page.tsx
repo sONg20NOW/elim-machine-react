@@ -208,7 +208,7 @@ export default function MachinePage() {
         </div>
         <div className='flex gap-1 items-center justify-center relative'>
           <Typography color='white' variant='h4'>
-            {`기계설비현장 (${totalCount})`}{' '}
+            {`기계설비현장(${totalCount})`}{' '}
           </Typography>
         </div>
         {!isMobile && (
@@ -233,7 +233,7 @@ export default function MachinePage() {
         </div>
         <div className='flex gap-1 items-center justify-center relative col-span-2'>
           <Typography color='white' variant='h4'>
-            {`기계설비현장 (${totalCount})`}{' '}
+            {`기계설비현장(${totalCount})`}
           </Typography>
         </div>
         <div className='flex justify-end'>
@@ -282,11 +282,31 @@ export default function MachinePage() {
   }
 
   function MachineProjectCard({ machineProject }: { machineProject: MachineProjectPageDtoType }) {
+    const engineerCnt = machineProject.engineerNames.length
+
     return (
-      <Card sx={{ p: 4, mb: 2 }} elevation={6}>
-        <Typography>
-          {machineProject.machineProjectName !== '' ? machineProject.machineProjectName : '이름없는 현장'}
-        </Typography>
+      <Card sx={{ mb: 5, display: 'flex', gap: 5 }} elevation={10}>
+        <i className={classNames('tabler-photo', { 'text-[180px]': !isMobile, 'text-[130px]': isMobile })} />
+        <Box sx={{ display: 'flex', flexDirection: 'column', px: 5, py: 10, gap: 3 }}>
+          <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
+            {machineProject.machineProjectName !== '' ? machineProject.machineProjectName : '이름없는 현장'}
+          </Typography>
+          <div className='flex flex-col gap-2'>
+            <Typography sx={{ fontWeight: 500 }}>
+              {machineProject.fieldBeginDate &&
+                machineProject.fieldEndDate &&
+                `${machineProject.fieldBeginDate} ~ ${machineProject.fieldEndDate.slice(5)}`}
+            </Typography>
+            <Typography>
+              {engineerCnt > 2
+                ? machineProject.engineerNames
+                    .slice(0, 2)
+                    .join(', ')
+                    .concat(`외 ${engineerCnt - 2}명`)
+                : machineProject.engineerNames.join(', ')}
+            </Typography>
+          </div>
+        </Box>
       </Card>
     )
   }
@@ -302,14 +322,16 @@ export default function MachinePage() {
           root: { sx: { position: 'relative' } }
         }}
         anchor='left'
-        ModalProps={{ keepMounted: true }}
       >
         <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', right: 0, top: 0 }}>
           <i className='tabler-x text-white' />
         </IconButton>
         <Box>
           <Box sx={{ backgroundColor: 'primary.light', p: 2 }}>
-            <img src='' alt='유저 이미지' width={50} />
+            {/* ! 유저 이미지로 변경 */}
+            <div className='w-[70px] h-[70px] bg-white rounded-full m-3'>
+              <i className='tabler-user text-[70px]' />
+            </div>
             <Typography variant='h5' color='white'>
               {currentUser.companyName}
             </Typography>
@@ -344,7 +366,7 @@ export default function MachinePage() {
           sx={{
             flex: 1,
             overflowY: 'auto',
-            p: 2
+            p: 5
           }}
         >
           {data.map(machineProject => (
