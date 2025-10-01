@@ -26,8 +26,8 @@ const Footer = () => {
         <span className='text-textSecondary'>{`© ${new Date().getFullYear()}, Made `}</span>
         <span className='text-textSecondary'>{` by Elim`}</span>
       </p>
-      <Link href='https://elimsafety.com/' target='_blank' className={`text-color-primary`}>
-        Go to Elim
+      <Link href='/check' className={`text-color-primary`}>
+        app view
       </Link>
     </div>
   )

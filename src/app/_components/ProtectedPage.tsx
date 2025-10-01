@@ -8,7 +8,7 @@ import { CircularProgress, Paper, useMediaQuery, useTheme } from '@mui/material'
 
 export const isTabletContext = createContext<boolean | null>(null)
 
-export default function ProtectedPage({ children, isNotWeb }: { children: React.ReactNode; isNotWeb?: boolean }) {
+export default function ProtectedPage({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [hasToken, setHasToken] = useState(false)
 
@@ -25,12 +25,6 @@ export default function ProtectedPage({ children, isNotWeb }: { children: React.
       setHasToken(true)
     }
   }, [router])
-
-  useEffect(() => {
-    if (isNotWeb) {
-      router.replace('/check')
-    }
-  }, [isNotWeb, router])
 
   return (
     <isTabletContext.Provider value={isTablet}>

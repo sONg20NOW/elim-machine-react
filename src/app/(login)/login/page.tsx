@@ -8,8 +8,6 @@ import { useForm } from 'react-hook-form'
 
 import { Button, Divider, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
 
-import { ToastContainer } from 'react-toastify'
-
 import ForgotPasswordPage from './_components/forgotPasswordModal'
 import { login } from '@/lib/auth'
 
@@ -90,7 +88,7 @@ export default function LoginPage() {
       {showForgotPasswordModal && (
         <ForgotPasswordPage open={showForgotPasswordModal} setOpen={setShowForgotPasswordModal} />
       )}
-      <ToastContainer autoClose={3000} />
+      {/* <ToastContainer autoClose={3000} /> */}
     </div>
   )
 }
