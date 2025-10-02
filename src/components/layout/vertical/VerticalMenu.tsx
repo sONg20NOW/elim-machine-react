@@ -1,6 +1,3 @@
-// Next Imports
-import { useParams } from 'next/navigation'
-
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
 
@@ -8,8 +5,9 @@ import { useTheme } from '@mui/material/styles'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
-import type { getDictionary } from '@/utils/getDictionary'
 import type { VerticalMenuContextProps } from '@menu/components/vertical-menu/Menu'
+
+// import type { getDictionary } from '@/utils/getDictionary'
 
 // Component Imports
 // import { Menu, SubMenu, MenuItem, MenuSection } from '@menu/vertical-menu'
@@ -38,7 +36,6 @@ type RenderExpandIconProps = {
 }
 
 type Props = {
-  dictionary: Awaited<ReturnType<typeof getDictionary>>
   scrollMenu: (container: any, isPerfectScrollbar: boolean) => void
 }
 
@@ -53,11 +50,13 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
   // Hooks
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
-  const params = useParams()
+
+  // const params = useParams()
 
   // Vars
   const { isBreakpointReached, transitionDuration } = verticalNavOptions
-  const { lang: locale } = params
+
+  // const { lang: locale } = params
 
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
@@ -84,49 +83,49 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        <MenuItem href={`/${locale}/calendar`} icon={<i className='tabler-calendar' />}>
+        <MenuItem href={`/calendar`} icon={<i className='tabler-calendar' />}>
           {'대시보드'}
         </MenuItem>
         <MenuSection label='기계설비점검'>
-          <MenuItem href={`/${locale}/machine`} icon={<i className='tabler-settings' />}>
+          <MenuItem href={`/machine`} icon={<i className='tabler-settings' />}>
             {'기계설비현장'}
           </MenuItem>
-          <MenuItem href={`/${locale}/machine/engineer`} icon={<i className='tabler-users' />}>
+          <MenuItem href={`/machine/engineer`} icon={<i className='tabler-users' />}>
             {'설비인력'}
           </MenuItem>
-          <MenuItem href={`/${locale}/machine/template`} icon={<i className='tabler-clipboard' />}>
+          <MenuItem href={`/machine/template`} icon={<i className='tabler-clipboard' />}>
             {'양식관리'}
           </MenuItem>
         </MenuSection>
         <MenuSection label='안전진단전검'>
-          <MenuItem href={`/${locale}/safety`} icon={<i className='tabler-shield' />}>
+          <MenuItem href={`/safety`} icon={<i className='tabler-shield' />}>
             {'안전진단현장'}
           </MenuItem>
         </MenuSection>
         <MenuSection label='문의'>
-          <MenuItem href={``} icon={<i className='tabler-speakerphone' />}>
+          <MenuItem href={`/board/notice`} icon={<i className='tabler-speakerphone' />}>
             {'공지사항'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-paperclip' />}>
+          <MenuItem href={`/board/files`} icon={<i className='tabler-paperclip' />}>
             {'자료실'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-clipboard-check' />}>
+          <MenuItem href={`/board/faq`} icon={<i className='tabler-clipboard-check' />}>
             {'FAQ'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-zoom-question' />}>
+          <MenuItem href={`/board/qna`} icon={<i className='tabler-zoom-question' />}>
             {'일대일 문의'}
           </MenuItem>
         </MenuSection>
         <MenuSection label='관리'>
-          <MenuItem href={`/${locale}/member`} icon={<i className='tabler-users-plus' />}>
+          <MenuItem href={`/member`} icon={<i className='tabler-users-plus' />}>
             {'직원관리'}
           </MenuItem>
-          <MenuItem href={``} icon={<i className='tabler-history' />}>
+          <MenuItem href={`/loginlog`} icon={<i className='tabler-history' />}>
             {'로그인 기록'}
           </MenuItem>
         </MenuSection>
         <MenuSection label='라이선스'>
-          <MenuItem href={`/${locale}/license`} icon={<i className='tabler-heart-handshake' />}>
+          <MenuItem href={`/license`} icon={<i className='tabler-heart-handshake' />}>
             {'라이선스관리'}
           </MenuItem>
         </MenuSection>
@@ -137,7 +136,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
             icon={<i className='tabler-smart-home' />}
             suffix={<CustomChip label='5' size='small' color='error' round='true' />}
           >
-            <MenuItem href={`/${locale}/dashboards/crm`}>{dictionary['navigation'].crm}</MenuItem>
+            <MenuItem href={``/${locale}`/dashboards/crm`}>{dictionary['navigation'].crm}</MenuItem>
             <MenuItem href={`/${locale}/dashboards/analytics`}>{dictionary['navigation'].analytics}</MenuItem>
             <MenuItem href={`/${locale}/dashboards/ecommerce`}>{dictionary['navigation'].eCommerce}</MenuItem>
             <MenuItem href={`/${locale}/dashboards/academy`}>{dictionary['navigation'].academy}</MenuItem>

@@ -56,7 +56,7 @@ const VerticalNav = (props: VerticalNavProps) => {
     defaultCollapsed = false,
     backgroundColor = 'white',
     backgroundImage,
-    breakpoint = 'lg',
+    breakpoint = 'md',
     customBreakpoint,
     breakpoints,
     transitionDuration = verticalNavToggleDuration,

@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 미디어쿼리 CSS - 반응형 */
+/* 1. 테이블 column 숨기기 */
+@media (max-width: 600px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
+
 :root {
   --border-radius: var(--mui-shape-borderRadius);
   --border-color: var(--mui-palette-divider);

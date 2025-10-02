@@ -1,15 +1,16 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import Grid from '@mui/material/Grid2'
 
-import { Box, Button } from '@mui/material'
+import { Box, Button, InputAdornment, MenuItem } from '@mui/material'
+
+import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import MultiSelectBox from './MultiSelectBox'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
-import { MemberIdContext } from '@/app/[lang]/(dashboard)/member/_components/UserModal'
-import { execDaumPostcode } from '@/app/_handler/daumMapPostcode'
+import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
+import PostCodeDialog from '@/app/_util/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
 
 interface InputBoxProps {
@@ -21,6 +22,7 @@ interface InputBoxProps {
   onChange: (value: string) => void
   tabInfos: Record<string, InputFieldType>
   showLabel?: boolean
+  required?: boolean
 }
 
 const InputBoxContext = createContext<InputBoxProps | null>(null)
@@ -60,13 +62,41 @@ export function InputBox(props: InputBoxProps) {
 
 function InputBoxContent() {
   const props = useContext(InputBoxContext)
-  const { isEditing, tabInfos, tabFieldKey, value, onChange, showLabel } = props!
+  const { isEditing, tabInfos, tabFieldKey, value, onChange, showLabel, required } = props!
   const tabField = tabInfos[tabFieldKey]
   const disabled = props?.disabled ?? tabField?.disabled ?? false
+
+  // 회사명 옵션
+  const [companyNameOption, setCompanyNameOption] = useState<{ value: string; label: string }[]>([])
+
+  const getCompanyNameOption = useCallback(async () => {
+    try {
+      const response = await axios.get<{
+        data: { licenseIdAndNameResponseDtos: { id: number; companyName: string }[] }
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/names`)
+
+      setCompanyNameOption(
+        response.data.data.licenseIdAndNameResponseDtos.map(v => ({ value: v.companyName, label: v.companyName }))
+      )
+    } catch (error) {
+      handleApiError(error)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (tabFieldKey === 'companyName') {
+      getCompanyNameOption()
+    }
+  }, [tabFieldKey, getCompanyNameOption])
+
+  // 주소 모달 상태
+  const [showMapModal, setShowMapModal] = useState(false)
 
   // 주민번호 핸들링
   const [juminNum, setJuminNum] = useState(value)
   const memberId = useContext(MemberIdContext)
+
+  const label = (showLabel && tabField?.label) ?? ''
 
   async function getJuminNum() {
     try {
@@ -94,9 +124,9 @@ function InputBoxContent() {
 
     return (
       <div className='flex flex-col p-0'>
-        {showLabel && <span className=' text-[13px] p-0 mb-[1px] w-fit'>{tabField.label}</span>}
+        {showLabel && <span className=' text-[10px] sm:text-[13px] p-0 mb-[1px] w-fit'>{tabField.label}</span>}
         <Box
-          className={'my-[1px] relative text-[15px] border-color-border rounded-lg px-[14px] py-[7.25px]'.concat(
+          className={'my-[1px] relative text-[13px] sm:text-[15px] border-color-border rounded-lg sm:px-[14px] sm:py-[7.25px]'.concat(
             showLabel ? ' border' : ''
           )}
         >
@@ -125,62 +155,79 @@ function InputBoxContent() {
     case 'number':
       return (
         <CustomTextField
+          required={showLabel && required}
           slotProps={{ htmlInput: { name: tabFieldKey } }}
           type={tabField.type}
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={showLabel && tabField.label}
-          value={value}
+          label={label}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
     case 'multi':
       return (
-        <MultiSelectBox
-          name={tabFieldKey}
-          tabField={tabField}
+        <CustomTextField
           id={tabFieldKey}
-          label={showLabel && tabField.label}
           disabled={disabled}
-          value={value}
+          select
+          fullWidth
+          label={label}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
-        />
+          required={showLabel && required}
+          slotProps={{
+            select: { displayEmpty: true }
+          }}
+        >
+          <MenuItem value=''>전체</MenuItem>
+          {(tabFieldKey === 'companyName' ? companyNameOption : tabField?.options)?.map(option => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </CustomTextField>
       )
     case 'yn':
       return (
         <YNSelectBox
+          required={showLabel && required}
           name={tabFieldKey}
           id={tabFieldKey}
           disabled={disabled}
-          label={showLabel && tabField.label}
-          value={value}
+          label={label}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
     case 'text':
       return (
         <CustomTextField
-          slotProps={{ htmlInput: { name: tabFieldKey } }}
+          required={showLabel && required}
+          slotProps={{
+            htmlInput: { name: tabFieldKey }
+          }}
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={showLabel && tabField.label}
-          value={value}
+          label={label}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
     case 'long text':
       return (
         <CustomTextField
+          required={showLabel && required}
           multiline
           rows={4}
           slotProps={{ htmlInput: { name: tabFieldKey } }}
           id={tabFieldKey}
           disabled={disabled}
           fullWidth
-          label={showLabel && tabField.label}
-          value={value}
+          label={label}
+          value={value ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )
@@ -188,12 +235,13 @@ function InputBoxContent() {
       return (
         <div className='relative'>
           <CustomTextField
+            required={showLabel && required}
             slotProps={{ htmlInput: { name: tabFieldKey } }}
             id={tabFieldKey}
             disabled={disabled}
             fullWidth
-            label={showLabel && tabField.label}
-            value={juminNum}
+            label={label}
+            value={juminNum ?? ''}
             onChange={e => {
               setJuminNum(e.target.value)
               onChange(e.target.value)
@@ -209,25 +257,25 @@ function InputBoxContent() {
       return (
         <div className='relative'>
           <CustomTextField
+            required={showLabel && required}
             slotProps={{ htmlInput: { name: tabFieldKey } }}
             id={tabFieldKey}
             disabled={disabled}
-            fullWidth
-            label={showLabel && tabField.label}
-            value={value}
+            sx={{ width: { xs: '75%', sm: '100%' } }}
+            label={label}
+            value={value ?? ''}
             onChange={e => onChange(e.target.value)}
-          />
-
-          <Button
-            onClick={() => {
-              execDaumPostcode(tabFieldKey, onChange)
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position='end'>
+                  <Button onClick={() => setShowMapModal(true)} variant='contained' size='small'>
+                    검색
+                  </Button>
+                </InputAdornment>
+              )
             }}
-            variant='contained'
-            size='small'
-            className='absolute bottom-[10%] right-1 p-1'
-          >
-            검색
-          </Button>
+          />
+          {<PostCodeDialog open={showMapModal} setOpen={setShowMapModal} ElementId={tabFieldKey} onChange={onChange} />}
         </div>
       )
     default:

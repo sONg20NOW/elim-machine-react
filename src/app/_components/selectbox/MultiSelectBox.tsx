@@ -1,9 +1,12 @@
-import type { ChangeEventHandler } from 'react'
+import { useCallback, useEffect, useState, type ChangeEventHandler } from 'react'
 
 import { MenuItem } from '@mui/material'
 
+import axios from 'axios'
+
 import CustomTextField from '@/@core/components/mui/TextField'
 import type { InputFieldType } from '@/app/_type/types'
+import { handleApiError } from '@/utils/errorHandler'
 
 interface MultiSelectBoxProps {
   tabField: InputFieldType
@@ -13,6 +16,7 @@ interface MultiSelectBoxProps {
   value: string
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  required?: boolean
 }
 
 /**
@@ -35,7 +39,38 @@ interface MultiSelectBoxProps {
  * 속성의 영어 이름 (ex. companyName, officePosition, ...)
  * @returns
  */
-const MultiSelectBox = ({ label, name, tabField, id, disabled = false, value, onChange }: MultiSelectBoxProps) => {
+const MultiSelectBox = ({
+  label,
+  name,
+  tabField,
+  id,
+  disabled = false,
+  value,
+  onChange,
+  required
+}: MultiSelectBoxProps) => {
+  const [companyNameOption, setCompanyNameOption] = useState<{ value: string; label: string }[]>([])
+
+  const getCompanyNameOption = useCallback(async () => {
+    try {
+      const response = await axios.get<{
+        data: { licenseIdAndNameResponseDtos: { id: number; companyName: string }[] }
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/names`)
+
+      setCompanyNameOption(
+        response.data.data.licenseIdAndNameResponseDtos.map(v => ({ value: v.companyName, label: v.companyName }))
+      )
+    } catch (error) {
+      handleApiError(error)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (id === 'companyName') {
+      getCompanyNameOption()
+    }
+  }, [id, getCompanyNameOption])
+
   return (
     <CustomTextField
       id={id}
@@ -45,13 +80,14 @@ const MultiSelectBox = ({ label, name, tabField, id, disabled = false, value, on
       label={label}
       value={value ?? ''}
       onChange={onChange}
+      required={required ?? false}
       slotProps={{
         select: { displayEmpty: true },
         htmlInput: { name: name }
       }}
     >
       <MenuItem value=''>전체</MenuItem>
-      {tabField?.options?.map(option => (
+      {(id === 'companyName' ? companyNameOption : tabField?.options)?.map(option => (
         <MenuItem key={option.value} value={option.value}>
           {option.label}
         </MenuItem>

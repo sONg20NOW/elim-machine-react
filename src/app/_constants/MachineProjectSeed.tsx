@@ -1,4 +1,8 @@
-import type { MachineFilterType, MachineProjectCreateRequestDtoType } from '@/app/_type/types'
+import type {
+  MachineFilterType,
+  MachineProjectCreateRequestDtoType,
+  machineProjectEngineerDetailDtoType
+} from '@/app/_type/types'
 
 export const MachineProjectInitialData: MachineProjectCreateRequestDtoType = {
   companyName: '',
@@ -15,4 +19,16 @@ export const MachineInitialFilters: MachineFilterType = {
   projectStatus: '',
   companyName: '',
   engineerName: '' // ← engineerNames → engineerName
+}
+
+// 초기 엔지니어 값 (참여기술진 추가에 사용)
+export const MachineProjectEngineerInitialData: machineProjectEngineerDetailDtoType = {
+  engineerId: 0,
+  engineerName: '',
+  grade: '',
+  gradeDescription: '',
+  engineerLicenseNum: '',
+  beginDate: '',
+  endDate: '',
+  note: ''
 }

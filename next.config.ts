@@ -7,22 +7,23 @@ const nextConfig: NextConfig = {
       // 기본적으로 캘린더로 가도록
       {
         source: '/',
-        destination: '/en/calendar',
-        permanent: true,
-        locale: false
-      },
-      {
-        source: '/:lang(en|fr|ar)',
-        destination: '/:lang(en|fr|ar)/calendar',
-        permanent: true,
-        locale: false
-      },
-      {
-        source: '/:path((?!en|fr|ar|front-pages|favicon\\.ico|api|images|fonts|_next|public).*)',
-        destination: '/en/:path',
+        destination: '/calendar',
         permanent: true,
         locale: false
       }
+
+      // {
+      //   source: '/:lang(en|fr|ar)',
+      //   destination: '/:lang(en|fr|ar)/calendar',
+      //   permanent: true,
+      //   locale: false
+      // },
+      // {
+      //   source: '/:path((?!en|fr|ar|front-pages|favicon\\.ico|api|images|fonts|_next|public).*)',
+      //   destination: '/en/:path',
+      //   permanent: true,
+      //   locale: false
+      // }
     ]
   }
 }

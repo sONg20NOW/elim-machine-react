@@ -11,12 +11,14 @@ interface YNSelectBoxProps {
   value: string
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  required?: boolean
 }
 
-const YNSelectBox = ({ name, id, label, value, disabled = false, onChange }: YNSelectBoxProps) => {
+const YNSelectBox = ({ name, id, label, value, disabled = false, onChange, required }: YNSelectBoxProps) => {
   return (
     <CustomTextField
-      slotProps={{ htmlInput: { name: name } }}
+      required={required ?? false}
+      slotProps={{ htmlInput: { name: name }, inputLabel: { sx: { color: required ? '#cc4c4cff !important' : '' } } }}
       select
       fullWidth
       id={id}
