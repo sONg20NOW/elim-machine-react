@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -11,37 +11,45 @@ import Button from '@mui/material/Button'
 import axios from 'axios'
 
 // Component Imports
-import { Box, Pagination, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Drawer, IconButton, Link, Pagination, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import classNames from 'classnames'
 
 import type { MachineProjectPageDtoType, successResponseDtoType } from '@/app/_type/types'
 import { handleApiError } from '@/utils/errorHandler'
-import MobileFooter from '../_components/MobileFooter'
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/app/_components/SearchBar'
+import { auth } from '@/lib/auth'
 
 export default function MachinePage() {
   const router = useRouter()
 
   const [data, setData] = useState<MachineProjectPageDtoType[]>([])
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
 
   const disabled = loading || error
 
+  // 페이지네이션
   const [totalElements, setTotalElements] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
-
-  const [projectName, setProjectName] = useState('')
-
   const [page, setPage] = useState(0)
   const [size, setSize] = useState(5)
 
+  // 현장명 검색
+  const [projectName, setProjectName] = useState('')
+
+  // 전체현장 / 나의현장 토글
   const [myProject, setMyProject] = useState(false)
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+  const [open, setOpen] = useState(false)
+
+  // 페이지 변경 시 스크롤 업을 위한 Ref
+  const listRef = useRef<HTMLDivElement>(null)
 
   // ! 나중에 accessToken 디코딩해서 실제 정보로
   const currentUser = {
@@ -77,6 +85,11 @@ export default function MachinePage() {
       setSize(result.page.size)
       setTotalElements(result.page.totalElements)
       setTotalPages(result.page.totalPages)
+
+      // 페이지가 바뀔 떄마다 맨 위 스크롤로
+      if (listRef.current) {
+        listRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     } catch (error) {
       handleApiError(error, '필터링된 데이터를 불러오는 데 실패했습니다.')
       setError(true)
@@ -86,10 +99,22 @@ export default function MachinePage() {
     // eslint-disable-next-line
   }, [page, size, projectName, myProject])
 
-  // 필터 변경 시 API 호출
+  // API 호출
   useEffect(() => {
     getFilteredData()
   }, [getFilteredData])
+
+  const handleLogout = async () => {
+    try {
+      // ! CSRF token 같이 넣어서 POST
+      await auth.post(`/api/authentication/web/logout`)
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      localStorage.removeItem('accessToken')
+      router.push('/login')
+    }
+  }
 
   // 기계설비현장 선택 핸들러
   const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
@@ -102,7 +127,7 @@ export default function MachinePage() {
     }
   }
 
-  // 기계설비현장 카드 목록
+  // 기계설비현장 카드
   function MachineProjectCard({ machineProject }: { machineProject: MachineProjectPageDtoType }) {
     const engineerCnt = machineProject.engineerNames.length
 
@@ -129,7 +154,9 @@ export default function MachinePage() {
                     .slice(0, 2)
                     .join(', ')
                     .concat(`외 ${engineerCnt - 2}명`)
-                : machineProject.engineerNames.join(', ')}
+                : engineerCnt === 0
+                  ? '배정된 점검진 없음'
+                  : machineProject.engineerNames.join(', ')}
             </Typography>
           </div>
         </Box>
@@ -156,24 +183,24 @@ export default function MachinePage() {
           backgroundColor: 'primary.main',
           borderRadius: isMobile ? 1 : 10,
           width: isMobile ? '90%' : '47%',
-          height: isMobile ? '45%' : '80%'
+          height: isMobile ? '45%' : '80%',
+          left: isMobile ? '0.25rem' : '50%', // left-1 == 0.25rem
+          top: '50%',
+          transform: isMobile
+            ? `translateY(${!myProject ? '-100%' : '-50%'})`
+            : `translate(${!myProject ? '-100%' : '-0%'}, -50%)`,
+          transition: 'transform 0.3s ease-in-out'
         }}
-        className={
-          isMobile
-            ? `left-1 top-[50%] -translate-y-1/2 ${!myProject ? '-translate-y-full' : 'translate-y-0'}`
-            : `transition-transform duration-300 ease-in-out left-[50%] top-[50%] -translate-y-1/2 ${
-                !myProject ? '-translate-x-full' : '-translate-x-0'
-              }`
-        }
       />
+
       <Button
-        onClick={() => setMyProject(false)}
+        onClick={() => setMyProject(prev => !prev)}
         sx={!myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
       >
         전체 현장
       </Button>
       <Button
-        onClick={() => setMyProject(true)}
+        onClick={() => setMyProject(prev => !prev)}
         sx={myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
       >
         나의 현장
@@ -183,12 +210,75 @@ export default function MachinePage() {
 
   return (
     <>
-      {/* Drawer */}
+      {/* Drawer 부분 */}
+      <Drawer
+        open={open}
+        onClose={() => setOpen(false)}
+        slotProps={{
+          paper: { sx: { width: isMobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
+          root: { sx: { position: 'relative' } }
+        }}
+        anchor='left'
+      >
+        <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', right: 0, top: 0 }}>
+          <i className='tabler-x text-white' />
+        </IconButton>
+        <Box>
+          <Box
+            sx={{
+              backgroundColor: 'primary.light',
+              p: 2
+            }}
+          >
+            {/* ! 유저 이미지로 변경 */}
+            <div className='w-[70px] h-[70px] bg-white rounded-full m-3'>
+              <i className='tabler-user text-[70px]' />
+            </div>
+            <div className='flex gap-2'>
+              <Typography variant='h4' color='white'>
+                {`[${currentUser.gradeDescription}] ${currentUser.name}`}
+              </Typography>
+            </div>
+            <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+              {currentUser.companyName}
+            </Typography>
+
+            <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+              수첩발급번호: {currentUser.engineerLicenseNum}
+            </Typography>
+          </Box>
+        </Box>
+        <div className='flex flex-col justify-between h-full'>
+          <Box sx={{ p: 5, mt: 5 }}>
+            <Button
+              fullWidth
+              sx={{ display: 'flex', justifyContent: 'start', boxShadow: 4, color: 'dimgray', borderColor: 'dimgray' }}
+              variant='outlined'
+              onClick={() => handleLogout()}
+            >
+              <i className='tabler-logout text-[30px]' />
+              <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>
+                로그아웃
+              </Typography>
+            </Button>
+          </Box>
+          <Link sx={{ textAlign: 'end', py: 3, px: 5 }} href='/machine'>
+            웹으로 보기
+          </Link>
+        </div>
+      </Drawer>
 
       {/* 렌더링 될 화면 */}
       <Box className='flex flex-col w-full' sx={{ height: '100vh' }}>
         <MobileHeader
-          left={<>{!isMobile && <ProjectToggle />}</>}
+          left={
+            <>
+              <IconButton sx={{ boxShadow: 3, backgroundColor: 'white' }} onClick={() => setOpen(true)}>
+                <i className='tabler-user' />
+              </IconButton>
+              {!isMobile && <ProjectToggle />}
+            </>
+          }
           title={`${myProject ? '내 현장' : '현장 목록'}(${totalElements})`}
           right={
             isMobile ? (
@@ -207,6 +297,7 @@ export default function MachinePage() {
         />
         {/* 카드 리스트 */}
         <Box
+          ref={listRef}
           sx={{
             flex: 1,
             overflowY: 'auto',
@@ -226,7 +317,6 @@ export default function MachinePage() {
           showFirstButton
           showLastButton
         />
-        <MobileFooter />
       </Box>
     </>
   )

@@ -30,7 +30,7 @@ import SearchBar from '@/app/_components/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/app/_components/table/BasicTable'
 import AddInspectionModal from './AddInspectionModal'
-import { ListsContext } from '../page'
+import { ListsContext, UseListsContext } from '../page'
 import PictureListModal from './detailModal/PictureListModal'
 
 export const SelectedInspectionContext = createContext<{
@@ -79,6 +79,8 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
   const [filters, setFilters] = useState<MachineInspectionFilterType>({
     engineerName: ''
   })
+
+  const categoryList = UseListsContext().categoryList
 
   const [machineCategoryName, setMachineCategoryName] = useState('')
   const [location, setLocation] = useState('')
@@ -428,6 +430,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           open={showAddModalOpen}
           setOpen={setShowAddModalOpen}
           machineProjectId={machineProjectId}
+          categoryList={categoryList}
         />
       )}
       {selectedInspection && (

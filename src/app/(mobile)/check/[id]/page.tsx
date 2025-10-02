@@ -1,92 +1,59 @@
 'use client'
 
-import type { Dispatch, ReactNode, SetStateAction, SyntheticEvent } from 'react'
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import { createContext, useCallback, useEffect, useState } from 'react'
 
-import { redirect, useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-
-import { CardContent, IconButton, Tab, Typography, useMediaQuery } from '@mui/material'
-import TabContext from '@mui/lab/TabContext'
-import TabList from '@mui/lab/TabList'
-import TabPanel from '@mui/lab/TabPanel'
+import { Box, Button, IconButton, InputLabel, TextField, Typography } from '@mui/material'
 
 import axios from 'axios'
 
-import classNames from 'classnames'
+import { useForm } from 'react-hook-form'
 
-import PictureListTabContent from './_components/PictureListTabContent'
-import type {
-  MachineCategoryResponseDtoType,
-  MachineEngineerOptionListResponseDtoType,
-  MachineEngineerOptionResponseDtoType,
-  machineProjectEngineerDetailDtoType,
-  MachineProjectResponseDtoType,
-  MachineProjectScheduleAndEngineerResponseDtoType
-} from '@/app/_type/types'
+import { toast } from 'react-toastify'
+
+import type { MachineProjectResponseDtoType, MachineProjectScheduleAndEngineerResponseDtoType } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import CustomTextField from '@/@core/components/mui/TextField'
-import DisabledTabWithTooltip from '@/app/_components/DisabledTabWithTooltip'
-import BasicTabContent from './_components/BasicTabContent'
-import ScheduleAndEngineerTabContent from './_components/ScheduleAndEngineerTabContent'
-import NoteTabContent from './_components/NoteTabContent'
-import InspectionListContent from './_components/InspectionListContent'
-
-export const ListsContext = createContext<{
-  engineerList: MachineEngineerOptionResponseDtoType[]
-  categoryList: MachineCategoryResponseDtoType[]
-  participatedEngineerList: machineProjectEngineerDetailDtoType[]
-  getParticipatedEngineerList: () => void
-}>({
-  engineerList: [],
-  categoryList: [],
-  participatedEngineerList: [],
-  getParticipatedEngineerList: () => null
-})
-
-export const UseListsContext = () => {
-  const context = useContext(ListsContext)
-
-  if (!context) throw new Error()
-
-  if (!context.engineerList || !context.categoryList || !context.participatedEngineerList) {
-    throw new Error()
-  }
-
-  return context
-}
+import MobileHeader from '../../_components/MobileHeader'
+import { auth } from '@/lib/auth'
 
 export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing: Dispatch<SetStateAction<boolean>> }>({
   isEditing: false,
   setIsEditing: () => null
 })
 
-const Tabs = [
-  { value: '현장정보', label: '현장정보' },
-  { value: '점검일정/참여기술진', label: '점검일정/참여기술진' },
-  { value: '설비목록', label: '설비목록' },
-  { value: '전체사진', label: '전체사진' },
-  { value: '특이사항', label: '특이사항' }
-]
+export interface thumbnailType {
+  machineProjectName: string
+  beginDate: string
+  endDate: string
+  engineerNames: string[]
+}
 
-const MachineUpdatePage = () => {
-  const isMobile = useMediaQuery('(max-width:600px)')
+const CheckDetailPage = () => {
+  const router = useRouter()
 
   const params = useParams()
   const machineProjectId = params?.id as string
 
   const [projectData, setProjectData] = useState<MachineProjectResponseDtoType>()
   const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
-  const [engineerList, setEngineerList] = useState<MachineEngineerOptionResponseDtoType[]>([])
-  const [categoryList, setCategoryList] = useState<MachineCategoryResponseDtoType[]>([])
-  const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
 
-  const [tabValue, setTabValue] = useState<string>('현장정보')
+  // ! 대표 이미지, 마지막 업로드 추가
+  const [thumbnailData, setThumbnailData] = useState<thumbnailType>()
 
-  const [isEditingProjectName, setIsEditingProjectName] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const {
+    register,
+    formState: { isSubmitting },
+    handleSubmit,
+    reset
+  } = useForm({
+    defaultValues: {
+      machineProjectName: '',
+      requirement: '',
+      note: ''
+    }
+  })
 
   // 현장정보 불러오기
   const getProjectData = useCallback(async () => {
@@ -103,6 +70,10 @@ const MachineUpdatePage = () => {
     }
   }, [machineProjectId])
 
+  useEffect(() => {
+    getProjectData()
+  }, [getProjectData])
+
   // 점검일정/참여기술진 정보 불러오기
   const getScheduleData = useCallback(async () => {
     try {
@@ -118,211 +89,211 @@ const MachineUpdatePage = () => {
     }
   }, [machineProjectId])
 
-  // 엔지니어 목록 가져오기
-  const getEngineerList = useCallback(async () => {
-    try {
-      const response = await axios.get<{ data: MachineEngineerOptionListResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`
-      )
+  useEffect(() => {
+    getScheduleData()
+  }, [getScheduleData])
 
-      setEngineerList(response.data.data.engineers)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [])
+  // projectData와 scheduleData 중 썸네일에 필요한 정보를 thumbnailData에 저장.
+  useEffect(() => {
+    if (!projectData || !scheduleData) return
+    const { machineProjectName } = projectData
+    const { engineers, beginDate, endDate } = scheduleData
+
+    setThumbnailData({ machineProjectName, engineerNames: engineers.map(v => v.engineerName), beginDate, endDate })
+  }, [projectData, scheduleData])
+
+  // thumbnailData가 바뀔 때마다 localStorage에 저장.
+  useEffect(() => {
+    localStorage.setItem('thumbnail', JSON.stringify(thumbnailData))
+  }, [thumbnailData])
 
   useEffect(() => {
-    getEngineerList()
-  }, [getEngineerList])
+    reset({
+      machineProjectName: projectData?.machineProjectName ?? '',
+      requirement: projectData?.requirement ?? '',
+      note: projectData?.note ?? ''
+    })
+  }, [projectData, reset])
 
-  // 카테고리 목록 가져오기
-  const getCategoryList = useCallback(async () => {
-    try {
-      const response = await axios.get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-categories`
-      )
-
-      setCategoryList(response.data.data.machineCategoryResponseDtos)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [])
-
-  useEffect(() => {
-    getCategoryList()
-  }, [getCategoryList])
-
-  // 해당 프로젝트에 참여 중인 기술진 목록 가져오기
-  const getParticipatedEngineerList = useCallback(async () => {
-    try {
-      const response = await axios.get<{
-        data: { machineProjectEngineerResponseDtos: machineProjectEngineerDetailDtoType[] }
-      }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-project-engineers`
-      )
-
-      setParticipatedEngineerList(response.data.data.machineProjectEngineerResponseDtos)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [machineProjectId])
-
-  useEffect(() => {
-    getParticipatedEngineerList()
-  }, [getParticipatedEngineerList])
-
-  const handleChange = (event: SyntheticEvent, newValue: string) => {
-    setTabValue(newValue)
-  }
-
-  const handleChangeProjectName = useCallback(
-    async (projectName: string) => {
+  // ! api 하나로 통일
+  const handleSave = useCallback(
+    async (data: { machineProjectName: string; requirement: string; note: string }) => {
       try {
-        await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/name`, {
-          version: projectData?.version,
-          name: projectName
+        if (!projectData) throw new Error()
+
+        const { machineProjectName, requirement, note } = projectData
+        const original = { machineProjectName, requirement, note }
+
+        if (JSON.stringify(original) === JSON.stringify(data)) {
+          toast.error('변경사항이 없습니다.', { autoClose: 1000 })
+
+          return
+        }
+
+        const response = await auth.put<{ data: { version: number } }>(`/api/machine-projects/${machineProjectId}`, {
+          ...projectData,
+          requirement: data.requirement
         })
-        getProjectData()
-        handleSuccess('프로젝트 이름이 변경되었습니다.')
-      } catch (error) {
-        handleApiError(error)
+
+        await auth.put<{ data: { version: number } }>(`/api/machine-projects/${machineProjectId}/name`, {
+          version: response.data.data.version,
+          name: data.machineProjectName
+        })
+
+        const finalRes = await auth.put<{ data: { version: number } }>(
+          `/api/machine-projects/${machineProjectId}/note`,
+          {
+            version: response.data.data.version + 1,
+            note: data.note
+          }
+        )
+
+        setProjectData(prev => ({
+          ...prev,
+          machineProjectName: data.machineProjectName,
+          requirement: data.requirement,
+          note: data.note,
+          version: finalRes.data.data.version
+        }))
+        handleSuccess('변경사항이 저장되었습니다.')
+      } catch (err) {
+        handleApiError(err)
       }
     },
-    [machineProjectId, projectData?.version, getProjectData]
+    [machineProjectId, projectData]
   )
 
-  useEffect(() => {
-    if (machineProjectId) {
-      switch (tabValue) {
-        case '현장정보':
-          if (!projectData) getProjectData()
-          break
-        case '점검일정/참여기술진':
-          if (!scheduleData) getScheduleData()
-          break
-        default:
-          break
-      }
-    }
-  }, [machineProjectId, tabValue, getProjectData, getScheduleData, engineerList, projectData, scheduleData])
-
-  const Providers = ({ children }: { children: ReactNode }) => (
-    <ListsContext.Provider
-      value={{
-        categoryList: categoryList,
-        engineerList: engineerList,
-        participatedEngineerList: participatedEngineerList,
-        getParticipatedEngineerList: getParticipatedEngineerList
-      }}
-    >
-      <IsEditingContext.Provider value={{ isEditing, setIsEditing }}>{children}</IsEditingContext.Provider>
-    </ListsContext.Provider>
-  )
-
+  // ! 마지막 업로드 정보 추가되면 추가, 실제 이미지로 변경.
+  // ! 설비목록 실제로 받아오기.
   return (
-    <Providers>
-      <Card>
-        <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-5': !isMobile })}>
-          <CardHeader
-            title={
-              <div
-                className={classNames('flex gap-0  mt-1', {
-                  'flex-col text-left items-start': isMobile,
-                  'items-center': !isMobile
-                })}
+    <form onSubmit={handleSubmit(data => handleSave(data))}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        <MobileHeader
+          left={
+            <IconButton onClick={() => router.back()}>
+              <i className='tabler-chevron-left text-white text-3xl' />
+            </IconButton>
+          }
+          title='현장정보'
+          right={
+            <div className='flex gap-4'>
+              <Button
+                variant='contained'
+                type='submit'
+                sx={{ boxShadow: 3, backgroundColor: 'white', color: 'gray' }}
+                disabled={isSubmitting}
               >
-                <Typography
-                  color='black'
-                  sx={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    ':hover': { color: 'primary.main' },
-                    alignItems: 'center',
-                    display: 'flex'
-                  }}
-                  onClick={() => redirect('/check')}
-                >
-                  기계설비현장
-                  <i className='tabler-chevron-right' />
-                </Typography>
-                <div className='flex'>
-                  {!isEditingProjectName ? (
-                    <Typography color='black' sx={{ fontSize: 25, fontWeight: 500 }}>
-                      {projectData?.machineProjectName ?? ''}
-                    </Typography>
-                  ) : (
-                    <CustomTextField id={'projectNameInput'} defaultValue={projectData?.machineProjectName ?? ''} />
-                  )}
-                  <IconButton
-                    onClick={() => {
-                      if (isEditingProjectName) {
-                        const projectNameInputElement = document.getElementById('projectNameInput') as HTMLInputElement
+                저장
+              </Button>
+              <IconButton
+                type='button'
+                sx={{
+                  backgroundColor: 'white',
+                  color: 'gray',
+                  boxShadow: 3,
+                  ':focus': { backgroundColor: 'lightgray !important' }
+                }}
+              >
+                <i className='tabler-camera' />
+              </IconButton>
+            </div>
+          }
+        />
 
-                        handleChangeProjectName(projectNameInputElement.value)
-                      }
+        <Box
+          sx={{
+            height: 200,
+            width: 'full',
+            backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(/images/pipe_info.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
 
-                      setIsEditingProjectName(prev => !prev)
-                    }}
-                  >
-                    <i className='tabler-pencil' />
-                  </IconButton>
-                </div>
-              </div>
-            }
-            sx={{ cursor: 'pointer', padding: 0 }}
-          />
-        </div>
-
-        <CardContent>
-          <TabContext value={tabValue}>
-            {/* 탭 목록 */}
-            <TabList onChange={handleChange} aria-label='nav tabs example'>
-              {Tabs.map(tab => {
-                return isEditing && tabValue !== tab.value ? (
-                  <DisabledTabWithTooltip value={tab.value} label={tab.label} />
-                ) : (
-                  <Tab key={tab.value} value={tab.value} label={tab.label} />
-                )
-              })}
-            </TabList>
-            <TabPanel value='현장정보'>
-              {projectData ? (
-                <BasicTabContent projectData={projectData} reloadData={getProjectData} />
-              ) : (
-                <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
-              )}
-            </TabPanel>
-            <TabPanel value='점검일정/참여기술진'>
-              {scheduleData && engineerList ? (
-                <ScheduleAndEngineerTabContent
-                  scheduleData={scheduleData}
-                  reloadData={async () => {
-                    getEngineerList()
-                    getScheduleData()
-                  }}
-                />
-              ) : (
-                <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
-              )}
-            </TabPanel>
-            <TabPanel value='설비목록'>
-              <InspectionListContent machineProjectId={machineProjectId} />
-            </TabPanel>
-            <TabPanel value='전체사진'>
-              <PictureListTabContent machineProjectId={machineProjectId} />
-            </TabPanel>
-            <TabPanel value='특이사항'>
-              {projectData ? (
-                <NoteTabContent id={machineProjectId} projectData={projectData} reloadData={getProjectData} />
-              ) : (
-                <Typography>특이사항 정보를 불러오는 중입니다.</Typography>
-              )}
-            </TabPanel>
-          </TabContext>
-        </CardContent>
-      </Card>
-    </Providers>
+            // backgroundBlendMode: 'normal',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            color: 'white',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+            fontSize: 18,
+            fontWeight: 500,
+            boxShadow: 5
+          }}
+        >
+          <Typography variant='inherit' sx={{ fontWeight: 600, fontSize: 24 }}>
+            {thumbnailData?.machineProjectName ?? '현장명'}
+          </Typography>
+          <div className='flex flex-col gap-1 items-center'>
+            <Typography
+              width={'fit-content'}
+              variant='inherit'
+            >{`${thumbnailData?.beginDate ?? '시작날짜'} ~ ${thumbnailData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
+            <Typography width={'fit-content'} variant='inherit'>
+              {(thumbnailData?.engineerNames.length ?? 0) > 2
+                ? `${thumbnailData?.engineerNames
+                    .slice(0, 2)
+                    .join(', ')} 외 ${thumbnailData!.engineerNames.length - 2}명`
+                : thumbnailData?.engineerNames
+                  ? thumbnailData?.engineerNames.join(', ')
+                  : '배정된 점검진 없음'}
+            </Typography>
+            <Typography width={'fit-content'} variant='inherit'>
+              마지막 업로드: {'없음'}
+            </Typography>
+          </div>
+        </Box>
+        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+          <Box sx={{ p: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>현장명</InputLabel>
+              <TextField
+                id='machineProjectName'
+                {...register('machineProjectName')}
+                fullWidth
+                hiddenLabel
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>관리주체 요청사항</InputLabel>
+              <TextField
+                id='requirement'
+                {...register('requirement')}
+                fullWidth
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>특이사항</InputLabel>
+              <TextField
+                id='note'
+                {...register('note')}
+                fullWidth
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+          </Box>
+        </Box>
+        <Box sx={{ py: 5, px: 8, boxShadow: 5 }}>
+          <Button
+            size='large'
+            variant='contained'
+            type='button'
+            fullWidth
+            sx={{ padding: 4, fontSize: 20 }}
+            onClick={() => router.push(`/check/${machineProjectId}/inspections`)}
+          >
+            설비목록 ({2})
+          </Button>
+        </Box>
+      </Box>
+    </form>
   )
 }
 
-export default MachineUpdatePage
+export default CheckDetailPage

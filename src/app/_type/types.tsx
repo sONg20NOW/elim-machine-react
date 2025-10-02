@@ -219,7 +219,7 @@ export type MachineProjectResponseDtoType = {
   grossArea?: number | null
   houseCnt?: number | null
   institutionName?: string | null
-  machineProjectName?: string | null
+  machineProjectName: string
   machineMaintainer1Info?: string | null
   machineMaintainer1Name?: string | null
   machineMaintainer2Info?: string | null
