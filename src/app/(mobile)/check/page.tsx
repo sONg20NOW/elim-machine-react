@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useCallback, createContext } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -11,18 +11,15 @@ import Button from '@mui/material/Button'
 import axios from 'axios'
 
 // Component Imports
-import { Box, Drawer, IconButton, Pagination, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Pagination, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import classNames from 'classnames'
 
 import type { MachineProjectPageDtoType, successResponseDtoType } from '@/app/_type/types'
 import { handleApiError } from '@/utils/errorHandler'
-import { auth } from '@/lib/auth'
 import MobileFooter from '../_components/MobileFooter'
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/app/_components/SearchBar'
-
-export const DrawerContext = createContext<{ openDrawer: () => void }>({ openDrawer: () => null })
 
 export default function MachinePage() {
   const router = useRouter()
@@ -32,8 +29,6 @@ export default function MachinePage() {
   const [error, setError] = useState(false)
 
   const disabled = loading || error
-
-  const [open, setOpen] = useState(false)
 
   const [totalElements, setTotalElements] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -104,18 +99,6 @@ export default function MachinePage() {
       router.push(`/check/${machineProject.machineProjectId}`)
     } catch (error) {
       handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      // ! CSRF token 같이 넣어서 POST
-      await auth.post(`/api/authentication/web/logout`)
-    } catch (e) {
-      handleApiError(e)
-    } finally {
-      localStorage.removeItem('accessToken')
-      router.push('/login')
     }
   }
 
@@ -199,53 +182,9 @@ export default function MachinePage() {
   )
 
   return (
-    <DrawerContext.Provider value={{ openDrawer: () => setOpen(true) }}>
+    <>
       {/* Drawer */}
-      <Drawer
-        open={open}
-        onClose={() => setOpen(false)}
-        slotProps={{
-          paper: { sx: { width: isMobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
-          root: { sx: { position: 'relative' } }
-        }}
-        anchor='left'
-      >
-        <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', right: 0, top: 0 }}>
-          <i className='tabler-x text-white' />
-        </IconButton>
-        <Box>
-          <Box sx={{ backgroundColor: 'primary.light', p: 2 }}>
-            {/* ! 유저 이미지로 변경 */}
-            <div className='w-[70px] h-[70px] bg-white rounded-full m-3'>
-              <i className='tabler-user text-[70px]' />
-            </div>
-            <Typography variant='h5' color='white'>
-              {currentUser.companyName}
-            </Typography>
-            <div className='flex gap-2'>
-              <Typography variant='h4' color='white'>
-                {`[${currentUser.gradeDescription}] ${currentUser.name}`}
-              </Typography>
-            </div>
-            <Typography variant='h5' color='white'>
-              수첩발급번호: {currentUser.engineerLicenseNum}
-            </Typography>
-          </Box>
-        </Box>
-        <Box sx={{ p: 5, mt: 5 }}>
-          <Button
-            fullWidth
-            sx={{ display: 'flex', justifyContent: 'start', boxShadow: 4, color: 'dimgray', borderColor: 'dimgray' }}
-            variant='outlined'
-            onClick={() => handleLogout()}
-          >
-            <i className='tabler-logout text-[30px]' />
-            <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>
-              로그아웃
-            </Typography>
-          </Button>
-        </Box>
-      </Drawer>
+
       {/* 렌더링 될 화면 */}
       <Box className='flex flex-col w-full' sx={{ height: '100vh' }}>
         <MobileHeader
@@ -289,6 +228,6 @@ export default function MachinePage() {
         />
         <MobileFooter />
       </Box>
-    </DrawerContext.Provider>
+    </>
   )
 }
