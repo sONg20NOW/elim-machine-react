@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, createContext } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -11,13 +11,6 @@ import Button from '@mui/material/Button'
 import axios from 'axios'
 
 // Component Imports
-import 'dayjs/locale/ko'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-
-import dayjs from 'dayjs'
-
 import { Box, Drawer, IconButton, Pagination, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import classNames from 'classnames'
@@ -27,9 +20,9 @@ import { handleApiError } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import MobileFooter from '../_components/MobileFooter'
 import MobileHeader from '../_components/MobileHeader'
+import SearchBar from '@/app/_components/SearchBar'
 
-// datepicker 한글화
-dayjs.locale('ko')
+export const DrawerContext = createContext<{ openDrawer: () => void }>({ openDrawer: () => null })
 
 export default function MachinePage() {
   const router = useRouter()
@@ -62,16 +55,6 @@ export default function MachinePage() {
     engineerLicenseNum: '259-1004',
     companyName: '엘림주식회사(주)'
   }
-
-  // 페이지 첫 로딩 시 localstorage에 headerKeyword가 있으면 해당 키워드를 이름으로 검색
-  const headerKeyword = localStorage.getItem('headerKeyword')
-
-  useEffect(() => {
-    if (headerKeyword) {
-      setProjectName(headerKeyword)
-      localStorage.removeItem('headerKeyword')
-    }
-  }, [headerKeyword])
 
   // 기계설비현장 리스트 호출 API 함수
   const getFilteredData = useCallback(async () => {
@@ -136,6 +119,7 @@ export default function MachinePage() {
     }
   }
 
+  // 기계설비현장 카드 목록
   function MachineProjectCard({ machineProject }: { machineProject: MachineProjectPageDtoType }) {
     const engineerCnt = machineProject.engineerNames.length
 
@@ -170,8 +154,52 @@ export default function MachinePage() {
     )
   }
 
+  // 전체 현장 / 나의 현장 토글 버튼
+  const ProjectToggle = () => (
+    <Box
+      sx={{
+        border: '1px solid lightgray',
+        borderRadius: isMobile ? 1 : 10,
+        p: 1,
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        position: 'relative',
+        backgroundColor: 'white'
+      }}
+    >
+      <Card
+        sx={{
+          position: 'absolute',
+          backgroundColor: 'primary.main',
+          borderRadius: isMobile ? 1 : 10,
+          width: isMobile ? '90%' : '47%',
+          height: isMobile ? '45%' : '80%'
+        }}
+        className={
+          isMobile
+            ? `left-1 top-[50%] -translate-y-1/2 ${!myProject ? '-translate-y-full' : 'translate-y-0'}`
+            : `transition-transform duration-300 ease-in-out left-[50%] top-[50%] -translate-y-1/2 ${
+                !myProject ? '-translate-x-full' : '-translate-x-0'
+              }`
+        }
+      />
+      <Button
+        onClick={() => setMyProject(false)}
+        sx={!myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
+      >
+        전체 현장
+      </Button>
+      <Button
+        onClick={() => setMyProject(true)}
+        sx={myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
+      >
+        나의 현장
+      </Button>
+    </Box>
+  )
+
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ko'>
+    <DrawerContext.Provider value={{ openDrawer: () => setOpen(true) }}>
       {/* Drawer */}
       <Drawer
         open={open}
@@ -207,11 +235,12 @@ export default function MachinePage() {
         <Box sx={{ p: 5, mt: 5 }}>
           <Button
             fullWidth
-            sx={{ display: 'flex', justifyContent: 'start', gap: 4, fontSize: 'large', color: 'dimgray' }}
+            sx={{ display: 'flex', justifyContent: 'start', boxShadow: 4, color: 'dimgray', borderColor: 'dimgray' }}
+            variant='outlined'
             onClick={() => handleLogout()}
           >
-            <i className='tabler-logout' />
-            <Typography variant='inherit' sx={{ fontWeight: 600 }}>
+            <i className='tabler-logout text-[30px]' />
+            <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>
               로그아웃
             </Typography>
           </Button>
@@ -220,15 +249,22 @@ export default function MachinePage() {
       {/* 렌더링 될 화면 */}
       <Box className='flex flex-col w-full' sx={{ height: '100vh' }}>
         <MobileHeader
-          currentPage='machine_main'
-          isMobile={isMobile}
-          myProject={myProject}
-          setMyProject={setMyProject}
-          setOpenDrawer={setOpen}
-          totalCount={totalElements}
-          setProjectName={setProjectName}
-          setPage={setPage}
-          disabled={disabled}
+          left={<>{!isMobile && <ProjectToggle />}</>}
+          title={`${myProject ? '내 현장' : '현장 목록'}(${totalElements})`}
+          right={
+            isMobile ? (
+              <ProjectToggle />
+            ) : (
+              <SearchBar
+                placeholder='현장명으로 검색'
+                setSearchKeyword={projectName => {
+                  setProjectName(projectName)
+                  setPage(0)
+                }}
+                disabled={disabled}
+              />
+            )
+          }
         />
         {/* 카드 리스트 */}
         <Box
@@ -253,6 +289,6 @@ export default function MachinePage() {
         />
         <MobileFooter />
       </Box>
-    </LocalizationProvider>
+    </DrawerContext.Provider>
   )
 }

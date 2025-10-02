@@ -240,7 +240,7 @@ const MachineUpdatePage = () => {
                     alignItems: 'center',
                     display: 'flex'
                   }}
-                  onClick={() => redirect('/machine')}
+                  onClick={() => redirect('/check')}
                 >
                   기계설비현장
                   <i className='tabler-chevron-right' />
