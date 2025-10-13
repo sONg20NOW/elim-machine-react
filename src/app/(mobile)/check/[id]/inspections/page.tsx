@@ -183,7 +183,12 @@ export default function InspectionsPage() {
         }
         title={`설비목록(${totalElements})`}
         right={
-          <IconButton type='button' sx={{ boxShadow: 3, backgroundColor: 'white' }} onClick={() => setOpen(true)}>
+          <IconButton
+            type='button'
+            sx={{ boxShadow: 3, backgroundColor: 'white' }}
+            disabled={disabled}
+            onClick={() => setOpen(true)}
+          >
             <i className='tabler-plus' />
           </IconButton>
         }

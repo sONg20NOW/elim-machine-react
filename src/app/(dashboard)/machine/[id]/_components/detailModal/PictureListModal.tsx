@@ -199,19 +199,19 @@ const PictureListModal = ({
     try {
       // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
       const presignedResponse = await axios.post<{
-        data: { presignedUrlResponseDtos: { objectKey: string; presignedUrl: string }[] }
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/presigned-urls/upload`, {
-        uploadType: 'INSPECTION_IMAGE',
-        originalFileNames: filesToUpload.map(file => file.name),
-        projectId: parseInt(machineProjectId),
-        machineInspectionId: selectedInspection.machineInspectionResponseDto.id,
-        cateName: selectedInspection.machineInspectionResponseDto.machineCategoryName ?? '배관설비',
-        picCateName: selectedItem?.machineChecklistItemName ?? '설비사진',
-        picSubCateName: selectedSubItem?.checklistSubItemName ?? '현황사진',
+        data: { presignedUrlResponseDtos: { s3Key: string; presignedUrl: string }[] }
+      }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/presigned-urls/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/upload`,
+        {
+          uploadType: 'INSPECTION_IMAGE',
+          originalFileNames: filesToUpload.map(file => file.name),
+          checklistItemId: selectedItem?.machineChecklistItemId ?? '설비사진',
+          checklistSubItemId: selectedSubItem?.machineChecklistSubItemId ?? '현황사진'
 
-        // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
-        memberId: 1
-      })
+          // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
+          // memberId: 1
+        }
+      )
 
       const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
 
@@ -236,7 +236,7 @@ const PictureListModal = ({
 
         return {
           fileName: file.name,
-          s3Key: presignedData.objectKey,
+          s3Key: presignedData.s3Key,
           uploadSuccess: true
         }
       })
@@ -387,7 +387,9 @@ const PictureListModal = ({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth disableEnforceFocus disableAutoFocus>
       <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 } }}>사진 목록</Typography>
+        <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 } }}>
+          {selectedInspection.machineInspectionResponseDto.machineInspectionName}
+        </Typography>
         <Grid item xs={12}>
           <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
             점검항목 선택

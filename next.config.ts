@@ -25,7 +25,10 @@ const nextConfig: NextConfig = {
       //   locale: false
       // }
     ]
-  }
+  },
+
+  // 모바일 접속 가능
+  allowedDevOrigins: ['http://192.168.0.50', 'http://192.168.0.224', '192.168.0.50']
 }
 
 export default nextConfig

@@ -1,7 +1,7 @@
 'use client'
 
 import type { Dispatch, SetStateAction } from 'react'
-import { createContext, useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -41,6 +41,12 @@ const CheckDetailPage = () => {
 
   // ! 대표 이미지, 마지막 업로드 추가
   const [thumbnailData, setThumbnailData] = useState<thumbnailType>()
+
+  // 1. 카메라로 찍은 이미지 URL을 저장할 상태 추가
+  const [customBackgroundImage, setCustomBackgroundImage] = useState<string | null>(null)
+
+  // 2. 숨겨진 <input type="file">에 접근하기 위한 ref 추가
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const {
     register,
@@ -163,10 +169,51 @@ const CheckDetailPage = () => {
     [machineProjectId, projectData]
   )
 
+  // 3. 카메라 버튼 클릭 핸들러: 숨겨진 <input type="file">을 클릭
+  const handleCameraClick = () => {
+    cameraInputRef.current?.click()
+  }
+
+  // 4. 이미지 파일 변경 핸들러: 찍은 사진을 읽어 배경 이미지로 설정
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (file) {
+      // 이전에 생성된 객체 URL이 있다면 메모리 누수를 막기 위해 해제 (Optional)
+      if (customBackgroundImage) {
+        URL.revokeObjectURL(customBackgroundImage)
+      }
+
+      // 새 파일의 객체 URL을 생성하여 상태에 저장
+      const newImageUrl = URL.createObjectURL(file)
+
+      setCustomBackgroundImage(newImageUrl)
+      toast.success('대표 이미지가 변경되었습니다.')
+    }
+  }
+
+  // 배경 이미지를 결정하는 유틸리티 함수
+  const getBackgroundImageStyle = () => {
+    // 5. customBackgroundImage가 있으면 그 URL을 사용하고, 없으면 기본 이미지를 사용
+    const imageUrl = customBackgroundImage || '/images/pipe_info.png'
+
+    // 배경 이미지 위에 어두운 오버레이를 유지하기 위해 linear-gradient와 결합
+    return `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(${imageUrl})`
+  }
+
   // ! 마지막 업로드 정보 추가되면 추가, 실제 이미지로 변경.
   // ! 설비목록 실제로 받아오기.
   return (
     <form onSubmit={handleSubmit(data => handleSave(data))}>
+      {/* 6. 숨겨진 파일 입력 요소 (카메라 접근용) */}
+      <input
+        type='file'
+        accept='image/*' // 이미지 파일만 허용
+        capture='environment' // 모바일에서 후면 카메라를 우선적으로 사용하도록 지정
+        ref={cameraInputRef}
+        onChange={handleImageChange}
+        style={{ display: 'none' }} // 화면에서 숨김
+      />
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
         <MobileHeader
           left={
@@ -187,6 +234,7 @@ const CheckDetailPage = () => {
               </Button>
               <IconButton
                 type='button'
+                onClick={handleCameraClick} // 7. 버튼 클릭 시 카메라 핸들러 호출
                 sx={{
                   backgroundColor: 'white',
                   color: 'gray',
@@ -204,7 +252,9 @@ const CheckDetailPage = () => {
           sx={{
             height: 200,
             width: 'full',
-            backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(/images/pipe_info.png)',
+
+            // 8. customBackgroundImage 상태에 따라 배경 이미지 변경
+            backgroundImage: getBackgroundImageStyle(),
             backgroundSize: 'cover',
             backgroundPosition: 'center',
 
