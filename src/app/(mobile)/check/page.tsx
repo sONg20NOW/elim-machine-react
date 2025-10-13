@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useContext } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -11,15 +11,25 @@ import Button from '@mui/material/Button'
 import axios from 'axios'
 
 // Component Imports
-import { Box, Drawer, IconButton, Link, Pagination, Typography, useMediaQuery, useTheme } from '@mui/material'
-
-import classNames from 'classnames'
+import {
+  alpha,
+  Box,
+  Drawer,
+  FormControlLabel,
+  IconButton,
+  Link,
+  Pagination,
+  styled,
+  Switch,
+  Typography
+} from '@mui/material'
 
 import type { MachineProjectPageDtoType, successResponseDtoType } from '@/app/_type/types'
 import { handleApiError } from '@/utils/errorHandler'
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/app/_components/SearchBar'
 import { auth } from '@/lib/auth'
+import { isMobileContext } from '@/app/_components/ProtectedPage'
 
 export default function MachinePage() {
   const router = useRouter()
@@ -43,8 +53,7 @@ export default function MachinePage() {
   // 전체현장 / 나의현장 토글
   const [myProject, setMyProject] = useState(false)
 
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useContext(isMobileContext)
 
   const [open, setOpen] = useState(false)
 
@@ -58,6 +67,18 @@ export default function MachinePage() {
     engineerLicenseNum: '259-1004',
     companyName: '엘림주식회사(주)'
   }
+
+  const CustomSwitch = styled(Switch)(({ theme }) => ({
+    '& .MuiSwitch-switchBase.Mui-checked': {
+      color: '#593ca2d6',
+      '&:hover': {
+        backgroundColor: alpha('#ffffff82', theme.palette.action.hoverOpacity)
+      }
+    },
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+      backgroundColor: '#ffffffff'
+    }
+  }))
 
   // 기계설비현장 리스트 호출 API 함수
   const getFilteredData = useCallback(async () => {
@@ -133,16 +154,27 @@ export default function MachinePage() {
 
     return (
       <Card
-        sx={{ mb: 5, display: 'flex', gap: 5 }}
+        sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
         elevation={10}
         onClick={() => handleMachineProjectClick(machineProject)}
       >
-        <i className={classNames('tabler-photo', { 'text-[180px]': !isMobile, 'text-[130px]': isMobile })} />
-        <Box sx={{ display: 'flex', flexDirection: 'column', px: 5, py: 10, gap: 3 }}>
+        <div className='w-fit flex-1'>
+          <i className='tabler-photo w-full h-full' />
+        </div>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            px: !isMobile ? 5 : 2,
+            py: !isMobile ? 10 : 5,
+            gap: !isMobile ? 3 : 1,
+            flex: !isMobile ? 3 : 2
+          }}
+        >
           <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
             {machineProject.machineProjectName !== '' ? machineProject.machineProjectName : '이름없는 현장'}
           </Typography>
-          <div className='flex flex-col gap-2'>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
             <Typography sx={{ fontWeight: 500 }}>
               {machineProject.fieldBeginDate &&
                 machineProject.fieldEndDate &&
@@ -158,55 +190,71 @@ export default function MachinePage() {
                   ? '배정된 점검진 없음'
                   : machineProject.engineerNames.join(', ')}
             </Typography>
-          </div>
+          </Box>
         </Box>
       </Card>
     )
   }
 
   // 전체 현장 / 나의 현장 토글 버튼
-  const ProjectToggle = () => (
-    <Box
-      sx={{
-        border: '1px solid lightgray',
-        borderRadius: isMobile ? 1 : 10,
-        p: 1,
-        display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        position: 'relative',
-        backgroundColor: 'white'
-      }}
-    >
-      <Card
+  const ProjectToggle = () =>
+    !isMobile ? (
+      <Box
         sx={{
-          position: 'absolute',
-          backgroundColor: 'primary.main',
+          border: '1px solid lightgray',
           borderRadius: isMobile ? 1 : 10,
-          width: isMobile ? '90%' : '47%',
-          height: isMobile ? '45%' : '80%',
-          left: isMobile ? '0.25rem' : '50%', // left-1 == 0.25rem
-          top: '50%',
-          transform: isMobile
-            ? `translateY(${!myProject ? '-100%' : '-50%'})`
-            : `translate(${!myProject ? '-100%' : '-0%'}, -50%)`,
-          transition: 'transform 0.3s ease-in-out'
+          p: 1,
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          position: 'relative',
+          backgroundColor: 'white'
         }}
-      />
+      >
+        <Card
+          sx={{
+            position: 'absolute',
+            backgroundColor: 'primary.main',
+            borderRadius: isMobile ? 1 : 10,
+            width: isMobile ? '90%' : '47%',
+            height: isMobile ? '45%' : '80%',
+            left: isMobile ? '0.25rem' : '50%', // left-1 == 0.25rem
+            top: '50%',
+            transform: isMobile
+              ? `translateY(${!myProject ? '-100%' : '-0%'})`
+              : `translate(${!myProject ? '-100%' : '-0%'}, -50%)`,
+            transition: 'transform 0.3s ease-in-out'
+          }}
+        />
 
-      <Button
-        onClick={() => setMyProject(prev => !prev)}
-        sx={!myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
-      >
-        전체 현장
-      </Button>
-      <Button
-        onClick={() => setMyProject(prev => !prev)}
-        sx={myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
-      >
-        나의 현장
-      </Button>
-    </Box>
-  )
+        <Button
+          onClick={() => setMyProject(prev => !prev)}
+          sx={
+            !myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }
+          }
+        >
+          전체 현장
+        </Button>
+        <Button
+          onClick={() => setMyProject(prev => !prev)}
+          sx={myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
+        >
+          나의 현장
+        </Button>
+      </Box>
+    ) : (
+      <FormControlLabel
+        label={
+          <Typography
+            color='white'
+            sx={{ fontWeight: 600, opacity: myProject ? '' : '60%', transition: 'ease-in-out all' }}
+          >
+            내 현장
+          </Typography>
+        }
+        labelPlacement='start'
+        control={<CustomSwitch checked={myProject} onClick={() => setMyProject(prev => !prev)} color='warning' />}
+      />
+    )
 
   return (
     <>
@@ -269,7 +317,7 @@ export default function MachinePage() {
       </Drawer>
 
       {/* 렌더링 될 화면 */}
-      <Box className='flex flex-col w-full' sx={{ height: '100vh' }}>
+      <Box className='flex flex-col w-full' sx={{ height: '100dvh' }}>
         <MobileHeader
           left={
             <>
@@ -279,7 +327,7 @@ export default function MachinePage() {
               {!isMobile && <ProjectToggle />}
             </>
           }
-          title={`${myProject ? '내 현장' : '현장 목록'}(${totalElements})`}
+          title={`현장 목록(${totalElements})`}
           right={
             isMobile ? (
               <ProjectToggle />
@@ -310,7 +358,7 @@ export default function MachinePage() {
         </Box>
 
         <Pagination
-          sx={{ alignSelf: 'center' }}
+          sx={{ alignSelf: 'center', py: 1 }}
           count={totalPages}
           page={page + 1}
           onChange={(_, value) => setPage(value - 1)}

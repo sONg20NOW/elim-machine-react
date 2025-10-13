@@ -1,7 +1,7 @@
 'use client'
 
 import type { Dispatch, SetStateAction } from 'react'
-import { createContext, useCallback, useEffect, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -17,6 +17,7 @@ import type { MachineProjectResponseDtoType, MachineProjectScheduleAndEngineerRe
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@/lib/auth'
+import { isMobileContext } from '@/app/_components/ProtectedPage'
 
 export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing: Dispatch<SetStateAction<boolean>> }>({
   isEditing: false,
@@ -35,6 +36,8 @@ const CheckDetailPage = () => {
 
   const params = useParams()
   const machineProjectId = params?.id as string
+
+  const isMobile = useContext(isMobileContext)
 
   const [projectData, setProjectData] = useState<MachineProjectResponseDtoType>()
   const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
@@ -188,14 +191,13 @@ const CheckDetailPage = () => {
       const newImageUrl = URL.createObjectURL(file)
 
       setCustomBackgroundImage(newImageUrl)
-      toast.success('대표 이미지가 변경되었습니다.')
     }
   }
 
   // 배경 이미지를 결정하는 유틸리티 함수
   const getBackgroundImageStyle = () => {
     // 5. customBackgroundImage가 있으면 그 URL을 사용하고, 없으면 기본 이미지를 사용
-    const imageUrl = customBackgroundImage || '/images/pipe_info.png'
+    const imageUrl = customBackgroundImage || '/images/safety114_logo.png'
 
     // 배경 이미지 위에 어두운 오버레이를 유지하기 위해 linear-gradient와 결합
     return `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(${imageUrl})`
@@ -214,7 +216,7 @@ const CheckDetailPage = () => {
         onChange={handleImageChange}
         style={{ display: 'none' }} // 화면에서 숨김
       />
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
         <MobileHeader
           left={
             <IconButton onClick={() => router.back()}>
@@ -232,18 +234,6 @@ const CheckDetailPage = () => {
               >
                 저장
               </Button>
-              <IconButton
-                type='button'
-                onClick={handleCameraClick} // 7. 버튼 클릭 시 카메라 핸들러 호출
-                sx={{
-                  backgroundColor: 'white',
-                  color: 'gray',
-                  boxShadow: 3,
-                  ':focus': { backgroundColor: 'lightgray !important' }
-                }}
-              >
-                <i className='tabler-camera' />
-              </IconButton>
             </div>
           }
         />
@@ -252,6 +242,7 @@ const CheckDetailPage = () => {
           sx={{
             height: 200,
             width: 'full',
+            position: 'relative',
 
             // 8. customBackgroundImage 상태에 따라 배경 이미지 변경
             backgroundImage: getBackgroundImageStyle(),
@@ -292,12 +283,29 @@ const CheckDetailPage = () => {
               마지막 업로드: {'없음'}
             </Typography>
           </div>
+          <IconButton
+            size='large'
+            type='button'
+            onClick={handleCameraClick} // 7. 버튼 클릭 시 카메라 핸들러 호출
+            sx={{
+              position: 'absolute',
+              right: 1,
+              top: 1,
+              color: 'white',
+              opacity: '90%'
+            }}
+          >
+            <i className='tabler-camera' />
+          </IconButton>
         </Box>
         <Box sx={{ flex: 1, overflowY: 'auto' }}>
-          <Box sx={{ p: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <Box
+            sx={{ py: !isMobile ? 10 : 4, px: 10, display: 'flex', flexDirection: 'column', gap: !isMobile ? 6 : 2 }}
+          >
             <div className='flex flex-col gap-1'>
               <InputLabel sx={{ px: 2 }}>현장명</InputLabel>
               <TextField
+                size={isMobile ? 'small' : 'medium'}
                 id='machineProjectName'
                 {...register('machineProjectName')}
                 fullWidth
@@ -308,6 +316,7 @@ const CheckDetailPage = () => {
             <div className='flex flex-col gap-1'>
               <InputLabel sx={{ px: 2 }}>관리주체 요청사항</InputLabel>
               <TextField
+                size={isMobile ? 'small' : 'medium'}
                 id='requirement'
                 {...register('requirement')}
                 fullWidth
@@ -319,6 +328,7 @@ const CheckDetailPage = () => {
             <div className='flex flex-col gap-1'>
               <InputLabel sx={{ px: 2 }}>특이사항</InputLabel>
               <TextField
+                size={isMobile ? 'small' : 'medium'}
                 id='note'
                 {...register('note')}
                 fullWidth
@@ -331,11 +341,11 @@ const CheckDetailPage = () => {
         </Box>
         <Box sx={{ py: 5, px: 8, boxShadow: 5 }}>
           <Button
-            size='large'
+            size={'large'}
             variant='contained'
             type='button'
             fullWidth
-            sx={{ padding: 4, fontSize: 20 }}
+            sx={{ padding: !isMobile ? 4 : 2, fontSize: 20 }}
             onClick={() => router.push(`/check/${machineProjectId}/inspections`)}
           >
             설비목록 ({2})

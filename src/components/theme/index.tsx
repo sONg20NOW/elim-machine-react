@@ -91,117 +91,103 @@ const CustomThemeProvider = (props: Props) => {
             root: {
               whiteSpace: 'nowrap', // ✅ 모든 버튼 줄바꿈 방지
               fontSize: '16px',
-              px: 0,
-              '@media (max-width:600px)': {
-                fontSize: '13px',
-                paddingLeft: '6px',
-                paddingRight: '6px',
-                paddingTop: '3px',
-                paddingBottom: '3px',
-                minWidth: '0 !important',
-                gap: '0'
-              },
-              '& .MuiButton-startIcon': {
-                '@media (max-width:600px)': {
-                  margin: 0,
-                  paddingBottom: '1.8px'
-                }
-              }
-            }
-          }
-        },
-        MuiCardHeader: {
-          styleOverrides: {
-            root: {
-              padding: '25px',
-              '@media (max-width:600px)': {
-                padding: '15px !important',
-                paddingBottom: '10px !important'
-              }
-            },
-            title: {
-              fontSize: '25px',
-              '@media (max-width:600px)': {
-                fontSize: '18px'
-              }
-            }
-          }
-        },
-
-        // 테이블 관련
-        MuiTable: {
-          styleOverrides: {
-            root: {
-              '@media (max-width:600px)': {
-                minWidth: 0
-              }
-            }
-          }
-        },
-        MuiTableCell: {
-          styleOverrides: {
-            root: {
-              whiteSpace: 'nowrap',
-              fontSize: '16px',
-              '@media (max-width:600px)': {
-                fontSize: '12px',
-                paddingLeft: '8px !important',
-                paddingRight: '8px !important',
-                paddingTop: '8px !important',
-                paddingBottom: '8px !important',
-                width: 'fit-content',
-                border: 'solid 1px silver !important',
-                overflowWrap: 'break-word'
-              }
-            },
-            head: {
-              '@media (max-width:600px)': { backgroundColor: '#f3f4f6' }
-            }
-          }
-        },
-
-        // 페이지네이션 관련
-        MuiToolbar: {
-          styleOverrides: {
-            root: {
-              '@media (max-width:600px)': {
-                margin: '0px !important'
-              },
-              '& .MuiTablePagination-actions': {
-                '.MuiIconButton-root': {
-                  '@media (max-width:600px)': {
-                    padding: 0
-                  }
-                }
-              },
-              '& .MuiInputBase-root.MuiSelect-root': {
-                '@media (max-width:600px)': { marginLeft: '0px !important', marginRight: '5px !important' }
-              }
-            }
-          }
-        }, // Dialog 관련
-        MuiDialogTitle: {
-          styleOverrides: {
-            root: {
-              '@media (max-width:600px)': {
-                padding: 12 // 모바일에서는 작게
-              }
-            }
-          }
-        },
-
-        // TextField - Select 관련
-        MuiMenu: {
-          styleOverrides: {
-            list: {
-              '& .MuiButtonBase-root': {
-                '@media (max-width:600px)': {
-                  fontSize: '13px'
-                }
-              }
+              px: 0
             }
           }
         }
+
+        // MuiCardHeader: {
+        //   styleOverrides: {
+        //     root: {
+        //       padding: '25px',
+        //       '@media (max-width:600px)': {
+        //         padding: '15px !important',
+        //         paddingBottom: '10px !important'
+        //       }
+        //     },
+        //     title: {
+        //       fontSize: '25px',
+        //       '@media (max-width:600px)': {
+        //         fontSize: '18px'
+        //       }
+        //     }
+        //   }
+        // },
+
+        // // 테이블 관련
+        // MuiTable: {
+        //   styleOverrides: {
+        //     root: {
+        //       '@media (max-width:600px)': {
+        //         minWidth: 0
+        //       }
+        //     }
+        //   }
+        // },
+        // MuiTableCell: {
+        //   styleOverrides: {
+        //     root: {
+        //       whiteSpace: 'nowrap',
+        //       fontSize: '16px',
+        //       '@media (max-width:600px)': {
+        //         fontSize: '12px',
+        //         paddingLeft: '8px !important',
+        //         paddingRight: '8px !important',
+        //         paddingTop: '8px !important',
+        //         paddingBottom: '8px !important',
+        //         width: 'fit-content',
+        //         border: 'solid 1px silver !important',
+        //         overflowWrap: 'break-word'
+        //       }
+        //     },
+        //     head: {
+        //       '@media (max-width:600px)': { backgroundColor: '#f3f4f6' }
+        //     }
+        //   }
+        // },
+
+        // // 페이지네이션 관련
+        // MuiToolbar: {
+        //   styleOverrides: {
+        //     root: {
+        //       '@media (max-width:600px)': {
+        //         margin: '0px !important'
+        //       },
+        //       '& .MuiTablePagination-actions': {
+        //         '.MuiIconButton-root': {
+        //           '@media (max-width:600px)': {
+        //             padding: 0
+        //           }
+        //         }
+        //       },
+        //       '& .MuiInputBase-root.MuiSelect-root': {
+        //         '@media (max-width:600px)': { marginLeft: '0px !important', marginRight: '5px !important' }
+        //       }
+        //     }
+        //   }
+        // }, // Dialog 관련
+        // MuiDialogTitle: {
+        //   styleOverrides: {
+        //     root: {
+        //       '@media (max-width:600px)': {
+        //         padding: 12 // 모바일에서는 작게
+        //       }
+        //     }
+        //   }
+        // },
+
+        // // TextField - Select 관련
+        // MuiMenu: {
+        //   styleOverrides: {
+        //     list: {
+        //       '& .MuiButtonBase-root': {
+        //         '@media (max-width:600px)': {
+        //           fontSize: '13px'
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
       }
     }
 

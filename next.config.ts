@@ -27,8 +27,8 @@ const nextConfig: NextConfig = {
     ]
   },
 
-  // 모바일 접속 가능
-  allowedDevOrigins: ['http://192.168.0.50', 'http://192.168.0.224', '192.168.0.50']
+  // IP주소로 접속 가능
+  allowedDevOrigins: ['http://192.168.0.50', '192.168.0.50']
 }
 
 export default nextConfig

@@ -1,12 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
-import { Box, Card, IconButton, Pagination, Typography, useMediaQuery, useTheme } from '@mui/material'
-
-import classNames from 'classnames'
+import { Box, Card, IconButton, Pagination, Typography } from '@mui/material'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { handleApiError } from '@/utils/errorHandler'
@@ -19,6 +17,7 @@ import type {
 import { auth } from '@/lib/auth'
 import type { thumbnailType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'
+import { isMobileContext } from '@/app/_components/ProtectedPage'
 
 export default function InspectionsPage() {
   const params = useParams()
@@ -26,8 +25,7 @@ export default function InspectionsPage() {
 
   const router = useRouter()
 
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useContext(isMobileContext)
 
   const [inspections, setInspections] = useState<MachineInspectionPageResponseDtoType[]>([])
 
@@ -148,13 +146,28 @@ export default function InspectionsPage() {
     const engineerCnt = inspection.engineerNames.length
 
     return (
-      <Card sx={{ mb: 5, display: 'flex', gap: 5 }} elevation={10} onClick={() => handleInspectionClick(inspection)}>
-        <i className={classNames('tabler-photo', { 'text-[180px]': !isMobile, 'text-[130px]': isMobile })} />
-        <Box sx={{ display: 'flex', flexDirection: 'column', px: 5, py: 10, gap: 3 }}>
+      <Card
+        sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
+        elevation={10}
+        onClick={() => handleInspectionClick(inspection)}
+      >
+        <div className='w-fit flex-1'>
+          <i className='tabler-photo-bolt w-full h-full' />
+        </div>{' '}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            px: !isMobile ? 5 : 2,
+            py: !isMobile ? 10 : 5,
+            gap: !isMobile ? 3 : 1,
+            flex: !isMobile ? 3 : 2
+          }}
+        >
           <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
             {inspection.machineInspectionName ?? '이름없는 설비'}
           </Typography>
-          <div className='flex flex-col gap-1'>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
             <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate ?? '점검날짜'}</Typography>
             <Typography sx={{ fontWeight: 500 }}>{inspection.location ?? '설치위치'}</Typography>
             <Typography>
@@ -167,14 +180,14 @@ export default function InspectionsPage() {
                   ? '배정된 점검진 없음'
                   : inspection.engineerNames.join(', ')}
             </Typography>
-          </div>
+          </Box>
         </Box>
       </Card>
     )
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
       <MobileHeader
         left={
           <IconButton onClick={() => router.back()}>

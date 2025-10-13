@@ -684,7 +684,7 @@ export type InputFieldType = {
 export interface HeaderInfoType {
   label: string
   canSort: boolean
-  hideOnMobile?: boolean
+  hideOnTablet?: boolean
 }
 
 export type HeaderType<T> = Record<keyof T, HeaderInfoType>

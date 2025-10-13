@@ -4,8 +4,8 @@
 
 /* 미디어쿼리 CSS - 반응형 */
 /* 1. 테이블 column 숨기기 */
-@media (max-width: 600px) {
-  .hide-on-mobile {
+@media (max-width: 900px) {
+  .hide-on-tablet {
     display: none;
   }
 }

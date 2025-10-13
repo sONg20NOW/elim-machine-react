@@ -19,7 +19,7 @@ const Footer = () => {
     <div
       className={classnames(
         verticalLayoutClasses.footerContent,
-        'pl-[10px] flex items-center justify-between flex-wrap  hidden sm:flex'
+        'pl-[10px] flex items-center justify-between flex-wrap  hidden md:flex'
       )}
     >
       <p>
@@ -27,7 +27,7 @@ const Footer = () => {
         <span className='text-textSecondary'>{` by Elim`}</span>
       </p>
       <Link href='/check' className={`text-color-primary`}>
-        app view
+        성능점검 앱
       </Link>
     </div>
   )
