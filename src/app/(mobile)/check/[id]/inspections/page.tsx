@@ -256,7 +256,7 @@ export default function InspectionsPage() {
         ))}
       </Box>
       <Pagination
-        sx={{ alignSelf: 'center' }}
+        sx={{ alignSelf: 'center', py: 1 }}
         count={totalPages}
         page={page + 1}
         onChange={(_, value) => setPage(value - 1)}
