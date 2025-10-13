@@ -141,11 +141,8 @@ export default function MachinePage() {
   const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
     if (!machineProject?.machineProjectId) return
 
-    try {
-      router.push(`/check/${machineProject.machineProjectId}`)
-    } catch (error) {
-      handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
-    }
+    localStorage.setItem('inspectionCnt', machineProject.inspectionCount.toString())
+    router.push(`/check/${machineProject.machineProjectId}`)
   }
 
   // 기계설비현장 카드

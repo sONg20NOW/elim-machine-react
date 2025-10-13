@@ -43,7 +43,9 @@ const CheckDetailPage = () => {
   const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
 
   // ! 대표 이미지, 마지막 업로드 추가
-  const [thumbnailData, setThumbnailData] = useState<thumbnailType>()
+  const [thumbnailData, setThumbnailData] = useState<thumbnailType | undefined>(
+    localStorage.getItem('thumbnail') !== null ? JSON.parse(localStorage.getItem('thumbnail')!) : undefined
+  )
 
   // 1. 카메라로 찍은 이미지 URL을 저장할 상태 추가
   const [customBackgroundImage, setCustomBackgroundImage] = useState<string | null>(null)
@@ -113,7 +115,7 @@ const CheckDetailPage = () => {
 
   // thumbnailData가 바뀔 때마다 localStorage에 저장.
   useEffect(() => {
-    localStorage.setItem('thumbnail', JSON.stringify(thumbnailData))
+    if (thumbnailData) localStorage.setItem('thumbnail', JSON.stringify(thumbnailData))
   }, [thumbnailData])
 
   useEffect(() => {
@@ -219,7 +221,14 @@ const CheckDetailPage = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
         <MobileHeader
           left={
-            <IconButton onClick={() => router.back()}>
+            <IconButton
+              sx={{ p: 0 }}
+              onClick={() => {
+                router.back()
+                localStorage.removeItem('thumbnail')
+                localStorage.removeItem('inspectionCnt')
+              }}
+            >
               <i className='tabler-chevron-left text-white text-3xl' />
             </IconButton>
           }
@@ -263,7 +272,7 @@ const CheckDetailPage = () => {
           }}
         >
           <Typography variant='inherit' sx={{ fontWeight: 600, fontSize: 24 }}>
-            {thumbnailData?.machineProjectName ?? '현장명'}
+            {thumbnailData?.machineProjectName ?? '　'}
           </Typography>
           <div className='flex flex-col gap-1 items-center'>
             <Typography
@@ -272,10 +281,8 @@ const CheckDetailPage = () => {
             >{`${thumbnailData?.beginDate ?? '시작날짜'} ~ ${thumbnailData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
             <Typography width={'fit-content'} variant='inherit'>
               {(thumbnailData?.engineerNames.length ?? 0) > 2
-                ? `${thumbnailData?.engineerNames
-                    .slice(0, 2)
-                    .join(', ')} 외 ${thumbnailData!.engineerNames.length - 2}명`
-                : thumbnailData?.engineerNames
+                ? `${thumbnailData?.engineerNames.slice(0, 2).join(', ')} 외 ${thumbnailData!.engineerNames.length - 2}명`
+                : thumbnailData?.engineerNames.length
                   ? thumbnailData?.engineerNames.join(', ')
                   : '배정된 점검진 없음'}
             </Typography>
@@ -348,7 +355,7 @@ const CheckDetailPage = () => {
             sx={{ padding: !isMobile ? 4 : 2, fontSize: 20 }}
             onClick={() => router.push(`/check/${machineProjectId}/inspections`)}
           >
-            설비목록 ({2})
+            설비목록 ({localStorage.getItem('inspectionCnt')})
           </Button>
         </Box>
       </Box>

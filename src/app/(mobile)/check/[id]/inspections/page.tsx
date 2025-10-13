@@ -190,7 +190,7 @@ export default function InspectionsPage() {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
       <MobileHeader
         left={
-          <IconButton onClick={() => router.back()}>
+          <IconButton sx={{ p: 0 }} onClick={() => router.back()}>
             <i className='tabler-chevron-left text-white text-3xl' />
           </IconButton>
         }
