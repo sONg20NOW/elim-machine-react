@@ -24,7 +24,7 @@ export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing
   setIsEditing: () => null
 })
 
-export interface thumbnailType {
+export interface projectSummaryType {
   machineProjectName: string
   beginDate: string
   endDate: string
@@ -43,8 +43,8 @@ const CheckDetailPage = () => {
   const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
 
   // ! 대표 이미지, 마지막 업로드 추가
-  const [thumbnailData, setThumbnailData] = useState<thumbnailType | undefined>(
-    localStorage.getItem('thumbnail') !== null ? JSON.parse(localStorage.getItem('thumbnail')!) : undefined
+  const [projectSummaryData, setProjectSummaryData] = useState<projectSummaryType | undefined>(
+    localStorage.getItem('projectSummary') !== null ? JSON.parse(localStorage.getItem('projectSummary')!) : undefined
   )
 
   // 1. 카메라로 찍은 이미지 URL을 저장할 상태 추가
@@ -104,19 +104,19 @@ const CheckDetailPage = () => {
     getScheduleData()
   }, [getScheduleData])
 
-  // projectData와 scheduleData 중 썸네일에 필요한 정보를 thumbnailData에 저장.
+  // projectData와 scheduleData 중 썸네일에 필요한 정보를 projectSummaryData에 저장.
   useEffect(() => {
     if (!projectData || !scheduleData) return
     const { machineProjectName } = projectData
     const { engineers, beginDate, endDate } = scheduleData
 
-    setThumbnailData({ machineProjectName, engineerNames: engineers.map(v => v.engineerName), beginDate, endDate })
+    setProjectSummaryData({ machineProjectName, engineerNames: engineers.map(v => v.engineerName), beginDate, endDate })
   }, [projectData, scheduleData])
 
-  // thumbnailData가 바뀔 때마다 localStorage에 저장.
+  // projectSummaryData가 바뀔 때마다 localStorage에 저장.
   useEffect(() => {
-    if (thumbnailData) localStorage.setItem('thumbnail', JSON.stringify(thumbnailData))
-  }, [thumbnailData])
+    if (projectSummaryData) localStorage.setItem('projectSummary', JSON.stringify(projectSummaryData))
+  }, [projectSummaryData])
 
   useEffect(() => {
     reset({
@@ -225,7 +225,7 @@ const CheckDetailPage = () => {
               sx={{ p: 0 }}
               onClick={() => {
                 router.back()
-                localStorage.removeItem('thumbnail')
+                localStorage.removeItem('projectSummary')
                 localStorage.removeItem('inspectionCnt')
               }}
             >
@@ -272,18 +272,18 @@ const CheckDetailPage = () => {
           }}
         >
           <Typography variant='inherit' sx={{ fontWeight: 600, fontSize: 24 }}>
-            {thumbnailData?.machineProjectName ?? '　'}
+            {projectSummaryData?.machineProjectName ?? '　'}
           </Typography>
           <div className='flex flex-col gap-1 items-center'>
             <Typography
               width={'fit-content'}
               variant='inherit'
-            >{`${thumbnailData?.beginDate ?? '시작날짜'} ~ ${thumbnailData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
+            >{`${projectSummaryData?.beginDate ?? '시작날짜'} ~ ${projectSummaryData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
             <Typography width={'fit-content'} variant='inherit'>
-              {(thumbnailData?.engineerNames.length ?? 0) > 2
-                ? `${thumbnailData?.engineerNames.slice(0, 2).join(', ')} 외 ${thumbnailData!.engineerNames.length - 2}명`
-                : thumbnailData?.engineerNames.length
-                  ? thumbnailData?.engineerNames.join(', ')
+              {(projectSummaryData?.engineerNames.length ?? 0) > 2
+                ? `${projectSummaryData?.engineerNames.slice(0, 2).join(', ')} 외 ${projectSummaryData!.engineerNames.length - 2}명`
+                : projectSummaryData?.engineerNames.length
+                  ? projectSummaryData?.engineerNames.join(', ')
                   : '배정된 점검진 없음'}
             </Typography>
             <Typography width={'fit-content'} variant='inherit'>

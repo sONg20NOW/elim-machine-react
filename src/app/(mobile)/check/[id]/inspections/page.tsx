@@ -15,9 +15,17 @@ import type {
   successResponseDtoType
 } from '@/app/_type/types'
 import { auth } from '@/lib/auth'
-import type { thumbnailType } from '../page'
+import type { projectSummaryType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
+
+export interface inspectionSummaryType {
+  machineProjectName: string
+  machineProjectId: string
+  beginDate: string
+  endDate: string
+  engineerNames: string[]
+}
 
 export default function InspectionsPage() {
   const params = useParams()
@@ -48,8 +56,8 @@ export default function InspectionsPage() {
   const [categoryList, setCategoryList] = useState<MachineCategoryResponseDtoType[]>()
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>()
 
-  // 로컬 스토리지에서 데이터 가져오기
-  const thumbnailData: thumbnailType = JSON.parse(localStorage.getItem('thumbnail') ?? '')
+  // ! 로컬 스토리지에서 데이터 가져오기
+  const projectSummaryData: projectSummaryType = JSON.parse(localStorage.getItem('projectSummary') ?? '')
 
   // 카테고리 목록 가져오기
   const getCategoryList = useCallback(async () => {
@@ -133,12 +141,7 @@ export default function InspectionsPage() {
   // 설비 선택 핸들러
   const handleInspectionClick = async (inspection: MachineInspectionPageResponseDtoType) => {
     if (!inspection?.machineInspectionId) return
-
-    try {
-      router.push(`/check/${machineProjectId}/inspections/${inspection?.machineInspectionId}`)
-    } catch (error) {
-      handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
-    }
+    router.push(`/check/${machineProjectId}/inspections/${inspection?.machineInspectionId}`)
   }
 
   // 설비 카드 컴포넌트
@@ -230,18 +233,18 @@ export default function InspectionsPage() {
         }}
       >
         <Typography variant='inherit' sx={{ fontWeight: 600, fontSize: 24 }}>
-          {thumbnailData?.machineProjectName ?? '현장명'}
+          {projectSummaryData?.machineProjectName ?? '현장명'}
         </Typography>
         <div className='flex flex-col gap-1 items-center'>
           <Typography
             width={'fit-content'}
             variant='inherit'
-          >{`${thumbnailData?.beginDate ?? '시작날짜'} ~ ${thumbnailData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
+          >{`${projectSummaryData?.beginDate ?? '시작날짜'} ~ ${projectSummaryData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
           <Typography width={'fit-content'} variant='inherit'>
-            {(thumbnailData?.engineerNames.length ?? 0) > 2
-              ? `${thumbnailData?.engineerNames.slice(0, 2).join(', ')} 외 ${thumbnailData!.engineerNames.length - 2}명`
-              : thumbnailData?.engineerNames.length
-                ? thumbnailData?.engineerNames.join(', ')
+            {(projectSummaryData?.engineerNames.length ?? 0) > 2
+              ? `${projectSummaryData?.engineerNames.slice(0, 2).join(', ')} 외 ${projectSummaryData!.engineerNames.length - 2}명`
+              : projectSummaryData?.engineerNames.length
+                ? projectSummaryData?.engineerNames.join(', ')
                 : '배정된 점검진 없음'}
           </Typography>
           <Typography width={'fit-content'} variant='inherit'>
