@@ -214,8 +214,16 @@ export default function PicTabContent({
                   onChange={e => setDfEditData(prev => ({ ...prev, deficiencies: e.target.value }))}
                 />
               ) : (
-                <Typography sx={{ border: 'solid 1px lightgray', borderRadius: 1, padding: 3, whiteSpace: 'pre-line' }}>
-                  {selectedDf?.deficiencies ?? ''}
+                <Typography
+                  sx={{
+                    border: 'solid 1px lightgray',
+                    borderRadius: 1,
+                    padding: 3,
+                    whiteSpace: 'pre-line',
+                    color: selectedDf?.actionRequired ? '' : 'lightgray'
+                  }}
+                >
+                  {selectedDf?.deficiencies ?? '내용 없음'}
                 </Typography>
               )}
             </div>
