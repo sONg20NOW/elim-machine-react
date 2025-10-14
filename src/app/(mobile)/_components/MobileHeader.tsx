@@ -4,7 +4,7 @@ import { Box, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 interface MobileHeaderProps {
   left?: ReactNode
-  title: string
+  title: ReactNode | string
   right?: ReactNode
 }
 
@@ -29,7 +29,13 @@ export default function MobileHeader({ left, title, right }: MobileHeaderProps) 
 
         {/* 중앙 영역 */}
         <div className={`flex gap-1 items-center justify-center relative ${isMobile ? 'col-span-2' : ''}`}>
-          <Typography color='white' variant={isMobile ? 'h4' : 'h3'}>{`${title}`}</Typography>
+          {typeof title === 'string' ? (
+            <Typography color='white' variant={isMobile ? 'h4' : 'h3'}>
+              {title}
+            </Typography>
+          ) : (
+            title
+          )}
         </div>
 
         {/* 오른쪽 영역 */}

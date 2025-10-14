@@ -56,8 +56,11 @@ export default function InspectionsPage() {
   const [categoryList, setCategoryList] = useState<MachineCategoryResponseDtoType[]>()
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>()
 
+  // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
+  if (!localStorage.getItem('projectSummary')) router.back()
+
   // ! 로컬 스토리지에서 데이터 가져오기
-  const projectSummaryData: projectSummaryType = JSON.parse(localStorage.getItem('projectSummary') ?? '')
+  const projectSummaryData: projectSummaryType = JSON.parse(localStorage.getItem('projectSummary')!)
 
   // 카테고리 목록 가져오기
   const getCategoryList = useCallback(async () => {
@@ -154,9 +157,9 @@ export default function InspectionsPage() {
         elevation={10}
         onClick={() => handleInspectionClick(inspection)}
       >
-        <div className='w-fit flex-1'>
+        <div className='flex-1'>
           <i className='tabler-photo-bolt w-full h-full' />
-        </div>{' '}
+        </div>
         <Box
           sx={{
             display: 'flex',
