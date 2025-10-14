@@ -212,7 +212,7 @@ export default function InspectionsPage() {
         sx={{
           height: 200,
           width: 'full',
-          backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(/images/pipe_info.png)',
+          backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(/images/safety114_logo.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
 

@@ -141,6 +141,7 @@ export default function MachinePage() {
   const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
     if (!machineProject?.machineProjectId) return
 
+    // ! 추후에 check/[id] 페이지에서 GET 할 때 가져오는 정보를 이용하도록.
     localStorage.setItem('inspectionCnt', machineProject.inspectionCount.toString())
     router.push(`/check/${machineProject.machineProjectId}`)
   }
