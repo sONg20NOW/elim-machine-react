@@ -25,6 +25,7 @@ import type {
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/app/_components/modal/DeleteModal'
+import PictureTable from './_components/PictureTable'
 
 type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
 
@@ -46,6 +47,8 @@ export default function CheckInspectionDetailPage() {
 
   const [inspection, setInspection] = useState<MachineInspectionDetailResponseDtoType>()
   const [category, setCategory] = useState<string>('전체')
+
+  const [checkNoPic, setCheckNoPic] = useState(false)
 
   const checklistItem = inspection?.machineChecklistItemsWithPicCountResponseDtos.find(
     v => v.machineChecklistItemId === Number(category)
@@ -235,7 +238,7 @@ export default function CheckInspectionDetailPage() {
                 <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
                 <div className='flex items-center'>
                   <Typography variant='body2'>사진 없음</Typography>
-                  <Checkbox />
+                  <Checkbox value={checkNoPic} onChange={() => setCheckNoPic(prev => !prev)} />
                 </div>
               </div>
               <TextField
@@ -306,6 +309,7 @@ export default function CheckInspectionDetailPage() {
                 />
               </div>
             )}
+            <PictureTable machineChecklistItemId={checklistItem?.machineChecklistItemId} checkNoPic={checkNoPic} />
           </TabPanel>
           <TabPanel value={'info'}>2</TabPanel>
         </Box>
