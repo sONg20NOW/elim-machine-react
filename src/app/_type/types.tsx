@@ -388,7 +388,7 @@ export interface MachineInspectionDetailResponseDtoType {
     | 'PIPE_MEASUREMENT'
   machineInspectionResponseDto: MachineInspectionResponseDtoType
   engineerIds: number[]
-  machineChecklistItemsWithPicCountResponseDtos: MachinePicCateWithPicCountDtoType[]
+  machineChecklistItemsWithPicCountResponseDtos: machineChecklistItemsWithPicCountResponseDtosType[]
   gasMeasurementResponseDto: GasMeasurementResponseDtoType
   pipeMeasurementResponseDtos: PipeMeasurementResponseDtoType[]
   windMeasurementResponseDtos: WindMeasurementResponseDtoType[]
@@ -411,7 +411,7 @@ export interface MachineInspectionResponseDtoType {
 }
 
 // 점검 항목 + 사진 개수 등의 정보 목록
-export interface MachinePicCateWithPicCountDtoType {
+export interface machineChecklistItemsWithPicCountResponseDtosType {
   machineChecklistItemId: number
   machineChecklistItemName: string
   checklistSubItems: MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType[]

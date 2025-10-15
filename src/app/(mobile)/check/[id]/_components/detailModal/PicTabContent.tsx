@@ -9,7 +9,7 @@ import PictureListModal from './PictureListModal'
 import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
-  MachinePicCateWithPicCountDtoType
+  machineChecklistItemsWithPicCountResponseDtosType
 } from '@/app/_type/types'
 import AlertModal from '@/app/_components/modal/AlertModal'
 import DefaultModal from '@/app/_components/modal/DefaultModal'
@@ -36,7 +36,7 @@ export default function PicTabContent({
 
   // 점검사진 모달
   const [openPicModal, setOpenPicModal] = useState<boolean>(false)
-  const [clickedPicCate, setClickedPicCate] = useState<MachinePicCateWithPicCountDtoType>()
+  const [clickedPicCate, setClickedPicCate] = useState<machineChecklistItemsWithPicCountResponseDtosType>()
 
   // 미흡사항 모달
   const [showDfModal, setShowDfModal] = useState(false)

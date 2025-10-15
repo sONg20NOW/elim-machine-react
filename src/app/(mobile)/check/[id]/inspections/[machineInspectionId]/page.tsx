@@ -315,11 +315,15 @@ export default function CheckInspectionDetailPage() {
                 </div>
               )}
             </Box>
-            <PictureTable
-              machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
-              emptyMode={emptyMode}
-              scrollableAreaRef={scrollableAreaRef}
-            />
+            {inspection && (
+              <PictureTable
+                machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
+                emptyMode={emptyMode}
+                scrollableAreaRef={scrollableAreaRef}
+                checklists={inspection.machineChecklistItemsWithPicCountResponseDtos}
+                refetchChecklists={getInspectionData}
+              />
+            )}
           </TabPanel>
           <TabPanel value={'info'}>2</TabPanel>
         </Box>

@@ -26,6 +26,7 @@ import classNames from 'classnames'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import type {
+  machineChecklistItemsWithPicCountResponseDtosType,
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
   MachinePicCursorType,
@@ -36,15 +37,20 @@ import type {
 import SearchBar from '@/app/_components/SearchBar'
 import PictureZoomModal from '../../../_components/PictureZoomModal'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
+import { uploadPictures } from '@/app/_util/uploadPictures'
 
 const PictureTable = ({
   machineChecklistItemId,
   emptyMode,
-  scrollableAreaRef
+  scrollableAreaRef,
+  checklists,
+  refetchChecklists
 }: {
   machineChecklistItemId: number | null
   emptyMode: boolean
   scrollableAreaRef: RefObject<HTMLElement>
+  checklists: machineChecklistItemsWithPicCountResponseDtosType[]
+  refetchChecklists: () => void
 }) => {
   const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
 
@@ -219,11 +225,39 @@ const PictureTable = ({
 
   const EmptyImageCard = ({
     machineChecklistItemName,
-    machineChecklistSubItemName
+    machineChecklistSubItemName,
+    machineChecklistItemId,
+    machineChecklistSubItemId
   }: {
     machineChecklistItemName: string
     machineChecklistSubItemName: string
+    machineChecklistItemId: number
+    machineChecklistSubItemId: number
   }) => {
+    const emptyCameraRef = useRef<HTMLInputElement>(null)
+
+    const [clicked, setClicked] = useState(false)
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (!event.target.files) return
+      const file = event.target.files[0]
+
+      if (!file || !machineProjectId || !inspectionId) return
+
+      if (
+        (await uploadPictures(
+          machineProjectId.toString(),
+          inspectionId.toString(),
+          [file],
+          machineChecklistItemId,
+          machineChecklistSubItemId
+        )) !== -1
+      )
+        refetchChecklists()
+
+      setClicked(false)
+    }
+
     return (
       <Paper
         sx={{
@@ -231,22 +265,25 @@ const PictureTable = ({
           cursor: 'pointer',
           borderColor: 'lightgray',
           borderWidth: '1px',
-          ':hover': { boxShadow: 10 }
+          ...(clicked && { boxShadow: '0px 0px 21px 5px #282828' })
         }}
         variant='outlined'
         key={machineChecklistItemName}
-        onClick={() => {}}
+        onClick={() => {
+          emptyCameraRef.current?.click()
+          setClicked(true)
+        }}
       >
         <ImageListItem
           sx={{
             background: '#373737ff',
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
+            borderTopLeftRadius: 6,
+            borderTopRightRadius: 6,
             placeItems: 'center',
             display: 'grid'
           }}
         >
-          <i className='tabler-camera w-20 h-20 text-white' />
+          <i className='tabler-camera text-[70px] text-white' />
         </ImageListItem>
 
         <div className='p-1'>
@@ -262,6 +299,14 @@ const PictureTable = ({
             textAlign={'center'}
           >{`${machineChecklistSubItemName}`}</Typography>
         </div>
+        <input
+          type='file'
+          className='hidden'
+          accept='image/*'
+          ref={emptyCameraRef}
+          onChange={handleImageUpload}
+          onBlur={() => console.log('blur!')}
+        />
       </Paper>
     )
   }
@@ -271,16 +316,25 @@ const PictureTable = ({
       <div className='flex flex-col gap-8'>
         {emptyMode ? (
           <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
-            {[
-              { machineChecklistItemName: '1', machineChecklistSubItemName: '1' },
-              { machineChecklistItemName: '2', machineChecklistSubItemName: '2' }
-            ].map((v, idx) => (
-              <EmptyImageCard
-                key={idx}
-                machineChecklistItemName={v.machineChecklistItemName}
-                machineChecklistSubItemName={v.machineChecklistSubItemName}
-              />
-            ))}
+            {checklists
+              .filter(v =>
+                machineChecklistItemIdRef.current
+                  ? v.machineChecklistItemId === machineChecklistItemIdRef.current
+                  : true
+              )
+              .map(v =>
+                v.checklistSubItems
+                  .filter(p => p.machinePicCount === 0)
+                  .map(p => (
+                    <EmptyImageCard
+                      key={p.machineChecklistSubItemId}
+                      machineChecklistItemId={v.machineChecklistItemId}
+                      machineChecklistSubItemId={p.machineChecklistSubItemId}
+                      machineChecklistItemName={v.machineChecklistItemName}
+                      machineChecklistSubItemName={p.checklistSubItemName}
+                    />
+                  ))
+              )}
           </ImageList>
         ) : pictures?.length > 0 ? (
           <>

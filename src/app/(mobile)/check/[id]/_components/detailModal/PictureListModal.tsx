@@ -31,7 +31,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 
 import type {
-  MachinePicCateWithPicCountDtoType,
+  machineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicCursorType
 } from '@/app/_type/types'
@@ -43,8 +43,8 @@ type PictureListModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
-  clickedPicCate?: MachinePicCateWithPicCountDtoType
-  checklistItems: MachinePicCateWithPicCountDtoType[]
+  clickedPicCate?: machineChecklistItemsWithPicCountResponseDtosType
+  checklistItems: machineChecklistItemsWithPicCountResponseDtosType[]
   totalPicCount: number
 }
 
