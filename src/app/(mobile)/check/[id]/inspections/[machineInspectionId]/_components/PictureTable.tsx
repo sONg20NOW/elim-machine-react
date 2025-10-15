@@ -10,32 +10,22 @@ import {
   ImageList,
   ImageListItem,
   ImageListItemBar,
-  useMediaQuery,
-  Button,
-  Checkbox,
-  TextField,
-  MenuItem,
-  Paper
+  Paper,
+  Fab,
+  useScrollTrigger,
+  Fade
 } from '@mui/material'
 
 // @ts-ignore
-import type { AxiosRequestConfig } from 'axios'
 import axios from 'axios'
 
-import classNames from 'classnames'
-
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError } from '@/utils/errorHandler'
 import type {
   machineChecklistItemsWithPicCountResponseDtosType,
-  MachineInspectionDetailResponseDtoType,
-  MachineInspectionPageResponseDtoType,
   MachinePicCursorType,
-  MachinePicPresignedUrlResponseDtoType,
-  successResponseDtoType
+  MachinePicPresignedUrlResponseDtoType
 } from '@/app/_type/types'
 
-import SearchBar from '@/app/_components/SearchBar'
-import PictureZoomModal from '../../../_components/PictureZoomModal'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 import { uploadPictures } from '@/app/_util/uploadPictures'
 
@@ -44,13 +34,15 @@ const PictureTable = ({
   emptyMode,
   scrollableAreaRef,
   checklists,
-  refetchChecklists
+  refetchChecklists,
+  tabHeight
 }: {
   machineChecklistItemId: number | null
   emptyMode: boolean
   scrollableAreaRef: RefObject<HTMLElement>
   checklists: machineChecklistItemsWithPicCountResponseDtosType[]
   refetchChecklists: () => void
+  tabHeight: number
 }) => {
   const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
 
@@ -77,6 +69,8 @@ const PictureTable = ({
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
   const [showPicModal, setShowPicModal] = useState(false)
+
+  const trigger = useScrollTrigger({ target: scrollableAreaRef.current })
 
   // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
   const getPictures = useCallback(
@@ -236,13 +230,10 @@ const PictureTable = ({
   }) => {
     const emptyCameraRef = useRef<HTMLInputElement>(null)
 
-    const [clicked, setClicked] = useState(false)
-
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (!event.target.files) return
-      const file = event.target.files[0]
+      if (!event.target.files || !machineProjectId || !inspectionId) return
 
-      if (!file || !machineProjectId || !inspectionId) return
+      const file = event.target.files[0]
 
       if (
         (await uploadPictures(
@@ -254,8 +245,6 @@ const PictureTable = ({
         )) !== -1
       )
         refetchChecklists()
-
-      setClicked(false)
     }
 
     return (
@@ -265,15 +254,23 @@ const PictureTable = ({
           cursor: 'pointer',
           borderColor: 'lightgray',
           borderWidth: '1px',
-          ...(clicked && { boxShadow: '0px 0px 21px 5px #282828' })
+          ':active': { boxShadow: '0px 0px 21px 5px #282828' }
         }}
         variant='outlined'
         key={machineChecklistItemName}
         onClick={() => {
           emptyCameraRef.current?.click()
-          setClicked(true)
         }}
       >
+        <input
+          type='file'
+          className='hidden absolute right-0 top-1/2 -translate-y-1/2'
+          accept='image/*'
+          ref={emptyCameraRef}
+          onChange={e => {
+            handleImageUpload(e)
+          }}
+        />
         <ImageListItem
           sx={{
             background: '#373737ff',
@@ -299,69 +296,70 @@ const PictureTable = ({
             textAlign={'center'}
           >{`${machineChecklistSubItemName}`}</Typography>
         </div>
-        <input
-          type='file'
-          className='hidden'
-          accept='image/*'
-          ref={emptyCameraRef}
-          onChange={handleImageUpload}
-          onBlur={() => console.log('blur!')}
-        />
       </Paper>
     )
   }
 
   return (
-    <div className='flex flex-col gap-5'>
-      <div className='flex flex-col gap-8'>
-        {emptyMode ? (
-          <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
-            {checklists
-              .filter(v =>
-                machineChecklistItemIdRef.current
-                  ? v.machineChecklistItemId === machineChecklistItemIdRef.current
-                  : true
-              )
-              .map(v =>
-                v.checklistSubItems
-                  .filter(p => p.machinePicCount === 0)
-                  .map(p => (
-                    <EmptyImageCard
-                      key={p.machineChecklistSubItemId}
-                      machineChecklistItemId={v.machineChecklistItemId}
-                      machineChecklistSubItemId={p.machineChecklistSubItemId}
-                      machineChecklistItemName={v.machineChecklistItemName}
-                      machineChecklistSubItemName={p.checklistSubItemName}
-                    />
-                  ))
-              )}
-          </ImageList>
-        ) : pictures?.length > 0 ? (
-          <>
-            <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
-              {pictures.map((pic, index) => (
-                <ImageCard key={index} pic={pic} index={index} />
-              ))}
-            </ImageList>
-            {!nextCursorRef.current && (
-              <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
-                <Typography variant='body1'>모든 사진을 불러왔습니다</Typography>
-              </Box>
+    <div className='flex flex-col gap-8'>
+      <Fade in={trigger}>
+        <Fab
+          sx={{
+            position: 'fixed',
+            right: 10,
+            bottom: tabHeight + 10
+          }}
+          color='primary'
+          onClick={() => scrollableAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
+          <i className='tabler-chevron-up' />
+        </Fab>
+      </Fade>
+      {emptyMode ? (
+        <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
+          {checklists
+            .filter(v =>
+              machineChecklistItemIdRef.current ? v.machineChecklistItemId === machineChecklistItemIdRef.current : true
+            )
+            .map(v =>
+              v.checklistSubItems
+                .filter(p => p.machinePicCount === 0)
+                .map(p => (
+                  <EmptyImageCard
+                    key={p.machineChecklistSubItemId}
+                    machineChecklistItemId={v.machineChecklistItemId}
+                    machineChecklistSubItemId={p.machineChecklistSubItemId}
+                    machineChecklistItemName={v.machineChecklistItemName}
+                    machineChecklistSubItemName={p.checklistSubItemName}
+                  />
+                ))
             )}
-          </>
-        ) : (
-          !isLoadingRef.current && (
+        </ImageList>
+      ) : pictures?.length > 0 ? (
+        <>
+          <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
+            {pictures.map((pic, index) => (
+              <ImageCard key={index} pic={pic} index={index} />
+            ))}
+          </ImageList>
+          {!nextCursorRef.current && (
             <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
-              <Typography variant='body1'>사진 데이터가 존재하지 않습니다</Typography>
+              <Typography variant='body1'>모든 사진을 불러왔습니다</Typography>
             </Box>
-          )
-        )}
-        {isLoadingRef.current && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <CircularProgress size={50} sx={{ mb: 5 }} />
+          )}
+        </>
+      ) : (
+        !isLoadingRef.current && (
+          <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
+            <Typography variant='body1'>사진 데이터가 존재하지 않습니다</Typography>
           </Box>
-        )}
-      </div>
+        )
+      )}
+      {isLoadingRef.current && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <CircularProgress size={50} sx={{ mb: 5 }} />
+        </Box>
+      )}
     </div>
   )
 }

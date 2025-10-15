@@ -12,6 +12,8 @@ import TabContext from '@mui/lab/TabContext'
 
 import TabPanel from '@mui/lab/TabPanel'
 
+import { position } from 'stylis'
+
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 
@@ -38,6 +40,8 @@ export default function CheckInspectionDetailPage() {
   const router = useRouter()
 
   const isMobile = useContext(isMobileContext)
+
+  const TabListRef = useRef<HTMLElement>(null)
 
   const [currentTab, setCurrentTab] = useState<currentTabType>('pictures')
 
@@ -233,7 +237,13 @@ export default function CheckInspectionDetailPage() {
         <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto' }}>
           <TabPanel
             value={'pictures'}
-            sx={{ py: !isMobile ? 10 : 4, px: 10, display: 'flex', flexDirection: 'column', gap: !isMobile ? 8 : 5 }}
+            sx={{
+              py: !isMobile ? 10 : 4,
+              px: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: !isMobile ? 8 : 5
+            }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
               <div className='flex flex-col gap-1'>
@@ -322,13 +332,14 @@ export default function CheckInspectionDetailPage() {
                 scrollableAreaRef={scrollableAreaRef}
                 checklists={inspection.machineChecklistItemsWithPicCountResponseDtos}
                 refetchChecklists={getInspectionData}
+                tabHeight={TabListRef.current?.clientHeight ?? 0}
               />
             )}
           </TabPanel>
           <TabPanel value={'info'}>2</TabPanel>
         </Box>
         {/* 탭 리스트 */}
-        <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
+        <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
           <TabList
             sx={{ display: 'flex', px: isMobile ? '' : 20 }}
             centered
