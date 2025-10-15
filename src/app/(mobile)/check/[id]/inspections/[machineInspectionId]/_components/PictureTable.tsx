@@ -1,3 +1,4 @@
+import type { Ref, RefObject } from 'react'
 import { useEffect, useState, useCallback, useRef, useContext } from 'react'
 
 import { useParams } from 'next/navigation'
@@ -38,23 +39,29 @@ import { isMobileContext } from '@/app/_components/ProtectedPage'
 
 const PictureTable = ({
   machineChecklistItemId,
-  checkNoPic
+  emptyMode,
+  scrollableAreaRef
 }: {
-  machineChecklistItemId?: number
-  checkNoPic: boolean
+  machineChecklistItemId: number | null
+  emptyMode: boolean
+  scrollableAreaRef: RefObject<HTMLElement>
 }) => {
   const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
 
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
 
-  const filteredPictures = pictures.filter(
-    pic => pic.machineChecklistItemId === (machineChecklistItemId ?? pic.machineChecklistItemId)
-  )
+  const machineChecklistItemIdRef = useRef(machineChecklistItemId)
+
+  useEffect(() => {
+    machineChecklistItemIdRef.current = machineChecklistItemId
+  }, [machineChecklistItemId])
 
   const defaultPageSize = 4
 
-  // 무한스크롤 관련 Ref들
   const [isLoading, setIsLoading] = useState(false)
+  const isLoadingRef = useRef(false)
+
+  // 무한스크롤 관련 Ref들
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
@@ -68,16 +75,20 @@ const PictureTable = ({
   // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
   const getPictures = useCallback(
     async (pageSize: number) => {
-      if (!hasNextRef.current || isLoading) return
+      if (!hasNextRef.current || isLoadingRef.current) return
 
+      isLoadingRef.current = true
       setIsLoading(true)
 
-      const requestBody = {
-        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {}),
-        machineInspectionId: Number(inspectionId)
-      }
-
       try {
+        console.log('id:', machineChecklistItemIdRef.current)
+
+        const requestBody = {
+          ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {}),
+          machineInspectionId: Number(inspectionId),
+          ...(machineChecklistItemIdRef.current ? { machineChecklistItemId: machineChecklistItemIdRef.current } : {})
+        }
+
         const response = await axios.post<{
           data: {
             content: MachinePicPresignedUrlResponseDtoType[]
@@ -94,49 +105,57 @@ const PictureTable = ({
         hasNextRef.current = response.data.data.hasNext
         nextCursorRef.current = response.data.data.nextCursor
 
+        isLoadingRef.current = false
+        setIsLoading(false)
+
         return response.data.data
       } catch (err) {
         handleApiError(err)
-      } finally {
-        setTimeout(() => {
-          setIsLoading(false)
-        }, 5000)
+
+        isLoadingRef.current = false
+        setIsLoading(false)
       }
     },
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [machineProjectId, inspectionId]
   )
 
-  const resetCursor = () => {
+  const resetCursor = async () => {
     hasNextRef.current = true
     nextCursorRef.current = undefined
     setPictures([])
   }
 
   useEffect(() => {
-    getPictures(defaultPageSize)
-  }, [getPictures])
+    resetCursor()
+  }, [machineChecklistItemId, emptyMode])
 
   // 스크롤 이벤트 핸들러
   const handleScroll = useCallback(() => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-    const scrollHeight = document.documentElement.scrollHeight
-    const clientHeight = window.innerHeight
+    if (!scrollableAreaRef.current) return
+
+    const scrollTop = scrollableAreaRef.current.scrollTop
+    const scrollHeight = scrollableAreaRef.current.scrollHeight
+    const clientHeight = scrollableAreaRef.current.clientHeight
 
     // 스크롤이 하단에서 100px 이내에 도달했을 때 다음 페이지 로드
-    if (scrollTop + clientHeight >= scrollHeight - 100 && hasNextRef.current && !isLoading) {
+    if (scrollTop + clientHeight >= scrollHeight - 100 && hasNextRef.current && !isLoadingRef.current) {
+      console.log('get pic by handleScroll')
       getPictures(defaultPageSize)
     }
-  }, [getPictures, isLoading])
+  }, [getPictures, scrollableAreaRef])
 
   useEffect(() => {
+    if (!scrollableAreaRef.current) return
+
     const checkAndLoad = () => {
-      const scrollHeight = document.documentElement.scrollHeight
-      const clientHeight = window.innerHeight
+      if (!scrollableAreaRef.current) return
+
+      const scrollHeight = scrollableAreaRef.current.scrollHeight
+      const clientHeight = scrollableAreaRef.current.clientHeight
 
       // 스크롤이 아예 없거나 화면보다 내용이 적을 때
-      if (scrollHeight <= clientHeight && hasNextRef.current) {
+      if (clientHeight == scrollHeight && hasNextRef.current) {
+        console.log('get pic by checkAndLoad')
         getPictures(defaultPageSize)
       }
     }
@@ -144,18 +163,18 @@ const PictureTable = ({
     // 초기 렌더링 직후, 데이터 불러오고 난 직후에도 체크
     checkAndLoad()
 
-    window.addEventListener('scroll', handleScroll)
+    scrollableAreaRef.current.addEventListener('scroll', handleScroll)
 
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [handleScroll, getPictures, pictures])
+  }, [handleScroll, getPictures, pictures, scrollableAreaRef])
 
   return (
     <div className='flex flex-col gap-5'>
       <div className='flex flex-col gap-8'>
-        {isLoading ? (
-          !checkNoPic && filteredPictures?.length > 0 ? (
+        {!emptyMode && pictures?.length > 0 ? (
+          <>
             <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 300} gap={15}>
-              {filteredPictures.map((pic, index: number) => {
+              {pictures.map((pic, index: number) => {
                 return (
                   <Paper
                     sx={{
@@ -204,14 +223,22 @@ const PictureTable = ({
                 )
               })}
             </ImageList>
-          ) : (
+            {!nextCursorRef.current && (
+              <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
+                <Typography variant='body1'>모든 사진을 불러왔습니다</Typography>
+              </Box>
+            )}
+          </>
+        ) : (
+          !isLoadingRef.current && (
             <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
               <Typography variant='body1'>사진 데이터가 존재하지 않습니다</Typography>
             </Box>
           )
-        ) : (
+        )}
+        {isLoadingRef.current && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <CircularProgress size={24} />
+            <CircularProgress size={50} sx={{ mb: 5 }} />
           </Box>
         )}
       </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -48,7 +48,9 @@ export default function CheckInspectionDetailPage() {
   const [inspection, setInspection] = useState<MachineInspectionDetailResponseDtoType>()
   const [category, setCategory] = useState<string>('전체')
 
-  const [checkNoPic, setCheckNoPic] = useState(false)
+  const [emptyMode, setEmptyMode] = useState(false)
+
+  const scrollableAreaRef = useRef<HTMLElement>(null)
 
   const checklistItem = inspection?.machineChecklistItemsWithPicCountResponseDtos.find(
     v => v.machineChecklistItemId === Number(category)
@@ -161,14 +163,14 @@ export default function CheckInspectionDetailPage() {
           </IconButton>
         }
         right={
-          <div className='flex gap-4'>
+          <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
             <IconButton sx={{ p: 0 }} onClick={handleSaveResult}>
               <i className='tabler-device-floppy text-white text-3xl' />
             </IconButton>
             <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
               <i className='tabler-trash-filled text-red-400 text-3xl' />
             </IconButton>
-          </div>
+          </Box>
         }
         title={
           <div className='flex flex-col w-full'>
@@ -213,10 +215,10 @@ export default function CheckInspectionDetailPage() {
                   value={inspection.machineInspectionId}
                   sx={{ display: 'flex', height: 70, border: 'solid 1px lightgray', mt: idx !== 0 ? 2 : 0 }}
                 >
-                  <i className='tabler-photo w-full h-full flex-1' />
+                  {!isMobile && <i className='tabler-photo w-full h-full flex-1' />}
                   <Box sx={{ flex: 3 }}>
                     <Typography variant='inherit'>{`${inspection.machineInspectionName} [${inspection.machinePicCount}]`}</Typography>
-                    <Typography variant='inherit' color='gray' fontSize={'small'}>
+                    <Typography variant='inherit' fontSize={'small'}>
                       {inspection.location !== '' ? (inspection.location ?? '　') : '　'}
                     </Typography>
                   </Box>
@@ -228,88 +230,96 @@ export default function CheckInspectionDetailPage() {
       />
       <TabContext value={currentTab}>
         {/* 본 컨텐츠 (스크롤 가능 영역)*/}
-        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto' }}>
           <TabPanel
             value={'pictures'}
-            sx={{ py: !isMobile ? 10 : 4, px: 10, display: 'flex', flexDirection: 'column', gap: !isMobile ? 6 : 2 }}
+            sx={{ py: !isMobile ? 10 : 4, px: 10, display: 'flex', flexDirection: 'column', gap: !isMobile ? 8 : 5 }}
           >
-            <div className='flex flex-col gap-1'>
-              <div className='flex justify-between items-center'>
-                <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
-                <div className='flex items-center'>
-                  <Typography variant='body2'>사진 없음</Typography>
-                  <Checkbox value={checkNoPic} onChange={() => setCheckNoPic(prev => !prev)} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
+              <div className='flex flex-col gap-1'>
+                <div className='flex justify-between items-center'>
+                  <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
+                  <div className='flex items-center'>
+                    <Typography variant='body2'>사진 없음</Typography>
+                    <Checkbox size='small' value={emptyMode} onChange={() => setEmptyMode(prev => !prev)} />
+                  </div>
                 </div>
-              </div>
-              <TextField
-                select
-                size={isMobile ? 'small' : 'medium'}
-                id='machineProjectName'
-                fullWidth
-                hiddenLabel
-                slotProps={{
-                  input: {
-                    sx: {
-                      fontSize: 18,
-                      color: checklistItem?.totalMachinePicCount === 0 ? 'red' : ''
+                <TextField
+                  select
+                  size={isMobile ? 'small' : 'medium'}
+                  id='machineProjectName'
+                  fullWidth
+                  hiddenLabel
+                  slotProps={{
+                    input: {
+                      sx: {
+                        fontSize: 18,
+                        color: checklistItem?.totalMachinePicCount === 0 ? 'red' : ''
+                      }
                     }
-                  }
-                }}
-                value={category}
-                onChange={e => setCategory(e.target.value)}
-              >
-                <MenuItem value='전체'>전체</MenuItem>
-                {inspection?.machineChecklistItemsWithPicCountResponseDtos.map(v =>
-                  v.machineChecklistItemName !== '기타' ? (
-                    <MenuItem
-                      key={v.machineChecklistItemId}
-                      value={v.machineChecklistItemId}
-                      sx={{
-                        color: v.totalMachinePicCount === 0 ? 'red' : ''
-                      }}
-                    >
-                      {v.machineChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}/
-                      {v.checklistSubItems.length}]
-                    </MenuItem>
-                  ) : (
-                    <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                      {v.machineChecklistItemName}
-                    </MenuItem>
-                  )
-                )}
-              </TextField>
-            </div>
-            {category !== '전체' && (
-              <div className='flex flex-col gap-1'>
-                <InputLabel sx={{ px: 2 }}>미흡사항</InputLabel>
-                <TextField
-                  size={isMobile ? 'small' : 'medium'}
-                  id='requirement'
-                  fullWidth
-                  value={checklistResult?.deficiencies ?? ''}
-                  onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
-                  hiddenLabel
-                  multiline
-                  slotProps={{ input: { sx: { fontSize: 18 } } }}
-                />
+                  }}
+                  value={category}
+                  onChange={e => {
+                    setCategory(e.target.value)
+                  }}
+                >
+                  <MenuItem value='전체'>전체</MenuItem>
+                  {inspection?.machineChecklistItemsWithPicCountResponseDtos.map(v =>
+                    v.machineChecklistItemName !== '기타' ? (
+                      <MenuItem
+                        key={v.machineChecklistItemId}
+                        value={v.machineChecklistItemId}
+                        sx={{
+                          color: v.totalMachinePicCount === 0 ? 'red' : ''
+                        }}
+                      >
+                        {v.machineChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}/
+                        {v.checklistSubItems.length}]
+                      </MenuItem>
+                    ) : (
+                      <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
+                        {v.machineChecklistItemName}
+                      </MenuItem>
+                    )
+                  )}
+                </TextField>
               </div>
-            )}
-            {category !== '전체' && (
-              <div className='flex flex-col gap-1'>
-                <InputLabel sx={{ px: 2 }}>조치필요사항</InputLabel>
-                <TextField
-                  size={isMobile ? 'small' : 'medium'}
-                  id='requirement'
-                  fullWidth
-                  value={checklistResult?.actionRequired ?? ''}
-                  onChange={e => setChecklistResult(prev => prev && { ...prev, actionRequired: e.target.value })}
-                  hiddenLabel
-                  multiline
-                  slotProps={{ input: { sx: { fontSize: 18 } } }}
-                />
-              </div>
-            )}
-            <PictureTable machineChecklistItemId={checklistItem?.machineChecklistItemId} checkNoPic={checkNoPic} />
+              {category !== '전체' && (
+                <div className='flex flex-col gap-1'>
+                  <InputLabel sx={{ px: 2 }}>미흡사항</InputLabel>
+                  <TextField
+                    size={isMobile ? 'small' : 'medium'}
+                    id='requirement'
+                    fullWidth
+                    value={checklistResult?.deficiencies ?? ''}
+                    onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
+                    hiddenLabel
+                    multiline
+                    slotProps={{ input: { sx: { fontSize: 18 } } }}
+                  />
+                </div>
+              )}
+              {category !== '전체' && (
+                <div className='flex flex-col gap-1'>
+                  <InputLabel sx={{ px: 2 }}>조치필요사항</InputLabel>
+                  <TextField
+                    size={isMobile ? 'small' : 'medium'}
+                    id='requirement'
+                    fullWidth
+                    value={checklistResult?.actionRequired ?? ''}
+                    onChange={e => setChecklistResult(prev => prev && { ...prev, actionRequired: e.target.value })}
+                    hiddenLabel
+                    multiline
+                    slotProps={{ input: { sx: { fontSize: 18 } } }}
+                  />
+                </div>
+              )}
+            </Box>
+            <PictureTable
+              machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
+              emptyMode={emptyMode}
+              scrollableAreaRef={scrollableAreaRef}
+            />
           </TabPanel>
           <TabPanel value={'info'}>2</TabPanel>
         </Box>
