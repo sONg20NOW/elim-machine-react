@@ -168,60 +168,126 @@ const PictureTable = ({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll, getPictures, pictures, scrollableAreaRef])
 
+  const ImageCard = ({ pic, index }: { pic: MachinePicPresignedUrlResponseDtoType; index: number }) => {
+    return (
+      <Paper
+        sx={{
+          position: 'relative',
+          cursor: 'pointer',
+          borderColor: 'lightgray',
+          borderWidth: '1px',
+          ':hover': { boxShadow: 10 }
+        }}
+        variant='outlined'
+        key={`${pic.machinePicId}-${index}`}
+        onClick={() => {
+          setSelectedPic(pic)
+          setShowPicModal(true)
+        }}
+      >
+        <ImageListItem>
+          <img
+            src={pic.presignedUrl}
+            alt={pic.originalFileName}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderTopLeftRadius: 5,
+              borderTopRightRadius: 5
+            }}
+          />
+          <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
+        </ImageListItem>
+
+        <div className='p-1'>
+          <Typography
+            fontSize={'medium'}
+            fontWeight={600}
+            color='primary.dark'
+            textAlign={'center'}
+          >{`${pic.machineChecklistItemName}`}</Typography>
+          <Typography
+            fontSize={'medium'}
+            color='black'
+            textAlign={'center'}
+          >{`${pic.machineChecklistSubItemName}`}</Typography>
+        </div>
+      </Paper>
+    )
+  }
+
+  const EmptyImageCard = ({
+    machineChecklistItemName,
+    machineChecklistSubItemName
+  }: {
+    machineChecklistItemName: string
+    machineChecklistSubItemName: string
+  }) => {
+    return (
+      <Paper
+        sx={{
+          position: 'relative',
+          cursor: 'pointer',
+          borderColor: 'lightgray',
+          borderWidth: '1px',
+          ':hover': { boxShadow: 10 }
+        }}
+        variant='outlined'
+        key={machineChecklistItemName}
+        onClick={() => {}}
+      >
+        <ImageListItem
+          sx={{
+            background: '#373737ff',
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
+            placeItems: 'center',
+            display: 'grid'
+          }}
+        >
+          <i className='tabler-camera w-20 h-20 text-white' />
+        </ImageListItem>
+
+        <div className='p-1'>
+          <Typography
+            fontSize={'medium'}
+            fontWeight={600}
+            color='primary.dark'
+            textAlign={'center'}
+          >{`${machineChecklistItemName}`}</Typography>
+          <Typography
+            fontSize={'medium'}
+            color='black'
+            textAlign={'center'}
+          >{`${machineChecklistSubItemName}`}</Typography>
+        </div>
+      </Paper>
+    )
+  }
+
   return (
     <div className='flex flex-col gap-5'>
       <div className='flex flex-col gap-8'>
-        {!emptyMode && pictures?.length > 0 ? (
+        {emptyMode ? (
+          <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
+            {[
+              { machineChecklistItemName: '1', machineChecklistSubItemName: '1' },
+              { machineChecklistItemName: '2', machineChecklistSubItemName: '2' }
+            ].map((v, idx) => (
+              <EmptyImageCard
+                key={idx}
+                machineChecklistItemName={v.machineChecklistItemName}
+                machineChecklistSubItemName={v.machineChecklistSubItemName}
+              />
+            ))}
+          </ImageList>
+        ) : pictures?.length > 0 ? (
           <>
-            <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 300} gap={15}>
-              {pictures.map((pic, index: number) => {
-                return (
-                  <Paper
-                    sx={{
-                      position: 'relative',
-                      cursor: 'pointer',
-                      borderColor: 'lightgray',
-                      borderWidth: '1px',
-                      ':hover': { boxShadow: 10 }
-                    }}
-                    variant='outlined'
-                    key={`${pic.machinePicId}-${index}`}
-                    onClick={() => {
-                      setSelectedPic(pic)
-                      setShowPicModal(true)
-                    }}
-                  >
-                    <ImageListItem>
-                      <img
-                        src={pic.presignedUrl}
-                        alt={pic.originalFileName}
-                        style={{
-                          width: '100%',
-                          height: '50%',
-                          objectFit: 'cover',
-                          borderTopLeftRadius: 5,
-                          borderTopRightRadius: 5
-                        }}
-                      />
-                      <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
-                    </ImageListItem>
-
-                    <div className='p-1'>
-                      <Typography
-                        fontSize={'medium'}
-                        fontWeight={600}
-                        color='primary.dark'
-                        textAlign={'center'}
-                      >{`${pic.machineChecklistItemName}`}</Typography>
-                      <Typography
-                        fontSize={'medium'}
-                        color='black'
-                        textAlign={'center'}
-                      >{`${pic.machineChecklistSubItemName}`}</Typography>
-                    </div>
-                  </Paper>
-                )
-              })}
+            <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
+              {pictures.map((pic, index) => (
+                <ImageCard key={index} pic={pic} index={index} />
+              ))}
             </ImageList>
             {!nextCursorRef.current && (
               <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
