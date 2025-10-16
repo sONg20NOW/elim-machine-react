@@ -47,7 +47,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className='flex justify-center items-center min-h-screen bg-gray-100'>
+    <div className='flex justify-center items-center min-h-[100dvh] bg-gray-100'>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className='bg-white py-6 px-10 rounded-lg shadow-md min-w-[400px] flex flex-col gap-2 items-center'

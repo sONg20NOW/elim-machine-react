@@ -15,7 +15,7 @@ interface SearchBarProps {
  */
 export default function SearchBar({ placeholder, setSearchKeyword, disabled = false, className }: SearchBarProps) {
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className} flex gap-1`}>
       <Input
         id={placeholder}
         onKeyDown={(e: any) => {
@@ -24,7 +24,6 @@ export default function SearchBar({ placeholder, setSearchKeyword, disabled = fa
           }
         }}
         placeholder={placeholder}
-        className='max-sm:is-full min-w-60'
         disabled={disabled}
         sx={{
           border: '1px solid var(--mui-palette-customColors-inputBorder)',

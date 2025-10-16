@@ -208,33 +208,42 @@ export default function MachinePage() {
           backgroundColor: 'white'
         }}
       >
-        <Card
-          sx={{
-            position: 'absolute',
-            backgroundColor: 'primary.main',
-            borderRadius: isMobile ? 1 : 10,
-            width: isMobile ? '90%' : '47%',
-            height: isMobile ? '45%' : '80%',
-            left: isMobile ? '0.25rem' : '50%', // left-1 == 0.25rem
-            top: '50%',
-            transform: isMobile
-              ? `translateY(${!myProject ? '-100%' : '-0%'})`
-              : `translate(${!myProject ? '-100%' : '-0%'}, -50%)`,
-            transition: 'transform 0.3s ease-in-out'
-          }}
-        />
+        {myProject ? (
+          <Card
+            className='animate-slideRight'
+            sx={{
+              position: 'absolute',
+              backgroundColor: 'primary.main',
+              borderRadius: isMobile ? 1 : 10,
+              width: isMobile ? '90%' : '47%',
+              height: isMobile ? '45%' : '80%',
+              boxShadow: 2,
+              color: 'white'
+            }}
+          />
+        ) : (
+          <Card
+            className='animate-slideLeft'
+            sx={{
+              position: 'absolute',
+              backgroundColor: 'primary.main',
+              borderRadius: isMobile ? 1 : 10,
+              width: isMobile ? '90%' : '47%',
+              height: isMobile ? '45%' : '80%',
+              boxShadow: 2
+            }}
+          />
+        )}
 
         <Button
           onClick={() => setMyProject(prev => !prev)}
-          sx={
-            !myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }
-          }
+          sx={!myProject ? { color: 'white', borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
         >
           전체 현장
         </Button>
         <Button
           onClick={() => setMyProject(prev => !prev)}
-          sx={myProject ? { color: 'white', boxShadow: 2, borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
+          sx={myProject ? { color: 'white', borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
         >
           나의 현장
         </Button>

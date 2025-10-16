@@ -140,7 +140,10 @@ export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
               )
             }
             hiddenLabel
-            slotProps={{ input: { sx: { fontSize: 18, py: '8.5px', px: '14px' } }, htmlInput: { sx: { p: 0 } } }}
+            slotProps={{
+              input: { sx: { fontSize: 18, ...(isMobile ? { py: '8.5px', px: '14px' } : {}) } },
+              htmlInput: { sx: { p: 0 } }
+            }}
           />
         </div>
       </div>
@@ -186,7 +189,10 @@ export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
               )
             }
             hiddenLabel
-            slotProps={{ input: { sx: { fontSize: 18, py: '8.5px', px: '14px' } }, htmlInput: { sx: { p: 0 } } }}
+            slotProps={{
+              input: { sx: { fontSize: 18, ...(isMobile ? { py: '8.5px', px: '14px' } : {}) } },
+              ...(isMobile && { htmlInput: { sx: { p: 0 } } })
+            }}
           />
         </div>
       </div>

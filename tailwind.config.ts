@@ -25,11 +25,21 @@ const config: Config = {
           '40%': { transform: 'translate(-1px, -1px)' },
           '60%': { transform: 'translate(2px, 1px)' },
           '80%': { transform: 'translate(1px, -2px)' }
+        },
+        slideRight: {
+          '0%': { transform: 'translate(0, 0)' },
+          '100%': { transform: 'translate(100%, 0)' }
+        },
+        slideLeft: {
+          '100%': { transform: 'translate(0, 0)' },
+          '0%': { transform: 'translate(100%, 0)' }
         }
       },
       animation: {
         ring: 'ring 1s ease-in-out infinite',
-        vibrate: 'vibrate 0.1s linear infinite'
+        vibrate: 'vibrate 0.1s linear infinite',
+        slideRight: 'slideRight 0.2s ease-in-out forwards',
+        slideLeft: 'slideLeft 0.2s ease-in-out forwards'
       },
       borderRadius: {
         lg: 'var(--radius)',

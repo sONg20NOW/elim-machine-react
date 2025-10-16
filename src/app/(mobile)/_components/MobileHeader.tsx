@@ -23,7 +23,9 @@ export default function MobileHeader({ left, title, right }: MobileHeaderProps) 
         }}
       >
         {/* 왼쪽 영역 */}
-        <div className={`flex gap-5 ${isMobile ? 'flex-col items-start' : 'overflow-visible items-center'}`}>
+        <div
+          className={`flex justify-between gap-1 ${isMobile ? 'flex-col items-start' : 'overflow-visible items-center'}`}
+        >
           {left}
         </div>
 
