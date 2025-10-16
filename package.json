@@ -60,6 +60,7 @@
     "react-redux": "9.2.0",
     "react-toastify": "10.0.6",
     "react-use": "17.6.0",
+    "react-webcam": "^7.2.0",
     "recharts": "2.15.0",
     "server-only": "0.0.1",
     "styled-components": "^6.1.19",

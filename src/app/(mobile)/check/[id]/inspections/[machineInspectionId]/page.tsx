@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -17,19 +17,25 @@ import type { projectSummaryType } from '../../page'
 import { auth } from '@/lib/auth'
 import type {
   MachineInspectionChecklistItemResultResponseDtoType,
+  machineProjectEngineerDetailDtoType,
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
   MachineInspectionResponseDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
+
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/app/_components/modal/DeleteModal'
 import PicturesPage from './_pages/PicturesPage'
 import InfoPage from './_pages/InfoPage'
+import type { ChildrenType } from '@/@core/types'
 
 type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
 
 const max_cnt = 100
+
+export const inspectionListContext = createContext<MachineInspectionPageResponseDtoType[]>([])
+export const engineerListContext = createContext<machineProjectEngineerDetailDtoType[]>([])
 
 export default function CheckInspectionDetailPage() {
   const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
@@ -59,6 +65,8 @@ export default function CheckInspectionDetailPage() {
 
   // InfoPage props
   const [initialInspection, setInitialInspection] = useState<MachineInspectionDetailResponseDtoType>()
+
+  const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
 
   // 변경감지
   const existResultChange = JSON.stringify(checklistResult) !== JSON.stringify(initialChecklistResult)
@@ -93,6 +101,24 @@ export default function CheckInspectionDetailPage() {
   useEffect(() => {
     getAllInspections()
   }, [getAllInspections])
+
+  // 참여중인 엔지니어 리스트 가져오기
+  const getParticipatedEngineerList = useCallback(async () => {
+    try {
+      const response = await auth.get<{
+        data: { machineProjectEngineerResponseDtos: machineProjectEngineerDetailDtoType[] }
+      }>(`/api/machine-projects/${machineProjectId}/machine-project-engineers`)
+
+      setParticipatedEngineerList(response.data.data.machineProjectEngineerResponseDtos)
+      console.log('get engineer list succeed: ', response.data.data.machineProjectEngineerResponseDtos)
+    } catch (e) {
+      handleApiError(e)
+    }
+  }, [machineProjectId])
+
+  useEffect(() => {
+    getParticipatedEngineerList()
+  }, [getParticipatedEngineerList])
 
   // 현재 선택된 inspection 데이터 가져오기
   const getInspectionData = useCallback(async () => {
@@ -213,118 +239,132 @@ export default function CheckInspectionDetailPage() {
     getChecklistResult()
   }, [getChecklistResult])
 
+  const InspectionPageProviders = ({ children }: ChildrenType) => {
+    return (
+      <inspectionListContext.Provider value={inspectionList}>
+        <engineerListContext.Provider value={participatedEngineerList}>{children}</engineerListContext.Provider>
+      </inspectionListContext.Provider>
+    )
+  }
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
-      {/* 헤더 */}
-      <MobileHeader
-        left={
-          <IconButton sx={{ p: 0 }} onClick={() => router.back()}>
-            <i className='tabler-chevron-left text-white text-3xl' />
-          </IconButton>
-        }
-        right={
-          <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
-            <IconButton sx={{ p: 0 }} onClick={handleSave}>
-              {existChange ? (
-                <i className=' tabler-device-floppy text-white text-3xl animate-ring ' />
-              ) : (
-                <i className='tabler-device-floppy text-white text-3xl' />
-              )}
+    <InspectionPageProviders>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
+        {/* 헤더 */}
+        <MobileHeader
+          left={
+            <IconButton sx={{ p: 0 }} onClick={() => router.back()}>
+              <i className='tabler-chevron-left text-white text-3xl' />
             </IconButton>
-            <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
-              <i className='tabler-trash-filled text-red-400 text-3xl' />
-            </IconButton>
-          </Box>
-        }
-        title={
-          <div className='flex flex-col w-full'>
-            <TextField
-              slotProps={{
-                input: {
-                  sx: { color: 'white', textAlign: 'center', ...(isMobile ? theme.typography.h5 : theme.typography.h4) }
-                },
-
-                // htmlInput: { sx: { p: 0 } },
-                select: {
-                  displayEmpty: true,
-                  renderValue: selectedValue => {
-                    const item = inspectionList.find(
-                      inspection => inspection.machineInspectionId.toString() === selectedValue
-                    )
-
-                    // Display only the name in the text field
-                    return item ? item.machineInspectionName : '　'
+          }
+          right={
+            <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
+              <IconButton sx={{ p: 0 }} onClick={handleSave}>
+                {existChange ? (
+                  <i className=' tabler-device-floppy text-white text-3xl animate-ring ' />
+                ) : (
+                  <i className='tabler-device-floppy text-white text-3xl' />
+                )}
+              </IconButton>
+              <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
+                <i className='tabler-trash-filled text-red-400 text-3xl' />
+              </IconButton>
+            </Box>
+          }
+          title={
+            <div className='flex flex-col w-full'>
+              <TextField
+                slotProps={{
+                  input: {
+                    sx: {
+                      color: 'white',
+                      textAlign: 'center',
+                      ...(isMobile ? theme.typography.h5 : theme.typography.h4)
+                    }
                   },
-                  MenuProps: {
-                    slotProps: {
-                      paper: {
-                        sx: {
-                          height: 500
+
+                  // htmlInput: { sx: { p: 0 } },
+                  select: {
+                    displayEmpty: true,
+                    renderValue: selectedValue => {
+                      const item = inspectionList.find(
+                        inspection => inspection.machineInspectionId.toString() === selectedValue
+                      )
+
+                      // Display only the name in the text field
+                      return item ? item.machineInspectionName : '　'
+                    },
+                    MenuProps: {
+                      slotProps: {
+                        paper: {
+                          sx: {
+                            height: 500
+                          }
                         }
                       }
                     }
                   }
-                }
-              }}
-              value={inspectionId}
-              fullWidth
-              select
-              variant='standard'
-              onChange={e => {
-                router.replace(`/check/${machineProjectId}/inspections/${e.target.value}`)
+                }}
+                value={inspectionId}
+                fullWidth
+                select
+                variant='standard'
+                onChange={e => {
+                  router.replace(`/check/${machineProjectId}/inspections/${e.target.value}`)
+                }}
+              >
+                {inspectionList.map((inspection, idx) => (
+                  <MenuItem
+                    key={inspection.machineInspectionId}
+                    value={inspection.machineInspectionId}
+                    sx={{ display: 'flex', height: 70, border: 'solid 1px lightgray', mt: idx !== 0 ? 2 : 0 }}
+                  >
+                    {/* {!isMobile && <i className='tabler-photo w-full h-full flex-1 shrink-0' />} */}
+                    <Box sx={{ flex: 3 }}>
+                      <Typography variant='inherit'>{`${inspection.machineInspectionName} [${inspection.machinePicCount}]`}</Typography>
+                      <Typography variant='inherit' fontSize={'small'}>
+                        {inspection.location !== '' ? (inspection.location ?? '　') : '　'}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </TextField>
+            </div>
+          }
+        />
+        <TabContext value={currentTab}>
+          {/* 본 컨텐츠 (스크롤 가능 영역)*/}
+          <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto', py: !isMobile ? 10 : 4, px: 10 }}>
+            <PicturesPage
+              scrollableAreaRef={scrollableAreaRef}
+              inspection={inspection}
+              checklistResult={checklistResult}
+              setChecklistResult={setChecklistResult}
+              category={category}
+              setCategory={setCategory}
+              getInspectionData={getInspectionData}
+              TabListRef={TabListRef}
+            />
+            <InfoPage inspection={inspection} setInspection={setInspection} />
+          </Box>
+          {/* 탭 리스트 */}
+          <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
+            <TabList
+              sx={{ display: 'flex', px: isMobile ? '' : 20 }}
+              centered
+              onChange={(event: React.SyntheticEvent, newValue: currentTabType) => {
+                if (newValue !== 'gallery' && newValue !== 'camera') setCurrentTab(newValue)
               }}
             >
-              {inspectionList.map((inspection, idx) => (
-                <MenuItem
-                  key={inspection.machineInspectionId}
-                  value={inspection.machineInspectionId}
-                  sx={{ display: 'flex', height: 70, border: 'solid 1px lightgray', mt: idx !== 0 ? 2 : 0 }}
-                >
-                  {!isMobile && <i className='tabler-photo w-full h-full flex-1' />}
-                  <Box sx={{ flex: 3 }}>
-                    <Typography variant='inherit'>{`${inspection.machineInspectionName} [${inspection.machinePicCount}]`}</Typography>
-                    <Typography variant='inherit' fontSize={'small'}>
-                      {inspection.location !== '' ? (inspection.location ?? '　') : '　'}
-                    </Typography>
-                  </Box>
-                </MenuItem>
-              ))}
-            </TextField>
-          </div>
-        }
-      />
-      <TabContext value={currentTab}>
-        {/* 본 컨텐츠 (스크롤 가능 영역)*/}
-        <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto', py: !isMobile ? 10 : 4, px: 10 }}>
-          <PicturesPage
-            scrollableAreaRef={scrollableAreaRef}
-            inspection={inspection}
-            checklistResult={checklistResult}
-            setChecklistResult={setChecklistResult}
-            category={category}
-            setCategory={setCategory}
-            getInspectionData={getInspectionData}
-            TabListRef={TabListRef}
-          />
-          <InfoPage inspection={inspection} setInspection={setInspection} />
-        </Box>
-        {/* 탭 리스트 */}
-        <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
-          <TabList
-            sx={{ display: 'flex', px: isMobile ? '' : 20 }}
-            centered
-            onChange={(event: React.SyntheticEvent, newValue: currentTabType) => {
-              if (newValue !== 'gallery' && newValue !== 'camera') setCurrentTab(newValue)
-            }}
-          >
-            <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />}></Tab>
-            <Tab sx={{ flex: 1 }} value={'info'} label={<i className='tabler-info-circle text-4xl' />}></Tab>
-            <Tab sx={{ flex: 1 }} value={'gallery'} label={<i className='tabler-library-photo text-4xl' />}></Tab>
-            <Tab sx={{ flex: 1 }} value={'camera'} label={<i className='tabler-camera-filled text-4xl' />}></Tab>
-          </TabList>
-        </Box>
-      </TabContext>
-      <DeleteModal showDeleteModal={openAlert} setShowDeleteModal={setOpenAlert} onDelete={handleDeleteInspection} />
-    </Box>
+              <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />}></Tab>
+              <Tab sx={{ flex: 1 }} value={'info'} label={<i className='tabler-info-circle text-4xl' />}></Tab>
+              <Tab sx={{ flex: 1 }} value={'gallery'} label={<i className='tabler-library-photo text-4xl' />}></Tab>
+              <Tab sx={{ flex: 1 }} value={'camera'} label={<i className='tabler-camera-filled text-4xl' />}></Tab>
+            </TabList>
+          </Box>
+        </TabContext>
+        <DeleteModal showDeleteModal={openAlert} setShowDeleteModal={setOpenAlert} onDelete={handleDeleteInspection} />
+      </Box>
+    </InspectionPageProviders>
   )
 }

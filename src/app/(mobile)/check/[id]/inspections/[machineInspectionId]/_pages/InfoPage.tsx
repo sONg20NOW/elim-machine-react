@@ -1,12 +1,13 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import { InputLabel, MenuItem, TextField } from '@mui/material'
+import { Box, Button, IconButton, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 import type { MachineInspectionDetailResponseDtoType } from '@/app/_type/types'
+import { engineerListContext } from '../page'
 
 interface InfoPageProps {
   inspection?: MachineInspectionDetailResponseDtoType
@@ -18,6 +19,10 @@ export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
 
   const [dayType1, setDayType1] = useState<'installedDate' | 'manufacturedDate'>('installedDate')
   const [dayType2, setDayType2] = useState<'usedDate' | 'checkDate'>('usedDate')
+
+  const engineerList = useContext(engineerListContext)
+
+  const [newEngineerId, setNewEngineerId] = useState(-1)
 
   return (
     <TabPanel
@@ -196,29 +201,84 @@ export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
           />
         </div>
       </div>
+
       <div className='flex flex-col gap-1'>
-        <InputLabel sx={{ px: 2 }}>점검자</InputLabel>
-        <TextField
-          size={isMobile ? 'small' : 'medium'}
-          id='requirement'
-          fullWidth
-          value={inspection?.engineerIds ?? ''}
-          onChange={e =>
-            setInspection(
-              prev =>
-                prev && {
-                  ...prev,
-                  machineInspectionResponseDto: {
-                    ...prev.machineInspectionResponseDto,
-                    engineerIds: e.target.value
-                  }
-                }
-            )
-          }
-          hiddenLabel
-          slotProps={{ input: { sx: { fontSize: 18 } } }}
-        />
+        <InputLabel>점검자 목록</InputLabel>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            p: 2,
+            border: '1px solid lightgray',
+            borderRadius: 1
+          }}
+        >
+          <div className='flex gap-1'>
+            <TextField
+              select
+              value={newEngineerId}
+              onChange={e => {
+                const newId = Number(e.target.value)
+
+                setNewEngineerId(newId)
+              }}
+              size={isMobile ? 'small' : 'medium'}
+              id='requirement'
+              fullWidth
+              hiddenLabel
+              slotProps={{ input: { sx: { fontSize: 18 } } }}
+            >
+              {inspection?.engineerIds.length === 0 && (
+                <MenuItem disabled value={-1}>
+                  점검자를 추가하세요
+                </MenuItem>
+              )}
+              {engineerList.map(v => (
+                <MenuItem
+                  disabled={inspection?.engineerIds.includes(v.engineerId)}
+                  value={v.engineerId}
+                  key={v.engineerId}
+                >{`[${v.gradeDescription}] ${v.engineerName}`}</MenuItem>
+              ))}
+            </TextField>
+            <IconButton
+              onClick={() => {
+                setInspection(
+                  prev =>
+                    prev && {
+                      ...prev,
+                      engineerIds: prev.engineerIds.includes(newEngineerId)
+                        ? prev.engineerIds
+                        : prev.engineerIds.concat(newEngineerId)
+                    }
+                )
+                setNewEngineerId(-1)
+              }}
+            >
+              <i className='tabler-plus' />
+            </IconButton>
+          </div>
+          <Box sx={{ border: '1px dashed lightgray', borderRadius: 1, p: 5 }}>
+            {inspection?.engineerIds.length !== 0 ? (
+              inspection?.engineerIds.map((id, index) => {
+                const engineer = engineerList.find(i => i.engineerId === id)
+
+                return (
+                  engineer && (
+                    <div className='flex flex-col gap-1' key={index}>
+                      <Typography>{`[${engineer.gradeDescription}] ${engineer.engineerName}`}</Typography>
+                    </div>
+                  )
+                )
+              })
+            ) : (
+              <Typography sx={{ textAlign: 'center' }}>참여 중인 점검자가 없습니다.</Typography>
+            )}
+          </Box>
+        </Box>
       </div>
+
       <div className='flex flex-col gap-1'>
         <InputLabel sx={{ px: 2 }}>비고</InputLabel>
         <TextField
