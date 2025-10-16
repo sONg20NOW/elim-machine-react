@@ -508,8 +508,8 @@ export interface MachineInspectionFilterType {
 export interface MachineInspectionChecklistItemResultResponseDtoType {
   id: number
   version: number
-  deficiencies: string
-  actionRequired: string
+  deficiencies: string | null
+  actionRequired: string | null
 }
 
 // POST 설비추가 형식

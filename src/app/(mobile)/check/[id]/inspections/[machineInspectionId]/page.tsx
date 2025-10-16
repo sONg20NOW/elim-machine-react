@@ -4,13 +4,11 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
-import { Box, Checkbox, IconButton, InputLabel, MenuItem, Tab, TextField, Typography, useTheme } from '@mui/material'
+import { Box, IconButton, MenuItem, Tab, TextField, Typography, useTheme } from '@mui/material'
 
 import TabList from '@mui/lab/TabList'
 
 import TabContext from '@mui/lab/TabContext'
-
-import TabPanel from '@mui/lab/TabPanel'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
@@ -21,11 +19,13 @@ import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
+  MachineInspectionResponseDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/app/_components/modal/DeleteModal'
-import PictureTable from './_components/PictureTable'
+import PicturesPage from './_pages/PicturesPage'
+import InfoPage from './_pages/InfoPage'
 
 type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
 
@@ -40,31 +40,41 @@ export default function CheckInspectionDetailPage() {
   const isMobile = useContext(isMobileContext)
 
   const TabListRef = useRef<HTMLElement>(null)
+  const scrollableAreaRef = useRef<HTMLElement>(null)
 
   const [currentTab, setCurrentTab] = useState<currentTabType>('pictures')
 
   const [openAlert, setOpenAlert] = useState(false)
 
+  // PicturesPage props
   const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
 
   const [inspection, setInspection] = useState<MachineInspectionDetailResponseDtoType>()
   const [category, setCategory] = useState<string>('전체')
 
-  const [emptyMode, setEmptyMode] = useState(false)
-
-  const scrollableAreaRef = useRef<HTMLElement>(null)
-
-  const checklistItem = inspection?.machineChecklistItemsWithPicCountResponseDtos.find(
-    v => v.machineChecklistItemId === Number(category)
-  )
-
   const [checklistResult, setChecklistResult] = useState<MachineInspectionChecklistItemResultResponseDtoType>()
+
+  const [initialChecklistResult, setInitialChecklistResult] =
+    useState<MachineInspectionChecklistItemResultResponseDtoType>()
+
+  // InfoPage props
+  const [initialInspection, setInitialInspection] = useState<MachineInspectionDetailResponseDtoType>()
+
+  // 변경감지
+  const existResultChange = JSON.stringify(checklistResult) !== JSON.stringify(initialChecklistResult)
+  const existInfoChange = JSON.stringify(inspection) !== JSON.stringify(initialInspection)
+
+  const existChange = existResultChange || existInfoChange
+
+  const machineProjectName = (JSON.parse(localStorage.getItem('projectSummary')!) as projectSummaryType)
+    .machineProjectName
 
   // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
   if (!localStorage.getItem('projectSummary')) router.back()
 
-  const machineProjectName = (JSON.parse(localStorage.getItem('projectSummary')!) as projectSummaryType)
-    .machineProjectName
+  const checklistItem = inspection?.machineChecklistItemsWithPicCountResponseDtos.find(
+    v => v.machineChecklistItemId === Number(category)
+  )
 
   // inspection 리스트 가져오기 (전체)
   const getAllInspections = useCallback(async () => {
@@ -92,6 +102,7 @@ export default function CheckInspectionDetailPage() {
       )
 
       setInspection(response.data.data)
+      setInitialInspection(structuredClone(response.data.data))
       console.log('current inspection: ', response.data.data)
     } catch (error) {
       handleApiError(error)
@@ -118,31 +129,69 @@ export default function CheckInspectionDetailPage() {
     }
   }, [machineProjectId, inspectionId, router, inspection])
 
-  const handleSaveResult = useCallback(async () => {
+  const handleSave = useCallback(async () => {
+    const successMessage: ('result' | 'info')[] = []
+
     // 미흡사항/조치필요사항 저장
     try {
-      if (checklistResult) {
-        const response = await auth.put<{
-          data: {
-            machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultResponseDtoType[]
-          }
-        }>(
-          `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/machine-inspection-checklist-item-results`,
-          { machineInspectionChecklistItemResultUpdateRequestDtos: [{ ...checklistResult, inspectionResult: 'FAIL' }] }
-        )
+      if (existResultChange && checklistResult) {
+        try {
+          const response = await auth.put<{
+            data: {
+              machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultResponseDtoType[]
+            }
+          }>(
+            `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/machine-inspection-checklist-item-results`,
+            {
+              machineInspectionChecklistItemResultUpdateRequestDtos: [{ ...checklistResult, inspectionResult: 'FAIL' }]
+            }
+          )
 
-        setChecklistResult(response.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
+          setChecklistResult(response.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
+          setInitialChecklistResult(
+            structuredClone(response.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
+          )
+
+          successMessage.push('result')
+        } catch (e) {
+          handleApiError(e)
+        }
       }
 
-      handleSuccess('저장되었습니다.')
+      if (existInfoChange && inspection) {
+        try {
+          const response = await auth.put<{
+            data: MachineInspectionResponseDtoType
+          }>(
+            `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}`,
+            inspection.machineInspectionResponseDto
+          )
+
+          setInspection(prev => prev && { ...prev, machineInspectionResponseDto: response.data.data })
+          setInitialInspection(
+            prev => prev && structuredClone({ ...prev, machineInspectionResponseDto: response.data.data })
+          )
+
+          successMessage.push('info')
+        } catch (e) {
+          handleApiError(e)
+        }
+      }
+
+      if (!successMessage.length) throw new Error('저장에 실패했습니다')
+
+      handleSuccess(
+        `${successMessage.map(v => ({ result: '점검결과', info: '설비정보' })[v]).join('와 ')}가 저장되었습니다.`
+      )
     } catch (e) {
       handleApiError(e)
     }
-  }, [machineProjectId, inspectionId, checklistResult])
+  }, [machineProjectId, inspectionId, checklistResult, inspection, existResultChange, existInfoChange])
 
   const getChecklistResult = useCallback(async () => {
     if (category === '전체') {
       setChecklistResult(undefined)
+      setInitialChecklistResult(undefined)
 
       return
     }
@@ -153,6 +202,7 @@ export default function CheckInspectionDetailPage() {
       )
 
       setChecklistResult(response.data.data)
+      setInitialChecklistResult(structuredClone(response.data.data))
       console.log('checklist result:', response.data.data)
     } catch (error) {
       handleApiError(error)
@@ -174,9 +224,11 @@ export default function CheckInspectionDetailPage() {
         }
         right={
           <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
-            <IconButton sx={{ p: 0, position: 'relative' }} onClick={handleSaveResult}>
+            <IconButton sx={{ p: 0, position: 'relative' }} onClick={handleSave}>
               <i className='tabler-device-floppy text-white text-3xl' />
-              <i className='absolute tabler-device-floppy text-white text-3xl animate-ping opacity-50' />
+              {existChange && (
+                <i className='absolute tabler-device-floppy text-white text-3xl animate-ping opacity-50' />
+              )}
             </IconButton>
             <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
               <i className='tabler-trash-filled text-red-400 text-3xl' />
@@ -188,9 +240,10 @@ export default function CheckInspectionDetailPage() {
             <TextField
               slotProps={{
                 input: {
-                  sx: { color: 'white', textAlign: 'center', ...(isMobile ? theme.typography.h4 : theme.typography.h3) }
+                  sx: { color: 'white', textAlign: 'center', ...(isMobile ? theme.typography.h5 : theme.typography.h4) }
                 },
-                htmlInput: { sx: { p: 0 } },
+
+                // htmlInput: { sx: { p: 0 } },
                 select: {
                   displayEmpty: true,
                   renderValue: selectedValue => {
@@ -242,194 +295,17 @@ export default function CheckInspectionDetailPage() {
       <TabContext value={currentTab}>
         {/* 본 컨텐츠 (스크롤 가능 영역)*/}
         <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto', py: !isMobile ? 10 : 4, px: 10 }}>
-          <TabPanel
-            value={'pictures'}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: !isMobile ? 8 : 5
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
-              <div className='flex flex-col gap-1'>
-                <div className='flex justify-between items-center'>
-                  <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
-                  <div className='flex items-center'>
-                    <Typography variant='body2'>사진 없음</Typography>
-                    <Checkbox size='small' value={emptyMode} onChange={() => setEmptyMode(prev => !prev)} />
-                  </div>
-                </div>
-                <TextField
-                  select
-                  size={isMobile ? 'small' : 'medium'}
-                  id='machineProjectName'
-                  fullWidth
-                  hiddenLabel
-                  slotProps={{
-                    input: {
-                      sx: {
-                        fontSize: 18,
-                        color: checklistItem?.totalMachinePicCount === 0 ? 'red' : ''
-                      }
-                    }
-                  }}
-                  value={category}
-                  onChange={e => {
-                    setCategory(e.target.value)
-                  }}
-                >
-                  <MenuItem value='전체'>전체</MenuItem>
-                  {inspection?.machineChecklistItemsWithPicCountResponseDtos.map(v =>
-                    v.machineChecklistItemName !== '기타' ? (
-                      <MenuItem
-                        key={v.machineChecklistItemId}
-                        value={v.machineChecklistItemId}
-                        sx={{
-                          color: v.totalMachinePicCount === 0 ? 'red' : ''
-                        }}
-                      >
-                        {v.machineChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}/
-                        {v.checklistSubItems.length}]
-                      </MenuItem>
-                    ) : (
-                      <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                        {v.machineChecklistItemName}
-                      </MenuItem>
-                    )
-                  )}
-                </TextField>
-              </div>
-              {category !== '전체' && (
-                <div className='flex flex-col gap-1'>
-                  <InputLabel sx={{ px: 2 }}>미흡사항</InputLabel>
-                  <TextField
-                    size={isMobile ? 'small' : 'medium'}
-                    id='requirement'
-                    fullWidth
-                    value={checklistResult?.deficiencies ?? ''}
-                    onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
-                    hiddenLabel
-                    multiline
-                    slotProps={{ input: { sx: { fontSize: 18 } } }}
-                  />
-                </div>
-              )}
-              {category !== '전체' && (
-                <div className='flex flex-col gap-1'>
-                  <InputLabel sx={{ px: 2 }}>조치필요사항</InputLabel>
-                  <TextField
-                    size={isMobile ? 'small' : 'medium'}
-                    id='requirement'
-                    fullWidth
-                    value={checklistResult?.actionRequired ?? ''}
-                    onChange={e => setChecklistResult(prev => prev && { ...prev, actionRequired: e.target.value })}
-                    hiddenLabel
-                    multiline
-                    slotProps={{ input: { sx: { fontSize: 18 } } }}
-                  />
-                </div>
-              )}
-            </Box>
-            {inspection && (
-              <PictureTable
-                machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
-                emptyMode={emptyMode}
-                scrollableAreaRef={scrollableAreaRef}
-                checklists={inspection.machineChecklistItemsWithPicCountResponseDtos}
-                refetchChecklists={getInspectionData}
-                tabHeight={TabListRef.current?.clientHeight ?? 0}
-              />
-            )}
-          </TabPanel>
-          <TabPanel
-            value={'info'}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: !isMobile ? 2 : 1
-            }}
-          >
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>설비명</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='requirement'
-                fullWidth
-                value={checklistResult?.deficiencies ?? ''}
-                onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>위치</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='requirement'
-                fullWidth
-                value={checklistResult?.deficiencies ?? ''}
-                onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>용도</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='requirement'
-                fullWidth
-                value={checklistResult?.deficiencies ?? ''}
-                onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-            {/* 설치/제조/점검일 */}
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>설치/제조일</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='requirement'
-                fullWidth
-                value={checklistResult?.deficiencies ?? ''}
-                onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>점검자</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='requirement'
-                fullWidth
-                value={checklistResult?.deficiencies ?? ''}
-                onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>비고</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='requirement'
-                fullWidth
-                value={checklistResult?.deficiencies ?? ''}
-                onChange={e => setChecklistResult(prev => prev && { ...prev, deficiencies: e.target.value })}
-                hiddenLabel
-                multiline
-                minRows={4}
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-          </TabPanel>
+          <PicturesPage
+            scrollableAreaRef={scrollableAreaRef}
+            inspection={inspection}
+            checklistResult={checklistResult}
+            setChecklistResult={setChecklistResult}
+            category={category}
+            setCategory={setCategory}
+            getInspectionData={getInspectionData}
+            TabListRef={TabListRef}
+          />
+          <InfoPage inspection={inspection} setInspection={setInspection} />
         </Box>
         {/* 탭 리스트 */}
         <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
