@@ -14,9 +14,6 @@ import type { ChildrenType } from '@core/types'
 
 // Component Imports
 
-// Util Imports
-import { getSystemMode } from '@core/utils/serverHelpers'
-
 // Style Imports
 import '@/app/globals.css'
 
@@ -36,7 +33,7 @@ const RootLayout = async (props: ChildrenType) => {
 
   // Vars
   // const headersList = await headers()
-  const systemMode = await getSystemMode()
+  const systemMode = 'light'
 
   // const direction = i18n.langDirection[params.lang]
 

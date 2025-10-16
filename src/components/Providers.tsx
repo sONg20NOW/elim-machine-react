@@ -8,7 +8,7 @@ import ThemeProvider from '@components/theme'
 import ReduxProvider from '@/redux-store/ReduxProvider'
 
 // Util Imports
-import { getMode, getSettingsFromCookie, getSystemMode } from '@core/utils/serverHelpers'
+import { getSettingsFromCookie } from '@core/utils/serverHelpers'
 
 type Props = ChildrenType
 
@@ -17,9 +17,9 @@ const Providers = async (props: Props) => {
   const { children } = props
 
   // Vars
-  const mode = await getMode()
+  const mode = 'light'
   const settingsCookie = await getSettingsFromCookie()
-  const systemMode = await getSystemMode()
+  const systemMode = 'light'
 
   return (
     <VerticalNavProvider>
