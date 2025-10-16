@@ -13,6 +13,24 @@ const config: Config = {
   plugins: [tailwindcssLogical, tailwindPlugin, require('tailwindcss-animate')],
   theme: {
     extend: {
+      keyframes: {
+        ring: {
+          '0%, 20%, 40%': { transform: 'rotate(-10deg)' },
+          '10%, 30%, 50%': { transform: 'rotate(10deg)' },
+          '60%, 100%': { transform: 'rotate(0deg)' } // 나머지 70%는 “휴식 구간”
+        },
+        vibrate: {
+          '0%, 100%': { transform: 'translate(0, 0)' },
+          '20%': { transform: 'translate(-2px, 1px)' },
+          '40%': { transform: 'translate(-1px, -1px)' },
+          '60%': { transform: 'translate(2px, 1px)' },
+          '80%': { transform: 'translate(1px, -2px)' }
+        }
+      },
+      animation: {
+        ring: 'ring 1s ease-in-out infinite',
+        vibrate: 'vibrate 0.1s linear infinite'
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

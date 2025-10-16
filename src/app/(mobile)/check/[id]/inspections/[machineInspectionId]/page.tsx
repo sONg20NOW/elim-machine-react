@@ -224,10 +224,11 @@ export default function CheckInspectionDetailPage() {
         }
         right={
           <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
-            <IconButton sx={{ p: 0, position: 'relative' }} onClick={handleSave}>
-              <i className='tabler-device-floppy text-white text-3xl' />
-              {existChange && (
-                <i className='absolute tabler-device-floppy text-white text-3xl animate-ping opacity-50' />
+            <IconButton sx={{ p: 0 }} onClick={handleSave}>
+              {existChange ? (
+                <i className=' tabler-device-floppy text-white text-3xl animate-ring ' />
+              ) : (
+                <i className='tabler-device-floppy text-white text-3xl' />
               )}
             </IconButton>
             <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
