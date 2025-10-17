@@ -75,81 +75,81 @@ export type memberDetailDtoType = {
   memberPrivacyResponseDto: memberPrivacyDtoType
 }
 interface memberBasicDtoType {
-  companyName?: string
-  email?: string
-  memberId?: number
-  memberStatus?: string
-  memberStatusDescription?: string
-  name?: string
-  note?: string
-  role?: string
-  roleDescription?: string
-  storedFileName?: string | null
-  version?: number
+  companyName: string
+  email: string
+  memberId: number
+  memberStatus: string
+  memberStatusDescription: string
+  name: string
+  note: string
+  role: string
+  roleDescription: string
+  storedFileName: string | null
+  version: number
 }
 interface memberCareerDtoType {
-  grade?: string
-  gradeDescription?: string
-  industryOtherMonth?: number
-  industrySameMonth?: number
-  jobField?: string
-  licenseName1?: string
-  licenseName2?: string
-  version?: number
+  grade: string
+  gradeDescription: string
+  industryOtherMonth: number
+  industrySameMonth: number
+  jobField: string
+  licenseName1: string
+  licenseName2: string
+  version: number
 }
 interface memberEtcDtoType {
-  employedType?: string
-  incomeTaxReducedBeginDate?: string
-  incomeTaxReducedEndDate?: string
-  militaryPeriod?: string
-  newMiddleAgedJobs?: string
-  seniorInternship?: string
-  youthDigital?: string
-  youthEmploymentIncentive?: string
-  youthJobLeap?: string
-  version?: number
+  employedType: string
+  incomeTaxReducedBeginDate: string
+  incomeTaxReducedEndDate: string
+  militaryPeriod: string
+  newMiddleAgedJobs: string
+  seniorInternship: string
+  youthDigital: string
+  youthEmploymentIncentive: string
+  youthJobLeap: string
+  version: number
 }
 interface memberOfficeDtoType {
-  apprentice?: string
-  contractType?: string
-  contractTypeDescription?: string
-  contractYn?: string
-  fieldworkYn?: string
-  groupInsuranceYn?: string
-  insuranceAcquisitionDate?: string
-  insuranceLostDate?: string | null
-  joinDate?: string
-  laborForm?: string
-  laborFormDescription?: string
-  officeDepartmentId?: number
-  officeDepartmentName?: string
-  officePosition?: string
-  officePositionDescription?: string
-  resignDate?: string | null
-  staffCardYn?: string
-  staffNum?: string
-  version?: number
-  workForm?: string
-  workFormDescription?: string
+  apprentice: string
+  contractType: string
+  contractTypeDescription: string
+  contractYn: string
+  fieldworkYn: string
+  groupInsuranceYn: string
+  insuranceAcquisitionDate: string
+  insuranceLostDate: string | null
+  joinDate: string
+  laborForm: string
+  laborFormDescription: string
+  officeDepartmentId: number
+  officeDepartmentName: string
+  officePosition: string
+  officePositionDescription: string
+  resignDate: string | null
+  staffCardYn: string
+  staffNum: string
+  version: number
+  workForm: string
+  workFormDescription: string
 }
 export interface memberPrivacyDtoType {
-  roadAddress?: string | null
-  detailAddress?: string | null
-  bankName?: string
-  bankNumber?: string
-  birthday?: string
-  carNumber?: string
-  carYn?: string
-  educationLevel?: string
-  educationMajor?: string
-  emerNum1?: string
-  emerNum2?: string
-  familyCnt?: number
-  foreignYn?: string
-  juminNum?: string
-  phoneNumber?: string
-  religion?: string
-  version?: number
+  roadAddress: string | null
+  detailAddress: string | null
+  bankName: string
+  bankNumber: string
+  birthday: string
+  carNumber: string
+  carYn: string
+  educationLevel: string
+  educationMajor: string
+  emerNum1: string
+  emerNum2: string
+  familyCnt: number
+  foreignYn: string
+  juminNum: string
+  phoneNumber: string
+  religion: string
+  version: number
 }
 
 export type memberLookupResponseDtoType = {
@@ -203,47 +203,47 @@ export interface MachineProjectPageDtoType {
 
 // GET api/machine-projects/[machineProjectId] : 현장정보 조회
 export type MachineProjectResponseDtoType = {
-  roadAddress?: string | null
-  detailAddress?: string | null
-  bizno?: string | null
-  completeDate?: string | null
-  contractDate?: string | null
-  contractManager?: string | null
-  contractManagerEmail?: string | null
-  contractManagerTel?: string | null
-  contractPartner?: string | null
-  contractPartnerEmail?: string | null
-  contractPartnerTel?: string | null
-  contractPrice?: number | null
-  companyName?: string | null
-  grossArea?: number | null
-  houseCnt?: number | null
-  institutionName?: string | null
+  roadAddress: string | null
+  detailAddress: string | null
+  bizno: string | null
+  completeDate: string | null
+  contractDate: string | null
+  contractManager: string | null
+  contractManagerEmail: string | null
+  contractManagerTel: string | null
+  contractPartner: string | null
+  contractPartnerEmail: string | null
+  contractPartnerTel: string | null
+  contractPrice: number | null
+  companyName: string | null
+  grossArea: number | null
+  houseCnt: number | null
+  institutionName: string | null
   machineProjectName: string
-  machineMaintainer1Info?: string | null
-  machineMaintainer1Name?: string | null
-  machineMaintainer2Info?: string | null
-  machineMaintainer2Name?: string | null
-  machineMaintainer3Info?: string | null
-  machineMaintainer3Name?: string | null
-  machineManager1Info?: string | null
-  machineManager1Name?: string | null
-  machineManager2Info?: string | null
-  machineManager2Name?: string | null
-  machineManager3Info?: string | null
-  machineManager3Name?: string | null
-  manager?: string | null
-  managerPhone?: string | null
-  projectStatus?: string | null
-  projectStatusDescription?: string | null
-  purpose?: string | null
-  representative?: string | null
-  requirement?: string | null
-  structure?: string | null
-  tel?: string | null
-  vatIncludedYn?: string | null
-  version?: number | null
-  note?: string | null
+  machineMaintainer1Info: string | null
+  machineMaintainer1Name: string | null
+  machineMaintainer2Info: string | null
+  machineMaintainer2Name: string | null
+  machineMaintainer3Info: string | null
+  machineMaintainer3Name: string | null
+  machineManager1Info: string | null
+  machineManager1Name: string | null
+  machineManager2Info: string | null
+  machineManager2Name: string | null
+  machineManager3Info: string | null
+  machineManager3Name: string | null
+  manager: string | null
+  managerPhone: string | null
+  projectStatus: string | null
+  projectStatusDescription: string | null
+  purpose: string | null
+  representative: string | null
+  requirement: string | null
+  structure: string | null
+  tel: string | null
+  vatIncludedYn: string | null
+  version: number | null
+  note: string | null
 }
 
 // GET /api/machine-projects/{machineProjectId}/schedule-tab : 일정 및 기술진 DTO
@@ -423,8 +423,8 @@ export interface machineInspectionChecklistItemResultBasicResponseDtoType {
   id: number
   version: number
   inspectionResult: string
-  deficiencies?: string
-  actionRequired?: string
+  deficiencies: string
+  actionRequired: string
 }
 
 // 점검 항목의 하위 항목 및 사진 개수 응답 DTO
@@ -567,7 +567,7 @@ export interface MachinePicUpdateResponseDtoType {
   machineChecklistSubItemId: number
   originalFileName: string
   s3Key: string
-  cdnPath?: string
+  cdnPath: string
   alternativeSubTitle: string
   measuredValue: string
   remark: string
@@ -673,18 +673,18 @@ export interface PageInfoDtoType {
 
 // 인풋 형식
 export type InputFieldType = {
-  size?: BoxSizeType
+  size: BoxSizeType
   type: InputType
   label: string
-  options?: Array<{ value: string; label: string }>
-  disabled?: boolean
+  options: Array<{ value: string; label: string }>
+  disabled: boolean
 }
 
 // 테이블 헤더
 export interface HeaderInfoType {
   label: string
   canSort: boolean
-  hideOnTablet?: boolean
+  hideOnTablet: boolean
 }
 
 export type HeaderType<T> = Record<keyof T, HeaderInfoType>
