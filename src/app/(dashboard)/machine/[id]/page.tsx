@@ -178,17 +178,23 @@ const MachineUpdatePage = () => {
   const handleChangeProjectName = useCallback(
     async (projectName: string) => {
       try {
-        await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/name`, {
-          version: projectData?.version,
-          name: projectName
-        })
-        getProjectData()
+        const response = await axios.put<{ data: { projectName: string; version: number } }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/name`,
+          {
+            version: projectData?.version,
+            name: projectName
+          }
+        )
+
+        const { projectName: name, version } = response.data.data
+
+        setProjectData(prev => prev && { ...prev, machineProjectName: name, version: version })
         handleSuccess('프로젝트 이름이 변경되었습니다.')
       } catch (error) {
         handleApiError(error)
       }
     },
-    [machineProjectId, projectData?.version, getProjectData]
+    [machineProjectId, projectData?.version]
   )
 
   useEffect(() => {
