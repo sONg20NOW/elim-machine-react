@@ -10,6 +10,7 @@ import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType
 } from '@/app/_type/types'
+import { checklistItemsContext } from '../page'
 
 // ! 전역 상태 관리로 props 줄이기.
 
@@ -35,12 +36,11 @@ export default function PicturesPage({
   getInspectionData
 }: PicturesPageProps) {
   const isMobile = useContext(isMobileContext)
+  const checklistItems = useContext(checklistItemsContext)
 
   const [emptyMode, setEmptyMode] = useState(false)
 
-  const checklistItem = inspection?.machineChecklistItemsWithPicCountResponseDtos.find(
-    v => v.machineChecklistItemId === Number(category)
-  )
+  const checklistItem = checklistItems.find(v => v.machineChecklistItemId === Number(category))
 
   return (
     <TabPanel
@@ -80,7 +80,7 @@ export default function PicturesPage({
             }}
           >
             <MenuItem value='전체'>전체</MenuItem>
-            {inspection?.machineChecklistItemsWithPicCountResponseDtos.map(v =>
+            {checklistItems.map(v =>
               v.machineChecklistItemName !== '기타' ? (
                 <MenuItem
                   key={v.machineChecklistItemId}
@@ -146,7 +146,7 @@ export default function PicturesPage({
           machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
           emptyMode={emptyMode}
           scrollableAreaRef={scrollableAreaRef}
-          checklists={inspection.machineChecklistItemsWithPicCountResponseDtos}
+          checklists={checklistItems}
           refetchChecklists={getInspectionData}
           tabHeight={TabListRef.current?.clientHeight ?? 0}
         />
