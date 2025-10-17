@@ -1,13 +1,14 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import { Box, Button, IconButton, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
+import { Box, IconButton, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 import type { MachineInspectionDetailResponseDtoType } from '@/app/_type/types'
 import { engineerListContext } from '../page'
+import EngineerCard from '../_components/EngineerCard'
 
 interface InfoPageProps {
   inspection?: MachineInspectionDetailResponseDtoType
@@ -229,13 +230,14 @@ export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
               hiddenLabel
               slotProps={{ input: { sx: { fontSize: 18 } } }}
             >
-              {inspection?.engineerIds.length === 0 && (
-                <MenuItem disabled value={-1}>
+              <MenuItem sx={{ fontSize: 18, display: 'none' }} disabled value={-1}>
+                <Typography variant='inherit' color='warning'>
                   점검자를 추가하세요
-                </MenuItem>
-              )}
+                </Typography>
+              </MenuItem>
               {engineerList.map(v => (
                 <MenuItem
+                  sx={{ fontSize: 18 }}
                   disabled={inspection?.engineerIds.includes(v.engineerId)}
                   value={v.engineerId}
                   key={v.engineerId}
@@ -259,16 +261,32 @@ export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
               <i className='tabler-plus' />
             </IconButton>
           </div>
-          <Box sx={{ border: '1px dashed lightgray', borderRadius: 1, p: 5 }}>
+          <Box
+            sx={{
+              border: '1px dashed lightgray',
+              borderRadius: 1,
+              p: 5,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3
+            }}
+          >
             {inspection?.engineerIds.length !== 0 ? (
               inspection?.engineerIds.map((id, index) => {
                 const engineer = engineerList.find(i => i.engineerId === id)
 
                 return (
                   engineer && (
-                    <div className='flex flex-col gap-1' key={index}>
-                      <Typography>{`[${engineer.gradeDescription}] ${engineer.engineerName}`}</Typography>
-                    </div>
+                    <EngineerCard
+                      key={index}
+                      engineer={engineer}
+                      handleDeleteEngineer={() =>
+                        setInspection(
+                          prev =>
+                            prev && { ...prev, engineerIds: prev?.engineerIds.filter(id => id !== engineer.engineerId) }
+                        )
+                      }
+                    />
                   )
                 )
               })
