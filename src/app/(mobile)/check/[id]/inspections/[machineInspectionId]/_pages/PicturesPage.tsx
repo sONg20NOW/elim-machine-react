@@ -4,17 +4,21 @@ import { useContext, useState } from 'react'
 import TabPanel from '@mui/lab/TabPanel'
 import { Box, Checkbox, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 
+import type { UseFormRegister } from 'react-hook-form'
+
 import PictureTable from '../_components/PictureTable'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType
 } from '@/app/_type/types'
+import type { InspectionformType } from '../page'
 import { checklistItemsContext } from '../page'
 
 // ! 전역 상태 관리로 props 줄이기.
 
 interface PicturesPageProps {
+  register: UseFormRegister<InspectionformType>
   scrollableAreaRef: RefObject<HTMLElement>
   TabListRef: RefObject<HTMLElement>
   inspection?: MachineInspectionDetailResponseDtoType
@@ -26,6 +30,7 @@ interface PicturesPageProps {
 }
 
 export default function PicturesPage({
+  register,
   scrollableAreaRef,
   TabListRef,
   inspection,
@@ -106,14 +111,8 @@ export default function PicturesPage({
               <InputLabel sx={{ px: 2 }}>미흡사항</InputLabel>
               <TextField
                 size={isMobile ? 'small' : 'medium'}
-                id='requirement'
                 fullWidth
-                value={checklistResult?.deficiencies ?? ''}
-                onChange={e =>
-                  setChecklistResult(
-                    prev => prev && { ...prev, deficiencies: e.target.value === '' ? null : e.target.value }
-                  )
-                }
+                {...register('deficiencies')}
                 hiddenLabel
                 multiline
                 slotProps={{ input: { sx: { fontSize: 18 } } }}
@@ -125,14 +124,8 @@ export default function PicturesPage({
               <InputLabel sx={{ px: 2 }}>조치필요사항</InputLabel>
               <TextField
                 size={isMobile ? 'small' : 'medium'}
-                id='requirement'
                 fullWidth
-                value={checklistResult?.actionRequired ?? ''}
-                onChange={e =>
-                  setChecklistResult(
-                    prev => prev && { ...prev, actionRequired: e.target.value === '' ? null : e.target.value }
-                  )
-                }
+                {...register('actionRequired')}
                 hiddenLabel
                 multiline
                 slotProps={{ input: { sx: { fontSize: 18 } } }}

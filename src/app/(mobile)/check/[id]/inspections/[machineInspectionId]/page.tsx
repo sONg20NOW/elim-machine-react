@@ -10,10 +10,11 @@ import TabList from '@mui/lab/TabList'
 
 import TabContext from '@mui/lab/TabContext'
 
+import { useForm } from 'react-hook-form'
+
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 
-import type { projectSummaryType } from '../../page'
 import { auth } from '@/lib/auth'
 import type {
   MachineInspectionChecklistItemResultResponseDtoType,
@@ -75,23 +76,16 @@ export default function CheckInspectionDetailPage() {
 
   const [checklistResult, setChecklistResult] = useState<MachineInspectionChecklistItemResultResponseDtoType>()
 
-  const [initialChecklistResult, setInitialChecklistResult] =
-    useState<MachineInspectionChecklistItemResultResponseDtoType>()
-
-  // InfoPage props
-  const [initialInspection, setInitialInspection] = useState<MachineInspectionDetailResponseDtoType>()
-
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
   const [checkiistList, setCheckiistList] = useState<machineChecklistItemsWithPicCountResponseDtosType[]>([])
 
   // 변경감지
-  const existResultChange = JSON.stringify(checklistResult) !== JSON.stringify(initialChecklistResult)
-  const existInfoChange = JSON.stringify(inspection) !== JSON.stringify(initialInspection)
-
-  const existChange = existResultChange || existInfoChange
-
-  const machineProjectName = (JSON.parse(localStorage.getItem('projectSummary')!) as projectSummaryType)
-    .machineProjectName
+  const {
+    register,
+    formState: { isSubmitting, isDirty },
+    handleSubmit,
+    reset
+  } = useForm<InspectionformType>()
 
   // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
   if (!localStorage.getItem('projectSummary')) router.back()
@@ -114,10 +108,6 @@ export default function CheckInspectionDetailPage() {
     }
   }, [machineProjectId])
 
-  useEffect(() => {
-    getAllInspections()
-  }, [getAllInspections])
-
   // 참여중인 엔지니어 리스트 가져오기
   const getParticipatedEngineerList = useCallback(async () => {
     try {
@@ -132,10 +122,6 @@ export default function CheckInspectionDetailPage() {
     }
   }, [machineProjectId])
 
-  useEffect(() => {
-    getParticipatedEngineerList()
-  }, [getParticipatedEngineerList])
-
   // inspectionId가 바뀔 때마다 점검항목 가져오기
   const getChecklistList = useCallback(async () => {
     const response = await auth.get<{
@@ -147,8 +133,10 @@ export default function CheckInspectionDetailPage() {
   }, [machineProjectId, inspectionId])
 
   useEffect(() => {
+    getAllInspections()
+    getParticipatedEngineerList()
     getChecklistList()
-  }, [getChecklistList])
+  }, [getAllInspections, getParticipatedEngineerList, getChecklistList])
 
   // 현재 선택된 inspection 데이터 가져오기
   const getInspectionData = useCallback(async () => {
@@ -158,7 +146,6 @@ export default function CheckInspectionDetailPage() {
       )
 
       setInspection(response.data.data)
-      setInitialInspection(structuredClone(response.data.data))
       console.log('current inspection: ', response.data.data)
     } catch (error) {
       handleApiError(error)
@@ -190,7 +177,7 @@ export default function CheckInspectionDetailPage() {
 
     // 미흡사항/조치필요사항 저장
     try {
-      if (existResultChange && checklistResult) {
+      if (isDirty && checklistResult) {
         try {
           const response = await auth.put<{
             data: {
@@ -204,9 +191,6 @@ export default function CheckInspectionDetailPage() {
           )
 
           setChecklistResult(response.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
-          setInitialChecklistResult(
-            structuredClone(response.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
-          )
 
           successMessage.push('result')
         } catch (e) {
@@ -214,7 +198,7 @@ export default function CheckInspectionDetailPage() {
         }
       }
 
-      if (existInfoChange && inspection) {
+      if (isDirty && inspection) {
         try {
           const response = await auth.put<{
             data: MachineInspectionResponseDtoType
@@ -224,9 +208,6 @@ export default function CheckInspectionDetailPage() {
           )
 
           setInspection(prev => prev && { ...prev, machineInspectionResponseDto: response.data.data })
-          setInitialInspection(
-            prev => prev && structuredClone({ ...prev, machineInspectionResponseDto: response.data.data })
-          )
 
           successMessage.push('info')
         } catch (e) {
@@ -242,12 +223,11 @@ export default function CheckInspectionDetailPage() {
     } catch (e) {
       handleApiError(e)
     }
-  }, [machineProjectId, inspectionId, checklistResult, inspection, existResultChange, existInfoChange])
+  }, [machineProjectId, inspectionId, checklistResult, inspection, isDirty])
 
   const getChecklistResult = useCallback(async () => {
     if (category === '전체') {
       setChecklistResult(undefined)
-      setInitialChecklistResult(undefined)
 
       return
     }
@@ -258,7 +238,6 @@ export default function CheckInspectionDetailPage() {
       )
 
       setChecklistResult(response.data.data)
-      setInitialChecklistResult(structuredClone(response.data.data))
       console.log('checklist result:', response.data.data)
     } catch (error) {
       handleApiError(error)
@@ -273,7 +252,9 @@ export default function CheckInspectionDetailPage() {
     return (
       <inspectionListContext.Provider value={inspectionList}>
         <engineerListContext.Provider value={participatedEngineerList}>
-          <checklistItemsContext.Provider value={checkiistList}>{children}</checklistItemsContext.Provider>
+          <form onSubmit={handleSubmit(data => handleSave())}>
+            <checklistItemsContext.Provider value={checkiistList}>{children}</checklistItemsContext.Provider>
+          </form>
         </engineerListContext.Provider>
       </inspectionListContext.Provider>
     )
@@ -292,7 +273,7 @@ export default function CheckInspectionDetailPage() {
           right={
             <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
               <IconButton sx={{ p: 0 }} onClick={handleSave}>
-                {existChange ? (
+                {isDirty ? (
                   <i className=' tabler-device-floppy text-white text-3xl animate-ring ' />
                 ) : (
                   <i className='tabler-device-floppy text-white text-3xl' />
@@ -368,6 +349,7 @@ export default function CheckInspectionDetailPage() {
           {/* 본 컨텐츠 (스크롤 가능 영역)*/}
           <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto', py: !isMobile ? 10 : 4, px: 10 }}>
             <PicturesPage
+              register={register}
               scrollableAreaRef={scrollableAreaRef}
               inspection={inspection}
               checklistResult={checklistResult}
@@ -379,6 +361,7 @@ export default function CheckInspectionDetailPage() {
             />
             <InfoPage inspection={inspection} setInspection={setInspection} />
           </Box>
+
           {/* 탭 리스트 */}
           <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
             <TabList

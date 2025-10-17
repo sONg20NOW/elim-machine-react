@@ -81,8 +81,6 @@ const PictureTable = ({
       setIsLoading(true)
 
       try {
-        console.log('id:', machineChecklistItemIdRef.current)
-
         const requestBody = {
           ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {}),
           machineInspectionId: Number(inspectionId),
