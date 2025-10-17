@@ -18,6 +18,7 @@ import { auth } from '@/lib/auth'
 import type { projectSummaryType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
+import ProjectInfoCard from '../_components/ProjectInfoCard'
 
 export interface inspectionSummaryType {
   machineProjectName: string
@@ -213,48 +214,7 @@ export default function InspectionsPage() {
         }
       />
 
-      {/* 현장 이미지 & 정보 */}
-      <Box
-        sx={{
-          height: 200,
-          width: 'full',
-          backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(/images/safety114_logo.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-
-          // backgroundBlendMode: 'normal',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 6,
-          color: 'white',
-          textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
-          fontSize: 18,
-          fontWeight: 500,
-          boxShadow: 5
-        }}
-      >
-        <Typography variant='inherit' sx={{ fontWeight: 600, fontSize: 24 }}>
-          {projectSummaryData?.machineProjectName ?? '현장명'}
-        </Typography>
-        <div className='flex flex-col gap-1 items-center'>
-          <Typography
-            width={'fit-content'}
-            variant='inherit'
-          >{`${projectSummaryData?.beginDate ?? '시작날짜'} ~ ${projectSummaryData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
-          <Typography width={'fit-content'} variant='inherit'>
-            {(projectSummaryData?.engineerNames.length ?? 0) > 2
-              ? `${projectSummaryData?.engineerNames.slice(0, 2).join(', ')} 외 ${projectSummaryData!.engineerNames.length - 2}명`
-              : projectSummaryData?.engineerNames.length
-                ? projectSummaryData?.engineerNames.join(', ')
-                : '배정된 점검진 없음'}
-          </Typography>
-          <Typography width={'fit-content'} variant='inherit'>
-            마지막 업로드: {'없음'}
-          </Typography>
-        </div>
-      </Box>
+      <ProjectInfoCard projectSummaryData={projectSummaryData} />
       {/* 스크롤이 생기는 메인 영역 */}
       <Box ref={listRef} sx={{ flex: 1, overflowY: 'auto', p: 5 }}>
         {inspections.map(inspection => (
