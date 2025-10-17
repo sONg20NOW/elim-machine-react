@@ -5,19 +5,23 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 
 import { useParams, useRouter } from 'next/navigation'
 
-import { Box, Button, IconButton, InputLabel, TextField, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, IconButton, InputLabel, TextField, Typography } from '@mui/material'
 
 import axios from 'axios'
 
 import { useForm } from 'react-hook-form'
 
-import { toast } from 'react-toastify'
-
-import type { MachineProjectResponseDtoType, MachineProjectScheduleAndEngineerResponseDtoType } from '@/app/_type/types'
+import type {
+  MachineInspectionPageResponseDtoType,
+  MachineProjectResponseDtoType,
+  MachineProjectScheduleAndEngineerResponseDtoType,
+  successResponseDtoType
+} from '@/app/_type/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@/lib/auth'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
+import ProjectInfoCard from './_components/ProjectInfoCard'
 
 export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing: Dispatch<SetStateAction<boolean>> }>({
   isEditing: false,
@@ -25,10 +29,16 @@ export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing
 })
 
 export interface projectSummaryType {
-  machineProjectName: string
-  beginDate: string
-  endDate: string
-  engineerNames: string[]
+  machineProjectName: string | null
+  beginDate: string | null
+  endDate: string | null
+  engineerNames: string[] | null
+}
+
+interface ProjectFormType {
+  machineProjectName: string | null
+  requirement: string | null
+  note: string | null
 }
 
 const CheckDetailPage = () => {
@@ -39,32 +49,34 @@ const CheckDetailPage = () => {
 
   const isMobile = useContext(isMobileContext)
 
-  const [projectData, setProjectData] = useState<MachineProjectResponseDtoType>()
-  const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
-
   // ! 대표 이미지, 마지막 업로드 추가
   const [projectSummaryData, setProjectSummaryData] = useState<projectSummaryType | undefined>(
     localStorage.getItem('projectSummary') !== null ? JSON.parse(localStorage.getItem('projectSummary')!) : undefined
   )
 
-  // 1. 카메라로 찍은 이미지 URL을 저장할 상태 추가
-  const [customBackgroundImage, setCustomBackgroundImage] = useState<string | null>(null)
+  const versionRef = useRef(0)
 
-  // 2. 숨겨진 <input type="file">에 접근하기 위한 ref 추가
-  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const [inspectionCnt, setInspectionCnt] = useState(0)
+  const [dotCnt, setDotCnt] = useState(0)
 
   const {
     register,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
     handleSubmit,
     reset
-  } = useForm({
-    defaultValues: {
-      machineProjectName: '',
-      requirement: '',
-      note: ''
+  } = useForm<ProjectFormType>()
+
+  useEffect(() => {
+    if (projectSummaryData) return
+
+    const dotIntervalId = setInterval(() => {
+      setDotCnt(prev => (prev > 3 ? 0 : prev + 1))
+    }, 1000)
+
+    return () => {
+      clearInterval(dotIntervalId)
     }
-  })
+  }, [projectSummaryData])
 
   // 현장정보 불러오기
   const getProjectData = useCallback(async () => {
@@ -73,17 +85,26 @@ const CheckDetailPage = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`
       )
 
-      setProjectData(response.data.data)
-
-      // handleSuccess('프로젝트 정보를 불러왔습니다.')
+      return response.data.data
     } catch (error) {
       handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
     }
   }, [machineProjectId])
 
-  useEffect(() => {
-    getProjectData()
-  }, [getProjectData])
+  // 설비 개수 불러오기
+  const getInspectionCnt = useCallback(async () => {
+    try {
+      const response = await auth.get<{ data: successResponseDtoType<MachineInspectionPageResponseDtoType> }>(
+        `/api/machine-projects/${machineProjectId}/machine-inspections`
+      )
+
+      return response.data.data.page.totalElements
+    } catch (error) {
+      handleApiError(error, '설비개수를 불러오는 데 실패했습니다.')
+
+      return 0
+    }
+  }, [machineProjectId])
 
   // 점검일정/참여기술진 정보 불러오기
   const getScheduleData = useCallback(async () => {
@@ -92,132 +113,100 @@ const CheckDetailPage = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/schedule-tab`
       )
 
-      setScheduleData(response.data.data)
-
-      // handleSuccess('점검일정/참여기술진 정보를 불러왔습니다.')
+      return response.data.data
     } catch (error) {
       handleApiError(error, '점검일정/참여기술진 정보를 불러오는 데 실패했습니다.')
     }
   }, [machineProjectId])
 
-  useEffect(() => {
-    getScheduleData()
-  }, [getScheduleData])
+  const getProjectSummaryData = useCallback(async () => {
+    const projectData = await getProjectData()
+    const scheduleData = await getScheduleData()
+
+    if (!(projectData && scheduleData)) return
+
+    const { version, machineProjectName } = projectData
+    const { beginDate, endDate, engineers } = scheduleData
+
+    versionRef.current = version ?? 0
+
+    setProjectSummaryData({
+      machineProjectName: machineProjectName,
+      beginDate: beginDate,
+      endDate: endDate,
+      engineerNames: engineers.map(v => v.engineerName)
+    })
+
+    setInspectionCnt(await getInspectionCnt())
+
+    reset(projectData)
+  }, [getProjectData, getScheduleData, getInspectionCnt, reset])
 
   // projectData와 scheduleData 중 썸네일에 필요한 정보를 projectSummaryData에 저장.
   useEffect(() => {
-    if (!projectData || !scheduleData) return
-    const { machineProjectName } = projectData
-    const { engineers, beginDate, endDate } = scheduleData
-
-    setProjectSummaryData({ machineProjectName, engineerNames: engineers.map(v => v.engineerName), beginDate, endDate })
-  }, [projectData, scheduleData])
+    getProjectSummaryData()
+  }, [getProjectSummaryData])
 
   // projectSummaryData가 바뀔 때마다 localStorage에 저장.
   useEffect(() => {
-    if (projectSummaryData) localStorage.setItem('projectSummary', JSON.stringify(projectSummaryData))
+    if (projectSummaryData) {
+      localStorage.setItem('projectSummary', JSON.stringify(projectSummaryData))
+    }
   }, [projectSummaryData])
-
-  useEffect(() => {
-    reset({
-      machineProjectName: projectData?.machineProjectName ?? '',
-      requirement: projectData?.requirement ?? '',
-      note: projectData?.note ?? ''
-    })
-  }, [projectData, reset])
 
   // ! api 하나로 통일
   const handleSave = useCallback(
-    async (data: { machineProjectName: string; requirement: string; note: string }) => {
+    async (data: ProjectFormType) => {
       try {
-        if (!projectData) throw new Error()
-
-        const { machineProjectName, requirement, note } = projectData
-        const original = { machineProjectName, requirement, note }
-
-        if (JSON.stringify(original) === JSON.stringify(data)) {
-          toast.error('변경사항이 없습니다.', { autoClose: 1000 })
-
-          return
-        }
-
-        const response = await auth.put<{ data: { version: number } }>(`/api/machine-projects/${machineProjectId}`, {
-          ...projectData,
-          requirement: data.requirement
+        const response1 = await auth.put<{ data: { version: number } }>(`/api/machine-projects/${machineProjectId}`, {
+          requirement: data.requirement,
+          version: versionRef.current
         })
 
-        await auth.put<{ data: { version: number } }>(`/api/machine-projects/${machineProjectId}/name`, {
-          version: response.data.data.version,
-          name: data.machineProjectName
-        })
+        versionRef.current = response1.data.data.version
+        reset({ requirement: data.requirement })
 
-        const finalRes = await auth.put<{ data: { version: number } }>(
+        const response2 = await auth.put<{ data: { version: number } }>(
           `/api/machine-projects/${machineProjectId}/note`,
+          { version: versionRef.current, note: data.note }
+        )
+
+        versionRef.current = response2.data.data.version
+        reset({ note: data.note })
+
+        // ! name은 version 반환을 안함..
+        const response3 = await auth.put<{ data: { version: number } }>(
+          `/api/machine-projects/${machineProjectId}/name`,
           {
-            version: response.data.data.version + 1,
-            note: data.note
+            version: versionRef.current,
+            name: data.machineProjectName
           }
         )
 
-        setProjectData(prev => ({
-          ...prev,
-          machineProjectName: data.machineProjectName,
-          requirement: data.requirement,
-          note: data.note,
-          version: finalRes.data.data.version
-        }))
+        versionRef.current = response3.data.data.version
+        reset({ machineProjectName: data.machineProjectName })
+
+        setProjectSummaryData(
+          prev =>
+            prev && {
+              ...prev,
+              machineProjectName: data.machineProjectName,
+              requirement: data.requirement,
+              note: data.note
+            }
+        )
         handleSuccess('변경사항이 저장되었습니다.')
       } catch (err) {
         handleApiError(err)
       }
     },
-    [machineProjectId, projectData]
+    [machineProjectId, reset]
   )
-
-  // 3. 카메라 버튼 클릭 핸들러: 숨겨진 <input type="file">을 클릭
-  const handleCameraClick = () => {
-    cameraInputRef.current?.click()
-  }
-
-  // 4. 이미지 파일 변경 핸들러: 찍은 사진을 읽어 배경 이미지로 설정
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-
-    if (file) {
-      // 이전에 생성된 객체 URL이 있다면 메모리 누수를 막기 위해 해제 (Optional)
-      if (customBackgroundImage) {
-        URL.revokeObjectURL(customBackgroundImage)
-      }
-
-      // 새 파일의 객체 URL을 생성하여 상태에 저장
-      const newImageUrl = URL.createObjectURL(file)
-
-      setCustomBackgroundImage(newImageUrl)
-    }
-  }
-
-  // 배경 이미지를 결정하는 유틸리티 함수
-  const getBackgroundImageStyle = () => {
-    // 5. customBackgroundImage가 있으면 그 URL을 사용하고, 없으면 기본 이미지를 사용
-    const imageUrl = customBackgroundImage || '/images/safety114_logo.png'
-
-    // 배경 이미지 위에 어두운 오버레이를 유지하기 위해 linear-gradient와 결합
-    return `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(${imageUrl})`
-  }
 
   // ! 마지막 업로드 정보 추가되면 추가, 실제 이미지로 변경.
   // ! 설비목록 실제로 받아오기.
   return (
     <form onSubmit={handleSubmit(data => handleSave(data))}>
-      {/* 6. 숨겨진 파일 입력 요소 (카메라 접근용) */}
-      <input
-        type='file'
-        accept='image/*' // 이미지 파일만 허용
-        capture='environment' // 모바일에서 후면 카메라를 우선적으로 사용하도록 지정
-        ref={cameraInputRef}
-        onChange={handleImageChange}
-        style={{ display: 'none' }} // 화면에서 숨김
-      />
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
         <MobileHeader
           left={
@@ -226,7 +215,6 @@ const CheckDetailPage = () => {
               onClick={() => {
                 router.back()
                 localStorage.removeItem('projectSummary')
-                localStorage.removeItem('inspectionCnt')
               }}
             >
               <i className='tabler-chevron-left text-white text-3xl' />
@@ -234,130 +222,93 @@ const CheckDetailPage = () => {
           }
           title='현장정보'
           right={
-            <div className='flex gap-4'>
-              <Button
-                variant='contained'
-                type='submit'
-                sx={{ boxShadow: 3, backgroundColor: 'white', color: 'gray' }}
-                disabled={isSubmitting}
-              >
-                저장
-              </Button>
-            </div>
+            <IconButton sx={{ p: 0 }} type='submit' disabled={isSubmitting || !isDirty}>
+              {isDirty ? (
+                <i className=' tabler-device-floppy text-white text-3xl animate-ring ' />
+              ) : (
+                <i className='tabler-device-floppy text-white text-3xl' />
+              )}
+            </IconButton>
           }
         />
 
-        <Box
-          sx={{
-            height: 200,
-            width: 'full',
-            position: 'relative',
-
-            // 8. customBackgroundImage 상태에 따라 배경 이미지 변경
-            backgroundImage: getBackgroundImageStyle(),
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-
-            // backgroundBlendMode: 'normal',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-            color: 'white',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
-            fontSize: 18,
-            fontWeight: 500,
-            boxShadow: 5
-          }}
-        >
-          <Typography variant='inherit' sx={{ fontWeight: 600, fontSize: 24 }}>
-            {projectSummaryData?.machineProjectName ?? '　'}
-          </Typography>
-          <div className='flex flex-col gap-1 items-center'>
-            <Typography
-              width={'fit-content'}
-              variant='inherit'
-            >{`${projectSummaryData?.beginDate ?? '시작날짜'} ~ ${projectSummaryData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
-            <Typography width={'fit-content'} variant='inherit'>
-              {(projectSummaryData?.engineerNames.length ?? 0) > 2
-                ? `${projectSummaryData?.engineerNames.slice(0, 2).join(', ')} 외 ${projectSummaryData!.engineerNames.length - 2}명`
-                : projectSummaryData?.engineerNames.length
-                  ? projectSummaryData?.engineerNames.join(', ')
-                  : '배정된 점검진 없음'}
-            </Typography>
-            <Typography width={'fit-content'} variant='inherit'>
-              마지막 업로드: {'없음'}
-            </Typography>
-          </div>
-          <IconButton
-            size='large'
-            type='button'
-            onClick={handleCameraClick} // 7. 버튼 클릭 시 카메라 핸들러 호출
-            sx={{
-              position: 'absolute',
-              right: 1,
-              top: 1,
-              color: 'white',
-              opacity: '90%'
-            }}
-          >
-            <i className='tabler-camera' />
-          </IconButton>
-        </Box>
-        <Box sx={{ flex: 1, overflowY: 'auto' }}>
-          <Box
-            sx={{ py: !isMobile ? 10 : 4, px: 10, display: 'flex', flexDirection: 'column', gap: !isMobile ? 6 : 2 }}
-          >
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>현장명</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='machineProjectName'
-                {...register('machineProjectName')}
+        {projectSummaryData ? (
+          <>
+            <ProjectInfoCard canChange projectSummaryData={projectSummaryData} />
+            <Box sx={{ flex: 1, overflowY: 'auto' }}>
+              <Box
+                sx={{
+                  py: !isMobile ? 10 : 4,
+                  px: 10,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: !isMobile ? 6 : 2
+                }}
+              >
+                <div className='flex flex-col gap-1'>
+                  <InputLabel sx={{ px: 2 }}>현장명</InputLabel>
+                  <TextField
+                    size={isMobile ? 'small' : 'medium'}
+                    id='machineProjectName'
+                    {...register('machineProjectName')}
+                    fullWidth
+                    hiddenLabel
+                    slotProps={{ input: { sx: { fontSize: 18 } } }}
+                  />
+                </div>
+                <div className='flex flex-col gap-1'>
+                  <InputLabel sx={{ px: 2 }}>관리주체 요청사항</InputLabel>
+                  <TextField
+                    size={isMobile ? 'small' : 'medium'}
+                    id='requirement'
+                    {...register('requirement')}
+                    fullWidth
+                    hiddenLabel
+                    multiline
+                    slotProps={{ input: { sx: { fontSize: 18 } } }}
+                  />
+                </div>
+                <div className='flex flex-col gap-1'>
+                  <InputLabel sx={{ px: 2 }}>특이사항</InputLabel>
+                  <TextField
+                    size={isMobile ? 'small' : 'medium'}
+                    id='note'
+                    {...register('note')}
+                    fullWidth
+                    hiddenLabel
+                    multiline
+                    slotProps={{ input: { sx: { fontSize: 18 } } }}
+                  />
+                </div>
+              </Box>
+            </Box>
+            <Box sx={{ py: 5, px: 8, boxShadow: 5 }}>
+              <Button
+                size={'large'}
+                variant='contained'
+                type='button'
                 fullWidth
-                hiddenLabel
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>관리주체 요청사항</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='requirement'
-                {...register('requirement')}
-                fullWidth
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>특이사항</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                id='note'
-                {...register('note')}
-                fullWidth
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
+                sx={{ padding: !isMobile ? 4 : 2, fontSize: 20 }}
+                onClick={() => router.push(`/check/${machineProjectId}/inspections`)}
+              >
+                설비목록 ({inspectionCnt})
+              </Button>
+            </Box>{' '}
+          </>
+        ) : (
+          <Box height={'100%'} sx={{ display: 'grid', placeItems: 'center' }}>
+            <div className='flex flex-col items-center gap-5'>
+              <Typography>
+                현장정보를 가지고 오고 있습니다
+                {new Array(dotCnt)
+                  .fill('.')
+                  .map((v, idx) => (idx === 3 ? '!' : v))
+                  .join('')}
+              </Typography>
+              <CircularProgress />
             </div>
           </Box>
-        </Box>
-        <Box sx={{ py: 5, px: 8, boxShadow: 5 }}>
-          <Button
-            size={'large'}
-            variant='contained'
-            type='button'
-            fullWidth
-            sx={{ padding: !isMobile ? 4 : 2, fontSize: 20 }}
-            onClick={() => router.push(`/check/${machineProjectId}/inspections`)}
-          >
-            설비목록 ({localStorage.getItem('inspectionCnt')})
-          </Button>
-        </Box>
+        )}
       </Box>
     </form>
   )

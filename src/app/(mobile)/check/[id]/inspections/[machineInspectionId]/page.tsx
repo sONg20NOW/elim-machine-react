@@ -21,7 +21,8 @@ import type {
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
   MachineInspectionResponseDtoType,
-  successResponseDtoType
+  successResponseDtoType,
+  machineChecklistItemsWithPicCountResponseDtosType
 } from '@/app/_type/types'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
@@ -36,6 +37,20 @@ const max_cnt = 100
 
 export const inspectionListContext = createContext<MachineInspectionPageResponseDtoType[]>([])
 export const engineerListContext = createContext<machineProjectEngineerDetailDtoType[]>([])
+export const checklistItemsContext = createContext<machineChecklistItemsWithPicCountResponseDtosType[]>([])
+
+export interface InspectionformType {
+  deficiencies: string
+  actionRequired: string
+  machineInspectionName: string
+  location: string
+  purpose: string
+  installedDate: string
+  manufacturedDate: string
+  usedDate: string
+  checkDate: string
+  remark: string
+}
 
 export default function CheckInspectionDetailPage() {
   const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
@@ -67,6 +82,7 @@ export default function CheckInspectionDetailPage() {
   const [initialInspection, setInitialInspection] = useState<MachineInspectionDetailResponseDtoType>()
 
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
+  const [checkiistList, setCheckiistList] = useState<machineChecklistItemsWithPicCountResponseDtosType[]>([])
 
   // 변경감지
   const existResultChange = JSON.stringify(checklistResult) !== JSON.stringify(initialChecklistResult)
@@ -119,6 +135,20 @@ export default function CheckInspectionDetailPage() {
   useEffect(() => {
     getParticipatedEngineerList()
   }, [getParticipatedEngineerList])
+
+  // inspectionId가 바뀔 때마다 점검항목 가져오기
+  const getChecklistList = useCallback(async () => {
+    const response = await auth.get<{
+      data: { machineChecklistItemsWithPicCountResponseDtos: machineChecklistItemsWithPicCountResponseDtosType[] }
+    }>(`/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}`)
+
+    setCheckiistList(response.data.data.machineChecklistItemsWithPicCountResponseDtos)
+    console.log('get checklist items succeed: ', response.data.data.machineChecklistItemsWithPicCountResponseDtos)
+  }, [machineProjectId, inspectionId])
+
+  useEffect(() => {
+    getChecklistList()
+  }, [getChecklistList])
 
   // 현재 선택된 inspection 데이터 가져오기
   const getInspectionData = useCallback(async () => {
@@ -242,7 +272,9 @@ export default function CheckInspectionDetailPage() {
   const InspectionPageProviders = ({ children }: ChildrenType) => {
     return (
       <inspectionListContext.Provider value={inspectionList}>
-        <engineerListContext.Provider value={participatedEngineerList}>{children}</engineerListContext.Provider>
+        <engineerListContext.Provider value={participatedEngineerList}>
+          <checklistItemsContext.Provider value={checkiistList}>{children}</checklistItemsContext.Provider>
+        </engineerListContext.Provider>
       </inspectionListContext.Provider>
     )
   }
