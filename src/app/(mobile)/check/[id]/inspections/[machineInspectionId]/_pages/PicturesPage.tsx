@@ -55,8 +55,7 @@ const PicturesPage = forwardRef<Form1ComponentHandle, PicturesPageProps>((props,
   } = useForm<formType>({ defaultValues: { deficiencies: '', actionRequired: '' } })
 
   const checklistMeta = useRef({ id: 0, version: 0 })
-
-  const [emptyMode, setEmptyMode] = useState(false)
+  const checkboxRef = useRef<HTMLButtonElement>(null)
 
   const checklistItem = checklistItems.find(v => v.machineChecklistItemId === Number(category))
 
@@ -136,103 +135,84 @@ const PicturesPage = forwardRef<Form1ComponentHandle, PicturesPageProps>((props,
   }, [isDirty])
 
   return (
-    <TabPanel
-      value={'pictures'}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: !isMobile ? 8 : 5
-      }}
-    >
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
-        <div className='flex flex-col gap-1'>
-          <div className='flex justify-between items-center'>
-            <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
-            <div className='flex items-center'>
-              <Typography variant='body2'>사진 없음</Typography>
-              <Checkbox size='small' value={emptyMode} onChange={() => setEmptyMode(prev => !prev)} />
-            </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
+      <div className='flex flex-col gap-1'>
+        <div className='flex justify-between items-center'>
+          <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
+          <div className='flex items-center'>
+            <Typography variant='body2'>사진 없음</Typography>
+            <Checkbox size='small' sx={{ opacity: 0 }} />
           </div>
-          <TextField
-            select
-            size={isMobile ? 'small' : 'medium'}
-            id='machineProjectName'
-            fullWidth
-            hiddenLabel
-            slotProps={{
-              input: {
-                sx: {
-                  fontSize: 18,
-                  color: checklistItem?.totalMachinePicCount === 0 ? 'red' : ''
-                }
-              }
-            }}
-            value={category}
-            onChange={e => {
-              setCategory(e.target.value)
-            }}
-          >
-            <MenuItem value='전체'>전체</MenuItem>
-            {checklistItems.map(v =>
-              v.machineChecklistItemName !== '기타' ? (
-                <MenuItem
-                  key={v.machineChecklistItemId}
-                  value={v.machineChecklistItemId}
-                  sx={{
-                    color: v.totalMachinePicCount === 0 ? 'red' : ''
-                  }}
-                >
-                  {v.machineChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}/
-                  {v.checklistSubItems.length}]
-                </MenuItem>
-              ) : (
-                <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                  {v.machineChecklistItemName}
-                </MenuItem>
-              )
-            )}
-          </TextField>
         </div>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
-          {category !== '전체' && (
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>미흡사항</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                fullWidth
-                {...register('deficiencies')}
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
+        <TextField
+          select
+          size={isMobile ? 'small' : 'medium'}
+          id='machineProjectName'
+          fullWidth
+          hiddenLabel
+          slotProps={{
+            input: {
+              sx: {
+                fontSize: 18,
+                color: checklistItem?.totalMachinePicCount === 0 ? 'red' : ''
+              }
+            }
+          }}
+          value={category}
+          onChange={e => {
+            setCategory(e.target.value)
+          }}
+        >
+          <MenuItem value='전체'>전체</MenuItem>
+          {checklistItems.map(v =>
+            v.machineChecklistItemName !== '기타' ? (
+              <MenuItem
+                key={v.machineChecklistItemId}
+                value={v.machineChecklistItemId}
+                sx={{
+                  color: v.totalMachinePicCount === 0 ? 'red' : ''
+                }}
+              >
+                {v.machineChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}/
+                {v.checklistSubItems.length}]
+              </MenuItem>
+            ) : (
+              <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
+                {v.machineChecklistItemName}
+              </MenuItem>
+            )
           )}
-          {category !== '전체' && (
-            <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>조치필요사항</InputLabel>
-              <TextField
-                size={isMobile ? 'small' : 'medium'}
-                fullWidth
-                {...register('actionRequired')}
-                hiddenLabel
-                multiline
-                slotProps={{ input: { sx: { fontSize: 18 } } }}
-              />
-            </div>
-          )}
-        </Box>
-      </Box>
-      {/* {inspection && (
-            <PictureTable
-              machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
-              emptyMode={emptyMode}
-              scrollableAreaRef={scrollableAreaRef}
-              checklists={checklistItems}
-              refetchChecklists={getInspectionData}
-              tabHeight={TabListRef.current?.clientHeight ?? 0}
+        </TextField>
+      </div>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
+        {category !== '전체' && (
+          <div className='flex flex-col gap-1'>
+            <InputLabel sx={{ px: 2 }}>미흡사항</InputLabel>
+            <TextField
+              size={isMobile ? 'small' : 'medium'}
+              fullWidth
+              {...register('deficiencies')}
+              hiddenLabel
+              multiline
+              slotProps={{ input: { sx: { fontSize: 18 } } }}
             />
-          )} */}
-    </TabPanel>
+          </div>
+        )}
+        {category !== '전체' && (
+          <div className='flex flex-col gap-1'>
+            <InputLabel sx={{ px: 2 }}>조치필요사항</InputLabel>
+            <TextField
+              size={isMobile ? 'small' : 'medium'}
+              fullWidth
+              {...register('actionRequired')}
+              hiddenLabel
+              multiline
+              slotProps={{ input: { sx: { fontSize: 18 } } }}
+            />
+          </div>
+        )}
+      </Box>
+    </Box>
   )
 })
 

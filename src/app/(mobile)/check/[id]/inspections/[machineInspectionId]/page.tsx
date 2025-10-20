@@ -32,6 +32,8 @@ import InfoPage from './_pages/InfoPage'
 import type { ChildrenType } from '@/@core/types'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 import { toast } from 'react-toastify'
+import TabPanel from '@mui/lab/TabPanel'
+import PictureTable from './_components/PictureTable'
 
 type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
 
@@ -195,7 +197,7 @@ export default function CheckInspectionDetailPage() {
         `${successMessage.map(v => ({ result: '점검결과', info: '설비정보' })[v]).join('와 ')}가 저장되었습니다.`
       )
     } else {
-      toast.warning('저장할 것이 없습니다')
+      toast.warning('변동사항이 없습니다')
     }
   }
   const handleSave = useCallback(async () => {
@@ -317,16 +319,33 @@ export default function CheckInspectionDetailPage() {
         <TabContext value={currentTab}>
           {/* 본 컨텐츠 (스크롤 가능 영역)*/}
           <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto', py: !isMobile ? 10 : 4, px: 10 }}>
-            <PicturesPage
-              ref={form1Ref}
-              saveButtonRef={saveButtonRef}
-              scrollableAreaRef={scrollableAreaRef}
-              inspection={inspection}
-              category={category}
-              setCategory={setCategory}
-              getInspectionData={getInspectionData}
-              TabListRef={TabListRef}
-            />
+            <TabPanel
+              value={'pictures'}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: !isMobile ? 8 : 5,
+                position: 'relative'
+              }}
+            >
+              <PicturesPage
+                ref={form1Ref}
+                saveButtonRef={saveButtonRef}
+                scrollableAreaRef={scrollableAreaRef}
+                inspection={inspection}
+                category={category}
+                setCategory={setCategory}
+                getInspectionData={getInspectionData}
+                TabListRef={TabListRef}
+              />
+              <PictureTable
+                machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
+                scrollableAreaRef={scrollableAreaRef}
+                checklists={checkiistList}
+                refetchChecklists={getInspectionData}
+                tabHeight={TabListRef.current?.clientHeight ?? 0}
+              />
+            </TabPanel>
             <InfoPage inspection={inspection} setInspection={setInspection} />
           </Box>
           {/* 탭 리스트 */}

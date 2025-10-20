@@ -13,7 +13,8 @@ import {
   Paper,
   Fab,
   useScrollTrigger,
-  Fade
+  Fade,
+  Checkbox
 } from '@mui/material'
 
 // @ts-ignore
@@ -31,14 +32,12 @@ import { uploadPictures } from '@/app/_util/uploadPictures'
 
 const PictureTable = ({
   machineChecklistItemId,
-  emptyMode,
   scrollableAreaRef,
   checklists,
   refetchChecklists,
   tabHeight
 }: {
   machineChecklistItemId: number | null
-  emptyMode: boolean
   scrollableAreaRef: RefObject<HTMLElement>
   checklists: machineChecklistItemsWithPicCountResponseDtosType[]
   refetchChecklists: () => void
@@ -69,6 +68,8 @@ const PictureTable = ({
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
   const [showPicModal, setShowPicModal] = useState(false)
+
+  const [emptyMode, setEmptyMode] = useState(false)
 
   const trigger = useScrollTrigger({ target: scrollableAreaRef.current })
 
@@ -300,6 +301,12 @@ const PictureTable = ({
 
   return (
     <div className='flex flex-col gap-8'>
+      <Checkbox
+        size='small'
+        sx={{ position: 'absolute', right: 0, top: 0, zIndex: 5 }}
+        checked={emptyMode}
+        onChange={e => setEmptyMode(prev => !prev)}
+      />
       <Fade in={trigger}>
         <Fab
           sx={{
