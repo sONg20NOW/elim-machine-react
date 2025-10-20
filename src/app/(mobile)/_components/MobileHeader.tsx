@@ -6,9 +6,10 @@ interface MobileHeaderProps {
   left?: ReactNode
   title: ReactNode | string
   right?: ReactNode
+  widerCenter?: boolean
 }
 
-export default function MobileHeader({ left, title, right }: MobileHeaderProps) {
+export default function MobileHeader({ left, title, right, widerCenter = false }: MobileHeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -16,7 +17,7 @@ export default function MobileHeader({ left, title, right }: MobileHeaderProps) 
     <>
       {/* 헤더 부분 */}
       <Box
-        className={`items-center grid ${isMobile ? 'grid-cols-4 px-4 py-2' : 'grid-cols-3 p-4'}`}
+        className={`items-center grid ${isMobile || widerCenter ? 'grid-cols-4' : 'grid-cols-3'} ${isMobile ? 'px-4 py-2' : 'p-4'}`}
         sx={{
           backgroundColor: 'primary.light',
           backgroundImage: 'linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.0))'
@@ -30,7 +31,9 @@ export default function MobileHeader({ left, title, right }: MobileHeaderProps) 
         </div>
 
         {/* 중앙 영역 */}
-        <div className={`flex gap-1 items-center justify-center relative ${isMobile ? 'col-span-2' : ''}`}>
+        <div
+          className={`flex gap-1 items-center justify-center relative ${isMobile || widerCenter ? 'col-span-2' : ''}`}
+        >
           {typeof title === 'string' ? (
             <Typography color='white' variant={isMobile ? 'h4' : 'h3'}>
               {title}
