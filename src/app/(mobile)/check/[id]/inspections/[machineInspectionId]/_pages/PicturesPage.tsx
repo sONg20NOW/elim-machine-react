@@ -7,7 +7,7 @@ import { useForm, type UseFormRegister } from 'react-hook-form'
 
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/app/_type/types'
-import { checklistItemsContext } from '../page'
+import { checklistItemsContext, FormComponentHandle } from '../page'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import { useParams } from 'next/navigation'
@@ -17,18 +17,13 @@ interface formType {
   actionRequired: string
 }
 
-export interface Form1ComponentHandle {
-  submit: () => Promise<boolean>
-  isDirty: () => boolean
-}
-
 interface PicturesPageProps {
   category: string
   setCategory: Dispatch<SetStateAction<string>>
   saveButtonRef: RefObject<HTMLElement>
 }
 
-const PicturesPage = forwardRef<Form1ComponentHandle, PicturesPageProps>((props, ref) => {
+const PicturesPage = forwardRef<FormComponentHandle, PicturesPageProps>((props, ref) => {
   const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
 
   const isMobile = useContext(isMobileContext)

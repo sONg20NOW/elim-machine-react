@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useContext, useState } from 'react'
+import { forwardRef, useContext, useImperativeHandle, useState } from 'react'
 
 import TabPanel from '@mui/lab/TabPanel'
 
@@ -7,15 +7,32 @@ import { Box, IconButton, InputLabel, MenuItem, TextField, Typography } from '@m
 
 import { isMobileContext } from '@/app/_components/ProtectedPage'
 import type { MachineInspectionDetailResponseDtoType } from '@/app/_type/types'
-import { engineerListContext } from '../page'
+import { engineerListContext, FormComponentHandle } from '../page'
 import EngineerCard from '../_components/EngineerCard'
+import { useForm } from 'react-hook-form'
+import { auth } from '@/lib/auth'
+import { useParams } from 'next/navigation'
+import { handleApiError } from '@/utils/errorHandler'
+
+export interface formType {
+  machineInspectionName: string
+  location: string
+  purpose: string
+  installedDate: string
+  manufacturedDate: string
+  usedDate: string
+  checkDate: string
+  remark: string
+}
 
 interface InfoPageProps {
   inspection?: MachineInspectionDetailResponseDtoType
   setInspection: Dispatch<SetStateAction<MachineInspectionDetailResponseDtoType | undefined>>
 }
 
-export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
+const InfoPage = forwardRef<FormComponentHandle, InfoPageProps>(({ inspection, setInspection }, ref) => {
+  const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
+
   const isMobile = useContext(isMobileContext)
 
   const [dayType1, setDayType1] = useState<'installedDate' | 'manufacturedDate'>('installedDate')
@@ -24,6 +41,48 @@ export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
   const engineerList = useContext(engineerListContext)
 
   const [newEngineerId, setNewEngineerId] = useState(-1)
+
+  const {
+    register,
+    reset,
+    formState: { isDirty }
+  } = useForm<formType>()
+
+  useImperativeHandle(ref, () => ({
+    submit: async () => {
+      try {
+        const response = await auth
+          .put<{
+            data: {
+              machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultResponseDtoType[]
+            }
+          }>(
+            `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/machine-inspection-checklist-item-results`,
+            {
+              machineInspectionChecklistItemResultUpdateRequestDtos: [
+                {
+                  id: checklistMeta.current.id,
+                  version: checklistMeta.current.version,
+                  ...getValues(),
+                  inspectionResult: 'FAIL'
+                }
+              ]
+            }
+          )
+          .then(v => v.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
+        checklistMeta.current = response
+        reset()
+        return true
+      } catch (e) {
+        handleApiError(e)
+        return false
+      }
+    },
+    isDirty: () => {
+      console.log('dirty', isDirty)
+      return isDirty
+    }
+  }))
 
   return (
     <TabPanel
@@ -324,4 +383,6 @@ export default function InfoPage({ inspection, setInspection }: InfoPageProps) {
       </div>
     </TabPanel>
   )
-}
+})
+
+export default InfoPage

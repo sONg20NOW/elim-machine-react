@@ -26,7 +26,6 @@ import type {
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/app/_components/modal/DeleteModal'
-import type { Form1ComponentHandle } from './_pages/PicturesPage'
 import PicturesPage from './_pages/PicturesPage'
 import InfoPage from './_pages/InfoPage'
 import type { ChildrenType } from '@/@core/types'
@@ -43,17 +42,9 @@ export const inspectionListContext = createContext<MachineInspectionPageResponse
 export const engineerListContext = createContext<machineProjectEngineerDetailDtoType[]>([])
 export const checklistItemsContext = createContext<machineChecklistItemsWithPicCountResponseDtosType[]>([])
 
-export interface InspectionformType {
-  deficiencies: string
-  actionRequired: string
-  machineInspectionName: string
-  location: string
-  purpose: string
-  installedDate: string
-  manufacturedDate: string
-  usedDate: string
-  checkDate: string
-  remark: string
+export interface FormComponentHandle {
+  submit: () => Promise<boolean>
+  isDirty: () => boolean
 }
 
 export default function CheckInspectionDetailPage() {
@@ -64,7 +55,8 @@ export default function CheckInspectionDetailPage() {
 
   const isMobile = useContext(isMobileContext)
 
-  const form1Ref = useRef<Form1ComponentHandle>(null)
+  const form1Ref = useRef<FormComponentHandle>(null)
+  const form2Ref = useRef<FormComponentHandle>(null)
 
   const TabListRef = useRef<HTMLElement>(null)
   const scrollableAreaRef = useRef<HTMLElement>(null)
@@ -79,25 +71,11 @@ export default function CheckInspectionDetailPage() {
   const [inspection, setInspection] = useState<MachineInspectionDetailResponseDtoType>()
   const [category, setCategory] = useState<string>('전체')
 
-  const [checklistResult, setChecklistResult] = useState<MachineInspectionChecklistItemResultResponseDtoType>()
-
-  const [initialChecklistResult, setInitialChecklistResult] =
-    useState<MachineInspectionChecklistItemResultResponseDtoType>()
-
   // InfoPage props
   const [initialInspection, setInitialInspection] = useState<MachineInspectionDetailResponseDtoType>()
 
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
   const [checkiistList, setCheckiistList] = useState<machineChecklistItemsWithPicCountResponseDtosType[]>([])
-
-  // 변경감지
-  const existResultChange = JSON.stringify(checklistResult) !== JSON.stringify(initialChecklistResult)
-  const existInfoChange = JSON.stringify(inspection) !== JSON.stringify(initialInspection)
-
-  const existChange = existResultChange || existInfoChange
-
-  const machineProjectName = (JSON.parse(localStorage.getItem('projectSummary')!) as projectSummaryType)
-    .machineProjectName
 
   const saveButtonRef = useRef<HTMLElement>(null)
   // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
@@ -203,7 +181,7 @@ export default function CheckInspectionDetailPage() {
   const handleSave = useCallback(async () => {
     // 미흡사항/조치필요사항 저장
     try {
-      if (existInfoChange && inspection) {
+      if (inspection) {
         try {
           const response = await auth.put<{
             data: MachineInspectionResponseDtoType
@@ -223,7 +201,7 @@ export default function CheckInspectionDetailPage() {
     } catch (e) {
       handleApiError(e)
     }
-  }, [machineProjectId, inspectionId, checklistResult, inspection, existResultChange, existInfoChange])
+  }, [machineProjectId, inspectionId, inspection])
 
   const InspectionPageProviders = ({ children }: ChildrenType) => {
     return (
@@ -331,12 +309,8 @@ export default function CheckInspectionDetailPage() {
               <PicturesPage
                 ref={form1Ref}
                 saveButtonRef={saveButtonRef}
-                scrollableAreaRef={scrollableAreaRef}
-                inspection={inspection}
                 category={category}
                 setCategory={setCategory}
-                getInspectionData={getInspectionData}
-                TabListRef={TabListRef}
               />
               <PictureTable
                 machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
@@ -346,7 +320,7 @@ export default function CheckInspectionDetailPage() {
                 tabHeight={TabListRef.current?.clientHeight ?? 0}
               />
             </TabPanel>
-            <InfoPage inspection={inspection} setInspection={setInspection} />
+            <InfoPage ref={form2Ref} inspection={inspection} setInspection={setInspection} />
           </Box>
           {/* 탭 리스트 */}
           <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
