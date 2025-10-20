@@ -1,18 +1,12 @@
 import type { Dispatch, RefObject, SetStateAction } from 'react'
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
-import TabPanel from '@mui/lab/TabPanel'
 import { Box, Checkbox, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 
 import { useForm, type UseFormRegister } from 'react-hook-form'
 
-import PictureTable from '../_components/PictureTable'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
-import type {
-  MachineInspectionChecklistItemResultResponseDtoType,
-  MachineInspectionDetailResponseDtoType
-} from '@/app/_type/types'
-import type { InspectionformType } from '../page'
+import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/app/_type/types'
 import { checklistItemsContext } from '../page'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
@@ -28,13 +22,7 @@ export interface Form1ComponentHandle {
   isDirty: () => boolean
 }
 
-// ! 전역 상태 관리로 props 줄이기.
-
 interface PicturesPageProps {
-  scrollableAreaRef: RefObject<HTMLElement>
-  TabListRef: RefObject<HTMLElement>
-  inspection?: MachineInspectionDetailResponseDtoType
-  getInspectionData: () => void
   category: string
   setCategory: Dispatch<SetStateAction<string>>
   saveButtonRef: RefObject<HTMLElement>
@@ -45,7 +33,7 @@ const PicturesPage = forwardRef<Form1ComponentHandle, PicturesPageProps>((props,
 
   const isMobile = useContext(isMobileContext)
   const checklistItems = useContext(checklistItemsContext)
-  const { scrollableAreaRef, TabListRef, inspection, getInspectionData, category, setCategory, saveButtonRef } = props
+  const { category, setCategory, saveButtonRef } = props
 
   const {
     register,
@@ -55,7 +43,6 @@ const PicturesPage = forwardRef<Form1ComponentHandle, PicturesPageProps>((props,
   } = useForm<formType>({ defaultValues: { deficiencies: '', actionRequired: '' } })
 
   const checklistMeta = useRef({ id: 0, version: 0 })
-  const checkboxRef = useRef<HTMLButtonElement>(null)
 
   const checklistItem = checklistItems.find(v => v.machineChecklistItemId === Number(category))
 
