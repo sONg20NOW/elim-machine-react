@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -10,28 +10,28 @@ import TabList from '@mui/lab/TabList'
 
 import TabContext from '@mui/lab/TabContext'
 
+import { toast } from 'react-toastify'
+
+import TabPanel from '@mui/lab/TabPanel'
+
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 
-import type { projectSummaryType } from '../../page'
 import { auth } from '@/lib/auth'
 import type {
-  MachineInspectionChecklistItemResultResponseDtoType,
   machineProjectEngineerDetailDtoType,
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
-  MachineInspectionResponseDtoType,
   successResponseDtoType,
   machineChecklistItemsWithPicCountResponseDtosType
 } from '@/app/_type/types'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/app/_components/modal/DeleteModal'
-import PicturesPage from './_pages/PicturesPage'
-import InfoPage from './_pages/InfoPage'
+import ChecklistForm from './_pages/ChecklistForm'
+import InspectionForm from './_pages/InspectionForm'
 import type { ChildrenType } from '@/@core/types'
 import { isMobileContext } from '@/app/_components/ProtectedPage'
-import { toast } from 'react-toastify'
-import TabPanel from '@mui/lab/TabPanel'
+
 import PictureTable from './_components/PictureTable'
 
 type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
@@ -58,6 +58,8 @@ export default function CheckInspectionDetailPage() {
   const form1Ref = useRef<FormComponentHandle>(null)
   const form2Ref = useRef<FormComponentHandle>(null)
 
+  const inspectionVersion = useRef(0)
+
   const TabListRef = useRef<HTMLElement>(null)
   const scrollableAreaRef = useRef<HTMLElement>(null)
 
@@ -65,19 +67,15 @@ export default function CheckInspectionDetailPage() {
 
   const [openAlert, setOpenAlert] = useState(false)
 
-  // PicturesPage props
-  const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
-
   const [inspection, setInspection] = useState<MachineInspectionDetailResponseDtoType>()
   const [category, setCategory] = useState<string>('전체')
 
-  // InfoPage props
-  const [initialInspection, setInitialInspection] = useState<MachineInspectionDetailResponseDtoType>()
-
+  const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
   const [checkiistList, setCheckiistList] = useState<machineChecklistItemsWithPicCountResponseDtosType[]>([])
 
   const saveButtonRef = useRef<HTMLElement>(null)
+
   // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
   if (!localStorage.getItem('projectSummary')) router.back()
 
@@ -129,6 +127,9 @@ export default function CheckInspectionDetailPage() {
     getChecklistList()
   }, [getAllInspections, getParticipatedEngineerList, getChecklistList])
 
+  // 하위 컴포넌트 리렌더링 방지를 위한 context 안정화
+  const stableChecklistList = useMemo(() => checkiistList, [checkiistList])
+
   // 현재 선택된 inspection 데이터 가져오기
   const getInspectionData = useCallback(async () => {
     try {
@@ -137,7 +138,6 @@ export default function CheckInspectionDetailPage() {
       )
 
       setInspection(response.data.data)
-      setInitialInspection(structuredClone(response.data.data))
       console.log('current inspection: ', response.data.data)
     } catch (error) {
       handleApiError(error)
@@ -154,7 +154,7 @@ export default function CheckInspectionDetailPage() {
         // @ts-ignore
         data: {
           machineInspectionDeleteRequestDtos: [
-            { machineInspectionId: inspectionId?.toString(), version: inspection?.machineInspectionResponseDto.version }
+            { machineInspectionId: inspectionId?.toString(), version: inspectionVersion.current }
           ]
         }
       })
@@ -162,7 +162,7 @@ export default function CheckInspectionDetailPage() {
     } catch (error) {
       handleApiError(error)
     }
-  }, [machineProjectId, inspectionId, router, inspection])
+  }, [machineProjectId, inspectionId, router])
 
   const globalSubmit = async () => {
     const successMessage: ('result' | 'info')[] = []
@@ -170,6 +170,11 @@ export default function CheckInspectionDetailPage() {
     if (form1Ref.current?.isDirty() && (await form1Ref.current?.submit())) {
       successMessage.push('result')
     }
+
+    if (form2Ref.current?.isDirty() && (await form2Ref.current?.submit())) {
+      successMessage.push('info')
+    }
+
     if (successMessage.length) {
       handleSuccess(
         `${successMessage.map(v => ({ result: '점검결과', info: '설비정보' })[v]).join('와 ')}가 저장되었습니다.`
@@ -178,36 +183,12 @@ export default function CheckInspectionDetailPage() {
       toast.warning('변동사항이 없습니다')
     }
   }
-  const handleSave = useCallback(async () => {
-    // 미흡사항/조치필요사항 저장
-    try {
-      if (inspection) {
-        try {
-          const response = await auth.put<{
-            data: MachineInspectionResponseDtoType
-          }>(
-            `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}`,
-            inspection.machineInspectionResponseDto
-          )
-
-          setInspection(prev => prev && { ...prev, machineInspectionResponseDto: response.data.data })
-          setInitialInspection(
-            prev => prev && structuredClone({ ...prev, machineInspectionResponseDto: response.data.data })
-          )
-        } catch (e) {
-          handleApiError(e)
-        }
-      }
-    } catch (e) {
-      handleApiError(e)
-    }
-  }, [machineProjectId, inspectionId, inspection])
 
   const InspectionPageProviders = ({ children }: ChildrenType) => {
     return (
       <inspectionListContext.Provider value={inspectionList}>
         <engineerListContext.Provider value={participatedEngineerList}>
-          <checklistItemsContext.Provider value={checkiistList}>{children}</checklistItemsContext.Provider>
+          <checklistItemsContext.Provider value={stableChecklistList}>{children}</checklistItemsContext.Provider>
         </engineerListContext.Provider>
       </inspectionListContext.Provider>
     )
@@ -306,7 +287,7 @@ export default function CheckInspectionDetailPage() {
                 position: 'relative'
               }}
             >
-              <PicturesPage
+              <ChecklistForm
                 ref={form1Ref}
                 saveButtonRef={saveButtonRef}
                 category={category}
@@ -320,7 +301,7 @@ export default function CheckInspectionDetailPage() {
                 tabHeight={TabListRef.current?.clientHeight ?? 0}
               />
             </TabPanel>
-            <InfoPage ref={form2Ref} inspection={inspection} setInspection={setInspection} />
+            <InspectionForm ref={form2Ref} saveButtonRef={saveButtonRef} inspectionVersion={inspectionVersion} />
           </Box>
           {/* 탭 리스트 */}
           <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>

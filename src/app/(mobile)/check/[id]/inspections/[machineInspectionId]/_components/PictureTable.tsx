@@ -305,7 +305,7 @@ const PictureTable = ({
         size='small'
         sx={{ position: 'absolute', right: 0, top: 0, zIndex: 5 }}
         checked={emptyMode}
-        onChange={e => setEmptyMode(prev => !prev)}
+        onChange={e => setEmptyMode(e.target.checked)}
       />
       <Fade in={trigger}>
         <Fab
