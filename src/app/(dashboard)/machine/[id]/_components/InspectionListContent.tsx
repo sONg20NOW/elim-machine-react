@@ -223,6 +223,8 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   // 여러개 한번에 삭제
   async function handleDeleteEngineers() {
+    if (!checked.length) return
+
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections`,

@@ -206,7 +206,7 @@ export default function EngineerPage() {
       setProjectName('')
       setPage(0)
       getFilteredData()
-      handleSuccess(`선택된 기계설비 기술자 ${checked.length}이 성공적으로 삭제되었습니다.`)
+      handleSuccess(`선택된 기계설비 기술자 ${checked.length}명이 성공적으로 삭제되었습니다.`)
       setChecked([])
       setShowCheckBox(false)
     } catch (error) {
@@ -232,6 +232,7 @@ export default function EngineerPage() {
           startIcon={<i className='tabler-reload' />}
           onClick={() => {
             setFilters(EngineerInitialFilters)
+            setPage(0)
             setName('')
             setProjectName('')
           }}

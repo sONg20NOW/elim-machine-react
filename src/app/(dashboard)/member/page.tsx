@@ -197,6 +197,8 @@ export default function MemberPage() {
 
   // 여러 유저 한번에 삭제
   async function handleDeleteUsers() {
+    if (!checked.length) return
+
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
         //@ts-ignore
@@ -208,7 +210,7 @@ export default function MemberPage() {
       setPage(0)
 
       getFilteredData()
-      handleSuccess(`선택된 직원 ${checked.length}이 성공적으로 삭제되었습니다.`)
+      handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
       setShowCheckBox(false)
       setChecked([])
     } catch (error) {
@@ -238,6 +240,7 @@ export default function MemberPage() {
             onClick={() => {
               setFilters(MemeberInitialFilters)
               setName('')
+              setPage(0)
               setRegion('')
             }}
             className='max-sm:is-full absolute right-8 top-8'
