@@ -91,7 +91,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
-  const [checked, setChecked] = useState<Set<number>>(new Set([]))
+  const [checked, setChecked] = useState<{ machineInspectionId: number; version: number }[]>([])
 
   // 테이블 행 클릭 시 초기 동작하는 함수
   const handleSelectInspection = useCallback(
@@ -181,25 +181,13 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   //  체크 핸들러 (다중선택)
   const handleCheckEngineer = (machine: MachineInspectionPageResponseDtoType) => {
-    const machineInspectionId = machine.machineInspectionId
+    const obj = { machineInspectionId: machine.machineInspectionId, version: machine.version }
     const checked = isChecked(machine)
 
     if (!checked) {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.add(machineInspectionId)
-
-        return newSet
-      })
+      setChecked(prev => prev.concat(obj))
     } else {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.delete(machineInspectionId)
-
-        return newSet
-      })
+      setChecked(prev => prev.filter(v => v.machineInspectionId !== machine.machineInspectionId))
     }
   }
 
@@ -207,42 +195,51 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
   const handleCheckAllEngineers = (checked: boolean) => {
     if (checked) {
       setChecked(prev => {
-        const newSet = new Set(prev)
+        const newChecked = structuredClone(prev)
 
-        filteredInspectionList.forEach(machine => newSet.add(machine.machineInspectionId))
+        filteredInspectionList.forEach(machine => {
+          if (!prev.find(v => v.machineInspectionId === machine.machineInspectionId)) {
+            newChecked.push({ machineInspectionId: machine.machineInspectionId, version: machine.version })
+          }
+        })
 
-        return newSet
+        return newChecked
       })
     } else {
-      setChecked(new Set<number>())
+      setChecked([])
     }
   }
 
   const isChecked = (machine: MachineInspectionPageResponseDtoType) => {
-    return checked.has(machine.machineInspectionId)
+    let exist = false
+
+    checked.forEach(v => {
+      if (JSON.stringify(v) === JSON.stringify({ newChecked: machine.machineInspectionId, version: machine.version }))
+        exist = true
+    })
+
+    return exist
   }
 
   // 여러개 한번에 삭제
   async function handleDeleteEngineers() {
     try {
-      const list = Array.from(checked).map(machineInspectionId => {
-        return {
-          machineInspectionId: machineInspectionId,
-          version: filteredInspectionList.find(machine => machine.machineInspectionId === machineInspectionId)!.version
-        }
-      })
-
       await axios.delete(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections`,
         {
           //@ts-ignore
-          data: { machineInspectionDeleteRequestDtos: list }
+          data: { machineInspectionDeleteRequestDtos: checked }
         }
       )
-
+      setFilters({
+        engineerName: ''
+      })
+      setMachineCategoryName('')
+      setLocation('')
+      setPage(0)
       getFilteredInspectionList()
-      handleSuccess('선택된 설비목록이 성공적으로 삭제되었습니다.')
-      setChecked(new Set())
+      handleSuccess(`선택된 설비목록 ${checked.length}개가 성공적으로 삭제되었습니다.`)
+      setChecked([])
       setShowCheckBox(false)
     } catch (error) {
       handleApiError(error)
@@ -318,7 +315,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           ) : (
             <div className='flex gap-1'>
               <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
-                {`(${checked.size}) 삭제`}
+                {`(${checked.length}) 삭제`}
               </Button>
               <Button
                 variant='contained'
