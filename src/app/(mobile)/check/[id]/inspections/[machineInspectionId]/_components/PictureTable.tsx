@@ -1,7 +1,7 @@
-import type { Ref, RefObject } from 'react'
+import type { RefObject } from 'react'
 import { useEffect, useState, useCallback, useRef, useContext } from 'react'
 
-import { useParams } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 
 import {
   Box,
@@ -45,6 +45,9 @@ const PictureTable = ({
 }) => {
   const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
 
+  const router = useRouter()
+  const pathname = usePathname()
+
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
 
   const machineChecklistItemIdRef = useRef(machineChecklistItemId)
@@ -64,10 +67,6 @@ const PictureTable = ({
 
   // 모바일 반응형을 위한 미디어쿼리
   const isMobile = useContext(isMobileContext)
-
-  // 사진 클릭 기능 구현을 위한 상태
-  const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
-  const [showPicModal, setShowPicModal] = useState(false)
 
   const [emptyMode, setEmptyMode] = useState(false)
 
@@ -180,8 +179,10 @@ const PictureTable = ({
         variant='outlined'
         key={`${pic.machinePicId}-${index}`}
         onClick={() => {
-          setSelectedPic(pic)
-          setShowPicModal(true)
+          const searchParams = new URLSearchParams()
+
+          searchParams.set('picId', pic.machinePicId.toString())
+          router.push(pathname.split('?')[0] + '/pictures' + '?' + searchParams.toString())
         }}
       >
         <ImageListItem>
