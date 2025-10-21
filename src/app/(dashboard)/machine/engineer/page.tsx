@@ -79,7 +79,7 @@ export default function EngineerPage() {
 
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
-  const [checked, setChecked] = useState<Set<number>>(new Set([]))
+  const [checked, setChecked] = useState<{ engineerId: number; version: number }[]>([])
 
   // 데이터 페치에 사용되는 쿼리 URL
 
@@ -153,62 +153,62 @@ export default function EngineerPage() {
 
   // 설비인력 체크 핸들러 (다중선택)
   const handleCheckEngineer = (engineer: MachineEngineerPageResponseDtoType) => {
-    const engineerId = engineer.engineerId
+    const obj = { engineerId: engineer.engineerId, version: engineer.version }
     const checked = isChecked(engineer)
 
     if (!checked) {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.add(engineerId)
-
-        return newSet
-      })
+      setChecked(prev => prev.concat(obj))
     } else {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.delete(engineerId)
-
-        return newSet
-      })
+      setChecked(prev => prev.filter(v => v.engineerId !== engineer.engineerId))
     }
   }
 
   const handleCheckAllEngineers = (checked: boolean) => {
     if (checked) {
       setChecked(prev => {
-        const newSet = new Set(prev)
+        const newChecked = structuredClone(prev)
 
-        data.forEach(engineer => newSet.add(engineer.engineerId))
+        data.forEach(engineer => {
+          if (!prev.find(v => v.engineerId === engineer.engineerId)) {
+            newChecked.push({ engineerId: engineer.engineerId, version: engineer.version })
+          }
+        })
 
-        return newSet
+        return newChecked
       })
     } else {
-      setChecked(new Set<number>())
+      setChecked([])
     }
   }
 
   const isChecked = (engineer: MachineEngineerPageResponseDtoType) => {
-    return checked.has(engineer.engineerId)
+    let exist = false
+
+    checked.forEach(v => {
+      if (JSON.stringify(v) === JSON.stringify({ engineerId: engineer.engineerId, version: engineer.version }))
+        exist = true
+    })
+
+    return exist
   }
 
   // 여러 기술자 한번에 삭제
   async function handleDeleteEngineers() {
-    try {
-      const list = Array.from(checked).map(engineerId => {
-        return {
-          engineerId: engineerId,
-          version: data.find(engineer => engineer.engineerId === engineerId)!.version
-        }
-      })
+    if (!checked.length) return
 
+    try {
       await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers`, {
         //@ts-ignore
-        data: { engineerDeleteRequestDtos: list }
+        data: { engineerDeleteRequestDtos: checked }
       })
+      setFilters(EngineerInitialFilters)
+      setName('')
+      setProjectName('')
+      setPage(0)
       getFilteredData()
-      handleSuccess('선택된 기계설비 기술자들이 성공적으로 삭제되었습니다.')
+      handleSuccess(`선택된 기계설비 기술자 ${checked.length}이 성공적으로 삭제되었습니다.`)
+      setChecked([])
+      setShowCheckBox(false)
     } catch (error) {
       handleApiError(error)
     }
@@ -271,7 +271,7 @@ export default function EngineerPage() {
             ) : (
               <div className='flex gap-1'>
                 <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
-                  {`(${checked.size}) 삭제`}
+                  {`(${checked.length}) 삭제`}
                 </Button>
                 <Button
                   variant='contained'
