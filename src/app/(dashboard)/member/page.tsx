@@ -72,7 +72,7 @@ export default function MemberPage() {
 
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
-  const [checked, setChecked] = useState<Set<number>>(new Set([]))
+  const [checked, setChecked] = useState<{ memberId: number; version: number }[]>([])
 
   // 직원 리스트 호출 API 함수
   const getFilteredData = useCallback(async () => {
@@ -157,59 +157,60 @@ export default function MemberPage() {
 
   // 사용자 체크 핸들러 (다중선택)
   const handleCheckUser = (user: memberPageDtoType) => {
-    const memberId = user.memberId
+    const obj = { memberId: user.memberId, version: user.version }
     const checked = isChecked(user)
 
     if (!checked) {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.add(memberId)
-
-        return newSet
-      })
+      setChecked(prev => prev.concat(obj))
     } else {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.delete(memberId)
-
-        return newSet
-      })
+      setChecked(prev => prev.filter(v => v.memberId !== user.memberId))
     }
   }
 
   const handleCheckAllUsers = (checked: boolean) => {
     if (checked) {
       setChecked(prev => {
-        const newSet = new Set(prev)
+        const newPrev = structuredClone(prev)
 
-        data.forEach(user => newSet.add(user.memberId))
+        data.forEach(user => {
+          if (!prev.find(v => v.memberId === user.memberId)) {
+            newPrev.push({ memberId: user.memberId, version: user.version })
+          }
+        })
 
-        return newSet
+        return newPrev
       })
     } else {
-      setChecked(new Set<number>())
+      setChecked([])
     }
   }
 
   const isChecked = (user: memberPageDtoType) => {
-    return checked.has(user.memberId)
+    let exist = false
+
+    checked.forEach(v => {
+      if (JSON.stringify(v) === JSON.stringify({ memberId: user.memberId, version: user.version })) exist = true
+    })
+
+    return exist
   }
 
   // 여러 유저 한번에 삭제
   async function handleDeleteUsers() {
     try {
-      const list = Array.from(checked).map(memberId => {
-        return { memberId: memberId, version: data.find(user => user.memberId === memberId)!.version }
-      })
-
       await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
         //@ts-ignore
-        data: { memberDeleteRequestDtos: list }
+        data: { memberDeleteRequestDtos: checked }
       })
+      setFilters(MemeberInitialFilters)
+      setName('')
+      setRegion('')
+      setPage(0)
 
-      handleSuccess('선택된 직원들이 성공적으로 삭제되었습니다.')
+      getFilteredData()
+      handleSuccess(`선택된 직원 ${checked.length}이 성공적으로 삭제되었습니다.`)
+      setShowCheckBox(false)
+      setChecked([])
     } catch (error) {
       handleApiError(error)
     }
@@ -301,7 +302,7 @@ export default function MemberPage() {
             ) : (
               <div className='flex gap-1'>
                 <Button variant='contained' color='error' onClick={() => handleDeleteUsers()}>
-                  {`(${checked.size}) 삭제`}
+                  {`(${checked.length}) 삭제`}
                 </Button>
                 <Button
                   variant='contained'
