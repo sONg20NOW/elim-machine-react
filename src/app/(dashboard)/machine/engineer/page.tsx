@@ -22,7 +22,7 @@ import type {
   EngineerResponseDtoType,
   MachineEngineerPageResponseDtoType,
   successResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'

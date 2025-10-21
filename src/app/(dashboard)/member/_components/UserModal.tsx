@@ -19,7 +19,7 @@ import axios from 'axios'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import MemberTabContent from './memberTabContent'
-import type { memberDetailDtoType } from '@/app/_type/types'
+import type { memberDetailDtoType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import DeleteModal from '@/@core/components/custom/DeleteModal'

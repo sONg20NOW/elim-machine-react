@@ -13,7 +13,7 @@ import type {
   MachineCategoryResponseDtoType,
   machineProjectEngineerDetailDtoType,
   successResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { auth } from '@/lib/auth'
 import type { projectSummaryType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'

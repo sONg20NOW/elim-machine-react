@@ -8,7 +8,7 @@ import axios from 'axios'
 
 import { DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
 
-import type { MachineProjectCreateRequestDtoType } from '@/app/_type/types'
+import type { MachineProjectCreateRequestDtoType } from '@/@core/types'
 import { MachineProjectInitialData } from '@/app/_constants/MachineProjectSeed'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { InputBox } from '@/@core/components/custom/InputBox'

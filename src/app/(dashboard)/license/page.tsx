@@ -14,7 +14,7 @@ import axios from 'axios'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import type { LicensePageResponseDtoType, LicenseResponseDtoType, successResponseDtoType } from '@/app/_type/types'
+import type { LicensePageResponseDtoType, LicenseResponseDtoType, successResponseDtoType } from '@/@core/types'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'

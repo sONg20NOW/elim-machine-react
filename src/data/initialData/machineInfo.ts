@@ -1,4 +1,4 @@
-import type { MachineProjectDetailDtoType } from '@/app/_type/types'
+import type { MachineProjectDetailDtoType } from '@/@core/types'
 
 export const initialData: MachineProjectDetailDtoType = {
   machineProjectResponseDto: {

@@ -22,14 +22,15 @@ import type {
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
   successResponseDtoType,
-  machineChecklistItemsWithPicCountResponseDtosType
-} from '@/app/_type/types'
+  machineChecklistItemsWithPicCountResponseDtosType,
+  ChildrenType
+} from '@/@core/types'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import ChecklistForm from './_pages/ChecklistForm'
 import InspectionForm from './_pages/InspectionForm'
-import type { ChildrenType } from '@/@core/types'
+
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 import PictureTable from './_components/PictureTable'

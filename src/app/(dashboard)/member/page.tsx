@@ -18,12 +18,7 @@ import CustomTextField from '@core/components/mui/TextField'
 // Style Imports
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
-import type {
-  memberDetailDtoType,
-  MemberFilterType,
-  memberPageDtoType,
-  successResponseDtoType
-} from '@/app/_type/types'
+import type { memberDetailDtoType, MemberFilterType, memberPageDtoType, successResponseDtoType } from '@/@core/types'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'

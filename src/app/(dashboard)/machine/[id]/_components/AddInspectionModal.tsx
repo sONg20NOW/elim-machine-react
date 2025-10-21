@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/app/_type/types'
+import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/@core/types'
 import { handleApiError } from '@/utils/errorHandler'
 
 type AddInspectionModalProps = {

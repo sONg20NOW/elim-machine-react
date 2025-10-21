@@ -9,7 +9,7 @@ import { lighten, styled } from '@mui/material/styles'
 import type { AvatarProps } from '@mui/material/Avatar'
 
 // Type Imports
-import type { ThemeColor } from '@core/types'
+import type { ThemeColor } from '@/@core/types'
 
 export type CustomAvatarProps = AvatarProps & {
   color?: ThemeColor

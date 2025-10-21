@@ -1,5 +1,5 @@
 // Type Imports
-import type { ChildrenType } from '@core/types'
+import type { ChildrenType } from '@/@core/types'
 
 // Component Imports
 import Header from '@components/layout/front-pages/Header'

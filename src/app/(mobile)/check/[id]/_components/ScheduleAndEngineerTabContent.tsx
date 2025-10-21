@@ -9,7 +9,7 @@ import { Box, Button, IconButton, MenuItem } from '@mui/material'
 import type {
   machineProjectEngineerDetailDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import {

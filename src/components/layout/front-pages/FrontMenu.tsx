@@ -18,7 +18,7 @@ import IconButton from '@mui/material/IconButton'
 import classnames from 'classnames'
 
 // Type Imports
-import type { Mode } from '@core/types'
+import type { Mode } from '@/@core/types'
 
 // Hook Imports
 import { useIntersection } from '@/hooks/useIntersection'

@@ -13,7 +13,7 @@ import { Box, DialogContent, Table, TableBody, TableCell, TableContainer, TableR
 import axios from 'axios'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import type { EngineerResponseDtoType } from '@/app/_type/types'
+import type { EngineerResponseDtoType } from '@/@core/types'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/EngineerInputInfo'

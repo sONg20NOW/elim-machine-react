@@ -28,7 +28,7 @@ import type {
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType,
   successResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 
 import SearchBar from '@/@core/components/custom/SearchBar'
 import PictureZoomModal from './PictureZoomModal'

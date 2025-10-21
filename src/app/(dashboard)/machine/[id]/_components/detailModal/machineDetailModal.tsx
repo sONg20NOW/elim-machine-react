@@ -17,7 +17,7 @@ import type {
   MachineInspectionResponseDtoType,
   PipeMeasurementResponseDtoType,
   WindMeasurementResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 

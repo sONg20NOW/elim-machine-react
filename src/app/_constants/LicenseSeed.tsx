@@ -1,4 +1,4 @@
-import type { LicenseCreateRequestDto } from '../_type/types'
+import type { LicenseCreateRequestDto } from '../../@core/types'
 
 export const LicenseInitialData: LicenseCreateRequestDto = {
   companyName: '',

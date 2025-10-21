@@ -9,7 +9,7 @@ import {
   // roleOption,
   workFormOption
 } from '@/app/_constants/options'
-import type { memberInputType } from '../../_type/types'
+import type { memberInputType } from '../../../@core/types'
 
 // 직원 상세 페이지
 export const MEMBER_INPUT_INFO: memberInputType = {

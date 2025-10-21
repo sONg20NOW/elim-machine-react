@@ -13,7 +13,7 @@ import { Box, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui
 import axios from 'axios'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import type { LicenseResponseDtoType } from '@/app/_type/types'
+import type { LicenseResponseDtoType } from '@/@core/types'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { LICENSE_INPUT_INFO } from '@/app/_constants/input/LicenseInputInfo'

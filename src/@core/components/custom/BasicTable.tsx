@@ -11,7 +11,7 @@ import classNames from 'classnames'
 
 import { Checkbox, Typography } from '@mui/material'
 
-import type { HeaderType, SortInfoType } from '@/app/_type/types'
+import type { HeaderType, SortInfoType } from '@/@core/types'
 import { isMobileContext, isTabletContext } from './ProtectedPage'
 
 interface BasicTableProps<T> {

@@ -11,7 +11,7 @@ import { DialogContent, Grid2 } from '@mui/material'
 import axios from 'axios'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import type { MemberCreateRequestDtoType } from '@/app/_type/types'
+import type { MemberCreateRequestDtoType } from '@/@core/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
 import { MemberInitialData } from '@/app/_constants/MemberSeed'
 import { InputBox } from '@/@core/components/custom/InputBox'

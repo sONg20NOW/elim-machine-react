@@ -1,5 +1,5 @@
 import { companyNameOption, gradeOption, workStatusOption } from '@/app/_constants/options'
-import type { EngineerFilterType, InputFieldType } from '../../_type/types'
+import type { EngineerFilterType, InputFieldType } from '../../../@core/types'
 
 export const ENGINEER_FILTER_INFO: Record<keyof EngineerFilterType, InputFieldType> = {
   companyName: {

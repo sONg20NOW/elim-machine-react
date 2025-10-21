@@ -6,7 +6,7 @@ import type { Theme } from '@mui/material/styles'
 
 // Type Imports
 import type { Settings } from '@core/contexts/settingsContext'
-import type { SystemMode, Skin } from '@core/types'
+import type { SystemMode, Skin } from '@/@core/types'
 
 // Theme Options Imports
 import overrides from './overrides'

@@ -8,9 +8,9 @@ import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import YNSelectBox from './YNSelectBox'
-import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
+import type { BoxSizeType, InputFieldType } from '@/@core/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
-import PostCodeDialog from '@/app/_util/daumMapPostcode'
+import PostCodeDialog from '@/@core/utils/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
 
 interface InputBoxProps {

@@ -10,7 +10,7 @@ import { InputLabel, MenuItem, TextField } from '@mui/material'
 import { useForm } from 'react-hook-form'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import type { MachineInspectionDetailResponseDtoType, MachineInspectionResponseDtoType } from '@/app/_type/types'
+import type { MachineInspectionDetailResponseDtoType, MachineInspectionResponseDtoType } from '@/@core/types'
 import type { FormComponentHandle } from '../page'
 
 // import { engineerListContext } from '../page'

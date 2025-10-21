@@ -8,7 +8,7 @@ import { Box, Checkbox, InputLabel, MenuItem, TextField, Typography } from '@mui
 import { useForm } from 'react-hook-form'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/app/_type/types'
+import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/@core/types'
 import type { FormComponentHandle } from '../page'
 import { checklistItemsContext } from '../page'
 import { auth } from '@/lib/auth'

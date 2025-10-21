@@ -10,7 +10,7 @@ import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
   machineChecklistItemsWithPicCountResponseDtosType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'

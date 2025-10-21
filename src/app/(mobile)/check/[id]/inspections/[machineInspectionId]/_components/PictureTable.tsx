@@ -25,10 +25,10 @@ import type {
   machineChecklistItemsWithPicCountResponseDtosType,
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { uploadPictures } from '@/app/_util/uploadPictures'
+import { uploadPictures } from '@/@core/utils/uploadPictures'
 
 const PictureTable = ({
   machineChecklistItemId,

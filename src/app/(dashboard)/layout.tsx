@@ -1,6 +1,6 @@
 // Type Imports
 
-import type { ChildrenType } from '@core/types'
+import type { ChildrenType } from '@/@core/types'
 import type { Locale } from '@configs/i18n'
 
 // Component Imports

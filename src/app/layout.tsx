@@ -10,7 +10,7 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/ReactToastify.css'
 
 // Type Imports
-import type { ChildrenType } from '@core/types'
+import type { ChildrenType } from '@/@core/types'
 
 // Component Imports
 

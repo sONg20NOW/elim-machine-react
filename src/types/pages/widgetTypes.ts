@@ -5,7 +5,7 @@ import type { ChipProps } from '@mui/material/Chip'
 import type { ApexOptions } from 'apexcharts'
 
 // Type Imports
-import type { ThemeColor } from '@core/types'
+import type { ThemeColor } from '@/@core/types'
 import type { CustomAvatarProps } from '@core/components/mui/Avatar'
 
 export type CardStatsHorizontalWithAvatarProps = {

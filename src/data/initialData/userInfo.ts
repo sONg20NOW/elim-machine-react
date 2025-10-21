@@ -1,4 +1,4 @@
-import type { memberDetailDtoType } from '@/app/_type/types'
+import type { memberDetailDtoType } from '@/@core/types'
 
 export const initialData: memberDetailDtoType = {
   memberBasicResponseDto: {

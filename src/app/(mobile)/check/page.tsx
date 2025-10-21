@@ -24,7 +24,7 @@ import {
   Typography
 } from '@mui/material'
 
-import type { MachineProjectPageDtoType, successResponseDtoType } from '@/app/_type/types'
+import type { MachineProjectPageDtoType, successResponseDtoType } from '@/@core/types'
 import { handleApiError } from '@/utils/errorHandler'
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'

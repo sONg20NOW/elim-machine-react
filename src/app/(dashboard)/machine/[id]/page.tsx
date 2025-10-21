@@ -25,7 +25,7 @@ import type {
   machineProjectEngineerDetailDtoType,
   MachineProjectResponseDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import CustomTextField from '@/@core/components/mui/TextField'
 import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'

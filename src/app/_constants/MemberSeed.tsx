@@ -1,4 +1,4 @@
-import type { MemberCreateRequestDtoType, MemberFilterType } from '@/app/_type/types'
+import type { MemberCreateRequestDtoType, MemberFilterType } from '@/@core/types'
 
 export const MemberInitialData: MemberCreateRequestDtoType = {
   name: '',

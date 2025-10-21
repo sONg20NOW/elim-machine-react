@@ -5,7 +5,7 @@ import { MenuItem } from '@mui/material'
 import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import type { InputFieldType } from '@/app/_type/types'
+import type { InputFieldType } from '@/@core/types'
 import { handleApiError } from '@/utils/errorHandler'
 
 interface MultiSelectBoxProps {

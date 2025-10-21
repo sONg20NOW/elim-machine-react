@@ -30,7 +30,7 @@ import type {
   MachineFilterType,
   MachineProjectPageDtoType,
   successResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { HEADERS, createInitialSorting } from '@/app/_constants/table/TableHeader'
 import TableFilters from '@/@core/components/custom/TableFilters'
 import { MACHINE_FILTER_INFO } from '@/app/_constants/filter/MachineFilterInfo'

@@ -17,7 +17,7 @@ import type { Theme } from '@mui/material/styles'
 import classnames from 'classnames'
 
 // Type Imports
-import type { Mode } from '@core/types'
+import type { Mode } from '@/@core/types'
 
 // Component Imports
 import Logo from '@components/layout/shared/Logo'

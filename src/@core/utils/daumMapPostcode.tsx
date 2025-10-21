@@ -36,7 +36,7 @@ export function execDaumPostcode(ElementId: string, onChange?: (value: string) =
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useRef } from 'react'
 
-import DefaultModal from '../../@core/components/custom/DefaultModal'
+import DefaultModal from '../components/custom/DefaultModal'
 
 interface PostCodeDialogProps {
   ElementId: string

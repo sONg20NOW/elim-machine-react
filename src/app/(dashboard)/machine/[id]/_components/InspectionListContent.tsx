@@ -24,7 +24,7 @@ import type {
   MachineInspectionFilterType,
   MachineInspectionPageResponseDtoType,
   successResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'

@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography'
 import classnames from 'classnames'
 
 // Type Imports
-import type { ThemeColor } from '@core/types'
+import type { ThemeColor } from '@/@core/types'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'

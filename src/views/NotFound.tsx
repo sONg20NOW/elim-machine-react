@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography'
 import classnames from 'classnames'
 
 // Type Imports
-import type { SystemMode } from '@core/types'
+import type { SystemMode } from '@/@core/types'
 
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'

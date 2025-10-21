@@ -34,11 +34,11 @@ import type {
   machineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicCursorType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import PictureZoomModal from '../PictureZoomModal'
 import { useSelectedInspectionContext } from '../InspectionListContent'
-import { uploadPictures } from '@/app/_util/uploadPictures'
+import { uploadPictures } from '@/@core/utils/uploadPictures'
 
 type PictureListModalProps = {
   machineProjectId: string

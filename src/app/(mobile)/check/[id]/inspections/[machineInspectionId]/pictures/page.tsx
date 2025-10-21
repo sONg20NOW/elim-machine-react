@@ -12,7 +12,7 @@ import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import { auth } from '@/lib/auth'
-import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/app/_type/types'
+import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/@core/types'
 
 const max_pic = 100
 

@@ -16,7 +16,7 @@ import { useMedia } from 'react-use'
 import stylisRTLPlugin from 'stylis-plugin-rtl'
 
 // Type Imports
-import type { ChildrenType, Direction, SystemMode } from '@core/types'
+import type { ChildrenType, Direction, SystemMode } from '@/@core/types'
 
 // Component Imports
 import ModeChanger from './ModeChanger'

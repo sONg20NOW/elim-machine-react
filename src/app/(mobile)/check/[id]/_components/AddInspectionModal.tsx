@@ -12,7 +12,7 @@ import type {
   MachineCategoryResponseDtoType,
   MachineInspectionCreateRequestDtoType,
   machineProjectEngineerDetailDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 

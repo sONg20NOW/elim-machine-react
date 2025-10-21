@@ -27,7 +27,7 @@ import type {
   MachinePicPresignedUrlResponseDtoType,
   MachinePicUpdateResponseDtoType,
   successResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 interface PictureZoomModalProps {
