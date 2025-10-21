@@ -10,11 +10,11 @@ import { DialogContent, Grid2 } from '@mui/material'
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/modal/DefaultModal'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@/app/_type/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
 import { MemberInitialData } from '@/app/_constants/MemberSeed'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import { InputBox } from '@/@core/components/custom/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 type AddUserModalProps = {

@@ -12,13 +12,13 @@ import { Box, DialogContent, Table, TableBody, TableCell, TableContainer, TableR
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/modal/DefaultModal'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { EngineerResponseDtoType } from '@/app/_type/types'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import { InputBox } from '@/@core/components/custom/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/EngineerInputInfo'
-import DeleteModal from '@/app/_components/modal/DeleteModal'
-import AlertModal from '@/app/_components/modal/AlertModal'
+import DeleteModal from '@/@core/components/custom/DeleteModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 type UserModalProps = {
   open: boolean

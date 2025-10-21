@@ -11,8 +11,8 @@ import type {
   MachineInspectionDetailResponseDtoType,
   machineChecklistItemsWithPicCountResponseDtosType
 } from '@/app/_type/types'
-import AlertModal from '@/app/_components/modal/AlertModal'
-import DefaultModal from '@/app/_components/modal/DefaultModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
 import { useSelectedInspectionContext } from '../InspectionListContent'

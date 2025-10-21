@@ -7,7 +7,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import type { MachineProjectResponseDtoType } from '@/app/_type/types'
 import { IsEditingContext } from '../page'
-import AlertModal from '@/app/_components/modal/AlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 interface NoteTabContentProps {
   id: string

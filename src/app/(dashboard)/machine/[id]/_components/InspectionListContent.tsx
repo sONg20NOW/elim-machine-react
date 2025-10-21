@@ -18,7 +18,7 @@ import { PageSizeOptions } from '@/app/_constants/options'
 
 // Utils
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import TableFilters from '@/app/_components/table/TableFilters'
+import TableFilters from '@/@core/components/custom/TableFilters'
 import type {
   MachineInspectionDetailResponseDtoType,
   MachineInspectionFilterType,
@@ -26,9 +26,9 @@ import type {
   successResponseDtoType
 } from '@/app/_type/types'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
-import SearchBar from '@/app/_components/SearchBar'
+import SearchBar from '@/@core/components/custom/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
-import BasicTable from '@/app/_components/table/BasicTable'
+import BasicTable from '@/@core/components/custom/BasicTable'
 import AddInspectionModal from './AddInspectionModal'
 import { ListsContext, UseListsContext } from '../page'
 import PictureListModal from './detailModal/PictureListModal'

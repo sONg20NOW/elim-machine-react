@@ -24,9 +24,9 @@ import type {
   successResponseDtoType
 } from '@/app/_type/types'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
-import BasicTable from '@/app/_components/table/BasicTable'
-import SearchBar from '@/app/_components/SearchBar'
-import TableFilters from '@/app/_components/table/TableFilters'
+import BasicTable from '@/@core/components/custom/BasicTable'
+import SearchBar from '@/@core/components/custom/SearchBar'
+import TableFilters from '@/@core/components/custom/TableFilters'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { EngineerInitialFilters } from '@/app/_constants/EngineerSeed'
 import { ENGINEER_FILTER_INFO } from '@/app/_constants/filter/EngineerFilterInfo'

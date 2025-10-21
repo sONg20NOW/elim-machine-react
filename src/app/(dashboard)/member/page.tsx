@@ -12,7 +12,7 @@ import MenuItem from '@mui/material/MenuItem'
 // Component Imports
 import axios from 'axios'
 
-import TableFilters from '../../_components/table/TableFilters'
+import TableFilters from '../../../@core/components/custom/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
@@ -24,15 +24,15 @@ import type {
   memberPageDtoType,
   successResponseDtoType
 } from '@/app/_type/types'
-import BasicTable from '@/app/_components/table/BasicTable'
-import SearchBar from '@/app/_components/SearchBar'
+import BasicTable from '@/@core/components/custom/BasicTable'
+import SearchBar from '@/@core/components/custom/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
-import { isTabletContext } from '@/app/_components/ProtectedPage'
+import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
 
 const defualtPageSize = 10
 

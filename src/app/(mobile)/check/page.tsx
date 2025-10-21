@@ -27,9 +27,9 @@ import {
 import type { MachineProjectPageDtoType, successResponseDtoType } from '@/app/_type/types'
 import { handleApiError } from '@/utils/errorHandler'
 import MobileHeader from '../_components/MobileHeader'
-import SearchBar from '@/app/_components/SearchBar'
+import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth } from '@/lib/auth'
-import { isMobileContext } from '@/app/_components/ProtectedPage'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 export default function MachinePage() {
   const router = useRouter()

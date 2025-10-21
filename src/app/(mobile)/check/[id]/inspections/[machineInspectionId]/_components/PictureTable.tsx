@@ -27,7 +27,7 @@ import type {
   MachinePicPresignedUrlResponseDtoType
 } from '@/app/_type/types'
 
-import { isMobileContext } from '@/app/_components/ProtectedPage'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadPictures } from '@/app/_util/uploadPictures'
 
 const PictureTable = ({

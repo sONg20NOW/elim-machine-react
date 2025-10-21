@@ -7,7 +7,7 @@ import { Grid, MenuItem, Button, Typography, IconButton } from '@mui/material'
 import { toast } from 'react-toastify'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultModal from '@/app/_components/modal/DefaultModal'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type {
   MachineCategoryResponseDtoType,
   MachineInspectionCreateRequestDtoType,

@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2'
 
 import type { memberDetailDtoType, TabType } from '@/app/_type/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import { InputBox } from '@/@core/components/custom/InputBox'
 
 const MemberTabContent = ({
   isEditing,

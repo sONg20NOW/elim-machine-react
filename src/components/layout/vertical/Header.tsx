@@ -8,10 +8,10 @@ import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography, Link } fr
 
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
-import SearchBar from '@/app/_components/SearchBar'
+import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
-import { isMobileContext, isTabletContext } from '@/app/_components/ProtectedPage'
+import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
 
 export default function Header() {
   const router = useRouter()

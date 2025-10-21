@@ -18,13 +18,13 @@ import type {
   PipeMeasurementResponseDtoType,
   WindMeasurementResponseDtoType
 } from '@/app/_type/types'
-import DefaultModal from '@/app/_components/modal/DefaultModal'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 // style
 import styles from '@/app/_style/Table.module.css'
-import DisabledTabWithTooltip from '@/app/_components/DisabledTabWithTooltip'
-import AlertModal from '@/app/_components/modal/AlertModal'
+import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
+import AlertModal from '@/@core/components/custom/AlertModal'
 import BasicTabContent from './BasicTabContent'
 import { GasTabContent } from './GasTabContent'
 import { WindTabContent } from './WindTabContent'

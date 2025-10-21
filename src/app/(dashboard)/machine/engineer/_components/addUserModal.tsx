@@ -19,8 +19,8 @@ import {
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/modal/DefaultModal'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
+import { InputBox } from '@/@core/components/custom/InputBox'
 import type { memberLookupResponseDtoType, MachineEngineerCreateRequestDtoType } from '@/app/_type/types'
 
 import { EngineerInitialData } from '@/app/_constants/EngineerSeed'

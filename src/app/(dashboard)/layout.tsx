@@ -14,9 +14,9 @@ import VerticalFooter from '@components/layout/vertical/Footer'
 // Util Imports
 import { getMode } from '@core/utils/serverHelpers'
 
-import ScrollToTopButton from '@/app/_components/button/ScrollToTopButton'
+import ScrollToTopButton from '@/@core/components/custom/ScrollToTopButton'
 import Header from '@/components/layout/vertical/Header'
-import ProtectedPage from '../_components/ProtectedPage'
+import ProtectedPage from '../../@core/components/custom/ProtectedPage'
 
 const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
   // const params = await props.params

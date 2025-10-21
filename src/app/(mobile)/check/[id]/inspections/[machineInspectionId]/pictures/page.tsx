@@ -9,8 +9,8 @@ import Image from 'next/image'
 import { Box, IconButton, TextField, Typography } from '@mui/material'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
-import { isMobileContext } from '@/app/_components/ProtectedPage'
-import DeleteModal from '@/app/_components/modal/DeleteModal'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import DeleteModal from '@/@core/components/custom/DeleteModal'
 import { auth } from '@/lib/auth'
 import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/app/_type/types'
 

@@ -10,8 +10,8 @@ import { DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } 
 
 import type { MachineProjectCreateRequestDtoType } from '@/app/_type/types'
 import { MachineProjectInitialData } from '@/app/_constants/MachineProjectSeed'
-import DefaultModal from '@/app/_components/modal/DefaultModal'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
+import { InputBox } from '@/@core/components/custom/InputBox'
 import { MACHINE_CREATE_INFO } from '@/app/_constants/input/MachineInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 

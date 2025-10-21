@@ -17,7 +17,7 @@ import type {
 import { auth } from '@/lib/auth'
 import type { projectSummaryType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'
-import { isMobileContext } from '@/app/_components/ProtectedPage'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
 
 export interface inspectionSummaryType {

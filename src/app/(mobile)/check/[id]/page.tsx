@@ -20,7 +20,7 @@ import type {
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@/lib/auth'
-import { isMobileContext } from '@/app/_components/ProtectedPage'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from './_components/ProjectInfoCard'
 
 export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing: Dispatch<SetStateAction<boolean>> }>({

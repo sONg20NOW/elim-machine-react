@@ -26,11 +26,11 @@ import type {
 } from '@/app/_type/types'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import DeleteModal from '@/app/_components/modal/DeleteModal'
+import DeleteModal from '@/@core/components/custom/DeleteModal'
 import ChecklistForm from './_pages/ChecklistForm'
 import InspectionForm from './_pages/InspectionForm'
 import type { ChildrenType } from '@/@core/types'
-import { isMobileContext } from '@/app/_components/ProtectedPage'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 import PictureTable from './_components/PictureTable'
 
