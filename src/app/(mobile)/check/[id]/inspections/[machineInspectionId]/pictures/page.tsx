@@ -282,7 +282,7 @@ export default function PicturePage() {
           }}
         >
           <Box sx={{ height: '40dvh', border: '1px solid lightgray', borderRadius: 2, p: 2, position: 'relative' }}>
-            <IconButton type='button' sx={{ position: 'absolute', right: 8, top: 8, color: '#3477FE' }}>
+            <IconButton type='button' sx={{ position: 'absolute', right: 8, top: 8, color: 'primary.main' }}>
               <i className='tabler-camera text-4xl' onClick={() => imageInputRef.current?.click()} />
             </IconButton>
             <input
@@ -390,6 +390,7 @@ export default function PicturePage() {
           <div className='flex flex-col gap-1'>
             <InputLabel sx={{ px: 2 }}>비고</InputLabel>
             <TextField
+              minRows={3}
               size={isMobile ? 'small' : 'medium'}
               fullWidth
               {...register('remark')}
