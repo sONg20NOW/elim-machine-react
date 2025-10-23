@@ -22,12 +22,9 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { toast } from 'react-toastify'
 
-import { useQueryClient } from '@tanstack/react-query'
-
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@/@core/hooks/useGetGecklistList'
-import { QUERY_KEYS } from '@/app/_constants/queryKeys'
 
 interface checklistFormType {
   checklistSubItemId: number
@@ -40,7 +37,7 @@ export default function ImageUploadPage() {
 
   const isMobile = useContext(isMobileContext)
 
-  const queryClient = useQueryClient()
+  const { refetch } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
 
@@ -93,12 +90,7 @@ export default function ImageUploadPage() {
 
       if (result) {
         setFilesToUpload([])
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(
-            machineProjectId!.toString(),
-            machineInspectionId!.toString()
-          )
-        })
+        refetch()
       }
     }, 1500)
   }

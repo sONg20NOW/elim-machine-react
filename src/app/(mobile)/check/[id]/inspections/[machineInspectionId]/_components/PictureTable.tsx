@@ -20,15 +20,12 @@ import {
 // @ts-ignore
 import axios from 'axios'
 
-import { useQueryClient } from '@tanstack/react-query'
-
 import { handleApiError } from '@/utils/errorHandler'
 import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/@core/types'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@/@core/hooks/useGetGecklistList'
-import { QUERY_KEYS } from '@/app/_constants/queryKeys'
 
 const PictureTable = memo(
   ({
@@ -45,27 +42,25 @@ const PictureTable = memo(
     const router = useRouter()
     const pathname = usePathname()
 
-    const queryClient = useQueryClient()
+    const isMobile = useContext(isMobileContext)
 
-    const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
+    const { refetch } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
     const machineChecklistItemIdRef = useRef(machineChecklistItemId)
-
-    useEffect(() => {
-      machineChecklistItemIdRef.current = machineChecklistItemId
-    }, [machineChecklistItemId])
-
-    const defaultPageSize = 4
-
-    const [isLoading, setIsLoading] = useState(false) // eslint-disable-line
     const isLoadingRef = useRef(false)
 
     // 무한스크롤 관련 Ref들
     const hasNextRef = useRef(true)
     const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
-    // 모바일 반응형을 위한 미디어쿼리
-    const isMobile = useContext(isMobileContext)
+    useEffect(() => {
+      machineChecklistItemIdRef.current = machineChecklistItemId
+    }, [machineChecklistItemId])
+
+    const defaultPageSize = 4
+    const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
+
+    const [isLoading, setIsLoading] = useState(false) // eslint-disable-line
 
     const [emptyMode, setEmptyMode] = useState(false)
 
@@ -245,12 +240,7 @@ const PictureTable = memo(
             machineChecklistSubItemId
           )
         )
-          queryClient.invalidateQueries({
-            queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(
-              machineProjectId!.toString(),
-              machineInspectionId!.toString()
-            )
-          })
+          refetch()
       }
 
       return (
