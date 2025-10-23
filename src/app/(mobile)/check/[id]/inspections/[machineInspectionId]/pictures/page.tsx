@@ -281,7 +281,15 @@ export default function PicturePage() {
             gap: 5
           }}
         >
-          <Box sx={{ height: '40dvh', border: '1px solid lightgray', borderRadius: 2, p: 2, position: 'relative' }}>
+          <Box
+            sx={{
+              height: isMobile ? '35dvh' : '48dvh',
+              border: '1px solid lightgray',
+              borderRadius: 2,
+              p: 2,
+              position: 'relative'
+            }}
+          >
             <IconButton type='button' sx={{ position: 'absolute', right: 8, top: 8, color: 'primary.main' }}>
               <i className='tabler-camera text-4xl' onClick={() => imageInputRef.current?.click()} />
             </IconButton>
