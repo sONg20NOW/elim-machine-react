@@ -5,10 +5,10 @@ import type { ChildrenType } from '@/@core/types'
 import { VerticalNavProvider } from '@menu/contexts/verticalNavContext'
 import { SettingsProvider } from '@core/contexts/settingsContext'
 import ThemeProvider from '@components/theme'
-import ReduxProvider from '@/redux-store/ReduxProvider'
 
 // Util Imports
 import { getSettingsFromCookie } from '@core/utils/serverHelpers'
+import QueryClientWrapper from './QueryClientWrapper'
 
 type Props = ChildrenType
 
@@ -25,7 +25,7 @@ const Providers = async (props: Props) => {
     <VerticalNavProvider>
       <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
         <ThemeProvider direction={'ltr'} systemMode={systemMode}>
-          <ReduxProvider>{children}</ReduxProvider>
+          <QueryClientWrapper>{children}</QueryClientWrapper>
           {/* <AppReactToastify hideProgressBar /> */}
         </ThemeProvider>
       </SettingsProvider>

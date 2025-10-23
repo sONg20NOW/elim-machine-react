@@ -1,0 +1,19 @@
+// src/components/QueryClientWrapper.tsx 또는 ClientProviders.tsx
+
+'use client' // 👈 이 파일은 클라이언트 컴포넌트로 지정
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+import ReduxProvider from '@/redux-store/ReduxProvider' // Redux도 클라이언트 상태이므로 여기에 포함
+import type { ChildrenType } from '@/@core/types'
+
+// QueryClient 인스턴스는 한 번만 생성되도록 파일 범위에 정의
+const queryClient = new QueryClient()
+
+export default function QueryClientWrapper({ children }: ChildrenType) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ReduxProvider>{children}</ReduxProvider>
+    </QueryClientProvider>
+  )
+}
