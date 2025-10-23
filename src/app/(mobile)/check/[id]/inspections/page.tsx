@@ -214,7 +214,7 @@ export default function InspectionsPage() {
         }
       />
 
-      <ProjectInfoCard projectSummaryData={projectSummaryData} />
+      <ProjectInfoCard machineProjectId={machineProjectId} projectSummaryData={projectSummaryData} />
       {/* 스크롤이 생기는 메인 영역 */}
       <Box ref={listRef} sx={{ flex: 1, overflowY: 'auto', p: 5 }}>
         {inspections.map(inspection => (

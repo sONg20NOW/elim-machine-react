@@ -1,17 +1,17 @@
-import { useRef, useState } from 'react'
-
-import { useParams } from 'next/navigation'
+import { useRef } from 'react'
 
 import { Box, IconButton, Typography } from '@mui/material'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { toast } from 'react-toastify'
 
 import type { projectSummaryType } from '../page'
 import { QUERY_KEYS } from '@/app/_constants/queryKeys'
 import { auth } from '@/lib/auth'
 
 import type { MachineProjectOverviewPicReadResponseDtoType } from '@/@core/types'
-import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
+import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 
 export default function ProjectInfoCard({
   projectSummaryData,
@@ -22,6 +22,8 @@ export default function ProjectInfoCard({
   machineProjectId: string
   canChange?: boolean
 }) {
+  const queryClient = useQueryClient()
+
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   // 대표사진 URL 가져오기
@@ -29,31 +31,39 @@ export default function ProjectInfoCard({
     queryKey: QUERY_KEYS.MACHINE_PROJECT_PIC.GET_OVERVIEW(machineProjectId),
     queryFn: async () =>
       await auth.get<{ data: { machineProjectPics: MachineProjectOverviewPicReadResponseDtoType[] } }>(
-        `/api/machine-projects/${machineProjectId}/machine-project-pics/overview`
+        `/api/machine-projects/${machineProjectId}/machine-project-pics/overview?machineProjectPicType=OVERVIEW`
       ),
     select: data => data.data.data.machineProjectPics,
-    placeholderData: prev => prev
+    placeholderData: prev => prev,
+    staleTime: 10 * 1000
   })
 
   const handleCameraClick = () => {
     cameraInputRef.current?.click()
   }
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
 
-    if (file) {
-      // 새 파일의 객체 URL을 생성하여 상태에 저장
-      const newImageUrl = URL.createObjectURL(file)
+    if (!file) {
+      toast.warning('파일 처리에 문제가 발생했습니다.')
 
-      upload(machineProjectId, inspectionId)
+      return
+    }
+
+    if (await uploadProjectPictures(machineProjectId, [file], 'OVERVIEW')) {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MACHINE_PROJECT_PIC.GET_OVERVIEW(machineProjectId) })
     }
   }
 
   // 배경 이미지를 결정하는 유틸리티 함수
   const getBackgroundImageStyle = () => {
     // 5. customBackgroundImage가 있으면 그 URL을 사용하고, 없으면 기본 이미지를 사용
-    const imageUrl = OverViewPic?.[-1].presignedUrl ?? '/images/safety114_logo.png'
+    if (!(OverViewPic && OverViewPic.length)) {
+      return `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(/images/safety114_logo.png)`
+    }
+
+    const imageUrl = OverViewPic[OverViewPic.length - 1].presignedUrl
 
     // 배경 이미지 위에 어두운 오버레이를 유지하기 위해 linear-gradient와 결합
     return `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(${imageUrl})`

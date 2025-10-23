@@ -3,14 +3,19 @@ import axios from 'axios'
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
-export const uploadProjectPictures = async (machineProjectId: string, inspectionId: string, filesToUpload: File[]) => {
+export const uploadProjectPictures = async (
+  machineProjectId: string,
+  filesToUpload: File[],
+  machineProjectPicType: 'OVERVIEW' | 'ETC' | 'LOCATION_MAP'
+) => {
   try {
     // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
     const presignedResponse = await auth.post<{
       data: { presignedUrlResponseDtos: { s3Key: string; presignedUrl: string }[] }
     }>(`/api/presigned-urls/machine-projects/${machineProjectId}/machine-project-pics/upload`, {
       uploadType: 'PROJECT_IMAGE',
-      originalFileNames: filesToUpload.map(file => file.name)
+      originalFileNames: filesToUpload.map(file => file.name),
+      machineProjectPicType: machineProjectPicType
     })
 
     const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
@@ -48,6 +53,7 @@ export const uploadProjectPictures = async (machineProjectId: string, inspection
 
     // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
     const machinePicCreateRequestDtos = uploadResults.map(result => ({
+      machineProjectPicType: machineProjectPicType,
       originalFileName: result.fileName,
       s3Key: result.s3Key
     }))
@@ -55,7 +61,7 @@ export const uploadProjectPictures = async (machineProjectId: string, inspection
     const dbResponse = await auth.post<{ data: { machineProjectPicIds: number[] } }>(
       `/api/machine-projects/${machineProjectId}/machine-project-pics`,
       {
-        machinePicCreateRequestDtos
+        machineProjectPics: machinePicCreateRequestDtos
       }
     )
 
