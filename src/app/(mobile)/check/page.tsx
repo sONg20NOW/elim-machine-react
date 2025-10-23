@@ -10,6 +10,10 @@ import Button from '@mui/material/Button'
 
 import axios from 'axios'
 
+import { motion } from 'motion/react'
+
+const MotionCard = motion(Card)
+
 // Component Imports
 import {
   alpha,
@@ -206,32 +210,19 @@ export default function MachinePage() {
           backgroundColor: 'white'
         }}
       >
-        {myProject ? (
-          <Card
-            className='animate-slideRight'
-            sx={{
-              position: 'absolute',
-              backgroundColor: 'primary.main',
-              borderRadius: isMobile ? 1 : 10,
-              width: isMobile ? '90%' : '47%',
-              height: isMobile ? '45%' : '80%',
-              boxShadow: 2,
-              color: 'white'
-            }}
-          />
-        ) : (
-          <Card
-            className='animate-slideLeft'
-            sx={{
-              position: 'absolute',
-              backgroundColor: 'primary.main',
-              borderRadius: isMobile ? 1 : 10,
-              width: isMobile ? '90%' : '47%',
-              height: isMobile ? '45%' : '80%',
-              boxShadow: 2
-            }}
-          />
-        )}
+        <MotionCard
+          initial={{ x: myProject ? 0 : '100%' }}
+          animate={{ x: myProject ? '100%' : 0 }}
+          sx={{
+            position: 'absolute',
+            backgroundColor: 'primary.main',
+            borderRadius: isMobile ? 1 : 10,
+            width: isMobile ? '90%' : '47%',
+            height: isMobile ? '45%' : '80%',
+            boxShadow: 2,
+            color: 'white'
+          }}
+        />
 
         <Button
           onClick={() => setMyProject(prev => !prev)}

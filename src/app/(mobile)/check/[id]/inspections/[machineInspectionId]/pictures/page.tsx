@@ -4,7 +4,7 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
-import { Box, IconButton, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
+import { Box, Button, IconButton, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -49,7 +49,6 @@ export default function PicturePage() {
   const scrollableAreaRef = useRef<HTMLElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 
-  const inspectionName = 'default'
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [selectedPicId, setSelectedPicId] = useState(Number(initialPicId))
   const selectedPic = pictures.find(v => v.machinePicId === selectedPicId)
@@ -249,9 +248,10 @@ export default function PicturePage() {
         {/* 헤더 */}
         <MobileHeader
           left={
-            <IconButton type='button' sx={{ p: 0 }} onClick={() => router.back()}>
+            <Button type='button' sx={{ p: 0 }} onClick={() => router.back()}>
               <i className='tabler-chevron-left text-white text-3xl' />
-            </IconButton>
+              <Typography color='white'>{localStorage.getItem('inspectionName') ?? ''}</Typography>
+            </Button>
           }
           right={
             <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
@@ -262,11 +262,11 @@ export default function PicturePage() {
                 />
               </IconButton>
               <IconButton type='button' sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
-                <i className='tabler-trash-filled text-red-400 text-3xl' />
+                <i className='tabler-file-x-filled text-red-400 text-3xl' />
               </IconButton>
             </Box>
           }
-          title={inspectionName + initialPicId}
+          title={`사진(${pictures.length})`}
         />
         {/* 본 컨텐츠 (스크롤 가능 영역)*/}
         <Box

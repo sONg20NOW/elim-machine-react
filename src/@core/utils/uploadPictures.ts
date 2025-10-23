@@ -8,7 +8,8 @@ export const uploadPictures = async (
   inspectionId: string,
   filesToUpload: File[],
   checklistItemId: number,
-  checklistSubItemId: number
+  checklistSubItemId: number,
+  justS3Keys = false
 ) => {
   try {
     // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
@@ -57,6 +58,10 @@ export const uploadPictures = async (
 
     console.log('업로드 완료:', uploadResults)
 
+    if (justS3Keys) {
+      return uploadResults
+    }
+
     // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
     const machinePicCreateRequestDtos = uploadResults.map(result => ({
       machineChecklistSubItemId: checklistSubItemId, // 기본값 또는 selectedMachine에서 가져오기
@@ -78,10 +83,10 @@ export const uploadPictures = async (
     console.log('DB 기록 완료:', uploadedPicIds)
     handleSuccess(`${uploadedPicIds.length}개 사진이 성공적으로 업로드되었습니다.`)
 
-    return 0
+    return true
   } catch (e) {
     handleApiError(e)
 
-    return -1
+    return false
   }
 }

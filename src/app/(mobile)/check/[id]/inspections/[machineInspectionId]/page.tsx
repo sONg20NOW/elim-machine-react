@@ -34,6 +34,7 @@ import InspectionForm from './_pages/InspectionForm'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 import PictureTable from './_components/PictureTable'
+import ImageUploadPage from './_pages/ImageUploadPage'
 
 type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
 
@@ -207,11 +208,11 @@ export default function CheckInspectionDetailPage() {
           }
           right={
             <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
-              <IconButton sx={{ p: 0 }} onClick={globalSubmit}>
+              <IconButton disabled={currentTab === 'gallery'} sx={{ p: 0 }} onClick={globalSubmit}>
                 <i ref={saveButtonRef} className=' tabler-device-floppy text-white text-3xl' />
               </IconButton>
               <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
-                <i className='tabler-trash-filled text-red-400 text-3xl' />
+                <i className='tabler-trash-x-filled text-red-400 text-3xl' />
               </IconButton>
             </Box>
           }
@@ -303,24 +304,46 @@ export default function CheckInspectionDetailPage() {
               />
             </TabPanel>
             <InspectionForm ref={form2Ref} saveButtonRef={saveButtonRef} inspectionVersion={inspectionVersion} />
+            <TabPanel
+              value={'gallery'}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: !isMobile ? 8 : 5
+              }}
+            >
+              <ImageUploadPage />
+            </TabPanel>
           </Box>
+
           {/* 탭 리스트 */}
           <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
             <TabList
               sx={{ display: 'flex', px: isMobile ? '' : 20 }}
               centered
               onChange={(event: React.SyntheticEvent, newValue: currentTabType) => {
-                if (newValue !== 'gallery' && newValue !== 'camera') setCurrentTab(newValue)
+                if (newValue !== 'camera') setCurrentTab(newValue)
               }}
             >
               <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />}></Tab>
               <Tab sx={{ flex: 1 }} value={'info'} label={<i className='tabler-info-circle text-4xl' />}></Tab>
               <Tab sx={{ flex: 1 }} value={'gallery'} label={<i className='tabler-library-photo text-4xl' />}></Tab>
-              <Tab sx={{ flex: 1 }} value={'camera'} label={<i className='tabler-camera-filled text-4xl' />}></Tab>
+
+              <Tab
+                disabled
+                sx={{ flex: 1 }}
+                value={'camera'}
+                label={<i className='tabler-camera-filled text-4xl' />}
+              ></Tab>
             </TabList>
           </Box>
         </TabContext>
-        <DeleteModal showDeleteModal={openAlert} setShowDeleteModal={setOpenAlert} onDelete={handleDeleteInspection} />
+        <DeleteModal
+          title={`해당 설비를\n삭제하시겠습니까?`}
+          showDeleteModal={openAlert}
+          setShowDeleteModal={setOpenAlert}
+          onDelete={handleDeleteInspection}
+        />
       </Box>
     </InspectionPageProviders>
   )

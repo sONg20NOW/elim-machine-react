@@ -234,7 +234,7 @@ const CheckDetailPage = () => {
 
         {projectSummaryData ? (
           <>
-            <ProjectInfoCard canChange projectSummaryData={projectSummaryData} />
+            <ProjectInfoCard canChange machineProjectId={machineProjectId} projectSummaryData={projectSummaryData} />
             <Box sx={{ flex: 1, overflowY: 'auto' }}>
               <Box
                 sx={{

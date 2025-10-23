@@ -211,7 +211,7 @@ const PictureListModal = ({
       selectedSubItem.machineChecklistSubItemId
     )
 
-    if (result !== -1) {
+    if (result) {
       setFilesToUpload([])
 
       // 디테일 모달 테이블의 해당 목록 정보 최신화 - selcetedMachine 최신화

@@ -8,15 +8,16 @@ interface DeleteModalProps {
   showDeleteModal: boolean
   setShowDeleteModal: Dispatch<SetStateAction<boolean>>
   onDelete: () => Promise<void>
+  title?: string
 }
 
-export default function DeleteModal({ showDeleteModal, setShowDeleteModal, onDelete }: DeleteModalProps) {
+export default function DeleteModal({ showDeleteModal, setShowDeleteModal, onDelete, title }: DeleteModalProps) {
   return (
     <DefaultModal
       size='xs'
       open={showDeleteModal}
       setOpen={setShowDeleteModal}
-      title={'정말 삭제하시겠습니까?'}
+      title={title ?? '정말 삭제하시겠습니까?'}
       headerDescription='삭제 후에는 되돌리지 못합니다.'
       primaryButton={
         <Button

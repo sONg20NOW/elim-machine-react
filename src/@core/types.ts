@@ -596,6 +596,17 @@ export interface MachinePicUpdateResponseDtoType {
   remark: string
 }
 
+// ----------- machineProject Pic 관련 -------------
+// GET /api/machine-projects/{machineProjectId}/machine-project-pics/overview
+export interface MachineProjectOverviewPicReadResponseDtoType {
+  id: number
+  version: number
+  originalFileName: string
+  machineProjectPicType: 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
+  presignedUrl: string
+  remark: string
+}
+
 // ----------- 라이선스 -----------
 // api/licenses 라이선스 목록 조회 응답 DTO
 export interface LicensePageResponseDtoType {
