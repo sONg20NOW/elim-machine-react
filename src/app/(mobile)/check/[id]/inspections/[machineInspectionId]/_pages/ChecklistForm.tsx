@@ -12,7 +12,7 @@ import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/@cor
 import type { FormComponentHandle } from '../page'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
-import { useGetChecklistInfo } from '@/@core/hooks/useGetGecklistList'
+import { useGetChecklistInfo } from '@/@core/hooks/custom_tanstack/useGetGecklistList'
 
 interface formType {
   deficiencies: string

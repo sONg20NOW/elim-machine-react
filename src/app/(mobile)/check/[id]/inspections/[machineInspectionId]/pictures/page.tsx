@@ -20,7 +20,7 @@ import type {
   MachinePicUpdateResponseDtoType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { useGetChecklistInfo } from '@/@core/hooks/useGetGecklistList'
+import { useGetChecklistInfo } from '@/@core/hooks/custom_tanstack/useGetGecklistList'
 
 const max_pic = 100
 
