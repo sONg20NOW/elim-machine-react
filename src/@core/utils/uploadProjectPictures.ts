@@ -3,26 +3,14 @@ import axios from 'axios'
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
-export const uploadPictures = async (
-  machineProjectId: string,
-  inspectionId: string,
-  filesToUpload: File[],
-  checklistItemId: number,
-  checklistSubItemId: number,
-  justS3Keys = false
-) => {
+export const uploadPictures = async (machineProjectId: string, inspectionId: string, filesToUpload: File[]) => {
   try {
     // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
     const presignedResponse = await auth.post<{
       data: { presignedUrlResponseDtos: { s3Key: string; presignedUrl: string }[] }
-    }>(`/api/presigned-urls/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/upload`, {
-      uploadType: 'INSPECTION_IMAGE',
-      originalFileNames: filesToUpload.map(file => file.name),
-      checklistItemId: checklistItemId,
-      checklistSubItemId: checklistSubItemId
-
-      // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
-      // memberId: 1
+    }>(`/api/presigned-urls/machine-projects/${machineProjectId}/machine-project-pics/upload`, {
+      uploadType: 'PROJECT_IMAGE',
+      originalFileNames: filesToUpload.map(file => file.name)
     })
 
     const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
@@ -56,29 +44,22 @@ export const uploadPictures = async (
     // 모든 파일 업로드 완료까지 대기
     const uploadResults = await Promise.all(uploadPromises)
 
-    console.log('업로드 완료:', uploadResults)
-
-    if (justS3Keys) {
-      return uploadResults
-    }
+    console.log('S3 bucket에 업로드 완료:', uploadResults)
 
     // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
     const machinePicCreateRequestDtos = uploadResults.map(result => ({
-      machineChecklistSubItemId: checklistSubItemId, // 기본값 또는 selectedMachine에서 가져오기
       originalFileName: result.fileName,
       s3Key: result.s3Key
-
-      // cdnPath는 추후 확장사항
     }))
 
-    const dbResponse = await auth.post<{ data: { machinePicIds: number[] } }>(
-      `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/machine-pics`,
+    const dbResponse = await auth.post<{ data: { machineProjectPicIds: number[] } }>(
+      `/api/machine-projects/${machineProjectId}/machine-project-pics`,
       {
         machinePicCreateRequestDtos
       }
     )
 
-    const uploadedPicIds = dbResponse.data.data.machinePicIds
+    const uploadedPicIds = dbResponse.data.data.machineProjectPicIds
 
     console.log('DB 기록 완료:', uploadedPicIds)
     handleSuccess(`${uploadedPicIds.length}개 사진이 성공적으로 업로드되었습니다.`)

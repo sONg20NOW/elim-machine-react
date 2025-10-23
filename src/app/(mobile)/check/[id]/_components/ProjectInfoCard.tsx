@@ -1,18 +1,39 @@
 import { useRef, useState } from 'react'
 
+import { useParams } from 'next/navigation'
+
 import { Box, IconButton, Typography } from '@mui/material'
 
+import { useQuery } from '@tanstack/react-query'
+
 import type { projectSummaryType } from '../page'
+import { QUERY_KEYS } from '@/app/_constants/queryKeys'
+import { auth } from '@/lib/auth'
+
+import type { MachineProjectOverviewPicReadResponseDtoType } from '@/@core/types'
+import { uploadPictures } from '@/@core/utils/uploadInspectionPictures'
 
 export default function ProjectInfoCard({
   projectSummaryData,
+  machineProjectId,
   canChange = false
 }: {
   projectSummaryData: projectSummaryType
+  machineProjectId: string
   canChange?: boolean
 }) {
   const cameraInputRef = useRef<HTMLInputElement>(null)
-  const [backgroundImg, setBackgroundImg] = useState<string>()
+
+  // 대표사진 URL 가져오기
+  const { data: OverViewPic } = useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PROJECT_PIC.GET_OVERVIEW(machineProjectId),
+    queryFn: async () =>
+      await auth.get<{ data: { machineProjectPics: MachineProjectOverviewPicReadResponseDtoType[] } }>(
+        `/api/machine-projects/${machineProjectId}/machine-project-pics/overview`
+      ),
+    select: data => data.data.data.machineProjectPics,
+    placeholderData: prev => prev
+  })
 
   const handleCameraClick = () => {
     cameraInputRef.current?.click()
@@ -22,22 +43,17 @@ export default function ProjectInfoCard({
     const file = event.target.files?.[0]
 
     if (file) {
-      // 이전에 생성된 객체 URL이 있다면 메모리 누수를 막기 위해 해제 (Optional)
-      if (backgroundImg) {
-        URL.revokeObjectURL(backgroundImg)
-      }
-
       // 새 파일의 객체 URL을 생성하여 상태에 저장
       const newImageUrl = URL.createObjectURL(file)
 
-      setBackgroundImg(newImageUrl)
+      uploadPictures(machineProjectId, inspectionId)
     }
   }
 
   // 배경 이미지를 결정하는 유틸리티 함수
   const getBackgroundImageStyle = () => {
     // 5. customBackgroundImage가 있으면 그 URL을 사용하고, 없으면 기본 이미지를 사용
-    const imageUrl = backgroundImg || '/images/safety114_logo.png'
+    const imageUrl = OverViewPic?.[-1].presignedUrl ?? '/images/safety114_logo.png'
 
     // 배경 이미지 위에 어두운 오버레이를 유지하기 위해 linear-gradient와 결합
     return `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(${imageUrl})`

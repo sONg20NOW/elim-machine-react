@@ -22,7 +22,7 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { checklistItemsContext } from '../page'
-import { uploadPictures } from '@/@core/utils/uploadPictures'
+import { uploadPictures } from '@/@core/utils/uploadInspectionPictures'
 
 interface checklistFormType {
   checklistSubItemId: number

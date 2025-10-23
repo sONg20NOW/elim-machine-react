@@ -28,7 +28,7 @@ import type {
 } from '@/@core/types'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { uploadPictures } from '@/@core/utils/uploadPictures'
+import { uploadPictures } from '@/@core/utils/uploadInspectionPictures'
 
 const PictureTable = memo(
   ({
