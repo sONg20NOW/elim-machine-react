@@ -10,9 +10,9 @@ import { useForm } from 'react-hook-form'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/@core/types'
 import type { FormComponentHandle } from '../page'
-import { checklistItemsContext } from '../page'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
+import { useGetChecklistInfo } from '@/@core/hooks/useGetGecklistList'
 
 interface formType {
   deficiencies: string
@@ -27,10 +27,11 @@ interface ChecklistFormProps {
 
 const ChecklistForm = memo(
   forwardRef<FormComponentHandle, ChecklistFormProps>((props, ref) => {
-    const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
+    const { id: machineProjectId, machineInspectionId } = useParams()
+
+    const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
     const isMobile = useContext(isMobileContext)
-    const checklistItems = useContext(checklistItemsContext)
     const { category, setCategory, saveButtonRef } = props
 
     const {
@@ -42,7 +43,7 @@ const ChecklistForm = memo(
 
     const checklistMeta = useRef({ id: 0, version: 0 })
 
-    const checklistItem = checklistItems.find(v => v.machineChecklistItemId === Number(category))
+    const checklistItem = checklistList?.find(v => v.machineChecklistItemId === Number(category))
 
     // form 초기화
     const getChecklistResult = useCallback(async () => {
@@ -55,7 +56,7 @@ const ChecklistForm = memo(
           .get<{
             data: MachineInspectionChecklistItemResultResponseDtoType
           }>(
-            `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/machine-inspection-checklist-item-results/${checklistItem?.machineInspectionChecklistItemResultBasicResponseDto.id}`
+            `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-inspection-checklist-item-results/${checklistItem?.machineInspectionChecklistItemResultBasicResponseDto.id}`
           )
           .then(v => v.data.data)
 
@@ -65,7 +66,7 @@ const ChecklistForm = memo(
       } catch (error) {
         handleApiError(error)
       }
-    }, [machineProjectId, inspectionId, category, checklistItem, reset])
+    }, [machineProjectId, machineInspectionId, category, checklistItem, reset])
 
     useEffect(() => {
       getChecklistResult()
@@ -80,7 +81,7 @@ const ChecklistForm = memo(
                 machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultResponseDtoType[]
               }
             }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/machine-inspection-checklist-item-results`,
+              `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-inspection-checklist-item-results`,
               {
                 machineInspectionChecklistItemResultUpdateRequestDtos: [
                   {
@@ -154,7 +155,7 @@ const ChecklistForm = memo(
             }}
           >
             <MenuItem value='전체'>전체</MenuItem>
-            {checklistItems.map(v =>
+            {checklistList?.map(v =>
               v.machineChecklistItemName !== '기타' ? (
                 <MenuItem
                   key={v.machineChecklistItemId}

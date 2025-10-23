@@ -20,34 +20,32 @@ import {
 // @ts-ignore
 import axios from 'axios'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import { handleApiError } from '@/utils/errorHandler'
-import type {
-  machineChecklistItemsWithPicCountResponseDtosType,
-  MachinePicCursorType,
-  MachinePicPresignedUrlResponseDtoType
-} from '@/@core/types'
+import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/@core/types'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
+import { useGetChecklistInfo } from '@/@core/hooks/useGetGecklistList'
+import { QUERY_KEYS } from '@/app/_constants/queryKeys'
 
 const PictureTable = memo(
   ({
     machineChecklistItemId,
     scrollableAreaRef,
-    checklists,
-    refetchChecklists,
     tabHeight
   }: {
     machineChecklistItemId: number | null
     scrollableAreaRef: RefObject<HTMLElement>
-    checklists: machineChecklistItemsWithPicCountResponseDtosType[]
-    refetchChecklists: () => void
     tabHeight: number
   }) => {
-    const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
+    const { id: machineProjectId, machineInspectionId } = useParams()
 
     const router = useRouter()
     const pathname = usePathname()
+
+    const queryClient = useQueryClient()
 
     const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
 
@@ -59,7 +57,7 @@ const PictureTable = memo(
 
     const defaultPageSize = 4
 
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(false) // eslint-disable-line
     const isLoadingRef = useRef(false)
 
     // 무한스크롤 관련 Ref들
@@ -73,6 +71,8 @@ const PictureTable = memo(
 
     const trigger = useScrollTrigger({ target: scrollableAreaRef.current })
 
+    const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
+
     // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
     const getPictures = useCallback(
       async (pageSize: number) => {
@@ -84,7 +84,7 @@ const PictureTable = memo(
         try {
           const requestBody = {
             ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {}),
-            machineInspectionId: Number(inspectionId),
+            machineInspectionId: Number(machineInspectionId),
             ...(machineChecklistItemIdRef.current ? { machineChecklistItemId: machineChecklistItemIdRef.current } : {})
           }
 
@@ -115,7 +115,7 @@ const PictureTable = memo(
           setIsLoading(false)
         }
       },
-      [machineProjectId, inspectionId]
+      [machineProjectId, machineInspectionId]
     )
 
     const resetCursor = async () => {
@@ -232,20 +232,25 @@ const PictureTable = memo(
       const emptyCameraRef = useRef<HTMLInputElement>(null)
 
       const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!event.target.files || !machineProjectId || !inspectionId) return
+        if (!event.target.files || !machineProjectId || !machineInspectionId) return
 
         const file = event.target.files[0]
 
         if (
           await uploadInspectionPictures(
             machineProjectId.toString(),
-            inspectionId.toString(),
+            machineInspectionId.toString(),
             [file],
             machineChecklistItemId,
             machineChecklistSubItemId
           )
         )
-          refetchChecklists()
+          queryClient.invalidateQueries({
+            queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(
+              machineProjectId!.toString(),
+              machineInspectionId!.toString()
+            )
+          })
       }
 
       return (
@@ -323,27 +328,29 @@ const PictureTable = memo(
           </Fab>
         </Fade>
         {emptyMode ? (
-          <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
-            {checklists
-              .filter(v =>
-                machineChecklistItemIdRef.current
-                  ? v.machineChecklistItemId === machineChecklistItemIdRef.current
-                  : true
-              )
-              .map(v =>
-                v.checklistSubItems
-                  .filter(p => p.machinePicCount === 0)
-                  .map(p => (
-                    <EmptyImageCard
-                      key={p.machineChecklistSubItemId}
-                      machineChecklistItemId={v.machineChecklistItemId}
-                      machineChecklistSubItemId={p.machineChecklistSubItemId}
-                      machineChecklistItemName={v.machineChecklistItemName}
-                      machineChecklistSubItemName={p.checklistSubItemName}
-                    />
-                  ))
-              )}
-          </ImageList>
+          checklistList && (
+            <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
+              {checklistList
+                .filter(v =>
+                  machineChecklistItemIdRef.current
+                    ? v.machineChecklistItemId === machineChecklistItemIdRef.current
+                    : true
+                )
+                .map(v =>
+                  v.checklistSubItems
+                    .filter(p => p.machinePicCount === 0)
+                    .map(p => (
+                      <EmptyImageCard
+                        key={p.machineChecklistSubItemId}
+                        machineChecklistItemId={v.machineChecklistItemId}
+                        machineChecklistSubItemId={p.machineChecklistSubItemId}
+                        machineChecklistItemName={v.machineChecklistItemName}
+                        machineChecklistSubItemName={p.checklistSubItemName}
+                      />
+                    ))
+                )}
+            </ImageList>
+          )
         ) : pictures?.length > 0 ? (
           <>
             <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>

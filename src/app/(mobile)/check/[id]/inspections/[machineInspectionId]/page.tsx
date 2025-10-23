@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -22,7 +22,6 @@ import type {
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
   successResponseDtoType,
-  machineChecklistItemsWithPicCountResponseDtosType,
   ChildrenType
 } from '@/@core/types'
 
@@ -42,7 +41,6 @@ const max_cnt = 100
 
 export const inspectionListContext = createContext<MachineInspectionPageResponseDtoType[]>([])
 export const engineerListContext = createContext<machineProjectEngineerDetailDtoType[]>([])
-export const checklistItemsContext = createContext<machineChecklistItemsWithPicCountResponseDtosType[]>([])
 
 export interface FormComponentHandle {
   submit: () => Promise<boolean>
@@ -50,7 +48,7 @@ export interface FormComponentHandle {
 }
 
 export default function CheckInspectionDetailPage() {
-  const { id: machineProjectId, machineInspectionId: inspectionId } = useParams()
+  const { id: machineProjectId, machineInspectionId } = useParams()
 
   const theme = useTheme()
   const router = useRouter()
@@ -74,7 +72,6 @@ export default function CheckInspectionDetailPage() {
 
   const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
-  const [checkiistList, setCheckiistList] = useState<machineChecklistItemsWithPicCountResponseDtosType[]>([])
 
   const saveButtonRef = useRef<HTMLElement>(null)
 
@@ -113,30 +110,16 @@ export default function CheckInspectionDetailPage() {
     }
   }, [machineProjectId])
 
-  // inspectionId가 바뀔 때마다 점검항목 가져오기
-  const getChecklistList = useCallback(async () => {
-    const response = await auth.get<{
-      data: { machineChecklistItemsWithPicCountResponseDtos: machineChecklistItemsWithPicCountResponseDtosType[] }
-    }>(`/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}`)
-
-    setCheckiistList(response.data.data.machineChecklistItemsWithPicCountResponseDtos)
-    console.log('get checklist items succeed: ', response.data.data.machineChecklistItemsWithPicCountResponseDtos)
-  }, [machineProjectId, inspectionId])
-
   useEffect(() => {
     getAllInspections()
     getParticipatedEngineerList()
-    getChecklistList()
-  }, [getAllInspections, getParticipatedEngineerList, getChecklistList])
-
-  // 하위 컴포넌트 리렌더링 방지를 위한 context 안정화
-  const stableChecklistList = useMemo(() => checkiistList, [checkiistList])
+  }, [getAllInspections, getParticipatedEngineerList])
 
   // 현재 선택된 inspection 데이터 가져오기
   const getInspectionData = useCallback(async () => {
     try {
       const response = await auth.get<{ data: MachineInspectionDetailResponseDtoType }>(
-        `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}`
+        `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}`
       )
 
       setInspection(response.data.data)
@@ -144,7 +127,7 @@ export default function CheckInspectionDetailPage() {
     } catch (error) {
       handleApiError(error)
     }
-  }, [machineProjectId, inspectionId])
+  }, [machineProjectId, machineInspectionId])
 
   useEffect(() => {
     getInspectionData()
@@ -156,7 +139,7 @@ export default function CheckInspectionDetailPage() {
         // @ts-ignore
         data: {
           machineInspectionDeleteRequestDtos: [
-            { machineInspectionId: inspectionId?.toString(), version: inspectionVersion.current }
+            { machineInspectionId: machineInspectionId?.toString(), version: inspectionVersion.current }
           ]
         }
       })
@@ -164,7 +147,7 @@ export default function CheckInspectionDetailPage() {
     } catch (error) {
       handleApiError(error)
     }
-  }, [machineProjectId, inspectionId, router])
+  }, [machineProjectId, machineInspectionId, router])
 
   const globalSubmit = async () => {
     const successMessage: ('result' | 'info')[] = []
@@ -189,9 +172,7 @@ export default function CheckInspectionDetailPage() {
   const InspectionPageProviders = ({ children }: ChildrenType) => {
     return (
       <inspectionListContext.Provider value={inspectionList}>
-        <engineerListContext.Provider value={participatedEngineerList}>
-          <checklistItemsContext.Provider value={stableChecklistList}>{children}</checklistItemsContext.Provider>
-        </engineerListContext.Provider>
+        <engineerListContext.Provider value={participatedEngineerList}>{children}</engineerListContext.Provider>
       </inspectionListContext.Provider>
     )
   }
@@ -250,7 +231,7 @@ export default function CheckInspectionDetailPage() {
                     }
                   }
                 }}
-                value={inspectionId}
+                value={machineInspectionId}
                 fullWidth
                 select
                 variant='standard'
@@ -298,8 +279,6 @@ export default function CheckInspectionDetailPage() {
               <PictureTable
                 machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
                 scrollableAreaRef={scrollableAreaRef}
-                checklists={checkiistList}
-                refetchChecklists={getInspectionData}
                 tabHeight={TabListRef.current?.clientHeight ?? 0}
               />
             </TabPanel>

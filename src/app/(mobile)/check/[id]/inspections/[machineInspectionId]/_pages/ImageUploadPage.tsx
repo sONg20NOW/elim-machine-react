@@ -22,9 +22,12 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { toast } from 'react-toastify'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { checklistItemsContext } from '../page'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
+import { useGetChecklistInfo } from '@/@core/hooks/useGetGecklistList'
+import { QUERY_KEYS } from '@/app/_constants/queryKeys'
 
 interface checklistFormType {
   checklistSubItemId: number
@@ -36,7 +39,8 @@ export default function ImageUploadPage() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const isMobile = useContext(isMobileContext)
-  const checklistItems = useContext(checklistItemsContext)
+
+  const queryClient = useQueryClient()
 
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
 
@@ -50,6 +54,8 @@ export default function ImageUploadPage() {
   })
 
   const watchedChecklistSubItemId = checklistForm.watch('checklistSubItemId')
+
+  const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
   useEffect(() => {
     checklistForm.reset({ checklistSubItemId: 0 })
@@ -87,6 +93,12 @@ export default function ImageUploadPage() {
 
       if (result) {
         setFilesToUpload([])
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(
+            machineProjectId!.toString(),
+            machineInspectionId!.toString()
+          )
+        })
       }
     }, 1500)
   }
@@ -152,7 +164,7 @@ export default function ImageUploadPage() {
               <MenuItem value={0} disabled>
                 --- 점검항목을 선택하세요 ---
               </MenuItem>
-              {checklistItems.map(v => (
+              {checklistList?.map(v => (
                 <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
                   {v.machineChecklistItemName}
                 </MenuItem>
@@ -178,13 +190,14 @@ export default function ImageUploadPage() {
                   <MenuItem value={0} disabled>
                     --- 하위항목을 선택하세요 ---
                   </MenuItem>
-                  {checklistItems
-                    .find(v => v.machineChecklistItemId === checklistItemId)
-                    ?.checklistSubItems.map(p => (
-                      <MenuItem key={p.machineChecklistSubItemId} value={p.machineChecklistSubItemId}>
-                        {p.checklistSubItemName}
-                      </MenuItem>
-                    ))}
+                  {checklistList &&
+                    checklistList
+                      .find(v => v.machineChecklistItemId === checklistItemId)
+                      ?.checklistSubItems.map(p => (
+                        <MenuItem key={p.machineChecklistSubItemId} value={p.machineChecklistSubItemId}>
+                          {p.checklistSubItemName}
+                        </MenuItem>
+                      ))}
                 </TextField>
               </div>
             )}

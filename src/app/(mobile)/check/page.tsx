@@ -10,7 +10,7 @@ import Button from '@mui/material/Button'
 
 import axios from 'axios'
 
-import { motion } from 'motion/react'
+import { animate, motion, useMotionValue, useTransform } from 'motion/react'
 
 const MotionCard = motion(Card)
 
@@ -25,7 +25,8 @@ import {
   Pagination,
   styled,
   Switch,
-  Typography
+  Typography,
+  useTheme
 } from '@mui/material'
 
 import type { MachineProjectPageDtoType, successResponseDtoType } from '@/@core/types'
@@ -63,6 +64,17 @@ export default function MachinePage() {
 
   // 페이지 변경 시 스크롤 업을 위한 Ref
   const listRef = useRef<HTMLDivElement>(null)
+
+  // motion관련
+  const count = useMotionValue(0)
+  const rounded = useTransform(() => Math.round(count.get()))
+  const theme = useTheme()
+
+  useEffect(() => {
+    const controls = animate(count, totalElements, { duration: 1 })
+
+    return () => controls.stop()
+  }, [totalElements, count])
 
   // ! 나중에 accessToken 디코딩해서 실제 정보로
   const currentUser = {
@@ -323,7 +335,19 @@ export default function MachinePage() {
               {!isMobile && <ProjectToggle />}
             </>
           }
-          title={`현장 목록(${totalElements})`}
+          title={
+            <div className='flex items-center'>
+              <Typography variant={isMobile ? 'h4' : 'h3'} color='white'>
+                현장목록(
+              </Typography>
+              <motion.pre style={{ ...(isMobile ? theme.typography.h4 : theme.typography.h3), color: 'white' }}>
+                {rounded}
+              </motion.pre>
+              <Typography variant={isMobile ? 'h4' : 'h3'} color='white'>
+                )
+              </Typography>
+            </div>
+          }
           right={
             isMobile ? (
               <ProjectToggle />
