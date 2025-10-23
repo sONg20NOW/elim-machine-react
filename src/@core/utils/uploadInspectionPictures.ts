@@ -3,7 +3,7 @@ import axios from 'axios'
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
-export const uploadPictures = async (
+export const uploadInspectionPictures = async (
   machineProjectId: string,
   inspectionId: string,
   filesToUpload: File[],

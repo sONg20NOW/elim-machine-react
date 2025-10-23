@@ -38,7 +38,7 @@ import type {
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import PictureZoomModal from '../PictureZoomModal'
 import { useSelectedInspectionContext } from '../InspectionListContent'
-import { uploadPictures } from '@/@core/utils/uploadInspectionPictures'
+import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 
 type PictureListModalProps = {
   machineProjectId: string
@@ -203,7 +203,7 @@ const PictureListModal = ({
       return
     }
 
-    const result = await uploadPictures(
+    const result = await uploadInspectionPictures(
       machineProjectId,
       selectedInspection.machineInspectionResponseDto.id.toString(),
       filesToUpload,

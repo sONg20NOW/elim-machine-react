@@ -3,7 +3,7 @@ import axios from 'axios'
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
-export const uploadPictures = async (machineProjectId: string, inspectionId: string, filesToUpload: File[]) => {
+export const uploadProjectPictures = async (machineProjectId: string, inspectionId: string, filesToUpload: File[]) => {
   try {
     // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
     const presignedResponse = await auth.post<{

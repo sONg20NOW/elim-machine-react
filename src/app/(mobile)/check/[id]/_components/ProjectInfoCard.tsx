@@ -11,7 +11,7 @@ import { QUERY_KEYS } from '@/app/_constants/queryKeys'
 import { auth } from '@/lib/auth'
 
 import type { MachineProjectOverviewPicReadResponseDtoType } from '@/@core/types'
-import { uploadPictures } from '@/@core/utils/uploadInspectionPictures'
+import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 
 export default function ProjectInfoCard({
   projectSummaryData,
@@ -46,7 +46,7 @@ export default function ProjectInfoCard({
       // 새 파일의 객체 URL을 생성하여 상태에 저장
       const newImageUrl = URL.createObjectURL(file)
 
-      uploadPictures(machineProjectId, inspectionId)
+      upload(machineProjectId, inspectionId)
     }
   }
 

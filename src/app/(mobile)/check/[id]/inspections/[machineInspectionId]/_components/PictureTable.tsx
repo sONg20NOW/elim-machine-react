@@ -28,7 +28,7 @@ import type {
 } from '@/@core/types'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { uploadPictures } from '@/@core/utils/uploadInspectionPictures'
+import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 
 const PictureTable = memo(
   ({
@@ -237,7 +237,7 @@ const PictureTable = memo(
         const file = event.target.files[0]
 
         if (
-          await uploadPictures(
+          await uploadInspectionPictures(
             machineProjectId.toString(),
             inspectionId.toString(),
             [file],
