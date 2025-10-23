@@ -320,6 +320,17 @@ export default function PicturePage() {
             )}
           </Box>
           <div className='flex flex-col gap-1'>
+            <InputLabel sx={{ px: 2 }}>파일 이름</InputLabel>
+            <TextField
+              size={isMobile ? 'small' : 'medium'}
+              fullWidth
+              {...register('originalFileName')}
+              hiddenLabel
+              multiline
+              slotProps={{ input: { sx: { fontSize: 18 } } }}
+            />
+          </div>
+          <div className='flex flex-col gap-1'>
             <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
             <TextField
               slotProps={{ input: { sx: { fontSize: 18 } } }}
@@ -362,17 +373,7 @@ export default function PicturePage() {
               />
             </div>
           )}
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>파일 이름</InputLabel>
-            <TextField
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('originalFileName')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
-          </div>
+
           <div className='flex flex-col gap-1'>
             <InputLabel sx={{ px: 2 }}>대체타이틀</InputLabel>
             <TextField

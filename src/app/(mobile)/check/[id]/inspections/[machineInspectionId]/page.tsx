@@ -325,16 +325,9 @@ export default function CheckInspectionDetailPage() {
                 if (newValue !== 'camera') setCurrentTab(newValue)
               }}
             >
-              <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />}></Tab>
-              <Tab sx={{ flex: 1 }} value={'info'} label={<i className='tabler-info-circle text-4xl' />}></Tab>
-              <Tab sx={{ flex: 1 }} value={'gallery'} label={<i className='tabler-library-photo text-4xl' />}></Tab>
-
-              <Tab
-                disabled
-                sx={{ flex: 1 }}
-                value={'camera'}
-                label={<i className='tabler-camera-filled text-4xl' />}
-              ></Tab>
+              <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />} />
+              <Tab sx={{ flex: 1 }} value={'info'} label={<i className='tabler-info-circle text-4xl' />} />
+              <Tab sx={{ flex: 1 }} value={'gallery'} label={<i className='tabler-library-photo text-4xl' />} />
             </TabList>
           </Box>
         </TabContext>
