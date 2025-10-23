@@ -20,6 +20,8 @@ import {
 
 import { Controller, useForm } from 'react-hook-form'
 
+import { toast } from 'react-toastify'
+
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { checklistItemsContext } from '../page'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
@@ -47,6 +49,8 @@ export default function ImageUploadPage() {
     }
   })
 
+  const watchedChecklistSubItemId = checklistForm.watch('checklistSubItemId')
+
   useEffect(() => {
     checklistForm.reset({ checklistSubItemId: 0 })
   }, [checklistItemId, checklistForm])
@@ -56,7 +60,18 @@ export default function ImageUploadPage() {
   }
 
   const handleUploadPictures = (data: checklistFormType) => {
-    if (!(machineProjectId && machineInspectionId)) return
+    if (!(machineProjectId && machineInspectionId)) {
+      toast.warning('기계정보와 설비정보가 없습니다.')
+
+      return
+    }
+
+    if (!checklistForm.getValues().checklistSubItemId) {
+      toast.warning('하위항목을 먼저 지정해주세요')
+
+      return
+    }
+
     setUploading(true)
 
     setTimeout(async () => {
@@ -196,14 +211,19 @@ export default function ImageUploadPage() {
             <Button type='button' variant='contained' onClick={() => inputRef.current?.click()}>
               파일 선택
             </Button>
-            <Button type='submit' variant='contained' color='secondary'>
+            <Button
+              type='submit'
+              variant='contained'
+              color='secondary'
+              disabled={filesToUpload.length === 0 || watchedChecklistSubItemId === 0}
+            >
               사진 업로드
             </Button>
           </Box>
         </Box>
       </Box>
-      <Backdrop open={uploading} onClick={e => e.stopPropagation()}>
-        <CircularProgress />
+      <Backdrop sx={{ color: 'white' }} open={uploading} onClick={e => e.stopPropagation()}>
+        <CircularProgress color='inherit' />
       </Backdrop>
     </form>
   )
