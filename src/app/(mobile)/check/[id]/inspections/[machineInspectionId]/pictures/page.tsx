@@ -15,12 +15,12 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import { auth } from '@/lib/auth'
 import type {
-  machineChecklistItemsWithPicCountResponseDtosType,
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicUpdateResponseDtoType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { useGetChecklistInfo } from '@/@core/hooks/useGetGecklistList'
 
 const max_pic = 100
 
@@ -55,8 +55,8 @@ export default function PicturePage() {
 
   const [openAlert, setOpenAlert] = useState(false)
 
-  const [checkiistList, setCheckiistList] = useState<machineChecklistItemsWithPicCountResponseDtosType[]>([])
   const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
+  const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
   const {
     register,
@@ -85,8 +85,8 @@ export default function PicturePage() {
   const watchedSubItemId = watch('machineChecklistSubItemId')
 
   const subItems = useMemo(() => {
-    return checkiistList.find(v => v.machineChecklistItemId === machineChecklistItemId)?.checklistSubItems ?? []
-  }, [checkiistList, machineChecklistItemId])
+    return checklistList?.find(v => v.machineChecklistItemId === machineChecklistItemId)?.checklistSubItems ?? []
+  }, [checklistList, machineChecklistItemId])
 
   useEffect(() => {
     if (!subItems.find(v => v.machineChecklistSubItemId === watchedSubItemId)) {
@@ -112,20 +112,6 @@ export default function PicturePage() {
       setMachineChecklistItemId(selectedPic.machineChecklistItemId ?? 0)
     }
   }, [selectedPic, reset])
-
-  // inspectionId가 바뀔 때마다 점검항목 가져오기
-  const getChecklistList = useCallback(async () => {
-    const response = await auth.get<{
-      data: { machineChecklistItemsWithPicCountResponseDtos: machineChecklistItemsWithPicCountResponseDtosType[] }
-    }>(`/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}`)
-
-    setCheckiistList(response.data.data.machineChecklistItemsWithPicCountResponseDtos)
-    console.log('get checklist items succeed: ', response.data.data.machineChecklistItemsWithPicCountResponseDtos)
-  }, [machineProjectId, machineInspectionId])
-
-  useEffect(() => {
-    getChecklistList()
-  }, [getChecklistList])
 
   // 모든 사진 가져오기
   const getAllPictures = useCallback(async () => {
@@ -339,13 +325,14 @@ export default function PicturePage() {
               fullWidth
               select
             >
-              {checkiistList
-                .filter(p => p.checklistSubItems.length !== 0)
-                .map(v => (
-                  <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                    {v.machineChecklistItemName}
-                  </MenuItem>
-                ))}
+              {checklistList &&
+                checklistList
+                  .filter(p => p.checklistSubItems.length !== 0)
+                  .map(v => (
+                    <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
+                      {v.machineChecklistItemName}
+                    </MenuItem>
+                  ))}
             </TextField>
           </div>
           {machineChecklistItemId && !!subItems.length && (
