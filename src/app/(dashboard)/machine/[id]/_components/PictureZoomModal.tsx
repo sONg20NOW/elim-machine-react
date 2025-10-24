@@ -149,7 +149,7 @@ export default function PictureZoomModal({
     >
       <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <div className='flex justify-between'>
-          <div className='flex gap-1'>
+          <div className='flex gap-4 items-center'>
             {!isEditingPicName ? (
               <Typography sx={{ fontWeight: 700, fontSize: isMobile ? 20 : 24 }}>
                 {editData.originalFileName}
@@ -192,9 +192,6 @@ export default function PictureZoomModal({
             )}
           </div>
           <div className='flex gap-4 items-center'>
-            <IconButton type='button' sx={{ color: 'primary.main' }} onClick={() => cameraInputRef.current?.click()}>
-              <i className='tabler-camera-filled text-4xl' />
-            </IconButton>
             <IconButton type='button' sx={{ height: 'fit-content' }} size='small' onClick={() => setOpen(false)}>
               <i className='tabler-x text-error' />
             </IconButton>
@@ -207,16 +204,32 @@ export default function PictureZoomModal({
             'flex-col': isMobile
           })}
         >
-          <img
-            src={editData.presignedUrl}
-            alt={editData.originalFileName}
-            style={{
-              width: '100%',
-              maxHeight: '60dvh',
-              objectFit: 'cover',
-              maxWidth: isMobile ? '' : 1000
-            }}
-          />
+          <div className='grid place-items-center relative'>
+            <img
+              src={editData.presignedUrl}
+              alt={editData.originalFileName}
+              style={{
+                width: '100%',
+                maxHeight: '60dvh',
+                objectFit: 'cover',
+                maxWidth: isMobile ? '' : 1000
+              }}
+            />
+            <IconButton
+              type='button'
+              sx={{
+                color: 'primary.light',
+                position: 'absolute',
+                top: 6,
+                right: 6,
+                ':hover': { textShadow: 1 },
+                backgroundColor: '#1111115a'
+              }}
+              onClick={() => cameraInputRef.current?.click()}
+            >
+              <i className='tabler-camera text-4xl' />
+            </IconButton>
+          </div>
           <Box>
             <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
               <Grid2 size={2}>
