@@ -218,16 +218,16 @@ export default function PictureZoomModal({
             <IconButton
               type='button'
               sx={{
-                color: 'primary.light',
+                color: 'white',
+                boxShadow: 10,
                 position: 'absolute',
                 top: 6,
                 right: 6,
-                ':hover': { textShadow: 1 },
-                backgroundColor: '#1111115a'
+                backgroundColor: 'primary.dark'
               }}
               onClick={() => cameraInputRef.current?.click()}
             >
-              <i className='tabler-camera text-4xl' />
+              <i className='tabler-photo text-4xl' />
             </IconButton>
           </div>
           <Box>
