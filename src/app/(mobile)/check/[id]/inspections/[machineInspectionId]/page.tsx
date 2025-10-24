@@ -19,7 +19,6 @@ import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { auth } from '@/lib/auth'
 import type {
   machineProjectEngineerDetailDtoType,
-  MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
   successResponseDtoType,
   ChildrenType
@@ -34,6 +33,7 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 import PictureTable from './_components/PictureTable'
 import ImageUploadPage from './_pages/ImageUploadPage'
+import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
 
 type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
 
@@ -67,7 +67,6 @@ export default function CheckInspectionDetailPage() {
 
   const [openAlert, setOpenAlert] = useState(false)
 
-  const [inspection, setInspection] = useState<MachineInspectionDetailResponseDtoType>()
   const [category, setCategory] = useState<string>('전체')
 
   const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
@@ -77,10 +76,6 @@ export default function CheckInspectionDetailPage() {
 
   // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
   if (!localStorage.getItem('projectSummary')) router.back()
-
-  const checklistItem = inspection?.machineChecklistItemsWithPicCountResponseDtos.find(
-    v => v.machineChecklistItemId === Number(category)
-  )
 
   // inspection 리스트 가져오기 (전체)
   const getAllInspections = useCallback(async () => {
@@ -116,22 +111,9 @@ export default function CheckInspectionDetailPage() {
   }, [getAllInspections, getParticipatedEngineerList])
 
   // 현재 선택된 inspection 데이터 가져오기
-  const getInspectionData = useCallback(async () => {
-    try {
-      const response = await auth.get<{ data: MachineInspectionDetailResponseDtoType }>(
-        `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}`
-      )
+  const { data: checklist } = useGetChecklistInfo(`${machineProjectId}`, `${machineInspectionId}`)
 
-      setInspection(response.data.data)
-      console.log('current inspection: ', response.data.data)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [machineProjectId, machineInspectionId])
-
-  useEffect(() => {
-    getInspectionData()
-  }, [getInspectionData])
+  const checklistItem = checklist?.find(v => v.machineChecklistItemId === Number(category))
 
   const handleDeleteInspection = useCallback(async () => {
     try {

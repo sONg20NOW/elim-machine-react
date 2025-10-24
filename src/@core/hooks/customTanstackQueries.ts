@@ -23,7 +23,7 @@ const fetchDetailInspection: QueryFunction<MachineInspectionDetailResponseDtoTyp
     }>(`/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}`)
     .then(v => v.data.data)
 
-  console.log(`queryFn ${keyInfo}:`, response)
+  console.log(`!!! queryFn ${keyInfo}:`, response)
 
   return response
 }
@@ -76,7 +76,7 @@ const fetchChecklistResult: QueryFunction<
     )
     .then(v => v.data.data)
 
-  console.log(`queryFn ${keyInfo}:`, response)
+  console.log(`!!! queryFn ${keyInfo}:`, response)
 
   return response
 }
