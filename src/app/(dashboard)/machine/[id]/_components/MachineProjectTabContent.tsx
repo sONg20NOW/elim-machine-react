@@ -13,6 +13,7 @@ import type { MachineProjectResponseDtoType } from '@/@core/types'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import { IsEditingContext } from '../page'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
+import EnergyReport from './report/EnergyReport'
 
 const BasicTabContent = ({
   projectData,
@@ -111,16 +112,7 @@ const BasicTabContent = ({
             성능점검시 검토사항
           </Button>
 
-          <Button
-            variant='contained'
-            color='warning'
-            disabled={true}
-            onClick={() => {
-              console.log('?')
-            }}
-          >
-            에너지 사용량
-          </Button>
+          <EnergyReport />
 
           <Button
             variant='contained'

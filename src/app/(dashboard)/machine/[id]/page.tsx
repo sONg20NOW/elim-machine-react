@@ -29,7 +29,7 @@ import type {
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import CustomTextField from '@/@core/components/mui/TextField'
 import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
-import BasicTabContent from './_components/BasicTabContent'
+import BasicTabContent from './_components/MachineProjectTabContent'
 import ScheduleAndEngineerTabContent from './_components/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/NoteTabContent'
 import InspectionListContent from './_components/InspectionListContent'

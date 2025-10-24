@@ -8,6 +8,10 @@
   background: #f3f4f6;
 }
 
+.container tfoot {
+  background: #f3f4f6;
+}
+
 .container th {
   border: 1px solid #d1d5db;
   background: #f3f4f6;
@@ -18,4 +22,8 @@
 .container td {
   border: 1px solid #d1d5db;
   padding: 8px;
+}
+
+.centered td {
+  text-align: center;
 }

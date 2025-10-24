@@ -551,6 +551,12 @@ export interface MachineCategoryResponseDtoType {
   name: string
 }
 
+// ----------- 보고서 관련 -----------
+export interface MachineEnergyTypeResponseDtoType {
+  machineEnergyTypeId: number
+  name: string
+}
+
 // ----------- presignedURL 관련 -----------
 
 // POST /api/machine-projects/{machineProjectId}/machine-pics 프로젝트 내 전체 사진 조회 (Presigned URL 포함)

@@ -1,5 +1,3 @@
-// src/hooks/useGetChecklistInfo.ts (예시)
-
 import { useCallback } from 'react'
 
 import type { QueryFunction } from '@tanstack/react-query'
@@ -9,6 +7,7 @@ import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
   MachineCategoryResponseDtoType,
+  MachineEnergyTypeResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
   MachineProjectOverviewPicReadResponseDtoType
@@ -125,18 +124,42 @@ export const useGetOverviewPics = (machineProjectId: string) => {
 }
 
 // GET /api/machine-categories
-const fetchCategories: QueryFunction<MachineCategoryResponseDtoType[], string[]> = async () => {
-  const response = await auth
-    .get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(`/api/machine-categories`)
-    .then(v => v.data.data.machineCategoryResponseDtos)
-
-  return response
-}
-
 export const useGetCategories = () => {
+  const fetchCategories: QueryFunction<MachineCategoryResponseDtoType[], string[]> = useCallback(async data => {
+    const response = await auth
+      .get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(`/api/machine-categories`)
+      .then(v => v.data.data.machineCategoryResponseDtos)
+
+    const [keyType] = data.queryKey
+
+    console.log(`!!! queryFn ${keyType}:`, response)
+
+    return response
+  }, [])
+
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_CATEGORY,
     queryFn: fetchCategories,
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-energy-types
+export const useGetEnergyTypes = () => {
+  const fetchEnergyTypes: QueryFunction<MachineEnergyTypeResponseDtoType[], string[]> = useCallback(async data => {
+    const response = await auth
+      .get<{ data: { machineEnergyTypes: MachineEnergyTypeResponseDtoType[] } }>(`/api/machine-energy-types`)
+      .then(v => v.data.data.machineEnergyTypes)
+
+    const [keyType] = data.queryKey
+
+    console.log(`!!! queryFn ${keyType}:`, response)
+
+    return response
+  }, [])
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_ENERGY_TYPE,
+    queryFn: fetchEnergyTypes
   })
 }

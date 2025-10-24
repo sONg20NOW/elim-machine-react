@@ -1,7 +1,6 @@
-import axios from 'axios'
-
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import getS3Key from './getS3Key'
 
 export const uploadProjectPictures = async (
   machineProjectId: string,
@@ -9,50 +8,21 @@ export const uploadProjectPictures = async (
   machineProjectPicType: 'OVERVIEW' | 'ETC' | 'LOCATION_MAP'
 ) => {
   try {
-    // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
-    const presignedResponse = await auth.post<{
-      data: { presignedUrlResponseDtos: { s3Key: string; presignedUrl: string }[] }
-    }>(`/api/presigned-urls/machine-projects/${machineProjectId}/machine-project-pics/upload`, {
-      uploadType: 'PROJECT_IMAGE',
-      originalFileNames: filesToUpload.map(file => file.name),
-      machineProjectPicType: machineProjectPicType
-    })
+    const S3uploadResults = await getS3Key(
+      machineProjectId,
+      filesToUpload,
+      undefined,
+      undefined,
+      undefined,
+      machineProjectPicType
+    )
 
-    const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
+    if (!S3uploadResults) {
+      return
+    }
 
-    // 2. 앞서 가져온 presignedURL로 각 파일을 S3에 직접 업로드 (AWS S3로 POST)
-    const uploadPromises = filesToUpload.map(async (file, index) => {
-      const presignedData = presignedUrls[index]
-
-      if (!presignedData) {
-        throw new Error(`파일 ${file.name}에 대한 프리사인드 URL을 받지 못했습니다.`)
-      }
-
-      console.log(`파일 ${file.name} 업로드 시작...`)
-
-      // S3에 직접 업로드 (axios 사용)
-      const uploadResponse = await axios.put(presignedData.presignedUrl, file, {
-        headers: {
-          'Content-Type': file.type
-        }
-      })
-
-      console.log(`파일 ${file.name} 업로드 완료! ${uploadResponse}`)
-
-      return {
-        fileName: file.name,
-        s3Key: presignedData.s3Key,
-        uploadSuccess: true
-      }
-    })
-
-    // 모든 파일 업로드 완료까지 대기
-    const uploadResults = await Promise.all(uploadPromises)
-
-    console.log('S3 bucket에 업로드 완료:', uploadResults)
-
-    // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
-    const machinePicCreateRequestDtos = uploadResults.map(result => ({
+    // DB에 사진 정보 기록 (백엔드 서버로 POST)
+    const machinePicCreateRequestDtos = S3uploadResults.map(result => ({
       machineProjectPicType: machineProjectPicType,
       originalFileName: result.fileName,
       s3Key: result.s3Key

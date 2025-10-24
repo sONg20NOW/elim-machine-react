@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import {
   Box,
@@ -9,6 +9,7 @@ import {
   DialogTitle,
   Grid2,
   IconButton,
+  InputLabel,
   MenuItem,
   TextField,
   Typography,
@@ -29,6 +30,7 @@ import type {
   successResponseDtoType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import getS3Key from '@/@core/utils/getS3Key'
 
 interface PictureZoomModalProps {
   open: boolean
@@ -55,12 +57,8 @@ export default function PictureZoomModal({
   )
 
   const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
-
-  useEffect(() => {
-    if (open) setEditData(JSON.parse(JSON.stringify(selectedPic)))
-  }, [open, selectedPic])
-
   const [isEditingPicName, setIsEditingPicName] = useState(false)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   // 반응형을 위한 미디어쿼리
   const isMobile = useMediaQuery('(max-width:600px)')
@@ -81,6 +79,32 @@ export default function PictureZoomModal({
   useEffect(() => {
     getInspectionList()
   }, [getInspectionList])
+
+  useEffect(() => {
+    if (open) setEditData(JSON.parse(JSON.stringify(selectedPic)))
+  }, [open, selectedPic])
+
+  const onChangeImage = async (file: File) => {
+    if (!editData.machineChecklistItemId || !editData.machineChecklistSubItemId) return
+
+    const S3KeyResult = await getS3Key(
+      machineProjectId,
+      [file],
+      editData.machineInspectionId.toString(),
+      editData.machineChecklistItemId,
+      editData.machineChecklistSubItemId,
+      undefined
+    )
+
+    if (!S3KeyResult) return
+
+    setEditData(prev => ({
+      ...prev,
+      s3Key: S3KeyResult[0].s3Key,
+      originalFileName: S3KeyResult[0].fileName,
+      presignedUrl: URL.createObjectURL(file)
+    }))
+  }
 
   const handleSave = useCallback(async () => {
     if (!editData.machineChecklistItemId) {
@@ -124,45 +148,57 @@ export default function PictureZoomModal({
       }}
     >
       <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <div className='flex gap-1'>
-          {!isEditingPicName ? (
-            <Typography sx={{ fontWeight: 700, fontSize: isMobile ? 20 : 24 }}>{editData.originalFileName}</Typography>
-          ) : (
-            <TextField
-              variant='standard'
-              fullWidth
-              size='small'
-              slotProps={{
-                htmlInput: {
-                  sx: {
-                    fontWeight: 700,
-                    fontSize: isMobile ? 20 : 24
+        <div className='flex justify-between'>
+          <div className='flex gap-1'>
+            {!isEditingPicName ? (
+              <Typography sx={{ fontWeight: 700, fontSize: isMobile ? 20 : 24 }}>
+                {editData.originalFileName}
+              </Typography>
+            ) : (
+              <TextField
+                variant='standard'
+                fullWidth
+                size='small'
+                slotProps={{
+                  htmlInput: {
+                    sx: {
+                      fontWeight: 700,
+                      fontSize: isMobile ? 20 : 24
+                    }
                   }
-                }
-              }}
-              id='new-picture-name-input'
-              value={editData.originalFileName}
-              onChange={e => setEditData(prev => ({ ...prev, originalFileName: e.target.value }))}
-            />
-          )}
-          <IconButton
-            onClick={() => {
-              setIsEditingPicName(prev => !prev)
-            }}
-          >
-            {!isEditingPicName ? <i className='tabler-pencil' /> : <i className='tabler-check' />}
-          </IconButton>
-          {isEditingPicName && (
+                }}
+                id='new-picture-name-input'
+                value={editData.originalFileName}
+                onChange={e => setEditData(prev => ({ ...prev, originalFileName: e.target.value }))}
+              />
+            )}
             <IconButton
-              color='error'
               onClick={() => {
-                setEditData(prev => ({ ...prev, originalFileName: selectedPic.originalFileName }))
-                setIsEditingPicName(false)
+                setIsEditingPicName(prev => !prev)
               }}
             >
-              <i className='tabler-x' />
+              {!isEditingPicName ? <i className='tabler-pencil' /> : <i className='tabler-check' />}
             </IconButton>
-          )}
+            {isEditingPicName && (
+              <IconButton
+                color='error'
+                onClick={() => {
+                  setEditData(prev => ({ ...prev, originalFileName: selectedPic.originalFileName }))
+                  setIsEditingPicName(false)
+                }}
+              >
+                <i className='tabler-x' />
+              </IconButton>
+            )}
+          </div>
+          <div className='flex gap-4 items-center'>
+            <IconButton type='button' sx={{ color: 'primary.main' }} onClick={() => cameraInputRef.current?.click()}>
+              <i className='tabler-camera-filled text-4xl' />
+            </IconButton>
+            <IconButton type='button' sx={{ height: 'fit-content' }} size='small' onClick={() => setOpen(false)}>
+              <i className='tabler-x text-error' />
+            </IconButton>
+          </div>
         </div>
       </DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -176,7 +212,7 @@ export default function PictureZoomModal({
             alt={editData.originalFileName}
             style={{
               width: '100%',
-              height: '50%',
+              maxHeight: '60dvh',
               objectFit: 'cover',
               maxWidth: isMobile ? '' : 1000
             }}
@@ -184,6 +220,7 @@ export default function PictureZoomModal({
           <Box>
             <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
               <Grid2 size={2}>
+                <InputLabel>설비명</InputLabel>
                 <TextField
                   select
                   value={editData.machineInspectionId ?? ''}
@@ -195,7 +232,7 @@ export default function PictureZoomModal({
                       machineChecklistItemId: null
                     }))
                   }
-                  label='설비명'
+                  hiddenLabel
                   size='small'
                   fullWidth
                 >
@@ -207,6 +244,8 @@ export default function PictureZoomModal({
                 </TextField>
               </Grid2>
               <Grid2 size={2}>
+                <InputLabel>점검항목</InputLabel>
+
                 <TextField
                   select
                   value={editData.machineChecklistItemId ?? ''}
@@ -217,7 +256,7 @@ export default function PictureZoomModal({
                       machineChecklistItemId: Number(e.target.value)
                     }))
                   }
-                  label='점검항목'
+                  hiddenLabel
                   size='small'
                   fullWidth
                 >
@@ -229,11 +268,13 @@ export default function PictureZoomModal({
                 </TextField>
               </Grid2>
               <Grid2 size={2}>
+                <InputLabel>하위항목</InputLabel>
+
                 <TextField
                   select
                   value={editData.machineChecklistSubItemId ?? ''}
                   onChange={e => setEditData(prev => ({ ...prev, machineChecklistSubItemId: Number(e.target.value) }))}
-                  label='하위항목'
+                  hiddenLabel
                   size='small'
                   fullWidth
                 >
@@ -247,8 +288,10 @@ export default function PictureZoomModal({
                 </TextField>
               </Grid2>
               <Grid2 size={2}>
+                <InputLabel>대체타이틀</InputLabel>
+
                 <TextField
-                  label='대체타이틀'
+                  hiddenLabel
                   size='small'
                   fullWidth
                   value={editData.alternativeSubTitle ?? ''}
@@ -256,31 +299,50 @@ export default function PictureZoomModal({
                 />
               </Grid2>
               <Grid2 size={2}>
+                <InputLabel>측정값</InputLabel>
+
                 <TextField
-                  label='측정값'
+                  hiddenLabel
                   size='small'
                   fullWidth
                   value={editData.measuredValue ?? ''}
                   onChange={e => setEditData(prev => ({ ...prev, measuredValue: e.target.value }))}
                 />
               </Grid2>
+              <Grid2 size={2}>
+                <InputLabel>비고</InputLabel>
+
+                <TextField
+                  minRows={3}
+                  multiline
+                  fullWidth
+                  hiddenLabel
+                  value={editData.remark ?? ''}
+                  onChange={e => setEditData(prev => ({ ...prev, remark: e.target.value }))}
+                />
+              </Grid2>
             </Grid2>
           </Box>
         </div>
-        <TextField
-          minRows={3}
-          multiline
-          fullWidth
-          label='비고'
-          value={editData.remark ?? ''}
-          onChange={e => setEditData(prev => ({ ...prev, remark: e.target.value }))}
-        />
       </DialogContent>
       <DialogActions>
         <Button variant='contained' onClick={() => handleSave()}>
           저장
         </Button>
       </DialogActions>
+      <input
+        type='file'
+        accept='image/*'
+        className='hidden'
+        ref={cameraInputRef}
+        onChange={e => {
+          if (!e.target.files) return
+
+          const files = Array.from(e.target.files)
+
+          onChangeImage(files[0])
+        }}
+      />
     </Dialog>
   )
 }

@@ -14,5 +14,6 @@ export const QUERY_KEYS = {
       machineChecklistItemResultId: string
     ) => ['checklist result', machineProjectId, machineInspectionId, machineChecklistItemResultId]
   },
-  MACHINE_CATEGORY: ['categories']
+  MACHINE_CATEGORY: ['categories'],
+  MACHINE_ENERGY_TYPE: ['machine energy type']
 }
