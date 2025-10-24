@@ -1,16 +1,17 @@
 'use client'
 
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
 import { Box, Card, IconButton, Pagination, Typography } from '@mui/material'
 
+import { motion } from 'motion/react'
+
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { handleApiError } from '@/utils/errorHandler'
 import type {
   MachineInspectionPageResponseDtoType,
-  MachineCategoryResponseDtoType,
   machineProjectEngineerDetailDtoType,
   successResponseDtoType
 } from '@/@core/types'
@@ -19,6 +20,8 @@ import type { projectSummaryType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
+
+const MotionCard = motion.create(Card)
 
 export interface inspectionSummaryType {
   machineProjectName: string
@@ -53,8 +56,6 @@ export default function InspectionsPage() {
   const listRef = useRef<HTMLDivElement>(null)
 
   // 설비 추가 모달
-  const [open, setOpen] = useState(false)
-  const [categoryList, setCategoryList] = useState<MachineCategoryResponseDtoType[]>()
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>()
 
   // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
@@ -62,19 +63,6 @@ export default function InspectionsPage() {
 
   // ! 로컬 스토리지에서 데이터 가져오기
   const projectSummaryData: projectSummaryType = JSON.parse(localStorage.getItem('projectSummary')!)
-
-  // 카테고리 목록 가져오기
-  const getCategoryList = useCallback(async () => {
-    try {
-      const response = await auth.get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(
-        `/api/machine-categories`
-      )
-
-      setCategoryList(response.data.data.machineCategoryResponseDtos)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [])
 
   // 참여기술진 목록 가져오기
   const getParticipatedEngineerList = useCallback(async () => {
@@ -92,14 +80,10 @@ export default function InspectionsPage() {
   }, [machineProjectId])
 
   useEffect(() => {
-    if (!categoryList && open) {
-      getCategoryList()
-    }
-
-    if (!participatedEngineerList && open) {
+    if (!participatedEngineerList) {
       getParticipatedEngineerList()
     }
-  }, [open, getCategoryList, categoryList, getParticipatedEngineerList, participatedEngineerList])
+  }, [getParticipatedEngineerList, participatedEngineerList])
 
   // 데이터 불러오기
   const getFilteredInspectionList = useCallback(async () => {
@@ -149,49 +133,54 @@ export default function InspectionsPage() {
   }
 
   // 설비 카드 컴포넌트
-  function InspectionInfoCard({ inspection }: { inspection: MachineInspectionPageResponseDtoType }) {
-    const engineerCnt = inspection.engineerNames.length
+  const InspectionInfoCard = memo(
+    ({ inspection, idx }: { inspection: MachineInspectionPageResponseDtoType; idx: number }) => {
+      const engineerCnt = inspection.engineerNames.length
 
-    return (
-      <Card
-        sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
-        elevation={10}
-        onClick={() => handleInspectionClick(inspection)}
-      >
-        <div className='flex-1'>
-          <i className='tabler-photo-bolt w-full h-full' />
-        </div>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            px: !isMobile ? 5 : 2,
-            py: !isMobile ? 10 : 5,
-            gap: !isMobile ? 3 : 1,
-            flex: !isMobile ? 3 : 2
-          }}
+      return (
+        <MotionCard
+          transition={{ delay: idx / 20 }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
+          elevation={10}
+          onClick={() => handleInspectionClick(inspection)}
         >
-          <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
-            {inspection.machineInspectionName ?? '이름없는 설비'}
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
-            <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate ?? '점검날짜'}</Typography>
-            <Typography sx={{ fontWeight: 500 }}>{inspection.location ?? '설치위치'}</Typography>
-            <Typography>
-              {engineerCnt > 2
-                ? inspection.engineerNames
-                    .slice(0, 2)
-                    .join(', ')
-                    .concat(`외 ${engineerCnt - 2}명`)
-                : engineerCnt === 0
-                  ? '배정된 점검진 없음'
-                  : inspection.engineerNames.join(', ')}
+          <div className='flex-1'>
+            <i className='tabler-photo-bolt w-full h-full' />
+          </div>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              px: !isMobile ? 5 : 2,
+              py: !isMobile ? 10 : 5,
+              gap: !isMobile ? 3 : 1,
+              flex: !isMobile ? 3 : 2
+            }}
+          >
+            <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
+              {inspection.machineInspectionName ?? '이름없는 설비'}
             </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
+              <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate ?? '점검날짜'}</Typography>
+              <Typography sx={{ fontWeight: 500 }}>{inspection.location ?? '설치위치'}</Typography>
+              <Typography>
+                {engineerCnt > 2
+                  ? inspection.engineerNames
+                      .slice(0, 2)
+                      .join(', ')
+                      .concat(`외 ${engineerCnt - 2}명`)
+                  : engineerCnt === 0
+                    ? '배정된 점검진 없음'
+                    : inspection.engineerNames.join(', ')}
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      </Card>
-    )
-  }
+        </MotionCard>
+      )
+    }
+  )
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
@@ -203,23 +192,30 @@ export default function InspectionsPage() {
         }
         title={`설비목록(${totalElements})`}
         right={
-          <IconButton
-            type='button'
-            sx={{ boxShadow: 3, backgroundColor: 'white' }}
-            disabled={disabled}
-            onClick={() => setOpen(true)}
-          >
-            <i className='tabler-plus' />
-          </IconButton>
+          participatedEngineerList && (
+            <AddInspectionModal
+              disabled={disabled}
+              getFilteredInspectionList={getFilteredInspectionList}
+              machineProjectId={machineProjectId}
+              participatedEngineerList={participatedEngineerList}
+            />
+          )
         }
       />
 
       <ProjectInfoCard machineProjectId={machineProjectId} projectSummaryData={projectSummaryData} />
       {/* 스크롤이 생기는 메인 영역 */}
       <Box ref={listRef} sx={{ flex: 1, overflowY: 'auto', p: 5 }}>
-        {inspections.map(inspection => (
-          <InspectionInfoCard key={inspection.machineInspectionId} inspection={inspection} />
-        ))}
+        {inspections.length > 0 ? (
+          inspections.map((inspection, idx) => <InspectionInfoCard key={idx} idx={idx} inspection={inspection} />)
+        ) : (
+          <Box sx={{ display: 'grid', placeItems: 'center', height: '100%' }}>
+            <div className='flex flex-col gap-3 items-center'>
+              <Typography variant='h5'>해당 프로젝트에는 설비가 존재하지 않습니다.</Typography>
+              <Typography>우측 상단 + 버튼으로 추가해주세요.</Typography>
+            </div>
+          </Box>
+        )}
       </Box>
       <Pagination
         sx={{ alignSelf: 'center', py: 1 }}
@@ -229,16 +225,6 @@ export default function InspectionsPage() {
         showFirstButton
         showLastButton
       />
-      {open && categoryList && participatedEngineerList && (
-        <AddInspectionModal
-          open={open}
-          setOpen={setOpen}
-          machineProjectId={machineProjectId}
-          getFilteredInspectionList={getFilteredInspectionList}
-          categoryList={categoryList}
-          participatedEngineerList={participatedEngineerList}
-        />
-      )}
     </Box>
   )
 }

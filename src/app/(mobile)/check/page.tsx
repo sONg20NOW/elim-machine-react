@@ -12,7 +12,7 @@ import axios from 'axios'
 
 import { animate, motion, useMotionValue, useTransform } from 'motion/react'
 
-const MotionCard = motion(Card)
+const MotionCard = motion.create(Card)
 
 // Component Imports
 import {
@@ -161,11 +161,14 @@ export default function MachinePage() {
   }
 
   // 기계설비현장 카드
-  function MachineProjectCard({ machineProject }: { machineProject: MachineProjectPageDtoType }) {
+  function MachineProjectCard({ machineProject, idx }: { machineProject: MachineProjectPageDtoType; idx: number }) {
     const engineerCnt = machineProject.engineerNames.length
 
     return (
-      <Card
+      <MotionCard
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: idx / 20 }}
         sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
         elevation={10}
         onClick={() => handleMachineProjectClick(machineProject)}
@@ -204,7 +207,7 @@ export default function MachinePage() {
             </Typography>
           </Box>
         </Box>
-      </Card>
+      </MotionCard>
     )
   }
 
@@ -372,8 +375,8 @@ export default function MachinePage() {
             p: 5
           }}
         >
-          {data.map(machineProject => (
-            <MachineProjectCard key={machineProject.machineProjectId} machineProject={machineProject} />
+          {data.map((machineProject, idx) => (
+            <MachineProjectCard key={machineProject.machineProjectId} idx={idx} machineProject={machineProject} />
           ))}
         </Box>
 

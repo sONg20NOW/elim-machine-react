@@ -2,16 +2,12 @@ import { useRef } from 'react'
 
 import { Box, IconButton, Typography } from '@mui/material'
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-
 import { toast } from 'react-toastify'
 
 import type { projectSummaryType } from '../page'
-import { QUERY_KEYS } from '@/app/_constants/queryKeys'
-import { auth } from '@/lib/auth'
 
-import type { MachineProjectOverviewPicReadResponseDtoType } from '@/@core/types'
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
+import { useGetOverviewPics } from '@/@core/hooks/customTanstackQueries'
 
 export default function ProjectInfoCard({
   projectSummaryData,
@@ -22,21 +18,10 @@ export default function ProjectInfoCard({
   machineProjectId: string
   canChange?: boolean
 }) {
-  const queryClient = useQueryClient()
-
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   // 대표사진 URL 가져오기
-  const { data: OverViewPic } = useQuery({
-    queryKey: QUERY_KEYS.MACHINE_PROJECT_PIC.GET_OVERVIEW(machineProjectId),
-    queryFn: async () =>
-      await auth.get<{ data: { machineProjectPics: MachineProjectOverviewPicReadResponseDtoType[] } }>(
-        `/api/machine-projects/${machineProjectId}/machine-project-pics/overview?machineProjectPicType=OVERVIEW`
-      ),
-    select: data => data.data.data.machineProjectPics,
-    placeholderData: prev => prev,
-    staleTime: 10 * 1000
-  })
+  const { data: OverViewPic, refetch } = useGetOverviewPics(`${machineProjectId}`)
 
   const handleCameraClick = () => {
     cameraInputRef.current?.click()
@@ -52,7 +37,7 @@ export default function ProjectInfoCard({
     }
 
     if (await uploadProjectPictures(machineProjectId, [file], 'OVERVIEW')) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MACHINE_PROJECT_PIC.GET_OVERVIEW(machineProjectId) })
+      refetch()
     }
   }
 
