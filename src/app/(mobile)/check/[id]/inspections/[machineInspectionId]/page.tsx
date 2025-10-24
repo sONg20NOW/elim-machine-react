@@ -26,13 +26,13 @@ import type {
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
-import ChecklistForm from './_pages/ChecklistForm'
-import InspectionForm from './_pages/InspectionForm'
+import ChecklistForm from './_components/ChecklistForm'
+import InspectionForm from './_components/InspectionForm'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 import PictureTable from './_components/PictureTable'
-import ImageUploadPage from './_pages/ImageUploadPage'
+import ImageUploadPage from './_components/ImageUploadPage'
 import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
 
 type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
