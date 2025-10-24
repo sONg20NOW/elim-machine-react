@@ -19,9 +19,12 @@ import {
 import type { NumericFormatProps } from 'react-number-format'
 import { NumericFormat } from 'react-number-format'
 
+import { useForm } from 'react-hook-form'
+
 import styles from '@/app/_style/Table.module.css'
 
 import { useGetEnergyTypes } from '@/@core/hooks/customTanstackQueries'
+import AddTargetModal from './AddTargetModal'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -62,9 +65,12 @@ export default function EnergyReport() {
   const [value, setValue] = useState(0)
   const targets = [{ targetId: 1 }]
 
-  // const
-
   const { data: energyTypes } = useGetEnergyTypes()
+
+  const form2022 = useForm<energyFormType>()
+  const form2023 = useForm<energyFormType>()
+  const form2024 = useForm<energyFormType>()
+  const form2025 = useForm<energyFormType>()
 
   useEffect(() => {
     if (energyTypes) setValue(energyTypes[0].machineEnergyTypeId)
@@ -110,9 +116,7 @@ export default function EnergyReport() {
               </AppBar>
               <div className='flex gap-6 ps-2 items-center'>
                 <Typography variant='h4'>{currentEnergyType.name} 사용량</Typography>
-                <Button variant='contained' color='warning' endIcon={<i className='tabler-plus' />}>
-                  장소 추가
-                </Button>
+                <AddTargetModal />
               </div>
               <table style={{ tableLayout: 'fixed' }}>
                 {/* year, target 헤더 */}
@@ -127,6 +131,7 @@ export default function EnergyReport() {
                       </th>
                     ))}
                   </tr>
+                  {/* target 이름칸 */}
                   <tr>
                     {defaultYears.map(year =>
                       targets.map(target => (
@@ -138,6 +143,7 @@ export default function EnergyReport() {
                   </tr>
                 </thead>
                 <tbody>
+                  {/* 사용량 */}
                   {new Array(12)
                     .fill(1)
                     .map((v, idx) => idx + 1)
@@ -176,7 +182,13 @@ export default function EnergyReport() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} type='button'>
+          <Button color='success' variant='contained' type='button'>
+            저장
+          </Button>
+          <Button color='info' variant='contained' type='button'>
+            보고서 다운로드
+          </Button>
+          <Button color='secondary' variant='contained' onClick={() => setOpen(false)} type='button'>
             취소
           </Button>
         </DialogActions>
