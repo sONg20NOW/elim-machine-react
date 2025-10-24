@@ -44,7 +44,7 @@ export const engineerListContext = createContext<machineProjectEngineerDetailDto
 
 export interface FormComponentHandle {
   submit: () => Promise<boolean>
-  isDirty: () => boolean
+  isDirty: boolean
 }
 
 export default function CheckInspectionDetailPage() {
@@ -65,6 +65,7 @@ export default function CheckInspectionDetailPage() {
 
   const [currentTab, setCurrentTab] = useState<currentTabType>('pictures')
 
+  // 설비 삭제 경고 창
   const [openAlert, setOpenAlert] = useState(false)
 
   const [category, setCategory] = useState<string>('전체')
@@ -134,11 +135,11 @@ export default function CheckInspectionDetailPage() {
   const globalSubmit = async () => {
     const successMessage: ('result' | 'info')[] = []
 
-    if (form1Ref.current?.isDirty() && (await form1Ref.current?.submit())) {
+    if (form1Ref.current?.isDirty && (await form1Ref.current?.submit())) {
       successMessage.push('result')
     }
 
-    if (form2Ref.current?.isDirty() && (await form2Ref.current?.submit())) {
+    if (form2Ref.current?.isDirty && (await form2Ref.current?.submit())) {
       successMessage.push('info')
     }
 
@@ -283,7 +284,9 @@ export default function CheckInspectionDetailPage() {
               sx={{ display: 'flex', px: isMobile ? '' : 20 }}
               centered
               onChange={(event: React.SyntheticEvent, newValue: currentTabType) => {
-                if (newValue !== 'camera') setCurrentTab(newValue)
+                if (form1Ref.current?.isDirty || form2Ref.current?.isDirty) {
+                  toast.warning('먼저 변경사항을 저장해주세요', { autoClose: 1500 })
+                } else setCurrentTab(newValue)
               }}
             >
               <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />} />

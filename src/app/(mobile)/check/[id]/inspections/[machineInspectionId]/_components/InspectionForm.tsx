@@ -86,9 +86,7 @@ const InspectionForm = memo(
           return false
         }
       },
-      isDirty: () => {
-        return isDirty
-      }
+      isDirty: isDirty
     }))
 
     useEffect(() => {
