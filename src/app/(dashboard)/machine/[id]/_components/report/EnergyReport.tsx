@@ -62,7 +62,7 @@ export default function EnergyReport() {
   const [value, setValue] = useState(0)
   const targets = [{ targetId: 1 }]
 
-    const 
+  // const
 
   const { data: energyTypes } = useGetEnergyTypes()
 
@@ -71,7 +71,6 @@ export default function EnergyReport() {
   }, [energyTypes])
 
   const currentEnergyType = energyTypes?.find(v => v.machineEnergyTypeId === value)
-
 
   return (
     <>

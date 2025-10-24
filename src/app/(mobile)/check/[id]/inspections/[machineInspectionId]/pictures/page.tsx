@@ -1,5 +1,6 @@
 'use client'
 
+import type { ChangeEvent } from 'react'
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
@@ -21,10 +22,12 @@ import type {
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
+import getS3Key from '@/@core/utils/getS3Key'
 
 const max_pic = 100
 
 interface formType {
+  s3Key: string
   presignedUrl: string
   version: number
   machinePicId: number
@@ -135,6 +138,31 @@ export default function PicturePage() {
     getAllPictures()
   }, [getAllPictures])
 
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+
+    if (!files) return
+    const file = files[0]
+
+    setValue('presignedUrl', URL.createObjectURL(file), {
+      shouldDirty: true,
+      shouldValidate: true
+    })
+
+    const S3KeyResult = await getS3Key(
+      `${machineProjectId}`,
+      [file],
+      `${machineInspectionId}`,
+      machineChecklistItemId,
+      watchedSubItemId,
+      undefined
+    )
+
+    if (!S3KeyResult) return
+    setValue('s3Key', S3KeyResult[0].s3Key)
+    setValue('originalFileName', S3KeyResult[0].fileName)
+  }
+
   const handleDeletePicture = useCallback(async () => {
     try {
       await auth.delete(`/api/machine-projects/${machineProjectId}/machine-pics`, {
@@ -181,7 +209,9 @@ export default function PicturePage() {
 
         setPictures(prev =>
           prev.map(v =>
-            v.machinePicId === selectedPicId ? { ...v, ...response, machineChecklistItemId: machineChecklistItemId } : v
+            v.machinePicId === selectedPicId
+              ? { ...v, ...response, machineChecklistItemId: machineChecklistItemId, presignedUrl: watchedPresignedUrl }
+              : v
           )
         )
         reset({ ...response })
@@ -191,7 +221,15 @@ export default function PicturePage() {
         handleApiError(e)
       }
     },
-    [machineProjectId, selectedPicId, machineInspectionId, reset, watchedSubItemId, machineChecklistItemId]
+    [
+      machineProjectId,
+      selectedPicId,
+      machineInspectionId,
+      reset,
+      watchedSubItemId,
+      watchedPresignedUrl,
+      machineChecklistItemId
+    ]
   )
 
   function TinyImgCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
@@ -285,14 +323,7 @@ export default function PicturePage() {
               ref={imageInputRef}
               accept='image/*' // 이미지 파일만 허용
               capture='environment'
-              onChange={e => {
-                if (e.target.files) {
-                  setValue('presignedUrl', URL.createObjectURL(e.target.files[0]), {
-                    shouldDirty: true,
-                    shouldValidate: true
-                  })
-                }
-              }}
+              onChange={handleImageChange}
             />
 
             {watchedPresignedUrl ? (
