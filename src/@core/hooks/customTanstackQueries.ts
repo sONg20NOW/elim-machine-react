@@ -8,8 +8,10 @@ import { useQuery } from '@tanstack/react-query'
 import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
+  MachineCategoryResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
-  MachineInspectionDetailResponseDtoType
+  MachineInspectionDetailResponseDtoType,
+  MachineProjectOverviewPicReadResponseDtoType
 } from '@/@core/types' // 타입 임포트
 
 // GET /api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}
@@ -96,6 +98,45 @@ export const useGetChecklistResult = (
       checklistResultId
     ),
     queryFn: fetchChecklistResult,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/${machineProjectId}/machine-project-pics/overview?machineProjectPicType=OVERVIEW
+
+export const useGetOverviewPics = (machineProjectId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PROJECT_PIC.GET_OVERVIEW(machineProjectId),
+    queryFn: async data => {
+      const [keytype, machineProjectId] = data.queryKey
+
+      const response = await auth
+        .get<{
+          data: { machineProjectPics: MachineProjectOverviewPicReadResponseDtoType[] }
+        }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/overview?machineProjectPicType=OVERVIEW`)
+        .then(v => v.data.data.machineProjectPics)
+
+      console.log(`!!! queryFn ${keytype}:`, response)
+
+      return response
+    },
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-categories
+const fetchCategories: QueryFunction<MachineCategoryResponseDtoType[], string[]> = async () => {
+  const response = await auth
+    .get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(`/api/machine-categories`)
+    .then(v => v.data.data.machineCategoryResponseDtos)
+
+  return response
+}
+
+export const useGetCategories = () => {
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_CATEGORY,
+    queryFn: fetchCategories,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
