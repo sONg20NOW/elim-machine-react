@@ -7,6 +7,11 @@ export const QUERY_KEYS = {
       'single inspection info',
       machineProjectId,
       machineInspectionId
-    ]
+    ],
+    GET_CHECKLIST_RESULT: (
+      machineProjectId: string,
+      machineInspectionId: string,
+      machineChecklistItemResultId: string
+    ) => ['checklist result', machineProjectId, machineInspectionId, machineChecklistItemResultId]
   }
 }

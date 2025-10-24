@@ -1,5 +1,5 @@
 import type { MutableRefObject, RefObject } from 'react'
-import { forwardRef, memo, useCallback, useContext, useEffect, useImperativeHandle, useState } from 'react'
+import { forwardRef, memo, useContext, useEffect, useImperativeHandle, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -10,13 +10,14 @@ import { InputLabel, MenuItem, TextField } from '@mui/material'
 import { useForm } from 'react-hook-form'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import type { MachineInspectionDetailResponseDtoType, MachineInspectionResponseDtoType } from '@/@core/types'
+import type { MachineInspectionResponseDtoType } from '@/@core/types'
 import type { FormComponentHandle } from '../page'
 
 // import { engineerListContext } from '../page'
 // import EngineerCard from '../_components/EngineerCard'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
+import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 
 export interface formType {
   machineInspectionName: string
@@ -54,25 +55,14 @@ const InspectionForm = memo(
     } = useForm<formType>()
 
     // 현재 선택된 inspection 데이터 가져오기
-    const getInspectionData = useCallback(async () => {
-      try {
-        const response = await auth
-          .get<{
-            data: MachineInspectionDetailResponseDtoType
-          }>(`/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}`)
-          .then(v => v.data.data.machineInspectionResponseDto)
-
-        inspectionVersion.current = response.version
-        reset(response)
-        console.log('initialize inspection form: ', response)
-      } catch (error) {
-        handleApiError(error)
-      }
-    }, [machineProjectId, inspectionId, reset, inspectionVersion])
+    const { data: singleInspectionInfo, refetch } = useGetSingleInspection(`${machineProjectId}`, `${inspectionId}`)
 
     useEffect(() => {
-      getInspectionData()
-    }, [getInspectionData])
+      if (!singleInspectionInfo) return
+
+      inspectionVersion.current = singleInspectionInfo.version
+      reset(singleInspectionInfo)
+    }, [singleInspectionInfo, reset, inspectionVersion])
 
     useImperativeHandle(ref, () => ({
       submit: async () => {
@@ -86,8 +76,7 @@ const InspectionForm = memo(
             })
             .then(v => v.data.data)
 
-          inspectionVersion.current = response.version
-          reset(response)
+          refetch()
           console.log('reset inspection form:', response)
 
           return true

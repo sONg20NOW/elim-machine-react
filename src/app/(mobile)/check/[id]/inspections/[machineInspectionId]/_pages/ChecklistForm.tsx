@@ -1,5 +1,5 @@
 import type { Dispatch, RefObject, SetStateAction } from 'react'
-import { forwardRef, memo, useCallback, useContext, useEffect, useImperativeHandle, useRef } from 'react'
+import { forwardRef, memo, useContext, useEffect, useImperativeHandle, useRef } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -12,7 +12,7 @@ import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/@cor
 import type { FormComponentHandle } from '../page'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
-import { useGetChecklistInfo } from '@/@core/hooks/custom_tanstack/getDetailInspection'
+import { useGetChecklistInfo, useGetChecklistResult } from '@/@core/hooks/customTanstackQueries'
 
 interface formType {
   deficiencies: string
@@ -45,32 +45,17 @@ const ChecklistForm = memo(
 
     const checklistItem = checklistList?.find(v => v.machineChecklistItemId === Number(category))
 
-    // form 초기화
-    const getChecklistResult = useCallback(async () => {
-      if (category === '전체') {
-        return
-      }
-
-      try {
-        const response = await auth
-          .get<{
-            data: MachineInspectionChecklistItemResultResponseDtoType
-          }>(
-            `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-inspection-checklist-item-results/${checklistItem?.machineInspectionChecklistItemResultBasicResponseDto.id}`
-          )
-          .then(v => v.data.data)
-
-        checklistMeta.current = response
-        reset({ deficiencies: response.deficiencies ?? '', actionRequired: response.actionRequired ?? '' })
-        console.log('initialize checklist result form:', response)
-      } catch (error) {
-        handleApiError(error)
-      }
-    }, [machineProjectId, machineInspectionId, category, checklistItem, reset])
+    const { data: checklistResult, refetch } = useGetChecklistResult(
+      `${machineProjectId}`,
+      `${machineInspectionId}`,
+      `${checklistItem?.machineInspectionChecklistItemResultBasicResponseDto.id}`
+    )
 
     useEffect(() => {
-      getChecklistResult()
-    }, [getChecklistResult])
+      if (!checklistResult) return
+      checklistMeta.current = checklistResult
+      reset({ deficiencies: checklistResult.deficiencies ?? '', actionRequired: checklistResult.actionRequired ?? '' })
+    }, [checklistResult, reset])
 
     useImperativeHandle(ref, () => ({
       submit: async () => {
@@ -95,8 +80,7 @@ const ChecklistForm = memo(
             )
             .then(v => v.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
 
-          checklistMeta.current = response
-          reset({ deficiencies: response.deficiencies ?? '', actionRequired: response.actionRequired ?? '' })
+          refetch()
           console.log('reset checklist result form:', response)
 
           return true

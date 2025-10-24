@@ -24,7 +24,7 @@ import { toast } from 'react-toastify'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
-import { useGetChecklistInfo } from '@/@core/hooks/custom_tanstack/getDetailInspection'
+import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
 
 interface checklistFormType {
   checklistSubItemId: number
