@@ -4,7 +4,7 @@ export const QUERY_KEYS = {
   },
   MACHINE_INSPECTION: {
     GET_INSPECTION_INFO: (machineProjectId: string, machineInspectionId: string) => [
-      'a inspection info',
+      'single inspection info',
       machineProjectId,
       machineInspectionId
     ]

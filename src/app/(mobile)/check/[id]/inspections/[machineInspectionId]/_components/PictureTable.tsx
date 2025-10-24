@@ -25,7 +25,7 @@ import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
-import { useGetChecklistInfo } from '@/@core/hooks/custom_tanstack/useGetGecklistList'
+import { useGetChecklistInfo } from '@/@core/hooks/custom_tanstack/getDetailInspection'
 
 const PictureTable = memo(
   ({
