@@ -50,12 +50,7 @@ const TextFieldStyled = styled(TextField)<TextFieldProps>(({ theme }) => ({
         transform: 'translateX(4px)'
       },
       '& :not(textarea).MuiFilledInput-input': {
-        padding: '6.25px 13px',
-        '@media (max-width:600px)': {
-          padding: '0px',
-          paddingLeft: '5px',
-          fontSize: '13px'
-        }
+        padding: '6.25px 13px'
       },
       '&:not(.Mui-error).MuiInputBase-colorPrimary': {
         borderColor: 'var(--mui-palette-primary-main)',
@@ -140,12 +135,7 @@ const TextFieldStyled = styled(TextField)<TextFieldProps>(({ theme }) => ({
 
   '& .MuiInputBase-input': {
     '&:not(textarea).MuiInputBase-inputSizeSmall': {
-      padding: '7.25px 14px',
-      '@media (max-width:600px)': {
-        padding: '0px',
-        paddingLeft: '5px',
-        fontSize: '13px'
-      }
+      padding: '7.25px 14px'
     },
     '&:not(.MuiInputBase-readOnly):not([readonly])::placeholder': {
       transition: theme.transitions.create(['opacity', 'transform'], {
@@ -250,9 +240,6 @@ const TextFieldStyled = styled(TextField)<TextFieldProps>(({ theme }) => ({
   '& .MuiInputBase-multiline': {
     '&.MuiInputBase-sizeSmall': {
       padding: '6px 14px',
-      '@media (max-width:600px)': {
-        fontSize: '13px'
-      },
       '&.Mui-focused': {
         padding: '5px 13px'
       }

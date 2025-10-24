@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useContext } from 'react'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -12,28 +12,28 @@ import MenuItem from '@mui/material/MenuItem'
 // Component Imports
 import axios from 'axios'
 
-import TableFilters from '../../_components/table/TableFilters'
+import TableFilters from '../../../@core/components/custom/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
-import type {
-  memberDetailDtoType,
-  MemberFilterType,
-  memberPageDtoType,
-  successResponseDtoType
-} from '@/app/_type/types'
-import BasicTable from '@/app/_components/table/BasicTable'
-import SearchBar from '@/app/_components/SearchBar'
+import type { memberDetailDtoType, MemberFilterType, memberPageDtoType, successResponseDtoType } from '@/@core/types'
+import BasicTable from '@/@core/components/custom/BasicTable'
+import SearchBar from '@/@core/components/custom/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
+import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
+
+const defualtPageSize = 10
 
 export default function MemberPage() {
+  const isTablet = useContext(isTabletContext)
+
   // 데이터 리스트
   const [data, setData] = useState<memberPageDtoType[]>([])
 
@@ -57,7 +57,7 @@ export default function MemberPage() {
 
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
-  const [size, setSize] = useState(30)
+  const [size, setSize] = useState(defualtPageSize)
 
   // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
@@ -72,7 +72,7 @@ export default function MemberPage() {
 
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
-  const [checked, setChecked] = useState<Set<number>>(new Set([]))
+  const [checked, setChecked] = useState<{ memberId: number; version: number }[]>([])
 
   // 직원 리스트 호출 API 함수
   const getFilteredData = useCallback(async () => {
@@ -157,59 +157,62 @@ export default function MemberPage() {
 
   // 사용자 체크 핸들러 (다중선택)
   const handleCheckUser = (user: memberPageDtoType) => {
-    const memberId = user.memberId
+    const obj = { memberId: user.memberId, version: user.version }
     const checked = isChecked(user)
 
     if (!checked) {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.add(memberId)
-
-        return newSet
-      })
+      setChecked(prev => prev.concat(obj))
     } else {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.delete(memberId)
-
-        return newSet
-      })
+      setChecked(prev => prev.filter(v => v.memberId !== user.memberId))
     }
   }
 
   const handleCheckAllUsers = (checked: boolean) => {
     if (checked) {
       setChecked(prev => {
-        const newSet = new Set(prev)
+        const newPrev = structuredClone(prev)
 
-        data.forEach(user => newSet.add(user.memberId))
+        data.forEach(user => {
+          if (!prev.find(v => v.memberId === user.memberId)) {
+            newPrev.push({ memberId: user.memberId, version: user.version })
+          }
+        })
 
-        return newSet
+        return newPrev
       })
     } else {
-      setChecked(new Set<number>())
+      setChecked([])
     }
   }
 
   const isChecked = (user: memberPageDtoType) => {
-    return checked.has(user.memberId)
+    let exist = false
+
+    checked.forEach(v => {
+      if (JSON.stringify(v) === JSON.stringify({ memberId: user.memberId, version: user.version })) exist = true
+    })
+
+    return exist
   }
 
   // 여러 유저 한번에 삭제
   async function handleDeleteUsers() {
-    try {
-      const list = Array.from(checked).map(memberId => {
-        return { memberId: memberId, version: data.find(user => user.memberId === memberId)!.version }
-      })
+    if (!checked.length) return
 
+    try {
       await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
         //@ts-ignore
-        data: { memberDeleteRequestDtos: list }
+        data: { memberDeleteRequestDtos: checked }
       })
+      setFilters(MemeberInitialFilters)
+      setName('')
+      setRegion('')
+      setPage(0)
 
-      handleSuccess('선택된 직원들이 성공적으로 삭제되었습니다.')
+      getFilteredData()
+      handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
+      setShowCheckBox(false)
+      setChecked([])
     } catch (error) {
       handleApiError(error)
     }
@@ -221,7 +224,7 @@ export default function MemberPage() {
         {/* 탭 제목 */}
         <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        <div className='hide-on-mobile'>
+        {!isTablet && (
           <TableFilters<MemberFilterType>
             filterInfo={MEMBER_FILTER_INFO}
             filters={filters}
@@ -229,20 +232,23 @@ export default function MemberPage() {
             disabled={disabled}
             setPage={setPage}
           />
-        </div>
+        )}
         {/* 필터 초기화 버튼 */}
-        <Button
-          startIcon={<i className='tabler-reload' />}
-          onClick={() => {
-            setFilters(MemeberInitialFilters)
-            setName('')
-            setRegion('')
-          }}
-          className='max-sm:is-full absolute right-8 top-8 hide-on-mobile'
-          disabled={disabled}
-        >
-          필터 초기화
-        </Button>
+        {!isTablet && (
+          <Button
+            startIcon={<i className='tabler-reload' />}
+            onClick={() => {
+              setFilters(MemeberInitialFilters)
+              setName('')
+              setPage(0)
+              setRegion('')
+            }}
+            className='max-sm:is-full absolute right-8 top-8'
+            disabled={disabled}
+          >
+            필터 초기화
+          </Button>
+        )}
         <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
           <div className='flex gap-2'>
             {/* 이름으로 검색 */}
@@ -255,18 +261,42 @@ export default function MemberPage() {
               disabled={disabled}
             />
             {/* 지역으로 검색 */}
-            <SearchBar
-              className='hide-on-mobile'
-              placeholder='지역으로 검색'
-              setSearchKeyword={region => {
-                setRegion(region)
-                setPage(0)
-              }}
-              disabled={disabled}
-            />
+            {!isTablet && (
+              <SearchBar
+                placeholder='지역으로 검색'
+                setSearchKeyword={region => {
+                  setRegion(region)
+                  setPage(0)
+                }}
+                disabled={disabled}
+              />
+            )}
+            {!isTablet && (
+              <div className='flex gap-3 itmes-center hidden sm:flex '>
+                {/* 페이지당 행수 */}
+                <span className='grid place-items-center'>페이지당 행 수 </span>
+                <CustomTextField
+                  select
+                  value={size.toString()}
+                  onChange={e => {
+                    setSize(Number(e.target.value))
+                    setPage(0)
+                  }}
+                  className='gap-[5px]'
+                  disabled={disabled}
+                >
+                  {PageSizeOptions.map(pageSize => (
+                    <MenuItem key={pageSize} value={pageSize}>
+                      {pageSize}
+                      {`\u00a0\u00a0`}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+              </div>
+            )}
           </div>
 
-          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-2 sm:gap-10'>
+          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-2 sm:gap-4'>
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
               <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
@@ -275,7 +305,7 @@ export default function MemberPage() {
             ) : (
               <div className='flex gap-1'>
                 <Button variant='contained' color='error' onClick={() => handleDeleteUsers()}>
-                  {`(${checked.size}) 삭제`}
+                  {`(${checked.length}) 삭제`}
                 </Button>
                 <Button
                   variant='contained'
@@ -289,27 +319,6 @@ export default function MemberPage() {
                 </Button>
               </div>
             )}
-            <div className='flex gap-3 itmes-center hidden sm:flex '>
-              {/* 페이지당 행수 */}
-              <span className='grid place-items-center'>페이지당 행 수 </span>
-              <CustomTextField
-                select
-                value={size.toString()}
-                onChange={e => {
-                  setSize(Number(e.target.value))
-                  setPage(0)
-                }}
-                className='gap-[5px]'
-                disabled={disabled}
-              >
-                {PageSizeOptions.map(pageSize => (
-                  <MenuItem key={pageSize} value={pageSize}>
-                    {pageSize}
-                    {`\u00a0\u00a0`}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
-            </div>
 
             {/* 유저 추가 버튼 */}
             <Button

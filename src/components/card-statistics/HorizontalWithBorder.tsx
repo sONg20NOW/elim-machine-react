@@ -11,7 +11,7 @@ import type { CardProps } from '@mui/material/Card'
 import classnames from 'classnames'
 
 // Types Imports
-import type { ThemeColor } from '@core/types'
+import type { ThemeColor } from '@/@core/types'
 import type { CardStatsHorizontalWithBorderProps } from '@/types/pages/widgetTypes'
 
 //Component Imports

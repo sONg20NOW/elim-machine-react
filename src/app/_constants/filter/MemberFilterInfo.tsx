@@ -1,5 +1,5 @@
 import { MEMBER_INPUT_INFO } from '../input/MemberInputInfo'
-import type { InputFieldType, MemberFilterType } from '../../_type/types'
+import type { InputFieldType, MemberFilterType } from '../../../@core/types'
 import { careerYearOption, genderOption } from '@/app/_constants/options'
 
 const { companyName, memberStatus } = MEMBER_INPUT_INFO.basic

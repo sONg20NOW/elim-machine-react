@@ -1,4 +1,4 @@
-import type { licenseInputType } from '@/app/_type/types'
+import type { licenseInputType } from '@/@core/types'
 
 export const LICENSE_INPUT_INFO: licenseInputType = {
   companyName: { type: 'text', label: '업체명' },

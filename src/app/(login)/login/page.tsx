@@ -1,12 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
 import { useForm } from 'react-hook-form'
 
-import { Button, Divider, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@mui/material'
 
 import ForgotPasswordPage from './_components/forgotPasswordModal'
 import { login } from '@/lib/auth'
@@ -22,6 +32,8 @@ export default function LoginPage() {
   const router = useRouter()
 
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
+  const [showPW, setShowPW] = useState(false)
+  const pwRef = useRef<HTMLInputElement>(null)
 
   const theme = useTheme()
   const isTablet = useMediaQuery(theme.breakpoints.down('md'))
@@ -47,7 +59,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className='flex justify-center items-center min-h-screen bg-gray-100'>
+    <div className='flex justify-center items-center min-h-[100dvh] bg-gray-100'>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className='bg-white py-6 px-10 rounded-lg shadow-md min-w-[400px] flex flex-col gap-2 items-center'
@@ -68,11 +80,32 @@ export default function LoginPage() {
             />
             {errors.email && <p className='text-red-500 text-sm'>{errors.email.message}</p>}
             <TextField
-              type='password'
-              slotProps={{ htmlInput: { sx: { py: 1 } } }}
+              inputRef={pwRef}
+              component={Box}
+              type={!showPW ? 'password' : 'text'}
+              slotProps={{
+                htmlInput: { sx: { py: 1 } },
+                input: {
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        onClick={() => {
+                          setShowPW(prev => !prev)
+                          pwRef.current?.focus()
+                        }}
+                        onMouseDown={e => e.preventDefault()}
+                        onMouseUp={e => e.preventDefault()}
+                        sx={{ position: 'absolute', right: 0, top: 0 }}
+                      >
+                        <i className={showPW ? 'tabler-eye-off' : 'tabler-eye'} />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }
+              }}
               placeholder='비밀번호를 입력하세요'
               {...register('password', { required: '비밀번호를 입력하세요' })}
-              className='border  w-full'
+              className='border w-full'
             />
           </div>
 

@@ -1,6 +1,6 @@
 // Type Imports
 
-import type { ChildrenType } from '@core/types'
+import type { ChildrenType } from '@/@core/types'
 import type { Locale } from '@configs/i18n'
 
 // Component Imports
@@ -11,8 +11,8 @@ import Providers from '@components/Providers'
 
 // Util Imports
 
-import ScrollToTopButton from '@/app/_components/button/ScrollToTopButton'
-import ProtectedPage from '../_components/ProtectedPage'
+import ScrollToTopButton from '@/@core/components/custom/ScrollToTopButton'
+import ProtectedPage from '../../@core/components/custom/ProtectedPage'
 
 const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
   // const params = await props.params

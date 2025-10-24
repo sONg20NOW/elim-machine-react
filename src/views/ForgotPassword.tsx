@@ -14,7 +14,7 @@ import Button from '@mui/material/Button'
 import classnames from 'classnames'
 
 // Type Imports
-import type { SystemMode } from '@core/types'
+import type { SystemMode } from '@/@core/types'
 import type { Locale } from '@configs/i18n'
 
 // Component Imports

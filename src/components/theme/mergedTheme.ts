@@ -12,7 +12,7 @@ import type { Theme } from '@mui/material/styles'
 
 // Type Imports
 import type { Settings } from '@core/contexts/settingsContext'
-import type { SystemMode } from '@core/types'
+import type { SystemMode } from '@/@core/types'
 
 // Core Theme Imports
 import coreTheme from '@core/theme'

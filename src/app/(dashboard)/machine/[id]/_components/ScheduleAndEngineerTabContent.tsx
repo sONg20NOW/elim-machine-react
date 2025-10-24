@@ -9,9 +9,9 @@ import { Box, Button, IconButton, MenuItem } from '@mui/material'
 import type {
   machineProjectEngineerDetailDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import { InputBox } from '@/@core/components/custom/InputBox'
 import {
   MACHINE_PROJECT_ENGINEER_INPUT_INFO,
   MACHINE_SCHEDULE_INPUT_INFO
@@ -20,7 +20,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import { IsEditingContext, UseListsContext } from '../page'
 import { gradeOption } from '@/app/_constants/options'
 import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'
-import AlertModal from '@/app/_components/modal/AlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 const ScheduleAndEngineerTabContent = ({
   scheduleData,

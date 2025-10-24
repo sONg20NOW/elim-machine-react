@@ -31,10 +31,10 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 
 import type {
-  MachinePicCateWithPicCountDtoType,
+  machineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicCursorType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import PictureZoomModal from '../PictureZoomModal'
 import { useSelectedInspectionContext } from '../InspectionListContent'
@@ -43,8 +43,8 @@ type PictureListModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
-  clickedPicCate?: MachinePicCateWithPicCountDtoType
-  checklistItems: MachinePicCateWithPicCountDtoType[]
+  clickedPicCate?: machineChecklistItemsWithPicCountResponseDtosType
+  checklistItems: machineChecklistItemsWithPicCountResponseDtosType[]
   totalPicCount: number
 }
 
@@ -199,19 +199,19 @@ const PictureListModal = ({
     try {
       // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
       const presignedResponse = await axios.post<{
-        data: { presignedUrlResponseDtos: { objectKey: string; presignedUrl: string }[] }
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/presigned-urls/upload`, {
-        uploadType: 'INSPECTION_IMAGE',
-        originalFileNames: filesToUpload.map(file => file.name),
-        projectId: parseInt(machineProjectId),
-        machineInspectionId: selectedInspection.machineInspectionResponseDto.id,
-        cateName: selectedInspection.machineInspectionResponseDto.machineCategoryName ?? '배관설비',
-        picCateName: selectedItem?.machineChecklistItemName ?? '설비사진',
-        picSubCateName: selectedSubItem?.checklistSubItemName ?? '현황사진',
+        data: { presignedUrlResponseDtos: { s3Key: string; presignedUrl: string }[] }
+      }>(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/presigned-urls/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/upload`,
+        {
+          uploadType: 'INSPECTION_IMAGE',
+          originalFileNames: filesToUpload.map(file => file.name),
+          checklistItemId: selectedItem?.machineChecklistItemId ?? '설비사진',
+          checklistSubItemId: selectedSubItem?.machineChecklistSubItemId ?? '현황사진'
 
-        // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
-        memberId: 1
-      })
+          // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
+          // memberId: 1
+        }
+      )
 
       const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
 
@@ -236,7 +236,7 @@ const PictureListModal = ({
 
         return {
           fileName: file.name,
-          s3Key: presignedData.objectKey,
+          s3Key: presignedData.s3Key,
           uploadSuccess: true
         }
       })

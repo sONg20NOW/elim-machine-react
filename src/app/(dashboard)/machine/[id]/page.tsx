@@ -25,10 +25,10 @@ import type {
   machineProjectEngineerDetailDtoType,
   MachineProjectResponseDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import CustomTextField from '@/@core/components/mui/TextField'
-import DisabledTabWithTooltip from '@/app/_components/DisabledTabWithTooltip'
+import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
 import BasicTabContent from './_components/BasicTabContent'
 import ScheduleAndEngineerTabContent from './_components/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/NoteTabContent'
@@ -178,17 +178,23 @@ const MachineUpdatePage = () => {
   const handleChangeProjectName = useCallback(
     async (projectName: string) => {
       try {
-        await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/name`, {
-          version: projectData?.version,
-          name: projectName
-        })
-        getProjectData()
+        const response = await axios.put<{ data: { projectName: string; version: number } }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/name`,
+          {
+            version: projectData?.version,
+            name: projectName
+          }
+        )
+
+        const { projectName: name, version } = response.data.data
+
+        setProjectData(prev => prev && { ...prev, machineProjectName: name, version: version })
         handleSuccess('프로젝트 이름이 변경되었습니다.')
       } catch (error) {
         handleApiError(error)
       }
     },
-    [machineProjectId, projectData?.version, getProjectData]
+    [machineProjectId, projectData?.version]
   )
 
   useEffect(() => {

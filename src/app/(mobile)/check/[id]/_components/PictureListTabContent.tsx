@@ -28,9 +28,9 @@ import type {
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType,
   successResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 
-import SearchBar from '@/app/_components/SearchBar'
+import SearchBar from '@/@core/components/custom/SearchBar'
 import PictureZoomModal from './PictureZoomModal'
 
 const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string }) => {

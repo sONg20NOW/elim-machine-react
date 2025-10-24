@@ -7,12 +7,12 @@ import { Button } from '@mui/material'
 import axios from 'axios'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import { InputBox } from '@/@core/components/custom/InputBox'
 import { MACHINE_INPUT_INFO } from '@/app/_constants/input/MachineInputInfo'
-import type { MachineProjectResponseDtoType } from '@/app/_type/types'
-import AlertModal from '@/app/_components/modal/AlertModal'
+import type { MachineProjectResponseDtoType } from '@/@core/types'
+import AlertModal from '@/@core/components/custom/AlertModal'
 import { IsEditingContext } from '../page'
-import DeleteModal from '@/app/_components/modal/DeleteModal'
+import DeleteModal from '@/@core/components/custom/DeleteModal'
 
 const BasicTabContent = ({
   projectData,

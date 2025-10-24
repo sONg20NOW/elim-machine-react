@@ -15,7 +15,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Typography from '@mui/material/Typography'
 
 // Type Imports
-import type { ThemeColor } from '@core/types'
+import type { ThemeColor } from '@/@core/types'
 
 // Component Imports
 import DialogCloseButton from '../DialogCloseButton'

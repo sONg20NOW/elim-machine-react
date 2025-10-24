@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import type { LoginResponseDtoType } from '@/app/_type/types'
+import type { LoginResponseDtoType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 export const auth = axios.create({

@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react'
+import { useContext, type Dispatch, type SetStateAction } from 'react'
 
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -11,7 +11,8 @@ import classNames from 'classnames'
 
 import { Checkbox, Typography } from '@mui/material'
 
-import type { HeaderType, SortInfoType } from '@/app/_type/types'
+import type { HeaderType, SortInfoType } from '@/@core/types'
+import { isMobileContext, isTabletContext } from './ProtectedPage'
 
 interface BasicTableProps<T> {
   header: HeaderType<T>
@@ -64,6 +65,9 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   handleCheckAllItems,
   onClickPicCount
 }: BasicTableProps<T>) {
+  const isTablet = useContext(isTabletContext)
+  const isMobile = useContext(isMobileContext)
+
   function toggleOrder(key: string) {
     // 로딩이 끝나고 에러가 없으면 not disabled
     if (key !== sorting.target) {
@@ -87,7 +91,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
 
   return (
     <TableContainer sx={{ overflowX: 'auto' }} className='px-2'>
-      <Table sx={{ minWidth: 650 }} aria-label='simple table' className='relative'>
+      <Table aria-label='simple table' className='relative'>
         <TableHead className='select-none'>
           <TableRow>
             {showCheckBox && handleCheckAllItems && (
@@ -101,25 +105,29 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 />
               </TableCell>
             )}
-            <TableCell align='center' key='order' className='font-medium text-base hide-on-mobile'>
-              번호
-            </TableCell>
+            {!isTablet && (
+              <TableCell align='center' key='order' className='font-medium text-base'>
+                번호
+              </TableCell>
+            )}
             {Object.keys(header).map(key => {
               const k = key as keyof T
 
               return (
                 <TableCell
+                  size={isMobile ? 'small' : 'medium'}
                   key={key}
                   align='center'
                   className={classNames(
-                    'relative',
+                    'relative text-base',
                     {
                       'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
                       'font-bold select-none': header[k].canSort,
                       'font-medium': !header[k].canSort
                     },
-                    { 'hide-on-mobile': header[k].hideOnMobile }
+                    { hidden: isTablet && header[k].hideOnTablet }
                   )}
+                  sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
                   onClick={!(loading || error) && header[k].canSort ? () => toggleOrder(key) : undefined}
                 >
                   <div className='flex'></div>
@@ -154,13 +162,15 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 }}
               >
                 {showCheckBox && isChecked && (
-                  <TableCell padding='checkbox'>
+                  <TableCell size={isMobile ? 'small' : 'medium'} padding='checkbox'>
                     <Checkbox checked={isChecked(info)} />
                   </TableCell>
                 )}
-                <TableCell align='center' key={'order'} className='hide-on-mobile'>
-                  <Typography>{page * pageSize + index + 1}</Typography>
-                </TableCell>
+                {!isTablet && (
+                  <TableCell size={isMobile ? 'small' : 'medium'} align='center' key={'order'}>
+                    <Typography>{page * pageSize + index + 1}</Typography>
+                  </TableCell>
+                )}
 
                 {Object.keys(header).map(property => {
                   const key = property as keyof T
@@ -203,29 +213,32 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   }
 
                   return (
-                    <TableCell
-                      key={key.toString()}
-                      align='center'
-                      className={classNames({ 'hide-on-mobile': header[key].hideOnMobile })}
-                    >
-                      {/* 사진의 경우 클릭 가능하도록 */}
-                      <Typography
-                        onClick={e => {
-                          if (key === 'machinePicCount' && onClickPicCount) {
-                            e.stopPropagation()
-                            onClickPicCount(info)
-                          }
-                        }}
-                        sx={{
-                          ...(key === 'machinePicCount' && {
-                            color: 'primary.main',
-                            ':hover': { textDecoration: 'underline' }
-                          })
-                        }}
+                    !(isTablet && header[key].hideOnTablet) && (
+                      <TableCell
+                        size={isMobile ? 'small' : 'medium'}
+                        key={key.toString()}
+                        align='center'
+                        sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
                       >
-                        {content}
-                      </Typography>
-                    </TableCell>
+                        {/* 사진의 경우 클릭 가능하도록 */}
+                        <Typography
+                          onClick={e => {
+                            if (key === 'machinePicCount' && onClickPicCount) {
+                              e.stopPropagation()
+                              onClickPicCount(info)
+                            }
+                          }}
+                          sx={{
+                            ...(key === 'machinePicCount' && {
+                              color: 'primary.main',
+                              ':hover': { textDecoration: 'underline' }
+                            })
+                          }}
+                        >
+                          {content}
+                        </Typography>
+                      </TableCell>
+                    )
                   )
                 })}
               </TableRow>

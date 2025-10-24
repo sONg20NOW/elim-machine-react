@@ -30,12 +30,12 @@ import type {
   MachineFilterType,
   MachineProjectPageDtoType,
   successResponseDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { HEADERS, createInitialSorting } from '@/app/_constants/table/TableHeader'
-import TableFilters from '@/app/_components/table/TableFilters'
+import TableFilters from '@/@core/components/custom/TableFilters'
 import { MACHINE_FILTER_INFO } from '@/app/_constants/filter/MachineFilterInfo'
-import SearchBar from '@/app/_components/SearchBar'
-import BasicTable from '@/app/_components/table/BasicTable'
+import SearchBar from '@/@core/components/custom/SearchBar'
+import BasicTable from '@/@core/components/custom/BasicTable'
 import AddMachineProjectModal from './_components/addMachineProjectModal'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { MachineInitialFilters } from '@/app/_constants/MachineProjectSeed'

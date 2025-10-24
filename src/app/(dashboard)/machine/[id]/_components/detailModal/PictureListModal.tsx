@@ -31,20 +31,21 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 
 import type {
-  MachinePicCateWithPicCountDtoType,
+  machineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicCursorType
-} from '@/app/_type/types'
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import PictureZoomModal from '../PictureZoomModal'
 import { useSelectedInspectionContext } from '../InspectionListContent'
+import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 
 type PictureListModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
-  clickedPicCate?: MachinePicCateWithPicCountDtoType
-  checklistItems: MachinePicCateWithPicCountDtoType[]
+  clickedPicCate?: machineChecklistItemsWithPicCountResponseDtosType
+  checklistItems: machineChecklistItemsWithPicCountResponseDtosType[]
   totalPicCount: number
 }
 
@@ -196,77 +197,21 @@ const PictureListModal = ({
 
     setIsUploading(true)
 
-    try {
-      // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
-      const presignedResponse = await axios.post<{
-        data: { presignedUrlResponseDtos: { objectKey: string; presignedUrl: string }[] }
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/presigned-urls/upload`, {
-        uploadType: 'INSPECTION_IMAGE',
-        originalFileNames: filesToUpload.map(file => file.name),
-        projectId: parseInt(machineProjectId),
-        machineInspectionId: selectedInspection.machineInspectionResponseDto.id,
-        cateName: selectedInspection.machineInspectionResponseDto.machineCategoryName ?? '배관설비',
-        picCateName: selectedItem?.machineChecklistItemName ?? '설비사진',
-        picSubCateName: selectedSubItem?.checklistSubItemName ?? '현황사진',
+    if (!selectedItem || !selectedSubItem) {
+      toast.error('카테고리를 먼저 설정해주세요.')
 
-        // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
-        memberId: 1
-      })
+      return
+    }
 
-      const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
+    const result = await uploadInspectionPictures(
+      machineProjectId,
+      selectedInspection.machineInspectionResponseDto.id.toString(),
+      filesToUpload,
+      selectedItem.machineChecklistItemId,
+      selectedSubItem.machineChecklistSubItemId
+    )
 
-      // 2. 앞서 가져온 presignedURL로 각 파일을 S3에 직접 업로드 (AWS S3로 POST)
-      const uploadPromises = filesToUpload.map(async (file, index) => {
-        const presignedData = presignedUrls[index]
-
-        if (!presignedData) {
-          throw new Error(`파일 ${file.name}에 대한 프리사인드 URL을 받지 못했습니다.`)
-        }
-
-        console.log(`파일 ${file.name} 업로드 시작...`)
-
-        // S3에 직접 업로드 (axios 사용)
-        const uploadResponse = await axios.put(presignedData.presignedUrl, file, {
-          headers: {
-            'Content-Type': file.type
-          }
-        })
-
-        console.log(`파일 ${file.name} 업로드 완료! ${uploadResponse}`)
-
-        return {
-          fileName: file.name,
-          s3Key: presignedData.objectKey,
-          uploadSuccess: true
-        }
-      })
-
-      // 모든 파일 업로드 완료까지 대기
-      const uploadResults = await Promise.all(uploadPromises)
-
-      console.log('업로드 완료:', uploadResults)
-
-      // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
-      const machinePicCreateRequestDtos = uploadResults.map(result => ({
-        machineChecklistSubItemId: selectedSubItem?.machineChecklistSubItemId || 1, // 기본값 또는 selectedMachine에서 가져오기
-        originalFileName: result.fileName,
-        s3Key: result.s3Key
-
-        // cdnPath는 추후 확장사항
-      }))
-
-      const dbResponse = await axios.post<{ data: { machinePicIds: number[] } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-pics`,
-        {
-          machinePicCreateRequestDtos
-        }
-      )
-
-      const uploadedPicIds = dbResponse.data.data.machinePicIds
-
-      console.log('DB 기록 완료:', uploadedPicIds)
-      handleSuccess(`${uploadedPicIds.length}개 사진이 성공적으로 업로드되었습니다.`)
-
+    if (result) {
       setFilesToUpload([])
 
       // 디테일 모달 테이블의 해당 목록 정보 최신화 - selcetedMachine 최신화
@@ -274,11 +219,9 @@ const PictureListModal = ({
 
       // 커서 리셋
       resetCursor()
-    } catch (error) {
-      console.error('Upload error:', error)
-    } finally {
-      setIsUploading(false)
     }
+
+    setIsUploading(false)
   }
 
   const removeFile = (index: number) => {
@@ -387,7 +330,9 @@ const PictureListModal = ({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth disableEnforceFocus disableAutoFocus>
       <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 } }}>사진 목록</Typography>
+        <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 } }}>
+          {selectedInspection.machineInspectionResponseDto.machineInspectionName}
+        </Typography>
         <Grid item xs={12}>
           <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
             점검항목 선택

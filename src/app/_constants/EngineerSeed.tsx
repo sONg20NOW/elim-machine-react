@@ -1,4 +1,4 @@
-import type { EngineerFilterType, MachineEngineerCreateRequestDtoType } from '@/app/_type/types'
+import type { EngineerFilterType, MachineEngineerCreateRequestDtoType } from '@/@core/types'
 
 export const EngineerInitialData: MachineEngineerCreateRequestDtoType = {
   memberId: -1,

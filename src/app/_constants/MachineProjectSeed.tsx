@@ -2,7 +2,7 @@ import type {
   MachineFilterType,
   MachineProjectCreateRequestDtoType,
   machineProjectEngineerDetailDtoType
-} from '@/app/_type/types'
+} from '@/@core/types'
 
 export const MachineProjectInitialData: MachineProjectCreateRequestDtoType = {
   companyName: '',

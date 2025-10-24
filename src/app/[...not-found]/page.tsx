@@ -3,13 +3,10 @@ import Providers from '@components/Providers'
 import BlankLayout from '@layouts/BlankLayout'
 import NotFound from '@views/NotFound'
 
-// Util Imports
-import { getServerMode, getSystemMode } from '@core/utils/serverHelpers'
-
 const NotFoundPage = async () => {
   // Vars
-  const mode = await getServerMode()
-  const systemMode = await getSystemMode()
+  const mode = 'light'
+  const systemMode = 'light'
 
   return (
     <Providers>

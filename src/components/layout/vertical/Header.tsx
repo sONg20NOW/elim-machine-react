@@ -4,14 +4,14 @@ import { useContext, useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography } from '@mui/material'
+import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography, Link } from '@mui/material'
 
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
-import SearchBar from '@/app/_components/SearchBar'
+import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
-import { isTabletContext } from '@/app/_components/ProtectedPage'
+import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
 
 export default function Header() {
   const router = useRouter()
@@ -19,6 +19,7 @@ export default function Header() {
   const [keyword, setKeyword] = useState<string>()
 
   const isTablet = useContext(isTabletContext)
+  const isMobile = useContext(isMobileContext)
 
   const username = '나중에이거진짜유저이름으로바꿔야돼요'
 
@@ -76,16 +77,16 @@ export default function Header() {
       {/* 모바일: Drawer 안에 Navigation */}
       {isTablet && (
         <Drawer
-          slotProps={{ paper: { sx: { width: '30%' } } }}
+          slotProps={{ paper: { sx: { width: !isMobile ? '30%' : '80%' } } }}
           anchor='left'
           open={open}
           onClose={() => setOpen(false)}
           ModalProps={{ keepMounted: true }}
         >
-          <Box sx={{ paddingBottom: 5 }}>
+          <Box sx={{ paddingBottom: 5, display: 'flex', flexDirection: 'column', gap: 5 }}>
             {isTablet && (
               <Box
-                sx={{ backgroundColor: 'primary.dark', mb: 5 }}
+                sx={{ backgroundColor: 'primary.dark' }}
                 className='flex justify-between items-center overflow-visible p-3'
               >
                 <div className='flex flex-col gap-1'>
@@ -261,6 +262,11 @@ export default function Header() {
                 </MenuItem>
               </MenuSection>
             </Menu>
+          </Box>
+          <Box sx={{ width: 'full', textAlign: 'right' }}>
+            <Link href='/check' className={`text-color-primary`} width={'fit-content'} sx={{ py: 1, px: 3 }}>
+              성능점검 앱
+            </Link>
           </Box>
         </Drawer>
       )}

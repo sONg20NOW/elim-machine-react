@@ -4,8 +4,8 @@ import type { Dispatch, SetStateAction } from 'react'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
 
-import { InputBox } from '@/app/_components/selectbox/InputBox'
-import type { InputFieldType } from '@/app/_type/types'
+import { InputBox } from '@/@core/components/custom/InputBox'
+import type { InputFieldType } from '@/@core/types'
 
 interface TableFiltersProps<T> {
   filterInfo: Record<keyof T, InputFieldType>

@@ -14,10 +14,10 @@ import axios from 'axios'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import type { LicensePageResponseDtoType, LicenseResponseDtoType, successResponseDtoType } from '@/app/_type/types'
+import type { LicensePageResponseDtoType, LicenseResponseDtoType, successResponseDtoType } from '@/@core/types'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
-import BasicTable from '@/app/_components/table/BasicTable'
-import SearchBar from '@/app/_components/SearchBar'
+import BasicTable from '@/@core/components/custom/BasicTable'
+import SearchBar from '@/@core/components/custom/SearchBar'
 import { PageSizeOptions } from '@/app/_constants/options'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AddModal from './_components/addModal'

@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { Button, Card, MenuItem, TextField, Tooltip } from '@mui/material'
 
-import type { MachineInspectionDetailResponseDtoType } from '@/app/_type/types'
+import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
 import { UseListsContext } from '../../page'
 
 interface basicTabContentProps<T> {

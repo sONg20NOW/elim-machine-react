@@ -9,10 +9,10 @@ import PictureListModal from './PictureListModal'
 import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
-  MachinePicCateWithPicCountDtoType
-} from '@/app/_type/types'
-import AlertModal from '@/app/_components/modal/AlertModal'
-import DefaultModal from '@/app/_components/modal/DefaultModal'
+  machineChecklistItemsWithPicCountResponseDtosType
+} from '@/@core/types'
+import AlertModal from '@/@core/components/custom/AlertModal'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
 import { useSelectedInspectionContext } from '../InspectionListContent'
@@ -36,7 +36,7 @@ export default function PicTabContent({
 
   // 점검사진 모달
   const [openPicModal, setOpenPicModal] = useState<boolean>(false)
-  const [clickedPicCate, setClickedPicCate] = useState<MachinePicCateWithPicCountDtoType>()
+  const [clickedPicCate, setClickedPicCate] = useState<machineChecklistItemsWithPicCountResponseDtosType>()
 
   // 미흡사항 모달
   const [showDfModal, setShowDfModal] = useState(false)

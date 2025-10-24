@@ -8,9 +8,9 @@ import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import YNSelectBox from './YNSelectBox'
-import type { BoxSizeType, InputFieldType } from '@/app/_type/types'
+import type { BoxSizeType, InputFieldType } from '@/@core/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
-import PostCodeDialog from '@/app/_util/daumMapPostcode'
+import PostCodeDialog from '@/@core/utils/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
 
 interface InputBoxProps {
@@ -124,9 +124,9 @@ function InputBoxContent() {
 
     return (
       <div className='flex flex-col p-0'>
-        {showLabel && <span className=' text-[10px] sm:text-[13px] p-0 mb-[1px] w-fit'>{tabField.label}</span>}
+        {showLabel && <span className='text-[13px] p-0 mb-[1px] w-fit'>{tabField.label}</span>}
         <Box
-          className={'my-[1px] relative text-[13px] sm:text-[15px] border-color-border rounded-lg sm:px-[14px] sm:py-[7.25px]'.concat(
+          className={'my-[1px] relative text-[15px] border-color-border rounded-lg px-[14px] py-[7.25px]'.concat(
             showLabel ? ' border' : ''
           )}
         >
@@ -261,7 +261,6 @@ function InputBoxContent() {
             slotProps={{ htmlInput: { name: tabFieldKey } }}
             id={tabFieldKey}
             disabled={disabled}
-            sx={{ width: { xs: '75%', sm: '100%' } }}
             label={label}
             value={value ?? ''}
             onChange={e => onChange(e.target.value)}

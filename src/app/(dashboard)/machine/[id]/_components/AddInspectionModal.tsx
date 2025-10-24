@@ -8,26 +8,25 @@ import { Grid, MenuItem, Button } from '@mui/material'
 import { toast } from 'react-toastify'
 
 import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultModal from '@/app/_components/modal/DefaultModal'
-import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/app/_type/types'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
+import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/@core/types'
 import { handleApiError } from '@/utils/errorHandler'
-import { UseListsContext } from '../page'
 
 type AddInspectionModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   machineProjectId: string
   getFilteredInspectionList: () => void
+  categoryList: MachineCategoryResponseDtoType[]
 }
 
 const AddInspectionModal = ({
   getFilteredInspectionList,
   open,
   setOpen,
-  machineProjectId
+  machineProjectId,
+  categoryList
 }: AddInspectionModalProps) => {
-  const categoryList = UseListsContext().categoryList
-
   const [newData, setNewData] = useState<MachineInspectionCreateRequestDtoType>({
     machineCategoryId: 0,
     purpose: '',

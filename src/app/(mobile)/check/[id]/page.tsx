@@ -1,92 +1,82 @@
 'use client'
 
-import type { Dispatch, ReactNode, SetStateAction, SyntheticEvent } from 'react'
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
-import { redirect, useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-
-import { CardContent, IconButton, Tab, Typography, useMediaQuery } from '@mui/material'
-import TabContext from '@mui/lab/TabContext'
-import TabList from '@mui/lab/TabList'
-import TabPanel from '@mui/lab/TabPanel'
+import { Box, Button, CircularProgress, IconButton, InputLabel, TextField, Typography } from '@mui/material'
 
 import axios from 'axios'
 
-import classNames from 'classnames'
+import { useForm } from 'react-hook-form'
 
-import PictureListTabContent from './_components/PictureListTabContent'
 import type {
-  MachineCategoryResponseDtoType,
-  MachineEngineerOptionListResponseDtoType,
-  MachineEngineerOptionResponseDtoType,
-  machineProjectEngineerDetailDtoType,
+  MachineInspectionPageResponseDtoType,
   MachineProjectResponseDtoType,
-  MachineProjectScheduleAndEngineerResponseDtoType
-} from '@/app/_type/types'
+  MachineProjectScheduleAndEngineerResponseDtoType,
+  successResponseDtoType
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import CustomTextField from '@/@core/components/mui/TextField'
-import DisabledTabWithTooltip from '@/app/_components/DisabledTabWithTooltip'
-import BasicTabContent from './_components/BasicTabContent'
-import ScheduleAndEngineerTabContent from './_components/ScheduleAndEngineerTabContent'
-import NoteTabContent from './_components/NoteTabContent'
-import InspectionListContent from './_components/InspectionListContent'
-
-export const ListsContext = createContext<{
-  engineerList: MachineEngineerOptionResponseDtoType[]
-  categoryList: MachineCategoryResponseDtoType[]
-  participatedEngineerList: machineProjectEngineerDetailDtoType[]
-  getParticipatedEngineerList: () => void
-}>({
-  engineerList: [],
-  categoryList: [],
-  participatedEngineerList: [],
-  getParticipatedEngineerList: () => null
-})
-
-export const UseListsContext = () => {
-  const context = useContext(ListsContext)
-
-  if (!context) throw new Error()
-
-  if (!context.engineerList || !context.categoryList || !context.participatedEngineerList) {
-    throw new Error()
-  }
-
-  return context
-}
+import MobileHeader from '../../_components/MobileHeader'
+import { auth } from '@/lib/auth'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import ProjectInfoCard from './_components/ProjectInfoCard'
 
 export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing: Dispatch<SetStateAction<boolean>> }>({
   isEditing: false,
   setIsEditing: () => null
 })
 
-const Tabs = [
-  { value: '현장정보', label: '현장정보' },
-  { value: '점검일정/참여기술진', label: '점검일정/참여기술진' },
-  { value: '설비목록', label: '설비목록' },
-  { value: '전체사진', label: '전체사진' },
-  { value: '특이사항', label: '특이사항' }
-]
+export interface projectSummaryType {
+  machineProjectName: string | null
+  beginDate: string | null
+  endDate: string | null
+  engineerNames: string[] | null
+}
 
-const MachineUpdatePage = () => {
-  const isMobile = useMediaQuery('(max-width:600px)')
+interface ProjectFormType {
+  machineProjectName: string | null
+  requirement: string | null
+  note: string | null
+}
+
+const CheckDetailPage = () => {
+  const router = useRouter()
 
   const params = useParams()
   const machineProjectId = params?.id as string
 
-  const [projectData, setProjectData] = useState<MachineProjectResponseDtoType>()
-  const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
-  const [engineerList, setEngineerList] = useState<MachineEngineerOptionResponseDtoType[]>([])
-  const [categoryList, setCategoryList] = useState<MachineCategoryResponseDtoType[]>([])
-  const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
+  const isMobile = useContext(isMobileContext)
 
-  const [tabValue, setTabValue] = useState<string>('현장정보')
+  // ! 대표 이미지, 마지막 업로드 추가
+  const [projectSummaryData, setProjectSummaryData] = useState<projectSummaryType | undefined>(
+    localStorage.getItem('projectSummary') !== null ? JSON.parse(localStorage.getItem('projectSummary')!) : undefined
+  )
 
-  const [isEditingProjectName, setIsEditingProjectName] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const versionRef = useRef(0)
+
+  const [inspectionCnt, setInspectionCnt] = useState(0)
+  const [dotCnt, setDotCnt] = useState(0)
+
+  const {
+    register,
+    formState: { isSubmitting, isDirty },
+    handleSubmit,
+    reset
+  } = useForm<ProjectFormType>()
+
+  useEffect(() => {
+    if (projectSummaryData) return
+
+    const dotIntervalId = setInterval(() => {
+      setDotCnt(prev => (prev > 3 ? 0 : prev + 1))
+    }, 1000)
+
+    return () => {
+      clearInterval(dotIntervalId)
+    }
+  }, [projectSummaryData])
 
   // 현장정보 불러오기
   const getProjectData = useCallback(async () => {
@@ -95,11 +85,24 @@ const MachineUpdatePage = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`
       )
 
-      setProjectData(response.data.data)
-
-      // handleSuccess('프로젝트 정보를 불러왔습니다.')
+      return response.data.data
     } catch (error) {
       handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
+    }
+  }, [machineProjectId])
+
+  // 설비 개수 불러오기
+  const getInspectionCnt = useCallback(async () => {
+    try {
+      const response = await auth.get<{ data: successResponseDtoType<MachineInspectionPageResponseDtoType> }>(
+        `/api/machine-projects/${machineProjectId}/machine-inspections`
+      )
+
+      return response.data.data.page.totalElements
+    } catch (error) {
+      handleApiError(error, '설비개수를 불러오는 데 실패했습니다.')
+
+      return 0
     }
   }, [machineProjectId])
 
@@ -110,219 +113,205 @@ const MachineUpdatePage = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/schedule-tab`
       )
 
-      setScheduleData(response.data.data)
-
-      // handleSuccess('점검일정/참여기술진 정보를 불러왔습니다.')
+      return response.data.data
     } catch (error) {
       handleApiError(error, '점검일정/참여기술진 정보를 불러오는 데 실패했습니다.')
     }
   }, [machineProjectId])
 
-  // 엔지니어 목록 가져오기
-  const getEngineerList = useCallback(async () => {
-    try {
-      const response = await axios.get<{ data: MachineEngineerOptionListResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`
-      )
+  const getProjectSummaryData = useCallback(async () => {
+    const projectData = await getProjectData()
+    const scheduleData = await getScheduleData()
 
-      setEngineerList(response.data.data.engineers)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [])
+    if (!(projectData && scheduleData)) return
 
+    const { version, machineProjectName } = projectData
+    const { beginDate, endDate, engineers } = scheduleData
+
+    versionRef.current = version ?? 0
+
+    setProjectSummaryData({
+      machineProjectName: machineProjectName,
+      beginDate: beginDate,
+      endDate: endDate,
+      engineerNames: engineers.map(v => v.engineerName)
+    })
+
+    setInspectionCnt(await getInspectionCnt())
+
+    reset(projectData)
+  }, [getProjectData, getScheduleData, getInspectionCnt, reset])
+
+  // projectData와 scheduleData 중 썸네일에 필요한 정보를 projectSummaryData에 저장.
   useEffect(() => {
-    getEngineerList()
-  }, [getEngineerList])
+    getProjectSummaryData()
+  }, [getProjectSummaryData])
 
-  // 카테고리 목록 가져오기
-  const getCategoryList = useCallback(async () => {
-    try {
-      const response = await axios.get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-categories`
-      )
-
-      setCategoryList(response.data.data.machineCategoryResponseDtos)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [])
-
+  // projectSummaryData가 바뀔 때마다 localStorage에 저장.
   useEffect(() => {
-    getCategoryList()
-  }, [getCategoryList])
-
-  // 해당 프로젝트에 참여 중인 기술진 목록 가져오기
-  const getParticipatedEngineerList = useCallback(async () => {
-    try {
-      const response = await axios.get<{
-        data: { machineProjectEngineerResponseDtos: machineProjectEngineerDetailDtoType[] }
-      }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-project-engineers`
-      )
-
-      setParticipatedEngineerList(response.data.data.machineProjectEngineerResponseDtos)
-    } catch (error) {
-      handleApiError(error)
+    if (projectSummaryData) {
+      localStorage.setItem('projectSummary', JSON.stringify(projectSummaryData))
     }
-  }, [machineProjectId])
+  }, [projectSummaryData])
 
-  useEffect(() => {
-    getParticipatedEngineerList()
-  }, [getParticipatedEngineerList])
-
-  const handleChange = (event: SyntheticEvent, newValue: string) => {
-    setTabValue(newValue)
-  }
-
-  const handleChangeProjectName = useCallback(
-    async (projectName: string) => {
+  // ! api 하나로 통일
+  const handleSave = useCallback(
+    async (data: ProjectFormType) => {
       try {
-        await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/name`, {
-          version: projectData?.version,
-          name: projectName
+        const response1 = await auth.put<{ data: { version: number } }>(`/api/machine-projects/${machineProjectId}`, {
+          requirement: data.requirement,
+          version: versionRef.current
         })
-        getProjectData()
-        handleSuccess('프로젝트 이름이 변경되었습니다.')
-      } catch (error) {
-        handleApiError(error)
+
+        versionRef.current = response1.data.data.version
+        reset({ requirement: data.requirement })
+
+        const response2 = await auth.put<{ data: { version: number } }>(
+          `/api/machine-projects/${machineProjectId}/note`,
+          { version: versionRef.current, note: data.note }
+        )
+
+        versionRef.current = response2.data.data.version
+        reset({ note: data.note })
+
+        // ! name은 version 반환을 안함..
+        const response3 = await auth.put<{ data: { version: number } }>(
+          `/api/machine-projects/${machineProjectId}/name`,
+          {
+            version: versionRef.current,
+            name: data.machineProjectName
+          }
+        )
+
+        versionRef.current = response3.data.data.version
+        reset({ machineProjectName: data.machineProjectName })
+
+        setProjectSummaryData(
+          prev =>
+            prev && {
+              ...prev,
+              machineProjectName: data.machineProjectName,
+              requirement: data.requirement,
+              note: data.note
+            }
+        )
+        handleSuccess('변경사항이 저장되었습니다.')
+      } catch (err) {
+        handleApiError(err)
       }
     },
-    [machineProjectId, projectData?.version, getProjectData]
+    [machineProjectId, reset]
   )
 
-  useEffect(() => {
-    if (machineProjectId) {
-      switch (tabValue) {
-        case '현장정보':
-          if (!projectData) getProjectData()
-          break
-        case '점검일정/참여기술진':
-          if (!scheduleData) getScheduleData()
-          break
-        default:
-          break
-      }
-    }
-  }, [machineProjectId, tabValue, getProjectData, getScheduleData, engineerList, projectData, scheduleData])
-
-  const Providers = ({ children }: { children: ReactNode }) => (
-    <ListsContext.Provider
-      value={{
-        categoryList: categoryList,
-        engineerList: engineerList,
-        participatedEngineerList: participatedEngineerList,
-        getParticipatedEngineerList: getParticipatedEngineerList
-      }}
-    >
-      <IsEditingContext.Provider value={{ isEditing, setIsEditing }}>{children}</IsEditingContext.Provider>
-    </ListsContext.Provider>
-  )
-
+  // ! 마지막 업로드 정보 추가되면 추가, 실제 이미지로 변경.
+  // ! 설비목록 실제로 받아오기.
   return (
-    <Providers>
-      <Card>
-        <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-5': !isMobile })}>
-          <CardHeader
-            title={
-              <div
-                className={classNames('flex gap-0  mt-1', {
-                  'flex-col text-left items-start': isMobile,
-                  'items-center': !isMobile
-                })}
+    <form onSubmit={handleSubmit(data => handleSave(data))}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
+        <MobileHeader
+          left={
+            <IconButton
+              sx={{ p: 0 }}
+              onClick={() => {
+                router.back()
+                localStorage.removeItem('projectSummary')
+              }}
+            >
+              <i className='tabler-chevron-left text-white text-3xl' />
+            </IconButton>
+          }
+          title='현장정보'
+          right={
+            <IconButton sx={{ p: 0 }} type='submit' disabled={isSubmitting || !isDirty}>
+              {isDirty ? (
+                <i className=' tabler-device-floppy text-white text-3xl animate-ring ' />
+              ) : (
+                <i className='tabler-device-floppy text-white text-3xl' />
+              )}
+            </IconButton>
+          }
+        />
+
+        {projectSummaryData ? (
+          <>
+            <ProjectInfoCard canChange machineProjectId={machineProjectId} projectSummaryData={projectSummaryData} />
+            <Box sx={{ flex: 1, overflowY: 'auto' }}>
+              <Box
+                sx={{
+                  py: !isMobile ? 10 : 4,
+                  px: 10,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: !isMobile ? 6 : 2
+                }}
               >
-                <Typography
-                  color='black'
-                  sx={{
-                    fontSize: 25,
-                    fontWeight: 500,
-                    ':hover': { color: 'primary.main' },
-                    alignItems: 'center',
-                    display: 'flex'
-                  }}
-                  onClick={() => redirect('/machine')}
-                >
-                  기계설비현장
-                  <i className='tabler-chevron-right' />
-                </Typography>
-                <div className='flex'>
-                  {!isEditingProjectName ? (
-                    <Typography color='black' sx={{ fontSize: 25, fontWeight: 500 }}>
-                      {projectData?.machineProjectName ?? ''}
-                    </Typography>
-                  ) : (
-                    <CustomTextField id={'projectNameInput'} defaultValue={projectData?.machineProjectName ?? ''} />
-                  )}
-                  <IconButton
-                    onClick={() => {
-                      if (isEditingProjectName) {
-                        const projectNameInputElement = document.getElementById('projectNameInput') as HTMLInputElement
-
-                        handleChangeProjectName(projectNameInputElement.value)
-                      }
-
-                      setIsEditingProjectName(prev => !prev)
-                    }}
-                  >
-                    <i className='tabler-pencil' />
-                  </IconButton>
+                <div className='flex flex-col gap-1'>
+                  <InputLabel sx={{ px: 2 }}>현장명</InputLabel>
+                  <TextField
+                    size={isMobile ? 'small' : 'medium'}
+                    id='machineProjectName'
+                    {...register('machineProjectName')}
+                    fullWidth
+                    hiddenLabel
+                    slotProps={{ input: { sx: { fontSize: 18 } } }}
+                  />
                 </div>
-              </div>
-            }
-            sx={{ cursor: 'pointer', padding: 0 }}
-          />
-        </div>
-
-        <CardContent>
-          <TabContext value={tabValue}>
-            {/* 탭 목록 */}
-            <TabList onChange={handleChange} aria-label='nav tabs example'>
-              {Tabs.map(tab => {
-                return isEditing && tabValue !== tab.value ? (
-                  <DisabledTabWithTooltip value={tab.value} label={tab.label} />
-                ) : (
-                  <Tab key={tab.value} value={tab.value} label={tab.label} />
-                )
-              })}
-            </TabList>
-            <TabPanel value='현장정보'>
-              {projectData ? (
-                <BasicTabContent projectData={projectData} reloadData={getProjectData} />
-              ) : (
-                <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
-              )}
-            </TabPanel>
-            <TabPanel value='점검일정/참여기술진'>
-              {scheduleData && engineerList ? (
-                <ScheduleAndEngineerTabContent
-                  scheduleData={scheduleData}
-                  reloadData={async () => {
-                    getEngineerList()
-                    getScheduleData()
-                  }}
-                />
-              ) : (
-                <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
-              )}
-            </TabPanel>
-            <TabPanel value='설비목록'>
-              <InspectionListContent machineProjectId={machineProjectId} />
-            </TabPanel>
-            <TabPanel value='전체사진'>
-              <PictureListTabContent machineProjectId={machineProjectId} />
-            </TabPanel>
-            <TabPanel value='특이사항'>
-              {projectData ? (
-                <NoteTabContent id={machineProjectId} projectData={projectData} reloadData={getProjectData} />
-              ) : (
-                <Typography>특이사항 정보를 불러오는 중입니다.</Typography>
-              )}
-            </TabPanel>
-          </TabContext>
-        </CardContent>
-      </Card>
-    </Providers>
+                <div className='flex flex-col gap-1'>
+                  <InputLabel sx={{ px: 2 }}>관리주체 요청사항</InputLabel>
+                  <TextField
+                    size={isMobile ? 'small' : 'medium'}
+                    id='requirement'
+                    {...register('requirement')}
+                    fullWidth
+                    hiddenLabel
+                    multiline
+                    slotProps={{ input: { sx: { fontSize: 18 } } }}
+                  />
+                </div>
+                <div className='flex flex-col gap-1'>
+                  <InputLabel sx={{ px: 2 }}>특이사항</InputLabel>
+                  <TextField
+                    size={isMobile ? 'small' : 'medium'}
+                    id='note'
+                    {...register('note')}
+                    fullWidth
+                    hiddenLabel
+                    multiline
+                    slotProps={{ input: { sx: { fontSize: 18 } } }}
+                  />
+                </div>
+              </Box>
+            </Box>
+            <Box sx={{ py: 5, px: 8, boxShadow: 5 }}>
+              <Button
+                size={'large'}
+                variant='contained'
+                type='button'
+                fullWidth
+                sx={{ padding: !isMobile ? 4 : 2, fontSize: 20 }}
+                onClick={() => router.push(`/check/${machineProjectId}/inspections`)}
+              >
+                설비목록 ({inspectionCnt})
+              </Button>
+            </Box>{' '}
+          </>
+        ) : (
+          <Box height={'100%'} sx={{ display: 'grid', placeItems: 'center' }}>
+            <div className='flex flex-col items-center gap-5'>
+              <Typography>
+                현장정보를 가지고 오고 있습니다
+                {new Array(dotCnt)
+                  .fill('.')
+                  .map((v, idx) => (idx === 3 ? '!' : v))
+                  .join('')}
+              </Typography>
+              <CircularProgress />
+            </div>
+          </Box>
+        )}
+      </Box>
+    </form>
   )
 }
 
-export default MachineUpdatePage
+export default CheckDetailPage

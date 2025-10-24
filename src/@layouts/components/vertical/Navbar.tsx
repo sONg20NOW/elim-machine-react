@@ -9,7 +9,7 @@ import classnames from 'classnames'
 import type { CSSObject } from '@emotion/styled'
 
 // Type Imports
-import type { ChildrenType } from '@core/types'
+import type { ChildrenType } from '@/@core/types'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'

@@ -3,7 +3,7 @@ import type { Dispatch } from '@reduxjs/toolkit'
 import type { EventInput } from '@fullcalendar/core'
 
 // Type Imports
-import type { ThemeColor } from '@core/types'
+import type { ThemeColor } from '@/@core/types'
 
 export type CalendarFiltersType = 'Personal' | 'Business' | 'Family' | 'Holiday' | 'ETC'
 

@@ -11,7 +11,7 @@ import type {
   MachineProjectCreateRequestDtoType,
   machineProjectEngineerInputType,
   machineScheduleInputType
-} from '../../_type/types'
+} from '../../../@core/types'
 
 // 기계설비현장 상세페이지
 export const MACHINE_INPUT_INFO: machineInputType = {

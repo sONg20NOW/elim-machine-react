@@ -1,5 +1,5 @@
 // Type Imports
-import type { Skin } from '@core/types'
+import type { Skin } from '@/@core/types'
 
 // Override Imports
 import Accordion from './accordion'

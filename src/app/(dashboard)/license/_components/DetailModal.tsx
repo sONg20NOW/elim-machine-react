@@ -12,13 +12,13 @@ import { Box, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/modal/DefaultModal'
-import type { LicenseResponseDtoType } from '@/app/_type/types'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
+import type { LicenseResponseDtoType } from '@/@core/types'
+import { InputBox } from '@/@core/components/custom/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { LICENSE_INPUT_INFO } from '@/app/_constants/input/LicenseInputInfo'
-import DeleteModal from '@/app/_components/modal/DeleteModal'
-import AlertModal from '@/app/_components/modal/AlertModal'
+import DeleteModal from '@/@core/components/custom/DeleteModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 type DetailModalProps = {
   open: boolean

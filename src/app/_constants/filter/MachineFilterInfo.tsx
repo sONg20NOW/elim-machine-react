@@ -1,4 +1,4 @@
-import type { InputFieldType, MachineFilterType } from '../../_type/types'
+import type { InputFieldType, MachineFilterType } from '../../../@core/types'
 import { MACHINE_INPUT_INFO } from '../input/MachineInputInfo'
 
 const { projectStatus, companyName } = MACHINE_INPUT_INFO

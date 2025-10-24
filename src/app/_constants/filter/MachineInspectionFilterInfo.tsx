@@ -1,4 +1,4 @@
-import type { InputFieldType, MachineInspectionFilterType } from '../../_type/types'
+import type { InputFieldType, MachineInspectionFilterType } from '../../../@core/types'
 
 export const MACHINE_INSPECTION_FILTER_INFO: Record<keyof MachineInspectionFilterType, InputFieldType> = {
   engineerName: {

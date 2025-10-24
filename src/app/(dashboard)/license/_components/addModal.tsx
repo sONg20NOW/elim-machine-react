@@ -10,12 +10,12 @@ import { DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } 
 
 import axios from 'axios'
 
-import DefaultModal from '@/app/_components/modal/DefaultModal'
-import { InputBox } from '@/app/_components/selectbox/InputBox'
+import DefaultModal from '@/@core/components/custom/DefaultModal'
+import { InputBox } from '@/@core/components/custom/InputBox'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { LicenseInitialData } from '@/app/_constants/LicenseSeed'
-import type { LicenseCreateRequestDto } from '@/app/_type/types'
+import type { LicenseCreateRequestDto } from '@/@core/types'
 import { LICENSE_INPUT_INFO } from '@/app/_constants/input/LicenseInputInfo'
 
 type AddModalProps = {
