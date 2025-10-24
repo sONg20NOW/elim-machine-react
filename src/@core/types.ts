@@ -707,11 +707,11 @@ export interface PageInfoDtoType {
 
 // 인풋 형식
 export type InputFieldType = {
-  size: BoxSizeType
+  size?: BoxSizeType
   type: InputType
   label: string
-  options: Array<{ value: string; label: string }>
-  disabled: boolean
+  options?: Array<{ value: string; label: string }>
+  disabled?: boolean
 }
 
 // 테이블 헤더
