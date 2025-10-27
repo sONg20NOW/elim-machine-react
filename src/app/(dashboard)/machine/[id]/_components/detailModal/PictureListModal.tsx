@@ -33,11 +33,11 @@ import { toast } from 'react-toastify'
 import type {
   machineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
-  MachinePicCursorType
+  MachinePicCursorType,
+  MachineInspectionDetailResponseDtoType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import PictureZoomModal from '../PictureZoomModal'
-import { useSelectedInspectionContext } from '../InspectionListContent'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 
 type PictureListModalProps = {
@@ -45,8 +45,8 @@ type PictureListModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   clickedPicCate?: machineChecklistItemsWithPicCountResponseDtosType
-  checklistItems: machineChecklistItemsWithPicCountResponseDtosType[]
-  totalPicCount: number
+  selectedInspection: MachineInspectionDetailResponseDtoType
+  refetchSelectedInspection: () => Promise<void>
 }
 
 const PictureListModal = ({
@@ -54,11 +54,9 @@ const PictureListModal = ({
   open,
   setOpen,
   clickedPicCate,
-  checklistItems,
-  totalPicCount
+  selectedInspection,
+  refetchSelectedInspection
 }: PictureListModalProps) => {
-  const { selectedInspection, refetchSelectedInspection } = useSelectedInspectionContext()
-
   // 사진 리스트
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
@@ -66,6 +64,14 @@ const PictureListModal = ({
 
   const [selectedSubItemId, setSelectedSubItemId] = useState<number>(0)
   const [selectedItemId, setSelectedItemId] = useState<number>(clickedPicCate?.machineChecklistItemId ?? 0)
+
+  const checklistItems = selectedInspection?.machineChecklistItemsWithPicCountResponseDtos ?? []
+
+  const totalPicCount =
+    selectedInspection?.machineChecklistItemsWithPicCountResponseDtos.reduce(
+      (sum, value) => sum + value.totalMachinePicCount,
+      0
+    ) ?? 0
 
   const selectedItem = checklistItems.find(v => v.machineChecklistItemId === selectedItemId)
 
@@ -137,7 +143,7 @@ const PictureListModal = ({
         isLoadingRef.current = false
       }
     },
-    [selectedItemId, machineProjectId, selectedInspection]
+    [selectedItemId, machineProjectId, selectedInspection.machineInspectionResponseDto.id]
   )
 
   // 최초에 전체 사진 가져오기

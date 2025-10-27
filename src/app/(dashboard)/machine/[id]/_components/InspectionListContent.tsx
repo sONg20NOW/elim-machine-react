@@ -382,8 +382,8 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
         isChecked={isChecked}
         handleCheckItem={handleCheckEngineer}
         handleCheckAllItems={handleCheckAllEngineers}
-        onClickPicCount={(machine: MachineInspectionPageResponseDtoType) => {
-          handleSelectInspection(machine, true)
+        onClickPicCount={async (machine: MachineInspectionPageResponseDtoType) => {
+          await handleSelectInspection(machine, true)
           setShowPictureListModal(true)
         }}
       />
@@ -432,21 +432,14 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           categoryList={categoryList}
         />
       )}
-      {selectedInspection && (
-        <SelectedInspectionContext.Provider value={{ selectedInspection, refetchSelectedInspection }}>
-          <PictureListModal
-            machineProjectId={machineProjectId}
-            open={showPictureListModal}
-            setOpen={setShowPictureListModal}
-            checklistItems={selectedInspection?.machineChecklistItemsWithPicCountResponseDtos ?? []}
-            totalPicCount={
-              selectedInspection?.machineChecklistItemsWithPicCountResponseDtos.reduce(
-                (sum, value) => sum + value.totalMachinePicCount,
-                0
-              ) ?? 0
-            }
-          />
-        </SelectedInspectionContext.Provider>
+      {showPictureListModal && selectedInspection && (
+        <PictureListModal
+          selectedInspection={selectedInspection}
+          machineProjectId={machineProjectId}
+          open={showPictureListModal}
+          setOpen={setShowPictureListModal}
+          refetchSelectedInspection={refetchSelectedInspection}
+        />
       )}
     </div>
   )
