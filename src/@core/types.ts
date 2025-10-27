@@ -568,6 +568,12 @@ export interface MachineEnergyUsageReadResponseDtoType {
   monthlyValues: string
 }
 
+// 기계설비 보고서 카테고리 응답 DTO
+export interface MachineReportCategoryReadResponseDtoType {
+  id: number
+  name: string
+}
+
 // ----------- presignedURL 관련 -----------
 
 // POST /api/machine-projects/{machineProjectId}/machine-pics 프로젝트 내 전체 사진 조회 (Presigned URL 포함)

@@ -29,5 +29,6 @@ export const QUERY_KEYS = {
       machineProjectId,
       machineEnergyTypeId
     ]
-  }
+  },
+  MACHINE_REPORT_CATEGORY_CONTROLLER: ['MACHINE_REPORT_CATEGORY_CONTROLLER']
 }

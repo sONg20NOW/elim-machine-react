@@ -11,6 +11,7 @@ import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
   MachineProjectOverviewPicReadResponseDtoType,
+  MachineReportCategoryReadResponseDtoType,
   targetType
 } from '@/@core/types' // 타입 임포트
 
@@ -161,7 +162,8 @@ export const useGetEnergyTypes = () => {
 
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_ENERGY_TYPE,
-    queryFn: fetchEnergyTypes
+    queryFn: fetchEnergyTypes,
+    staleTime: 1000 * 60 * 5 // 5분
   })
 }
 
@@ -191,7 +193,8 @@ export const useGetEnergyTargets = (machineProjectId: string, machineEnergyTypeI
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_ENERGY_TARGET.GET_ENERGY_TARGETS(machineProjectId, machineEnergyTypeId),
     queryFn: fetchEnergyTargets,
-    enabled: isEnabled
+    enabled: isEnabled,
+    staleTime: 1000 * 60 * 5 // 5분
   })
 }
 
@@ -224,6 +227,33 @@ export const useGetEnergyUsages = (machineProjectId: string, machineEnergyTypeId
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_ENERGY_USAGE.GET_ENERGY_USAGES(machineProjectId, machineEnergyTypeId),
     queryFn: fetchEnergyUsages,
-    enabled: isEnabled
+    enabled: isEnabled,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-report-categories
+export const useGetReportCategories = () => {
+  const fetchReportCategories: QueryFunction<MachineReportCategoryReadResponseDtoType[], string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { machineReportCategories: MachineReportCategoryReadResponseDtoType[] }
+        }>(`/api/machine-report-categories`)
+        .then(v => v.data.data.machineReportCategories)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    []
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_REPORT_CATEGORY_CONTROLLER,
+    queryFn: fetchReportCategories,
+    staleTime: 1000 * 60 * 5 // 5분
   })
 }

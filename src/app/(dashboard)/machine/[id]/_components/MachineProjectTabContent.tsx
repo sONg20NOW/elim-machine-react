@@ -13,7 +13,8 @@ import type { MachineProjectResponseDtoType } from '@/@core/types'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import { IsEditingContext } from '../page'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
-import EnergyReport from './report/EnergyReport'
+import EnergyReport from './report/EnergyReportModal'
+import DownloadReportModal from './report/DownloadReportModal'
 
 const BasicTabContent = ({
   projectData,
@@ -114,16 +115,7 @@ const BasicTabContent = ({
 
           <EnergyReport />
 
-          <Button
-            variant='contained'
-            color='error'
-            disabled={true}
-            onClick={() => {
-              console.log('?')
-            }}
-          >
-            보고서 다운로드
-          </Button>
+          <DownloadReportModal />
         </div>
         <Button
           variant='contained'
