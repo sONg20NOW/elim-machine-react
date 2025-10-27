@@ -10,7 +10,8 @@ import type {
   MachineEnergyTypeResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
-  MachineProjectOverviewPicReadResponseDtoType
+  MachineProjectOverviewPicReadResponseDtoType,
+  targetType
 } from '@/@core/types' // 타입 임포트
 
 // GET /api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}
@@ -161,5 +162,68 @@ export const useGetEnergyTypes = () => {
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_ENERGY_TYPE,
     queryFn: fetchEnergyTypes
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-energy-targets
+export const useGetEnergyTargets = (machineProjectId: string, machineEnergyTypeId: string) => {
+  const fetchEnergyTargets: QueryFunction<targetType[], string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { machineEnergyTargets: targetType[] }
+        }>(
+          `/api/machine-projects/${machineProjectId}/machine-energy-targets?machineEnergyTypeId=${machineEnergyTypeId}`
+        )
+        .then(v => v.data.data.machineEnergyTargets)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId, machineEnergyTypeId]
+  )
+
+  const isEnabled = machineEnergyTypeId !== 'undefined'
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_ENERGY_TARGET.GET_ENERGY_TARGETS(machineProjectId, machineEnergyTypeId),
+    queryFn: fetchEnergyTargets,
+    enabled: isEnabled
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-energy-usages 에너지 사용량 전체 조회
+export const useGetEnergyUsages = (machineProjectId: string, machineEnergyTypeId: string) => {
+  const fetchEnergyUsages: QueryFunction<
+    { targetId: number; year: number; monthlyValues: Record<string, number> }[],
+    string[]
+  > = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { machineEnergyUsages: { targetId: number; year: number; monthlyValues: Record<string, number> }[] }
+        }>(
+          `/api/machine-projects/${machineProjectId}/machine-energy-usages?machineEnergyTypeId=${machineEnergyTypeId}&years=${'2022, 2023, 2024, 2025'}`
+        )
+        .then(v => v.data.data.machineEnergyUsages)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId, machineEnergyTypeId]
+  )
+
+  const isEnabled = machineEnergyTypeId !== 'undefined'
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_ENERGY_USAGE.GET_ENERGY_USAGES(machineProjectId, machineEnergyTypeId),
+    queryFn: fetchEnergyUsages,
+    enabled: isEnabled
   })
 }

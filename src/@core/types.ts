@@ -557,6 +557,17 @@ export interface MachineEnergyTypeResponseDtoType {
   name: string
 }
 
+export interface targetType {
+  name: string
+  machineEnergyTargetId: number
+}
+
+export interface MachineEnergyUsageReadResponseDtoType {
+  targetId: number
+  year: number
+  monthlyValues: string
+}
+
 // ----------- presignedURL 관련 -----------
 
 // POST /api/machine-projects/{machineProjectId}/machine-pics 프로젝트 내 전체 사진 조회 (Presigned URL 포함)
