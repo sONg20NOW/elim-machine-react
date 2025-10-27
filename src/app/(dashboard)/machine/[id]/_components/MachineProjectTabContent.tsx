@@ -15,6 +15,7 @@ import { IsEditingContext } from '../page'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import EnergyReport from './report/EnergyReportModal'
 import DownloadReportModal from './report/DownloadReportModal'
+import ChecklistResultSummaryModal from './report/ChecklistResultSummaryModal'
 
 const BasicTabContent = ({
   projectData,
@@ -92,16 +93,7 @@ const BasicTabContent = ({
           >
             입수자료
           </Button>
-          <Button
-            variant='contained'
-            color='success'
-            disabled={true}
-            onClick={() => {
-              console.log('?')
-            }}
-          >
-            점검의견서
-          </Button>
+          <ChecklistResultSummaryModal machineProjectName={projectData.machineProjectName} />
           <Button
             variant='contained'
             color='primary'

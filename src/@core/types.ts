@@ -574,6 +574,20 @@ export interface MachineReportCategoryReadResponseDtoType {
   name: string
 }
 
+// 점검의견서 조회 응답 DTO
+
+export interface machineInspectionSummaryResponseDtoType {
+  machineInspectionSummaryResponseDto: {
+    summaryElements: {
+      machineTopCategoryName: string
+      inspectionResult: 'PASS' | 'FAIL' | 'NONE'
+      actionRequired: string
+    }[]
+  }
+  inspectionResultOverallOpinion: string
+  performanceInspectionReportResult: string
+}
+
 // ----------- presignedURL 관련 -----------
 
 // POST /api/machine-projects/{machineProjectId}/machine-pics 프로젝트 내 전체 사진 조회 (Presigned URL 포함)

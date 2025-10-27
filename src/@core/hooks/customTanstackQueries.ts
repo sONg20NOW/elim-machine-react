@@ -10,6 +10,7 @@ import type {
   MachineEnergyTypeResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
+  machineInspectionSummaryResponseDtoType,
   MachineProjectOverviewPicReadResponseDtoType,
   MachineReportCategoryReadResponseDtoType,
   targetType
@@ -254,6 +255,32 @@ export const useGetReportCategories = () => {
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_REPORT_CATEGORY_CONTROLLER,
     queryFn: fetchReportCategories,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-inspection-opinions/summary
+export const useGetInspectionOpinions = (machineProjectId: string) => {
+  const fetchInspectionOpinions: QueryFunction<machineInspectionSummaryResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: machineInspectionSummaryResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-inspection-opinions/summary`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_INSPECTION_OPINION.GET_INSPECTION_OPINION(machineProjectId),
+    queryFn: fetchInspectionOpinions,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
