@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -55,6 +55,7 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
     register,
     handleSubmit,
     reset,
+    getValues,
     formState: { dirtyFields, isDirty }
   } = useForm<formType>({
     defaultValues: {
@@ -63,11 +64,15 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
     }
   })
 
+  useEffect(() => {
+    refetch()
+  }, [open, refetch])
+
   const handleSave = async (data: formType) => {
     const message = []
 
-    if (dirtyFields.performanceInspectionReportResult) {
-      try {
+    try {
+      if (dirtyFields.performanceInspectionReportResult) {
         const response = await auth
           .patch<{
             data: { performanceInspectionReportResult: string }
@@ -77,16 +82,15 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
           )
           .then(v => v.data.data.performanceInspectionReportResult)
 
-        reset({ performanceInspectionReportResult: response })
+        reset({
+          performanceInspectionReportResult: response,
+          inspectionResultOverallOpinion: getValues().inspectionResultOverallOpinion
+        })
 
         message.push('점검결과')
-      } catch (e) {
-        handleApiError(e)
       }
-    }
 
-    if (dirtyFields.inspectionResultOverallOpinion) {
-      try {
+      if (dirtyFields.inspectionResultOverallOpinion) {
         const response = await auth
           .patch<{
             data: { inspectionResultOverallOpinion: string }
@@ -98,16 +102,18 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
           )
           .then(v => v.data.data.inspectionResultOverallOpinion)
 
-        reset({ inspectionResultOverallOpinion: response })
+        reset({
+          inspectionResultOverallOpinion: response,
+          performanceInspectionReportResult: getValues().performanceInspectionReportResult
+        })
 
         message.push('종합의견')
-      } catch (e) {
-        handleApiError(e)
       }
+    } catch (e) {
+      handleApiError(e)
     }
 
-    toast.success(`${message.join('와 ')}이 업데이트 되었습니다.`)
-    refetch()
+    if (message.length > 0) toast.success(`${message.join('와 ')}이 업데이트 되었습니다.`)
   }
 
   return (
@@ -154,36 +160,43 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
                   ))}
                 </TabList>
               </AppBar>
-              <TabPanel value={0}>
-                <table style={{ tableLayout: 'fixed' }}>
-                  <thead>
-                    <tr>
-                      <th colSpan={3}>구분</th>
-                      <th>점검결과</th>
-                      <th colSpan={5}>조치필요사항</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {inspectionSummary?.machineInspectionSummaryResponseDto?.summaryElements.map(value => (
-                      <tr key={value.machineTopCategoryName}>
-                        <td colSpan={3}>{value.machineTopCategoryName}</td>
-                        <td>
-                          <div className='grid place-items-center'>
-                            {{ NONE: '/', PASS: 'O', FAIL: 'X' }[value.inspectionResult]}
-                          </div>
-                        </td>
-                        <td colSpan={5}>
-                          <TextField
-                            placeholder={{ NONE: '해당없음', PASS: '적합', FAIL: '부적합' }[value.inspectionResult]}
-                            fullWidth
-                            variant='standard'
-                          />
-                        </td>
-                        {/* <td >{value.actionRequired}</td> */}
+              <TabPanel value={0} sx={{ height: '100%' }}>
+                {inspectionSummary?.machineInspectionSummaryResponseDto?.summaryElements &&
+                inspectionSummary?.machineInspectionSummaryResponseDto?.summaryElements.length > 0 ? (
+                  <table style={{ tableLayout: 'fixed' }}>
+                    <thead>
+                      <tr>
+                        <th colSpan={3}>구분</th>
+                        <th>점검결과</th>
+                        <th colSpan={5}>조치필요사항</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {inspectionSummary?.machineInspectionSummaryResponseDto?.summaryElements.map(value => (
+                        <tr key={value.machineTopCategoryName}>
+                          <td colSpan={3}>{value.machineTopCategoryName}</td>
+                          <td>
+                            <div className='grid place-items-center'>
+                              {{ NONE: '/', PASS: 'O', FAIL: 'X' }[value.inspectionResult]}
+                            </div>
+                          </td>
+                          <td colSpan={5}>
+                            <TextField
+                              placeholder={{ NONE: '해당없음', PASS: '적합', FAIL: '부적합' }[value.inspectionResult]}
+                              fullWidth
+                              variant='standard'
+                            />
+                          </td>
+                          {/* <td >{value.actionRequired}</td> */}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className='grid place-items-center h-full'>
+                    <Typography>조회된 설비가 없습니다</Typography>
+                  </div>
+                )}
               </TabPanel>
               <TabPanel sx={{ height: '90%' }} value={1}>
                 <TextField
