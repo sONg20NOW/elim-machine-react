@@ -23,13 +23,24 @@ import TabContext from '@mui/lab/TabContext'
 
 import TabList from '@mui/lab/TabList'
 
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'react-toastify'
+
 import styles from '@/app/_style/Table.module.css'
 import { useGetInspectionOpinions } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@/lib/auth'
+import { handleApiError } from '@/utils/errorHandler'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
   fontSize: theme.typography.h5.fontSize
 }))
+
+interface formType {
+  inspectionResultOverallOpinion: string
+  performanceInspectionReportResult: string
+}
 
 export default function ChecklistResultSummaryModal({ machineProjectName }: { machineProjectName: string }) {
   const { id } = useParams()
@@ -40,9 +51,69 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
 
   const { data: inspectionSummary, refetch } = useGetInspectionOpinions(machineProjectId!)
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { dirtyFields, isDirty }
+  } = useForm<formType>({
+    defaultValues: {
+      inspectionResultOverallOpinion: inspectionSummary?.inspectionResultOverallOpinion ?? '',
+      performanceInspectionReportResult: inspectionSummary?.performanceInspectionReportResult ?? ''
+    }
+  })
+
+  const handleSave = async (data: formType) => {
+    const message = []
+
+    if (dirtyFields.performanceInspectionReportResult) {
+      try {
+        const response = await auth
+          .patch<{
+            data: { performanceInspectionReportResult: string }
+          }>(
+            `/api/machine-projects/${machineProjectId}/machine-inspection-opinions/performance-inspection-report-result`,
+            { performanceInspectionReportResult: data.performanceInspectionReportResult }
+          )
+          .then(v => v.data.data.performanceInspectionReportResult)
+
+        reset({ performanceInspectionReportResult: response })
+
+        message.push('점검결과')
+      } catch (e) {
+        handleApiError(e)
+      }
+    }
+
+    if (dirtyFields.inspectionResultOverallOpinion) {
+      try {
+        const response = await auth
+          .patch<{
+            data: { inspectionResultOverallOpinion: string }
+          }>(
+            `/api/machine-projects/${machineProjectId}/machine-inspection-opinions/inspection-result-overall-opinion`,
+            {
+              inspectionResultOverallOpinion: data.inspectionResultOverallOpinion
+            }
+          )
+          .then(v => v.data.data.inspectionResultOverallOpinion)
+
+        reset({ inspectionResultOverallOpinion: response })
+
+        message.push('종합의견')
+      } catch (e) {
+        handleApiError(e)
+      }
+    }
+
+    toast.success(`${message.join('와 ')}이 업데이트 되었습니다.`)
+    refetch()
+  }
+
   return (
     <>
       <Button
+        type='button'
         variant='contained'
         color='success'
         onClick={() => {
@@ -52,82 +123,126 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
         점검의견서
       </Button>
       <Dialog fullWidth maxWidth={'md'} open={open}>
-        <DialogTitle variant='h3' sx={{ position: 'relative' }}>
-          <Box sx={{ display: 'flex', alignItems: 'end', gap: 2 }}>
-            점검의견서 <Typography variant='h5'>[{machineProjectName}]</Typography>
-            <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
-              <i className='tabler-x text-red-500' />
-            </IconButton>
-          </Box>
-          <Divider />
-        </DialogTitle>
-        <DialogContent
-          className={`${styles.container}`}
-          sx={{ height: '70dvh', overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}
-        >
-          <TabContext value={value}>
-            <AppBar position='static' color='success' sx={{ mb: 4 }}>
-              <TabList
-                onChange={(_, newValue) => setValue(newValue)}
-                indicatorColor='secondary'
-                sx={{ color: 'white' }}
-                textColor='inherit'
-              >
-                {[
-                  { title: '설비별 점검내용 요약', value: 0 },
-                  { title: '점검내용요약 종합의견', value: 1 },
-                  { title: '성능점검결과보고서 점검결과', value: 2 }
-                ].map(v => (
-                  <StyledTab key={v.value} label={v.title} value={v.value} />
-                ))}
-              </TabList>
-            </AppBar>
-            <TabPanel value={0}>
-              <table style={{ tableLayout: 'fixed' }}>
-                <thead>
-                  <tr>
-                    <th colSpan={3}>구분</th>
-                    <th>점검결과</th>
-                    <th colSpan={5}>조치필요사항</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inspectionSummary?.machineInspectionSummaryResponseDto?.summaryElements.map(value => (
-                    <tr key={value.machineTopCategoryName}>
-                      <td colSpan={3}>{value.machineTopCategoryName}</td>
-                      <td>
-                        <div className='grid place-items-center'>
-                          {{ NONE: '/', PASS: 'O', FAIL: 'X' }[value.inspectionResult]}
-                        </div>
-                      </td>
-                      <td colSpan={5}>
-                        <TextField
-                          placeholder={{ NONE: '해당없음', PASS: '적합', FAIL: '부적합' }[value.inspectionResult]}
-                          fullWidth
-                          variant='standard'
-                        />
-                      </td>
-                      {/* <td >{value.actionRequired}</td> */}
-                    </tr>
+        <form onSubmit={handleSubmit(handleSave)}>
+          <DialogTitle variant='h3' sx={{ position: 'relative' }}>
+            <Box sx={{ display: 'flex', alignItems: 'end', gap: 2 }}>
+              점검의견서 <Typography variant='h5'>[{machineProjectName}]</Typography>
+              <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
+                <i className='tabler-x text-red-500' />
+              </IconButton>
+            </Box>
+            <Divider />
+          </DialogTitle>
+          <DialogContent
+            className={`${styles.container}`}
+            sx={{ height: '70dvh', overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}
+          >
+            <TabContext value={value}>
+              <AppBar position='static' color='success' sx={{ mb: 4 }}>
+                <TabList
+                  onChange={(_, newValue) => setValue(newValue)}
+                  indicatorColor='secondary'
+                  sx={{ color: 'white' }}
+                  textColor='inherit'
+                >
+                  {[
+                    { title: '설비별 점검내용 요약', value: 0 },
+                    { title: '점검내용요약 종합의견', value: 1 },
+                    { title: '성능점검결과보고서 점검결과', value: 2 }
+                  ].map(v => (
+                    <StyledTab key={v.value} label={v.title} value={v.value} />
                   ))}
-                </tbody>
-              </table>
-            </TabPanel>
-            <TabPanel value={1}>점검내용요약 종합의견</TabPanel>
-            <TabPanel value={2}>성능점검결과보고서 점검결과</TabPanel>
-          </TabContext>
-        </DialogContent>
-        <DialogActions className='flex items-center justify-center'>
-          <Button color='primary' variant='contained'>
-            저장
-          </Button>
-          <Button color='success' variant='contained'>
-            보고서 다운로드
-          </Button>
-          <Button color='secondary' variant='contained' onClick={() => setOpen(false)}>
-            닫기
-          </Button>
-        </DialogActions>
+                </TabList>
+              </AppBar>
+              <TabPanel value={0}>
+                <table style={{ tableLayout: 'fixed' }}>
+                  <thead>
+                    <tr>
+                      <th colSpan={3}>구분</th>
+                      <th>점검결과</th>
+                      <th colSpan={5}>조치필요사항</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {inspectionSummary?.machineInspectionSummaryResponseDto?.summaryElements.map(value => (
+                      <tr key={value.machineTopCategoryName}>
+                        <td colSpan={3}>{value.machineTopCategoryName}</td>
+                        <td>
+                          <div className='grid place-items-center'>
+                            {{ NONE: '/', PASS: 'O', FAIL: 'X' }[value.inspectionResult]}
+                          </div>
+                        </td>
+                        <td colSpan={5}>
+                          <TextField
+                            placeholder={{ NONE: '해당없음', PASS: '적합', FAIL: '부적합' }[value.inspectionResult]}
+                            fullWidth
+                            variant='standard'
+                          />
+                        </td>
+                        {/* <td >{value.actionRequired}</td> */}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </TabPanel>
+              <TabPanel sx={{ height: '90%' }} value={1}>
+                <TextField
+                  {...register('inspectionResultOverallOpinion')}
+                  placeholder='종합의견을 작성해주세요'
+                  fullWidth
+                  multiline
+                  sx={{
+                    height: '100%', // TextField 컨테이너 전체 높이를 100%로 설정
+                    // 내부 입력 요소(textarea)의 스타일을 조정하여 높이를 맞춥니다.
+                    '& .MuiInputBase-root': {
+                      height: '100%',
+                      alignItems: 'flex-start' // 입력 커서와 내용이 위에서 시작하도록 정렬
+                    },
+
+                    // 실제 textarea 요소에 높이를 100%로 적용하여 공간을 모두 차지하게 합니다.
+                    '& textarea': {
+                      height: '100% !important' // 중요: 높이 100% 강제 적용
+                    }
+                  }}
+                  slotProps={{ input: { sx: { fontSize: 18 } } }}
+                />
+              </TabPanel>
+              <TabPanel sx={{ height: '90%' }} value={2}>
+                <TextField
+                  {...register('performanceInspectionReportResult')}
+                  placeholder='점검결과를 작성해주세요'
+                  fullWidth
+                  multiline
+                  sx={{
+                    height: '100%', // TextField 컨테이너 전체 높이를 100%로 설정
+                    // 내부 입력 요소(textarea)의 스타일을 조정하여 높이를 맞춥니다.
+                    '& .MuiInputBase-root': {
+                      height: '100%',
+                      alignItems: 'flex-start' // 입력 커서와 내용이 위에서 시작하도록 정렬
+                    },
+
+                    // 실제 textarea 요소에 높이를 100%로 적용하여 공간을 모두 차지하게 합니다.
+                    '& textarea': {
+                      height: '100% !important' // 중요: 높이 100% 강제 적용
+                    }
+                  }}
+                  slotProps={{ input: { sx: { fontSize: 18 } } }}
+                />
+              </TabPanel>
+            </TabContext>
+          </DialogContent>
+          <DialogActions className='flex items-center justify-center'>
+            <Button color='primary' variant='contained' type='submit' disabled={!isDirty}>
+              {isDirty ? '저장' : '변경사항 없음'}
+            </Button>
+            <Button color='success' variant='contained' type='button'>
+              보고서 다운로드
+            </Button>
+            <Button color='secondary' variant='contained' onClick={() => setOpen(false)} type='button'>
+              닫기
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </>
   )
