@@ -36,6 +36,7 @@ const BasicTabContent = ({
   const [editData, setEditData] = useState<MachineProjectResponseDtoType>(JSON.parse(JSON.stringify(projectData)))
   const [showAlertModal, setShowAlertModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
 
   const existChange = JSON.stringify(editData) !== JSON.stringify(projectData)
 
@@ -106,8 +107,15 @@ const BasicTabContent = ({
           </Button>
 
           <EnergyReport />
-
-          <DownloadReportModal />
+          <Button
+            variant='contained'
+            color='info'
+            onClick={() => {
+              setShowDownloadModal(true)
+            }}
+          >
+            보고서 다운로드
+          </Button>
         </div>
         <Button
           variant='contained'
@@ -770,6 +778,7 @@ const BasicTabContent = ({
           onDelete={handleDelete}
         />
       )}
+      {showDownloadModal && <DownloadReportModal open={showDownloadModal} setOpen={setShowDownloadModal} />}
     </div>
   )
 }

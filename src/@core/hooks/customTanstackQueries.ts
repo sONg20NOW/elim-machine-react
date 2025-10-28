@@ -284,31 +284,3 @@ export const useGetInspectionOpinions = (machineProjectId: string) => {
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
-
-// GET /api/machine-projects/{machineProjectId}/machine-reports/download
-export const useGetReportDownloadUrl = (machineProjectId: string, machineReportCategoryId: string) => {
-  const fetchReportDownloadUrl: QueryFunction<string, string[]> = useCallback(
-    async data => {
-      const presignedUrl = await auth
-        .get<{
-          data: { presignedUrl: string }
-        }>(
-          `/api/machine-projects/${machineProjectId}/machine-reports/download?machineReportCategoryId=${machineReportCategoryId}`
-        )
-        .then(v => v.data.data.presignedUrl)
-
-      const [keyType] = data.queryKey
-
-      console.log(`!!! queryFn ${keyType}:`, presignedUrl)
-
-      return presignedUrl
-    },
-    [machineProjectId, machineReportCategoryId]
-  )
-
-  return useQuery({
-    queryKey: QUERY_KEYS.MACHINE_REPORT.GET_DOWNLOAD_URL(machineProjectId, machineReportCategoryId),
-    queryFn: fetchReportDownloadUrl,
-    staleTime: 1000 * 60 * 5 // 5분
-  })
-}

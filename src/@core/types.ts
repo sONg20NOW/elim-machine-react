@@ -1,6 +1,8 @@
 // React Imports
 import type { ReactNode } from 'react'
 
+import type { StatusType } from '@/types/apps/chatTypes'
+
 export type Layout = 'vertical' | 'collapsed' | 'horizontal'
 
 export type Skin = 'default' | 'bordered'
@@ -568,10 +570,39 @@ export interface MachineEnergyUsageReadResponseDtoType {
   monthlyValues: string
 }
 
+type reportStatusType = 'PENDING' | 'COMPLETED' | 'FAILED'
+
+// GET /api/machine-projects/{machineProjectId}/machine-reports/status 보고서 상태 다건 조회
+export interface MachineReportStatusResponseDtoType {
+  machineReportCategoryId: number
+  machineCategoryId: number | null
+  latestMachineReportId: number
+  reportStatus: reportStatusType
+  updatedAt: string
+  fileName: string
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-reports/machine-report-categories/status 카테고리별 보고서 상태 조회
+export interface MachineReportCategoryDetailResponseDtoType {
+  machineReportCategoryId: number
+  reports: MachineReportSimpleResponseDtoType[]
+  latestStatus: reportStatusType
+  latestReportId: number
+  completedCount: number
+}
+
+export interface MachineReportSimpleResponseDtoType {
+  id: number
+  reportStatus: StatusType
+  updatedAt: string
+  fileName: string
+}
+
 // 기계설비 보고서 카테고리 응답 DTO
 export interface MachineReportCategoryReadResponseDtoType {
   id: number
   name: string
+  mappedUrl: string
 }
 
 // 점검의견서 조회 응답 DTO

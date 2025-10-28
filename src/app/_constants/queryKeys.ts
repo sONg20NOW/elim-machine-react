@@ -33,12 +33,5 @@ export const QUERY_KEYS = {
   MACHINE_REPORT_CATEGORY_CONTROLLER: ['MACHINE_REPORT_CATEGORY_CONTROLLER'],
   MACHINE_INSPECTION_OPINION: {
     GET_INSPECTION_OPINION: (machineProjectId: string) => ['GET_INSPECTION_OPINION', machineProjectId]
-  },
-  MACHINE_REPORT: {
-    GET_DOWNLOAD_URL: (machineProjectId: string, machineReportCategoryId: string) => [
-      'GET_DOWNLOAD_URL',
-      machineProjectId,
-      machineReportCategoryId
-    ]
   }
 }
