@@ -143,7 +143,7 @@ const PictureListModal = ({
         isLoadingRef.current = false
       }
     },
-    [selectedItemId, machineProjectId, selectedInspection.machineInspectionResponseDto.id]
+    [selectedItemId, machineProjectId, selectedInspection]
   )
 
   // 최초에 전체 사진 가져오기
