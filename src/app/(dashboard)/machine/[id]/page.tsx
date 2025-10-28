@@ -251,13 +251,20 @@ const MachineUpdatePage = () => {
                   기계설비현장
                   <i className='tabler-chevron-right' />
                 </Typography>
-                <div className='flex'>
+                <div className='flex items-center'>
                   {!isEditingProjectName ? (
                     <Typography color='black' sx={{ fontSize: 25, fontWeight: 500 }}>
                       {projectData?.machineProjectName ?? ''}
                     </Typography>
                   ) : (
-                    <CustomTextField id={'projectNameInput'} defaultValue={projectData?.machineProjectName ?? ''} />
+                    <CustomTextField
+                      slotProps={{
+                        input: { sx: { fontSize: 20 } },
+                        htmlInput: { sx: { py: '0 !important' } }
+                      }}
+                      id={'projectNameInput'}
+                      defaultValue={projectData?.machineProjectName ?? ''}
+                    />
                   )}
                   <IconButton
                     onClick={() => {
