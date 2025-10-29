@@ -45,7 +45,7 @@ export default function ProjectInfoCard({
   const getBackgroundImageStyle = () => {
     // 5. customBackgroundImage가 있으면 그 URL을 사용하고, 없으면 기본 이미지를 사용
     if (!(OverViewPic && OverViewPic.length)) {
-      return `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(/images/safety114_logo.png)`
+      return `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3))`
     }
 
     const imageUrl = OverViewPic[OverViewPic.length - 1].presignedUrl

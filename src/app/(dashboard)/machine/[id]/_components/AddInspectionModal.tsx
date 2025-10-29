@@ -47,6 +47,7 @@ const AddInspectionModal = ({
         setNewData(prev => ({ ...prev, machineCategoryId: parentCategory.id }))
       } else {
         setShowSubCategory(true)
+        setNewData(prev => ({ ...prev, machineCategoryId: 0 }))
       }
     }
   }, [parentCategory, categoryList])

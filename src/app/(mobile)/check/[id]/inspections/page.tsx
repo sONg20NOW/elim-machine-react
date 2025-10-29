@@ -197,7 +197,6 @@ export default function InspectionsPage() {
               disabled={disabled}
               getFilteredInspectionList={getFilteredInspectionList}
               machineProjectId={machineProjectId}
-              participatedEngineerList={participatedEngineerList}
             />
           )
         }
