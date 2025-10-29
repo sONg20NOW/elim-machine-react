@@ -33,6 +33,8 @@ import BasicTabContent from './_components/MachineProjectTabContent'
 import ScheduleAndEngineerTabContent from './_components/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/NoteTabContent'
 import InspectionListContent from './_components/InspectionListContent'
+import type { MachineTabValue } from '@/@core/utils/machineTabValueStore'
+import useMachineTabValueStore from '@/@core/utils/machineTabValueStore'
 
 export const ListsContext = createContext<{
   engineerList: MachineEngineerOptionResponseDtoType[]
@@ -77,13 +79,13 @@ const MachineUpdatePage = () => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
+  const { tabValue, setTabValue } = useMachineTabValueStore(state => state)
+
   const [projectData, setProjectData] = useState<MachineProjectResponseDtoType>()
   const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
   const [engineerList, setEngineerList] = useState<MachineEngineerOptionResponseDtoType[]>([])
   const [categoryList, setCategoryList] = useState<MachineCategoryResponseDtoType[]>([])
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
-
-  const [tabValue, setTabValue] = useState<string>('현장정보')
 
   const [isEditingProjectName, setIsEditingProjectName] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -172,7 +174,7 @@ const MachineUpdatePage = () => {
   }, [getParticipatedEngineerList])
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
-    setTabValue(newValue)
+    setTabValue(newValue as MachineTabValue)
   }
 
   const handleChangeProjectName = useCallback(

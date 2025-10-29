@@ -40,6 +40,7 @@ import AddMachineProjectModal from './_components/addMachineProjectModal'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { MachineInitialFilters } from '@/app/_constants/MachineProjectSeed'
 import { handleApiError } from '@/utils/errorHandler'
+import useMachineTabValueStore from '@/@core/utils/machineTabValueStore'
 
 // datepicker 한글화
 dayjs.locale('ko')
@@ -49,6 +50,8 @@ const periodOptions = [1, 3, 6]
 
 export default function MachinePage() {
   const router = useRouter()
+
+  const setTabValue = useMachineTabValueStore(state => state.setTabValue)
 
   const [data, setData] = useState<MachineProjectPageDtoType[]>([])
   const [loading, setLoading] = useState(false)
@@ -192,6 +195,7 @@ export default function MachinePage() {
     if (!machineProject?.machineProjectId) return
 
     try {
+      setTabValue('현장정보')
       router.push(`/machine/${machineProject.machineProjectId}`)
     } catch (error) {
       handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
