@@ -8,7 +8,6 @@ import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography, Link } fr
 
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
-import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
@@ -21,7 +20,7 @@ export default function Header() {
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
 
-  const username = '나중에이거진짜유저이름으로바꿔야돼요'
+  const username = '송강규'
 
   const handleLogout = async () => {
     try {
@@ -56,7 +55,7 @@ export default function Header() {
               <i className='tabler-menu-2 text-white' />
             </IconButton>
           )}
-          <SearchBar placeholder='검색어를 입력하세요' setSearchKeyword={name => setKeyword(name)} />
+          {/* <SearchBar placeholder='검색어를 입력하세요' setSearchKeyword={name => setKeyword(name)} /> */}
         </div>
         {!isTablet && (
           <div className='flex gap-5 items-center overflow-visible'>
