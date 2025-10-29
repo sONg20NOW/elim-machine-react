@@ -184,15 +184,21 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
                             </div>
                           </td>
                           <td colSpan={5}>
-                            <table>
-                              {Object.keys(value.actionRequired).map((key, idx) => (
-                                <tr key={key}>
-                                  <th style={{ whiteSpace: 'nowrap', width: '1px' }}>{idx + 1}</th>
-                                  <td style={{ whiteSpace: 'nowrap', width: '1px', fontWeight: 'normal' }}>{key}</td>
-                                  <td>{value.actionRequired[key]}</td>
-                                </tr>
-                              ))}
-                            </table>
+                            {JSON.stringify(value.actionRequired) !== JSON.stringify({}) ? (
+                              <table>
+                                {Object.keys(value.actionRequired).map((key, idx) => (
+                                  <tr key={key}>
+                                    <th style={{ whiteSpace: 'nowrap', width: '1px' }}>{idx + 1}</th>
+                                    <td style={{ whiteSpace: 'nowrap', width: '1px', fontWeight: 'normal' }}>{key}</td>
+                                    <td>{value.actionRequired[key]}</td>
+                                  </tr>
+                                ))}
+                              </table>
+                            ) : (
+                              <div className='grid place-items-center'>
+                                <span>-</span>
+                              </div>
+                            )}
                           </td>
                           {/* <td >{value.actionRequired}</td> */}
                         </tr>
