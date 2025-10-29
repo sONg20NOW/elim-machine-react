@@ -113,6 +113,9 @@ export default function PicturePage() {
         remark: selectedPic.remark
       })
       setMachineChecklistItemId(selectedPic.machineChecklistItemId ?? 0)
+      setTimeout(() => {
+        scrollableAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 100)
     }
   }, [selectedPic, reset])
 
