@@ -3,10 +3,9 @@
 // React Imports
 import { useEffect, useRef } from 'react'
 
-// Next Imports
-import Link from 'next/link'
-
 // MUI Imports
+import { useRouter } from 'next/navigation'
+
 import { styled, useColorScheme, useTheme } from '@mui/material/styles'
 
 // Type Imports
@@ -53,6 +52,8 @@ const Navigation = (props: Props) => {
     // dictionary,
     mode
   } = props
+
+  const router = useRouter()
 
   // Hooks
   const verticalNavOptions = useVerticalNav()
@@ -115,9 +116,9 @@ const Navigation = (props: Props) => {
     >
       {/* Nav Header including Logo & nav toggle icons  */}
       <NavHeader>
-        <Link href={'/'}>
+        <div onClick={() => router.push('/machine')} className='cursor-pointer'>
           <Logo />
-        </Link>
+        </div>
         {!(isCollapsed && !isHovered) && (
           <NavCollapseIcons
             lockedIcon={<i className='tabler-chevrons-left text-xl' />}

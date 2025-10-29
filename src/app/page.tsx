@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -12,12 +12,8 @@ export default function HomeRedirectPage() {
   const router = useRouter()
   const isTablet = useIsTablet()
 
-  useEffect(() => {
-    if (isTablet) {
-      router.replace('/check')
-    } else {
-      router.replace('/machine')
-    }
+  useLayoutEffect(() => {
+    router.replace(isTablet ? '/check' : '/machine')
   }, [router, isTablet])
 
   return (
