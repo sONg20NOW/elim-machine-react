@@ -133,9 +133,9 @@ const TableRow = memo(
 
     const aRef = useRef<HTMLAnchorElement>(null)
 
-    const disabled = statuses.find(v => v.machineReportCategoryId === category.id)?.reportStatus !== 'COMPLETED'
-
     const myStatus = statuses.find(status => status.machineReportCategoryId === category.id)
+
+    const disabled = myStatus?.reportStatus !== 'COMPLETED'
 
     const getReportPresignedUrl = useCallback(
       async (machineReportCategoryId: number) => {
