@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react'
 
 import axios from 'axios'
-import { Grid, MenuItem, Button } from '@mui/material'
+import { Grid, MenuItem, Button, Typography } from '@mui/material'
 
 import { toast } from 'react-toastify'
+
+import { NumberField } from '@base-ui-components/react/number-field'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
@@ -76,9 +78,40 @@ const AddInspectionModal = ({
       setOpen={setOpen}
       title='설비 추가'
       primaryButton={
-        <Button variant='contained' onClick={handleSubmit} sx={{ mr: 1 }}>
-          추가
-        </Button>
+        <div className='flex gap-3'>
+          <NumberField.Root
+            value={newData.cnt}
+            onValueChange={value => setNewData(prev => ({ ...prev, cnt: value ?? 0 }))}
+            defaultValue={1}
+            min={1}
+            max={100}
+          >
+            {/* <NumberField.ScrubArea className='cursor-ew-resize'>
+              <label className='cursor-ew-resize text-sm font-light text-gray-900'>수량</label>
+              <NumberField.ScrubAreaCursor className='drop-shadow-[0_1px_1px_#0008] filter'>
+                <i className='tabler-plus' />
+              </NumberField.ScrubAreaCursor>
+            </NumberField.ScrubArea> */}
+
+            <NumberField.Group className='flex border rounded-lg'>
+              <NumberField.Decrement className='flex size-10 items-center justify-center rounded-tl-md rounded-bl-md border border-gray-200 bg-gray-50 bg-clip-padding text-gray-900 select-none hover:bg-gray-100 active:bg-gray-100'>
+                <i className='tabler-chevron-left' />
+              </NumberField.Decrement>
+              <div className='flex items-center'>
+                <NumberField.Input className='h-10 w-10 border-gray-200 text-center text-base text-gray-900 tabular-nums focus:z-1 focus:outline focus:outline-2 focus:-outline-offset-1 focus:outline-blue-800' />
+                <Typography variant='h6' sx={{ paddingInlineEnd: 2 }}>
+                  개
+                </Typography>
+              </div>
+              <NumberField.Increment className='flex size-10 items-center justify-center rounded-tr-md rounded-br-md border border-gray-200 bg-gray-50 bg-clip-padding text-gray-900 select-none hover:bg-gray-100 active:bg-gray-100'>
+                <i className='tabler-chevron-right' />
+              </NumberField.Increment>
+            </NumberField.Group>
+          </NumberField.Root>
+          <Button variant='contained' onClick={handleSubmit} sx={{ mr: 1 }}>
+            추가
+          </Button>
+        </div>
       }
       secondaryButton={
         <Button variant='outlined' color='secondary' onClick={() => setOpen(false)}>
@@ -150,15 +183,7 @@ const AddInspectionModal = ({
           />
         </Grid>
 
-        <Grid item xs={12}>
-          <CustomTextField
-            type='number'
-            fullWidth
-            label='수량'
-            value={newData.cnt}
-            onChange={e => setNewData(prev => ({ ...prev, cnt: Number(e.target.value) }))}
-          />
-        </Grid>
+        <Grid item xs={12}></Grid>
       </Grid>
     </DefaultModal>
   )
