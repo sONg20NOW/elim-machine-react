@@ -65,8 +65,16 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
   })
 
   useEffect(() => {
-    refetch()
-  }, [open, refetch])
+    async function RefetchAndReset() {
+      const { data: response } = await refetch()
+
+      reset(response)
+
+      setValue(0)
+    }
+
+    RefetchAndReset()
+  }, [open, refetch, reset])
 
   const handleSave = async (data: formType) => {
     const message = []
