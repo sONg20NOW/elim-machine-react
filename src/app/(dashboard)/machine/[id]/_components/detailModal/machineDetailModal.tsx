@@ -276,7 +276,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
               )
             )}
           </TabList>
-          <div className='flex gap-2 absolute right-0 top-0'>
+          <div className='flex gap-2 absolute right-0 top-[-2]'>
             <Button variant='contained' color='info' onClick={() => setShowPictureListModal(true)}>
               갤러리 (
               {editData.machineChecklistItemsWithPicCountResponseDtos?.reduce(
@@ -285,9 +285,9 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
               )}
               )
             </Button>
-            <Button variant='contained' color='success'>
+            {/* <Button variant='contained' color='success'>
               보고서
-            </Button>
+            </Button> */}
           </div>
           <TabPanel value={'BASIC'}>
             <BasicTabContent

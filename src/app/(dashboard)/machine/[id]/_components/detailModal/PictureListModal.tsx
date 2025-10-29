@@ -335,7 +335,10 @@ const PictureListModal = ({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth disableEnforceFocus disableAutoFocus>
-      <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4, position: 'relative' }}>
+        <IconButton sx={{ position: 'absolute', top: 0, right: 0 }} onClick={() => setOpen(false)}>
+          <i className='tabler-x' />
+        </IconButton>
         <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 } }}>
           {selectedInspection.machineInspectionResponseDto.machineInspectionName}
         </Typography>

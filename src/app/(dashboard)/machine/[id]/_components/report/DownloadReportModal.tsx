@@ -68,7 +68,7 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
           보고서 다운로드
           {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
           <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
-            <i className='tabler-x text-red-500' />
+            <i className='tabler-x' />
           </IconButton>
           <DialogContentText>※버튼이 비활성화된 경우 먼저 생성을 요청해주세요</DialogContentText>
           <Divider />

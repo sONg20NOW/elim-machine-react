@@ -60,7 +60,7 @@ export default function Header() {
         {!isTablet && (
           <div className='flex gap-5 items-center overflow-visible'>
             <Typography color='white' onClick={() => console.log(document.cookie.split(';'))}>
-              반갑습니다, {username}
+              반갑습니다, {username}님
             </Typography>
             <Button
               size='small'
