@@ -86,7 +86,7 @@ const AddInspectionModal = ({ disabled, getFilteredInspectionList, machineProjec
         setOpen={setOpen}
         title='설비 추가'
         primaryButton={
-          <div className='flex gap-3'>
+          <div className='flex gap-3 items-center'>
             <NumberField.Root
               value={newData.cnt}
               onValueChange={value => setNewData(prev => ({ ...prev, cnt: value ?? 0 }))}
