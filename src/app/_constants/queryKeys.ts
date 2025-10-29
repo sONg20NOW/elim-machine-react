@@ -14,7 +14,10 @@ export const QUERY_KEYS = {
       machineChecklistItemResultId: string
     ) => ['GET_CHECKLIST_RESULT', machineProjectId, machineInspectionId, machineChecklistItemResultId]
   },
-  MACHINE_CATEGORY: ['MACHINE_CATEGORY'],
+  MACHINE_CATEGORY: {
+    GET_MACHINE_CATEGORY: ['GET_MACHINE_CATEGORY'],
+    GET_MACHINE_LEAF_CATEGORY: ['GET_MACHINE_LEAF_CATEGORY']
+  },
   MACHINE_ENERGY_TYPE: ['MACHINE_ENERGY_TYPE'],
   MACHINE_ENERGY_TARGET: {
     GET_ENERGY_TARGETS: (machineProjectId: string, machineEnergyTypeId: string) => [

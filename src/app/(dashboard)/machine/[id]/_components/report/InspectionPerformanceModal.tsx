@@ -21,8 +21,8 @@ import {
 import { toast } from 'react-toastify'
 
 import style from '@/app/_style/Table.module.css'
-import { useGetCategories } from '@/@core/hooks/customTanstackQueries'
-import type { MachineCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
+import { useGetLeafCategories } from '@/@core/hooks/customTanstackQueries'
+import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 
@@ -38,7 +38,7 @@ export default function InspectionPerformanceModal({
   const [loading, setLoading] = useState(false)
   const [statuses, setStatuses] = useState<MachineReportStatusResponseDtoType[]>([])
 
-  const { data: everyCategories } = useGetCategories()
+  const { data: everyCategories } = useGetLeafCategories()
 
   const categories = everyCategories
 
@@ -117,7 +117,7 @@ const InspectionTableRow = memo(
     setStatuses,
     setLoading
   }: {
-    machineCategory: MachineCategoryResponseDtoType
+    machineCategory: MachineLeafCategoryResponseDtoType
     idx: number
     statuses: MachineReportStatusResponseDtoType[]
     setStatuses: Dispatch<SetStateAction<MachineReportStatusResponseDtoType[]>>

@@ -553,6 +553,12 @@ export interface MachineCategoryResponseDtoType {
   name: string
 }
 
+// GET /api/machine-categories/leaf
+export interface MachineLeafCategoryResponseDtoType {
+  id: number
+  name: string
+}
+
 // ----------- 보고서 관련 -----------
 export interface MachineEnergyTypeResponseDtoType {
   machineEnergyTypeId: number

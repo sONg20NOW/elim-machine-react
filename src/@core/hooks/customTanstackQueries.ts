@@ -11,6 +11,7 @@ import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
   machineInspectionSummaryResponseDtoType,
+  MachineLeafCategoryResponseDtoType,
   MachineProjectOverviewPicReadResponseDtoType,
   MachineReportCategoryReadResponseDtoType,
   targetType
@@ -141,8 +142,29 @@ export const useGetCategories = () => {
   }, [])
 
   return useQuery({
-    queryKey: QUERY_KEYS.MACHINE_CATEGORY,
+    queryKey: QUERY_KEYS.MACHINE_CATEGORY.GET_MACHINE_CATEGORY,
     queryFn: fetchCategories,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-categories/leaf
+export const useGetLeafCategories = () => {
+  const fetchLeafCategories: QueryFunction<MachineLeafCategoryResponseDtoType[], string[]> = useCallback(async data => {
+    const response = await auth
+      .get<{ data: { leafCategories: MachineLeafCategoryResponseDtoType[] } }>(`/api/machine-categories/leaf`)
+      .then(v => v.data.data.leafCategories)
+
+    const [keyType] = data.queryKey
+
+    console.log(`!!! queryFn ${keyType}:`, response)
+
+    return response
+  }, [])
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_CATEGORY.GET_MACHINE_LEAF_CATEGORY,
+    queryFn: fetchLeafCategories,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
