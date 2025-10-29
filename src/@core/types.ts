@@ -618,7 +618,7 @@ export interface machineInspectionSummaryResponseDtoType {
     summaryElements: {
       machineTopCategoryName: string
       inspectionResult: 'PASS' | 'FAIL' | 'NONE'
-      actionRequired: string
+      actionRequired: Record<string, string>
     }[]
   }
   inspectionResultOverallOpinion: string

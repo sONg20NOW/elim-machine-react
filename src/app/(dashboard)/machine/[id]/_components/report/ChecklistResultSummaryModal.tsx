@@ -132,7 +132,10 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
         <form onSubmit={handleSubmit(handleSave)}>
           <DialogTitle variant='h3' sx={{ position: 'relative' }}>
             <Box sx={{ display: 'flex', alignItems: 'end', gap: 2 }}>
-              점검의견서 <Typography variant='h5'>[{machineProjectName}]</Typography>
+              점검의견서{' '}
+              <Typography variant='h5' sx={{ color: 'gray' }}>
+                {machineProjectName}
+              </Typography>
               <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
                 <i className='tabler-x text-red-500' />
               </IconButton>
@@ -181,11 +184,15 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
                             </div>
                           </td>
                           <td colSpan={5}>
-                            <TextField
-                              placeholder={{ NONE: '해당없음', PASS: '적합', FAIL: '부적합' }[value.inspectionResult]}
-                              fullWidth
-                              variant='standard'
-                            />
+                            <table>
+                              {Object.keys(value.actionRequired).map((key, idx) => (
+                                <tr key={key}>
+                                  <th style={{ whiteSpace: 'nowrap', width: '1px' }}>{idx + 1}</th>
+                                  <td style={{ whiteSpace: 'nowrap', width: '1px', fontWeight: 'normal' }}>{key}</td>
+                                  <td>{value.actionRequired[key]}</td>
+                                </tr>
+                              ))}
+                            </table>
                           </td>
                           {/* <td >{value.actionRequired}</td> */}
                         </tr>
