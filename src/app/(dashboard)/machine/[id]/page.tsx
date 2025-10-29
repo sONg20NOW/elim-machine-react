@@ -254,7 +254,11 @@ const MachineUpdatePage = () => {
                 <div className='flex items-center'>
                   {!isEditingProjectName ? (
                     <Typography color='black' sx={{ fontSize: 25, fontWeight: 500 }}>
-                      {projectData?.machineProjectName ?? ''}
+                      {projectData?.machineProjectName ? (
+                        projectData?.machineProjectName
+                      ) : (
+                        <span className='font-normal text-slate-400'>이름 없음</span>
+                      )}
                     </Typography>
                   ) : (
                     <CustomTextField

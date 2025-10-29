@@ -177,7 +177,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   useEffect(() => {
     getFilteredInspectionList()
-  }, [getFilteredInspectionList, open, showAddModalOpen])
+  }, [getFilteredInspectionList, open, showAddModalOpen, showPictureListModal])
 
   //  체크 핸들러 (다중선택)
   const handleCheckEngineer = (machine: MachineInspectionPageResponseDtoType) => {

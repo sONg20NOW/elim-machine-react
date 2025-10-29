@@ -351,11 +351,8 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
             machineProjectId={machineProjectId}
             open={showPictureListModal}
             setOpen={setShowPictureListModal}
-            checklistItems={selectedMachine.machineChecklistItemsWithPicCountResponseDtos}
-            totalPicCount={selectedMachine.machineChecklistItemsWithPicCountResponseDtos.reduce(
-              (sum, value) => sum + value.totalMachinePicCount,
-              0
-            )}
+            selectedInspection={selectedMachine}
+            refetchSelectedInspection={refetchSelectMachine}
           />
         )}
       </DefaultModal>

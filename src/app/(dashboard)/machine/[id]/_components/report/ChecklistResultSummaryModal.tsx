@@ -248,9 +248,9 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
             <Button color='primary' variant='contained' type='submit' disabled={!isDirty}>
               {isDirty ? '저장' : '변경사항 없음'}
             </Button>
-            <Button color='success' variant='contained' type='button'>
+            {/* <Button color='success' variant='contained' type='button'>
               보고서 다운로드
-            </Button>
+            </Button> */}
             <Button color='secondary' variant='contained' onClick={() => setOpen(false)} type='button'>
               닫기
             </Button>

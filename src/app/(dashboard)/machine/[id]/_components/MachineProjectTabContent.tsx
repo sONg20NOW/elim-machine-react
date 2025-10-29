@@ -84,7 +84,7 @@ const BasicTabContent = ({
       <div className='flex mb-4 justify-between'>
         <div className='flex gap-[4px]'>
           {/* TODO: 버튼 구현 */}
-          <Button
+          {/* <Button
             variant='contained'
             color='info'
             disabled={true}
@@ -93,7 +93,7 @@ const BasicTabContent = ({
             }}
           >
             입수자료
-          </Button>
+          </Button> */}
           <ChecklistResultSummaryModal machineProjectName={projectData.machineProjectName} />
           <Button
             variant='contained'
@@ -417,6 +417,7 @@ const BasicTabContent = ({
                   </th>
                   <td className='pe-4 border-r solid'>
                     <InputBox
+                      placeholder='이름'
                       showLabel={false}
                       tabFieldKey='contractManager'
                       value={editData.contractManager ?? ''}
@@ -424,6 +425,7 @@ const BasicTabContent = ({
                       tabInfos={MACHINE_INPUT_INFO}
                     />
                     <InputBox
+                      placeholder='전화번호'
                       showLabel={false}
                       tabFieldKey='contractManagerTel'
                       value={editData.contractManagerTel ?? ''}
@@ -431,6 +433,7 @@ const BasicTabContent = ({
                       tabInfos={MACHINE_INPUT_INFO}
                     />
                     <InputBox
+                      placeholder='이메일'
                       showLabel={false}
                       tabFieldKey='contractManagerEmail'
                       value={editData.contractManagerEmail ?? ''}
@@ -444,6 +447,7 @@ const BasicTabContent = ({
                   </th>
                   <td className='pe-4'>
                     <InputBox
+                      placeholder='이름'
                       showLabel={false}
                       tabFieldKey='contractPartner'
                       value={editData.contractPartner ?? ''}
@@ -451,6 +455,7 @@ const BasicTabContent = ({
                       tabInfos={MACHINE_INPUT_INFO}
                     />
                     <InputBox
+                      placeholder='전화번호'
                       showLabel={false}
                       tabFieldKey='contractPartnerTel'
                       value={editData.contractPartnerTel ?? ''}
@@ -458,6 +463,7 @@ const BasicTabContent = ({
                       tabInfos={MACHINE_INPUT_INFO}
                     />
                     <InputBox
+                      placeholder='이메일'
                       showLabel={false}
                       tabFieldKey='contractPartnerEmail'
                       value={editData.contractPartnerEmail ?? ''}
@@ -563,66 +569,68 @@ const BasicTabContent = ({
                     <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       기관명
                     </td>
-                    <td style={{ padding: '10px 12px' }}>{editData?.institutionName ?? ''}</td>
+                    <td style={{ padding: '10px 12px' }}>
+                      {editData?.institutionName ? editData?.institutionName : '-'}
+                    </td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       주소
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px' }}>
-                      {editData?.roadAddress ?? ''}
+                      {editData?.roadAddress ? editData?.roadAddress : '-'}
                     </td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       대표자
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.representative}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.representative ? editData.representative : '-'}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       연면적(㎡)
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.grossArea}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.grossArea ? editData.grossArea : '-'}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       사업자번호
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.bizno}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.bizno ? editData.bizno : '-'}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       세대수
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.houseCnt}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.houseCnt ? editData.houseCnt : '-'}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       용도
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.purpose}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.purpose ? editData.purpose : '-'}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.manager}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.manager ? editData.manager : '-'}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       건물구조
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.structure}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.structure ? editData.structure : '-'}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       연락처
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.managerPhone}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.managerPhone ? editData.managerPhone : '-'}</td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       전화번호
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.tel}</td>
+                    <td style={{ padding: '10px 12px' }}>{editData.tel ? editData.tel : '-'}</td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       준공일
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.completeDate ? new Date(editData.completeDate).toLocaleDateString() : ''}
+                      {editData.completeDate ? new Date(editData.completeDate).toLocaleDateString() : '-'}
                     </td>
                   </tr>
                   <tr style={{ background: '#f3f4f6' }}>
@@ -635,12 +643,14 @@ const BasicTabContent = ({
                       계약일
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.contractDate ? new Date(editData.contractDate).toLocaleDateString() : ''}
+                      {editData.contractDate ? new Date(editData.contractDate).toLocaleDateString() : '-'}
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       진행상태
                     </th>
-                    <td style={{ padding: '10px 12px' }}>{editData.projectStatusDescription}</td>
+                    <td style={{ padding: '10px 12px' }}>
+                      {editData.projectStatusDescription ? editData.projectStatusDescription : '-'}
+                    </td>
                     {/* <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약금액
                     </th>
@@ -656,7 +666,7 @@ const BasicTabContent = ({
                       계약금액
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.contractPrice?.toLocaleString()} 원
+                      {editData.contractPrice?.toLocaleString() ? `${editData.contractPrice?.toLocaleString()}원` : '-'}
                       {editData.vatIncludedYn === 'Y' && (
                         <span style={{ color: '#888', marginLeft: 8 }}>(VAT포함)</span>
                       )}
@@ -671,21 +681,54 @@ const BasicTabContent = ({
                       계약담당자
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.contractManager}
+                      {editData.contractManager ? (
+                        editData.contractManager
+                      ) : (
+                        <span style={{ opacity: '50%' }}>이름 입력란</span>
+                      )}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.contractManagerTel}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.contractManagerTel ? (
+                          editData.contractManagerTel
+                        ) : (
+                          <span style={{ opacity: '50%' }}>전화번호 입력란</span>
+                        )}
+                      </span>
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.contractManagerEmail}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.contractManagerEmail ? (
+                          editData.contractManagerEmail
+                        ) : (
+                          <span style={{ opacity: '50%' }}>이메일 입력란</span>
+                        )}
+                      </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약상대자
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.contractPartner}
+                      {editData.contractPartner ? (
+                        editData.contractPartner
+                      ) : (
+                        <span style={{ opacity: '50%' }}>이름 입력란</span>
+                      )}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.contractPartnerTel}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.contractPartnerTel ? (
+                          editData.contractPartnerTel
+                        ) : (
+                          <span style={{ opacity: '50%' }}>전화번호 입력란</span>
+                        )}
+                      </span>
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.contractPartnerEmail}</span>
+                      <span style={{ color: '#888' }}>
+                        {' '}
+                        {editData.contractPartnerEmail ? (
+                          editData.contractPartnerEmail
+                        ) : (
+                          <span style={{ opacity: '50%' }}>이메일 입력란</span>
+                        )}
+                      </span>
                     </td>
                   </tr>
                   <tr>
@@ -693,7 +736,7 @@ const BasicTabContent = ({
                       요구사항
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px', minHeight: 200 }}>
-                      <p>{editData.requirement}</p>
+                      <p>{editData.requirement ? editData.requirement : '-'}</p>
                     </td>
                   </tr>
                   <tr style={{ background: '#f3f4f6' }}>
@@ -706,53 +749,115 @@ const BasicTabContent = ({
                       유지관리자1
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineMaintainer1Name}
+                      {editData.machineMaintainer1Name ? (
+                        editData.machineMaintainer1Name
+                      ) : (
+                        <span style={{ opacity: '50%' }}>이름 입력란</span>
+                      )}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineMaintainer1Info}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.machineMaintainer1Info ? (
+                          editData.machineMaintainer1Info
+                        ) : (
+                          <span style={{ opacity: '50%' }}>정보 입력란</span>
+                        )}
+                      </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자1
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineManager1Name}
+                      {editData.machineManager1Name ? (
+                        editData.machineManager1Name
+                      ) : (
+                        <span style={{ opacity: '50%' }}>이름 입력란</span>
+                      )}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineManager1Info}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.machineManager1Info ? (
+                          editData.machineManager1Info
+                        ) : (
+                          <span style={{ opacity: '50%' }}>정보 입력란</span>
+                        )}
+                      </span>
                     </td>
                   </tr>
+
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       유지관리자2
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineMaintainer2Name}
+                      {editData.machineMaintainer2Name ? (
+                        editData.machineMaintainer2Name
+                      ) : (
+                        <span style={{ opacity: '50%' }}>이름 입력란</span>
+                      )}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineMaintainer2Info}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.machineMaintainer2Info ? (
+                          editData.machineMaintainer2Info
+                        ) : (
+                          <span style={{ opacity: '50%' }}>정보 입력란</span>
+                        )}
+                      </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자2
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineManager2Name}
+                      {editData.machineManager2Name ? (
+                        editData.machineManager2Name
+                      ) : (
+                        <span style={{ opacity: '50%' }}>이름 입력란</span>
+                      )}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineManager2Info}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.machineManager2Info ? (
+                          editData.machineManager2Info
+                        ) : (
+                          <span style={{ opacity: '50%' }}>정보 입력란</span>
+                        )}
+                      </span>
                     </td>
                   </tr>
+
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       유지관리자3
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineMaintainer3Name}
+                      {editData.machineMaintainer3Name ? (
+                        editData.machineMaintainer3Name
+                      ) : (
+                        <span style={{ opacity: '50%' }}>이름 입력란</span>
+                      )}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineMaintainer3Info}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.machineMaintainer3Info ? (
+                          editData.machineMaintainer3Info
+                        ) : (
+                          <span style={{ opacity: '50%' }}>정보 입력란</span>
+                        )}
+                      </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자3
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineManager3Name}
+                      {editData.machineManager3Name ? (
+                        editData.machineManager3Name
+                      ) : (
+                        <span style={{ opacity: '50%' }}>이름 입력란</span>
+                      )}
                       <br />
-                      <span style={{ color: '#888', fontSize: 13 }}>{editData.machineManager3Info}</span>
+                      <span style={{ color: '#888' }}>
+                        {editData.machineManager3Info ? (
+                          editData.machineManager3Info
+                        ) : (
+                          <span style={{ opacity: '50%' }}>정보 입력란</span>
+                        )}
+                      </span>
                     </td>
                   </tr>
                 </tbody>
