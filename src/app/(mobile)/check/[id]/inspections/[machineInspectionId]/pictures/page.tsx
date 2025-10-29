@@ -5,7 +5,19 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
-import { Box, Button, IconButton, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  TextField,
+  Typography
+} from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -13,7 +25,6 @@ import { toast } from 'react-toastify'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import DeleteModal from '@/@core/components/custom/DeleteModal'
 import { auth } from '@/lib/auth'
 import type {
   MachinePicCursorType,
@@ -21,7 +32,7 @@ import type {
   MachinePicUpdateResponseDtoType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
+import { useGetChecklistInfo, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import getS3Key from '@/@core/utils/getS3Key'
 
 const max_pic = 100
@@ -60,6 +71,8 @@ export default function PicturePage() {
 
   const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
   const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
+
+  const { data: currentInspectioin } = useGetSingleInspection(`${machineProjectId}`, `${machineInspectionId}`)
 
   const {
     register,
@@ -275,9 +288,9 @@ export default function PicturePage() {
         {/* 헤더 */}
         <MobileHeader
           left={
-            <Button type='button' sx={{ p: 0 }} onClick={() => router.back()}>
+            <Button type='button' sx={{ p: 0, display: 'flex', gap: 2 }} onClick={() => router.back()}>
               <i className='tabler-chevron-left text-white text-3xl' />
-              <Typography color='white'>{localStorage.getItem('inspectionName') ?? ''}</Typography>
+              {!isMobile && <Typography color='white'>{currentInspectioin?.machineInspectionName}</Typography>}
             </Button>
           }
           right={
@@ -444,7 +457,25 @@ export default function PicturePage() {
             <TinyImgCard key={pic.machinePicId} pic={pic} />
           ))}
         </Box>
-        <DeleteModal showDeleteModal={openAlert} setShowDeleteModal={setOpenAlert} onDelete={handleDeletePicture} />
+        <Dialog open={openAlert}>
+          <DialogTitle variant='h3'>
+            사진을 삭제하시겠습니까?
+            <DialogContentText>삭제 후에는 되돌릴 수 없습니다.</DialogContentText>
+          </DialogTitle>
+          <DialogActions>
+            <Button
+              variant='contained'
+              className='bg-color-warning hover:bg-color-warning-light'
+              onClick={handleDeletePicture}
+              type='submit'
+            >
+              삭제
+            </Button>
+            <Button variant='contained' color='secondary' type='reset' onClick={() => setOpenAlert(false)}>
+              취소
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </form>
   )
