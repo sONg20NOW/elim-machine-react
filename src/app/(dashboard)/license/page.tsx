@@ -18,7 +18,7 @@ import type { LicensePageResponseDtoType, LicenseResponseDtoType, successRespons
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
-import { PageSizeOptions } from '@/app/_constants/options'
+import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AddModal from './_components/addModal'
 import DetailModal from './_components/DetailModal'
@@ -47,7 +47,7 @@ export default function Licensepage() {
 
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
-  const [size, setSize] = useState(30)
+  const [size, setSize] = useState(DEFAULT_PAGESIZE)
 
   // 모달 관련 상태
   const [addModalOpen, setAddModalOpen] = useState(false)
@@ -213,6 +213,32 @@ export default function Licensepage() {
         </Button>  */}
         <div className=' flex justify-between flex-col items-start sm:flex-row sm:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
           <div className='flex gap-2'>
+            {/* 페이지당 행수 */}
+            <CustomTextField
+              size='small'
+              select
+              value={size.toString()}
+              onChange={e => {
+                setSize(Number(e.target.value))
+                setPage(0)
+              }}
+              className='gap-[5px]'
+              disabled={disabled}
+              slotProps={{
+                select: {
+                  renderValue: selectedValue => {
+                    return selectedValue + ' 개씩'
+                  }
+                }
+              }}
+            >
+              {PageSizeOptions.map(pageSize => (
+                <MenuItem key={pageSize} value={pageSize}>
+                  {pageSize}
+                  {`\u00a0\u00a0`}
+                </MenuItem>
+              ))}
+            </CustomTextField>
             <SearchBar
               placeholder='업체명으로 검색'
               setSearchKeyword={companyName => {
@@ -255,27 +281,6 @@ export default function Licensepage() {
                 </Button>
               </div>
             )}
-            <div className=' gap-3 items-center hidden sm:flex'>
-              {/* 페이지당 행수 */}
-              <span className='grid place-items-center'>페이지당 행 수 </span>
-              <CustomTextField
-                select
-                value={size.toString()}
-                onChange={e => {
-                  setSize(Number(e.target.value))
-                  setPage(0)
-                }}
-                className='gap-[5px]'
-                disabled={disabled}
-              >
-                {PageSizeOptions.map(pageSize => (
-                  <MenuItem key={pageSize} value={pageSize}>
-                    {pageSize}
-                    {`\u00a0\u00a0`}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
-            </div>
 
             {/* 유저 추가 버튼 */}
             <Button

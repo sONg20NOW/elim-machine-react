@@ -14,7 +14,7 @@ import axios from 'axios'
 import MachineDetailModal from './detailModal/machineDetailModal'
 
 // Constants
-import { PageSizeOptions } from '@/app/_constants/options'
+import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 
 // Utils
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
@@ -72,7 +72,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   // 페이지네이션 상태
   const [page, setPage] = useState(0)
-  const [pageSize, setPageSize] = useState(10)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [totalCount, setTotalCount] = useState(0)
 
   // 필터링
@@ -285,6 +285,32 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
       </Button>
       <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
         <div className='flex gap-2'>
+          {/* 페이지당 행수 */}
+          <CustomTextField
+            size='small'
+            select
+            value={pageSize.toString()}
+            onChange={e => {
+              setPageSize(Number(e.target.value))
+              setPage(0)
+            }}
+            className='gap-[5px]'
+            disabled={disabled}
+            slotProps={{
+              select: {
+                renderValue: selectedValue => {
+                  return selectedValue + ' 개씩'
+                }
+              }
+            }}
+          >
+            {PageSizeOptions.map(pageSize => (
+              <MenuItem key={pageSize} value={pageSize}>
+                {pageSize}
+                {`\u00a0\u00a0`}
+              </MenuItem>
+            ))}
+          </CustomTextField>
           {/* 이름으로 검색 */}
           <SearchBar
             placeholder='설비분류로 검색'
@@ -331,27 +357,6 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
               </Button>
             </div>
           )}
-          <div className='flex gap-3 itmes-center'>
-            {/* 페이지당 행수 */}
-            <span className='grid place-items-center whitespace-nowrap'>페이지당 행 수 </span>
-            <CustomTextField
-              select
-              value={pageSize.toString()}
-              onChange={e => {
-                setPageSize(Number(e.target.value))
-                setPage(0)
-              }}
-              className='gap-[5px]'
-              disabled={disabled}
-            >
-              {PageSizeOptions.map(pageSize => (
-                <MenuItem key={pageSize} value={pageSize}>
-                  {pageSize}
-                  {`\u00a0\u00a0`}
-                </MenuItem>
-              ))}
-            </CustomTextField>
-          </div>
 
           {/* 유저 추가 버튼 */}
           <Button

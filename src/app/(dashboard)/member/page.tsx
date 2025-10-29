@@ -22,14 +22,12 @@ import type { memberDetailDtoType, MemberFilterType, memberPageDtoType, successR
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
-import { PageSizeOptions } from '@/app/_constants/options'
+import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
-
-const defualtPageSize = 10
 
 export default function MemberPage() {
   const isTablet = useContext(isTabletContext)
@@ -57,7 +55,7 @@ export default function MemberPage() {
 
   // 페이지네이션 관련
   const [page, setPage] = useState(0)
-  const [size, setSize] = useState(defualtPageSize)
+  const [size, setSize] = useState(DEFAULT_PAGESIZE)
 
   // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
@@ -251,6 +249,32 @@ export default function MemberPage() {
         )}
         <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
           <div className='flex gap-2'>
+            {/* 페이지당 행수 */}
+            <CustomTextField
+              size='small'
+              select
+              value={size.toString()}
+              onChange={e => {
+                setSize(Number(e.target.value))
+                setPage(0)
+              }}
+              className='gap-[5px]'
+              disabled={disabled}
+              slotProps={{
+                select: {
+                  renderValue: selectedValue => {
+                    return selectedValue + ' 개씩'
+                  }
+                }
+              }}
+            >
+              {PageSizeOptions.map(pageSize => (
+                <MenuItem key={pageSize} value={pageSize}>
+                  {pageSize}
+                  {`\u00a0\u00a0`}
+                </MenuItem>
+              ))}
+            </CustomTextField>
             {/* 이름으로 검색 */}
             <SearchBar
               placeholder='이름으로 검색'
@@ -270,29 +294,6 @@ export default function MemberPage() {
                 }}
                 disabled={disabled}
               />
-            )}
-            {!isTablet && (
-              <div className='flex gap-3 itmes-center hidden sm:flex '>
-                {/* 페이지당 행수 */}
-                <span className='grid place-items-center'>페이지당 행 수 </span>
-                <CustomTextField
-                  select
-                  value={size.toString()}
-                  onChange={e => {
-                    setSize(Number(e.target.value))
-                    setPage(0)
-                  }}
-                  className='gap-[5px]'
-                  disabled={disabled}
-                >
-                  {PageSizeOptions.map(pageSize => (
-                    <MenuItem key={pageSize} value={pageSize}>
-                      {pageSize}
-                      {`\u00a0\u00a0`}
-                    </MenuItem>
-                  ))}
-                </CustomTextField>
-              </div>
             )}
           </div>
 
