@@ -94,16 +94,16 @@ const AddInspectionModal = ({
             </NumberField.ScrubArea> */}
 
             <NumberField.Group className='flex border rounded-lg'>
-              <NumberField.Decrement className='flex size-10 items-center justify-center rounded-tl-md rounded-bl-md border border-gray-200 bg-gray-50 bg-clip-padding text-gray-900 select-none hover:bg-gray-100 active:bg-gray-100'>
+              <NumberField.Decrement className='flex h-10 items-center justify-center rounded-tl-md rounded-bl-md border border-gray-200 bg-gray-50 bg-clip-padding text-gray-900 select-none hover:bg-gray-100 active:bg-gray-100'>
                 <i className='tabler-chevron-left' />
               </NumberField.Decrement>
-              <div className='flex items-center'>
-                <NumberField.Input className='h-10 w-10 border-gray-200 text-center text-base text-gray-900 tabular-nums focus:z-1 focus:outline focus:outline-2 focus:-outline-offset-1 focus:outline-blue-800' />
+              <div className='flex items-center gap-1'>
+                <NumberField.Input className='h-8 w-8 border-gray-200 text-center text-base text-gray-900 tabular-nums focus:z-1 focus:outline focus:outline-2 focus:-outline-offset-1 focus:outline-blue-800' />
                 <Typography variant='h6' sx={{ paddingInlineEnd: 2 }}>
                   개
                 </Typography>
               </div>
-              <NumberField.Increment className='flex size-10 items-center justify-center rounded-tr-md rounded-br-md border border-gray-200 bg-gray-50 bg-clip-padding text-gray-900 select-none hover:bg-gray-100 active:bg-gray-100'>
+              <NumberField.Increment className='flex h-10 items-center justify-center rounded-tr-md rounded-br-md border border-gray-200 bg-gray-50 bg-clip-padding text-gray-900 select-none hover:bg-gray-100 active:bg-gray-100'>
                 <i className='tabler-chevron-right' />
               </NumberField.Increment>
             </NumberField.Group>
