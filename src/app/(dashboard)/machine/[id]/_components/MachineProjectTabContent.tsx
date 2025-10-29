@@ -502,6 +502,7 @@ const BasicTabContent = ({
                     </th>
                     <td className='pe-4 border-r solid'>
                       <InputBox
+                        placeholder='이름'
                         showLabel={false}
                         tabFieldKey={`machineMaintainer${i}Name`}
                         value={editData[`machineMaintainer${i}Name` as keyof typeof editData]?.toString() ?? ''}
@@ -509,6 +510,7 @@ const BasicTabContent = ({
                         tabInfos={MACHINE_INPUT_INFO}
                       />
                       <InputBox
+                        placeholder='정보'
                         showLabel={false}
                         tabFieldKey={`machineMaintainer${i}Info`}
                         value={editData[`machineMaintainer${i}Info` as keyof typeof editData]?.toString() ?? ''}
@@ -521,6 +523,7 @@ const BasicTabContent = ({
                     </th>
                     <td className='pe-4'>
                       <InputBox
+                        placeholder='이름'
                         showLabel={false}
                         tabFieldKey={`machineManager${i}Name`}
                         value={editData[`machineManager${i}Name` as keyof typeof editData]?.toString() ?? ''}
@@ -528,6 +531,7 @@ const BasicTabContent = ({
                         tabInfos={MACHINE_INPUT_INFO}
                       />
                       <InputBox
+                        placeholder='정보'
                         showLabel={false}
                         tabFieldKey={`machineManager${i}Info`}
                         value={editData[`machineManager${i}Info` as keyof typeof editData]?.toString() ?? ''}
@@ -681,53 +685,29 @@ const BasicTabContent = ({
                       계약담당자
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.contractManager ? (
-                        editData.contractManager
-                      ) : (
-                        <span style={{ opacity: '50%' }}>이름 입력란</span>
-                      )}
+                      {editData.contractManager ? editData.contractManager : '-'}
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.contractManagerTel ? (
-                          editData.contractManagerTel
-                        ) : (
-                          <span style={{ opacity: '50%' }}>전화번호 입력란</span>
-                        )}
+                        {editData.contractManagerTel ? editData.contractManagerTel : '-'}
                       </span>
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.contractManagerEmail ? (
-                          editData.contractManagerEmail
-                        ) : (
-                          <span style={{ opacity: '50%' }}>이메일 입력란</span>
-                        )}
+                        {editData.contractManagerEmail ? editData.contractManagerEmail : '-'}
                       </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       계약상대자
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.contractPartner ? (
-                        editData.contractPartner
-                      ) : (
-                        <span style={{ opacity: '50%' }}>이름 입력란</span>
-                      )}
+                      {editData.contractPartner ? editData.contractPartner : '-'}
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.contractPartnerTel ? (
-                          editData.contractPartnerTel
-                        ) : (
-                          <span style={{ opacity: '50%' }}>전화번호 입력란</span>
-                        )}
+                        {editData.contractPartnerTel ? editData.contractPartnerTel : '-'}
                       </span>
                       <br />
                       <span style={{ color: '#888' }}>
                         {' '}
-                        {editData.contractPartnerEmail ? (
-                          editData.contractPartnerEmail
-                        ) : (
-                          <span style={{ opacity: '50%' }}>이메일 입력란</span>
-                        )}
+                        {editData.contractPartnerEmail ? editData.contractPartnerEmail : '-'}
                       </span>
                     </td>
                   </tr>
@@ -749,36 +729,20 @@ const BasicTabContent = ({
                       유지관리자1
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineMaintainer1Name ? (
-                        editData.machineMaintainer1Name
-                      ) : (
-                        <span style={{ opacity: '50%' }}>이름 입력란</span>
-                      )}
+                      {editData.machineMaintainer1Name ? editData.machineMaintainer1Name : '-'}
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.machineMaintainer1Info ? (
-                          editData.machineMaintainer1Info
-                        ) : (
-                          <span style={{ opacity: '50%' }}>정보 입력란</span>
-                        )}
+                        {editData.machineMaintainer1Info ? editData.machineMaintainer1Info : '-'}
                       </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자1
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineManager1Name ? (
-                        editData.machineManager1Name
-                      ) : (
-                        <span style={{ opacity: '50%' }}>이름 입력란</span>
-                      )}
+                      {editData.machineManager1Name ? editData.machineManager1Name : '-'}
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.machineManager1Info ? (
-                          editData.machineManager1Info
-                        ) : (
-                          <span style={{ opacity: '50%' }}>정보 입력란</span>
-                        )}
+                        {editData.machineManager1Info ? editData.machineManager1Info : '-'}
                       </span>
                     </td>
                   </tr>
@@ -788,36 +752,20 @@ const BasicTabContent = ({
                       유지관리자2
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineMaintainer2Name ? (
-                        editData.machineMaintainer2Name
-                      ) : (
-                        <span style={{ opacity: '50%' }}>이름 입력란</span>
-                      )}
+                      {editData.machineMaintainer2Name ? editData.machineMaintainer2Name : '-'}
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.machineMaintainer2Info ? (
-                          editData.machineMaintainer2Info
-                        ) : (
-                          <span style={{ opacity: '50%' }}>정보 입력란</span>
-                        )}
+                        {editData.machineMaintainer2Info ? editData.machineMaintainer2Info : '-'}
                       </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자2
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineManager2Name ? (
-                        editData.machineManager2Name
-                      ) : (
-                        <span style={{ opacity: '50%' }}>이름 입력란</span>
-                      )}
+                      {editData.machineManager2Name ? editData.machineManager2Name : '-'}
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.machineManager2Info ? (
-                          editData.machineManager2Info
-                        ) : (
-                          <span style={{ opacity: '50%' }}>정보 입력란</span>
-                        )}
+                        {editData.machineManager2Info ? editData.machineManager2Info : '-'}
                       </span>
                     </td>
                   </tr>
@@ -827,36 +775,20 @@ const BasicTabContent = ({
                       유지관리자3
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineMaintainer3Name ? (
-                        editData.machineMaintainer3Name
-                      ) : (
-                        <span style={{ opacity: '50%' }}>이름 입력란</span>
-                      )}
+                      {editData.machineMaintainer3Name ? editData.machineMaintainer3Name : '-'}
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.machineMaintainer3Info ? (
-                          editData.machineMaintainer3Info
-                        ) : (
-                          <span style={{ opacity: '50%' }}>정보 입력란</span>
-                        )}
+                        {editData.machineMaintainer3Info ? editData.machineMaintainer3Info : '-'}
                       </span>
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       담당자3
                     </th>
                     <td style={{ padding: '10px 12px' }}>
-                      {editData.machineManager3Name ? (
-                        editData.machineManager3Name
-                      ) : (
-                        <span style={{ opacity: '50%' }}>이름 입력란</span>
-                      )}
+                      {editData.machineManager3Name ? editData.machineManager3Name : '-'}
                       <br />
                       <span style={{ color: '#888' }}>
-                        {editData.machineManager3Info ? (
-                          editData.machineManager3Info
-                        ) : (
-                          <span style={{ opacity: '50%' }}>정보 입력란</span>
-                        )}
+                        {editData.machineManager3Info ? editData.machineManager3Info : '-'}
                       </span>
                     </td>
                   </tr>
