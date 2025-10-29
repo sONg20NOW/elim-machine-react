@@ -145,7 +145,7 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
                 {machineProjectName}
               </Typography>
               <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
-                <i className='tabler-x text-red-500' />
+                <i className='tabler-x' />
               </IconButton>
             </Box>
             <Divider />
@@ -194,13 +194,17 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
                           <td colSpan={5}>
                             {JSON.stringify(value.actionRequired) !== JSON.stringify({}) ? (
                               <table>
-                                {Object.keys(value.actionRequired).map((key, idx) => (
-                                  <tr key={key}>
-                                    <th style={{ whiteSpace: 'nowrap', width: '1px' }}>{idx + 1}</th>
-                                    <td style={{ whiteSpace: 'nowrap', width: '1px', fontWeight: 'normal' }}>{key}</td>
-                                    <td>{value.actionRequired[key]}</td>
-                                  </tr>
-                                ))}
+                                <tbody>
+                                  {Object.keys(value.actionRequired).map((key, idx) => (
+                                    <tr key={key}>
+                                      <th style={{ whiteSpace: 'nowrap', width: '1px' }}>{idx + 1}</th>
+                                      <td style={{ whiteSpace: 'nowrap', width: '1px', fontWeight: 'normal' }}>
+                                        {key}
+                                      </td>
+                                      <td>{value.actionRequired[key]}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
                               </table>
                             ) : (
                               <div className='grid place-items-center'>
