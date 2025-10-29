@@ -93,26 +93,26 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           <MenuItem href={`/machine/engineer`} icon={<i className='tabler-users' />}>
             {'설비인력'}
           </MenuItem>
-          <MenuItem href={`/machine/template`} icon={<i className='tabler-clipboard' />}>
+          <MenuItem disabled href={`/machine/template`} icon={<i className='tabler-clipboard' />}>
             {'양식관리'}
           </MenuItem>
         </MenuSection>
         <MenuSection label='안전진단전검'>
-          <MenuItem href={`/safety`} icon={<i className='tabler-shield' />}>
+          <MenuItem disabled href={`/safety`} icon={<i className='tabler-shield' />}>
             {'안전진단현장'}
           </MenuItem>
         </MenuSection>
         <MenuSection label='문의'>
-          <MenuItem href={`/board/notice`} icon={<i className='tabler-speakerphone' />}>
+          <MenuItem disabled href={`/board/notice`} icon={<i className='tabler-speakerphone' />}>
             {'공지사항'}
           </MenuItem>
-          <MenuItem href={`/board/files`} icon={<i className='tabler-paperclip' />}>
+          <MenuItem disabled href={`/board/files`} icon={<i className='tabler-paperclip' />}>
             {'자료실'}
           </MenuItem>
-          <MenuItem href={`/board/faq`} icon={<i className='tabler-clipboard-check' />}>
+          <MenuItem disabled href={`/board/faq`} icon={<i className='tabler-clipboard-check' />}>
             {'FAQ'}
           </MenuItem>
-          <MenuItem href={`/board/qna`} icon={<i className='tabler-zoom-question' />}>
+          <MenuItem disabled href={`/board/qna`} icon={<i className='tabler-zoom-question' />}>
             {'일대일 문의'}
           </MenuItem>
         </MenuSection>
@@ -120,7 +120,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           <MenuItem href={`/member`} icon={<i className='tabler-users-plus' />}>
             {'직원관리'}
           </MenuItem>
-          <MenuItem href={`/loginlog`} icon={<i className='tabler-history' />}>
+          <MenuItem disabled href={`/loginlog`} icon={<i className='tabler-history' />}>
             {'로그인 기록'}
           </MenuItem>
         </MenuSection>
