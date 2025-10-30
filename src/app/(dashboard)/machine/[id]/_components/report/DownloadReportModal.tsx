@@ -175,11 +175,11 @@ const TableRow = memo(
 
     const requestReportCreate = useCallback(
       async (machineReportCategory: MachineReportCategoryReadResponseDtoType) => {
-        const { mappedUrl, id: machineReportCategoryId } = machineReportCategory
+        const { reportTemplateCode } = machineReportCategory
 
         try {
           await auth.post(
-            `api/machine-projects/${machineProjectId}/machine-reports/${mappedUrl}?machineReportCategoryId=${machineReportCategoryId}`
+            `api/machine-projects/${machineProjectId}/machine-reports?reportTemplateCode=${reportTemplateCode}`
           )
 
           console.log('보고서 생성 요청 완료')

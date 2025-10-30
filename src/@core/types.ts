@@ -608,7 +608,7 @@ export interface MachineReportSimpleResponseDtoType {
 export interface MachineReportCategoryReadResponseDtoType {
   id: number
   name: string
-  mappedUrl: string
+  reportTemplateCode: string
 }
 
 // 점검의견서 조회 응답 DTO
