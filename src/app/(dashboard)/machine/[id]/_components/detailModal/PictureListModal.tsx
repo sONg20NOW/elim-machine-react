@@ -336,6 +336,13 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
     )
   }
 
+  useEffect(() => {
+    if (!showPicModal) {
+      resetCursor()
+      getPictures()
+    }
+  }, [showPicModal, getPictures])
+
   return (
     selectedInspection && (
       <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth disableEnforceFocus disableAutoFocus>

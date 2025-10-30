@@ -84,6 +84,7 @@ export default function PictureZoomModal({ open, setOpen, selectedPic, selectedI
     reset(selectedPic)
     setPresignedUrl(selectedPic.presignedUrl)
     setMachineChecklistItemId(selectedPic.machineChecklistItemId)
+    setUrlInspectionId(selectedPic.machineInspectionId)
   }, [selectedPic, reset])
 
   const onChangeImage = async (file: File) => {
