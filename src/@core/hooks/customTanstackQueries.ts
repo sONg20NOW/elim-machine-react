@@ -22,6 +22,27 @@ import type {
 } from '@/@core/types' // 타입 임포트
 
 // ------------------------- MachineInspection 관련 -------------------------
+// GET /api/machine-projects/${machineProjectId}/machine-inspections : 특정 프로젝트의 설비목록 가져오기
+// export const useGetMachineInspections = (machineProjectId: string) => {
+//   return useQuery({
+//     queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS(machineProjectId),
+//     queryFn: async data => {
+//       const [keytype, machineProjectId] = data.queryKey
+
+//       const response = await auth
+//         .get<{
+//           data: { machineProjectPics: MachineInspectionPageResponseDtoType[] }
+//         }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/overview?machineProjectPicType=OVERVIEW`)
+//         .then(v => v.data.data.machineProjectPics)
+
+//       console.log(`!!! queryFn ${keytype}:`, response)
+
+//       return response
+//     },
+//     staleTime: 1000 * 60 * 5 // 5분
+//   })
+// }
+
 // GET /api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}
 const fetchSingleInspection: QueryFunction<MachineInspectionDetailResponseDtoType, string[]> = async data => {
   const [keyInfo, machineProjectId, machineInspectionId] = data.queryKey
@@ -43,7 +64,8 @@ export const useGetSingleInspection = (machineProjectId: string, machineInspecti
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId),
     queryFn: fetchSingleInspection,
-    staleTime: 1000 * 60 * 5 // 5분
+    staleTime: 1000 * 60 * 5, // 5분
+    enabled: Number(machineInspectionId) > 0
   })
 }
 

@@ -17,7 +17,7 @@ import type { FormComponentHandle } from '../page'
 // import EngineerCard from '../_components/EngineerCard'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
-import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import { useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
 
 export interface formType {
   machineInspectionName: string
@@ -55,7 +55,10 @@ const InspectionForm = memo(
     } = useForm<formType>()
 
     // 현재 선택된 inspection 데이터 가져오기
-    const { data: singleInspectionInfo, refetch } = useGetSingleInspection(`${machineProjectId}`, `${inspectionId}`)
+    const { data: singleInspectionInfo, refetch } = useGetSingleInspectionSumamry(
+      `${machineProjectId}`,
+      `${inspectionId}`
+    )
 
     useEffect(() => {
       if (!singleInspectionInfo) return

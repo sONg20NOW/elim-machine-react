@@ -12,7 +12,8 @@ export const QUERY_KEYS = {
       machineProjectId: string,
       machineInspectionId: string,
       machineChecklistItemResultId: string
-    ) => ['GET_CHECKLIST_RESULT', machineProjectId, machineInspectionId, machineChecklistItemResultId]
+    ) => ['GET_CHECKLIST_RESULT', machineProjectId, machineInspectionId, machineChecklistItemResultId],
+    GET_INSPECTIONS: (machineProjectId: string) => ['GET_INSPECTIONS', machineProjectId]
   },
   MACHINE_CATEGORY: {
     GET_MACHINE_CATEGORY: ['GET_MACHINE_CATEGORY'],

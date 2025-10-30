@@ -39,7 +39,7 @@ interface PictureZoomModalProps {
   reloadPics: () => void
   machineProjectId: string
   selectedInspection: MachineInspectionDetailResponseDtoType
-  refetchSelectedInspection?: () => Promise<void>
+  refetchSelectedInspection?: () => void
 }
 
 // ! 확대 기능 구현, 현재 리스트에 있는 목록 슬라이드로 이동 가능 기능 구현, 사진 정보 수정 기능 구현(이름 수정은 연필로)
