@@ -23,6 +23,7 @@ interface InputBoxProps {
   tabInfos: Record<string, InputFieldType>
   showLabel?: boolean
   required?: boolean
+  placeholder?: string
 }
 
 const InputBoxContext = createContext<InputBoxProps | null>(null)
@@ -62,7 +63,7 @@ export function InputBox(props: InputBoxProps) {
 
 function InputBoxContent() {
   const props = useContext(InputBoxContext)
-  const { isEditing, tabInfos, tabFieldKey, value, onChange, showLabel, required } = props!
+  const { isEditing, tabInfos, tabFieldKey, value, onChange, showLabel, required, placeholder } = props!
   const tabField = tabInfos[tabFieldKey]
   const disabled = props?.disabled ?? tabField?.disabled ?? false
 
@@ -204,6 +205,7 @@ function InputBoxContent() {
     case 'text':
       return (
         <CustomTextField
+          placeholder={placeholder}
           required={showLabel && required}
           slotProps={{
             htmlInput: { name: tabFieldKey }

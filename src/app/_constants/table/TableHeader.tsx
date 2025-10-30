@@ -60,7 +60,7 @@ export const HEADERS = {
     officePositionDescription: { label: '직급', canSort: false },
     engineerLicenseNum: { label: '수첩발급번호', canSort: false },
     email: { label: '이메일', canSort: false },
-    phoneNumber: { label: '휴대폰', canSort: false },
+    // phoneNumber: { label: '휴대폰', canSort: false },
     workStatusDescription: { label: '상태', canSort: false },
     projectCnt: { label: '현장수', canSort: false },
     latestProjectName: { label: '마지막현장', canSort: false },

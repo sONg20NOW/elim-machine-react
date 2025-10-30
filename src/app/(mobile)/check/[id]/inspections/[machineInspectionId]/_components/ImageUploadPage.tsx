@@ -154,7 +154,7 @@ export default function ImageUploadPage() {
               slotProps={{ input: { sx: { fontSize: 18 } } }}
             >
               <MenuItem value={0} disabled>
-                --- 점검항목을 선택하세요 ---
+                <Typography sx={{ fontSize: 18, opacity: '50%' }}>--- 점검항목을 선택하세요 ---</Typography>
               </MenuItem>
               {checklistList?.map(v => (
                 <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
@@ -180,7 +180,7 @@ export default function ImageUploadPage() {
                   slotProps={{ input: { sx: { fontSize: 18 } } }}
                 >
                   <MenuItem value={0} disabled>
-                    --- 하위항목을 선택하세요 ---
+                    <Typography sx={{ fontSize: 18, opacity: '50%' }}>--- 하위항목을 선택하세요 ---</Typography>
                   </MenuItem>
                   {checklistList &&
                     checklistList

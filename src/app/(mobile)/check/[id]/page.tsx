@@ -174,7 +174,6 @@ const CheckDetailPage = () => {
         versionRef.current = response2.data.data.version
         reset({ note: data.note })
 
-        // ! name은 version 반환을 안함..
         const response3 = await auth.put<{ data: { version: number } }>(
           `/api/machine-projects/${machineProjectId}/name`,
           {
@@ -203,7 +202,6 @@ const CheckDetailPage = () => {
     [machineProjectId, reset]
   )
 
-  // ! 마지막 업로드 정보 추가되면 추가, 실제 이미지로 변경.
   // ! 설비목록 실제로 받아오기.
   return (
     <form onSubmit={handleSubmit(data => handleSave(data))}>

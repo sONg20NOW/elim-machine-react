@@ -1,10 +1,23 @@
 'use client'
 
+import type { ChangeEvent } from 'react'
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 
-import { Box, Button, IconButton, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  TextField,
+  Typography
+} from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -12,7 +25,6 @@ import { toast } from 'react-toastify'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import DeleteModal from '@/@core/components/custom/DeleteModal'
 import { auth } from '@/lib/auth'
 import type {
   MachinePicCursorType,
@@ -20,11 +32,13 @@ import type {
   MachinePicUpdateResponseDtoType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
+import { useGetChecklistInfo, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import getS3Key from '@/@core/utils/getS3Key'
 
 const max_pic = 100
 
 interface formType {
+  s3Key: string
   presignedUrl: string
   version: number
   machinePicId: number
@@ -57,6 +71,8 @@ export default function PicturePage() {
 
   const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
   const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
+
+  const { data: currentInspectioin } = useGetSingleInspection(`${machineProjectId}`, `${machineInspectionId}`)
 
   const {
     register,
@@ -110,6 +126,9 @@ export default function PicturePage() {
         remark: selectedPic.remark
       })
       setMachineChecklistItemId(selectedPic.machineChecklistItemId ?? 0)
+      setTimeout(() => {
+        scrollableAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 100)
     }
   }, [selectedPic, reset])
 
@@ -134,6 +153,31 @@ export default function PicturePage() {
   useEffect(() => {
     getAllPictures()
   }, [getAllPictures])
+
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+
+    if (!files) return
+    const file = files[0]
+
+    setValue('presignedUrl', URL.createObjectURL(file), {
+      shouldDirty: true,
+      shouldValidate: true
+    })
+
+    const S3KeyResult = await getS3Key(
+      `${machineProjectId}`,
+      [file],
+      `${machineInspectionId}`,
+      machineChecklistItemId,
+      watchedSubItemId,
+      undefined
+    )
+
+    if (!S3KeyResult) return
+    setValue('s3Key', S3KeyResult[0].s3Key)
+    setValue('originalFileName', S3KeyResult[0].fileName)
+  }
 
   const handleDeletePicture = useCallback(async () => {
     try {
@@ -181,7 +225,9 @@ export default function PicturePage() {
 
         setPictures(prev =>
           prev.map(v =>
-            v.machinePicId === selectedPicId ? { ...v, ...response, machineChecklistItemId: machineChecklistItemId } : v
+            v.machinePicId === selectedPicId
+              ? { ...v, ...response, machineChecklistItemId: machineChecklistItemId, presignedUrl: watchedPresignedUrl }
+              : v
           )
         )
         reset({ ...response })
@@ -191,7 +237,15 @@ export default function PicturePage() {
         handleApiError(e)
       }
     },
-    [machineProjectId, selectedPicId, machineInspectionId, reset, watchedSubItemId, machineChecklistItemId]
+    [
+      machineProjectId,
+      selectedPicId,
+      machineInspectionId,
+      reset,
+      watchedSubItemId,
+      watchedPresignedUrl,
+      machineChecklistItemId
+    ]
   )
 
   function TinyImgCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
@@ -234,9 +288,9 @@ export default function PicturePage() {
         {/* 헤더 */}
         <MobileHeader
           left={
-            <Button type='button' sx={{ p: 0 }} onClick={() => router.back()}>
+            <Button type='button' sx={{ p: 0, display: 'flex', gap: 2 }} onClick={() => router.back()}>
               <i className='tabler-chevron-left text-white text-3xl' />
-              <Typography color='white'>{localStorage.getItem('inspectionName') ?? ''}</Typography>
+              {!isMobile && <Typography color='white'>{currentInspectioin?.machineInspectionName}</Typography>}
             </Button>
           }
           right={
@@ -285,14 +339,7 @@ export default function PicturePage() {
               ref={imageInputRef}
               accept='image/*' // 이미지 파일만 허용
               capture='environment'
-              onChange={e => {
-                if (e.target.files) {
-                  setValue('presignedUrl', URL.createObjectURL(e.target.files[0]), {
-                    shouldDirty: true,
-                    shouldValidate: true
-                  })
-                }
-              }}
+              onChange={handleImageChange}
             />
 
             {watchedPresignedUrl ? (
@@ -410,7 +457,25 @@ export default function PicturePage() {
             <TinyImgCard key={pic.machinePicId} pic={pic} />
           ))}
         </Box>
-        <DeleteModal showDeleteModal={openAlert} setShowDeleteModal={setOpenAlert} onDelete={handleDeletePicture} />
+        <Dialog open={openAlert}>
+          <DialogTitle variant='h3'>
+            사진을 삭제하시겠습니까?
+            <DialogContentText>삭제 후에는 되돌릴 수 없습니다.</DialogContentText>
+          </DialogTitle>
+          <DialogActions>
+            <Button
+              variant='contained'
+              className='bg-color-warning hover:bg-color-warning-light'
+              onClick={handleDeletePicture}
+              type='submit'
+            >
+              삭제
+            </Button>
+            <Button variant='contained' color='secondary' type='reset' onClick={() => setOpenAlert(false)}>
+              취소
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </form>
   )

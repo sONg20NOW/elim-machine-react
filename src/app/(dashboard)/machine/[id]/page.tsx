@@ -29,10 +29,12 @@ import type {
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import CustomTextField from '@/@core/components/mui/TextField'
 import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
-import BasicTabContent from './_components/BasicTabContent'
+import BasicTabContent from './_components/MachineProjectTabContent'
 import ScheduleAndEngineerTabContent from './_components/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/NoteTabContent'
 import InspectionListContent from './_components/InspectionListContent'
+import type { MachineTabValue } from '@/@core/utils/machineTabValueStore'
+import useMachineTabValueStore from '@/@core/utils/machineTabValueStore'
 
 export const ListsContext = createContext<{
   engineerList: MachineEngineerOptionResponseDtoType[]
@@ -77,13 +79,13 @@ const MachineUpdatePage = () => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
+  const { tabValue, setTabValue } = useMachineTabValueStore(state => state)
+
   const [projectData, setProjectData] = useState<MachineProjectResponseDtoType>()
   const [scheduleData, setScheduleData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>()
   const [engineerList, setEngineerList] = useState<MachineEngineerOptionResponseDtoType[]>([])
   const [categoryList, setCategoryList] = useState<MachineCategoryResponseDtoType[]>([])
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>([])
-
-  const [tabValue, setTabValue] = useState<string>('현장정보')
 
   const [isEditingProjectName, setIsEditingProjectName] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -172,7 +174,7 @@ const MachineUpdatePage = () => {
   }, [getParticipatedEngineerList])
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
-    setTabValue(newValue)
+    setTabValue(newValue as MachineTabValue)
   }
 
   const handleChangeProjectName = useCallback(
@@ -251,13 +253,24 @@ const MachineUpdatePage = () => {
                   기계설비현장
                   <i className='tabler-chevron-right' />
                 </Typography>
-                <div className='flex'>
+                <div className='flex items-center'>
                   {!isEditingProjectName ? (
                     <Typography color='black' sx={{ fontSize: 25, fontWeight: 500 }}>
-                      {projectData?.machineProjectName ?? ''}
+                      {projectData?.machineProjectName ? (
+                        projectData?.machineProjectName
+                      ) : (
+                        <span className='font-normal text-slate-400'>이름 없음</span>
+                      )}
                     </Typography>
                   ) : (
-                    <CustomTextField id={'projectNameInput'} defaultValue={projectData?.machineProjectName ?? ''} />
+                    <CustomTextField
+                      slotProps={{
+                        input: { sx: { fontSize: 20 } },
+                        htmlInput: { sx: { py: '0 !important' } }
+                      }}
+                      id={'projectNameInput'}
+                      defaultValue={projectData?.machineProjectName ?? ''}
+                    />
                   )}
                   <IconButton
                     onClick={() => {

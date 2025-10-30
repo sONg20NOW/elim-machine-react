@@ -260,6 +260,7 @@ const PictureTable = memo(
         >
           <input
             type='file'
+            capture='environment'
             className='hidden absolute right-0 top-1/2 -translate-y-1/2'
             accept='image/*'
             ref={emptyCameraRef}

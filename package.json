@@ -1,7 +1,7 @@
 {
-  "name": "vuexy-mui-nextjs-admin-template",
+  "name": "elim-machine",
   "version": "4.0.0",
-  "license": "Commercial",
+  "license": "SongKangGyu",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 3001",
@@ -15,6 +15,7 @@
     "removeI18n": "tsx src/remove-translation-scripts/index.ts"
   },
   "dependencies": {
+    "@base-ui-components/react": "^1.0.0-beta.4",
     "@emotion/cache": "11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -58,6 +59,7 @@
     "react-draggable": "^4.5.0",
     "react-dropzone": "14.3.5",
     "react-hook-form": "7.54.1",
+    "react-number-format": "^5.4.4",
     "react-perfect-scrollbar": "1.5.8",
     "react-redux": "9.2.0",
     "react-toastify": "10.0.6",
@@ -67,7 +69,8 @@
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "valibot": "0.42.1"
+    "valibot": "0.42.1",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@iconify/json": "2.2.286",

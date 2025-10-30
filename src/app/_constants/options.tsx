@@ -182,4 +182,6 @@ export const workStatusOption = [
 ]
 
 // 공통
-export const PageSizeOptions = [1, 10, 30, 50]
+export const PageSizeOptions = [15, 20, 25, 30, 50, 100]
+
+export const DEFAULT_PAGESIZE = 15

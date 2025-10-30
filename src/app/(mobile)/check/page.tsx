@@ -367,18 +367,28 @@ export default function MachinePage() {
           }
         />
         {/* 카드 리스트 */}
-        <Box
-          ref={listRef}
-          sx={{
-            flex: 1,
-            overflowY: 'auto',
-            p: 5
-          }}
-        >
-          {data.map((machineProject, idx) => (
-            <MachineProjectCard key={machineProject.machineProjectId} idx={idx} machineProject={machineProject} />
-          ))}
-        </Box>
+        {data.length > 0 ? (
+          <Box
+            ref={listRef}
+            sx={{
+              flex: 1,
+              overflowY: 'auto',
+              p: 5,
+              overflowX: 'hidden'
+            }}
+          >
+            {data.map((machineProject, idx) => (
+              <MachineProjectCard key={machineProject.machineProjectId} idx={idx} machineProject={machineProject} />
+            ))}
+          </Box>
+        ) : (
+          <Box sx={{ display: 'grid', placeItems: 'center', height: '100%' }}>
+            <div className='flex flex-col gap-3 items-center'>
+              <Typography variant='h5'>조건에 맞는 설비현장이 존재하지 않습니다.</Typography>
+              <Typography>다시 검색해주세요.</Typography>
+            </div>
+          </Box>
+        )}
 
         <Pagination
           sx={{ alignSelf: 'center', py: 1 }}

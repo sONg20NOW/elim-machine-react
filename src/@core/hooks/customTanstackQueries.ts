@@ -1,5 +1,3 @@
-// src/hooks/useGetChecklistInfo.ts (예시)
-
 import { useCallback } from 'react'
 
 import type { QueryFunction } from '@tanstack/react-query'
@@ -9,9 +7,14 @@ import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
   MachineCategoryResponseDtoType,
+  MachineEnergyTypeResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
-  MachineProjectOverviewPicReadResponseDtoType
+  machineInspectionSummaryResponseDtoType,
+  MachineLeafCategoryResponseDtoType,
+  MachineProjectOverviewPicReadResponseDtoType,
+  MachineReportCategoryReadResponseDtoType,
+  targetType
 } from '@/@core/types' // 타입 임포트
 
 // GET /api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}
@@ -125,18 +128,181 @@ export const useGetOverviewPics = (machineProjectId: string) => {
 }
 
 // GET /api/machine-categories
-const fetchCategories: QueryFunction<MachineCategoryResponseDtoType[], string[]> = async () => {
-  const response = await auth
-    .get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(`/api/machine-categories`)
-    .then(v => v.data.data.machineCategoryResponseDtos)
+export const useGetCategories = () => {
+  const fetchCategories: QueryFunction<MachineCategoryResponseDtoType[], string[]> = useCallback(async data => {
+    const response = await auth
+      .get<{ data: { machineCategoryResponseDtos: MachineCategoryResponseDtoType[] } }>(`/api/machine-categories`)
+      .then(v => v.data.data.machineCategoryResponseDtos)
 
-  return response
+    const [keyType] = data.queryKey
+
+    console.log(`!!! queryFn ${keyType}:`, response)
+
+    return response
+  }, [])
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_CATEGORY.GET_MACHINE_CATEGORY,
+    queryFn: fetchCategories,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
 }
 
-export const useGetCategories = () => {
+// GET /api/machine-categories/leaf
+export const useGetLeafCategories = () => {
+  const fetchLeafCategories: QueryFunction<MachineLeafCategoryResponseDtoType[], string[]> = useCallback(async data => {
+    const response = await auth
+      .get<{ data: { leafCategories: MachineLeafCategoryResponseDtoType[] } }>(`/api/machine-categories/leaf`)
+      .then(v => v.data.data.leafCategories)
+
+    const [keyType] = data.queryKey
+
+    console.log(`!!! queryFn ${keyType}:`, response)
+
+    return response
+  }, [])
+
   return useQuery({
-    queryKey: QUERY_KEYS.MACHINE_CATEGORY,
-    queryFn: fetchCategories,
+    queryKey: QUERY_KEYS.MACHINE_CATEGORY.GET_MACHINE_LEAF_CATEGORY,
+    queryFn: fetchLeafCategories,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-energy-types
+export const useGetEnergyTypes = () => {
+  const fetchEnergyTypes: QueryFunction<MachineEnergyTypeResponseDtoType[], string[]> = useCallback(async data => {
+    const response = await auth
+      .get<{ data: { machineEnergyTypes: MachineEnergyTypeResponseDtoType[] } }>(`/api/machine-energy-types`)
+      .then(v => v.data.data.machineEnergyTypes)
+
+    const [keyType] = data.queryKey
+
+    console.log(`!!! queryFn ${keyType}:`, response)
+
+    return response
+  }, [])
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_ENERGY_TYPE,
+    queryFn: fetchEnergyTypes,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-energy-targets
+export const useGetEnergyTargets = (machineProjectId: string, machineEnergyTypeId: string) => {
+  const fetchEnergyTargets: QueryFunction<targetType[], string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { machineEnergyTargets: targetType[] }
+        }>(
+          `/api/machine-projects/${machineProjectId}/machine-energy-targets?machineEnergyTypeId=${machineEnergyTypeId}`
+        )
+        .then(v => v.data.data.machineEnergyTargets)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId, machineEnergyTypeId]
+  )
+
+  const isEnabled = machineEnergyTypeId !== 'undefined'
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_ENERGY_TARGET.GET_ENERGY_TARGETS(machineProjectId, machineEnergyTypeId),
+    queryFn: fetchEnergyTargets,
+    enabled: isEnabled,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-energy-usages 에너지 사용량 전체 조회
+export const useGetEnergyUsages = (machineProjectId: string, machineEnergyTypeId: string) => {
+  const fetchEnergyUsages: QueryFunction<
+    { targetId: number; year: number; monthlyValues: Record<string, number> }[],
+    string[]
+  > = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { machineEnergyUsages: { targetId: number; year: number; monthlyValues: Record<string, number> }[] }
+        }>(
+          `/api/machine-projects/${machineProjectId}/machine-energy-usages?machineEnergyTypeId=${machineEnergyTypeId}&years=${'2022, 2023, 2024, 2025'}`
+        )
+        .then(v => v.data.data.machineEnergyUsages)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId, machineEnergyTypeId]
+  )
+
+  const isEnabled = machineEnergyTypeId !== 'undefined'
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_ENERGY_USAGE.GET_ENERGY_USAGES(machineProjectId, machineEnergyTypeId),
+    queryFn: fetchEnergyUsages,
+    enabled: isEnabled,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-report-categories
+export const useGetReportCategories = () => {
+  const fetchReportCategories: QueryFunction<MachineReportCategoryReadResponseDtoType[], string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { machineReportCategories: MachineReportCategoryReadResponseDtoType[] }
+        }>(`/api/machine-report-categories`)
+        .then(v => v.data.data.machineReportCategories)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    []
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_REPORT_CATEGORY_CONTROLLER,
+    queryFn: fetchReportCategories,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-inspection-opinions/summary
+export const useGetInspectionOpinions = (machineProjectId: string) => {
+  const fetchInspectionOpinions: QueryFunction<machineInspectionSummaryResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: machineInspectionSummaryResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-inspection-opinions/summary`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_INSPECTION_OPINION.GET_INSPECTION_OPINION(machineProjectId),
+    queryFn: fetchInspectionOpinions,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }

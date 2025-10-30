@@ -1,10 +1,10 @@
 export const QUERY_KEYS = {
   MACHINE_PROJECT_PIC: {
-    GET_OVERVIEW: (machineProjectId: string) => ['overview', machineProjectId]
+    GET_OVERVIEW: (machineProjectId: string) => ['GET_OVERVIEW', machineProjectId]
   },
   MACHINE_INSPECTION: {
     GET_INSPECTION_INFO: (machineProjectId: string, machineInspectionId: string) => [
-      'single inspection info',
+      'GET_INSPECTION_INFO',
       machineProjectId,
       machineInspectionId
     ],
@@ -12,7 +12,29 @@ export const QUERY_KEYS = {
       machineProjectId: string,
       machineInspectionId: string,
       machineChecklistItemResultId: string
-    ) => ['checklist result', machineProjectId, machineInspectionId, machineChecklistItemResultId]
+    ) => ['GET_CHECKLIST_RESULT', machineProjectId, machineInspectionId, machineChecklistItemResultId]
   },
-  MACHINE_CATEGORY: ['categories']
+  MACHINE_CATEGORY: {
+    GET_MACHINE_CATEGORY: ['GET_MACHINE_CATEGORY'],
+    GET_MACHINE_LEAF_CATEGORY: ['GET_MACHINE_LEAF_CATEGORY']
+  },
+  MACHINE_ENERGY_TYPE: ['MACHINE_ENERGY_TYPE'],
+  MACHINE_ENERGY_TARGET: {
+    GET_ENERGY_TARGETS: (machineProjectId: string, machineEnergyTypeId: string) => [
+      'GET_ENERGY_TARGETS',
+      machineProjectId,
+      machineEnergyTypeId
+    ]
+  },
+  MACHINE_ENERGY_USAGE: {
+    GET_ENERGY_USAGES: (machineProjectId: string, machineEnergyTypeId: string) => [
+      'GET_ENERGY_USAGES',
+      machineProjectId,
+      machineEnergyTypeId
+    ]
+  },
+  MACHINE_REPORT_CATEGORY_CONTROLLER: ['MACHINE_REPORT_CATEGORY_CONTROLLER'],
+  MACHINE_INSPECTION_OPINION: {
+    GET_INSPECTION_OPINION: (machineProjectId: string) => ['GET_INSPECTION_OPINION', machineProjectId]
+  }
 }
