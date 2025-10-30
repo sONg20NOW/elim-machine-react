@@ -1,7 +1,5 @@
 import { create } from 'zustand'
 
-export type MachineTabValue = '현장정보' | '점검일정/참여기술진' | '설비목록' | '전체사진' | '특이사항'
-
 interface isEditingState {
   isEditing: boolean
   setIsEditing: (value: boolean) => void

@@ -21,8 +21,9 @@ import type {
   targetType
 } from '@/@core/types' // 타입 임포트
 
+// ------------------------- MachineInspection 관련 -------------------------
 // GET /api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}
-const fetchDetailInspection: QueryFunction<MachineInspectionDetailResponseDtoType, string[]> = async data => {
+const fetchSingleInspection: QueryFunction<MachineInspectionDetailResponseDtoType, string[]> = async data => {
   const [keyInfo, machineProjectId, machineInspectionId] = data.queryKey
 
   // API 호출 로직
@@ -37,6 +38,16 @@ const fetchDetailInspection: QueryFunction<MachineInspectionDetailResponseDtoTyp
   return response
 }
 
+// 단일 설비 정보 전체 가져오기
+export const useGetSingleInspection = (machineProjectId: string, machineInspectionId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId),
+    queryFn: fetchSingleInspection,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// 단일 설비 정보에서 체크리스트 정보만 샘플링
 export const useGetChecklistInfo = (machineProjectId: string, machineInspectionId: string) => {
   const selectMachineChecklistItemsWithPicCountResponseDtos = useCallback(
     (data: MachineInspectionDetailResponseDtoType) => {
@@ -49,13 +60,14 @@ export const useGetChecklistInfo = (machineProjectId: string, machineInspectionI
 
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId),
-    queryFn: fetchDetailInspection,
+    queryFn: fetchSingleInspection,
     select: selectMachineChecklistItemsWithPicCountResponseDtos,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
 
-export const useGetSingleInspection = (machineProjectId: string, machineInspectionId: string) => {
+// 단일 설비 정보에서 machineInspectionResponseDto만 샘플링
+export const useGetSingleInspectionSumamry = (machineProjectId: string, machineInspectionId: string) => {
   const selectMachineInspectionResponseDto = useCallback((data: MachineInspectionDetailResponseDtoType) => {
     console.log('select machineInspectionResponseDto!')
 
@@ -64,7 +76,7 @@ export const useGetSingleInspection = (machineProjectId: string, machineInspecti
 
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId),
-    queryFn: fetchDetailInspection,
+    queryFn: fetchSingleInspection,
     select: selectMachineInspectionResponseDto,
     staleTime: 1000 * 60 * 5 // 5분
   })
