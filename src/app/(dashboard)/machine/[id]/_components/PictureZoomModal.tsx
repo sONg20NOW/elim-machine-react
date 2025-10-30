@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -24,6 +24,8 @@ import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
 
+import { Controller, useForm } from 'react-hook-form'
+
 import type {
   MachineInspectionDetailResponseDtoType,
   MachinePicPresignedUrlResponseDtoType,
@@ -44,313 +46,298 @@ interface PictureZoomModalProps {
 }
 
 // ! 확대 기능 구현, 현재 리스트에 있는 목록 슬라이드로 이동 가능 기능 구현, 사진 정보 수정 기능 구현(이름 수정은 연필로)
-export default function PictureZoomModal({
-  open,
-  setOpen,
-  selectedPic,
-  reloadPics,
-  selectedInspection,
-  refetchSelectedInspection
-}: PictureZoomModalProps) {
+export default function PictureZoomModal({ open, setOpen, selectedPic, selectedInspection }: PictureZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
 
-  const [editData, setEditData] = useState<MachinePicPresignedUrlResponseDtoType>(
-    JSON.parse(JSON.stringify(selectedPic))
-  )
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { isDirty, dirtyFields },
+    setValue,
+    getValues,
+    watch
+  } = useForm<MachinePicUpdateResponseDtoType & { machineInspectionId: number }>({
+    defaultValues: {
+      ...selectedPic
+    }
+  })
+
+  const watchedSubItemId = watch('machineChecklistSubItemId')
+  const watchedAlternativeSubTitle = watch('alternativeSubTitle')
+
+  const [machineChecklistItemId, setMachineChecklistItemId] = useState(selectedPic.machineChecklistItemId)
+  const [presignedUrl, setPresignedUrl] = useState(selectedPic.presignedUrl)
+
+  // 사진 정보 수정을 위한 상태관리
+  const [urlInspectionId, setUrlInspectionId] = useState(selectedPic.machineInspectionId)
 
   const { data: inspectionList } = useGetInspections(machineProjectId)
 
-  const [isEditingPicName, setIsEditingPicName] = useState(false)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   // 반응형을 위한 미디어쿼리
   const isMobile = useMediaQuery('(max-width:600px)')
 
   useEffect(() => {
-    if (open) setEditData(JSON.parse(JSON.stringify(selectedPic)))
-  }, [open, selectedPic])
+    reset(selectedPic)
+    setPresignedUrl(selectedPic.presignedUrl)
+    setMachineChecklistItemId(selectedPic.machineChecklistItemId)
+  }, [selectedPic, reset])
 
   const onChangeImage = async (file: File) => {
-    if (!editData.machineChecklistItemId || !editData.machineChecklistSubItemId) return
+    if (!watchedSubItemId) return
 
     const S3KeyResult = await getS3Key(
       machineProjectId,
       [file],
-      editData.machineInspectionId.toString(),
-      editData.machineChecklistItemId,
-      editData.machineChecklistSubItemId,
+      getValues().machineInspectionId.toString(),
+      machineChecklistItemId,
+      getValues().machineChecklistSubItemId,
       undefined
     )
 
     if (!S3KeyResult) return
 
-    setEditData(prev => ({
-      ...prev,
-      s3Key: S3KeyResult[0].s3Key,
-      originalFileName: S3KeyResult[0].fileName,
-      presignedUrl: URL.createObjectURL(file)
-    }))
+    setPresignedUrl(URL.createObjectURL(file))
+    setValue('s3Key', S3KeyResult[0].s3Key, { shouldDirty: true })
+    setValue('originalFileName', S3KeyResult[0].fileName, { shouldDirty: true })
   }
 
-  const handleSave = useCallback(async () => {
-    if (!editData.machineChecklistItemId) {
-      toast.error('점검항목과 하위항목을 선택해주세요')
+  const handleSave = async (data: MachinePicUpdateResponseDtoType) => {
+    console.log('save?')
 
-      return
-    }
-
-    if (!editData.machineChecklistSubItemId) {
+    if (!watchedSubItemId) {
       toast.error('하위항목을 선택해주세요')
 
       return
     }
 
+    const updateRequest = dirtyFields.s3Key ? data : { ...data, s3Key: null }
+
     try {
-      const response = await axios.put<{ data: MachinePicUpdateResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedPic.machineInspectionId}/machine-pics/${selectedPic.machinePicId}`,
-        editData
-      )
+      const response = await axios
+        .put<{
+          data: MachinePicUpdateResponseDtoType
+        }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${urlInspectionId}/machine-pics/${selectedPic.machinePicId}`,
+          updateRequest
+        )
+        .then(v => v.data.data)
 
-      const updatedData = response.data.data
+      reset(response)
+      setUrlInspectionId(response.machineInspectionId)
 
-      reloadPics()
-      if (refetchSelectedInspection) refetchSelectedInspection()
-      setEditData(prev => ({ ...prev, ...updatedData }))
       handleSuccess('사진 정보가 변경되었습니다.')
     } catch (error) {
       handleApiError(error)
     }
-  }, [machineProjectId, selectedPic, reloadPics, refetchSelectedInspection, editData])
+  }
 
-  useEffect(() => setEditData(JSON.parse(JSON.stringify(selectedPic))), [selectedPic])
+  useEffect(() => {
+    console.log(JSON.stringify(getValues()))
+  })
 
   return (
     inspectionList && (
-      <Dialog
-        maxWidth='xl'
-        open={open}
-        onClose={() => {
-          setOpen(false)
-          setIsEditingPicName(false)
-        }}
-      >
-        <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
-          <div className='flex justify-between'>
-            <div className='flex gap-4 items-center'>
-              {!isEditingPicName ? (
-                <Typography sx={{ fontWeight: 700, fontSize: isMobile ? 20 : 24 }}>
-                  {editData.originalFileName}
-                </Typography>
-              ) : (
-                <TextField
-                  variant='standard'
-                  fullWidth
-                  size='small'
-                  slotProps={{
-                    htmlInput: {
-                      sx: {
-                        fontWeight: 700,
-                        fontSize: isMobile ? 20 : 24
-                      }
+      <form onSubmit={handleSubmit(handleSave)} id='picture-form'>
+        <Dialog
+          maxWidth='xl'
+          fullWidth
+          open={open}
+          onClose={() => {
+            setOpen(false)
+          }}
+        >
+          <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
+            <div className='flex justify-between'>
+              <TextField
+                {...register('originalFileName')}
+                variant='standard'
+                fullWidth
+                size='small'
+                sx={{ width: '30%' }}
+                slotProps={{
+                  htmlInput: {
+                    sx: {
+                      fontWeight: 700,
+                      fontSize: isMobile ? 20 : 24
                     }
-                  }}
-                  id='new-picture-name-input'
-                  value={editData.originalFileName}
-                  onChange={e => setEditData(prev => ({ ...prev, originalFileName: e.target.value }))}
-                />
-              )}
-              <IconButton
-                onClick={() => {
-                  setIsEditingPicName(prev => !prev)
+                  }
                 }}
-              >
-                {!isEditingPicName ? <i className='tabler-pencil' /> : <i className='tabler-check text-green-500' />}
-              </IconButton>
-              {isEditingPicName && (
+                id='new-picture-name-input'
+              />
+              <div className='flex gap-4 items-center'>
                 <IconButton
-                  color='error'
-                  onClick={() => {
-                    setEditData(prev => ({ ...prev, originalFileName: selectedPic.originalFileName }))
-                    setIsEditingPicName(false)
-                  }}
+                  type='button'
+                  sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
+                  size='small'
+                  onClick={() => setOpen(false)}
                 >
                   <i className='tabler-x' />
                 </IconButton>
-              )}
+              </div>
             </div>
-            <div className='flex gap-4 items-center'>
-              <IconButton
-                type='button'
-                sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
-                size='small'
-                onClick={() => setOpen(false)}
-              >
-                <i className='tabler-x' />
-              </IconButton>
-            </div>
-          </div>
-        </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <div
-            className={classNames('flex gap-4', {
-              'flex-col': isMobile
-            })}
-          >
-            <div className='grid place-items-center relative'>
-              <img
-                src={editData.presignedUrl}
-                alt={editData.originalFileName}
-                style={{
-                  width: '100%',
-                  maxHeight: '60dvh',
-                  objectFit: 'cover',
-                  maxWidth: isMobile ? '' : 1000
-                }}
-              />
-              <IconButton
-                type='button'
-                sx={{
-                  color: 'white',
-                  boxShadow: 10,
-                  position: 'absolute',
-                  top: 6,
-                  right: 6,
-                  backgroundColor: 'primary.dark'
-                }}
-                onClick={() => cameraInputRef.current?.click()}
-              >
-                <i className='tabler-photo text-4xl' />
-              </IconButton>
-            </div>
-            <Box>
-              <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
-                <Grid2 size={2}>
-                  <InputLabel>설비명</InputLabel>
-                  <TextField
-                    select
-                    value={editData.machineInspectionId ?? ''}
-                    onChange={e =>
-                      setEditData(prev => ({
-                        ...prev,
-                        machineInspectionId: Number(e.target.value),
-                        machineChecklistSubItemId: null,
-                        machineChecklistItemId: null
-                      }))
-                    }
-                    hiddenLabel
-                    size='small'
-                    fullWidth
-                  >
-                    {inspectionList?.map(v => (
-                      <MenuItem key={v.id} value={v.id}>
-                        {v.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid2>
-                <Grid2 size={2}>
-                  <InputLabel>점검항목</InputLabel>
+          </DialogTitle>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <div
+              className={classNames('flex gap-4  w-full', {
+                'flex-col': isMobile
+              })}
+            >
+              <div className='flex-1 grid w-full place-items-center relative border-4 p-2 rounded-lg border-[1px solid lightgray]'>
+                <img
+                  src={presignedUrl}
+                  alt={watchedAlternativeSubTitle}
+                  style={{
+                    width: '100%',
+                    minHeight: '50dvh',
+                    maxHeight: '60dvh',
+                    objectFit: 'contain'
+                  }}
+                />
+                <Button
+                  type='button'
+                  sx={{
+                    color: 'white',
+                    boxShadow: 10,
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    backgroundColor: 'primary.dark'
+                  }}
+                  onClick={() => cameraInputRef.current?.click()}
+                >
+                  사진 변경
+                </Button>
+              </div>
+              <Box>
+                <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
+                  <Grid2 size={2}>
+                    <Controller
+                      name='machineInspectionId'
+                      control={control}
+                      render={({ field }) => (
+                        <>
+                          <InputLabel>설비명</InputLabel>
+                          <TextField
+                            select
+                            value={field.value}
+                            onChange={v => {
+                              field.onChange(Number(v.target.value))
+                              setMachineChecklistItemId(0)
+                              setValue('machineChecklistSubItemId', 0, { shouldDirty: true })
+                            }}
+                            hiddenLabel
+                            size='small'
+                            fullWidth
+                          >
+                            {inspectionList?.map(v => (
+                              <MenuItem key={v.id} value={v.id}>
+                                {v.name}
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                        </>
+                      )}
+                    />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <InputLabel>점검항목</InputLabel>
 
-                  <TextField
-                    select
-                    value={editData.machineChecklistItemId ?? ''}
-                    onChange={e =>
-                      setEditData(prev => ({
-                        ...prev,
-                        machineChecklistSubItemId: null,
-                        machineChecklistItemId: Number(e.target.value)
-                      }))
-                    }
-                    hiddenLabel
-                    size='small'
-                    fullWidth
-                  >
-                    {selectedInspection.machineChecklistItemsWithPicCountResponseDtos?.map(v => (
-                      <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                        {v.machineChecklistItemName}
-                      </MenuItem>
-                    )) ?? <MenuItem></MenuItem>}
-                  </TextField>
-                </Grid2>
-                <Grid2 size={2}>
-                  <InputLabel>하위항목</InputLabel>
-
-                  <TextField
-                    select
-                    value={editData.machineChecklistSubItemId ?? ''}
-                    onChange={e =>
-                      setEditData(prev => ({ ...prev, machineChecklistSubItemId: Number(e.target.value) }))
-                    }
-                    hiddenLabel
-                    size='small'
-                    fullWidth
-                  >
-                    {selectedInspection.machineChecklistItemsWithPicCountResponseDtos
-                      .find(v => v.machineChecklistItemId === editData.machineChecklistItemId)
-                      ?.checklistSubItems.map(v => (
-                        <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
-                          {v.checklistSubItemName}
+                    <TextField
+                      select
+                      hiddenLabel
+                      size='small'
+                      fullWidth
+                      value={machineChecklistItemId}
+                      onChange={e => setMachineChecklistItemId(Number(e.target.value))}
+                    >
+                      {selectedInspection.machineChecklistItemsWithPicCountResponseDtos?.map(v => (
+                        <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
+                          {v.machineChecklistItemName}
                         </MenuItem>
                       )) ?? <MenuItem></MenuItem>}
-                  </TextField>
+                    </TextField>
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <Controller
+                      name='machineChecklistSubItemId'
+                      control={control}
+                      render={({ field }) => (
+                        <>
+                          <InputLabel>하위항목</InputLabel>
+                          <TextField
+                            select
+                            value={field.value}
+                            onChange={e => field.onChange(Number(e.target.value))}
+                            hiddenLabel
+                            size='small'
+                            fullWidth
+                          >
+                            {selectedInspection.machineChecklistItemsWithPicCountResponseDtos
+                              .find(v => v.machineChecklistItemId === machineChecklistItemId)
+                              ?.checklistSubItems.map(v => (
+                                <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
+                                  {v.checklistSubItemName}
+                                </MenuItem>
+                              )) ?? <MenuItem></MenuItem>}
+                          </TextField>
+                        </>
+                      )}
+                    />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <InputLabel>대체타이틀</InputLabel>
+
+                    <TextField {...register('alternativeSubTitle')} hiddenLabel size='small' fullWidth />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <InputLabel>측정값</InputLabel>
+
+                    <TextField {...register('measuredValue')} hiddenLabel size='small' fullWidth />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <InputLabel>비고</InputLabel>
+
+                    <TextField {...register('remark')} minRows={3} multiline fullWidth hiddenLabel />
+                  </Grid2>
                 </Grid2>
-                <Grid2 size={2}>
-                  <InputLabel>대체타이틀</InputLabel>
+              </Box>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <div className='flex items-end gap-4'>
+              <Typography color={isDirty ? 'error.main' : 'warning.main'}>
+                {!isDirty ? '변경사항이 없습니다' : !watchedSubItemId && '※하위항목을 지정해주세요'}
+              </Typography>
+              <Button
+                sx={{ width: 'fit-content' }}
+                variant='contained'
+                type='submit'
+                form='picture-form'
+                disabled={!isDirty || !watchedSubItemId}
+              >
+                저장
+              </Button>
+            </div>
+          </DialogActions>
+          <input
+            type='file'
+            accept='image/*'
+            className='hidden'
+            ref={cameraInputRef}
+            onChange={e => {
+              if (!e.target.files) return
 
-                  <TextField
-                    hiddenLabel
-                    size='small'
-                    fullWidth
-                    value={editData.alternativeSubTitle ?? ''}
-                    onChange={e => setEditData(prev => ({ ...prev, alternativeSubTitle: e.target.value }))}
-                  />
-                </Grid2>
-                <Grid2 size={2}>
-                  <InputLabel>측정값</InputLabel>
+              const files = Array.from(e.target.files)
 
-                  <TextField
-                    hiddenLabel
-                    size='small'
-                    fullWidth
-                    value={editData.measuredValue ?? ''}
-                    onChange={e => setEditData(prev => ({ ...prev, measuredValue: e.target.value }))}
-                  />
-                </Grid2>
-                <Grid2 size={2}>
-                  <InputLabel>비고</InputLabel>
-
-                  <TextField
-                    minRows={3}
-                    multiline
-                    fullWidth
-                    hiddenLabel
-                    value={editData.remark ?? ''}
-                    onChange={e => setEditData(prev => ({ ...prev, remark: e.target.value }))}
-                  />
-                </Grid2>
-              </Grid2>
-            </Box>
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button variant='contained' onClick={() => handleSave()}>
-            저장
-          </Button>
-        </DialogActions>
-        <input
-          type='file'
-          accept='image/*'
-          className='hidden'
-          ref={cameraInputRef}
-          onChange={e => {
-            if (!e.target.files) return
-
-            const files = Array.from(e.target.files)
-
-            onChangeImage(files[0])
-          }}
-        />
-      </Dialog>
+              onChangeImage(files[0])
+            }}
+          />
+        </Dialog>
+      </form>
     )
   )
 }

@@ -206,6 +206,13 @@ const PictureListTabContent = () => {
     }
   }, [filterPics, getPictures])
 
+  useEffect(() => {
+    if (!showPicModal) {
+      resetCursor()
+      getPictures(defaultPageSize)
+    }
+  }, [showPicModal, getPictures])
+
   return (
     inspectionList && (
       <div className='flex flex-col gap-5'>

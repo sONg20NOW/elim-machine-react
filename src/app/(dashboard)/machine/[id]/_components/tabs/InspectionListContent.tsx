@@ -388,7 +388,6 @@ const InspectionListContent = ({}) => {
           getFilteredInspectionList={getFilteredInspectionList}
           open={showAddModalOpen}
           setOpen={setShowAddModalOpen}
-          machineProjectId={machineProjectId}
         />
       )}
       {showPictureListModal && currentInspection && (

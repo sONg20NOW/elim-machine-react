@@ -634,8 +634,8 @@ export interface MachinePicPresignedUrlResponseDtoType {
   machinePicId: number
   version: number
   machineCategoryId: number
-  machineChecklistItemId: number | null
-  machineChecklistSubItemId: number | null
+  machineChecklistItemId: number
+  machineChecklistSubItemId: number
   machineCategoryName: string
   machineChecklistItemName: string
   machineChecklistSubItemName: string
@@ -659,6 +659,7 @@ export interface MachinePicCursorType {
 
 // PUT /api/machine-projects/{machineProjectId}/machine-inspections/{machineInspectionId}/machine-pics/{machinePicId}
 export interface MachinePicUpdateResponseDtoType {
+  machineInspectionId: number
   machinePicId: number
   version: number
   machineChecklistSubItemId: number

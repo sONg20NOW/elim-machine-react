@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import { useParams } from 'next/navigation'
+
 import axios from 'axios'
 import { Grid, MenuItem, Button, Typography } from '@mui/material'
 
@@ -13,21 +15,17 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/@core/types'
 import { handleApiError } from '@/utils/errorHandler'
-import { useGetCategories } from '@/@core/hooks/customTanstackQueries'
+import { useGetCategories, useGetInspections } from '@/@core/hooks/customTanstackQueries'
 
 type AddInspectionModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  machineProjectId: string
   getFilteredInspectionList: () => void
 }
 
-const AddInspectionModal = ({
-  getFilteredInspectionList,
-  open,
-  setOpen,
-  machineProjectId
-}: AddInspectionModalProps) => {
+const AddInspectionModal = ({ getFilteredInspectionList, open, setOpen }: AddInspectionModalProps) => {
+  const machineProjectId = useParams().id?.toString() as string
+
   const [newData, setNewData] = useState<MachineInspectionCreateRequestDtoType>({
     machineCategoryId: 0,
     purpose: '',
@@ -36,6 +34,7 @@ const AddInspectionModal = ({
   })
 
   const { data: categoryList } = useGetCategories()
+  const { refetch: refetchInspections } = useGetInspections(machineProjectId)
 
   const [parentCategory, setParentCategory] = useState<MachineCategoryResponseDtoType>()
   const [showSubCategory, setShowSubCategory] = useState(false)
@@ -67,6 +66,7 @@ const AddInspectionModal = ({
       )
 
       setOpen(false)
+      refetchInspections()
       getFilteredInspectionList()
     } catch (error) {
       handleApiError(error)
