@@ -63,13 +63,13 @@ const TabInfo: Record<
   ]
 }
 
-type MachineDetailModalProps = {
+type InspectionDetailModalProps = {
   machineProjectId: string
   open: boolean
   setOpen: (open: boolean) => void
 }
 
-const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailModalProps) => {
+const InspectionDetailModal = ({ machineProjectId, open, setOpen }: InspectionDetailModalProps) => {
   const { selectedInspection: selectedMachine, refetchSelectedInspection: refetchSelectMachine } =
     useSelectedInspectionContext()
 
@@ -276,7 +276,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
               )
             )}
           </TabList>
-          <div className='flex gap-2 absolute right-0 top-[-2]'>
+          <div className='flex gap-2 absolute right-0 top-0'>
             <Button variant='contained' color='info' onClick={() => setShowPictureListModal(true)}>
               갤러리 (
               {editData.machineChecklistItemsWithPicCountResponseDtos?.reduce(
@@ -360,7 +360,7 @@ const MachineDetailModal = ({ machineProjectId, open, setOpen }: MachineDetailMo
   )
 }
 
-export default MachineDetailModal
+export default InspectionDetailModal
 
 // util 함수: 배열 안 객체에서 version 제거
 const stripVersion = (data: MachineInspectionDetailResponseDtoType) => {

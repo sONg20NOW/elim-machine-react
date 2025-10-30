@@ -11,7 +11,7 @@ import { MenuItem } from '@mui/material'
 
 import axios from 'axios'
 
-import MachineDetailModal from './detailModal/machineDetailModal'
+import InspectionDetailModal from './detailModal/InspectionDetailModal'
 
 // Constants
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
@@ -423,7 +423,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
       {/* 모달 */}
       {open && selectedInspection && (
         <SelectedInspectionContext.Provider value={{ selectedInspection, refetchSelectedInspection }}>
-          <MachineDetailModal machineProjectId={machineProjectId} open={open} setOpen={setOpen} />
+          <InspectionDetailModal machineProjectId={machineProjectId} open={open} setOpen={setOpen} />
         </SelectedInspectionContext.Provider>
       )}
       {showAddModalOpen && (
