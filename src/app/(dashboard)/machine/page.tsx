@@ -40,7 +40,7 @@ import AddMachineProjectModal from './_components/addMachineProjectModal'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { MachineInitialFilters } from '@/app/_constants/MachineProjectSeed'
 import { handleApiError } from '@/utils/errorHandler'
-import useMachineTabValueStore from '@/@core/utils/machineTabValueStore'
+import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 
 // datepicker 한글화
 dayjs.locale('ko')

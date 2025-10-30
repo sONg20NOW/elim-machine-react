@@ -8,11 +8,15 @@ import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임
 import type {
   MachineCategoryResponseDtoType,
   MachineEnergyTypeResponseDtoType,
+  MachineEngineerOptionResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
   machineInspectionSummaryResponseDtoType,
   MachineLeafCategoryResponseDtoType,
+  machineProjectEngineerDetailDtoType,
   MachineProjectOverviewPicReadResponseDtoType,
+  MachineProjectResponseDtoType,
+  MachineProjectScheduleAndEngineerResponseDtoType,
   MachineReportCategoryReadResponseDtoType,
   targetType
 } from '@/@core/types' // 타입 임포트
@@ -303,6 +307,109 @@ export const useGetInspectionOpinions = (machineProjectId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_INSPECTION_OPINION.GET_INSPECTION_OPINION(machineProjectId),
     queryFn: fetchInspectionOpinions,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// ------------------------- MachineProject 관련 -------------------------
+// GET /api/machine-projects/{machineProjectId}/machine-project-engineers
+export const useGetParticipatedEngineerList = (machineProjectId: string) => {
+  const fetchParticipatedEngineers: QueryFunction<machineProjectEngineerDetailDtoType[], string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { machineProjectEngineerResponseDtos: machineProjectEngineerDetailDtoType[] }
+        }>(`/api/machine-projects/${machineProjectId}/machine-project-engineers`)
+        .then(v => v.data.data.machineProjectEngineerResponseDtos)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECT_ENGINEERS(machineProjectId),
+    queryFn: fetchParticipatedEngineers,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/schedule-tab
+export const useGetScheduleTab = (machineProjectId: string) => {
+  const fetchScheduleTab: QueryFunction<MachineProjectScheduleAndEngineerResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MachineProjectScheduleAndEngineerResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/schedule-tab`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECT_SCHEDULE_TAB(machineProjectId),
+    queryFn: fetchScheduleTab,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/
+export const useGetMachineProject = (machineProjectId: string) => {
+  const fetchMachineProjectData: QueryFunction<MachineProjectResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MachineProjectResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECT(machineProjectId),
+    queryFn: fetchMachineProjectData,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// ------------------------- Engineer 관련 -------------------------
+// GET /api/machine-projects/{machineProjectId}/machine-project-engineers
+export const useGetEngineerList = () => {
+  const fetchEngineers: QueryFunction<MachineEngineerOptionResponseDtoType[], string[]> = useCallback(async data => {
+    const response = await auth
+      .get<{
+        data: { engineers: MachineEngineerOptionResponseDtoType[] }
+      }>(`/api/engineers/options`)
+      .then(v => v.data.data.engineers)
+
+    const [keyType] = data.queryKey
+
+    console.log(`!!! queryFn ${keyType}:`, response)
+
+    return response
+  }, [])
+
+  return useQuery({
+    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS_OPTIONS,
+    queryFn: fetchEngineers,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }

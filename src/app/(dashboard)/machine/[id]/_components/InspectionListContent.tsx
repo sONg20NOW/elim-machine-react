@@ -30,8 +30,8 @@ import SearchBar from '@/@core/components/custom/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import AddInspectionModal from './AddInspectionModal'
-import { ListsContext, UseListsContext } from '../page'
 import PictureListModal from './detailModal/PictureListModal'
+import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 
 export const SelectedInspectionContext = createContext<{
   selectedInspection: MachineInspectionDetailResponseDtoType
@@ -80,14 +80,12 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
     engineerName: ''
   })
 
-  const categoryList = UseListsContext().categoryList
-
   const [machineCategoryName, setMachineCategoryName] = useState('')
   const [location, setLocation] = useState('')
 
   const [sorting, setSorting] = useState(createInitialSorting<MachineInspectionPageResponseDtoType>)
 
-  const { participatedEngineerList } = useContext(ListsContext)
+  const { data: participatedEngineerList } = useGetParticipatedEngineerList(machineProjectId)
 
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
@@ -256,7 +254,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           engineerName: {
             label: '점검자',
             type: 'multi',
-            options: participatedEngineerList.map(engineer => ({
+            options: participatedEngineerList?.map(engineer => ({
               value: engineer.engineerName,
               label: `${engineer.engineerName} (${engineer.gradeDescription})`
             }))
@@ -434,7 +432,6 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           open={showAddModalOpen}
           setOpen={setShowAddModalOpen}
           machineProjectId={machineProjectId}
-          categoryList={categoryList}
         />
       )}
       {showPictureListModal && selectedInspection && (

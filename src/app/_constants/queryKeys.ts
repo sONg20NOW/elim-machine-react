@@ -36,5 +36,16 @@ export const QUERY_KEYS = {
   MACHINE_REPORT_CATEGORY_CONTROLLER: ['MACHINE_REPORT_CATEGORY_CONTROLLER'],
   MACHINE_INSPECTION_OPINION: {
     GET_INSPECTION_OPINION: (machineProjectId: string) => ['GET_INSPECTION_OPINION', machineProjectId]
+  },
+  ENGINEER: {
+    GET_ENGINEERS_OPTIONS: ['GET_ENGINEERS_OPTIONS']
+  },
+  MACHINE_PROJECT: {
+    GET_MACHINE_PROJECT_ENGINEERS: (machineProjectId: string) => ['GET_MACHINE_PROJECT_ENGINEERS', machineProjectId],
+    GET_MACHINE_PROJECT_SCHEDULE_TAB: (machineProjectId: string) => [
+      'GET_MACHINE_PROJECT_SCHEDULE_TAB',
+      machineProjectId
+    ],
+    GET_MACHINE_PROJECT: (machineProjectId: string) => ['GET_MACHINE_PROJECT', machineProjectId]
   }
 }
