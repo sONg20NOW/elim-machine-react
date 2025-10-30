@@ -179,10 +179,10 @@ const MachineUpdatePage = () => {
             )}
           </TabPanel>
           <TabPanel value='설비목록'>
-            <InspectionListContent machineProjectId={machineProjectId} />
+            <InspectionListContent />
           </TabPanel>
           <TabPanel value='전체사진'>
-            <PictureListTabContent machineProjectId={machineProjectId} />
+            <PictureListTabContent />
           </TabPanel>
           <TabPanel value='특이사항'>
             {projectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}

@@ -306,12 +306,7 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
             />
           </TabPanel>
           <TabPanel value={'PIC'}>
-            <PicTabContent
-              editData={editData}
-              setEditData={setEditData}
-              isEditing={isEditing}
-              machineProjectId={machineProjectId}
-            />
+            <PicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
           </TabPanel>
           {editData.gasMeasurementResponseDto && (
             <TabPanel value={'GAS'}>

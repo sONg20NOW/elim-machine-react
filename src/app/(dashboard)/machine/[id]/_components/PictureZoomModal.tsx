@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
+import { useParams } from 'next/navigation'
+
 import {
   Box,
   Button,
@@ -24,13 +26,12 @@ import { toast } from 'react-toastify'
 
 import type {
   MachineInspectionDetailResponseDtoType,
-  MachineInspectionPageResponseDtoType,
   MachinePicPresignedUrlResponseDtoType,
-  MachinePicUpdateResponseDtoType,
-  successResponseDtoType
+  MachinePicUpdateResponseDtoType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
+import { useGetInspections } from '@/@core/hooks/customTanstackQueries'
 
 interface PictureZoomModalProps {
   open: boolean
@@ -48,37 +49,22 @@ export default function PictureZoomModal({
   setOpen,
   selectedPic,
   reloadPics,
-  machineProjectId,
   selectedInspection,
   refetchSelectedInspection
 }: PictureZoomModalProps) {
+  const machineProjectId = useParams().id?.toString() as string
+
   const [editData, setEditData] = useState<MachinePicPresignedUrlResponseDtoType>(
     JSON.parse(JSON.stringify(selectedPic))
   )
 
-  const [inspectionList, setInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
+  const { data: inspectionList } = useGetInspections(machineProjectId)
+
   const [isEditingPicName, setIsEditingPicName] = useState(false)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   // 반응형을 위한 미디어쿼리
   const isMobile = useMediaQuery('(max-width:600px)')
-
-  // 설비목록 가져오기
-  const getInspectionList = useCallback(async () => {
-    try {
-      const response = await axios.get<{ data: successResponseDtoType<MachineInspectionPageResponseDtoType[]> }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections`
-      )
-
-      setInspectionList(response.data.data.content)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [machineProjectId])
-
-  useEffect(() => {
-    getInspectionList()
-  }, [getInspectionList])
 
   useEffect(() => {
     if (open) setEditData(JSON.parse(JSON.stringify(selectedPic)))
@@ -139,223 +125,232 @@ export default function PictureZoomModal({
   useEffect(() => setEditData(JSON.parse(JSON.stringify(selectedPic))), [selectedPic])
 
   return (
-    <Dialog
-      maxWidth='xl'
-      open={open}
-      onClose={() => {
-        setOpen(false)
-        setIsEditingPicName(false)
-      }}
-    >
-      <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <div className='flex justify-between'>
-          <div className='flex gap-4 items-center'>
-            {!isEditingPicName ? (
-              <Typography sx={{ fontWeight: 700, fontSize: isMobile ? 20 : 24 }}>
-                {editData.originalFileName}
-              </Typography>
-            ) : (
-              <TextField
-                variant='standard'
-                fullWidth
-                size='small'
-                slotProps={{
-                  htmlInput: {
-                    sx: {
-                      fontWeight: 700,
-                      fontSize: isMobile ? 20 : 24
+    inspectionList && (
+      <Dialog
+        maxWidth='xl'
+        open={open}
+        onClose={() => {
+          setOpen(false)
+          setIsEditingPicName(false)
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
+          <div className='flex justify-between'>
+            <div className='flex gap-4 items-center'>
+              {!isEditingPicName ? (
+                <Typography sx={{ fontWeight: 700, fontSize: isMobile ? 20 : 24 }}>
+                  {editData.originalFileName}
+                </Typography>
+              ) : (
+                <TextField
+                  variant='standard'
+                  fullWidth
+                  size='small'
+                  slotProps={{
+                    htmlInput: {
+                      sx: {
+                        fontWeight: 700,
+                        fontSize: isMobile ? 20 : 24
+                      }
                     }
-                  }
-                }}
-                id='new-picture-name-input'
-                value={editData.originalFileName}
-                onChange={e => setEditData(prev => ({ ...prev, originalFileName: e.target.value }))}
-              />
-            )}
-            <IconButton
-              onClick={() => {
-                setIsEditingPicName(prev => !prev)
-              }}
-            >
-              {!isEditingPicName ? <i className='tabler-pencil' /> : <i className='tabler-check' />}
-            </IconButton>
-            {isEditingPicName && (
+                  }}
+                  id='new-picture-name-input'
+                  value={editData.originalFileName}
+                  onChange={e => setEditData(prev => ({ ...prev, originalFileName: e.target.value }))}
+                />
+              )}
               <IconButton
-                color='error'
                 onClick={() => {
-                  setEditData(prev => ({ ...prev, originalFileName: selectedPic.originalFileName }))
-                  setIsEditingPicName(false)
+                  setIsEditingPicName(prev => !prev)
                 }}
+              >
+                {!isEditingPicName ? <i className='tabler-pencil' /> : <i className='tabler-check text-green-500' />}
+              </IconButton>
+              {isEditingPicName && (
+                <IconButton
+                  color='error'
+                  onClick={() => {
+                    setEditData(prev => ({ ...prev, originalFileName: selectedPic.originalFileName }))
+                    setIsEditingPicName(false)
+                  }}
+                >
+                  <i className='tabler-x' />
+                </IconButton>
+              )}
+            </div>
+            <div className='flex gap-4 items-center'>
+              <IconButton
+                type='button'
+                sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
+                size='small'
+                onClick={() => setOpen(false)}
               >
                 <i className='tabler-x' />
               </IconButton>
-            )}
+            </div>
           </div>
-          <div className='flex gap-4 items-center'>
-            <IconButton type='button' sx={{ height: 'fit-content' }} size='small' onClick={() => setOpen(false)}>
-              <i className='tabler-x text-error' />
-            </IconButton>
-          </div>
-        </div>
-      </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <div
-          className={classNames('flex gap-4', {
-            'flex-col': isMobile
-          })}
-        >
-          <div className='grid place-items-center relative'>
-            <img
-              src={editData.presignedUrl}
-              alt={editData.originalFileName}
-              style={{
-                width: '100%',
-                maxHeight: '60dvh',
-                objectFit: 'cover',
-                maxWidth: isMobile ? '' : 1000
-              }}
-            />
-            <IconButton
-              type='button'
-              sx={{
-                color: 'white',
-                boxShadow: 10,
-                position: 'absolute',
-                top: 6,
-                right: 6,
-                backgroundColor: 'primary.dark'
-              }}
-              onClick={() => cameraInputRef.current?.click()}
-            >
-              <i className='tabler-photo text-4xl' />
-            </IconButton>
-          </div>
-          <Box>
-            <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
-              <Grid2 size={2}>
-                <InputLabel>설비명</InputLabel>
-                <TextField
-                  select
-                  value={editData.machineInspectionId ?? ''}
-                  onChange={e =>
-                    setEditData(prev => ({
-                      ...prev,
-                      machineInspectionId: Number(e.target.value),
-                      machineChecklistSubItemId: null,
-                      machineChecklistItemId: null
-                    }))
-                  }
-                  hiddenLabel
-                  size='small'
-                  fullWidth
-                >
-                  {inspectionList.map(v => (
-                    <MenuItem key={v.machineInspectionId} value={v.machineInspectionId}>
-                      {v.machineInspectionName}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid2>
-              <Grid2 size={2}>
-                <InputLabel>점검항목</InputLabel>
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <div
+            className={classNames('flex gap-4', {
+              'flex-col': isMobile
+            })}
+          >
+            <div className='grid place-items-center relative'>
+              <img
+                src={editData.presignedUrl}
+                alt={editData.originalFileName}
+                style={{
+                  width: '100%',
+                  maxHeight: '60dvh',
+                  objectFit: 'cover',
+                  maxWidth: isMobile ? '' : 1000
+                }}
+              />
+              <IconButton
+                type='button'
+                sx={{
+                  color: 'white',
+                  boxShadow: 10,
+                  position: 'absolute',
+                  top: 6,
+                  right: 6,
+                  backgroundColor: 'primary.dark'
+                }}
+                onClick={() => cameraInputRef.current?.click()}
+              >
+                <i className='tabler-photo text-4xl' />
+              </IconButton>
+            </div>
+            <Box>
+              <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
+                <Grid2 size={2}>
+                  <InputLabel>설비명</InputLabel>
+                  <TextField
+                    select
+                    value={editData.machineInspectionId ?? ''}
+                    onChange={e =>
+                      setEditData(prev => ({
+                        ...prev,
+                        machineInspectionId: Number(e.target.value),
+                        machineChecklistSubItemId: null,
+                        machineChecklistItemId: null
+                      }))
+                    }
+                    hiddenLabel
+                    size='small'
+                    fullWidth
+                  >
+                    {inspectionList?.map(v => (
+                      <MenuItem key={v.id} value={v.id}>
+                        {v.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid2>
+                <Grid2 size={2}>
+                  <InputLabel>점검항목</InputLabel>
 
-                <TextField
-                  select
-                  value={editData.machineChecklistItemId ?? ''}
-                  onChange={e =>
-                    setEditData(prev => ({
-                      ...prev,
-                      machineChecklistSubItemId: null,
-                      machineChecklistItemId: Number(e.target.value)
-                    }))
-                  }
-                  hiddenLabel
-                  size='small'
-                  fullWidth
-                >
-                  {selectedInspection.machineChecklistItemsWithPicCountResponseDtos?.map(v => (
-                    <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                      {v.machineChecklistItemName}
-                    </MenuItem>
-                  )) ?? <MenuItem></MenuItem>}
-                </TextField>
-              </Grid2>
-              <Grid2 size={2}>
-                <InputLabel>하위항목</InputLabel>
-
-                <TextField
-                  select
-                  value={editData.machineChecklistSubItemId ?? ''}
-                  onChange={e => setEditData(prev => ({ ...prev, machineChecklistSubItemId: Number(e.target.value) }))}
-                  hiddenLabel
-                  size='small'
-                  fullWidth
-                >
-                  {selectedInspection.machineChecklistItemsWithPicCountResponseDtos
-                    .find(v => v.machineChecklistItemId === editData.machineChecklistItemId)
-                    ?.checklistSubItems.map(v => (
-                      <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
-                        {v.checklistSubItemName}
+                  <TextField
+                    select
+                    value={editData.machineChecklistItemId ?? ''}
+                    onChange={e =>
+                      setEditData(prev => ({
+                        ...prev,
+                        machineChecklistSubItemId: null,
+                        machineChecklistItemId: Number(e.target.value)
+                      }))
+                    }
+                    hiddenLabel
+                    size='small'
+                    fullWidth
+                  >
+                    {selectedInspection.machineChecklistItemsWithPicCountResponseDtos?.map(v => (
+                      <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
+                        {v.machineChecklistItemName}
                       </MenuItem>
                     )) ?? <MenuItem></MenuItem>}
-                </TextField>
+                  </TextField>
+                </Grid2>
+                <Grid2 size={2}>
+                  <InputLabel>하위항목</InputLabel>
+
+                  <TextField
+                    select
+                    value={editData.machineChecklistSubItemId ?? ''}
+                    onChange={e =>
+                      setEditData(prev => ({ ...prev, machineChecklistSubItemId: Number(e.target.value) }))
+                    }
+                    hiddenLabel
+                    size='small'
+                    fullWidth
+                  >
+                    {selectedInspection.machineChecklistItemsWithPicCountResponseDtos
+                      .find(v => v.machineChecklistItemId === editData.machineChecklistItemId)
+                      ?.checklistSubItems.map(v => (
+                        <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
+                          {v.checklistSubItemName}
+                        </MenuItem>
+                      )) ?? <MenuItem></MenuItem>}
+                  </TextField>
+                </Grid2>
+                <Grid2 size={2}>
+                  <InputLabel>대체타이틀</InputLabel>
+
+                  <TextField
+                    hiddenLabel
+                    size='small'
+                    fullWidth
+                    value={editData.alternativeSubTitle ?? ''}
+                    onChange={e => setEditData(prev => ({ ...prev, alternativeSubTitle: e.target.value }))}
+                  />
+                </Grid2>
+                <Grid2 size={2}>
+                  <InputLabel>측정값</InputLabel>
+
+                  <TextField
+                    hiddenLabel
+                    size='small'
+                    fullWidth
+                    value={editData.measuredValue ?? ''}
+                    onChange={e => setEditData(prev => ({ ...prev, measuredValue: e.target.value }))}
+                  />
+                </Grid2>
+                <Grid2 size={2}>
+                  <InputLabel>비고</InputLabel>
+
+                  <TextField
+                    minRows={3}
+                    multiline
+                    fullWidth
+                    hiddenLabel
+                    value={editData.remark ?? ''}
+                    onChange={e => setEditData(prev => ({ ...prev, remark: e.target.value }))}
+                  />
+                </Grid2>
               </Grid2>
-              <Grid2 size={2}>
-                <InputLabel>대체타이틀</InputLabel>
+            </Box>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button variant='contained' onClick={() => handleSave()}>
+            저장
+          </Button>
+        </DialogActions>
+        <input
+          type='file'
+          accept='image/*'
+          className='hidden'
+          ref={cameraInputRef}
+          onChange={e => {
+            if (!e.target.files) return
 
-                <TextField
-                  hiddenLabel
-                  size='small'
-                  fullWidth
-                  value={editData.alternativeSubTitle ?? ''}
-                  onChange={e => setEditData(prev => ({ ...prev, alternativeSubTitle: e.target.value }))}
-                />
-              </Grid2>
-              <Grid2 size={2}>
-                <InputLabel>측정값</InputLabel>
+            const files = Array.from(e.target.files)
 
-                <TextField
-                  hiddenLabel
-                  size='small'
-                  fullWidth
-                  value={editData.measuredValue ?? ''}
-                  onChange={e => setEditData(prev => ({ ...prev, measuredValue: e.target.value }))}
-                />
-              </Grid2>
-              <Grid2 size={2}>
-                <InputLabel>비고</InputLabel>
-
-                <TextField
-                  minRows={3}
-                  multiline
-                  fullWidth
-                  hiddenLabel
-                  value={editData.remark ?? ''}
-                  onChange={e => setEditData(prev => ({ ...prev, remark: e.target.value }))}
-                />
-              </Grid2>
-            </Grid2>
-          </Box>
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button variant='contained' onClick={() => handleSave()}>
-          저장
-        </Button>
-      </DialogActions>
-      <input
-        type='file'
-        accept='image/*'
-        className='hidden'
-        ref={cameraInputRef}
-        onChange={e => {
-          if (!e.target.files) return
-
-          const files = Array.from(e.target.files)
-
-          onChangeImage(files[0])
-        }}
-      />
-    </Dialog>
+            onChangeImage(files[0])
+          }}
+        />
+      </Dialog>
+    )
   )
 }
