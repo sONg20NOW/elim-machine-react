@@ -52,7 +52,7 @@ export default function CreateColumns<T>(headerList: Record<keyof T, string>) {
   const columns = useMemo(
     () =>
       (Object.keys(headerList) as Array<keyof typeof headerList>).map(key => ColumnAccessor<T>(key, headerList[key])),
-    []
+    [headerList]
   )
 
   return columns
