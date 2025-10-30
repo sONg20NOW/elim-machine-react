@@ -11,7 +11,7 @@ import { MenuItem } from '@mui/material'
 
 import axios from 'axios'
 
-import InspectionDetailModal from './detailModal/InspectionDetailModal'
+import InspectionDetailModal from '../detailModal/InspectionDetailModal'
 
 // Constants
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
@@ -29,9 +29,10 @@ import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeade
 import SearchBar from '@/@core/components/custom/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/@core/components/custom/BasicTable'
-import AddInspectionModal from './AddInspectionModal'
-import PictureListModal from './detailModal/PictureListModal'
-import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
+import AddInspectionModal from '../AddInspectionModal'
+import PictureListModal from '../detailModal/PictureListModal'
+import { useGetParticipatedEngineerList, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 
 export const SelectedInspectionContext = createContext<{
   selectedInspection: MachineInspectionDetailResponseDtoType
@@ -69,6 +70,8 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   // 테이블 행 선택
   const [selectedInspection, setSelectedInspection] = useState<MachineInspectionDetailResponseDtoType>()
+  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
+  const { data: currentInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
 
   // 페이지네이션 상태
   const [page, setPage] = useState(0)
@@ -94,6 +97,8 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
   // 테이블 행 클릭 시 초기 동작하는 함수
   const handleSelectInspection = useCallback(
     async (machine: MachineInspectionPageResponseDtoType, pictureClick?: boolean) => {
+      setCurrentInspectionId(machine.machineInspectionId)
+
       try {
         const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
           `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${machine?.machineInspectionId}`
@@ -106,7 +111,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
         handleApiError(error)
       }
     },
-    [machineProjectId]
+    [machineProjectId, setCurrentInspectionId]
   )
 
   const refetchSelectedInspection = useCallback(async () => {
@@ -421,9 +426,9 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
       />
 
       {/* 모달 */}
-      {open && selectedInspection && (
+      {open && selectedInspection && currentInspection && (
         <SelectedInspectionContext.Provider value={{ selectedInspection, refetchSelectedInspection }}>
-          <InspectionDetailModal machineProjectId={machineProjectId} open={open} setOpen={setOpen} />
+          <InspectionDetailModal open={open} setOpen={setOpen} />
         </SelectedInspectionContext.Provider>
       )}
       {showAddModalOpen && (
@@ -434,14 +439,8 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           machineProjectId={machineProjectId}
         />
       )}
-      {showPictureListModal && selectedInspection && (
-        <PictureListModal
-          selectedInspection={selectedInspection}
-          machineProjectId={machineProjectId}
-          open={showPictureListModal}
-          setOpen={setShowPictureListModal}
-          refetchSelectedInspection={refetchSelectedInspection}
-        />
+      {showPictureListModal && selectedInspection && currentInspection && (
+        <PictureListModal open={showPictureListModal} setOpen={setShowPictureListModal} />
       )}
     </div>
   )

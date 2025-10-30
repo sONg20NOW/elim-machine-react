@@ -31,7 +31,7 @@ import type {
 } from '@/@core/types'
 
 import SearchBar from '@/@core/components/custom/SearchBar'
-import PictureZoomModal from './PictureZoomModal'
+import PictureZoomModal from '../PictureZoomModal'
 
 const PictureListTabContent = ({ machineProjectId }: { machineProjectId: string }) => {
   // 이름으로 검색 필터 (파일 이름, 카테고리 이름, 체크 아이템, 섭아이템 이름에 포함된 것만 필터링 하기.)

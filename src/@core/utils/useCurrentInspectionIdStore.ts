@@ -12,7 +12,7 @@ const useCurrentInspectionIdStore = create<CurrentInspectionIdState>(set => ({
   // ⭐ 액션 (Action)
   setCurrentInspectionId: (value: number) => {
     set({ currentInspectionId: value }) // set 함수를 통해 상태 업데이트
-    console.log('zustand call (currentInspectionId)!')
+    console.log(`zustand call (currentInspectionId : ${value})!`)
   }
 }))
 

@@ -15,7 +15,7 @@ import AlertModal from '@/@core/components/custom/AlertModal'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
-import { useSelectedInspectionContext } from '../InspectionListContent'
+import { useSelectedInspectionContext } from '../tabs/InspectionListContent'
 
 interface PicTabContentProps<T> {
   editData: T
@@ -412,14 +412,7 @@ export default function PicTabContent({
       </tbody>
       {showDfModal && selectedDf && <DeficiencyModal />}
       {openPicModal && clickedPicCate && (
-        <PictureListModal
-          machineProjectId={machineProjectId}
-          open={openPicModal}
-          setOpen={setOpenPicModal}
-          clickedPicCate={clickedPicCate}
-          selectedInspection={selectedInspection}
-          refetchSelectedInspection={refetchSelectedInspection}
-        />
+        <PictureListModal open={openPicModal} setOpen={setOpenPicModal} clickedPicCate={clickedPicCate} />
       )}
     </table>
   )
