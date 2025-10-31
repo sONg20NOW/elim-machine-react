@@ -41,7 +41,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import PictureZoomModal from '../PictureZoomModal'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
-import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 
 type PictureListModalProps = {
   open: boolean
@@ -51,12 +51,14 @@ type PictureListModalProps = {
 
 const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
-  const currentInspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
+  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore(set => set)
 
   const { data: selectedInspection, refetch: refetchSelectedInspection } = useGetSingleInspection(
     machineProjectId,
     currentInspectionId.toString()
   )
+
+  const { data: inspections } = useGetInspectionsSimple(machineProjectId)
 
   // 사진 리스트
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
@@ -107,79 +109,9 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
     setPictures([])
   }
 
-  // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
-  const getPictures = useCallback(
-    async (pageSize = 10) => {
-      if (!hasNextRef.current || isLoadingRef.current) return
-
-      isLoadingRef.current = true
-
-      const requestBody = {
-        machineInspectionId: selectedInspection?.machineInspectionResponseDto.id,
-        machineChecklistItemId: selectedItemId !== 0 ? selectedItemId : null,
-        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
-      }
-
-      try {
-        const response = await axios.post<{
-          data: {
-            content: MachinePicPresignedUrlResponseDtoType[]
-            hasNext: boolean
-            nextCursor: MachinePicCursorType | null
-          }
-        }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
-          requestBody
-        )
-
-        console.log('get pictures: ', response.data.data.content)
-        setPictures(prev => prev.concat(response.data.data.content))
-        hasNextRef.current = response.data.data.hasNext
-        nextCursorRef.current = response.data.data.nextCursor
-
-        return response.data.data
-      } catch (err) {
-        handleApiError(err)
-      } finally {
-        isLoadingRef.current = false
-      }
-    },
-    [selectedItemId, machineProjectId, selectedInspection]
-  )
-
-  // 최초에 전체 사진 가져오기
-  useEffect(() => {
-    getPictures(100)
-  }, [getPictures])
-
-  useEffect(() => {
-    // 정보에 있는 사진 개수(selectedSubItem)보다 실제로 있는 사진 개수(pictures)가 적다면 getPictures.
-    if (
-      !isUploading &&
-      (selectedSubItem
-        ? selectedSubItem.machinePicCount !==
-          pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId).length
-        : selectedItem?.totalMachinePicCount !== pictures.length)
-    ) {
-      getPictures()
-    }
-  }, [
-    isUploading,
-    selectedSubItem,
-    selectedItem,
-    pictures,
-    selectedInspection?.machineInspectionResponseDto.id,
-    machineProjectId,
-    getPictures
-  ])
-
   const handleClose = () => {
     setOpen(false)
   }
-
-  useEffect(() => setShowCheck(false), [selectedSubItem])
-
-  // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -303,12 +235,81 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
     }
   }
 
-  async function RefetchPictures() {
-    resetCursor()
-    await getPictures()
+  // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
+  const getPictures = useCallback(
+    async (pageSize = 10) => {
+      if (!hasNextRef.current || isLoadingRef.current) return
 
-    return
-  }
+      isLoadingRef.current = true
+
+      const requestBody = {
+        machineInspectionId: selectedInspection?.machineInspectionResponseDto.id,
+        machineChecklistItemId: selectedItemId !== 0 ? selectedItemId : null,
+        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
+      }
+
+      try {
+        const response = await axios.post<{
+          data: {
+            content: MachinePicPresignedUrlResponseDtoType[]
+            hasNext: boolean
+            nextCursor: MachinePicCursorType | null
+          }
+        }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
+          requestBody
+        )
+
+        console.log('get pictures: ', response.data.data.content)
+        setPictures(prev => prev.concat(response.data.data.content))
+        hasNextRef.current = response.data.data.hasNext
+        nextCursorRef.current = response.data.data.nextCursor
+
+        return response.data.data
+      } catch (err) {
+        handleApiError(err)
+      } finally {
+        isLoadingRef.current = false
+      }
+    },
+    [selectedItemId, machineProjectId, selectedInspection]
+  )
+
+  // 최초에 전체 사진 가져오기
+  useEffect(() => {
+    getPictures()
+  }, [getPictures])
+
+  useEffect(() => {
+    // 정보에 있는 사진 개수(selectedSubItem)보다 실제로 있는 사진 개수(pictures)가 적다면 getPictures.
+    if (
+      !isUploading &&
+      (selectedSubItem
+        ? selectedSubItem.machinePicCount !==
+          pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId).length
+        : selectedItem?.totalMachinePicCount !== pictures.length)
+    ) {
+      getPictures()
+    }
+  }, [
+    isUploading,
+    selectedSubItem,
+    selectedItem,
+    pictures,
+    selectedInspection?.machineInspectionResponseDto.id,
+    machineProjectId,
+    getPictures
+  ])
+
+  useEffect(() => setShowCheck(false), [selectedSubItem])
+
+  // 설비 변경 시
+  useEffect(() => {
+    setSelectedItemId(0)
+    resetCursor()
+  }, [currentInspectionId])
+
+  // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
 
   // 사진 카드 컴포넌트
   function PictureCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
@@ -399,9 +400,25 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
           <IconButton sx={{ position: 'absolute', top: 0, right: 0 }} onClick={() => setOpen(false)}>
             <i className='tabler-x' />
           </IconButton>
-          <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 } }}>
-            {selectedInspection.machineInspectionResponseDto.machineInspectionName}
-          </Typography>
+
+          <TextField
+            size='small'
+            select
+            value={currentInspectionId}
+            onChange={e => setCurrentInspectionId(Number(e.target.value))}
+            sx={{ width: 'fit-content' }}
+            slotProps={{
+              select: {
+                sx: { fontWeight: 700, fontSize: { xs: 20, sm: 30 }, paddingInlineEnd: 5 }
+              }
+            }}
+          >
+            {inspections?.map(inspection => (
+              <MenuItem key={inspection.id} value={inspection.id}>
+                {inspection.name}
+              </MenuItem>
+            ))}
+          </TextField>
           <Grid item xs={12}>
             <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
               점검항목 선택
@@ -708,7 +725,7 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
             open={showPicModal}
             setOpen={setShowPicModal}
             selectedPic={selectedPic}
-            reloadPics={RefetchPictures}
+            reloadPics={resetCursor}
             selectedInspection={selectedInspection}
             refetchSelectedInspection={refetchSelectedInspection}
           />
