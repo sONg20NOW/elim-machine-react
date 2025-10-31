@@ -261,6 +261,55 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
     }
   }, [machineProjectId, picturesToDelete, selectedSubItem, refetchSelectedInspection])
 
+  async function MovePicture(dir: 'next' | 'previous') {
+    const currentPictureIdx = pictures.findIndex(v => v.machinePicId === selectedPic?.machinePicId)
+
+    if (currentPictureIdx === -1) {
+      throw new Error('현재 사진을 찾을 수 없음. 관리자에게 문의하세요.')
+    }
+
+    switch (dir) {
+      case 'next':
+        if (currentPictureIdx + 1 < pictures.length) {
+          setSelectedPic(pictures[currentPictureIdx + 1])
+
+          return
+        }
+
+        if (hasNextRef.current) {
+          const nextResponse = await getPictures()
+
+          // if (currentPictureIdx + 1 >= pictures.length) {
+          //   throw new Error('hasNext가 true지만 다음 페이지 없음')
+          // }
+
+          setSelectedPic(nextResponse?.content[0])
+        } else {
+          toast.warning('다음 사진이 없습니다')
+        }
+
+        break
+      case 'previous':
+        if (currentPictureIdx === 0) {
+          toast.warning('첫번째 사진입니다')
+        } else {
+          setSelectedPic(pictures[currentPictureIdx - 1])
+        }
+
+        break
+
+      default:
+        break
+    }
+  }
+
+  async function RefetchPictures() {
+    resetCursor()
+    await getPictures()
+
+    return
+  }
+
   // 사진 카드 컴포넌트
   function PictureCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
     return (
@@ -336,12 +385,12 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
     )
   }
 
-  useEffect(() => {
-    if (!showPicModal) {
-      resetCursor()
-      getPictures()
-    }
-  }, [showPicModal, getPictures])
+  // useEffect(() => {
+  //   if (!showPicModal) {
+  //     resetCursor()
+  //     getPictures()
+  //   }
+  // }, [showPicModal, getPictures])
 
   return (
     selectedInspection && (
@@ -655,14 +704,11 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
         </DialogActions>
         {selectedPic && (
           <PictureZoomModal
+            MovePicture={MovePicture}
             open={showPicModal}
             setOpen={setShowPicModal}
             selectedPic={selectedPic}
-            reloadPics={() => {
-              resetCursor()
-              getPictures()
-            }}
-            machineProjectId={machineProjectId}
+            reloadPics={RefetchPictures}
             selectedInspection={selectedInspection}
             refetchSelectedInspection={refetchSelectedInspection}
           />

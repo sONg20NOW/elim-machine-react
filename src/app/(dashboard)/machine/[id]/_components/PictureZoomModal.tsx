@@ -36,18 +36,28 @@ import getS3Key from '@/@core/utils/getS3Key'
 import { useGetInspections } from '@/@core/hooks/customTanstackQueries'
 
 interface PictureZoomModalProps {
+  MovePicture?: (dir: 'next' | 'previous') => void
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   selectedPic: MachinePicPresignedUrlResponseDtoType
-  reloadPics: () => void
-  machineProjectId: string
   selectedInspection: MachineInspectionDetailResponseDtoType
+  reloadPics?: () => void
   refetchSelectedInspection?: () => void
 }
 
 // ! 확대 기능 구현, 현재 리스트에 있는 목록 슬라이드로 이동 가능 기능 구현, 사진 정보 수정 기능 구현(이름 수정은 연필로)
-export default function PictureZoomModal({ open, setOpen, selectedPic, selectedInspection }: PictureZoomModalProps) {
+export default function PictureZoomModal({
+  MovePicture,
+  open,
+  setOpen,
+  selectedPic,
+  selectedInspection,
+  reloadPics
+}: PictureZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
+
+  const [openAlert, setOpenAlert] = useState(false)
+  const proceedingJob = useRef<() => void>()
 
   const {
     register,
@@ -131,6 +141,7 @@ export default function PictureZoomModal({ open, setOpen, selectedPic, selectedI
       setUrlInspectionId(response.machineInspectionId)
 
       handleSuccess('사진 정보가 변경되었습니다.')
+      reloadPics && reloadPics()
     } catch (error) {
       handleApiError(error)
     }
@@ -153,22 +164,6 @@ export default function PictureZoomModal({ open, setOpen, selectedPic, selectedI
         >
           <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
             <div className='flex justify-between'>
-              <TextField
-                {...register('originalFileName')}
-                variant='standard'
-                fullWidth
-                size='small'
-                sx={{ width: '30%' }}
-                slotProps={{
-                  htmlInput: {
-                    sx: {
-                      fontWeight: 700,
-                      fontSize: isMobile ? 20 : 24
-                    }
-                  }
-                }}
-                id='new-picture-name-input'
-              />
               <div className='flex gap-4 items-center'>
                 <IconButton
                   type='button'
@@ -183,11 +178,45 @@ export default function PictureZoomModal({ open, setOpen, selectedPic, selectedI
           </DialogTitle>
           <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <div
-              className={classNames('flex gap-4  w-full', {
+              className={classNames('flex gap-4 w-full', {
                 'flex-col': isMobile
               })}
             >
-              <div className='flex-1 grid w-full place-items-center relative border-4 p-2 rounded-lg border-[1px solid lightgray]'>
+              {MovePicture && (
+                <div
+                  className='grid place-items-center'
+                  onClick={() => {
+                    if (isDirty) {
+                      proceedingJob.current = () => MovePicture('previous')
+                      setOpenAlert(true)
+                    } else {
+                      MovePicture('previous')
+                    }
+                  }}
+                >
+                  <IconButton>
+                    <i className='tabler-chevron-compact-left size-[30px] text-gray-600' />
+                  </IconButton>
+                </div>
+              )}
+
+              <div className='flex-1 flex flex-col w-full items-start relative border-4 p-2 rounded-lg border-[1px solid lightgray]'>
+                <TextField
+                  {...register('originalFileName')}
+                  variant='standard'
+                  fullWidth
+                  size='small'
+                  sx={{ width: '50%' }}
+                  slotProps={{
+                    htmlInput: {
+                      sx: {
+                        fontWeight: 700,
+                        fontSize: isMobile ? 20 : 24
+                      }
+                    }
+                  }}
+                  id='new-picture-name-input'
+                />
                 <img
                   src={presignedUrl}
                   alt={watchedAlternativeSubTitle}
@@ -306,6 +335,23 @@ export default function PictureZoomModal({ open, setOpen, selectedPic, selectedI
                   </Grid2>
                 </Grid2>
               </Box>
+              {MovePicture && (
+                <div
+                  className='grid place-items-center'
+                  onClick={() => {
+                    if (isDirty) {
+                      proceedingJob.current = () => MovePicture('next')
+                      setOpenAlert(true)
+                    } else {
+                      MovePicture('next')
+                    }
+                  }}
+                >
+                  <IconButton>
+                    <i className='tabler-chevron-compact-right size-[30px] text-gray-600' />
+                  </IconButton>
+                </div>
+              )}
             </div>
           </DialogContent>
           <DialogActions>
@@ -338,6 +384,32 @@ export default function PictureZoomModal({ open, setOpen, selectedPic, selectedI
             }}
           />
         </Dialog>
+        {
+          <Dialog open={openAlert}>
+            <DialogTitle sx={{ position: 'relative' }}>
+              <div className='flex gap-2 text-xl items-center'>
+                <i className='tabler-alert-triangle' />
+                <Typography variant='inherit'>변경사항이 저장되지 않았습니다</Typography>
+              </div>
+            </DialogTitle>
+            <DialogActions>
+              <Button
+                type='button'
+                variant='contained'
+                color='error'
+                onClick={() => {
+                  proceedingJob.current && proceedingJob.current()
+                  setOpenAlert(false)
+                }}
+              >
+                저장하지 않음
+              </Button>
+              <Button type='button' variant='contained' color='secondary' onClick={() => setOpenAlert(false)}>
+                계속 수정
+              </Button>
+            </DialogActions>
+          </Dialog>
+        }
       </form>
     )
   )
