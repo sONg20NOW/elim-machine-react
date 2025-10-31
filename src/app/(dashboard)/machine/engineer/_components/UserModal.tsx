@@ -52,7 +52,7 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
         data: { engineerDeleteRequestDtos: [{ engineerId: engineerId, version: version }] }
       })
 
-      handleSuccess('설비인력이 정상적으로 삭제되었습니다.')
+      handleSuccess('설비인력에서 삭제되었습니다.')
       setShowDeleteModal(false)
       setOpen(false)
       reloadData()
@@ -136,11 +136,9 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
         )
       }
       modifyButton={
-        isEditing && (
-          <Button variant='contained' color='error' type='reset' onClick={() => setShowDeleteModal(true)}>
-            삭제
-          </Button>
-        )
+        <Button variant='contained' color='error' type='reset' onClick={() => setShowDeleteModal(true)}>
+          삭제
+        </Button>
       }
     >
       <DialogContent className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>

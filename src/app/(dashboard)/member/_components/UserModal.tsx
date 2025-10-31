@@ -195,18 +195,16 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
           )
         }
         modifyButton={
-          isEditing && (
-            <Button
-              variant='contained'
-              color='error'
-              type='reset'
-              onClick={() => {
-                setShowDeleteModal(true)
-              }}
-            >
-              삭제
-            </Button>
-          )
+          <Button
+            variant='contained'
+            color='error'
+            type='reset'
+            onClick={() => {
+              setShowDeleteModal(true)
+            }}
+          >
+            삭제
+          </Button>
         }
         secondaryButton={
           isEditing ? (
