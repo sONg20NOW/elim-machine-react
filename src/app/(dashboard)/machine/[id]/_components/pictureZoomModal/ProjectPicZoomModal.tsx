@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -14,46 +14,37 @@ import {
   InputLabel,
   MenuItem,
   TextField,
-  Typography,
-  useMediaQuery
+  Typography
 } from '@mui/material'
-
-import axios from 'axios'
 
 import classNames from 'classnames'
 
-import { toast } from 'react-toastify'
-
 import { Controller, useForm } from 'react-hook-form'
 
-import type {
-  MachineInspectionDetailResponseDtoType,
-  MachinePicPresignedUrlResponseDtoType,
-  MachinePicUpdateResponseDtoType
-} from '@/@core/types'
+import type { MachineProjectPicReadResponseDtoType, MachineProjectPicUpdateRequestDtoType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { auth } from '@/lib/auth'
+import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/MachineProjectPictureCategory'
 
-interface PictureZoomModalProps {
+interface ProjectPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  selectedPic: MachinePicPresignedUrlResponseDtoType
-  selectedInspection: MachineInspectionDetailResponseDtoType
+  selectedPic: MachineProjectPicReadResponseDtoType
   reloadPics?: () => void
-  refetchSelectedInspection?: () => void
 }
 
 // ! 확대 기능 구현, 현재 리스트에 있는 목록 슬라이드로 이동 가능 기능 구현, 사진 정보 수정 기능 구현(이름 수정은 연필로)
-export default function PictureZoomModal({
+export default function ProjectPicZoomModal({
   MovePicture,
   open,
   setOpen,
   selectedPic,
-  selectedInspection,
   reloadPics
-}: PictureZoomModalProps) {
+}: ProjectPicZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
 
   const [openAlert, setOpenAlert] = useState(false)
@@ -68,77 +59,56 @@ export default function PictureZoomModal({
     setValue,
     getValues,
     watch
-  } = useForm<MachinePicUpdateResponseDtoType & { machineInspectionId: number }>({
+  } = useForm<MachineProjectPicUpdateRequestDtoType>({
     defaultValues: {
       ...selectedPic
     }
   })
 
-  const watchedSubItemId = watch('machineChecklistSubItemId')
-  const watchedAlternativeSubTitle = watch('alternativeSubTitle')
+  const watchedMachineProjectPicType = watch('machineProjectPicType')
+  const watchedOriginalFileName = watch('originalFileName')
 
-  const [machineChecklistItemId, setMachineChecklistItemId] = useState(selectedPic.machineChecklistItemId)
   const [presignedUrl, setPresignedUrl] = useState(selectedPic.presignedUrl)
-
-  // 사진 정보 수정을 위한 상태관리
-  const [urlInspectionId, setUrlInspectionId] = useState(selectedPic.machineInspectionId)
 
   const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
 
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   // 반응형을 위한 미디어쿼리
-  const isMobile = useMediaQuery('(max-width:600px)')
+  const isMobile = useContext(isMobileContext)
 
   useEffect(() => {
     reset(selectedPic)
     setPresignedUrl(selectedPic.presignedUrl)
-    setMachineChecklistItemId(selectedPic.machineChecklistItemId)
-    setUrlInspectionId(selectedPic.machineInspectionId)
   }, [selectedPic, reset])
 
   const onChangeImage = async (file: File) => {
-    if (!watchedSubItemId) return
-
     const S3KeyResult = await getS3Key(
       machineProjectId,
       [file],
-      getValues().machineInspectionId.toString(),
-      machineChecklistItemId,
-      getValues().machineChecklistSubItemId,
-      undefined
+      undefined,
+      undefined,
+      undefined,
+      watchedMachineProjectPicType
     )
 
     if (!S3KeyResult) return
 
     setPresignedUrl(URL.createObjectURL(file))
     setValue('s3Key', S3KeyResult[0].s3Key, { shouldDirty: true })
-    setValue('originalFileName', S3KeyResult[0].fileName, { shouldDirty: true })
   }
 
-  const handleSave = async (data: MachinePicUpdateResponseDtoType) => {
-    console.log('save?')
-
-    if (!watchedSubItemId) {
-      toast.error('하위항목을 선택해주세요')
-
-      return
-    }
-
+  const handleSave = async (data: MachineProjectPicUpdateRequestDtoType) => {
     const updateRequest = dirtyFields.s3Key ? data : { ...data, s3Key: null }
 
     try {
-      const response = await axios
+      const response = await auth
         .put<{
-          data: MachinePicUpdateResponseDtoType
-        }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${urlInspectionId}/machine-pics/${selectedPic.machinePicId}`,
-          updateRequest
-        )
+          data: MachineProjectPicUpdateRequestDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/${selectedPic.id}`, updateRequest)
         .then(v => v.data.data)
 
       reset(response)
-      setUrlInspectionId(response.machineInspectionId)
 
       handleSuccess('사진 정보가 변경되었습니다.')
       reloadPics && reloadPics()
@@ -219,7 +189,7 @@ export default function PictureZoomModal({
                 />
                 <img
                   src={presignedUrl}
-                  alt={watchedAlternativeSubTitle}
+                  alt={watchedOriginalFileName}
                   style={{
                     width: '100%',
                     minHeight: '50dvh',
@@ -246,26 +216,24 @@ export default function PictureZoomModal({
                 <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
                   <Grid2 size={2}>
                     <Controller
-                      name='machineInspectionId'
+                      name='machineProjectPicType'
                       control={control}
                       render={({ field }) => (
                         <>
-                          <InputLabel>설비명</InputLabel>
+                          <InputLabel>사진 종류</InputLabel>
                           <TextField
                             select
                             value={field.value}
                             onChange={v => {
-                              field.onChange(Number(v.target.value))
-                              setMachineChecklistItemId(0)
-                              setValue('machineChecklistSubItemId', 0, { shouldDirty: true })
+                              field.onChange(v.target.value)
                             }}
                             hiddenLabel
                             size='small'
                             fullWidth
                           >
-                            {inspectionList?.map(v => (
-                              <MenuItem key={v.id} value={v.id}>
-                                {v.name}
+                            {MACHINE_PROJECT_PICTURE_TYPE.map(v => (
+                              <MenuItem key={v.value} value={v.value}>
+                                {v.label}
                               </MenuItem>
                             ))}
                           </TextField>
@@ -274,64 +242,16 @@ export default function PictureZoomModal({
                     />
                   </Grid2>
                   <Grid2 size={2}>
-                    <InputLabel>점검항목</InputLabel>
-
-                    <TextField
-                      select
-                      hiddenLabel
-                      size='small'
-                      fullWidth
-                      value={machineChecklistItemId}
-                      onChange={e => setMachineChecklistItemId(Number(e.target.value))}
-                    >
-                      {selectedInspection.machineChecklistItemsWithPicCountResponseDtos?.map(v => (
-                        <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                          {v.machineChecklistItemName}
-                        </MenuItem>
-                      )) ?? <MenuItem></MenuItem>}
-                    </TextField>
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <Controller
-                      name='machineChecklistSubItemId'
-                      control={control}
-                      render={({ field }) => (
-                        <>
-                          <InputLabel>하위항목</InputLabel>
-                          <TextField
-                            select
-                            value={field.value}
-                            onChange={e => field.onChange(Number(e.target.value))}
-                            hiddenLabel
-                            size='small'
-                            fullWidth
-                          >
-                            {selectedInspection.machineChecklistItemsWithPicCountResponseDtos
-                              .find(v => v.machineChecklistItemId === machineChecklistItemId)
-                              ?.checklistSubItems.map(v => (
-                                <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
-                                  {v.checklistSubItemName}
-                                </MenuItem>
-                              )) ?? <MenuItem></MenuItem>}
-                          </TextField>
-                        </>
-                      )}
-                    />
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <InputLabel>대체타이틀</InputLabel>
-
-                    <TextField {...register('alternativeSubTitle')} hiddenLabel size='small' fullWidth />
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <InputLabel>측정값</InputLabel>
-
-                    <TextField {...register('measuredValue')} hiddenLabel size='small' fullWidth />
-                  </Grid2>
-                  <Grid2 size={2}>
                     <InputLabel>비고</InputLabel>
 
-                    <TextField {...register('remark')} minRows={3} multiline fullWidth hiddenLabel />
+                    <TextField
+                      {...register('remark')}
+                      placeholder='비고를 입력해주세요'
+                      minRows={3}
+                      multiline
+                      fullWidth
+                      hiddenLabel
+                    />
                   </Grid2>
                 </Grid2>
               </Box>
@@ -357,14 +277,14 @@ export default function PictureZoomModal({
           <DialogActions>
             <div className='flex items-end gap-4'>
               <Typography color={isDirty ? 'error.main' : 'warning.main'}>
-                {!isDirty ? '변경사항이 없습니다' : !watchedSubItemId && '※하위항목을 지정해주세요'}
+                {!isDirty ? '변경사항이 없습니다' : !watchedMachineProjectPicType && '※사진종류를 지정해주세요'}
               </Typography>
               <Button
                 sx={{ width: 'fit-content' }}
                 variant='contained'
                 type='submit'
                 form='picture-form'
-                disabled={!isDirty || !watchedSubItemId}
+                disabled={!isDirty || !watchedMachineProjectPicType}
               >
                 저장
               </Button>

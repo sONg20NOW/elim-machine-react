@@ -38,18 +38,19 @@ import type {
   MachinePicCursorType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import PictureZoomModal from '../PictureZoomModal'
+import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 
-type PictureListModalProps = {
+type InspectionPicListModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   clickedPicCate?: machineChecklistItemsWithPicCountResponseDtosType
+  ToggleProjectPic: () => void
 }
 
-const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalProps) => {
+const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPic }: InspectionPicListModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
   const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore(set => set)
 
@@ -394,13 +395,32 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
   // }, [showPicModal, getPictures])
 
   return (
-    selectedInspection && (
-      <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth disableEnforceFocus disableAutoFocus>
-        <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4, position: 'relative' }}>
-          <IconButton sx={{ position: 'absolute', top: 0, right: 0 }} onClick={() => setOpen(false)}>
+    selectedInspection &&
+    inspections && (
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth='xl'
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { height: '90vh', display: 'flex', flexDirection: 'column' }
+          }
+        }}
+        disableEnforceFocus
+        disableAutoFocus
+      >
+        <div className='flex flex-col gap-5 absolute top-0 right-0 items-end'>
+          <IconButton onClick={() => setOpen(false)}>
             <i className='tabler-x' />
           </IconButton>
-
+          <div className='grid place-items-center pe-7' onClick={ToggleProjectPic}>
+            <Button variant='outlined' color='success'>
+              현장사진 추가
+            </Button>
+          </div>
+        </div>
+        <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <TextField
             size='small'
             select
@@ -489,160 +509,87 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
           </Grid>
         </DialogTitle>
         <Divider />
-        <DialogContent>
-          <Grid container spacing={3}>
-            {/* 기존 사진 목록 */}
-            <Grid item xs={12}>
-              <Paper sx={{ p: 4, borderColor: 'lightgray' }} elevation={3}>
-                <div className='flex justify-between'>
-                  <Typography sx={{ fontWeight: 700, mb: 5 }} color='primary.dark' variant='h4' gutterBottom>
-                    검사 사진 목록
-                  </Typography>
-                  <div className='flex gap-1 top-2 right-1'>
-                    {showCheck && [
-                      <Button
-                        key={1}
-                        size='small'
-                        color='warning'
-                        onClick={async () => {
-                          setPicturesToDelete(
-                            pictures
-                              .concat(await getPictures(1000).then(v => v?.content ?? []))
-                              .filter(
-                                pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId
-                              )
-                          )
-                        }}
-                      >
-                        전체선택
-                      </Button>,
-                      <Button key={2} size='small' color='error' onClick={() => handleDeletePics()}>
-                        일괄삭제({picturesToDelete.length})
-                      </Button>
-                    ]}
-                    {filteredPics.length > 0 && (
-                      <Button
-                        color={showCheck ? 'secondary' : 'primary'}
-                        size='small'
-                        onClick={() => {
-                          if (showCheck) {
-                            setPicturesToDelete([])
-                          }
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 0 }}>
+          {/* 기존 사진 목록 */}
+          <Grid item xs={12} sx={{ flex: 1, overflowY: 'scroll' }}>
+            <Paper sx={{ p: 4, borderColor: 'lightgray' }} elevation={3}>
+              <div className='flex justify-between'>
+                <Typography sx={{ fontWeight: 700, mb: 5 }} color='primary.dark' variant='h4' gutterBottom>
+                  검사 사진 목록
+                </Typography>
+                <div className='flex gap-1 top-2 right-1'>
+                  {showCheck && [
+                    <Button
+                      key={1}
+                      size='small'
+                      color='warning'
+                      onClick={async () => {
+                        setPicturesToDelete(
+                          pictures
+                            .concat(await getPictures(1000).then(v => v?.content ?? []))
+                            .filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
+                        )
+                      }}
+                    >
+                      전체선택
+                    </Button>,
+                    <Button key={2} size='small' color='error' onClick={() => handleDeletePics()}>
+                      일괄삭제({picturesToDelete.length})
+                    </Button>
+                  ]}
+                  {filteredPics.length > 0 && (
+                    <Button
+                      color={showCheck ? 'secondary' : 'primary'}
+                      size='small'
+                      onClick={() => {
+                        if (showCheck) {
+                          setPicturesToDelete([])
+                        }
 
-                          setShowCheck(prev => !prev)
-                        }}
-                      >
-                        {showCheck ? '취소' : '선택삭제'}
-                      </Button>
-                    )}
-                  </div>
+                        setShowCheck(prev => !prev)
+                      }}
+                    >
+                      {showCheck ? '취소' : '선택삭제'}
+                    </Button>
+                  )}
                 </div>
-                {selectedItemId === 0 ? ( // 점검항목: 전체
-                  pictures.length > 0 ? (
-                    checklistItems.map(item => {
-                      const picsByItem = pictures.filter(
-                        pic => pic.machineChecklistItemId === item.machineChecklistItemId
-                      )
+              </div>
+              {selectedItemId === 0 ? ( // 점검항목: 전체
+                pictures.length > 0 ? (
+                  checklistItems.map(item => {
+                    const picsByItem = pictures.filter(
+                      pic => pic.machineChecklistItemId === item.machineChecklistItemId
+                    )
 
-                      return (
-                        picsByItem.length > 0 && (
-                          <Box
-                            key={item.machineChecklistItemId}
-                            sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
+                    return (
+                      picsByItem.length > 0 && (
+                        <Box
+                          key={item.machineChecklistItemId}
+                          sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
+                        >
+                          <Typography
+                            variant='h5'
+                            paddingInlineStart={2}
+                            onClick={() => setSelectedItemId(item.machineChecklistItemId)}
+                            sx={{
+                              cursor: 'pointer',
+                              ':hover': { textDecoration: 'underline', textUnderlineOffset: '3px' },
+                              width: 'fit-content'
+                            }}
                           >
-                            <Typography
-                              variant='h5'
-                              paddingInlineStart={2}
-                              onClick={() => setSelectedItemId(item.machineChecklistItemId)}
-                              sx={{
-                                cursor: 'pointer',
-                                ':hover': { textDecoration: 'underline', textUnderlineOffset: '3px' },
-                                width: 'fit-content'
-                              }}
-                            >
-                              # {item.machineChecklistItemName}
-                            </Typography>
-                            <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
-                              {picsByItem.map((pic, idx) => (
-                                <PictureCard key={idx} pic={pic} />
-                              ))}
-                            </ImageList>
-                          </Box>
-                        )
+                            # {item.machineChecklistItemName}
+                          </Typography>
+                          <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+                            {picsByItem.map((pic, idx) => (
+                              <PictureCard key={idx} pic={pic} />
+                            ))}
+                          </ImageList>
+                        </Box>
                       )
-                    })
-                  ) : (
-                    <Box
-                      sx={{
-                        textAlign: 'center',
-                        py: 4,
-                        border: '2px dashed #e0e0e0',
-                        borderRadius: 1,
-                        color: 'text.secondary'
-                      }}
-                    >
-                      <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
-                      <Typography>등록된 검사 사진이 없습니다.</Typography>
-                    </Box>
-                  )
-                ) : selectedSubItemId === 0 ? ( //하위항목: 전체의 경우
-                  selectedItem?.totalMachinePicCount !== 0 ? (
-                    selectedItem?.checklistSubItems.map(sub => {
-                      const picBySubItems = filteredPics.filter(
-                        pic => pic.machineChecklistSubItemId === sub.machineChecklistSubItemId
-                      )
-
-                      return (
-                        picBySubItems &&
-                        picBySubItems.length > 0 && (
-                          <Box
-                            key={sub.machineChecklistSubItemId}
-                            sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
-                          >
-                            <Typography
-                              variant='h5'
-                              paddingInlineStart={2}
-                              onClick={() => setSelectedSubItemId(sub.machineChecklistSubItemId)}
-                              sx={{
-                                cursor: 'pointer',
-                                ':hover': { textDecoration: 'underline', textUnderlineOffset: '3px' },
-                                width: 'fit-content'
-                              }}
-                            >
-                              # {sub.checklistSubItemName}
-                            </Typography>
-                            <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
-                              {picBySubItems.map((pic, idx) => (
-                                <PictureCard key={idx} pic={pic} />
-                              ))}
-                            </ImageList>
-                          </Box>
-                        )
-                      )
-                    })
-                  ) : (
-                    <Box
-                      sx={{
-                        textAlign: 'center',
-                        py: 4,
-                        border: '2px dashed #e0e0e0',
-                        borderRadius: 1,
-                        color: 'text.secondary'
-                      }}
-                    >
-                      <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
-                      <Typography>등록된 검사 사진이 없습니다.</Typography>
-                    </Box>
-                  )
-                ) : filteredPics && filteredPics.length > 0 ? ( //하위항목이 정해진 경우
-                  //해당 하위항목의 사진이 존재하는 경우
-                  <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
-                    {filteredPics.map((pic, idx) => (
-                      <PictureCard key={idx} pic={pic} />
-                    ))}
-                  </ImageList>
+                    )
+                  })
                 ) : (
-                  <Box //해당 하위 항목의 사진 개수가 0인 경우
+                  <Box
                     sx={{
                       textAlign: 'center',
                       py: 4,
@@ -654,73 +601,141 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
                     <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
                     <Typography>등록된 검사 사진이 없습니다.</Typography>
                   </Box>
-                )}
-              </Paper>
-            </Grid>
-            {/* 사진 업로드 영역 */}
-            <Grid item xs={12}>
-              <Paper
-                sx={{
-                  p: 4,
-                  position: 'relative',
-                  borderColor: 'lightgray',
-                  borderWidth: '1px'
-                }}
-                elevation={3}
-              >
-                {/* 선택된 파일 미리보기 */}
-                {filesToUpload.length > 0 && (
-                  <div>
-                    <Typography color='black' variant='subtitle1' gutterBottom>
-                      미리보기
-                    </Typography>
-                    <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
-                      {filesToUpload.map((file, index) => (
-                        <PicturePreviewCard key={index} file={file} index={index} />
-                      ))}
-                    </ImageList>
-                  </div>
-                )}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 5 }}>
-                  <input
-                    type='file'
-                    multiple
-                    accept='image/*'
-                    onChange={handleFileSelect}
-                    style={{ display: 'none' }}
-                    id='photo-upload-input'
-                  />
-                  <label htmlFor='photo-upload-input'>
-                    <Button variant='outlined' component='span' startIcon={<i className='ri-upload-2-line' />}>
-                      파일 선택
-                    </Button>
-                  </label>
+                )
+              ) : selectedSubItemId === 0 ? ( //하위항목: 전체의 경우
+                selectedItem?.totalMachinePicCount !== 0 ? (
+                  selectedItem?.checklistSubItems.map(sub => {
+                    const picBySubItems = filteredPics.filter(
+                      pic => pic.machineChecklistSubItemId === sub.machineChecklistSubItemId
+                    )
 
-                  <Button
-                    variant='contained'
-                    onClick={handleFileUpload}
-                    disabled={filesToUpload.length === 0 || isUploading}
-                    startIcon={<i className='ri-image-add-line' />}
+                    return (
+                      picBySubItems &&
+                      picBySubItems.length > 0 && (
+                        <Box
+                          key={sub.machineChecklistSubItemId}
+                          sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
+                        >
+                          <Typography
+                            variant='h5'
+                            paddingInlineStart={2}
+                            onClick={() => setSelectedSubItemId(sub.machineChecklistSubItemId)}
+                            sx={{
+                              cursor: 'pointer',
+                              ':hover': { textDecoration: 'underline', textUnderlineOffset: '3px' },
+                              width: 'fit-content'
+                            }}
+                          >
+                            # {sub.checklistSubItemName}
+                          </Typography>
+                          <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+                            {picBySubItems.map((pic, idx) => (
+                              <PictureCard key={idx} pic={pic} />
+                            ))}
+                          </ImageList>
+                        </Box>
+                      )
+                    )
+                  })
+                ) : (
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4,
+                      border: '2px dashed #e0e0e0',
+                      borderRadius: 1,
+                      color: 'text.secondary'
+                    }}
                   >
-                    {isUploading ? '업로드 중...' : '사진 업로드'}
-                  </Button>
-
-                  <Typography variant='body2' color='text.secondary'>
-                    {filesToUpload.length}개 파일 선택됨
-                  </Typography>
+                    <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
+                    <Typography>등록된 검사 사진이 없습니다.</Typography>
+                  </Box>
+                )
+              ) : filteredPics && filteredPics.length > 0 ? ( //하위항목이 정해진 경우
+                //해당 하위항목의 사진이 존재하는 경우
+                <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+                  {filteredPics.map((pic, idx) => (
+                    <PictureCard key={idx} pic={pic} />
+                  ))}
+                </ImageList>
+              ) : (
+                <Box //해당 하위 항목의 사진 개수가 0인 경우
+                  sx={{
+                    textAlign: 'center',
+                    py: 4,
+                    border: '2px dashed #e0e0e0',
+                    borderRadius: 1,
+                    color: 'text.secondary'
+                  }}
+                >
+                  <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
+                  <Typography>등록된 검사 사진이 없습니다.</Typography>
                 </Box>
-              </Paper>
-            </Grid>
+              )}
+            </Paper>
+          </Grid>
+          {/* 사진 업로드 영역 */}
+          <Grid item xs={12}>
+            <Paper
+              sx={{
+                p: 4,
+                position: 'relative',
+                borderColor: 'lightgray',
+                borderWidth: '1px'
+              }}
+              elevation={3}
+            >
+              {/* 선택된 파일 미리보기 */}
+              {filesToUpload.length > 0 && (
+                <div>
+                  <Typography color='black' variant='subtitle1' gutterBottom>
+                    미리보기
+                  </Typography>
+                  <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+                    {filesToUpload.map((file, index) => (
+                      <PicturePreviewCard key={index} file={file} index={index} />
+                    ))}
+                  </ImageList>
+                </div>
+              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 5 }}>
+                <input
+                  type='file'
+                  multiple
+                  accept='image/*'
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                  id='photo-upload-input'
+                />
+                <label htmlFor='photo-upload-input'>
+                  <Button variant='outlined' component='span' startIcon={<i className='ri-upload-2-line' />}>
+                    파일 선택
+                  </Button>
+                </label>
+
+                <Button
+                  variant='contained'
+                  onClick={handleFileUpload}
+                  disabled={filesToUpload.length === 0 || isUploading}
+                  startIcon={<i className='ri-image-add-line' />}
+                >
+                  {isUploading ? '업로드 중...' : '사진 업로드'}
+                </Button>
+
+                <Typography variant='body2' color='text.secondary'>
+                  {filesToUpload.length}개 파일 선택됨
+                </Typography>
+              </Box>
+            </Paper>
           </Grid>
         </DialogContent>
-
         <DialogActions>
           <Button onClick={handleClose} variant='outlined' sx={{ marginTop: 6 }}>
             닫기
           </Button>
         </DialogActions>
         {selectedPic && (
-          <PictureZoomModal
+          <InspectionPicZoomModal
             MovePicture={MovePicture}
             open={showPicModal}
             setOpen={setShowPicModal}
@@ -735,4 +750,4 @@ const PictureListModal = ({ open, setOpen, clickedPicCate }: PictureListModalPro
   )
 }
 
-export default PictureListModal
+export default InspectionPicListModal

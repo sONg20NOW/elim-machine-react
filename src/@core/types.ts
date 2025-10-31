@@ -680,13 +680,26 @@ export interface MachinePicUpdateResponseDtoType {
 }
 
 // ----------- machineProject Pic 관련 -------------
+export type ProjectPicType = 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
+
 // GET /api/machine-projects/{machineProjectId}/machine-project-pics/overview
-export interface MachineProjectOverviewPicReadResponseDtoType {
+// GET /api/machine-projects/{machineProjectId}/machine-project-pics
+
+export interface MachineProjectPicReadResponseDtoType {
   id: number
   version: number
   originalFileName: string
-  machineProjectPicType: 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
+  machineProjectPicType: ProjectPicType
   presignedUrl: string
+  remark: string
+}
+
+// PUT /api/machine-projects/{machineProjectId}/machine-project-pics/{machineProjectPicId}
+export interface MachineProjectPicUpdateRequestDtoType {
+  version: number
+  originalFileName: string
+  s3Key: string
+  machineProjectPicType: ProjectPicType
   remark: string
 }
 

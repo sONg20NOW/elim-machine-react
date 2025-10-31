@@ -1,11 +1,12 @@
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from './getS3Key'
+import type { ProjectPicType } from '../types'
 
 export const uploadProjectPictures = async (
   machineProjectId: string,
   filesToUpload: File[],
-  machineProjectPicType: 'OVERVIEW' | 'ETC' | 'LOCATION_MAP'
+  machineProjectPicType: ProjectPicType
 ) => {
   try {
     const S3uploadResults = await getS3Key(

@@ -31,7 +31,7 @@ import SearchBar from '@/@core/components/custom/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import AddInspectionModal from '../AddInspectionModal'
-import PictureListModal from '../detailModal/PictureListModal'
+import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { useGetParticipatedEngineerList, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 

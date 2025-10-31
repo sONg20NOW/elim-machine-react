@@ -15,7 +15,7 @@ import type {
   machineInspectionSummaryResponseDtoType,
   MachineLeafCategoryResponseDtoType,
   machineProjectEngineerDetailDtoType,
-  MachineProjectOverviewPicReadResponseDtoType,
+  MachineProjectPicReadResponseDtoType,
   MachineProjectResponseDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType,
   MachineReportCategoryReadResponseDtoType,
@@ -183,7 +183,7 @@ export const useGetOverviewPics = (machineProjectId: string) => {
 
       const response = await auth
         .get<{
-          data: { machineProjectPics: MachineProjectOverviewPicReadResponseDtoType[] }
+          data: { machineProjectPics: MachineProjectPicReadResponseDtoType[] }
         }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/overview?machineProjectPicType=OVERVIEW`)
         .then(v => v.data.data.machineProjectPics)
 

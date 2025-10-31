@@ -32,7 +32,7 @@ import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
 import PipeTabContent from './tabs/PipeTabContent'
 import PicTabContent from './tabs/PicTabContent'
-import PictureListModal from './PictureListModal'
+import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 

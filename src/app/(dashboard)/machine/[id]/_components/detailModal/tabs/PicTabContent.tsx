@@ -7,7 +7,7 @@ import { Button, IconButton, MenuItem, TextField, Tooltip, Typography } from '@m
 
 import axios from 'axios'
 
-import PictureListModal from '../PictureListModal'
+import PictureListModal from '../../pictureUpdateModal/PictureListModal'
 import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
