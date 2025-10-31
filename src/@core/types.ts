@@ -60,6 +60,14 @@ export type engineerInputType = Partial<Record<keyof EngineerResponseDtoType, In
 // licenses/[id] 인풋 정보 형식
 export type licenseInputType = Partial<Record<keyof LicenseResponseDtoType, InputFieldType>>
 
+// -------- 캘린더 ----------
+export interface CalendarEventResponseDtoType {
+  id: number
+  type: string
+  name: string
+  colorCode: string
+}
+
 // -------- 직원관리 --------
 // POST api/members (필수: role)
 export interface MemberCreateRequestDtoType {

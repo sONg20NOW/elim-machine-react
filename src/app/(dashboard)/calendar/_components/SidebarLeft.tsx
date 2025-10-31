@@ -98,7 +98,7 @@ const SidebarLeft = (props: SidebarLeftProps) => {
             onClick={handleSidebarToggleSidebar}
             startIcon={<i className='tabler-plus' />}
           >
-            Add Event
+            이벤트 추가하기
           </Button>
         </div>
         <Divider className='is-full' />
@@ -114,7 +114,7 @@ const SidebarLeft = (props: SidebarLeftProps) => {
 
         <div className='flex flex-col p-6 is-full'>
           <Typography variant='h5' className='mbe-4'>
-            Event Filters
+            이벤트 필터
           </Typography>
           <FormControlLabel
             className='mbe-1'

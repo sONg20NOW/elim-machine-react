@@ -59,7 +59,7 @@ const Calendar = (props: CalenderProps) => {
   } = props
 
   // Refs
-  const calendarRef = useRef()
+  const calendarRef = useRef<FullCalendar>(null)
 
   // Hooks
   const theme = useTheme()
@@ -127,15 +127,16 @@ const Calendar = (props: CalenderProps) => {
       ]
     },
 
-    eventClick({ event: clickedEvent, jsEvent }: any) {
+    eventClick({ event, jsEvent }) {
       jsEvent.preventDefault()
+      alert(JSON.stringify(event))
 
-      dispatch(selectedEvent(clickedEvent))
+      dispatch(selectedEvent(event))
       handleAddEventSidebarToggle()
 
-      if (clickedEvent.url) {
+      if (event.url) {
         // Open the URL in a new tab
-        window.open(clickedEvent.url, '_blank')
+        window.open(event.url, '_blank')
       }
 
       //* Only grab required field otherwise it goes in infinity loop
@@ -181,13 +182,11 @@ const Calendar = (props: CalenderProps) => {
       dispatch(filterEvents())
     },
 
-    // @ts-ignore
-    ref: calendarRef,
-
+    locale: 'ko',
     direction: theme.direction
   }
 
-  return <FullCalendar {...calendarOptions} />
+  return <FullCalendar ref={calendarRef} {...calendarOptions} />
 }
 
 export default Calendar

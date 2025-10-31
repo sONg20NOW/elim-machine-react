@@ -3,10 +3,6 @@
 // React Imports
 import { useEffect, useState } from 'react'
 
-// MUI Imports
-import { useMediaQuery } from '@mui/material'
-import type { Theme } from '@mui/material/styles'
-
 // Third-party Imports
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -18,7 +14,6 @@ import type { CalendarColors, CalendarType } from '@/types/apps/calendarTypes'
 // Component Imports
 import Calendar from './Calendar'
 
-import SidebarLeft from './SidebarLeft'
 import { fetchEvents } from '@/redux-store/slices/calendar'
 
 // CalendarColors Object
@@ -40,7 +35,7 @@ const AppCalendar = () => {
   const dispatch = useDispatch<AppDispatch>()
   const calendarStore = useSelector((state: { calendarReducer: CalendarType }) => state.calendarReducer)
 
-  const mdAbove = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'))
+  // const mdAbove = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'))
 
   const handleLeftSidebarToggle = () => setLeftSidebarOpen(!leftSidebarOpen)
 
@@ -52,7 +47,7 @@ const AppCalendar = () => {
 
   return (
     <>
-      <SidebarLeft
+      {/* <SidebarLeft
         mdAbove={mdAbove}
         dispatch={dispatch}
         calendarApi={calendarApi}
@@ -61,7 +56,7 @@ const AppCalendar = () => {
         leftSidebarOpen={leftSidebarOpen}
         handleLeftSidebarToggle={handleLeftSidebarToggle}
         handleAddEventSidebarToggle={handleAddEventSidebarToggle}
-      />
+      /> */}
       <div className='p-6 pbe-0 flex-grow overflow-visible bg-backgroundPaper rounded'>
         <Calendar
           dispatch={dispatch}
