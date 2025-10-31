@@ -1,7 +1,6 @@
 'use client'
 
-import type { Dispatch, SetStateAction } from 'react'
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -22,11 +21,6 @@ import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from './_components/ProjectInfoCard'
-
-export const IsEditingContext = createContext<{ isEditing: boolean; setIsEditing: Dispatch<SetStateAction<boolean>> }>({
-  isEditing: false,
-  setIsEditing: () => null
-})
 
 export interface projectSummaryType {
   machineProjectName: string | null

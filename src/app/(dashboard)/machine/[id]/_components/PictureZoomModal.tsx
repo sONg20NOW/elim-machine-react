@@ -33,7 +33,7 @@ import type {
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
-import { useGetInspections } from '@/@core/hooks/customTanstackQueries'
+import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
 
 interface PictureZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
@@ -83,7 +83,7 @@ export default function PictureZoomModal({
   // 사진 정보 수정을 위한 상태관리
   const [urlInspectionId, setUrlInspectionId] = useState(selectedPic.machineInspectionId)
 
-  const { data: inspectionList } = useGetInspections(machineProjectId)
+  const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
 
   const cameraInputRef = useRef<HTMLInputElement>(null)
 

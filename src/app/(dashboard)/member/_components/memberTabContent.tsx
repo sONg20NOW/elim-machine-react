@@ -1,7 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
 
-import { DialogContent } from '@mui/material'
-import Grid from '@mui/material/Grid2'
+import { DialogContent, Grid2 } from '@mui/material'
 
 import type { memberDetailDtoType, TabType } from '@/@core/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
@@ -28,11 +27,14 @@ const MemberTabContent = ({
     etc: 'memberEtcResponseDto'
   }
 
+  const dtoKey: keyof memberDetailDtoType = dtoMap[tabName]
   const properties = Object.keys(MEMBER_INPUT_INFO[tabName])
+
+  const currentSubData = userData[dtoKey] as Record<string, any>
 
   return (
     <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-      <Grid container spacing={3}>
+      <Grid2 container spacing={3}>
         {properties.map(property => {
           return (
             <InputBox
@@ -40,7 +42,7 @@ const MemberTabContent = ({
               key={property}
               tabInfos={tabInfos}
               tabFieldKey={property}
-              value={(userData[dtoMap[tabName]] as Record<string, string>)[property] ?? ''}
+              value={currentSubData[property] ?? ''}
               onChange={(value: string) => {
                 setUserData({
                   ...userData,
@@ -53,7 +55,7 @@ const MemberTabContent = ({
             />
           )
         })}
-      </Grid>
+      </Grid2>
     </DialogContent>
   )
 }

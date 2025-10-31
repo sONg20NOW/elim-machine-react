@@ -15,7 +15,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/@core/types'
 import { handleApiError } from '@/utils/errorHandler'
-import { useGetCategories, useGetInspections } from '@/@core/hooks/customTanstackQueries'
+import { useGetCategories, useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
 
 type AddInspectionModalProps = {
   open: boolean
@@ -34,7 +34,7 @@ const AddInspectionModal = ({ getFilteredInspectionList, open, setOpen }: AddIns
   })
 
   const { data: categoryList } = useGetCategories()
-  const { refetch: refetchInspections } = useGetInspections(machineProjectId)
+  const { refetch: refetchInspections } = useGetInspectionsSimple(machineProjectId)
 
   const [parentCategory, setParentCategory] = useState<MachineCategoryResponseDtoType>()
   const [showSubCategory, setShowSubCategory] = useState(false)

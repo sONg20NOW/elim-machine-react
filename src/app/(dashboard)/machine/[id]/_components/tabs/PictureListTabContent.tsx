@@ -34,7 +34,7 @@ import type {
 
 import SearchBar from '@/@core/components/custom/SearchBar'
 import PictureZoomModal from '../PictureZoomModal'
-import { useGetInspections } from '@/@core/hooks/customTanstackQueries'
+import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
 
 const PictureListTabContent = () => {
   const machineProjectId = useParams().id?.toString() as string
@@ -49,7 +49,7 @@ const PictureListTabContent = () => {
   const [showCheck, setShowCheck] = useState(false)
 
   // inspection으로 필터링하기 위한 옵션
-  const { data: inspectionList } = useGetInspections(machineProjectId)
+  const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
   const [inspectionId, setInspectionId] = useState(0)
 
   // ! 추후 세부 필터링 추가
