@@ -11,6 +11,7 @@ import type {
   MachineEngineerOptionResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
+  MachineInspectionPageResponseDtoType,
   machineInspectionSummaryResponseDtoType,
   MachineLeafCategoryResponseDtoType,
   machineProjectEngineerDetailDtoType,
@@ -28,9 +29,10 @@ interface MachineInspectionSimpleResponseDtoType {
   name: string
 }
 
-export const useGetInspections = (machineProjectId: string) => {
+// GET /api/machine-projects/${machineProjectId}/machine-inspections/simple : 설비 목록 조회 (SIMPLE)
+export const useGetInspectionsSimple = (machineProjectId: string) => {
   return useQuery({
-    queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS(machineProjectId),
+    queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS_SIMPLE(machineProjectId),
     queryFn: async data => {
       const [keytype, machineProjectId] = data.queryKey
 
@@ -39,6 +41,29 @@ export const useGetInspections = (machineProjectId: string) => {
           data: { machineInspections: MachineInspectionSimpleResponseDtoType[] }
         }>(`/api/machine-projects/${machineProjectId}/machine-inspections/simple`)
         .then(v => v.data.data.machineInspections)
+
+      console.log(`!!! queryFn ${keytype}:`, response)
+
+      return response
+    },
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/${machineProjectId}/machine-inspections : 설비 목록 조회
+export const useGetEveryInspections = (machineProjectId: string) => {
+  const maxCnt = 100
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS_SIMPLE(machineProjectId),
+    queryFn: async data => {
+      const [keytype, machineProjectId] = data.queryKey
+
+      const response = await auth
+        .get<{
+          data: { content: MachineInspectionPageResponseDtoType[] }
+        }>(`/api/machine-projects/${machineProjectId}/machine-inspections?size=${maxCnt}`)
+        .then(v => v.data.data.content)
 
       console.log(`!!! queryFn ${keytype}:`, response)
 
