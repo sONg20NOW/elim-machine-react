@@ -325,7 +325,7 @@ const TableRow = memo(
             </Tooltip>
           </div>
         </td>
-        {category.id !== 15 ? (
+        {category.reportTemplateCode !== 'MACHINE_INSPECTION_PERFORMANCE' ? (
           <>
             <td colSpan={1} className='px-0'>
               <div className='grid place-items-center relative'>

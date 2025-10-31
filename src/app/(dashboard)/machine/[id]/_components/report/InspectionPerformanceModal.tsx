@@ -21,7 +21,7 @@ import {
 import { toast } from 'react-toastify'
 
 import style from '@/app/_style/Table.module.css'
-import { useGetLeafCategories } from '@/@core/hooks/customTanstackQueries'
+import { useGetLeafCategories, useGetReportCategories } from '@/@core/hooks/customTanstackQueries'
 import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
@@ -34,6 +34,12 @@ export default function InspectionPerformanceModal({
   setOpen: (open: boolean) => void
 }) {
   const machineProjectId = useParams().id?.toString()
+
+  const { data: reportCategories } = useGetReportCategories()
+
+  const MACHINE_INSPECTION_PERFORMANCE_ID = reportCategories?.find(
+    v => v.reportTemplateCode === 'MACHINE_INSPECTION_PERFORMANCE'
+  )?.id as number
 
   const [loading, setLoading] = useState(false)
   const [statuses, setStatuses] = useState<MachineReportStatusResponseDtoType[]>([])
@@ -49,7 +55,9 @@ export default function InspectionPerformanceModal({
         const reports = await auth
           .get<{
             data: { machineReports: MachineReportStatusResponseDtoType[] }
-          }>(`/api/machine-projects/${machineProjectId}/machine-reports/status?machineReportCategoryIds=15`)
+          }>(
+            `/api/machine-projects/${machineProjectId}/machine-reports/status?machineReportCategoryIds=${MACHINE_INSPECTION_PERFORMANCE_ID}`
+          )
           .then(v => v.data.data.machineReports)
 
         console.log('최초에 리포트 상태 모두 가져오기', reports)
@@ -60,12 +68,12 @@ export default function InspectionPerformanceModal({
     }
 
     getAllReportStatus()
-  }, [machineProjectId])
+  }, [machineProjectId, MACHINE_INSPECTION_PERFORMANCE_ID])
 
   return (
     <Dialog fullWidth maxWidth='sm' open={open}>
       <DialogTitle variant='h3' sx={{ position: 'relative' }}>
-        보고서 다운로드
+        설비별
         {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
         <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
           <i className='tabler-x' />
@@ -125,6 +133,12 @@ const InspectionTableRow = memo(
   }) => {
     const machineProjectId = useParams().id?.toString()
 
+    const { data: reportCategories } = useGetReportCategories()
+
+    const MACHINE_INSPECTION_PERFORMANCE_ID = reportCategories?.find(
+      v => v.reportTemplateCode === 'MACHINE_INSPECTION_PERFORMANCE'
+    )?.id as number
+
     const aRef = useRef<HTMLAnchorElement>(null)
 
     const ourStatus = statuses.filter(status => status.machineCategoryId === machineCategory.id)
@@ -143,7 +157,7 @@ const InspectionTableRow = memo(
             .get<{
               data: { presignedUrl: string }
             }>(
-              `/api/machine-projects/${machineProjectId}/machine-reports/download?machineReportCategoryId=15&machineCategoryId=${machineCategoryId}`
+              `/api/machine-projects/${machineProjectId}/machine-reports/download?machineReportCategoryId=${MACHINE_INSPECTION_PERFORMANCE_ID}&machineCategoryId=${machineCategoryId}`
             )
             .then(response => response.data.data.presignedUrl)
 
@@ -154,7 +168,7 @@ const InspectionTableRow = memo(
           handleApiError(e)
         }
       },
-      [machineProjectId]
+      [machineProjectId, MACHINE_INSPECTION_PERFORMANCE_ID]
     )
 
     useEffect(() => {
@@ -177,7 +191,7 @@ const InspectionTableRow = memo(
         try {
           await auth.post(`api/machine-projects/${machineProjectId}/machine-reports/inspection-performance`, {
             machineProjectId: Number(machineProjectId),
-            machineReportCategoryId: 15,
+            machineReportCategoryId: MACHINE_INSPECTION_PERFORMANCE_ID,
             machineCategoryId: machineCategoryId
           })
 
@@ -193,7 +207,7 @@ const InspectionTableRow = memo(
           return false
         }
       },
-      [machineProjectId]
+      [machineProjectId, MACHINE_INSPECTION_PERFORMANCE_ID]
     )
 
     const getReportStatusUnit = useCallback(
@@ -202,7 +216,9 @@ const InspectionTableRow = memo(
           const reports = await auth
             .get<{
               data: { machineReports: MachineReportStatusResponseDtoType[] }
-            }>(`/api/machine-projects/${machineProjectId}/machine-reports/status?machineReportCategoryIds=15`)
+            }>(
+              `/api/machine-projects/${machineProjectId}/machine-reports/status?machineReportCategoryIds=${MACHINE_INSPECTION_PERFORMANCE_ID}`
+            )
             .then(v => v.data.data.machineReports)
 
           const report = reports.find(report => report.machineCategoryId === machineCategoryId)
@@ -229,7 +245,7 @@ const InspectionTableRow = memo(
           handleApiError(e)
         }
       },
-      [machineProjectId, setStatuses]
+      [machineProjectId, setStatuses, MACHINE_INSPECTION_PERFORMANCE_ID]
     )
 
     const handleCreate = useCallback(
