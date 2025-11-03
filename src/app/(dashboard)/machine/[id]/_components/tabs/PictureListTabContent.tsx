@@ -14,7 +14,8 @@ import {
   Checkbox,
   TextField,
   MenuItem,
-  Paper
+  Paper,
+  IconButton
 } from '@mui/material'
 
 // @ts-ignore
@@ -68,6 +69,8 @@ const PictureListTabContent = () => {
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
+  const reloadIconRef = useRef<HTMLElement>(null)
+
   // 반응형을 위한 미디어쿼리
   const isMobile = useMediaQuery('(max-width:600px)')
 
@@ -96,7 +99,7 @@ const PictureListTabContent = () => {
     [machineProjectId]
   )
 
-  // 사진을 가져오는 함수. (무한 스크롤 X)
+  // 현장사진을 가져오는 함수. (무한 스크롤 X)
   const getProjectPics = useCallback(async () => {
     try {
       const response = await auth
@@ -116,7 +119,7 @@ const PictureListTabContent = () => {
     }
   }, [machineProjectId])
 
-  // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
+  // 현재 커서 정보에 기반해서 사진을 가져오는 함수. (설비 사진)
   const getInspectionPics = useCallback(
     async (pageSize = defaultPageSize) => {
       if (!hasNextRef.current || isLoadingRef.current) return
@@ -235,13 +238,13 @@ const PictureListTabContent = () => {
     }
   }
 
-  const refetchPictures = async () => {
+  const refetchPictures = useCallback(async () => {
     resetCursor()
     await getInspectionPics(defaultPageSize)
     await getProjectPics()
 
     return
-  }
+  }, [getInspectionPics, getProjectPics])
 
   useEffect(() => {
     getProjectPics()
@@ -296,6 +299,12 @@ const PictureListTabContent = () => {
   //   }
   // }, [showPicModal, getPictures])
 
+  // useEffect(() => {
+  //   if (!showProjectPicModal && !showInspecitonPicModal && !open) {
+  //     refetchPictures()
+  //   }
+  // }, [showInspecitonPicModal, showProjectPicModal, open, refetchPictures])
+
   return (
     inspectionList && (
       <div className='flex flex-col gap-5'>
@@ -321,6 +330,19 @@ const PictureListTabContent = () => {
                 </MenuItem>
               ))}
             </TextField>
+            <IconButton
+              onClick={() => {
+                if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
+
+                reloadIconRef.current.classList.add('animate-spin')
+                setTimeout(() => {
+                  reloadIconRef.current?.classList.remove('animate-spin')
+                }, 1000)
+                refetchPictures()
+              }}
+            >
+              <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
+            </IconButton>
             {/* ! 추후구현
            {
             inspectionId !== 0 && filterPics(pictures).length !== 0
@@ -585,8 +607,8 @@ const PictureListTabContent = () => {
             setOpen={setShowInspecitonPicModal}
             selectedPic={selectedInspectionPic}
             selectedInspection={selectedInspection}
-            reloadPics={refetchPictures}
             MovePicture={MoveInspectionPicture}
+            setPictures={setInspectionPics}
           />
         )}
         {selectedProjectPic && (
@@ -594,7 +616,7 @@ const PictureListTabContent = () => {
             open={showProjectPicModal}
             setOpen={setShowProjectPicModal}
             selectedPic={selectedProjectPic}
-            reloadPics={refetchPictures}
+            setPictures={setProjectPics}
           />
         )}
         {open && <PictureListModal open={open} setOpen={setOpen} projectPic={true} />}

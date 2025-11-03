@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -14,8 +14,7 @@ import {
   InputLabel,
   MenuItem,
   TextField,
-  Typography,
-  useMediaQuery
+  Typography
 } from '@mui/material'
 
 import axios from 'axios'
@@ -34,6 +33,7 @@ import type {
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 interface InspectionPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
@@ -41,8 +41,7 @@ interface InspectionPicZoomModalProps {
   setOpen: Dispatch<SetStateAction<boolean>>
   selectedPic: MachinePicPresignedUrlResponseDtoType
   selectedInspection: MachineInspectionDetailResponseDtoType
-  reloadPics?: () => void
-  refetchSelectedInspection?: () => void
+  setPictures: Dispatch<SetStateAction<MachinePicPresignedUrlResponseDtoType[]>>
 }
 
 // ! 확대 기능 구현, 현재 리스트에 있는 목록 슬라이드로 이동 가능 기능 구현, 사진 정보 수정 기능 구현(이름 수정은 연필로)
@@ -52,7 +51,7 @@ export default function InspectionPicZoomModal({
   setOpen,
   selectedPic,
   selectedInspection,
-  reloadPics
+  setPictures
 }: InspectionPicZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
 
@@ -87,8 +86,7 @@ export default function InspectionPicZoomModal({
 
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
-  // 반응형을 위한 미디어쿼리
-  const isMobile = useMediaQuery('(max-width:600px)')
+  const isMobile = useContext(isMobileContext)
 
   useEffect(() => {
     reset(selectedPic)
@@ -143,15 +141,11 @@ export default function InspectionPicZoomModal({
       setUrlInspectionId(response.machineInspectionId)
 
       handleSuccess('사진 정보가 변경되었습니다.')
-      reloadPics && reloadPics()
+      setPictures(prev => prev.map(v => (v.machinePicId === selectedPic.machinePicId ? { ...v, ...response } : v)))
     } catch (error) {
       handleApiError(error)
     }
   }
-
-  useEffect(() => {
-    console.log(JSON.stringify(getValues()))
-  })
 
   return (
     inspectionList && (
@@ -202,7 +196,7 @@ export default function InspectionPicZoomModal({
                 </div>
               )}
 
-              <div className='flex-1 flex flex-col w-full items-start relative border-4 p-2 rounded-lg border-[1px solid lightgray]'>
+              <div className='flex-1 flex flex-col gap-2 w-full items-start relative border-4 p-2 rounded-lg border-[1px solid lightgray]'>
                 <TextField
                   {...register('originalFileName')}
                   variant='standard'

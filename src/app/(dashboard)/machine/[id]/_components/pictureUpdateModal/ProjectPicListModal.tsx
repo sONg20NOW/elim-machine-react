@@ -37,6 +37,8 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { auth } from '@/lib/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
+import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
+import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 
 type ProjectPicListModalProps = {
   open: boolean
@@ -47,10 +49,14 @@ type ProjectPicListModalProps = {
 const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicListModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
 
+  const setCurrentInspectionId = useCurrentInspectionIdStore(set => set.setCurrentInspectionId)
+
   // 사진 리스트
   const [pictures, setPictures] = useState<MachineProjectPicReadResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
+
+  const reloadIconRef = useRef<HTMLElement>(null)
 
   // 프로젝트 사진 관련
   const [selectedPicType, setSelectedPicType] = useState<ProjectPicType | '전체'>('전체')
@@ -68,6 +74,8 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   const filteredPics = pictures.filter(pic =>
     selectedPicType !== '전체' ? selectedPicType === pic.machineProjectPicType : true
   )
+
+  const { data: inspections } = useGetInspectionsSimple(machineProjectId)
 
   // 반응형을 위한 미디어쿼리
   const isMobile = useContext(isMobileContext)
@@ -287,10 +295,23 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
         <IconButton onClick={() => setOpen(false)}>
           <i className='tabler-x' />
         </IconButton>
-        <div className='grid place-items-center pe-7' onClick={ToggleProjectPic}>
-          <Button variant='outlined' color='primary'>
+        <div className='flex flex-col gap-2 pe-7 items-end'>
+          <Button
+            variant='outlined'
+            color='primary'
+            onClick={() => {
+              if (!inspections) return
+
+              setCurrentInspectionId(inspections[0].id)
+              ToggleProjectPic()
+            }}
+            disabled={(inspections?.length ?? 0) === 0}
+          >
             설비사진 추가
           </Button>
+          {(inspections?.length ?? 0) === 0 && (
+            <Typography color='error.main'>선택할 수 있는 설비가 없습니다</Typography>
+          )}
         </div>
       </div>
       <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -339,9 +360,24 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
         <Grid item xs={12} sx={{ flex: 1, overflowY: 'scroll' }}>
           <Paper sx={{ p: 4, borderColor: 'lightgray' }} elevation={3}>
             <div className='flex justify-between'>
-              <Typography sx={{ fontWeight: 700, mb: 5 }} color='primary.dark' variant='h4' gutterBottom>
-                검사 사진 목록
-              </Typography>
+              <div className='flex items-center mb-5'>
+                <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
+                  현장 사진 목록
+                </Typography>
+                <IconButton
+                  onClick={() => {
+                    if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
+
+                    reloadIconRef.current.classList.add('animate-spin')
+                    setTimeout(() => {
+                      reloadIconRef.current?.classList.remove('animate-spin')
+                    }, 1000)
+                    getPictures()
+                  }}
+                >
+                  <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
+                </IconButton>
+              </div>
               <div className='flex gap-1 top-2 right-1'>
                 {showCheck && [
                   <Button
@@ -509,7 +545,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           open={showPicModal}
           setOpen={setShowPicModal}
           selectedPic={selectedPic}
-          reloadPics={getPictures}
+          setPictures={setPictures}
         />
       )}
     </Dialog>

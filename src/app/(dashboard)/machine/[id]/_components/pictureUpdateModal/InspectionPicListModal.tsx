@@ -91,6 +91,8 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
+  const reloadIconRef = useRef<HTMLElement>(null)
+
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
   const [showPicModal, setShowPicModal] = useState(false)
@@ -390,9 +392,8 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
   // useEffect(() => {
   //   if (!showPicModal) {
   //     resetCursor()
-  //     getPictures()
   //   }
-  // }, [showPicModal, getPictures])
+  // }, [showPicModal])
 
   return (
     selectedInspection &&
@@ -514,10 +515,25 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
           <Grid item xs={12} sx={{ flex: 1, overflowY: 'scroll' }}>
             <Paper sx={{ p: 4, borderColor: 'lightgray' }} elevation={3}>
               <div className='flex justify-between'>
-                <Typography sx={{ fontWeight: 700, mb: 5 }} color='primary.dark' variant='h4' gutterBottom>
-                  검사 사진 목록
-                </Typography>
-                <div className='flex gap-1 top-2 right-1'>
+                <div className='flex items-center mb-5'>
+                  <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
+                    설비 사진 목록
+                  </Typography>
+                  <IconButton
+                    onClick={() => {
+                      if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
+
+                      reloadIconRef.current.classList.add('animate-spin')
+                      setTimeout(() => {
+                        reloadIconRef.current?.classList.remove('animate-spin')
+                      }, 1000)
+                      resetCursor()
+                    }}
+                  >
+                    <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
+                  </IconButton>
+                </div>
+                <div className='flex gap-1 top-2 right-1 items-center'>
                   {showCheck && [
                     <Button
                       key={1}
@@ -740,9 +756,8 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
             open={showPicModal}
             setOpen={setShowPicModal}
             selectedPic={selectedPic}
-            reloadPics={resetCursor}
             selectedInspection={selectedInspection}
-            refetchSelectedInspection={refetchSelectedInspection}
+            setPictures={setPictures}
           />
         )}
       </Dialog>

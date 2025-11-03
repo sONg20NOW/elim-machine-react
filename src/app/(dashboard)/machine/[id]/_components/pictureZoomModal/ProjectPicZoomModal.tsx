@@ -34,7 +34,7 @@ interface ProjectPicZoomModalProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   selectedPic: MachineProjectPicReadResponseDtoType
-  reloadPics?: () => void
+  setPictures: Dispatch<SetStateAction<MachineProjectPicReadResponseDtoType[]>>
 }
 
 // ! 확대 기능 구현, 현재 리스트에 있는 목록 슬라이드로 이동 가능 기능 구현, 사진 정보 수정 기능 구현(이름 수정은 연필로)
@@ -43,7 +43,7 @@ export default function ProjectPicZoomModal({
   open,
   setOpen,
   selectedPic,
-  reloadPics
+  setPictures
 }: ProjectPicZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
 
@@ -57,7 +57,6 @@ export default function ProjectPicZoomModal({
     reset,
     formState: { isDirty, dirtyFields },
     setValue,
-    getValues,
     watch
   } = useForm<MachineProjectPicUpdateRequestDtoType>({
     defaultValues: {
@@ -111,15 +110,11 @@ export default function ProjectPicZoomModal({
       reset(response)
 
       handleSuccess('사진 정보가 변경되었습니다.')
-      reloadPics && reloadPics()
+      setPictures(prev => prev.map(v => (v.id === selectedPic.id ? { ...v, ...response } : v)))
     } catch (error) {
       handleApiError(error)
     }
   }
-
-  useEffect(() => {
-    console.log(JSON.stringify(getValues()))
-  })
 
   return (
     inspectionList && (
@@ -170,7 +165,7 @@ export default function ProjectPicZoomModal({
                 </div>
               )}
 
-              <div className='flex-1 flex flex-col w-full items-start relative border-4 p-2 rounded-lg border-[1px solid lightgray]'>
+              <div className='flex-1 flex flex-col gap-2 w-full items-start relative border-4 p-2 rounded-lg border-[1px solid lightgray]'>
                 <TextField
                   {...register('originalFileName')}
                   variant='standard'
