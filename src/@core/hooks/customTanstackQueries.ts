@@ -20,6 +20,7 @@ import type {
   MachineProjectScheduleAndEngineerResponseDtoType,
   MachineReportCategoryReadResponseDtoType,
   MachineReportStatusResponseDtoType,
+  MemberDetailResponseDtoType,
   targetType
 } from '@/@core/types' // 타입 임포트
 
@@ -502,6 +503,32 @@ export const useGetEngineerList = () => {
   return useQuery({
     queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS_OPTIONS,
     queryFn: fetchEngineers,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// ------------------------- Member 관련 -------------------------
+export const useGetSignleMember = (memberId: string) => {
+  const fetchMember: QueryFunction<MemberDetailResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MemberDetailResponseDtoType
+        }>(`/api/members/${memberId}`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [memberId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MEMBER.GET_SINGLE_MEMBER(memberId),
+    queryFn: fetchMember,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }

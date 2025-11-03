@@ -19,7 +19,7 @@ import axios from 'axios'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import MemberTabContent from './memberTabContent'
-import type { memberDetailDtoType } from '@/@core/types'
+import type { MemberDetailResponseDtoType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
@@ -29,7 +29,7 @@ type requestRuleBodyType = {
   url: string
   value: string
   label: string
-  dtoKey: keyof memberDetailDtoType
+  dtoKey: keyof MemberDetailResponseDtoType
 }
 
 type tabType = '1' | '2' | '3' | '4' | '5'
@@ -70,16 +70,16 @@ const requestRule: Record<tabType, requestRuleBodyType> = {
 type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  selectedUserData: memberDetailDtoType
-  setSelectedUserData: Dispatch<SetStateAction<memberDetailDtoType | undefined>>
-  reloadData: () => void
+  selectedUserData: MemberDetailResponseDtoType
+  setSelectedUserData: Dispatch<SetStateAction<MemberDetailResponseDtoType | undefined>>
+  reloadData?: () => void
 }
 
 export const MemberIdContext = createContext<number>(0)
 
 const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloadData }: EditUserInfoProps) => {
   const [value, setValue] = useState<tabType>('1')
-  const [editData, setEditData] = useState<memberDetailDtoType>(JSON.parse(JSON.stringify(selectedUserData)))
+  const [editData, setEditData] = useState<MemberDetailResponseDtoType>(JSON.parse(JSON.stringify(selectedUserData)))
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
 
@@ -117,7 +117,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
   const onDeleteUserConfirm = async () => {
     try {
       await handleDeleteUser()
-      reloadData()
+      reloadData && reloadData()
     } catch (error: any) {
       toast.error(`${error.message}`)
     }
@@ -136,7 +136,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
     }
 
     try {
-      const response = await axios.put<{ data: memberDetailDtoType }>(
+      const response = await axios.put<{ data: MemberDetailResponseDtoType }>(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${memberId}${requestRule[value].url}`,
         { ...editData[requestRule[value].dtoKey] }
       )
@@ -154,7 +154,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
       console.log(`${requestRule[value].value} info saved: `, returnData)
       handleSuccess(`${requestRule[value].label}가 수정되었습니다.`)
       setIsEditing(false)
-      reloadData()
+      reloadData && reloadData()
     } catch (error: any) {
       handleApiError(error)
     }
@@ -274,7 +274,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
           />
         )}
         {showAlertModal && (
-          <AlertModal<memberDetailDtoType>
+          <AlertModal<MemberDetailResponseDtoType>
             showAlertModal={showAlertModal}
             setShowAlertModal={setShowAlertModal}
             setEditData={setEditData}

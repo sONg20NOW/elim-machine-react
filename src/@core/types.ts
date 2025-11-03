@@ -41,7 +41,7 @@ export type TabType = {
 }
 
 // member 인풋 정보 형식
-export type memberInputType = InputInfoType<TabType['member'], memberDetailDtoType>
+export type memberInputType = InputInfoType<TabType['member'], MemberDetailResponseDtoType>
 
 // machine-projects/[id] 인풋 정보 형식
 export type machineInputType = Partial<Record<keyof MachineProjectResponseDtoType, InputFieldType>>
@@ -100,7 +100,7 @@ export type memberPageDtoType = {
 }
 
 // GET api/members/[memberId]
-export type memberDetailDtoType = {
+export type MemberDetailResponseDtoType = {
   memberBasicResponseDto: memberBasicDtoType
   memberCareerResponseDto: memberCareerDtoType
   memberEtcResponseDto: memberEtcDtoType

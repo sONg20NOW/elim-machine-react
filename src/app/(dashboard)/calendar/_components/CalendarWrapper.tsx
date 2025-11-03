@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react'
 // Third-party Imports
 import { useDispatch, useSelector } from 'react-redux'
 
+import dayjs from 'dayjs'
+
 import type { AppDispatch } from '@/redux-store'
 
 // Type Imports
@@ -42,7 +44,11 @@ const AppCalendar = () => {
   const handleAddEventSidebarToggle = () => setAddEventSidebarOpen(!addEventSidebarOpen)
 
   useEffect(() => {
-    dispatch(fetchEvents())
+    const now = dayjs(Date.now())
+
+    console.log(now.toString())
+
+    dispatch(fetchEvents({ year: now.year(), month: now.month() + 1 }))
   }, [dispatch])
 
   return (

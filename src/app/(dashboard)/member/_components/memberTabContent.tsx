@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { DialogContent, Grid2 } from '@mui/material'
 
-import type { memberDetailDtoType, TabType } from '@/@core/types'
+import type { MemberDetailResponseDtoType, TabType } from '@/@core/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
 import { InputBox } from '@/@core/components/custom/InputBox'
 
@@ -14,12 +14,12 @@ const MemberTabContent = ({
 }: {
   isEditing?: boolean
   tabName: TabType['member']
-  userData: memberDetailDtoType
-  setUserData: Dispatch<SetStateAction<memberDetailDtoType>>
+  userData: MemberDetailResponseDtoType
+  setUserData: Dispatch<SetStateAction<MemberDetailResponseDtoType>>
 }) => {
   const tabInfos = MEMBER_INPUT_INFO[tabName]
 
-  const dtoMap: Record<typeof tabName, keyof memberDetailDtoType> = {
+  const dtoMap: Record<typeof tabName, keyof MemberDetailResponseDtoType> = {
     basic: 'memberBasicResponseDto',
     privacy: 'memberPrivacyResponseDto',
     office: 'memberOfficeResponseDto',
@@ -27,7 +27,7 @@ const MemberTabContent = ({
     etc: 'memberEtcResponseDto'
   }
 
-  const dtoKey: keyof memberDetailDtoType = dtoMap[tabName]
+  const dtoKey: keyof MemberDetailResponseDtoType = dtoMap[tabName]
   const properties = Object.keys(MEMBER_INPUT_INFO[tabName])
 
   const currentSubData = userData[dtoKey] as Record<string, any>

@@ -56,5 +56,8 @@ export const QUERY_KEYS = {
       machineProjectId
     ],
     GET_MACHINE_PROJECT: (machineProjectId: string) => ['GET_MACHINE_PROJECT', machineProjectId]
+  },
+  MEMBER: {
+    GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId]
   }
 }
