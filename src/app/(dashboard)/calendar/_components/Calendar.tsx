@@ -29,6 +29,7 @@ import type { MemberDetailResponseDtoType } from '@/@core/types'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import UserModal from '../../member/_components/UserModal'
+import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 
 type CalenderProps = {
   calendarStore: CalendarType
@@ -66,6 +67,8 @@ const Calendar = (props: CalenderProps) => {
   const [open, setOpen] = useState(false)
   const [selectedUserData, setSelectedUserData] = useState<MemberDetailResponseDtoType>()
 
+  const setTabValue = useMachineTabValueStore(set => set.setTabValue)
+
   const getSingleMember = useCallback(async (memberId: number) => {
     try {
       const response = await auth
@@ -95,8 +98,8 @@ const Calendar = (props: CalenderProps) => {
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     initialView: 'dayGridMonth',
     headerToolbar: {
-      // start: 'sidebarToggle, prev, next, title',
-      // end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+      start: 'title',
+      end: 'today, prev,  next,'
     },
     datesSet(dateInfo) {
       const currentDate = dateInfo.view.calendar.getDate()
@@ -158,7 +161,7 @@ const Calendar = (props: CalenderProps) => {
         <>
           <div className='flex gap-1 items-center'>
             {eventInfo.event.extendedProps['type'] === '생일' && <i className='tabler-cake' />}
-            {eventInfo.event.extendedProps['type'] === '기계설비' && <i className='tabler-settings' />}
+            {eventInfo.event.extendedProps['type'] === '기계설비' && <i className='tabler-settings-filled' />}
             <Typography color='white' variant='h5'>
               {eventInfo.event.title}
             </Typography>
@@ -171,6 +174,7 @@ const Calendar = (props: CalenderProps) => {
       jsEvent.preventDefault()
 
       if (event.extendedProps['type'] === '기계설비') {
+        setTabValue('현장정보')
         router.push(`/machine/${event.id}`)
       } else if (event.extendedProps['type'] === '생일') {
         const memberId = event.id
@@ -190,16 +194,19 @@ const Calendar = (props: CalenderProps) => {
       // isAddNewEventSidebarActive.value = true
     },
     buttonText: {
-      today: '오늘'
+      today: `오늘`
     },
 
     // customButtons: {
-    // sidebarToggle: {
-    //   icon: 'tabler tabler-menu-2',
-    //   click() {
-    //     handleLeftSidebarToggle()
+    //   goToday: {
+    //     text: '오늘',
+    //     icon: 'tabler-calendar',
+    //     click: function () {
+    //       if (calendarApi) {
+    //         calendarApi.today()
+    //       }
+    //     }
     //   }
-    // }
     // },
 
     // dateClick(info: any) {
