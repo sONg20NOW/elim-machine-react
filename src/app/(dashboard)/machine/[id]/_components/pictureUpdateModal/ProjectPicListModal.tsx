@@ -358,9 +358,9 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 0 }}>
         {/* 기존 사진 목록 */}
         <Grid item xs={12} sx={{ flex: 1, overflowY: 'scroll' }}>
-          <Paper sx={{ p: 4, borderColor: 'lightgray' }} elevation={3}>
-            <div className='flex justify-between'>
-              <div className='flex items-center mb-5'>
+          <Paper sx={{ p: 4, borderColor: 'lightgray', display: 'grid', gap: 2 }} elevation={3}>
+            <div className='flex justify-between items-center'>
+              <div className='flex items-center mb-2'>
                 <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
                   현장 사진 목록
                 </Typography>
@@ -440,7 +440,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
 
                 return (
                   picsByItem.length > 0 && (
-                    <Box key={type} sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box key={type} sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                       <Typography
                         variant='h5'
                         paddingInlineStart={2}

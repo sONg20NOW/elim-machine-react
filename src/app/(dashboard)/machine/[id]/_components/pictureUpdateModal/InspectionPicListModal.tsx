@@ -513,9 +513,9 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 0 }}>
           {/* 기존 사진 목록 */}
           <Grid item xs={12} sx={{ flex: 1, overflowY: 'scroll' }}>
-            <Paper sx={{ p: 4, borderColor: 'lightgray' }} elevation={3}>
-              <div className='flex justify-between'>
-                <div className='flex items-center mb-5'>
+            <Paper sx={{ p: 4, borderColor: 'lightgray', display: 'grid', gap: 2 }} elevation={3}>
+              <div className='flex justify-between items-center'>
+                <div className='flex items-center mb-2'>
                   <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
                     설비 사진 목록
                   </Typography>
@@ -581,7 +581,7 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
                       picsByItem.length > 0 && (
                         <Box
                           key={item.machineChecklistItemId}
-                          sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
+                          sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 0 }}
                         >
                           <Typography
                             variant='h5'
