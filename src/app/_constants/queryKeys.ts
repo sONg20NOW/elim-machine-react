@@ -36,6 +36,13 @@ export const QUERY_KEYS = {
     ]
   },
   MACHINE_REPORT_CATEGORY_CONTROLLER: ['MACHINE_REPORT_CATEGORY_CONTROLLER'],
+  MACHINE_REPORT: {
+    GET_MACHINE_REPORT_STATUS: (machineProjectId: string, machineReportCategoryIds: number[]) => [
+      'GET_MACHINE_REPORT_STATUS',
+      machineProjectId,
+      ...machineReportCategoryIds.map(v => v.toString())
+    ]
+  },
   MACHINE_INSPECTION_OPINION: {
     GET_INSPECTION_OPINION: (machineProjectId: string) => ['GET_INSPECTION_OPINION', machineProjectId]
   },

@@ -19,6 +19,7 @@ import type {
   MachineProjectResponseDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType,
   MachineReportCategoryReadResponseDtoType,
+  MachineReportStatusResponseDtoType,
   targetType
 } from '@/@core/types' // 타입 임포트
 
@@ -174,7 +175,6 @@ export const useGetChecklistResult = (
 }
 
 // GET /api/machine-projects/${machineProjectId}/machine-project-pics/overview?machineProjectPicType=OVERVIEW
-
 export const useGetOverviewPics = (machineProjectId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_PROJECT_PIC.GET_OVERVIEW(machineProjectId),
@@ -345,6 +345,34 @@ export const useGetReportCategories = () => {
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_REPORT_CATEGORY_CONTROLLER,
     queryFn: fetchReportCategories,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-reports/status
+export const useGetReportStatuses = (machineProjectId: string, machineReportCategoryIds: number[]) => {
+  const fetchReportStatuses: QueryFunction<MachineReportStatusResponseDtoType[], string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { machineReports: MachineReportStatusResponseDtoType[] }
+        }>(
+          `/api/machine-projects/${machineProjectId}/machine-reports/status?machineReportCategoryIds=${machineReportCategoryIds.join(', ')}`
+        )
+        .then(v => v.data.data.machineReports)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId, machineReportCategoryIds]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_REPORT.GET_MACHINE_REPORT_STATUS(machineProjectId, machineReportCategoryIds),
+    queryFn: fetchReportStatuses,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
