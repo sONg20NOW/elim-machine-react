@@ -115,7 +115,6 @@ export default function InspectionPicZoomModal({
 
     setPresignedUrl(URL.createObjectURL(file))
     setValue('s3Key', S3KeyResult[0].s3Key, { shouldDirty: true })
-    setValue('originalFileName', S3KeyResult[0].fileName, { shouldDirty: true })
   }
 
   const handleSave = async (data: MachinePicUpdateResponseDtoType) => {
@@ -141,7 +140,11 @@ export default function InspectionPicZoomModal({
       setUrlInspectionId(response.machineInspectionId)
 
       handleSuccess('사진 정보가 변경되었습니다.')
-      setPictures(prev => prev.map(v => (v.machinePicId === selectedPic.machinePicId ? { ...v, ...response } : v)))
+      setPictures(prev =>
+        prev.map(v =>
+          v.machinePicId === selectedPic.machinePicId ? { ...v, ...response, presignedUrl: presignedUrl } : v
+        )
+      )
     } catch (error) {
       handleApiError(error)
     }

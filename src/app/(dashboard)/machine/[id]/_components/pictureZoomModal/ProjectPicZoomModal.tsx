@@ -110,7 +110,9 @@ export default function ProjectPicZoomModal({
       reset(response)
 
       handleSuccess('사진 정보가 변경되었습니다.')
-      setPictures(prev => prev.map(v => (v.id === selectedPic.id ? { ...v, ...response } : v)))
+      setPictures(prev =>
+        prev.map(v => (v.id === selectedPic.id ? { ...v, ...response, presignedUrl: presignedUrl } : v))
+      )
     } catch (error) {
       handleApiError(error)
     }
