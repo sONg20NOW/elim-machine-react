@@ -214,6 +214,7 @@ const PictureListTabContent = () => {
 
       // 삭제 예정 리스트 리셋
       setInspectionPicsToDelete([])
+      setProjectPicsToDelete([])
       refetchPictures()
     } catch (error) {
       handleApiError(error)
@@ -386,6 +387,8 @@ const PictureListTabContent = () => {
                     reloadIconRef.current?.classList.remove('animate-spin')
                   }, 1000)
                   refetchPictures()
+                  setKeyword('')
+                  setInspectionId(0)
                 }}
               >
                 <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
