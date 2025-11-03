@@ -251,7 +251,12 @@ const PictureListTabContent = () => {
         break
       case 'previous':
         if (currentPictureIdx === 0) {
-          toast.warning('첫번째 사진입니다')
+          if (projectPics.length > 0) {
+            setSelectedInspection(undefined)
+            setSelectedInspectionPic(undefined)
+            setSelectedProjectPic(projectPics[projectPics.length - 1])
+            setShowProjectPicModal(true)
+          } else toast.warning('첫번째 사진입니다')
         } else {
           setSelectedInspectionPic(inspectionPics[currentPictureIdx - 1])
         }
@@ -275,7 +280,14 @@ const PictureListTabContent = () => {
         if (currentPictureIdx + 1 < projectPics.length) {
           setSelectedProjectPic(projectPics[currentPictureIdx + 1])
         } else {
-          toast.warning('다음 사진이 없습니다')
+          if (inspectionPics.length > 0) {
+            setSelectedProjectPic(undefined)
+            setSelectedInspectionPic(inspectionPics[0])
+            getInspectionByPic(inspectionPics[0])
+            setShowInspecitonPicModal(true)
+          } else {
+            toast.warning('다음 사진이 없습니다')
+          }
         }
 
         break
