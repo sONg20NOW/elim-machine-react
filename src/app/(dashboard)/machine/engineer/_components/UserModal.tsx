@@ -8,17 +8,30 @@ import { createContext, useState } from 'react'
 
 import Button from '@mui/material/Button'
 
-import { Box, DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  MenuItem,
+  TextField,
+  Typography
+} from '@mui/material'
 
 import axios from 'axios'
 
+import { Controller, useForm } from 'react-hook-form'
+
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { EngineerResponseDtoType } from '@/@core/types'
-import { InputBox } from '@/@core/components/custom/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/EngineerInputInfo'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
-import AlertModal from '@/@core/components/custom/AlertModal'
+
+import styles from '@/app/_style/Table.module.css'
+import { gradeOption } from '@/app/_constants/options'
+import { auth } from '@/lib/auth'
 
 type UserModalProps = {
   open: boolean
@@ -31,25 +44,26 @@ type UserModalProps = {
 export const MemberIdContext = createContext<number>(0)
 
 const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps) => {
-  const [editData, setEditData] = useState<EngineerResponseDtoType>(JSON.parse(JSON.stringify(data)))
-
-  const [isEditing, setIsEditing] = useState(false)
-
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
 
-  const [onQuit, setOnQuit] = useState<() => void>()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    watch,
+    formState: { isDirty }
+  } = useForm<EngineerResponseDtoType>({ defaultValues: data })
 
-  const existChange = JSON.stringify(editData) !== JSON.stringify(data)
-
-  const engineerId = editData.id
-  const version = editData.version
+  const watchedVersion = watch('version')
+  const engineerId = data.id
 
   const handleDeleteUser = async () => {
     try {
       await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers`, {
         // @ts-ignore
-        data: { engineerDeleteRequestDtos: [{ engineerId: engineerId, version: version }] }
+        data: { engineerDeleteRequestDtos: [{ engineerId: engineerId, version: watchedVersion }] }
       })
 
       handleSuccess('설비인력에서 삭제되었습니다.')
@@ -61,168 +75,180 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
     }
   }
 
-  const handleModifyUser = async () => {
-    if (existChange) {
-      try {
-        const response = await axios.put<{ data: EngineerResponseDtoType }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/${engineerId}`,
-          editData
-        )
+  const handleSaveUser = async (data: EngineerResponseDtoType) => {
+    try {
+      const response = await auth.put<{ data: EngineerResponseDtoType }>(`/api/engineers/${engineerId}`, data)
 
-        const returnData = response.data.data
+      const returnData = response.data.data
 
-        setEditData(returnData)
-        setData(returnData)
+      reset(returnData)
+      setData(returnData)
 
-        console.log(`info saved: `, returnData)
-        handleSuccess(`설비인력 정보가 수정되었습니다.`)
-        setIsEditing(false)
-        reloadData()
-      } catch (error: any) {
-        handleApiError(error)
-      }
+      console.log(`info saved: `, returnData)
+      handleSuccess(`설비인력 정보가 수정되었습니다.`)
+      reloadData()
+    } catch (error: any) {
+      handleApiError(error)
+    }
+  }
+
+  function handleClose() {
+    if (isDirty) {
+      setShowAlertModal(true)
     } else {
-      setIsEditing(false)
+      setOpen(false)
     }
   }
 
   return (
-    <DefaultModal
-      size='sm'
-      open={open}
-      setOpen={setOpen}
-      title={data.name}
-      onClose={() => {
-        if (existChange) {
-          setOnQuit(() => () => setOpen(false))
-          setShowAlertModal(true)
-        } else {
-          setOpen(false)
+    <form id='submit-engineer-form' onSubmit={handleSubmit(handleSaveUser)}>
+      <DefaultModal
+        size='sm'
+        open={open}
+        setOpen={setOpen}
+        title={<Typography variant='h3'>{data.name}</Typography>}
+        onClose={handleClose}
+        headerDescription={data.engineerLicenseNum}
+        primaryButton={
+          <div className='flex justify-end gap-2 w-full'>
+            <div className='flex items-end gap-1'>
+              {!isDirty && <Typography color='error.main'>변경사항이 없습니다</Typography>}
+              <Button variant='contained' type='submit' disabled={!isDirty} form={'submit-engineer-form'}>
+                저장
+              </Button>
+            </div>
+            <Button variant='contained' color='secondary' onClick={handleClose}>
+              닫기
+            </Button>
+          </div>
         }
-      }}
-      headerDescription={data.engineerLicenseNum}
-      primaryButton={
-        !isEditing ? (
-          <Button variant='contained' onClick={() => setIsEditing(true)} type='submit'>
-            수정하기
+        modifyButton={
+          <Button variant='contained' color='error' type='reset' onClick={() => setShowDeleteModal(true)}>
+            삭제
           </Button>
-        ) : (
-          <Button variant='contained' onClick={() => handleModifyUser()} type='submit'>
-            저장
-          </Button>
-        )
-      }
-      secondaryButton={
-        isEditing ? (
-          <Button
-            variant='contained'
-            color='secondary'
-            type='reset'
-            onClick={() => {
-              if (existChange) {
-                setOnQuit(undefined)
-                setShowAlertModal(true)
-              } else {
-                setIsEditing(false)
-              }
-            }}
-          >
-            취소
-          </Button>
-        ) : (
-          <Button variant='contained' color='secondary' onClick={() => setOpen(false)}>
-            닫기
-          </Button>
-        )
-      }
-      modifyButton={
-        <Button variant='contained' color='error' type='reset' onClick={() => setShowDeleteModal(true)}>
-          삭제
-        </Button>
-      }
-    >
-      <DialogContent className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
-        <TableContainer sx={{ border: 'solid 1px', borderColor: 'lightgray', borderRadius: '8px' }}>
-          <Table size='small'>
-            <TableBody>
-              {Object.keys(editData).map(value => {
-                if (['id', 'version', 'remark'].includes(value)) return null
-                const key = value as keyof typeof editData
-
-                return (
-                  <TableRow key={key}>
-                    <TableCell
-                      width={'30%'}
-                      sx={{
-                        borderRight: '1px solid',
-                        borderColor: 'lightgray',
-                        textAlign: 'center',
-                        fontWeight: 'bold',
-                        fontSize: 'medium'
-                      }}
-                    >
-                      {ENGINEER_INPUT_INFO[key]?.label}
-                    </TableCell>
-                    <TableCell>
-                      <InputBox
-                        isEditing={isEditing}
-                        tabInfos={ENGINEER_INPUT_INFO}
-                        tabFieldKey={key}
-                        value={editData[key] as string}
-                        onChange={value => setEditData({ ...editData, [key]: value })}
-                        showLabel={false}
-                      />
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <div className='flex flex-col gap-1'>
-          <span className='font-extrabold'>{ENGINEER_INPUT_INFO.remark?.label}</span>
-          {isEditing ? (
-            <InputBox
-              tabInfos={ENGINEER_INPUT_INFO}
-              tabFieldKey={'remark'}
-              value={editData.remark}
-              onChange={value => setEditData({ ...editData, remark: value })}
-              showLabel={false}
+        }
+      >
+        <DialogContent className={`flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4 ${styles.container}`}>
+          <table style={{ fontSize: 18 }}>
+            <tbody>
+              <tr>
+                <th style={{ width: '1%', whiteSpace: 'nowrap' }}>이름</th>
+                <td colSpan={4}>
+                  <TextField
+                    slotProps={{ input: { sx: { fontSize: 'inherit' } } }}
+                    {...register('name')}
+                    fullWidth
+                    size='small'
+                    variant='standard'
+                    placeholder='이름을 입력하세요'
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th style={{ width: 1, whiteSpace: 'nowrap' }}>이메일</th>
+                <td colSpan={4}>
+                  <TextField
+                    slotProps={{ input: { sx: { fontSize: 'inherit' } } }}
+                    {...register('email')}
+                    fullWidth
+                    size='small'
+                    variant='standard'
+                    placeholder='이메일을 입력하세요'
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th style={{ width: 1, whiteSpace: 'nowrap' }}>휴대폰 번호</th>
+                <td colSpan={4}>
+                  <TextField
+                    slotProps={{ input: { sx: { fontSize: 'inherit' } } }}
+                    {...register('phoneNumber')}
+                    fullWidth
+                    size='small'
+                    variant='standard'
+                    placeholder='휴대폰 번호를 입력하세요'
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th style={{ width: 1, whiteSpace: 'nowrap' }}>등급</th>
+                <td colSpan={4}>
+                  <Controller
+                    control={control}
+                    name='grade'
+                    render={({ field }) => (
+                      <TextField
+                        slotProps={{ input: { sx: { paddingInlineEnd: 5, fontSize: 'inherit' } } }}
+                        value={field.value}
+                        onChange={field.onChange}
+                        select
+                        size='small'
+                        variant='standard'
+                        placeholder='등급을 입력하세요'
+                      >
+                        {gradeOption.map(v => (
+                          <MenuItem key={v.value} value={v.value}>
+                            {v.label}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th style={{ width: 1, whiteSpace: 'nowrap' }}>수첩발급번호</th>
+                <td colSpan={4}>
+                  <TextField
+                    slotProps={{ input: { sx: { fontSize: 'inherit' } } }}
+                    {...register('engineerLicenseNum')}
+                    fullWidth
+                    size='small'
+                    variant='standard'
+                    placeholder='수첩발급번호를 입력하세요'
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div className='flex flex-col gap-1 text-[18px]'>
+            <span className='font-extrabold'>{ENGINEER_INPUT_INFO.remark?.label}</span>
+            <TextField
+              slotProps={{ input: { sx: { fontSize: 'inherit' } } }}
+              {...register('remark')}
+              fullWidth
+              multiline
+              minRows={3}
+              size='small'
+              placeholder='비고를 입력하세요'
             />
-          ) : (
-            <Box
-              sx={{
-                border: 'solid 1px',
-                borderColor: 'lightgray',
-                borderRadius: '8px',
-                padding: 3,
-                whiteSpace: 'pre-wrap',
-                minHeight: 110
-              }}
-            >
-              {editData.remark}
-            </Box>
+          </div>
+          {showDeleteModal && (
+            <DeleteModal
+              showDeleteModal={showDeleteModal}
+              setShowDeleteModal={setShowDeleteModal}
+              onDelete={handleDeleteUser}
+            />
           )}
-        </div>
-        {showDeleteModal && (
-          <DeleteModal
-            showDeleteModal={showDeleteModal}
-            setShowDeleteModal={setShowDeleteModal}
-            onDelete={handleDeleteUser}
-          />
-        )}
-        {showAlertModal && (
-          <AlertModal<EngineerResponseDtoType>
-            showAlertModal={showAlertModal}
-            setShowAlertModal={setShowAlertModal}
-            setEditData={setEditData}
-            setIsEditing={setIsEditing}
-            originalData={data}
-            onQuit={onQuit}
-          />
-        )}
-      </DialogContent>
-    </DefaultModal>
+          {
+            <Dialog open={showAlertModal}>
+              <DialogTitle variant='h4'>
+                변경사항을 저장하지 않았습니다
+                <DialogContentText>나가시면 변경사항이 폐기됩니다</DialogContentText>
+              </DialogTitle>
+              <DialogActions>
+                <Button variant='contained' color='error' type='button' onClick={() => setOpen(false)}>
+                  저장하지 않음
+                </Button>
+                <Button variant='contained' color='secondary' type='button' onClick={() => setShowAlertModal(false)}>
+                  취소
+                </Button>
+              </DialogActions>
+            </Dialog>
+          }
+        </DialogContent>
+      </DefaultModal>
+    </form>
   )
 }
 
