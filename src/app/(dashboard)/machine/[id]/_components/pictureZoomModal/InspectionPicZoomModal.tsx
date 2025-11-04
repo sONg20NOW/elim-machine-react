@@ -320,17 +320,36 @@ export default function InspectionPicZoomModal({
                   <Grid2 size={2}>
                     <InputLabel>대체타이틀</InputLabel>
 
-                    <TextField {...register('alternativeSubTitle')} hiddenLabel size='small' fullWidth />
+                    <TextField
+                      {...register('alternativeSubTitle')}
+                      placeholder='대체타이틀을 입력해주세요'
+                      hiddenLabel
+                      size='small'
+                      fullWidth
+                    />
                   </Grid2>
                   <Grid2 size={2}>
                     <InputLabel>측정값</InputLabel>
 
-                    <TextField {...register('measuredValue')} hiddenLabel size='small' fullWidth />
+                    <TextField
+                      {...register('measuredValue')}
+                      placeholder='측정값을 입력해주세요'
+                      hiddenLabel
+                      size='small'
+                      fullWidth
+                    />
                   </Grid2>
                   <Grid2 size={2}>
                     <InputLabel>비고</InputLabel>
 
-                    <TextField {...register('remark')} minRows={3} multiline fullWidth hiddenLabel />
+                    <TextField
+                      placeholder='비고는 보고서에 포함되지 않습니다'
+                      {...register('remark')}
+                      minRows={3}
+                      multiline
+                      fullWidth
+                      hiddenLabel
+                    />
                   </Grid2>
                 </Grid2>
               </Box>
