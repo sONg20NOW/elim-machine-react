@@ -316,6 +316,7 @@ const TableRow = memo(
         <td colSpan={8}>
           <div className='flex justify-between items-center'>
             <Tooltip
+              slotProps={{ popper: { sx: { wordBreak: 'break-all' } } }}
               title={
                 myStatus ? (
                   <div className='grid text-white'>
