@@ -31,7 +31,7 @@ const StyledTab = styled(Tab)(({ theme }) => ({
   fontSize: theme.typography.h5.fontSize
 }))
 
-const defaultYears = [2022, 2023, 2024, 2025]
+const defaultYears = [2023, 2024, 2025]
 const defaultMonths = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] as const
 
 export default function EnergyReport() {
@@ -39,19 +39,24 @@ export default function EnergyReport() {
 
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState(0)
+  const [years, setYears] = useState<number[]>(defaultYears)
 
   const { data: energyTypes } = useGetEnergyTypes()
   const currentEnergyType = energyTypes?.find(v => v.machineEnergyTypeId === value)
 
   const { data: targets } = useGetEnergyTargets(`${params.id}`, `${currentEnergyType?.machineEnergyTypeId}`)
 
-  const { data: usages, refetch } = useGetEnergyUsages(`${params.id}`, `${currentEnergyType?.machineEnergyTypeId}`)
+  const { data: usages, refetch } = useGetEnergyUsages(
+    `${params.id}`,
+    `${currentEnergyType?.machineEnergyTypeId}`,
+    years
+  )
 
   // 👉 usage[year][targetId][month] 구조
   const [usage, setUsage] = useState<Record<string, Record<string, Record<string, number>>>>(() => {
     const init: Record<string, Record<string, Record<string, number>>> = {}
 
-    defaultYears.forEach(year => {
+    years.forEach(year => {
       init[year] = {}
       targets?.forEach(t => {
         init[year][t.machineEnergyTargetId] = {}
@@ -62,6 +67,14 @@ export default function EnergyReport() {
     return init
   })
 
+  const movePreviousYear = () => {
+    setYears(prev => [prev[0] - 1].concat(prev.slice(0, 2)))
+  }
+
+  const moveNextYear = () => {
+    setYears(prev => prev.slice(1, 3).concat([prev[2] + 1]))
+  }
+
   // ✅ 데이터 로드 후 초기화
   useEffect(() => {
     if (!usages) return
@@ -69,7 +82,7 @@ export default function EnergyReport() {
     const newUsage: Record<string, Record<number, Record<string, number>>> = {}
 
     // 기본 구조를 0으로 초기화
-    defaultYears.forEach(year => {
+    years.forEach(year => {
       newUsage[year] = {}
       targets?.forEach(target => {
         newUsage[year][target.machineEnergyTargetId] = {}
@@ -90,7 +103,7 @@ export default function EnergyReport() {
     })
 
     setUsage(newUsage)
-  }, [usages, targets, open])
+  }, [usages, targets, open, years])
 
   useEffect(() => {
     if (energyTypes) setValue(energyTypes[0].machineEnergyTypeId)
@@ -115,7 +128,7 @@ export default function EnergyReport() {
 
     const result: Record<string, Record<string, number>> = {}
 
-    defaultYears.forEach(year => {
+    years.forEach(year => {
       // usage[year]이 없으면 초기화
       if (!usage[year]) return
 
@@ -138,7 +151,7 @@ export default function EnergyReport() {
     })
 
     return result
-  }, [usage, targets])
+  }, [usage, targets, years])
 
   // ✅ 변경 부분만 추출 후 저장
   const handleSave = async () => {
@@ -146,16 +159,17 @@ export default function EnergyReport() {
 
     const allData: { targetId: number; year: number; monthlyValues: Record<string, number> }[] = []
 
-    defaultYears.forEach(year => {
+    years.forEach(year => {
       targets?.forEach(target => {
         const targetId = target.machineEnergyTargetId
         const monthlyValues = usage[year][targetId]
 
-        allData.push({
-          targetId,
-          year: Number(year),
-          monthlyValues
-        })
+        if (!Object.values(monthlyValues).every(v => v === 0))
+          allData.push({
+            targetId,
+            year: Number(year),
+            monthlyValues
+          })
       })
     })
 
@@ -213,83 +227,98 @@ export default function EnergyReport() {
                 <AddTargetModal machineEnergyTypeId={currentEnergyType.machineEnergyTypeId} />
               </div>
               {targets.length > 0 ? (
-                <table style={{ tableLayout: 'fixed' }}>
-                  {/* year, target 헤더 */}
-                  <thead>
-                    <tr>
-                      <th rowSpan={2} colSpan={1}>
-                        월
-                      </th>
-                      {defaultYears.map(year => (
-                        <th colSpan={6} key={year}>
-                          {year}
+                <div className='flex'>
+                  <div className='grid place-items-center'>
+                    <IconButton onClick={movePreviousYear} type='button'>
+                      <i className='tabler-chevron-compact-left' />
+                    </IconButton>
+                  </div>
+                  <table style={{ tableLayout: 'fixed' }}>
+                    {/* year, target 헤더 */}
+                    <thead>
+                      <tr>
+                        <th rowSpan={2} colSpan={1}>
+                          월
                         </th>
-                      ))}
-                    </tr>
-                    {/* target 이름칸 */}
-                    <tr>
-                      {defaultYears.map(year =>
-                        targets.map(target => (
-                          <td
-                            className='truncate'
-                            key={`${year} and ${target.machineEnergyTargetId}`}
-                            colSpan={6 / targets.length}
-                          >
-                            {target.name}
-                          </td>
-                        ))
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* 사용량 */}
-                    {new Array(12)
-                      .fill(1)
-                      .map((year, idx) => idx + 1)
-                      .map(month => (
-                        <tr key={month}>
-                          <td>{month}</td>
-                          {defaultYears.map(year =>
-                            targets.map(target => (
-                              <td key={`${year}-${target.machineEnergyTargetId}-${month}`} colSpan={6 / targets.length}>
-                                <NumericFormat
-                                  value={usage?.[year]?.[target.machineEnergyTargetId]?.[month] ?? 0}
-                                  thousandSeparator
-                                  customInput={TextField}
-                                  variant='standard'
-                                  onValueChange={v =>
-                                    handleChange(
-                                      year.toString(),
-                                      target.machineEnergyTargetId,
-                                      month.toString(),
-                                      Number(v.value) || 0
-                                    )
-                                  }
-                                  slotProps={{ htmlInput: { sx: { textAlign: 'center' } } }}
-                                />
-                              </td>
-                            ))
-                          )}
-                        </tr>
-                      ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td>합계</td>
-                      {defaultYears.map(year =>
-                        targets.map(target => (
-                          <td
-                            colSpan={6 / targets.length}
-                            key={`sum-${year}-${target.machineEnergyTargetId}`}
-                            style={{ fontWeight: 'bold' }}
-                          >
-                            {new Intl.NumberFormat().format(totals?.[year]?.[target.machineEnergyTargetId] ?? 0)}
-                          </td>
-                        ))
-                      )}
-                    </tr>
-                  </tfoot>
-                </table>
+                        {years.map(year => (
+                          <th colSpan={6} key={year}>
+                            {year}
+                          </th>
+                        ))}
+                      </tr>
+                      {/* target 이름칸 */}
+                      <tr>
+                        {years.map(year =>
+                          targets.map(target => (
+                            <td
+                              className='truncate'
+                              key={`${year} and ${target.machineEnergyTargetId}`}
+                              colSpan={6 / targets.length}
+                            >
+                              {target.name}
+                            </td>
+                          ))
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* 사용량 */}
+                      {new Array(12)
+                        .fill(1)
+                        .map((year, idx) => idx + 1)
+                        .map(month => (
+                          <tr key={month}>
+                            <td>{month}</td>
+                            {years.map(year =>
+                              targets.map(target => (
+                                <td
+                                  key={`${year}-${target.machineEnergyTargetId}-${month}`}
+                                  colSpan={6 / targets.length}
+                                >
+                                  <NumericFormat
+                                    value={usage?.[year]?.[target.machineEnergyTargetId]?.[month] ?? 0}
+                                    thousandSeparator
+                                    customInput={TextField}
+                                    variant='standard'
+                                    onValueChange={v =>
+                                      handleChange(
+                                        year.toString(),
+                                        target.machineEnergyTargetId,
+                                        month.toString(),
+                                        Number(v.value) || 0
+                                      )
+                                    }
+                                    slotProps={{ htmlInput: { sx: { textAlign: 'center' } } }}
+                                  />
+                                </td>
+                              ))
+                            )}
+                          </tr>
+                        ))}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td>합계</td>
+                        {years.map(year =>
+                          targets.map(target => (
+                            <td
+                              colSpan={6 / targets.length}
+                              key={`sum-${year}-${target.machineEnergyTargetId}`}
+                              style={{ fontWeight: 'bold' }}
+                            >
+                              {new Intl.NumberFormat().format(totals?.[year]?.[target.machineEnergyTargetId] ?? 0)}
+                            </td>
+                          ))
+                        )}
+                      </tr>
+                    </tfoot>
+                  </table>
+                  <div className='grid place-items-center'>
+                    <IconButton type='button' onClick={moveNextYear}>
+                      <i className='tabler-chevron-compact-right' />
+                    </IconButton>
+                  </div>
+                </div>
               ) : (
                 <div className='flex flex-col items-center gap-2'>
                   <Typography color='warning.dark' variant='h5'>
