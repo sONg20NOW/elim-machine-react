@@ -29,10 +29,10 @@ const Layout = async (props: ChildrenType) => {
   return (
     <Providers>
       <ProtectedPage>
-        <div className='flex flex- auto relative h-full'>
+        <Header />
+        <div className='flex flex-auto relative h-full'>
           <Navigation mode={mode} />
           <div className='flex flex-col w-full pb-[10px] gap-[5px] h-full'>
-            <Header />
             <div className='px-[10px] flex flex-col w-full justify-between h-full'>
               <div className='flex-auto w-full pt-[10px] pb-[10px]'>{children}</div>
               <VerticalFooter />
