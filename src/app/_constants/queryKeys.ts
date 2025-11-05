@@ -29,10 +29,11 @@ export const QUERY_KEYS = {
     ]
   },
   MACHINE_ENERGY_USAGE: {
-    GET_ENERGY_USAGES: (machineProjectId: string, machineEnergyTypeId: string) => [
+    GET_ENERGY_USAGES: (machineProjectId: string, machineEnergyTypeId: string, years: number[]) => [
       'GET_ENERGY_USAGES',
       machineProjectId,
-      machineEnergyTypeId
+      machineEnergyTypeId,
+      ...years.map(year => year.toString())
     ]
   },
   MACHINE_REPORT_CATEGORY_CONTROLLER: ['MACHINE_REPORT_CATEGORY_CONTROLLER'],

@@ -291,7 +291,7 @@ export const useGetEnergyTargets = (machineProjectId: string, machineEnergyTypeI
 }
 
 // GET /api/machine-projects/{machineProjectId}/machine-energy-usages 에너지 사용량 전체 조회
-export const useGetEnergyUsages = (machineProjectId: string, machineEnergyTypeId: string) => {
+export const useGetEnergyUsages = (machineProjectId: string, machineEnergyTypeId: string, years: number[]) => {
   const fetchEnergyUsages: QueryFunction<
     { targetId: number; year: number; monthlyValues: Record<string, number> }[],
     string[]
@@ -301,7 +301,7 @@ export const useGetEnergyUsages = (machineProjectId: string, machineEnergyTypeId
         .get<{
           data: { machineEnergyUsages: { targetId: number; year: number; monthlyValues: Record<string, number> }[] }
         }>(
-          `/api/machine-projects/${machineProjectId}/machine-energy-usages?machineEnergyTypeId=${machineEnergyTypeId}&years=${'2022, 2023, 2024, 2025'}`
+          `/api/machine-projects/${machineProjectId}/machine-energy-usages?machineEnergyTypeId=${machineEnergyTypeId}&years=${years.join(', ')}`
         )
         .then(v => v.data.data.machineEnergyUsages)
 
@@ -311,13 +311,13 @@ export const useGetEnergyUsages = (machineProjectId: string, machineEnergyTypeId
 
       return response
     },
-    [machineProjectId, machineEnergyTypeId]
+    [machineProjectId, machineEnergyTypeId, years]
   )
 
-  const isEnabled = machineEnergyTypeId !== 'undefined'
+  const isEnabled = machineEnergyTypeId !== 'undefined' && years !== undefined
 
   return useQuery({
-    queryKey: QUERY_KEYS.MACHINE_ENERGY_USAGE.GET_ENERGY_USAGES(machineProjectId, machineEnergyTypeId),
+    queryKey: QUERY_KEYS.MACHINE_ENERGY_USAGE.GET_ENERGY_USAGES(machineProjectId, machineEnergyTypeId, years),
     queryFn: fetchEnergyUsages,
     enabled: isEnabled,
     staleTime: 1000 * 60 * 5 // 5분
