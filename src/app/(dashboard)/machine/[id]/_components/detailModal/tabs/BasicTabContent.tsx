@@ -2,10 +2,12 @@
 
 import type { Dispatch, SetStateAction } from 'react'
 
+import { useParams } from 'next/navigation'
+
 import { Button, Card, MenuItem, TextField, Tooltip } from '@mui/material'
 
 import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
-import { UseListsContext } from '../../page'
+import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 
 interface basicTabContentProps<T> {
   selectedMachineData: T
@@ -20,7 +22,10 @@ export default function BasicTabContent({
   setEditData,
   isEditing
 }: basicTabContentProps<MachineInspectionDetailResponseDtoType>) {
-  const { participatedEngineerList } = UseListsContext()
+  const params = useParams()
+  const machineProjectId = params?.id as string
+
+  const { data: participatedEngineerList } = useGetParticipatedEngineerList(machineProjectId)
 
   return (
     <div className='flex flex-col gap-5'>
@@ -153,7 +158,7 @@ export default function BasicTabContent({
         <div className='grid grid-cols-4 gap-2'>
           {!isEditing
             ? (selectedMachineData.engineerIds || []).map((id, idx) => {
-                const engineer = participatedEngineerList.find(value => value.engineerId === id)
+                const engineer = participatedEngineerList?.find(value => value.engineerId === id)
 
                 return (
                   <Card
@@ -165,7 +170,7 @@ export default function BasicTabContent({
               })
             : editData.engineerIds
                 .map((id, idx) => {
-                  const engineer = participatedEngineerList.find(value => value.engineerId === id)
+                  const engineer = participatedEngineerList?.find(value => value.engineerId === id)
 
                   return (
                     <Card key={idx} variant='outlined' sx={{ px: 2, py: 2, border: '1px solid #d1d5db' }}>
@@ -187,7 +192,7 @@ export default function BasicTabContent({
                           }))
                         }}
                       >
-                        {participatedEngineerList.map(engineer => (
+                        {participatedEngineerList?.map(engineer => (
                           <MenuItem
                             key={engineer.engineerId}
                             value={engineer.engineerId}

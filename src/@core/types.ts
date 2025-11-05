@@ -41,7 +41,7 @@ export type TabType = {
 }
 
 // member 인풋 정보 형식
-export type memberInputType = InputInfoType<TabType['member'], memberDetailDtoType>
+export type memberInputType = InputInfoType<TabType['member'], MemberDetailResponseDtoType>
 
 // machine-projects/[id] 인풋 정보 형식
 export type machineInputType = Partial<Record<keyof MachineProjectResponseDtoType, InputFieldType>>
@@ -59,6 +59,14 @@ export type engineerInputType = Partial<Record<keyof EngineerResponseDtoType, In
 
 // licenses/[id] 인풋 정보 형식
 export type licenseInputType = Partial<Record<keyof LicenseResponseDtoType, InputFieldType>>
+
+// -------- 캘린더 ----------
+export interface CalendarEventResponseDtoType {
+  id: number
+  type: string
+  name: string
+  colorCode: string
+}
 
 // -------- 직원관리 --------
 // POST api/members (필수: role)
@@ -92,7 +100,7 @@ export type memberPageDtoType = {
 }
 
 // GET api/members/[memberId]
-export type memberDetailDtoType = {
+export type MemberDetailResponseDtoType = {
   memberBasicResponseDto: memberBasicDtoType
   memberCareerResponseDto: memberCareerDtoType
   memberEtcResponseDto: memberEtcDtoType
@@ -608,7 +616,7 @@ export interface MachineReportSimpleResponseDtoType {
 export interface MachineReportCategoryReadResponseDtoType {
   id: number
   name: string
-  mappedUrl: string
+  reportTemplateCode: string
 }
 
 // 점검의견서 조회 응답 DTO
@@ -634,8 +642,8 @@ export interface MachinePicPresignedUrlResponseDtoType {
   machinePicId: number
   version: number
   machineCategoryId: number
-  machineChecklistItemId: number | null
-  machineChecklistSubItemId: number | null
+  machineChecklistItemId: number
+  machineChecklistSubItemId: number
   machineCategoryName: string
   machineChecklistItemName: string
   machineChecklistSubItemName: string
@@ -659,6 +667,7 @@ export interface MachinePicCursorType {
 
 // PUT /api/machine-projects/{machineProjectId}/machine-inspections/{machineInspectionId}/machine-pics/{machinePicId}
 export interface MachinePicUpdateResponseDtoType {
+  machineInspectionId: number
   machinePicId: number
   version: number
   machineChecklistSubItemId: number
@@ -671,13 +680,26 @@ export interface MachinePicUpdateResponseDtoType {
 }
 
 // ----------- machineProject Pic 관련 -------------
+export type ProjectPicType = 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
+
 // GET /api/machine-projects/{machineProjectId}/machine-project-pics/overview
-export interface MachineProjectOverviewPicReadResponseDtoType {
+// GET /api/machine-projects/{machineProjectId}/machine-project-pics
+
+export interface MachineProjectPicReadResponseDtoType {
   id: number
   version: number
   originalFileName: string
-  machineProjectPicType: 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
+  machineProjectPicType: ProjectPicType
   presignedUrl: string
+  remark: string
+}
+
+// PUT /api/machine-projects/{machineProjectId}/machine-project-pics/{machineProjectPicId}
+export interface MachineProjectPicUpdateRequestDtoType {
+  version: number
+  originalFileName: string
+  s3Key: string
+  machineProjectPicType: ProjectPicType
   remark: string
 }
 

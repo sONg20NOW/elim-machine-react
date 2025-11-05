@@ -18,7 +18,12 @@ import CustomTextField from '@core/components/mui/TextField'
 // Style Imports
 import UserModal from './_components/UserModal'
 import AddUserModal from './_components/addUserModal'
-import type { memberDetailDtoType, MemberFilterType, memberPageDtoType, successResponseDtoType } from '@/@core/types'
+import type {
+  MemberDetailResponseDtoType,
+  MemberFilterType,
+  memberPageDtoType,
+  successResponseDtoType
+} from '@/@core/types'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
@@ -60,7 +65,7 @@ export default function MemberPage() {
   // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<memberDetailDtoType>()
+  const [selectedUser, setSelectedUser] = useState<MemberDetailResponseDtoType>()
 
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(MemeberInitialFilters)
@@ -144,7 +149,7 @@ export default function MemberPage() {
     //   toast.error(data.message)
     // }
     try {
-      const response = await auth.get<{ data: memberDetailDtoType }>(`/api/members/${user?.memberId}`)
+      const response = await auth.get<{ data: MemberDetailResponseDtoType }>(`/api/members/${user?.memberId}`)
 
       setSelectedUser(response.data.data)
       setUserDetailModalOpen(true)

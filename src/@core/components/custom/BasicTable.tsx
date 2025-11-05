@@ -1,4 +1,4 @@
-import { useContext, type Dispatch, type SetStateAction } from 'react'
+import { type Dispatch, type SetStateAction, type MouseEvent, useContext, useState } from 'react'
 
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow'
 
 import classNames from 'classnames'
 
-import { Checkbox, Typography } from '@mui/material'
+import { Checkbox, Divider, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material'
 
 import type { HeaderType, SortInfoType } from '@/@core/types'
 import { isMobileContext, isTabletContext } from './ProtectedPage'
@@ -17,6 +17,7 @@ import { isMobileContext, isTabletContext } from './ProtectedPage'
 interface BasicTableProps<T> {
   header: HeaderType<T>
   data: T[]
+  RowRightClickMenu?: { iconClass: string; label: string; handleClick: (row: T) => void }[]
   handleRowClick: (row: T) => Promise<void>
   page: number
   pageSize: number
@@ -50,6 +51,7 @@ interface BasicTableProps<T> {
 export default function BasicTable<T extends Record<keyof T, string | number | string[]>>({
   header,
   data,
+  RowRightClickMenu,
   handleRowClick,
   page,
   pageSize,
@@ -67,6 +69,26 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
 }: BasicTableProps<T>) {
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
+
+  const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number; row: T } | null>(null)
+
+  const handleContextMenu = (event: MouseEvent, rowInfo: T) => {
+    event.preventDefault()
+    setContextMenu(
+      contextMenu === null
+        ? {
+            mouseX: event.clientX + 2,
+            mouseY: event.clientY - 6,
+            row: rowInfo
+          }
+        : // 닫힌 상태에서 다시 열릴 때 위치를 재설정하여 메뉴가 제대로 표시되도록 함
+          null
+    )
+  }
+
+  const handleClose = () => {
+    setContextMenu(null)
+  }
 
   function toggleOrder(key: string) {
     // 로딩이 끝나고 에러가 없으면 not disabled
@@ -154,13 +176,56 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 className='cursor-pointer'
                 onClick={() => {
+                  if (contextMenu) return
+
                   if (!showCheckBox) {
                     handleRowClick(info)
                   } else if (handleCheckItem) {
                     handleCheckItem(info)
                   }
                 }}
+                onContextMenu={e => {
+                  RowRightClickMenu && handleContextMenu(e, info)
+                }}
               >
+                {contextMenu && (
+                  <Menu
+                    open={contextMenu !== null}
+                    onClose={handleClose}
+                    anchorReference='anchorPosition'
+                    anchorPosition={
+                      contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
+                    }
+                  >
+                    <MenuItem
+                      onClick={() => handleRowClick(contextMenu.row)}
+                      sx={{ display: 'flex', alignItems: 'center' }}
+                    >
+                      <ListItemIcon className='grid place-items-center'>
+                        <i className={`tabler-exclamation-circle-filled text-blue-500`} />
+                      </ListItemIcon>
+                      <Typography variant='h5'>{contextMenu.row['machineProjectName' as keyof T]}</Typography>
+                    </MenuItem>
+                    <Divider />
+                    {RowRightClickMenu?.map(v => (
+                      <MenuItem
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                        key={v.label}
+                        onClick={() => {
+                          v.handleClick(contextMenu.row)
+                          setContextMenu(null)
+                        }}
+                      >
+                        <ListItemIcon className='grid place-items-center'>
+                          <i className={`${v.iconClass} text-gray-500`} />
+                        </ListItemIcon>
+                        <Typography variant='h6' className='text-gray-500'>
+                          {v.label}
+                        </Typography>
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                )}
                 {showCheckBox && isChecked && (
                   <TableCell size={isMobile ? 'small' : 'medium'} padding='checkbox'>
                     <Checkbox checked={isChecked(info)} />

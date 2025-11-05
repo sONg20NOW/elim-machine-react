@@ -6,6 +6,7 @@ import type { EventInput } from '@fullcalendar/core'
 
 // Type Imports
 import type { CalendarFiltersType, CalendarType } from '@/types/apps/calendarTypes'
+import type { CalendarEventResponseDtoType } from '@/@core/types'
 
 function mergeEventsByName(eventsObj: Record<string, any[]>): any[] {
   const merged: Record<string, { name: string; start: string; end: string; [key: string]: any }> = {}
@@ -32,9 +33,20 @@ function mergeEventsByName(eventsObj: Record<string, any[]>): any[] {
   return Object.values(merged)
 }
 
+// Payload 타입 정의
+type FetchEventsArgs = {
+  year: number
+  month: number
+}
+
 // fetchEvents thunk에서 사용
-export const fetchEvents = createAsyncThunk('calendar/fetchEvents', async () => {
-  const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/calendar-events?year=2025&month=7`)
+export const fetchEvents = createAsyncThunk('calendar/fetchEvents', async (args: FetchEventsArgs) => {
+  const { year, month } = args
+
+  const res = await axios.get<{ data: Record<string, CalendarEventResponseDtoType[]> }>(
+    `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/calendar-events?year=${year}&month=${month}`
+  )
+
   const eventsObj = res.data.data
   const events = mergeEventsByName(eventsObj)
 

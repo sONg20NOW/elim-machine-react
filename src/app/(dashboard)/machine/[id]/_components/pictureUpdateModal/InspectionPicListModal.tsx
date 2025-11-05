@@ -3,6 +3,8 @@
 // React Imports
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { useParams } from 'next/navigation'
+
 import {
   Dialog,
   DialogTitle,
@@ -33,30 +35,32 @@ import { toast } from 'react-toastify'
 import type {
   machineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
-  MachinePicCursorType,
-  MachineInspectionDetailResponseDtoType
+  MachinePicCursorType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import PictureZoomModal from '../PictureZoomModal'
+import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
+import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
+import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 
-type PictureListModalProps = {
-  machineProjectId: string
+type InspectionPicListModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   clickedPicCate?: machineChecklistItemsWithPicCountResponseDtosType
-  selectedInspection: MachineInspectionDetailResponseDtoType
-  refetchSelectedInspection: () => Promise<void>
+  ToggleProjectPic: () => void
 }
 
-const PictureListModal = ({
-  machineProjectId,
-  open,
-  setOpen,
-  clickedPicCate,
-  selectedInspection,
-  refetchSelectedInspection
-}: PictureListModalProps) => {
+const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPic }: InspectionPicListModalProps) => {
+  const machineProjectId = useParams().id?.toString() as string
+  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore(set => set)
+
+  const { data: selectedInspection, refetch: refetchSelectedInspection } = useGetSingleInspection(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const { data: inspections } = useGetInspectionsSimple(machineProjectId)
+
   // 사진 리스트
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
@@ -87,6 +91,8 @@ const PictureListModal = ({
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
+  const reloadIconRef = useRef<HTMLElement>(null)
+
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
   const [showPicModal, setShowPicModal] = useState(false)
@@ -106,79 +112,9 @@ const PictureListModal = ({
     setPictures([])
   }
 
-  // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
-  const getPictures = useCallback(
-    async (pageSize = 10) => {
-      if (!hasNextRef.current || isLoadingRef.current) return
-
-      isLoadingRef.current = true
-
-      const requestBody = {
-        machineInspectionId: selectedInspection.machineInspectionResponseDto.id,
-        machineChecklistItemId: selectedItemId !== 0 ? selectedItemId : null,
-        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
-      }
-
-      try {
-        const response = await axios.post<{
-          data: {
-            content: MachinePicPresignedUrlResponseDtoType[]
-            hasNext: boolean
-            nextCursor: MachinePicCursorType | null
-          }
-        }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
-          requestBody
-        )
-
-        console.log('get pictures: ', response.data.data.content)
-        setPictures(prev => prev.concat(response.data.data.content))
-        hasNextRef.current = response.data.data.hasNext
-        nextCursorRef.current = response.data.data.nextCursor
-
-        return response.data.data
-      } catch (err) {
-        handleApiError(err)
-      } finally {
-        isLoadingRef.current = false
-      }
-    },
-    [selectedItemId, machineProjectId, selectedInspection]
-  )
-
-  // 최초에 전체 사진 가져오기
-  useEffect(() => {
-    getPictures(100)
-  }, [getPictures])
-
-  useEffect(() => {
-    // 정보에 있는 사진 개수(selectedSubItem)보다 실제로 있는 사진 개수(pictures)가 적다면 getPictures.
-    if (
-      !isUploading &&
-      (selectedSubItem
-        ? selectedSubItem.machinePicCount !==
-          pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId).length
-        : selectedItem?.totalMachinePicCount !== pictures.length)
-    ) {
-      getPictures()
-    }
-  }, [
-    isUploading,
-    selectedSubItem,
-    selectedItem,
-    pictures,
-    selectedInspection.machineInspectionResponseDto.id,
-    machineProjectId,
-    getPictures
-  ])
-
   const handleClose = () => {
     setOpen(false)
   }
-
-  useEffect(() => setShowCheck(false), [selectedSubItem])
-
-  // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -191,6 +127,8 @@ const PictureListModal = ({
   }
 
   const handleFileUpload = async () => {
+    if (!selectedInspection) return
+
     if (filesToUpload.length === 0) {
       toast.error('업로드할 파일을 선택하세요.')
 
@@ -257,6 +195,124 @@ const PictureListModal = ({
       handleApiError(error)
     }
   }, [machineProjectId, picturesToDelete, selectedSubItem, refetchSelectedInspection])
+
+  async function MovePicture(dir: 'next' | 'previous') {
+    const currentPictureIdx = pictures.findIndex(v => v.machinePicId === selectedPic?.machinePicId)
+
+    if (currentPictureIdx === -1) {
+      throw new Error('현재 사진을 찾을 수 없음. 관리자에게 문의하세요.')
+    }
+
+    switch (dir) {
+      case 'next':
+        if (currentPictureIdx + 1 < pictures.length) {
+          setSelectedPic(pictures[currentPictureIdx + 1])
+
+          return
+        }
+
+        if (hasNextRef.current) {
+          const nextResponse = await getPictures()
+
+          // if (currentPictureIdx + 1 >= pictures.length) {
+          //   throw new Error('hasNext가 true지만 다음 페이지 없음')
+          // }
+
+          setSelectedPic(nextResponse?.content[0])
+        } else {
+          toast.warning('다음 사진이 없습니다')
+        }
+
+        break
+      case 'previous':
+        if (currentPictureIdx === 0) {
+          toast.warning('첫번째 사진입니다')
+        } else {
+          setSelectedPic(pictures[currentPictureIdx - 1])
+        }
+
+        break
+
+      default:
+        break
+    }
+  }
+
+  // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
+  const getPictures = useCallback(
+    async (pageSize = 10) => {
+      if (!hasNextRef.current || isLoadingRef.current) return
+
+      isLoadingRef.current = true
+
+      const requestBody = {
+        machineInspectionId: selectedInspection?.machineInspectionResponseDto.id,
+        machineChecklistItemId: selectedItemId !== 0 ? selectedItemId : null,
+        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
+      }
+
+      try {
+        const response = await axios.post<{
+          data: {
+            content: MachinePicPresignedUrlResponseDtoType[]
+            hasNext: boolean
+            nextCursor: MachinePicCursorType | null
+          }
+        }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
+          requestBody
+        )
+
+        console.log('get pictures: ', response.data.data.content)
+        setPictures(prev => prev.concat(response.data.data.content))
+        hasNextRef.current = response.data.data.hasNext
+        nextCursorRef.current = response.data.data.nextCursor
+
+        return response.data.data
+      } catch (err) {
+        handleApiError(err)
+      } finally {
+        isLoadingRef.current = false
+      }
+    },
+    [selectedItemId, machineProjectId, selectedInspection]
+  )
+
+  // 최초에 전체 사진 가져오기
+  useEffect(() => {
+    getPictures()
+  }, [getPictures])
+
+  useEffect(() => {
+    // 정보에 있는 사진 개수(selectedSubItem)보다 실제로 있는 사진 개수(pictures)가 적다면 getPictures.
+    if (
+      !isUploading &&
+      (selectedSubItem
+        ? selectedSubItem.machinePicCount !==
+          pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId).length
+        : selectedItem?.totalMachinePicCount !== pictures.length)
+    ) {
+      getPictures()
+    }
+  }, [
+    isUploading,
+    selectedSubItem,
+    selectedItem,
+    pictures,
+    selectedInspection?.machineInspectionResponseDto.id,
+    machineProjectId,
+    getPictures
+  ])
+
+  useEffect(() => setShowCheck(false), [selectedSubItem])
+
+  // 설비 변경 시
+  useEffect(() => {
+    setSelectedItemId(0)
+    resetCursor()
+  }, [currentInspectionId])
+
+  // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
 
   // 사진 카드 컴포넌트
   function PictureCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
@@ -333,91 +389,151 @@ const PictureListModal = ({
     )
   }
 
+  // useEffect(() => {
+  //   if (!showPicModal) {
+  //     resetCursor()
+  //   }
+  // }, [showPicModal])
+
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth disableEnforceFocus disableAutoFocus>
-      <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4, position: 'relative' }}>
-        <IconButton sx={{ position: 'absolute', top: 0, right: 0 }} onClick={() => setOpen(false)}>
-          <i className='tabler-x' />
-        </IconButton>
-        <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 } }}>
-          {selectedInspection.machineInspectionResponseDto.machineInspectionName}
-        </Typography>
-        <Grid item xs={12}>
-          <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
-            점검항목 선택
-          </Typography>
+    selectedInspection &&
+    inspections && (
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth='xl'
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { height: '90vh', display: 'flex', flexDirection: 'column' }
+          }
+        }}
+        disableEnforceFocus
+        disableAutoFocus
+      >
+        <div className='flex flex-col gap-5 absolute top-0 right-0 items-end'>
+          <IconButton onClick={() => setOpen(false)}>
+            <i className='tabler-x' />
+          </IconButton>
+          <div className='grid place-items-center pe-7' onClick={ToggleProjectPic}>
+            <Button variant='outlined' color='success'>
+              현장사진 추가
+            </Button>
+          </div>
+        </div>
+        <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <TextField
-            slotProps={{ htmlInput: { sx: { display: 'flex', alignItems: 'center', gap: 1 } } }}
             size='small'
-            fullWidth
             select
-            value={selectedItem?.machineChecklistItemId ?? 0}
-            onChange={e => {
-              resetCursor()
-              setSelectedSubItemId(0)
-              setSelectedItemId(Number(e.target.value))
+            value={currentInspectionId}
+            onChange={e => setCurrentInspectionId(Number(e.target.value))}
+            sx={{ width: 'fit-content' }}
+            slotProps={{
+              select: {
+                sx: { fontWeight: 700, fontSize: { xs: 20, sm: 30 }, paddingInlineEnd: 5 }
+              }
             }}
           >
-            <MenuItem value={0}>
-              <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>전체</Typography>
-              <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
-                {totalPicCount ? `(${totalPicCount})` : ''}
-              </Typography>
-            </MenuItem>
-            {checklistItems.map(item => (
-              <MenuItem key={item.machineChecklistItemId} value={item.machineChecklistItemId}>
-                <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {item.machineChecklistItemName}
-                </Typography>
-                <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
-                  {item.totalMachinePicCount ? `(${item.totalMachinePicCount})` : ''}
-                </Typography>
+            {inspections?.map(inspection => (
+              <MenuItem key={inspection.id} value={inspection.id}>
+                {inspection.name}
               </MenuItem>
             ))}
           </TextField>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
-            하위항목 선택
-          </Typography>
-          <TextField
-            slotProps={{ htmlInput: { sx: { display: 'flex', alignItems: 'center', gap: 1 } } }}
-            size='small'
-            fullWidth
-            select
-            value={selectedSubItemId ?? 0}
-            onChange={e => setSelectedSubItemId(Number(e.target.value))}
-          >
-            <MenuItem value={0}>
-              <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>전체</Typography>
-              <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
-                {selectedItem?.totalMachinePicCount ? `(${selectedItem?.totalMachinePicCount})` : ''}
-              </Typography>
-            </MenuItem>
-            {selectedItem?.checklistSubItems?.map(sub => (
-              <MenuItem key={sub.machineChecklistSubItemId} value={sub.machineChecklistSubItemId}>
-                <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {sub.checklistSubItemName}
-                </Typography>
-                <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
-                  {sub.machinePicCount ? `(${sub.machinePicCount})` : ''}
-                </Typography>
-              </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Grid container spacing={3}>
-          {/* 기존 사진 목록 */}
           <Grid item xs={12}>
-            <Paper sx={{ p: 4, borderColor: 'lightgray' }} elevation={3}>
-              <div className='flex justify-between'>
-                <Typography sx={{ fontWeight: 700, mb: 5 }} color='primary.dark' variant='h4' gutterBottom>
-                  검사 사진 목록
+            <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
+              점검항목 선택
+            </Typography>
+            <TextField
+              slotProps={{ htmlInput: { sx: { display: 'flex', alignItems: 'center', gap: 1 } } }}
+              size='small'
+              fullWidth
+              select
+              value={selectedItem?.machineChecklistItemId ?? 0}
+              onChange={e => {
+                resetCursor()
+                setSelectedSubItemId(0)
+                setSelectedItemId(Number(e.target.value))
+              }}
+            >
+              <MenuItem value={0}>
+                <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  전체
                 </Typography>
-                <div className='flex gap-1 top-2 right-1'>
+                <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
+                  {totalPicCount ? `(${totalPicCount})` : ''}
+                </Typography>
+              </MenuItem>
+              {checklistItems.map(item => (
+                <MenuItem key={item.machineChecklistItemId} value={item.machineChecklistItemId}>
+                  <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.machineChecklistItemName}
+                  </Typography>
+                  <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
+                    {item.totalMachinePicCount ? `(${item.totalMachinePicCount})` : ''}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
+              하위항목 선택
+            </Typography>
+            <TextField
+              slotProps={{ htmlInput: { sx: { display: 'flex', alignItems: 'center', gap: 1 } } }}
+              size='small'
+              fullWidth
+              select
+              value={selectedSubItemId ?? 0}
+              onChange={e => setSelectedSubItemId(Number(e.target.value))}
+            >
+              <MenuItem value={0}>
+                <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  전체
+                </Typography>
+                <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
+                  {selectedItem?.totalMachinePicCount ? `(${selectedItem?.totalMachinePicCount})` : ''}
+                </Typography>
+              </MenuItem>
+              {selectedItem?.checklistSubItems?.map(sub => (
+                <MenuItem key={sub.machineChecklistSubItemId} value={sub.machineChecklistSubItemId}>
+                  <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {sub.checklistSubItemName}
+                  </Typography>
+                  <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
+                    {sub.machinePicCount ? `(${sub.machinePicCount})` : ''}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 0 }}>
+          {/* 기존 사진 목록 */}
+          <Grid item xs={12} sx={{ flex: 1, overflowY: 'scroll' }}>
+            <Paper sx={{ p: 4, borderColor: 'lightgray', display: 'grid', gap: 2 }} elevation={3}>
+              <div className='flex justify-between items-center'>
+                <div className='flex items-center mb-2'>
+                  <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
+                    설비 사진 목록
+                  </Typography>
+                  <IconButton
+                    onClick={() => {
+                      if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
+
+                      reloadIconRef.current.classList.add('animate-spin')
+                      setTimeout(() => {
+                        reloadIconRef.current?.classList.remove('animate-spin')
+                      }, 1000)
+                      resetCursor()
+                    }}
+                  >
+                    <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
+                  </IconButton>
+                </div>
+                <div className='flex gap-1 top-2 right-1 items-center'>
                   {showCheck && [
                     <Button
                       key={1}
@@ -465,7 +581,7 @@ const PictureListModal = ({
                       picsByItem.length > 0 && (
                         <Box
                           key={item.machineChecklistItemId}
-                          sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
+                          sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 0 }}
                         >
                           <Typography
                             variant='h5'
@@ -628,30 +744,25 @@ const PictureListModal = ({
               </Box>
             </Paper>
           </Grid>
-        </Grid>
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={handleClose} variant='outlined' sx={{ marginTop: 6 }}>
-          닫기
-        </Button>
-      </DialogActions>
-      {selectedPic && (
-        <PictureZoomModal
-          open={showPicModal}
-          setOpen={setShowPicModal}
-          selectedPic={selectedPic}
-          reloadPics={() => {
-            resetCursor()
-            getPictures()
-          }}
-          machineProjectId={machineProjectId}
-          selectedInspection={selectedInspection}
-          refetchSelectedInspection={refetchSelectedInspection}
-        />
-      )}
-    </Dialog>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} variant='outlined' sx={{ marginTop: 6 }}>
+            닫기
+          </Button>
+        </DialogActions>
+        {selectedPic && (
+          <InspectionPicZoomModal
+            MovePicture={MovePicture}
+            open={showPicModal}
+            setOpen={setShowPicModal}
+            selectedPic={selectedPic}
+            selectedInspection={selectedInspection}
+            setPictures={setPictures}
+          />
+        )}
+      </Dialog>
+    )
   )
 }
 
-export default PictureListModal
+export default InspectionPicListModal

@@ -12,7 +12,9 @@ export const QUERY_KEYS = {
       machineProjectId: string,
       machineInspectionId: string,
       machineChecklistItemResultId: string
-    ) => ['GET_CHECKLIST_RESULT', machineProjectId, machineInspectionId, machineChecklistItemResultId]
+    ) => ['GET_CHECKLIST_RESULT', machineProjectId, machineInspectionId, machineChecklistItemResultId],
+    GET_INSPECTIONS_SIMPLE: (machineProjectId: string) => ['GET_INSPECTIONS_SIMPLE', machineProjectId],
+    GET_INSPECTIONS: (machineProjectId: string) => ['GET_INSPECTIONS', machineProjectId]
   },
   MACHINE_CATEGORY: {
     GET_MACHINE_CATEGORY: ['GET_MACHINE_CATEGORY'],
@@ -27,14 +29,36 @@ export const QUERY_KEYS = {
     ]
   },
   MACHINE_ENERGY_USAGE: {
-    GET_ENERGY_USAGES: (machineProjectId: string, machineEnergyTypeId: string) => [
+    GET_ENERGY_USAGES: (machineProjectId: string, machineEnergyTypeId: string, years: number[]) => [
       'GET_ENERGY_USAGES',
       machineProjectId,
-      machineEnergyTypeId
+      machineEnergyTypeId,
+      ...years.map(year => year.toString())
     ]
   },
   MACHINE_REPORT_CATEGORY_CONTROLLER: ['MACHINE_REPORT_CATEGORY_CONTROLLER'],
+  MACHINE_REPORT: {
+    GET_MACHINE_REPORT_STATUS: (machineProjectId: string, machineReportCategoryIds: number[]) => [
+      'GET_MACHINE_REPORT_STATUS',
+      machineProjectId,
+      ...machineReportCategoryIds.map(v => v.toString())
+    ]
+  },
   MACHINE_INSPECTION_OPINION: {
     GET_INSPECTION_OPINION: (machineProjectId: string) => ['GET_INSPECTION_OPINION', machineProjectId]
+  },
+  ENGINEER: {
+    GET_ENGINEERS_OPTIONS: ['GET_ENGINEERS_OPTIONS']
+  },
+  MACHINE_PROJECT: {
+    GET_MACHINE_PROJECT_ENGINEERS: (machineProjectId: string) => ['GET_MACHINE_PROJECT_ENGINEERS', machineProjectId],
+    GET_MACHINE_PROJECT_SCHEDULE_TAB: (machineProjectId: string) => [
+      'GET_MACHINE_PROJECT_SCHEDULE_TAB',
+      machineProjectId
+    ],
+    GET_MACHINE_PROJECT: (machineProjectId: string) => ['GET_MACHINE_PROJECT', machineProjectId]
+  },
+  MEMBER: {
+    GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId]
   }
 }

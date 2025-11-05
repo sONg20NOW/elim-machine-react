@@ -1,9 +1,11 @@
 'use client'
 
 // React Imports
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 // MUI Imports
+import { useRouter } from 'next/navigation'
+
 import { useTheme } from '@mui/material/styles'
 
 // Third-party imports
@@ -17,10 +19,17 @@ import interactionPlugin from '@fullcalendar/interaction'
 import type { CalendarOptions } from '@fullcalendar/core'
 
 // Type Imports
+import { Typography } from '@mui/material'
+
 import type { CalendarColors, CalendarType } from '@/types/apps/calendarTypes'
 
 // Slice Imports
-import { filterEvents, selectedEvent, updateEvent } from '@/redux-store/slices/calendar'
+import { fetchEvents, filterEvents, updateEvent } from '@/redux-store/slices/calendar'
+import type { MemberDetailResponseDtoType } from '@/@core/types'
+import { auth } from '@/lib/auth'
+import { handleApiError } from '@/utils/errorHandler'
+import UserModal from '../../member/_components/UserModal'
+import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 
 type CalenderProps = {
   calendarStore: CalendarType
@@ -48,18 +57,29 @@ type CalenderProps = {
 
 const Calendar = (props: CalenderProps) => {
   // Props
-  const {
-    calendarStore,
-    calendarApi,
-    setCalendarApi,
-    calendarsColor,
-    dispatch,
-    handleAddEventSidebarToggle,
-    handleLeftSidebarToggle
-  } = props
+  const { calendarStore, calendarApi, setCalendarApi, dispatch } = props
 
   // Refs
-  const calendarRef = useRef()
+  const calendarRef = useRef<FullCalendar>(null)
+
+  const router = useRouter()
+
+  const [open, setOpen] = useState(false)
+  const [selectedUserData, setSelectedUserData] = useState<MemberDetailResponseDtoType>()
+
+  const setTabValue = useMachineTabValueStore(set => set.setTabValue)
+
+  const getSingleMember = useCallback(async (memberId: number) => {
+    try {
+      const response = await auth
+        .get<{ data: MemberDetailResponseDtoType }>(`/api/members/${memberId}`)
+        .then(v => v.data.data)
+
+      setSelectedUserData(response)
+    } catch (e) {
+      handleApiError(e)
+    }
+  }, [])
 
   // Hooks
   const theme = useTheme()
@@ -78,8 +98,17 @@ const Calendar = (props: CalenderProps) => {
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     initialView: 'dayGridMonth',
     headerToolbar: {
-      start: 'sidebarToggle, prev, next, title',
-      end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+      start: 'title',
+      end: 'today, prev,  next,'
+    },
+    datesSet(dateInfo) {
+      const currentDate = dateInfo.view.calendar.getDate()
+      const year = currentDate.getFullYear()
+
+      const month = currentDate.getMonth() + 1
+
+      // @ts-ignore
+      dispatch(fetchEvents({ year, month }))
     },
     views: {
       week: {
@@ -117,25 +146,46 @@ const Calendar = (props: CalenderProps) => {
     */
     navLinks: true,
 
-    eventClassNames({ event: calendarEvent }: any) {
+    eventClassNames({ event }) {
       // @ts-ignore
-      const colorName = calendarsColor[calendarEvent._def.extendedProps.calendar]
+      const colorName = event.extendedProps['colorCode']
 
       return [
         // Background Color
-        `event-bg-${colorName}`
+        `event-bg-[${colorName}] cursor-pointer`
       ]
     },
 
-    eventClick({ event: clickedEvent, jsEvent }: any) {
+    eventContent(eventInfo) {
+      return (
+        <>
+          <div className='flex gap-1 items-center'>
+            {eventInfo.event.extendedProps['type'] === '생일' && <i className='tabler-cake' />}
+            {eventInfo.event.extendedProps['type'] === '기계설비' && <i className='tabler-settings-filled' />}
+            <Typography color='white' variant='h5'>
+              {eventInfo.event.title}
+            </Typography>
+          </div>
+        </>
+      )
+    },
+
+    async eventClick({ event, jsEvent }) {
       jsEvent.preventDefault()
 
-      dispatch(selectedEvent(clickedEvent))
-      handleAddEventSidebarToggle()
+      if (event.extendedProps['type'] === '기계설비') {
+        setTabValue('현장정보')
+        router.push(`/machine/${event.id}`)
+      } else if (event.extendedProps['type'] === '생일') {
+        const memberId = event.id
 
-      if (clickedEvent.url) {
+        await getSingleMember(Number(memberId))
+        setOpen(true)
+      }
+
+      if (event.url) {
         // Open the URL in a new tab
-        window.open(clickedEvent.url, '_blank')
+        window.open(event.url, '_blank')
       }
 
       //* Only grab required field otherwise it goes in infinity loop
@@ -143,15 +193,21 @@ const Calendar = (props: CalenderProps) => {
       // event.value = grabEventDataFromEventApi(clickedEvent)
       // isAddNewEventSidebarActive.value = true
     },
-
-    customButtons: {
-      sidebarToggle: {
-        icon: 'tabler tabler-menu-2',
-        click() {
-          handleLeftSidebarToggle()
-        }
-      }
+    buttonText: {
+      today: `오늘`
     },
+
+    // customButtons: {
+    //   goToday: {
+    //     text: '오늘',
+    //     icon: 'tabler-calendar',
+    //     click: function () {
+    //       if (calendarApi) {
+    //         calendarApi.today()
+    //       }
+    //     }
+    //   }
+    // },
 
     // dateClick(info: any) {
     // const ev = { ...blankEvent }
@@ -181,13 +237,23 @@ const Calendar = (props: CalenderProps) => {
       dispatch(filterEvents())
     },
 
-    // @ts-ignore
-    ref: calendarRef,
-
+    locale: 'ko',
     direction: theme.direction
   }
 
-  return <FullCalendar {...calendarOptions} />
+  return (
+    <>
+      <FullCalendar height='100%' ref={calendarRef} {...calendarOptions} />
+      {open && selectedUserData && (
+        <UserModal
+          selectedUserData={selectedUserData}
+          setSelectedUserData={setSelectedUserData}
+          open={open}
+          setOpen={setOpen}
+        />
+      )}
+    </>
+  )
 }
 
 export default Calendar

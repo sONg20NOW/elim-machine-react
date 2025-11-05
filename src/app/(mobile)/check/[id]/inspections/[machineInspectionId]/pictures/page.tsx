@@ -32,7 +32,7 @@ import type {
   MachinePicUpdateResponseDtoType
 } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { useGetChecklistInfo, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
 import getS3Key from '@/@core/utils/getS3Key'
 
 const max_pic = 100
@@ -72,7 +72,7 @@ export default function PicturePage() {
   const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
   const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
-  const { data: currentInspectioin } = useGetSingleInspection(`${machineProjectId}`, `${machineInspectionId}`)
+  const { data: currentInspectioin } = useGetSingleInspectionSumamry(`${machineProjectId}`, `${machineInspectionId}`)
 
   const {
     register,

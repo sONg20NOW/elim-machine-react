@@ -8,7 +8,7 @@ interface AlertModalProps<T> {
   showAlertModal: boolean
   setShowAlertModal: Dispatch<SetStateAction<boolean>>
   setEditData: Dispatch<SetStateAction<T>>
-  setIsEditing: Dispatch<SetStateAction<boolean>>
+  setIsEditing: (isEditing: boolean) => void
   originalData: T
   onQuit?: () => void
 }

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useCallback, createContext, useContext, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 // MUI Imports
+import { useParams } from 'next/navigation'
+
 import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 
@@ -11,7 +13,7 @@ import { MenuItem } from '@mui/material'
 
 import axios from 'axios'
 
-import MachineDetailModal from './detailModal/machineDetailModal'
+import InspectionDetailModal from '../detailModal/InspectionDetailModal'
 
 // Constants
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
@@ -20,7 +22,6 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import TableFilters from '@/@core/components/custom/TableFilters'
 import type {
-  MachineInspectionDetailResponseDtoType,
   MachineInspectionFilterType,
   MachineInspectionPageResponseDtoType,
   successResponseDtoType
@@ -29,32 +30,14 @@ import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeade
 import SearchBar from '@/@core/components/custom/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/@core/components/custom/BasicTable'
-import AddInspectionModal from './AddInspectionModal'
-import { ListsContext, UseListsContext } from '../page'
-import PictureListModal from './detailModal/PictureListModal'
+import AddInspectionModal from '../AddInspectionModal'
+import PictureListModal from '../pictureUpdateModal/PictureListModal'
+import { useGetParticipatedEngineerList, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 
-export const SelectedInspectionContext = createContext<{
-  selectedInspection: MachineInspectionDetailResponseDtoType
-  refetchSelectedInspection: () => Promise<void>
-} | null>(null)
+const InspectionListContent = ({}) => {
+  const machineProjectId = useParams().id?.toString() as string
 
-export const useSelectedInspectionContext = () => {
-  const context = useContext(SelectedInspectionContext)
-
-  if (!context) {
-    throw new Error('SelectedMachineContext is null')
-  }
-
-  const { selectedInspection, refetchSelectedInspection } = context
-
-  if (!selectedInspection) {
-    throw new Error('selectedMachine is undefined')
-  }
-
-  return { selectedInspection, refetchSelectedInspection }
-}
-
-const InspectionListContent = ({ machineProjectId }: { machineProjectId: string }) => {
   // 모달 상태
   const [open, setOpen] = useState(false)
   const [showAddModalOpen, setShowAddModalOpen] = useState(false)
@@ -67,8 +50,8 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
 
   const disabled = loading || error
 
-  // 테이블 행 선택
-  const [selectedInspection, setSelectedInspection] = useState<MachineInspectionDetailResponseDtoType>()
+  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
+  const { data: currentInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
 
   // 페이지네이션 상태
   const [page, setPage] = useState(0)
@@ -80,14 +63,12 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
     engineerName: ''
   })
 
-  const categoryList = UseListsContext().categoryList
-
   const [machineCategoryName, setMachineCategoryName] = useState('')
   const [location, setLocation] = useState('')
 
   const [sorting, setSorting] = useState(createInitialSorting<MachineInspectionPageResponseDtoType>)
 
-  const { participatedEngineerList } = useContext(ListsContext)
+  const { data: participatedEngineerList } = useGetParticipatedEngineerList(machineProjectId)
 
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
@@ -96,34 +77,12 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
   // 테이블 행 클릭 시 초기 동작하는 함수
   const handleSelectInspection = useCallback(
     async (machine: MachineInspectionPageResponseDtoType, pictureClick?: boolean) => {
-      try {
-        const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${machine?.machineInspectionId}`
-        )
-
-        setSelectedInspection(response.data.data)
-        if (pictureClick) return
-        setOpen(true)
-      } catch (error) {
-        handleApiError(error)
-      }
+      setCurrentInspectionId(machine.machineInspectionId)
+      if (pictureClick) return
+      setOpen(true)
     },
-    [machineProjectId]
+    [setCurrentInspectionId]
   )
-
-  const refetchSelectedInspection = useCallback(async () => {
-    try {
-      if (!selectedInspection) throw new Error('there is no selectedMachine!')
-
-      const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}`
-      )
-
-      setSelectedInspection(response.data.data)
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [machineProjectId, selectedInspection])
 
   // 데이터 불러오기
   const getFilteredInspectionList = useCallback(async () => {
@@ -256,7 +215,7 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
           engineerName: {
             label: '점검자',
             type: 'multi',
-            options: participatedEngineerList.map(engineer => ({
+            options: participatedEngineerList?.map(engineer => ({
               value: engineer.engineerName,
               label: `${engineer.engineerName} (${engineer.gradeDescription})`
             }))
@@ -423,28 +382,16 @@ const InspectionListContent = ({ machineProjectId }: { machineProjectId: string 
       />
 
       {/* 모달 */}
-      {open && selectedInspection && (
-        <SelectedInspectionContext.Provider value={{ selectedInspection, refetchSelectedInspection }}>
-          <MachineDetailModal machineProjectId={machineProjectId} open={open} setOpen={setOpen} />
-        </SelectedInspectionContext.Provider>
-      )}
+      {open && currentInspection && <InspectionDetailModal open={open} setOpen={setOpen} />}
       {showAddModalOpen && (
         <AddInspectionModal
           getFilteredInspectionList={getFilteredInspectionList}
           open={showAddModalOpen}
           setOpen={setShowAddModalOpen}
-          machineProjectId={machineProjectId}
-          categoryList={categoryList}
         />
       )}
-      {showPictureListModal && selectedInspection && (
-        <PictureListModal
-          selectedInspection={selectedInspection}
-          machineProjectId={machineProjectId}
-          open={showPictureListModal}
-          setOpen={setShowPictureListModal}
-          refetchSelectedInspection={refetchSelectedInspection}
-        />
+      {showPictureListModal && currentInspection && (
+        <PictureListModal open={showPictureListModal} setOpen={setShowPictureListModal} />
       )}
     </div>
   )

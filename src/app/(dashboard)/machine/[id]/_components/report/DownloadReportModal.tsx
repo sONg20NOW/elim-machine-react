@@ -22,7 +22,7 @@ import {
 import { toast } from 'react-toastify'
 
 import style from '@/app/_style/Table.module.css'
-import { useGetReportCategories } from '@/@core/hooks/customTanstackQueries'
+import { useGetReportCategories, useGetReportStatuses } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import InspectionPerformanceModal from './InspectionPerformanceModal'
@@ -35,81 +35,94 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
   const [openInspModal, setOpenInspModal] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const [statuses, setStatuses] = useState<MachineReportStatusResponseDtoType[]>([])
+  const reloadRef = useRef<HTMLElement>(null)
 
   const { data: reportCategories } = useGetReportCategories()
 
+  const { data: initialStatuses, refetch } = useGetReportStatuses(
+    `${machineProjectId}`,
+    reportCategories?.map(v => v.id) ?? []
+  )
+
+  const [statuses, setStatuses] = useState<MachineReportStatusResponseDtoType[]>(initialStatuses ?? [])
+
+  const refetchStatuses = useCallback(async () => {
+    const { data: newStatuses } = await refetch()
+
+    if (newStatuses) setStatuses(newStatuses)
+  }, [refetch])
+
   // 최초에 상태 조회
   useEffect(() => {
-    const getAllReportStatus = async () => {
-      try {
-        const reports = await auth
-          .get<{
-            data: { machineReports: MachineReportStatusResponseDtoType[] }
-          }>(
-            `/api/machine-projects/${machineProjectId}/machine-reports/status?machineReportCategoryIds=1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17`
-          )
-          .then(v => v.data.data.machineReports)
-
-        console.log('최초에 리포트 상태 모두 가져오기', reports)
-        setStatuses(reports)
-      } catch (e) {
-        handleApiError(e)
-      }
-    }
-
-    getAllReportStatus()
-  }, [machineProjectId])
+    refetchStatuses()
+  }, [refetchStatuses, reportCategories])
 
   return (
-    <>
-      <Dialog fullWidth maxWidth='md' open={open}>
-        <DialogTitle variant='h3' sx={{ position: 'relative' }}>
-          보고서 다운로드
-          {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
-          <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
-            <i className='tabler-x' />
-          </IconButton>
-          <DialogContentText>※버튼이 비활성화된 경우 먼저 생성을 요청해주세요</DialogContentText>
-          <Divider />
-        </DialogTitle>
-        <DialogContent className={`${style.container} max-h-[50dvh]`}>
-          <table style={{ tableLayout: 'fixed', width: '100%' }}>
-            <thead>
-              <tr>
-                <th colSpan={1}>번호</th>
-                <th colSpan={8}>내용</th>
-                <th colSpan={1}>생성</th>
-                <th colSpan={1}>다운로드</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportCategories?.map((category, idx) => (
-                <TableRow
-                  key={category.id}
-                  category={category}
-                  idx={idx}
-                  statuses={statuses}
-                  setStatuses={setStatuses}
-                  setOpenInspModal={setOpenInspModal}
-                  setLoading={setLoading}
+    reportCategories && (
+      <>
+        <Dialog fullWidth maxWidth='md' open={open}>
+          <DialogTitle variant='h3' sx={{ position: 'relative' }}>
+            보고서 다운로드
+            {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
+            <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
+              <i className='tabler-x' />
+            </IconButton>
+            <div className='flex items-center justify-between'>
+              <DialogContentText>※버튼이 비활성화된 경우 먼저 GUI에서 생성을 요청해주세요</DialogContentText>
+              <IconButton size='medium'>
+                <i
+                  ref={reloadRef}
+                  className='tabler-reload text-2xl text-green-500'
+                  onClick={() => {
+                    reloadRef.current?.classList.add('animate-spin')
+                    setTimeout(() => {
+                      reloadRef.current?.classList.remove('animate-spin')
+                    }, 1000)
+                    refetchStatuses()
+                  }}
                 />
-              ))}
-            </tbody>
-          </table>
-        </DialogContent>
-        <DialogActions className='flex items-center justify-center pt-4' sx={{ boxShadow: 10 }}>
-          <Button variant='contained' className='bg-sky-500 hover:bg-sky-600'>
-            전체 다운로드
-          </Button>
-          <SettingButton />
-        </DialogActions>
-        <Backdrop open={loading} sx={{ color: 'white' }}>
-          <CircularProgress size={60} color='inherit' />
-        </Backdrop>
-      </Dialog>
-      {openInspModal && <InspectionPerformanceModal open={openInspModal} setOpen={setOpenInspModal} />}
-    </>
+              </IconButton>
+            </div>
+            <Divider />
+          </DialogTitle>
+          <DialogContent className={`${style.container} max-h-[50dvh]`}>
+            <table style={{ tableLayout: 'fixed', width: '100%' }}>
+              <thead>
+                <tr>
+                  <th colSpan={1}>번호</th>
+                  <th colSpan={8}>내용</th>
+                  {/* <th colSpan={1}>생성</th> */}
+                  <th colSpan={1}>다운로드</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reportCategories?.map((category, idx) => (
+                  <TableRow
+                    key={category.id}
+                    category={category}
+                    idx={idx}
+                    statuses={statuses}
+                    setStatuses={setStatuses}
+                    setOpenInspModal={setOpenInspModal}
+                    setLoading={setLoading}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </DialogContent>
+          <DialogActions className='flex items-center justify-center pt-4' sx={{ boxShadow: 10 }}>
+            <Button variant='contained' className='bg-sky-500 hover:bg-sky-600'>
+              전체 다운로드
+            </Button>
+            <SettingButton />
+          </DialogActions>
+          <Backdrop open={loading} sx={{ color: 'white' }}>
+            <CircularProgress size={60} color='inherit' />
+          </Backdrop>
+        </Dialog>
+        {openInspModal && <InspectionPerformanceModal open={openInspModal} setOpen={setOpenInspModal} />}
+      </>
+    )
   )
 }
 
@@ -175,11 +188,11 @@ const TableRow = memo(
 
     const requestReportCreate = useCallback(
       async (machineReportCategory: MachineReportCategoryReadResponseDtoType) => {
-        const { mappedUrl, id: machineReportCategoryId } = machineReportCategory
+        const { reportTemplateCode } = machineReportCategory
 
         try {
           await auth.post(
-            `api/machine-projects/${machineProjectId}/machine-reports/${mappedUrl}?machineReportCategoryId=${machineReportCategoryId}`
+            `api/machine-projects/${machineProjectId}/machine-reports?reportTemplateCode=${reportTemplateCode}`
           )
 
           console.log('보고서 생성 요청 완료')
@@ -235,6 +248,7 @@ const TableRow = memo(
       [machineProjectId, setStatuses]
     )
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleCreate = useCallback(
       async (machineReportCategory: MachineReportCategoryReadResponseDtoType) => {
         if (!aRef.current) return
@@ -302,6 +316,7 @@ const TableRow = memo(
         <td colSpan={8}>
           <div className='flex justify-between items-center'>
             <Tooltip
+              slotProps={{ popper: { sx: { wordBreak: 'break-all' } } }}
               title={
                 myStatus ? (
                   <div className='grid text-white'>
@@ -325,9 +340,9 @@ const TableRow = memo(
             </Tooltip>
           </div>
         </td>
-        {category.id !== 15 ? (
+        {category.reportTemplateCode !== 'MACHINE_INSPECTION_PERFORMANCE' ? (
           <>
-            <td colSpan={1} className='px-0'>
+            {/* <td colSpan={1} className='px-0'>
               <div className='grid place-items-center relative'>
                 <Button
                   variant='contained'
@@ -348,19 +363,19 @@ const TableRow = memo(
                   </div>
                 )}
               </div>
-            </td>
+            </td> */}
             <td colSpan={1} className='px-0'>
               <div className='grid place-items-center'>
                 <a ref={aRef} download={'hi'}>
                   <Button className='bg-blue-500 hover:bg-blue-600 text-white  disabled:opacity-60' disabled={disabled}>
-                    DOCX
+                    HWPX
                   </Button>
                 </a>
               </div>
             </td>
           </>
         ) : (
-          <td colSpan={2}>
+          <td colSpan={1} className='px-1'>
             <div className='grid place-items-cetner'>
               <Button
                 variant='outlined'

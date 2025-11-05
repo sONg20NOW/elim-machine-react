@@ -39,8 +39,9 @@ import BasicTable from '@/@core/components/custom/BasicTable'
 import AddMachineProjectModal from './_components/addMachineProjectModal'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { MachineInitialFilters } from '@/app/_constants/MachineProjectSeed'
-import { handleApiError } from '@/utils/errorHandler'
-import useMachineTabValueStore from '@/@core/utils/machineTabValueStore'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
+import { auth } from '@/lib/auth'
 
 // datepicker 한글화
 dayjs.locale('ko')
@@ -215,6 +216,22 @@ export default function MachinePage() {
     }
 
     ToggleDate()
+  }
+
+  const handleDeleteRow = async (row: MachineProjectPageDtoType) => {
+    await auth.delete(`/api/machine-projects/${row.machineProjectId}?version=${row.version}`)
+    handleSuccess(`${row.machineProjectName}이(가) 삭제되었습니다`)
+    getFilteredData()
+
+    return
+  }
+
+  const handleCopyRow = async (row: MachineProjectPageDtoType) => {
+    await auth.post(`/api/machine-projects/${row.machineProjectId}`)
+    handleSuccess(`${row.machineProjectName}이(가) 복사되었습니다`)
+    getFilteredData()
+
+    return
   }
 
   // // 설비현장 체크 핸들러 (다중선택)
@@ -444,6 +461,10 @@ export default function MachinePage() {
         <BasicTable<MachineProjectPageDtoType>
           header={HEADERS.machine}
           data={data}
+          RowRightClickMenu={[
+            { iconClass: 'tabler-copy-plus-filled', label: '복사', handleClick: handleCopyRow },
+            { iconClass: 'tabler-square-rounded-minus-filled', label: '삭제', handleClick: handleDeleteRow }
+          ]}
           handleRowClick={handleMachineProjectClick}
           page={page}
           pageSize={size}
