@@ -308,8 +308,10 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
 
   // 설비 변경 시
   useEffect(() => {
-    setSelectedItemId(0)
-    resetCursor()
+    if (!clickedPicCate) {
+      setSelectedItemId(0)
+      resetCursor()
+    }
   }, [currentInspectionId])
 
   // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
@@ -422,24 +424,30 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
           </div>
         </div>
         <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <TextField
-            size='small'
-            select
-            value={currentInspectionId}
-            onChange={e => setCurrentInspectionId(Number(e.target.value))}
-            sx={{ width: 'fit-content' }}
-            slotProps={{
-              select: {
-                sx: { fontWeight: 700, fontSize: { xs: 20, sm: 30 }, paddingInlineEnd: 5 }
-              }
-            }}
-          >
-            {inspections?.map(inspection => (
-              <MenuItem key={inspection.id} value={inspection.id}>
-                {inspection.name}
-              </MenuItem>
-            ))}
-          </TextField>
+          {clickedPicCate ? (
+            <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 }, paddingInlineEnd: 5 }}>
+              {inspections.find(i => i.id === currentInspectionId)?.name}
+            </Typography>
+          ) : (
+            <TextField
+              size='small'
+              select
+              value={currentInspectionId}
+              onChange={e => setCurrentInspectionId(Number(e.target.value))}
+              sx={{ width: 'fit-content' }}
+              slotProps={{
+                select: {
+                  sx: { fontWeight: 700, fontSize: { xs: 20, sm: 30 }, paddingInlineEnd: 5 }
+                }
+              }}
+            >
+              {inspections?.map(inspection => (
+                <MenuItem key={inspection.id} value={inspection.id}>
+                  {inspection.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
           <Grid item xs={12}>
             <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
               점검항목 선택
