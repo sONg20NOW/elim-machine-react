@@ -162,7 +162,11 @@ const Calendar = (props: CalenderProps) => {
           <div className='flex gap-1 items-center'>
             {eventInfo.event.extendedProps['type'] === '생일' && <i className='tabler-cake' />}
             {eventInfo.event.extendedProps['type'] === '기계설비' && <i className='tabler-settings-filled' />}
-            <Typography color='white' variant='h5'>
+            <Typography
+              sx={{ overflowX: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              color='white'
+              variant='h5'
+            >
               {eventInfo.event.title}
             </Typography>
           </div>
