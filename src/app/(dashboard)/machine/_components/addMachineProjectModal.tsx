@@ -4,8 +4,6 @@ import { useState } from 'react'
 
 import Button from '@mui/material/Button'
 
-import axios from 'axios'
-
 import { DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
 
 import type { MachineProjectCreateRequestDtoType } from '@/@core/types'
@@ -14,6 +12,7 @@ import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import { MACHINE_CREATE_INFO } from '@/app/_constants/input/MachineInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { auth } from '@/lib/auth'
 
 type AddMachineProjectModalProps = {
   open: boolean
@@ -26,10 +25,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
 
   const onSubmitHandler = async () => {
     try {
-      const response = await axios.post<{ data: MachineProjectCreateRequestDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects`,
-        newData
-      )
+      const response = await auth.post<{ data: MachineProjectCreateRequestDtoType }>(`/api/machine-projects`, newData)
 
       console.log('new machine project added', response.data.data)
       handleSuccess('새 기계설비현장이 추가되었습니다.')

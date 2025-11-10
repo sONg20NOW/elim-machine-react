@@ -10,8 +10,6 @@ import Button from '@mui/material/Button'
 
 import { Box, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
 
-import axios from 'axios'
-
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { LicenseResponseDtoType } from '@/@core/types'
 import { InputBox } from '@/@core/components/custom/InputBox'
@@ -19,6 +17,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { LICENSE_INPUT_INFO } from '@/app/_constants/input/LicenseInputInfo'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import AlertModal from '@/@core/components/custom/AlertModal'
+import { auth } from '@/lib/auth'
 
 type DetailModalProps = {
   open: boolean
@@ -55,7 +54,7 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
 
   const handleDeleteUser = async () => {
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/${licenseId}`)
+      await auth.delete(`/api/licenses/${licenseId}`)
 
       handleSuccess('라이선스가 정상적으로 삭제되었습니다.')
     } catch (error) {
@@ -66,10 +65,7 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
   const handleModifyData = async () => {
     if (existChange) {
       try {
-        const response = await axios.put<{ data: LicenseResponseDtoType }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/${licenseId}`,
-          editData
-        )
+        const response = await auth.put<{ data: LicenseResponseDtoType }>(`/api/licenses/${licenseId}`, editData)
 
         const returnData = response.data.data
 

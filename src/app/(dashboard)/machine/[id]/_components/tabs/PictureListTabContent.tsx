@@ -21,7 +21,6 @@ import {
 
 // @ts-ignore
 import type { AxiosRequestConfig } from 'axios'
-import axios from 'axios'
 
 import classNames from 'classnames'
 
@@ -90,8 +89,8 @@ const PictureListTabContent = () => {
   const getInspectionByPic = useCallback(
     async (pic: MachinePicPresignedUrlResponseDtoType) => {
       try {
-        const response = await axios.get<{ data: MachineInspectionDetailResponseDtoType }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${pic.machineInspectionId}`
+        const response = await auth.get<{ data: MachineInspectionDetailResponseDtoType }>(
+          `/api/machine-projects/${machineProjectId}/machine-inspections/${pic.machineInspectionId}`
         )
 
         setSelectedInspection(response.data.data)

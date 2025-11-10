@@ -3,13 +3,13 @@ import { useState } from 'react'
 import { useParams } from 'next/navigation'
 
 import { Button, Typography } from '@mui/material'
-import axios from 'axios'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@/lib/auth'
 
 const NoteTabContent = ({}) => {
   const params = useParams()
@@ -40,10 +40,7 @@ const NoteTabContent = ({}) => {
           note: note
         }
 
-        const response = await axios.put(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/note`,
-          updatedData
-        )
+        const response = await auth.put(`/api/machine-projects/${machineProjectId}/note`, updatedData)
 
         refetchProjectData()
         console.log('참고사항 저장 성공:', response.data)

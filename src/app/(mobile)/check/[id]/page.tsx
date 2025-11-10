@@ -6,8 +6,6 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { Box, Button, CircularProgress, IconButton, InputLabel, TextField, Typography } from '@mui/material'
 
-import axios from 'axios'
-
 import { useForm } from 'react-hook-form'
 
 import type {
@@ -75,8 +73,8 @@ const CheckDetailPage = () => {
   // 현장정보 불러오기
   const getProjectData = useCallback(async () => {
     try {
-      const response = await axios.get<{ data: MachineProjectResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`
+      const response = await auth.get<{ data: MachineProjectResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}`
       )
 
       return response.data.data
@@ -103,8 +101,8 @@ const CheckDetailPage = () => {
   // 점검일정/참여기술진 정보 불러오기
   const getScheduleData = useCallback(async () => {
     try {
-      const response = await axios.get<{ data: MachineProjectScheduleAndEngineerResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/schedule-tab`
+      const response = await auth.get<{ data: MachineProjectScheduleAndEngineerResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}/schedule-tab`
       )
 
       return response.data.data

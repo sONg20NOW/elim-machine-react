@@ -5,8 +5,6 @@ import { useParams } from 'next/navigation'
 
 import { Button, IconButton, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
 
-import axios from 'axios'
-
 import PictureListModal from '../../pictureUpdateModal/PictureListModal'
 import type {
   MachineInspectionChecklistItemResultResponseDtoType,
@@ -19,6 +17,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
 import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
+import { auth } from '@/lib/auth'
 
 interface PicTabContentProps<T> {
   editData: T
@@ -71,8 +70,8 @@ export default function PicTabContent({
     async function getDf(id: number) {
       if (id > 0 && !knownDfs.find(difficiency => difficiency.id === id)) {
         try {
-          const response = await axios.get<{ data: MachineInspectionChecklistItemResultResponseDtoType }>(
-            `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${currentInspectionId}/machine-inspection-checklist-item-results/${id}`
+          const response = await auth.get<{ data: MachineInspectionChecklistItemResultResponseDtoType }>(
+            `/api/machine-projects/${machineProjectId}/machine-inspections/${currentInspectionId}/machine-inspection-checklist-item-results/${id}`
           )
 
           setKnownDfs(prev => prev.concat(response.data.data))
@@ -89,12 +88,12 @@ export default function PicTabContent({
   const handleSaveDf = useCallback(
     async (dfs: MachineInspectionChecklistItemResultResponseDtoType[]) => {
       try {
-        const response = await axios.put<{
+        const response = await auth.put<{
           data: {
             machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultResponseDtoType[]
           }
         }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${currentInspectionId}/machine-inspection-checklist-item-results`,
+          `/api/machine-projects/${machineProjectId}/machine-inspections/${currentInspectionId}/machine-inspection-checklist-item-results`,
           {
             machineInspectionChecklistItemResultUpdateRequestDtos: dfs.map(df => ({ ...df, inspectionResult: 'FAIL' }))
           }

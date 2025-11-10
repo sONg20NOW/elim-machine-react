@@ -4,14 +4,13 @@ import Grid from '@mui/material/Grid2'
 
 import { Box, Button, InputAdornment, MenuItem } from '@mui/material'
 
-import axios from 'axios'
-
 import CustomTextField from '@/@core/components/mui/TextField'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType } from '@/@core/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
 import PostCodeDialog from '@/@core/utils/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
+import { auth } from '@/lib/auth'
 
 interface InputBoxProps {
   isEditing?: boolean
@@ -72,9 +71,9 @@ function InputBoxContent() {
 
   const getCompanyNameOption = useCallback(async () => {
     try {
-      const response = await axios.get<{
+      const response = await auth.get<{
         data: { licenseIdAndNameResponseDtos: { id: number; companyName: string }[] }
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/names`)
+      }>(`/api/licenses/names`)
 
       setCompanyNameOption(
         response.data.data.licenseIdAndNameResponseDtos.map(v => ({ value: v.companyName, label: v.companyName }))
@@ -101,10 +100,9 @@ function InputBoxContent() {
 
   async function getJuminNum() {
     try {
-      const response = await axios.post<{ data: { juminNum: string } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/jumin-num/view`,
-        { memberId: memberId }
-      )
+      const response = await auth.post<{ data: { juminNum: string } }>(`/api/members/jumin-num/view`, {
+        memberId: memberId
+      })
 
       setJuminNum(response.data.data.juminNum)
     } catch (error: any) {

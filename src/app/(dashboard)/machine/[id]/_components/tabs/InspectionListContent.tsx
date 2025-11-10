@@ -11,8 +11,6 @@ import TablePagination from '@mui/material/TablePagination'
 // Component Imports
 import { MenuItem } from '@mui/material'
 
-import axios from 'axios'
-
 import InspectionDetailModal from '../detailModal/InspectionDetailModal'
 
 // Constants
@@ -34,6 +32,7 @@ import AddInspectionModal from '../AddInspectionModal'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { useGetParticipatedEngineerList, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
+import { auth } from '@/lib/auth'
 
 const InspectionListContent = ({}) => {
   const machineProjectId = useParams().id?.toString() as string
@@ -115,8 +114,8 @@ const InspectionListContent = ({}) => {
       queryParams.set('size', pageSize.toString())
 
       // axios GET 요청
-      const response = await axios.get<{ data: successResponseDtoType<MachineInspectionPageResponseDtoType[]> }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections?${queryParams.toString()}`
+      const response = await auth.get<{ data: successResponseDtoType<MachineInspectionPageResponseDtoType[]> }>(
+        `/api/machine-projects/${machineProjectId}/machine-inspections?${queryParams.toString()}`
       )
 
       const result = response.data.data
@@ -185,13 +184,10 @@ const InspectionListContent = ({}) => {
     if (!checked.length) return
 
     try {
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections`,
-        {
-          //@ts-ignore
-          data: { machineInspectionDeleteRequestDtos: checked }
-        }
-      )
+      await auth.delete(`/api/machine-projects/${machineProjectId}/machine-inspections`, {
+        //@ts-ignore
+        data: { machineInspectionDeleteRequestDtos: checked }
+      })
       setFilters({
         engineerName: ''
       })

@@ -19,8 +19,6 @@ import {
   Typography
 } from '@mui/material'
 
-import axios from 'axios'
-
 import { Controller, useForm } from 'react-hook-form'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
@@ -61,7 +59,7 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
 
   const handleDeleteUser = async () => {
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers`, {
+      await auth.delete(`/api/engineers`, {
         // @ts-ignore
         data: { engineerDeleteRequestDtos: [{ engineerId: engineerId, version: watchedVersion }] }
       })

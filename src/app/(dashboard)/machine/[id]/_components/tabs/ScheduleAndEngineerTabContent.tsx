@@ -2,8 +2,6 @@ import { useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import axios from 'axios'
-
 import { Box, Button, IconButton, MenuItem } from '@mui/material'
 
 import type {
@@ -26,6 +24,7 @@ import {
   useGetScheduleTab
 } from '@/@core/hooks/customTanstackQueries'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
+import { auth } from '@/lib/auth'
 
 const ScheduleAndEngineerTabContent = ({}: {}) => {
   const params = useParams()
@@ -52,15 +51,11 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
   // 실제 API 호출 부분 (PUT/PATCH 등)
   const handleSave = async () => {
     try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/schedule`,
-        editData
-      )
+      await auth.put(`/api/machine-projects/${machineProjectId}/schedule`, editData)
 
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-project-engineers`,
-        { engineers: editData.engineers.filter(value => value.engineerId > 0) }
-      )
+      await auth.put(`/api/machine-projects/${machineProjectId}/machine-project-engineers`, {
+        engineers: editData.engineers.filter(value => value.engineerId > 0)
+      })
       refetchParticipatedEngineers()
       const { data: changed } = await refetchScheduleData()
 

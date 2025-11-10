@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 
 import { Button, Tab } from '@mui/material'
-import axios from 'axios'
 
 import TabList from '@mui/lab/TabList'
 
@@ -35,6 +34,7 @@ import PicTabContent from './tabs/PicTabContent'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
+import { auth } from '@/lib/auth'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -113,8 +113,8 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
       try {
         switch (tabValue) {
           case 'BASIC':
-            await axios.put<{ data: MachineInspectionResponseDtoType }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}`,
+            await auth.put<{ data: MachineInspectionResponseDtoType }>(
+              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}`,
               editData.machineInspectionResponseDto
             )
 
@@ -123,8 +123,8 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
               JSON.stringify(editData.engineerIds.filter(id => id > 0)) !==
               JSON.stringify(selectedInspection.engineerIds)
             ) {
-              await axios.put<{ data: { engineerIds: number[] } }>(
-                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-engineers`,
+              await auth.put<{ data: { engineerIds: number[] } }>(
+                `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-engineers`,
                 { engineerIds: editData.engineerIds.filter(id => id > 0) }
               )
             }
@@ -149,12 +149,12 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
             })
 
             if (changedCates) {
-              await axios.put<{
+              await auth.put<{
                 data: {
                   machineInspectionChecklistItemResultUpdateResponseDtos: machineInspectionChecklistItemResultBasicResponseDtoType[]
                 }
               }>(
-                `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
+                `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
                 { machineInspectionChecklistItemResultUpdateRequestDtos: changedCates }
               )
               refetchSelectedInspection()
@@ -162,29 +162,29 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
 
             break
           case 'GAS':
-            await axios.put<{
+            await auth.put<{
               data: GasMeasurementResponseDtoType
             }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/gasMeasurement`,
+              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/gasMeasurement`,
               editData.gasMeasurementResponseDto
             )
 
             refetchSelectedInspection()
             break
           case 'WIND':
-            await axios.put<{
+            await auth.put<{
               data: { windMeasurementUpdateResponseDtos: WindMeasurementResponseDtoType[] }
             }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/windMeasurements`,
+              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/windMeasurements`,
               { windMeasurementUpdateRequestDtos: editData.windMeasurementResponseDtos }
             )
             refetchSelectedInspection()
             break
           case 'PIPE':
-            await axios.put<{
+            await auth.put<{
               data: { pipeMeasurementUpdateResponseDtos: PipeMeasurementResponseDtoType[] }
             }>(
-              `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/pipeMeasurements`,
+              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/pipeMeasurements`,
               { pipeMeasurementUpdateRequestDtos: editData.pipeMeasurementResponseDtos }
             )
             refetchSelectedInspection()

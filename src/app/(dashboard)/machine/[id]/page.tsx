@@ -13,8 +13,6 @@ import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 
-import axios from 'axios'
-
 import classNames from 'classnames'
 
 import PictureListTabContent from './_components/tabs/PictureListTabContent'
@@ -29,6 +27,7 @@ import type { MachineTabValue } from '@/@core/utils/useMachineTabValueStore'
 import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 import { useGetEngineerList, useGetMachineProject, useGetScheduleTab } from '@/@core/hooks/customTanstackQueries'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
+import { auth } from '@/lib/auth'
 
 const Tabs = [
   { value: '현장정보', label: '현장정보' },
@@ -60,8 +59,8 @@ const MachineUpdatePage = () => {
   const handleChangeProjectName = useCallback(
     async (projectName: string) => {
       try {
-        await axios.put<{ data: { projectName: string; version: number } }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/name`,
+        await auth.put<{ data: { projectName: string; version: number } }>(
+          `/api/machine-projects/${machineProjectId}/name`,
           {
             version: projectData?.version,
             name: projectName
