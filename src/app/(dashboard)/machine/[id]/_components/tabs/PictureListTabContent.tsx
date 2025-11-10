@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useContext } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -9,7 +9,6 @@ import {
   ImageList,
   ImageListItem,
   ImageListItemBar,
-  useMediaQuery,
   Button,
   Checkbox,
   TextField,
@@ -41,6 +40,7 @@ import { auth } from '@/lib/auth'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/MachineProjectPictureCategory'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 const PictureListTabContent = () => {
   const machineProjectId = useParams().id?.toString() as string
@@ -74,7 +74,7 @@ const PictureListTabContent = () => {
   const reloadIconRef = useRef<HTMLElement>(null)
 
   // 반응형을 위한 미디어쿼리
-  const isMobile = useMediaQuery('(max-width:600px)')
+  const isMobile = useContext(isMobileContext)
 
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedInspectionPic, setSelectedInspectionPic] = useState<MachinePicPresignedUrlResponseDtoType>()
@@ -84,6 +84,10 @@ const PictureListTabContent = () => {
   const [showProjectPicModal, setShowProjectPicModal] = useState(false)
 
   const [selectedInspection, setSelectedInspection] = useState<MachineInspectionDetailResponseDtoType>()
+
+  useEffect(() => {
+    console.log(selectedProjectPic)
+  }, [selectedProjectPic])
 
   // 클릭된 사진이 속한 inspection 정보 가져오기. (사진 모달에 검사항목.하위항목을 위해 필요)
   const getInspectionByPic = useCallback(
@@ -364,12 +368,12 @@ const PictureListTabContent = () => {
   }, [open, refetchPictures])
 
   return (
-    inspectionList && (
-      <div className='flex flex-col gap-5'>
-        {/* 상단 필터링, 검색, 선택 삭제 등 */}
-        <div className='flex justify-between'>
-          <div className={classNames('flex gap-3', { 'flex-col': isMobile })}>
-            <SearchBar placeholder='검색' setSearchKeyword={name => setKeyword(name)} />
+    <div className='flex flex-col gap-5'>
+      {/* 상단 필터링, 검색, 선택 삭제 등 */}
+      <div className='flex justify-between'>
+        <div className={classNames('flex gap-3', { 'flex-col': isMobile })}>
+          <SearchBar placeholder='검색' setSearchKeyword={name => setKeyword(name)} />
+          {inspectionList && (
             <TextField
               label='설비명으로 검색'
               sx={{ width: { sx: 'full', sm: 250 } }}
@@ -388,24 +392,25 @@ const PictureListTabContent = () => {
                 </MenuItem>
               ))}
             </TextField>
-            <Tooltip arrow title='사진 새로고침'>
-              <IconButton
-                onClick={() => {
-                  if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
+          )}
+          <Tooltip arrow title='사진 새로고침'>
+            <IconButton
+              onClick={() => {
+                if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
 
-                  reloadIconRef.current.classList.add('animate-spin')
-                  setTimeout(() => {
-                    reloadIconRef.current?.classList.remove('animate-spin')
-                  }, 1000)
-                  refetchPictures()
-                  setKeyword('')
-                  setInspectionId(0)
-                }}
-              >
-                <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
-              </IconButton>
-            </Tooltip>
-            {/* ! 추후구현
+                reloadIconRef.current.classList.add('animate-spin')
+                setTimeout(() => {
+                  reloadIconRef.current?.classList.remove('animate-spin')
+                }, 1000)
+                refetchPictures()
+                setKeyword('')
+                setInspectionId(0)
+              }}
+            >
+              <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
+            </IconButton>
+          </Tooltip>
+          {/* ! 추후구현
            {
             inspectionId !== 0 && filterPics(pictures).length !== 0
             && (
@@ -429,146 +434,147 @@ const PictureListTabContent = () => {
               </TextField>
             )
           } */}
-          </div>
-          <div className='flex gap-2'>
-            <Button variant='outlined' type='button' color='success' onClick={() => setOpen(true)}>
-              현장사진 추가
-            </Button>
-            <div className={classNames('flex gap-1', { 'flex-col': isMobile })}>
-              {showCheck && [
-                <Button
-                  key={1}
-                  color='warning'
-                  onClick={async () => {
-                    if (selectAll) {
-                      setInspectionPicsToDelete(
-                        handlefilterInspectionPics(
-                          inspectionPics.concat(await getInspectionPics(1000).then(v => v?.content ?? []))
-                        )
-                      )
-                      setProjectPicsToDelete(handlefilterProjectPics(projectPics))
-                    } else {
-                      setInspectionPicsToDelete([])
-                      setProjectPicsToDelete([])
-                    }
-
-                    setSelectAll(prev => !prev)
-                  }}
-                >
-                  {selectAll ? '전체선택' : '전체해제'}
-                </Button>,
-                <Button
-                  key={2}
-                  color='error'
-                  onClick={() => handleDeletePics()}
-                  disabled={projectPicsToDelete.length + inspectionPicsToDelete.length === 0}
-                >
-                  일괄삭제({inspectionPicsToDelete.length + projectPicsToDelete.length})
-                </Button>
-              ]}
+        </div>
+        <div className='flex gap-2'>
+          <Button variant='outlined' type='button' color='success' onClick={() => setOpen(true)}>
+            현장사진 추가
+          </Button>
+          <div className={classNames('flex gap-1', { 'flex-col': isMobile })}>
+            {showCheck && [
               <Button
-                color={showCheck ? 'secondary' : 'primary'}
-                variant='contained'
-                onClick={() => {
-                  if (showCheck) {
+                key={1}
+                color='warning'
+                onClick={async () => {
+                  if (selectAll) {
+                    setInspectionPicsToDelete(
+                      handlefilterInspectionPics(
+                        inspectionPics.concat(await getInspectionPics(1000).then(v => v?.content ?? []))
+                      )
+                    )
+                    setProjectPicsToDelete(handlefilterProjectPics(projectPics))
+                  } else {
                     setInspectionPicsToDelete([])
                     setProjectPicsToDelete([])
                   }
 
-                  setShowCheck(prev => !prev)
-                  setSelectAll(true)
+                  setSelectAll(prev => !prev)
                 }}
               >
-                {showCheck ? '취소' : '선택삭제'}
+                {selectAll ? '전체선택' : '전체해제'}
+              </Button>,
+              <Button
+                key={2}
+                color='error'
+                onClick={() => handleDeletePics()}
+                disabled={projectPicsToDelete.length + inspectionPicsToDelete.length === 0}
+              >
+                일괄삭제({inspectionPicsToDelete.length + projectPicsToDelete.length})
               </Button>
-            </div>
+            ]}
+            <Button
+              color={showCheck ? 'secondary' : 'primary'}
+              variant='contained'
+              onClick={() => {
+                if (showCheck) {
+                  setInspectionPicsToDelete([])
+                  setProjectPicsToDelete([])
+                }
+
+                setShowCheck(prev => !prev)
+                setSelectAll(true)
+              }}
+            >
+              {showCheck ? '취소' : '선택삭제'}
+            </Button>
           </div>
         </div>
-        <div className='flex flex-col gap-8'>
-          {handlefilterProjectPics(projectPics) && handlefilterProjectPics(projectPics).length > 0 && (
-            <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography variant='h3'>현장사진</Typography>
-              <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 4} rowHeight={isMobile ? 180 : 300} gap={15}>
-                {handlefilterProjectPics(projectPics).map(pic => {
-                  return (
-                    <Paper
-                      sx={{
-                        position: 'relative',
-                        cursor: 'pointer',
-                        borderColor: 'lightgray',
-                        borderWidth: '1px',
-                        ':hover': { boxShadow: 10 }
-                      }}
-                      variant='outlined'
-                      key={`${pic.id}`}
-                      onClick={() => {
-                        // 일괄선택 활성화 시 클릭 동작
-                        if (showCheck) {
-                          if (!projectPicsToDelete.find(v => v.id === pic.id)) {
-                            setProjectPicsToDelete(prev => {
-                              const newList = prev.map(v => ({ ...v }))
+      </div>
+      <div className='flex flex-col gap-8'>
+        {handlefilterProjectPics(projectPics) && handlefilterProjectPics(projectPics).length > 0 && (
+          <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Typography variant='h3'>현장사진</Typography>
+            <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 4} rowHeight={isMobile ? 180 : 300} gap={15}>
+              {handlefilterProjectPics(projectPics).map(pic => {
+                return (
+                  <Paper
+                    sx={{
+                      position: 'relative',
+                      cursor: 'pointer',
+                      borderColor: 'lightgray',
+                      borderWidth: '1px',
+                      ':hover': { boxShadow: 10 }
+                    }}
+                    variant='outlined'
+                    key={`${pic.id}`}
+                    onClick={() => {
+                      // 일괄선택 활성화 시 클릭 동작
+                      if (showCheck) {
+                        if (!projectPicsToDelete.find(v => v.id === pic.id)) {
+                          setProjectPicsToDelete(prev => {
+                            const newList = prev.map(v => ({ ...v }))
 
-                              return newList.concat({ id: pic.id, version: pic.version })
-                            })
-                          } else {
-                            setProjectPicsToDelete(prev => {
-                              const newList = prev.map(v => ({ ...v }))
+                            return newList.concat({ id: pic.id, version: pic.version })
+                          })
+                        } else {
+                          setProjectPicsToDelete(prev => {
+                            const newList = prev.map(v => ({ ...v }))
 
-                              return newList.filter(v => v.id !== pic.id)
-                            })
-                          }
+                            return newList.filter(v => v.id !== pic.id)
+                          })
                         }
+                      }
 
-                        // 일괄선택 비활성화 시 클릭 동작
-                        else {
-                          setSelectedProjectPic(pic)
-                          setShowProjectPicModal(true)
-                        }
-                      }}
-                    >
-                      <ImageListItem>
-                        <img
-                          src={pic.presignedUrl}
-                          alt={pic.originalFileName}
-                          style={{
-                            width: '100%',
-                            height: '50%',
-                            objectFit: 'cover',
-                            borderTopLeftRadius: 5,
-                            borderTopRightRadius: 5
-                          }}
-                        />
-                        <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
-                      </ImageListItem>
+                      // 일괄선택 비활성화 시 클릭 동작
+                      else {
+                        setSelectedProjectPic(pic)
+                        setShowProjectPicModal(true)
+                      }
+                    }}
+                  >
+                    <ImageListItem>
+                      <img
+                        src={pic.presignedUrl}
+                        alt={pic.originalFileName}
+                        style={{
+                          width: '100%',
+                          height: '50%',
+                          objectFit: 'cover',
+                          borderTopLeftRadius: 5,
+                          borderTopRightRadius: 5
+                        }}
+                      />
+                      <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
+                    </ImageListItem>
 
-                      <Typography
-                        fontSize={'medium'}
-                        fontWeight={600}
-                        color='primary.dark'
-                        textAlign={'center'}
-                        sx={{ p: 2 }}
-                      >{`${MACHINE_PROJECT_PICTURE_TYPE.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
+                    <Typography
+                      fontSize={'medium'}
+                      fontWeight={600}
+                      color='primary.dark'
+                      textAlign={'center'}
+                      sx={{ p: 2 }}
+                    >{`${MACHINE_PROJECT_PICTURE_TYPE.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
 
-                      {showCheck && (
-                        <Checkbox
-                          color='error'
-                          sx={{
-                            position: 'absolute',
-                            left: 0,
-                            top: 0
-                          }}
-                          checked={projectPicsToDelete.find(v => v.id === pic.id) ? true : false}
-                        />
-                      )}
-                    </Paper>
-                  )
-                })}
-              </ImageList>
-              {/* 더 이상 데이터가 없을 때 메시지 */}
-            </Box>
-          )}
+                    {showCheck && (
+                      <Checkbox
+                        color='error'
+                        sx={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0
+                        }}
+                        checked={projectPicsToDelete.find(v => v.id === pic.id) ? true : false}
+                      />
+                    )}
+                  </Paper>
+                )
+              })}
+            </ImageList>
+            {/* 더 이상 데이터가 없을 때 메시지 */}
+          </Box>
+        )}
 
-          {inspectionList.map(insp => {
+        {inspectionList &&
+          inspectionList.map(insp => {
             const inspectionsPic = inspectionPics.filter(pic => pic.machineInspectionId === insp.id)
 
             return (
@@ -672,40 +678,39 @@ const PictureListTabContent = () => {
               )
             )
           })}
-          {handlefilterInspectionPics(inspectionPics).length === 0 && (
-            <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
-              <Typography variant='body1'>사진 데이터가 존재하지 않습니다</Typography>
-            </Box>
-          )}
-        </div>
-        {/* 로딩 인디케이터 */}
-        {isLoadingRef.current && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <CircularProgress size={24} />
+        {handlefilterInspectionPics(inspectionPics).length === 0 && (
+          <Box sx={{ textAlign: 'center', mt: 6, color: 'text.secondary' }}>
+            <Typography variant='body1'>사진 데이터가 존재하지 않습니다</Typography>
           </Box>
         )}
-        {selectedInspectionPic && selectedInspection && (
-          <InspectionPicZoomModal
-            open={showInspecitonPicModal}
-            setOpen={setShowInspecitonPicModal}
-            selectedPic={selectedInspectionPic}
-            selectedInspection={selectedInspection}
-            setPictures={setInspectionPics}
-            MovePicture={MoveInspectionPic}
-          />
-        )}
-        {selectedProjectPic && (
-          <ProjectPicZoomModal
-            open={showProjectPicModal}
-            setOpen={setShowProjectPicModal}
-            selectedPic={selectedProjectPic}
-            setPictures={setProjectPics}
-            MovePicture={MoveProjectPic}
-          />
-        )}
-        {open && <PictureListModal open={open} setOpen={setOpen} projectPic />}
       </div>
-    )
+      {/* 로딩 인디케이터 */}
+      {isLoadingRef.current && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <CircularProgress size={24} />
+        </Box>
+      )}
+      {selectedInspectionPic && selectedInspection && (
+        <InspectionPicZoomModal
+          open={showInspecitonPicModal}
+          setOpen={setShowInspecitonPicModal}
+          selectedPic={selectedInspectionPic}
+          selectedInspection={selectedInspection}
+          setPictures={setInspectionPics}
+          MovePicture={MoveInspectionPic}
+        />
+      )}
+      {selectedProjectPic && (
+        <ProjectPicZoomModal
+          open={showProjectPicModal}
+          setOpen={setShowProjectPicModal}
+          selectedPic={selectedProjectPic}
+          setPictures={setProjectPics}
+          MovePicture={MoveProjectPic}
+        />
+      )}
+      {open && <PictureListModal open={open} setOpen={setOpen} projectPic />}
+    </div>
   )
 }
 
