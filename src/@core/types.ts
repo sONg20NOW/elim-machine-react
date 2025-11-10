@@ -427,6 +427,8 @@ export interface MachineInspectionDetailResponseDtoType {
   windMeasurementResponseDtos: WindMeasurementResponseDtoType[]
 }
 
+type equipmentPhaseType = 'INSTALL' | 'MANUFACTURE' | 'USE'
+
 // 점검 설비 기본 정보 응답 DTO
 export interface MachineInspectionResponseDtoType {
   version: number
@@ -436,9 +438,8 @@ export interface MachineInspectionResponseDtoType {
   machineCategoryName: string
   purpose: string
   location: string
-  installedDate: string
-  manufacturedDate: string
-  usedDate: string
+  equipmentPhase: equipmentPhaseType
+  equipmentPhaseDate: string
   checkDate: string
   remark: string
 }

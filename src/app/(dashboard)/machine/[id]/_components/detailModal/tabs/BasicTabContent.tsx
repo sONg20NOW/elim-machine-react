@@ -53,21 +53,47 @@ export default function BasicTabContent({
                 />
               )}
             </td>
-            <th>설치일</th>
-            <td colSpan={2}>
+            <th>
               {!isEditing ? (
-                editData.machineInspectionResponseDto.installedDate
+                { INSTALL: '설치일', MANUFACTURE: '제조일', USE: '사용일', null: '-' }[
+                  editData.machineInspectionResponseDto.equipmentPhase
+                ]
               ) : (
                 <TextField
-                  type='date'
+                  select
                   size='small'
-                  value={editData.machineInspectionResponseDto.installedDate ?? ''}
+                  value={editData.machineInspectionResponseDto.equipmentPhase}
+                  slotProps={{ htmlInput: { sx: { py: '5px !important' } } }}
                   onChange={e =>
                     setEditData(prev => ({
                       ...prev,
                       machineInspectionResponseDto: {
                         ...prev.machineInspectionResponseDto,
-                        installedDate: e.target.value
+                        equipmentPhase: e.target.value as 'INSTALL' | 'MANUFACTURE' | 'USE'
+                      }
+                    }))
+                  }
+                >
+                  <MenuItem value='INSTALL'>설치일</MenuItem>
+                  <MenuItem value='MANUFACTURE'>제조일</MenuItem>
+                  <MenuItem value='USE'>사용일</MenuItem>
+                </TextField>
+              )}
+            </th>
+            <td colSpan={2}>
+              {!isEditing ? (
+                editData.machineInspectionResponseDto.equipmentPhaseDate
+              ) : (
+                <TextField
+                  type='date'
+                  size='small'
+                  value={editData.machineInspectionResponseDto.equipmentPhaseDate ?? ''}
+                  onChange={e =>
+                    setEditData(prev => ({
+                      ...prev,
+                      machineInspectionResponseDto: {
+                        ...prev.machineInspectionResponseDto,
+                        equipmentPhaseDate: e.target.value
                       }
                     }))
                   }

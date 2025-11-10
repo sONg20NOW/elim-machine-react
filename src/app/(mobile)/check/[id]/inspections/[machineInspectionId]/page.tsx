@@ -108,140 +108,147 @@ export default function CheckInspectionDetailPage() {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
-      {/* 헤더 */}
-      <MobileHeader
-        left={
-          <IconButton sx={{ p: 0 }} onClick={() => router.back()}>
-            <i className='tabler-chevron-left text-white text-3xl' />
-          </IconButton>
-        }
-        right={
-          <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
-            <IconButton disabled={currentTab === 'gallery'} sx={{ p: 0 }} onClick={globalSubmit}>
-              <i ref={saveButtonRef} className=' tabler-device-floppy text-white text-3xl' />
+    inspectionList && (
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
+        {/* 헤더 */}
+        <MobileHeader
+          left={
+            <IconButton sx={{ p: 0 }} onClick={() => router.back()}>
+              <i className='tabler-chevron-left text-white text-3xl' />
             </IconButton>
-            <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
-              <i className='tabler-trash-x-filled text-red-400 text-3xl' />
-            </IconButton>
-          </Box>
-        }
-        title={
-          <div className='flex flex-col w-full'>
-            <TextField
-              slotProps={{
-                input: {
-                  sx: {
-                    color: 'white',
-                    textAlign: 'center',
-                    ...(isMobile ? theme.typography.h5 : theme.typography.h4)
-                  }
-                },
-
-                // htmlInput: { sx: { p: 0 } },
-                select: {
-                  displayEmpty: true,
-                  renderValue: selectedValue => {
-                    const item = inspectionList?.find(
-                      inspection => inspection.machineInspectionId.toString() === selectedValue
-                    )
-
-                    // Display only the name in the text field
-                    return item ? item.machineInspectionName : '　'
+          }
+          right={
+            <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
+              <IconButton disabled={currentTab === 'gallery'} sx={{ p: 0 }} onClick={globalSubmit}>
+                <i ref={saveButtonRef} className=' tabler-device-floppy text-white text-3xl' />
+              </IconButton>
+              <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
+                <i className='tabler-trash-x-filled text-red-400 text-3xl' />
+              </IconButton>
+            </Box>
+          }
+          title={
+            <div className='flex flex-col w-full'>
+              <TextField
+                slotProps={{
+                  input: {
+                    sx: {
+                      color: 'white',
+                      textAlign: 'center',
+                      ...(isMobile ? theme.typography.h5 : theme.typography.h4)
+                    }
                   },
-                  MenuProps: {
-                    slotProps: {
-                      paper: {
-                        sx: {
-                          height: 500
+
+                  // htmlInput: { sx: { p: 0 } },
+                  select: {
+                    displayEmpty: true,
+                    renderValue: selectedValue => {
+                      const item = inspectionList?.find(
+                        inspection => inspection.machineInspectionId.toString() === selectedValue
+                      )
+
+                      // Display only the name in the text field
+                      return item ? item.machineInspectionName : '　'
+                    },
+                    MenuProps: {
+                      slotProps: {
+                        paper: {
+                          sx: {
+                            height: 500
+                          }
                         }
                       }
                     }
                   }
-                }
-              }}
-              value={machineInspectionId}
-              fullWidth
-              select
-              variant='standard'
-              onChange={e => {
-                router.replace(`/check/${machineProjectId}/inspections/${e.target.value}`)
+                }}
+                value={machineInspectionId}
+                fullWidth
+                select
+                variant='standard'
+                onChange={e => {
+                  router.replace(`/check/${machineProjectId}/inspections/${e.target.value}`)
+                }}
+              >
+                {inspectionList?.map((inspection, idx) => (
+                  <MenuItem
+                    key={inspection.machineInspectionId}
+                    value={inspection.machineInspectionId}
+                    sx={{ display: 'flex', height: 70, border: 'solid 1px lightgray', mt: idx !== 0 ? 2 : 0 }}
+                  >
+                    {/* {!isMobile && <i className='tabler-photo w-full h-full flex-1 shrink-0' />} */}
+                    <Box sx={{ flex: 3 }}>
+                      <Typography variant='inherit'>{`${inspection.machineInspectionName} [${inspection.machinePicCount}]`}</Typography>
+                      <Typography variant='inherit' fontSize={'small'}>
+                        {inspection.location !== '' ? (inspection.location ?? '　') : '　'}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </TextField>
+            </div>
+          }
+        />
+        <TabContext value={currentTab}>
+          {/* 본 컨텐츠 (스크롤 가능 영역)*/}
+          <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto', py: !isMobile ? 10 : 4, px: 10 }}>
+            <TabPanel
+              value={'pictures'}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: !isMobile ? 8 : 5,
+                position: 'relative'
               }}
             >
-              {inspectionList?.map((inspection, idx) => (
-                <MenuItem
-                  key={inspection.machineInspectionId}
-                  value={inspection.machineInspectionId}
-                  sx={{ display: 'flex', height: 70, border: 'solid 1px lightgray', mt: idx !== 0 ? 2 : 0 }}
-                >
-                  {/* {!isMobile && <i className='tabler-photo w-full h-full flex-1 shrink-0' />} */}
-                  <Box sx={{ flex: 3 }}>
-                    <Typography variant='inherit'>{`${inspection.machineInspectionName} [${inspection.machinePicCount}]`}</Typography>
-                    <Typography variant='inherit' fontSize={'small'}>
-                      {inspection.location !== '' ? (inspection.location ?? '　') : '　'}
-                    </Typography>
-                  </Box>
-                </MenuItem>
-              ))}
-            </TextField>
-          </div>
-        }
-      />
-      <TabContext value={currentTab}>
-        {/* 본 컨텐츠 (스크롤 가능 영역)*/}
-        <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto', py: !isMobile ? 10 : 4, px: 10 }}>
-          <TabPanel
-            value={'pictures'}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: !isMobile ? 8 : 5,
-              position: 'relative'
-            }}
-          >
-            <ChecklistForm ref={form1Ref} saveButtonRef={saveButtonRef} category={category} setCategory={setCategory} />
-            <PictureTable
-              machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
-              scrollableAreaRef={scrollableAreaRef}
-              tabHeight={TabListRef.current?.clientHeight ?? 0}
-            />
-          </TabPanel>
-          <InspectionForm ref={form2Ref} saveButtonRef={saveButtonRef} inspectionVersion={inspectionVersion} />
-          <TabPanel
-            value={'gallery'}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: !isMobile ? 8 : 5
-            }}
-          >
-            <ImageUploadPage />
-          </TabPanel>
-        </Box>
+              <ChecklistForm
+                ref={form1Ref}
+                saveButtonRef={saveButtonRef}
+                category={category}
+                setCategory={setCategory}
+              />
+              <PictureTable
+                machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
+                scrollableAreaRef={scrollableAreaRef}
+                tabHeight={TabListRef.current?.clientHeight ?? 0}
+              />
+            </TabPanel>
+            <InspectionForm ref={form2Ref} saveButtonRef={saveButtonRef} inspectionVersion={inspectionVersion} />
+            <TabPanel
+              value={'gallery'}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: !isMobile ? 8 : 5
+              }}
+            >
+              <ImageUploadPage />
+            </TabPanel>
+          </Box>
 
-        {/* 탭 리스트 */}
-        <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
-          <TabList
-            sx={{ display: 'flex', px: isMobile ? '' : 20 }}
-            centered
-            onChange={(event: React.SyntheticEvent, newValue: currentTabType) => {
-              if (form1Ref.current?.isDirty || form2Ref.current?.isDirty) {
-                toast.warning('먼저 변경사항을 저장해주세요', { autoClose: 1500 })
-              } else setCurrentTab(newValue)
-            }}
-          >
-            <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />} />
-            <Tab sx={{ flex: 1 }} value={'info'} label={<i className='tabler-info-circle text-4xl' />} />
-            <Tab sx={{ flex: 1 }} value={'gallery'} label={<i className='tabler-library-photo text-4xl' />} />
-          </TabList>
-        </Box>
-      </TabContext>
-      <DeleteModal
-        title={`해당 설비를\n삭제하시겠습니까?`}
-        showDeleteModal={openAlert}
-        setShowDeleteModal={setOpenAlert}
-        onDelete={handleDeleteInspection}
-      />
-    </Box>
+          {/* 탭 리스트 */}
+          <Box ref={TabListRef} sx={{ borderTop: 1, borderColor: 'divider' }}>
+            <TabList
+              sx={{ display: 'flex', px: isMobile ? '' : 20 }}
+              centered
+              onChange={(event: React.SyntheticEvent, newValue: currentTabType) => {
+                if (form1Ref.current?.isDirty || form2Ref.current?.isDirty) {
+                  toast.warning('먼저 변경사항을 저장해주세요', { autoClose: 1500 })
+                } else setCurrentTab(newValue)
+              }}
+            >
+              <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />} />
+              <Tab sx={{ flex: 1 }} value={'info'} label={<i className='tabler-info-circle text-4xl' />} />
+              <Tab sx={{ flex: 1 }} value={'gallery'} label={<i className='tabler-library-photo text-4xl' />} />
+            </TabList>
+          </Box>
+        </TabContext>
+        <DeleteModal
+          title={`해당 설비를\n삭제하시겠습니까?`}
+          showDeleteModal={openAlert}
+          setShowDeleteModal={setOpenAlert}
+          onDelete={handleDeleteInspection}
+        />
+      </Box>
+    )
   )
 }

@@ -12,6 +12,8 @@ import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
 
+// import Logo from '@components/layout/shared/Logo'
+
 export default function Header() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -47,9 +49,20 @@ export default function Header() {
   }, [keyword, router])
 
   return (
-    <AppBar position='static'>
+    <AppBar
+      sx={{
+        background: theme => `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.light})`
+      }}
+      position='static'
+    >
       <Toolbar className='flex justify-between'>
         <div className='flex gap-4'>
+          <div onClick={() => router.push('/machine')} className='cursor-pointer'>
+            {/* <Logo /> */}
+            <Typography color='white' variant='h4' sx={{ paddingInlineStart: 4 }}>
+              엘림 주식회사
+            </Typography>
+          </div>
           {isTablet && (
             <IconButton edge='end' onClick={() => setOpen(true)}>
               <i className='tabler-menu-2 text-white' />

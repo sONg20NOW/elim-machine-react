@@ -1,5 +1,5 @@
 import type { MutableRefObject, RefObject } from 'react'
-import { forwardRef, memo, useContext, useEffect, useImperativeHandle, useState } from 'react'
+import { forwardRef, memo, useContext, useEffect, useImperativeHandle } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -7,7 +7,7 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { InputLabel, MenuItem, TextField } from '@mui/material'
 
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import type { MachineInspectionResponseDtoType } from '@/@core/types'
@@ -23,9 +23,8 @@ export interface formType {
   machineInspectionName: string
   location: string
   purpose: string
-  installedDate: string
-  manufacturedDate: string
-  usedDate: string
+  equipmentPhase: 'INSTALL' | 'MANUFACTURE' | 'USE'
+  equipmentPhaseDate: string
   checkDate: string
   remark: string
 }
@@ -41,9 +40,6 @@ const InspectionForm = memo(
 
     const isMobile = useContext(isMobileContext)
 
-    const [dayType1, setDayType1] = useState<'installedDate' | 'manufacturedDate'>('installedDate')
-    const [dayType2, setDayType2] = useState<'usedDate' | 'checkDate'>('usedDate')
-
     // const engineerList = useContext(engineerListContext)
     // const [newEngineerId, setNewEngineerId] = useState(-1)
 
@@ -51,6 +47,7 @@ const InspectionForm = memo(
       register,
       getValues,
       reset,
+      control,
       formState: { isDirty }
     } = useForm<formType>()
 
@@ -150,35 +147,41 @@ const InspectionForm = memo(
         </div>
         {/* 설치/점검일 */}
         <div className='flex flex-col gap-1'>
-          <InputLabel sx={{ px: 2 }}>설치/제조일</InputLabel>
-          <div className='flex gap-2'>
+          <InputLabel sx={{ px: 2 }}>설치/제조/사용일</InputLabel>
+          <div className='flex gap-2 items-center'>
+            {
+              <Controller
+                control={control}
+                name='equipmentPhase'
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    slotProps={{
+                      select: { sx: { width: 'fit-content', paddingRight: 2, fontSize: 18 } }
+                    }}
+                    select
+                    sx={{ flex: 1 }}
+                    size={isMobile ? 'small' : 'medium'}
+                  >
+                    {[
+                      { label: '설치일', value: 'INSTALL' },
+                      { label: '제조일', value: 'MANUFACTURE' },
+                      { label: '사용일', value: 'USE' }
+                    ].map(v => (
+                      <MenuItem value={v.value} key={v.value}>
+                        {v.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            }
             <TextField
-              value={dayType1}
-              onChange={e => {
-                if (e.target.value === 'installedDate' || e.target.value === 'manufacturedDate')
-                  setDayType1(e.target.value)
-              }}
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-              select
-              sx={{ flex: 1 }}
-              size={isMobile ? 'small' : 'medium'}
-            >
-              {[
-                { label: '설치일', value: 'installedDate' },
-                { label: '제조일', value: 'manufacturedDate' }
-              ].map(v => (
-                <MenuItem value={v.value} key={v.value}>
-                  {v.label}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              key={dayType1}
               type='date'
               sx={{ flex: isMobile ? 2 : 4 }}
               size={isMobile ? 'small' : 'medium'}
               fullWidth
-              {...register(dayType1)}
+              {...register('equipmentPhaseDate')}
               hiddenLabel
               slotProps={{
                 input: { sx: { fontSize: 18, ...(isMobile ? { py: '8.5px', px: '14px' } : {}) } },
@@ -189,41 +192,19 @@ const InspectionForm = memo(
         </div>
         {/* 사용/점검일 */}
         <div className='flex flex-col gap-1'>
-          <InputLabel sx={{ px: 2 }}>사용/점검일</InputLabel>
-          <div className='flex gap-2'>
-            <TextField
-              value={dayType2}
-              onChange={e => {
-                if (e.target.value === 'usedDate' || e.target.value === 'checkDate') setDayType2(e.target.value)
-              }}
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-              select
-              sx={{ flex: 1 }}
-              size={isMobile ? 'small' : 'medium'}
-            >
-              {[
-                { label: '사용일', value: 'usedDate' },
-                { label: '점검일', value: 'checkDate' }
-              ].map(v => (
-                <MenuItem value={v.value} key={v.value}>
-                  {v.label}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              key={dayType2}
-              type='date'
-              sx={{ flex: isMobile ? 2 : 4 }}
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register(dayType2)}
-              hiddenLabel
-              slotProps={{
-                input: { sx: { fontSize: 18, ...(isMobile ? { py: '8.5px', px: '14px' } : {}) } },
-                ...(isMobile && { htmlInput: { sx: { p: 0 } } })
-              }}
-            />
-          </div>
+          <InputLabel sx={{ px: 2 }}>점검일</InputLabel>
+          <TextField
+            type='date'
+            sx={{ flex: isMobile ? 2 : 4 }}
+            size={isMobile ? 'small' : 'medium'}
+            fullWidth
+            {...register('checkDate')}
+            hiddenLabel
+            slotProps={{
+              input: { sx: { fontSize: 18, ...(isMobile ? { py: '8.5px', px: '14px' } : {}) } },
+              ...(isMobile && { htmlInput: { sx: { p: 0 } } })
+            }}
+          />
         </div>
 
         {/* <div className='flex flex-col gap-1'>

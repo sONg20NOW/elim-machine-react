@@ -37,7 +37,12 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
 
   const reloadRef = useRef<HTMLElement>(null)
 
-  const { data: reportCategories } = useGetReportCategories()
+  const { data: totalReportCategories } = useGetReportCategories()
+
+  const reportCategories = totalReportCategories?.filter(
+    v =>
+      v.reportTemplateCode !== 'MACHINE_PROJECT_SUMMARY' && v.reportTemplateCode !== 'MACHINE_EQUIPMENT_CATEGORY_COVER'
+  )
 
   const { data: initialStatuses, refetch } = useGetReportStatuses(
     `${machineProjectId}`,
