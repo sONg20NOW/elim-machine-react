@@ -8,8 +8,6 @@ import Button from '@mui/material/Button'
 
 import { DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
 
-import axios from 'axios'
-
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { InputBox } from '@/@core/components/custom/InputBox'
 
@@ -17,6 +15,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { LicenseInitialData } from '@/app/_constants/LicenseSeed'
 import type { LicenseCreateRequestDto } from '@/@core/types'
 import { LICENSE_INPUT_INFO } from '@/app/_constants/input/LicenseInputInfo'
+import { auth } from '@/lib/auth'
 
 type AddModalProps = {
   open: boolean
@@ -39,10 +38,7 @@ const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
   // 추가 핸들러
   const onSubmitHandler = async () => {
     try {
-      const response = await axios.post<{ data: { licenseId: number } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses`,
-        data
-      )
+      const response = await auth.post<{ data: { licenseId: number } }>(`/api/licenses`, data)
 
       console.log(`LicenseId:${response.data.data.licenseId} new license added`)
       handleSuccess('새 라이선스가 추가되었습니다.')

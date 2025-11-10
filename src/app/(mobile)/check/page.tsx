@@ -8,8 +8,6 @@ import { useRouter } from 'next/navigation'
 import Card from '@mui/material/Card'
 import Button from '@mui/material/Button'
 
-import axios from 'axios'
-
 import { animate, motion, useMotionValue, useTransform } from 'motion/react'
 
 const MotionCard = motion.create(Card)
@@ -111,9 +109,9 @@ export default function MachinePage() {
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
 
-      const response = await axios.get<{
+      const response = await auth.get<{
         data: successResponseDtoType<MachineProjectPageDtoType[]>
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects?${queryParams.toString()}`)
+      }>(`/api/machine-projects?${queryParams.toString()}`)
 
       const result = response.data.data
 

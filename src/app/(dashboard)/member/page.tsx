@@ -10,8 +10,6 @@ import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
-import axios from 'axios'
-
 import TableFilters from '../../../@core/components/custom/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
@@ -107,8 +105,8 @@ export default function MemberPage() {
       queryParams.set('size', size.toString())
 
       // axios GET 요청
-      // const response = await axios.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
-      //   `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members?${queryParams.toString()}`
+      // const response = await auth.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
+      //   `/api/members?${queryParams.toString()}`
       // )
       const response = await auth.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
         `/api/members?${queryParams.toString()}`
@@ -136,9 +134,7 @@ export default function MemberPage() {
 
   // 사용자 선택 핸들러 (디테일 모달)
   const handleUserClick = async (user: memberPageDtoType) => {
-    // const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${user?.memberId}`, {
-    //   method: 'GET'
-    // })
+    // const response = await auth.get(`/api/members/${user?.memberId}`)
 
     // const data = await response.json()
 
@@ -203,7 +199,7 @@ export default function MemberPage() {
     if (!checked.length) return
 
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
+      await auth.delete(`/api/members`, {
         //@ts-ignore
         data: { memberDeleteRequestDtos: checked }
       })

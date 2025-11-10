@@ -17,8 +17,6 @@ import {
   Typography
 } from '@mui/material'
 
-import axios from 'axios'
-
 import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
@@ -34,6 +32,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { auth } from '@/lib/auth'
 
 interface InspectionPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
@@ -127,11 +126,11 @@ export default function InspectionPicZoomModal({
     const updateRequest = dirtyFields.s3Key ? data : { ...data, s3Key: null }
 
     try {
-      const response = await axios
+      const response = await auth
         .put<{
           data: MachinePicUpdateResponseDtoType
         }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections/${urlInspectionId}/machine-pics/${selectedPic.machinePicId}`,
+          `/api/machine-projects/${machineProjectId}/machine-inspections/${urlInspectionId}/machine-pics/${selectedPic.machinePicId}`,
           updateRequest
         )
         .then(v => v.data.data)

@@ -4,8 +4,6 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { Button } from '@mui/material'
 
-import axios from 'axios'
-
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import { MACHINE_INPUT_INFO } from '@/app/_constants/input/MachineInputInfo'
@@ -17,6 +15,7 @@ import DownloadReportModal from '../report/DownloadReportModal'
 import ChecklistResultSummaryModal from '../report/ChecklistResultSummaryModal'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@/lib/auth'
 
 const BasicTabContent = ({}: {}) => {
   const router = useRouter()
@@ -44,8 +43,8 @@ const BasicTabContent = ({}: {}) => {
 
   const handleSave = async () => {
     try {
-      const result = await axios.put<{ data: MachineProjectResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}`,
+      const result = await auth.put<{ data: MachineProjectResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}`,
         editData
       )
 
@@ -66,9 +65,7 @@ const BasicTabContent = ({}: {}) => {
     try {
       if (!projectData) throw new Error()
 
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}?version=${projectData.version}`
-      )
+      await auth.delete(`/api/machine-projects/${machineProjectId}?version=${projectData.version}`)
 
       handleSuccess('해당 프로젝트가 삭제되었습니다.')
       router.push('/machine')

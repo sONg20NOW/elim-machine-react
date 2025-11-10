@@ -11,8 +11,6 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import axios from 'axios'
-
 // Component Imports
 import 'dayjs/locale/ko'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
@@ -101,9 +99,7 @@ export default function MachinePage() {
     setError(false)
 
     try {
-      const response = await axios.get<{ data: MachineEngineerOptionListResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/options`
-      )
+      const response = await auth.get<{ data: MachineEngineerOptionListResponseDtoType }>(`/api/engineers/options`)
 
       const data = response.data.data
 
@@ -167,9 +163,9 @@ export default function MachinePage() {
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
 
-      const response = await axios.get<{
+      const response = await auth.get<{
         data: successResponseDtoType<MachineProjectPageDtoType[]>
-      }>(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects?${queryParams.toString()}`)
+      }>(`/api/machine-projects?${queryParams.toString()}`)
 
       const result = response.data.data
 
@@ -286,7 +282,7 @@ export default function MachinePage() {
   //       }
   //     })
 
-  //     await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
+  //     await auth.delete(`/api/members`, {
   //       //@ts-ignore
   //       data: { memberDeleteRequestDtos: list }
   //     })

@@ -17,15 +17,13 @@ import {
   Checkbox
 } from '@mui/material'
 
-// @ts-ignore
-import axios from 'axios'
-
 import { handleApiError } from '@/utils/errorHandler'
 import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/@core/types'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@/lib/auth'
 
 const PictureTable = memo(
   ({
@@ -83,16 +81,13 @@ const PictureTable = memo(
             ...(machineChecklistItemIdRef.current ? { machineChecklistItemId: machineChecklistItemIdRef.current } : {})
           }
 
-          const response = await axios.post<{
+          const response = await auth.post<{
             data: {
               content: MachinePicPresignedUrlResponseDtoType[]
               hasNext: boolean
               nextCursor: MachinePicCursorType | null
             }
-          }>(
-            `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
-            requestBody
-          )
+          }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
 
           console.log('get pictures: ', response.data.data.content)
           setPictures(prev => prev.concat(response.data.data.content))

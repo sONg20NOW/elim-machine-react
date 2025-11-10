@@ -9,8 +9,6 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import axios from 'axios'
-
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
@@ -22,6 +20,7 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AddModal from './_components/addModal'
 import DetailModal from './_components/DetailModal'
+import { auth } from '@/lib/auth'
 
 export default function Licensepage() {
   // 데이터 리스트
@@ -85,8 +84,8 @@ export default function Licensepage() {
       queryParams.set('size', size.toString())
 
       // axios GET 요청
-      const response = await axios.get<{ data: successResponseDtoType<LicensePageResponseDtoType[]> }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses?${queryParams.toString()}`
+      const response = await auth.get<{ data: successResponseDtoType<LicensePageResponseDtoType[]> }>(
+        `/api/licenses?${queryParams.toString()}`
       )
 
       const result = response.data.data
@@ -112,9 +111,7 @@ export default function Licensepage() {
   // 라이선스 선택 핸들러
   const handleLicenseClick = async (licenseData: LicensePageResponseDtoType) => {
     try {
-      const response = await axios.get<{ data: LicenseResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses/${licenseData.licenseId}`
-      )
+      const response = await auth.get<{ data: LicenseResponseDtoType }>(`/api/licenses/${licenseData.licenseId}`)
 
       const licenseInfo = response.data.data
 
@@ -177,7 +174,7 @@ export default function Licensepage() {
         }
       })
 
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/licenses`, {
+      await auth.delete(`/api/licenses`, {
         //@ts-ignore
         data: { licenseDeleteRequestDtos: list }
       })

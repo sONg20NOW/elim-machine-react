@@ -69,9 +69,7 @@ export default function InspectionsPage() {
     try {
       const response = await auth.get<{
         data: { machineProjectEngineerResponseDtos: machineProjectEngineerDetailDtoType[] }
-      }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-project-engineers`
-      )
+      }>(`/api/machine-projects/${machineProjectId}/machine-project-engineers`)
 
       setParticipatedEngineerList(response.data.data.machineProjectEngineerResponseDtos)
     } catch (error) {

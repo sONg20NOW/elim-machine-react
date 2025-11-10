@@ -8,14 +8,13 @@ import Button from '@mui/material/Button'
 
 import { DialogContent, Grid2 } from '@mui/material'
 
-import axios from 'axios'
-
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@/@core/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
 import { MemberInitialData } from '@/app/_constants/MemberSeed'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { auth } from '@/lib/auth'
 
 type AddUserModalProps = {
   open: boolean
@@ -28,10 +27,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
 
   const onSubmitHandler = async () => {
     try {
-      const response = await axios.post<{ data: MemberCreateRequestDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`,
-        userData
-      )
+      const response = await auth.post<{ data: MemberCreateRequestDtoType }>(`/api/members`, userData)
 
       console.log('new member added', response.data.data)
       handleSuccess('새 직원이 추가되었습니다.')

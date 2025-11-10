@@ -28,7 +28,6 @@ import {
 
 // @ts-ignore
 import type { AxiosRequestConfig } from 'axios'
-import axios from 'axios'
 
 import { toast } from 'react-toastify'
 
@@ -42,6 +41,7 @@ import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@/lib/auth'
 
 type InspectionPicListModalProps = {
   open: boolean
@@ -176,10 +176,9 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
     if (!selectedSubItem) return
 
     try {
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics`,
-        { data: { machinePicDeleteRequestDtos: picturesToDelete } } as AxiosRequestConfig
-      )
+      await auth.delete(`/api/machine-projects/${machineProjectId}/machine-pics`, {
+        data: { machinePicDeleteRequestDtos: picturesToDelete }
+      } as AxiosRequestConfig)
 
       // 성공했다면 업로드 때와 마찬가지로 selectedMachine 최신화.
       refetchSelectedInspection()
@@ -252,16 +251,13 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
       }
 
       try {
-        const response = await axios.post<{
+        const response = await auth.post<{
           data: {
             content: MachinePicPresignedUrlResponseDtoType[]
             hasNext: boolean
             nextCursor: MachinePicCursorType | null
           }
-        }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`,
-          requestBody
-        )
+        }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
 
         console.log('get pictures: ', response.data.data.content)
         setPictures(prev => prev.concat(response.data.data.content))
@@ -312,7 +308,7 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
       setSelectedItemId(0)
       resetCursor()
     }
-  }, [currentInspectionId])
+  }, [currentInspectionId, clickedPicCate])
 
   // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
 

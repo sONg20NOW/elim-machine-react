@@ -9,8 +9,6 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import axios from 'axios'
-
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
@@ -31,6 +29,7 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { EngineerInitialFilters } from '@/app/_constants/EngineerSeed'
 import { ENGINEER_FILTER_INFO } from '@/app/_constants/filter/EngineerFilterInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { auth } from '@/lib/auth'
 
 /**
  * @type T
@@ -111,8 +110,8 @@ export default function EngineerPage() {
       queryParams.set('size', size.toString())
 
       // axios GET 요청
-      const response = await axios.get<{ data: successResponseDtoType<MachineEngineerPageResponseDtoType[]> }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers?${queryParams.toString()}`
+      const response = await auth.get<{ data: successResponseDtoType<MachineEngineerPageResponseDtoType[]> }>(
+        `/api/engineers?${queryParams.toString()}`
       )
 
       const result = response.data.data
@@ -138,9 +137,7 @@ export default function EngineerPage() {
   // 엔지니어 선택 핸들러
   const handleEngineerClick = async (engineerData: MachineEngineerPageResponseDtoType) => {
     try {
-      const response = await axios.get<{ data: EngineerResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers/${engineerData.engineerId}`
-      )
+      const response = await auth.get<{ data: EngineerResponseDtoType }>(`/api/engineers/${engineerData.engineerId}`)
 
       const engineerInfo = response.data.data
 
@@ -197,7 +194,7 @@ export default function EngineerPage() {
     if (!checked.length) return
 
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers`, {
+      await auth.delete(`/api/engineers`, {
         //@ts-ignore
         data: { engineerDeleteRequestDtos: checked }
       })

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import axios from 'axios'
 import { Grid, MenuItem, Button, Typography } from '@mui/material'
 
 import { toast } from 'react-toastify'
@@ -16,6 +15,7 @@ import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/@core/types'
 import { handleApiError } from '@/utils/errorHandler'
 import { useGetCategories, useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@/lib/auth'
 
 type AddInspectionModalProps = {
   open: boolean
@@ -60,10 +60,7 @@ const AddInspectionModal = ({ getFilteredInspectionList, open, setOpen }: AddIns
     }
 
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/machine-projects/${machineProjectId}/machine-inspections`,
-        { inspections: [newData] }
-      )
+      await auth.post(`/api/machine-projects/${machineProjectId}/machine-inspections`, { inspections: [newData] })
 
       setOpen(false)
       refetchInspections()

@@ -17,8 +17,6 @@ import {
   TextField
 } from '@mui/material'
 
-import axios from 'axios'
-
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import type { memberLookupResponseDtoType, MachineEngineerCreateRequestDtoType } from '@/@core/types'
@@ -26,6 +24,7 @@ import type { memberLookupResponseDtoType, MachineEngineerCreateRequestDtoType }
 import { EngineerInitialData } from '@/app/_constants/EngineerSeed'
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/EngineerInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { auth } from '@/lib/auth'
 
 type AddUserModalProps = {
   open: boolean
@@ -40,8 +39,8 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
   // 멤버 리스트 가져오기
   const getMemberList = useCallback(async () => {
     try {
-      const response = await axios.get<{ data: { memberLookupResponseDtos: memberLookupResponseDtoType[] } }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/lookup`
+      const response = await auth.get<{ data: { memberLookupResponseDtos: memberLookupResponseDtoType[] } }>(
+        `/api/members/lookup`
       )
 
       const result = response.data.data.memberLookupResponseDtos
@@ -59,10 +58,7 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
   // 추가 핸들러
   const onSubmitHandler = async () => {
     try {
-      const response = await axios.post<{ data: MachineEngineerCreateRequestDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/engineers`,
-        userData
-      )
+      const response = await auth.post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, userData)
 
       console.log('new member added', response.data.data)
       handleSuccess('새 직원이 추가되었습니다.')

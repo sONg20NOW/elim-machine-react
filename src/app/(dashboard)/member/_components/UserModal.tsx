@@ -15,8 +15,6 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { toast } from 'react-toastify'
 
-import axios from 'axios'
-
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import MemberTabContent from './memberTabContent'
 import type { MemberDetailResponseDtoType } from '@/@core/types'
@@ -24,6 +22,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
+import { auth } from '@/lib/auth'
 
 type requestRuleBodyType = {
   url: string
@@ -98,7 +97,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
 
     if (version !== undefined && memberId !== undefined) {
       try {
-        await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members`, {
+        await auth.delete(`/api/members`, {
           // @ts-ignore
           data: { memberDeleteRequestDtos: [{ memberId: memberId, version: version }] }
         })
@@ -136,8 +135,8 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
     }
 
     try {
-      const response = await axios.put<{ data: MemberDetailResponseDtoType }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/members/${memberId}${requestRule[value].url}`,
+      const response = await auth.put<{ data: MemberDetailResponseDtoType }>(
+        `/api/members/${memberId}${requestRule[value].url}`,
         { ...editData[requestRule[value].dtoKey] }
       )
 
