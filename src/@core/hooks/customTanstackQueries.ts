@@ -48,7 +48,8 @@ export const useGetInspectionsSimple = (machineProjectId: string) => {
 
       return response
     },
-    staleTime: 1000 * 60 * 5 // 5분
+    staleTime: 1000 * 60 * 5, // 5분
+    retryDelay: 1000 * 60 * 5 // 5분
   })
 }
 
