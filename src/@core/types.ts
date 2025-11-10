@@ -568,6 +568,11 @@ export interface MachineLeafCategoryResponseDtoType {
   name: string
 }
 
+export interface MachineInspectionRootCategoryResponseDtoType {
+  machineCategoryId: number
+  machineCategoryName: string
+}
+
 // ----------- 보고서 관련 -----------
 export interface MachineEnergyTypeResponseDtoType {
   machineEnergyTypeId: number

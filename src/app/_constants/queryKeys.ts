@@ -14,7 +14,8 @@ export const QUERY_KEYS = {
       machineChecklistItemResultId: string
     ) => ['GET_CHECKLIST_RESULT', machineProjectId, machineInspectionId, machineChecklistItemResultId],
     GET_INSPECTIONS_SIMPLE: (machineProjectId: string) => ['GET_INSPECTIONS_SIMPLE', machineProjectId],
-    GET_INSPECTIONS: (machineProjectId: string) => ['GET_INSPECTIONS', machineProjectId]
+    GET_INSPECTIONS: (machineProjectId: string) => ['GET_INSPECTIONS', machineProjectId],
+    GET_ROOT_CATEGORIES: (machineProjectId: string) => ['GET_ROOT_CATEGORIES', machineProjectId]
   },
   MACHINE_CATEGORY: {
     GET_MACHINE_CATEGORY: ['GET_MACHINE_CATEGORY'],

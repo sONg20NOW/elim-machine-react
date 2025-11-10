@@ -1,7 +1,10 @@
 import { useCallback } from 'react'
 
 import type { QueryFunction } from '@tanstack/react-query'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+// @ts-ignore
+import type { AxiosError } from 'axios'
 
 import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
@@ -12,6 +15,7 @@ import type {
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
+  MachineInspectionRootCategoryResponseDtoType,
   machineInspectionSummaryResponseDtoType,
   MachineLeafCategoryResponseDtoType,
   MachinePerformanceReviewAgingReadResponseDtoType,
@@ -140,6 +144,27 @@ export const useGetSingleInspectionSumamry = (machineProjectId: string, machineI
     queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId),
     queryFn: fetchSingleInspection,
     select: selectMachineInspectionResponseDto,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-inspections/root-categories
+export const useGetRootCategories = (machineProjectId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_ROOT_CATEGORIES(machineProjectId),
+    queryFn: async data => {
+      const [keytype, machineProjectId] = data.queryKey
+
+      const response = await auth
+        .get<{
+          data: { rootCategories: MachineInspectionRootCategoryResponseDtoType[] }
+        }>(`/api/machine-projects/${machineProjectId}/machine-inspections/root-categories`)
+        .then(v => v.data.data.rootCategories)
+
+      console.log(`!!! queryFn ${keytype}:`, response)
+
+      return response
+    },
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
@@ -568,6 +593,69 @@ export const useGetYearlyPlan = (machineProjectId: string) => {
   })
 }
 
+// --- [1] Yearly Plan (연도별 계획) Mutation ---
+const putYearlyPlanData = async ({
+  machineProjectId,
+  data
+}: {
+  machineProjectId: string
+  data: MachinePerformanceReviewYearlyPlanResponseDtoType
+}) => {
+  const response = await auth.put<{ data: MachinePerformanceReviewYearlyPlanResponseDtoType }>(
+    `/api/machine-projects/${machineProjectId}/machine-performance-review/yearly-plan`,
+    data
+  )
+
+  return response.data.data
+}
+
+export const useMutateYearlyPlan = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_YEARLY_PLAN(machineProjectId)
+
+  return useMutation<
+    MachinePerformanceReviewYearlyPlanResponseDtoType,
+    AxiosError,
+    MachinePerformanceReviewYearlyPlanResponseDtoType
+  >({
+    mutationFn: data => putYearlyPlanData({ machineProjectId, data }),
+
+    onSuccess: newYearlyPlanData => {
+      queryClient.setQueryData(queryKey, newYearlyPlanData)
+      console.log('연도별 계획 정보가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
+// --- [1-A] Yearly Plan Auto Fill (연도별 계획 자동채우기) Mutation ---
+export const useMutateYearlyPlanAutoFill = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_YEARLY_PLAN(machineProjectId)
+
+  return useMutation<MachinePerformanceReviewYearlyPlanResponseDtoType, AxiosError>({
+    mutationFn: async () => {
+      const response = await auth.put<{ data: MachinePerformanceReviewYearlyPlanResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}/machine-performance-review/yearly-plan/auto-fill`
+      )
+
+      return response.data.data
+    },
+
+    onSuccess: newYearlyPlanData => {
+      queryClient.setQueryData(queryKey, newYearlyPlanData)
+      console.log('연도별 계획 자동채우기 정보가 성공적으로 반영되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/result-summary 성능점검시 검토사항 - 결과요약
 export const useGetResultSummary = (machineProjectId: string) => {
   const fetchResultSummary: QueryFunction<MachinePerformanceReviewSummaryResponseDtoType, string[]> = useCallback(
@@ -591,6 +679,71 @@ export const useGetResultSummary = (machineProjectId: string) => {
     queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_RESULT_SUMMARY(machineProjectId),
     queryFn: fetchResultSummary,
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// --- [2] Result Summary (결과요약) Mutation ---
+
+export const useMutateResultSummary = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_RESULT_SUMMARY(machineProjectId)
+
+  const putResultSummaryData = async ({
+    machineProjectId,
+    data
+  }: {
+    machineProjectId: string
+    data: MachinePerformanceReviewSummaryResponseDtoType
+  }) => {
+    const response = await auth.put<{ data: MachinePerformanceReviewSummaryResponseDtoType }>(
+      `/api/machine-projects/${machineProjectId}/machine-performance-review/result-summary`,
+      data
+    )
+
+    return response.data.data
+  }
+
+  return useMutation<
+    MachinePerformanceReviewSummaryResponseDtoType,
+    AxiosError,
+    MachinePerformanceReviewSummaryResponseDtoType
+  >({
+    mutationFn: data => putResultSummaryData({ machineProjectId, data }),
+
+    onSuccess: newSummaryData => {
+      queryClient.setQueryData(queryKey, newSummaryData)
+      console.log('결과요약 정보가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
+// --- [2-A] Result Summary Auto Fill (결과요약 자동채우기) Mutation ---
+
+export const useMutateResultSummaryAutoFill = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_RESULT_SUMMARY(machineProjectId)
+
+  return useMutation<machineInspectionSummaryResponseDtoType, AxiosError>({
+    mutationFn: async () => {
+      const response = await auth.put<{ data: machineInspectionSummaryResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}/machine-performance-review/result-summary/auto-fill`
+      )
+
+      return response.data.data
+    },
+
+    onSuccess: newSummaryData => {
+      queryClient.setQueryData(queryKey, newSummaryData)
+      console.log('결과요약 자동채우기 정보가 성공적으로 반영되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
   })
 }
 
@@ -621,6 +774,71 @@ export const useGetOperationStatus = (machineProjectId: string) => {
   })
 }
 
+// --- [3] Operation Status (작동상태) Mutation ---
+
+const putOperationStatusData = async ({
+  machineProjectId,
+  data
+}: {
+  machineProjectId: string
+  data: MachinePerformanceReviewOperationStatusResponseDtoType
+}) => {
+  const response = await auth.put<{ data: MachinePerformanceReviewOperationStatusResponseDtoType }>(
+    `/api/machine-projects/${machineProjectId}/machine-performance-review/operation-status`,
+    data
+  )
+
+  return response.data.data
+}
+
+export const useMutateOperationStatus = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_OPERATION_STATUS(machineProjectId)
+
+  return useMutation<
+    MachinePerformanceReviewOperationStatusResponseDtoType,
+    AxiosError,
+    MachinePerformanceReviewOperationStatusResponseDtoType
+  >({
+    mutationFn: data => putOperationStatusData({ machineProjectId, data }),
+
+    onSuccess: newStatusData => {
+      queryClient.setQueryData(queryKey, newStatusData)
+      console.log('작동상태 정보가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
+// --- [3-A] Operation Status Auto Fill (작동상태 자동채우기) Mutation ---
+
+export const useMutateOperationStatusAutoFill = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_OPERATION_STATUS(machineProjectId)
+
+  return useMutation<MachinePerformanceReviewOperationStatusResponseDtoType, AxiosError>({
+    mutationFn: async () => {
+      const response = await auth.put<{ data: MachinePerformanceReviewOperationStatusResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}/machine-performance-review/operation-status/auto-fill`
+      )
+
+      return response.data.data
+    },
+
+    onSuccess: newStatusData => {
+      queryClient.setQueryData(queryKey, newStatusData)
+      console.log('작동상태 자동채우기 정보가 성공적으로 반영되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/measurement 성능점검시 검토사항 - 측정값 일치
 export const useGetMeasurement = (machineProjectId: string) => {
   const fetchMeasurement: QueryFunction<MachinePerformanceReviewMeasurementResponseDtoType, string[]> = useCallback(
@@ -644,6 +862,70 @@ export const useGetMeasurement = (machineProjectId: string) => {
     queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_MEASUREMENT(machineProjectId),
     queryFn: fetchMeasurement,
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// --- [4] Measurement (측정값 일치) Mutation ---
+
+const putMeasurementData = async ({
+  machineProjectId,
+  data
+}: {
+  machineProjectId: string
+  data: MachinePerformanceReviewMeasurementResponseDtoType
+}) => {
+  const response = await auth.put<{ data: MachinePerformanceReviewMeasurementResponseDtoType }>(
+    `/api/machine-projects/${machineProjectId}/machine-performance-review/measurement`,
+    data
+  )
+
+  return response.data.data
+}
+
+export const useMutateMeasurement = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_MEASUREMENT(machineProjectId)
+
+  return useMutation<
+    MachinePerformanceReviewMeasurementResponseDtoType,
+    AxiosError,
+    MachinePerformanceReviewMeasurementResponseDtoType
+  >({
+    mutationFn: data => putMeasurementData({ machineProjectId, data }),
+
+    onSuccess: newMeasurementData => {
+      queryClient.setQueryData(queryKey, newMeasurementData)
+      console.log('측정값 일치 정보가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
+// --- [4-A] Measurement Auto Fill (측정값 일치 자동채우기) Mutation ---
+export const useMutateMeasurementAutoFill = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_MEASUREMENT(machineProjectId)
+
+  return useMutation<MachinePerformanceReviewMeasurementResponseDtoType, AxiosError>({
+    mutationFn: async () => {
+      const response = await auth.put<{ data: MachinePerformanceReviewMeasurementResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}/machine-performance-review/measurement/auto-fill`
+      )
+
+      return response.data.data
+    },
+
+    onSuccess: newMeasurementData => {
+      queryClient.setQueryData(queryKey, newMeasurementData)
+      console.log('측정값 일치 자동채우기 정보가 성공적으로 반영되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
   })
 }
 
@@ -673,6 +955,70 @@ export const useGetImprovement = (machineProjectId: string) => {
   })
 }
 
+// --- [5] Improvement (개선사항) Mutation ---
+
+const putImprovementData = async ({
+  machineProjectId,
+  data
+}: {
+  machineProjectId: string
+  data: MachinePerformanceReviewImprovementResponseDtoType
+}) => {
+  const response = await auth.put<{ data: MachinePerformanceReviewImprovementResponseDtoType }>(
+    `/api/machine-projects/${machineProjectId}/machine-performance-review/improvement`,
+    data
+  )
+
+  return response.data.data
+}
+
+export const useMutateImprovement = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_IMPROVEMENT(machineProjectId)
+
+  return useMutation<
+    MachinePerformanceReviewImprovementResponseDtoType,
+    AxiosError,
+    MachinePerformanceReviewImprovementResponseDtoType
+  >({
+    mutationFn: data => putImprovementData({ machineProjectId, data }),
+
+    onSuccess: newImprovementData => {
+      queryClient.setQueryData(queryKey, newImprovementData)
+      console.log('개선사항 정보가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
+// --- [5-A] Improvement Auto Fill (개선사항 자동채우기) Mutation ---
+export const useMutateImprovementAutoFill = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_IMPROVEMENT(machineProjectId)
+
+  return useMutation<MachinePerformanceReviewImprovementResponseDtoType, AxiosError>({
+    mutationFn: async () => {
+      const response = await auth.put<{ data: MachinePerformanceReviewImprovementResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}/machine-performance-review/improvement/auto-fill`
+      )
+
+      return response.data.data
+    },
+
+    onSuccess: newImprovementData => {
+      queryClient.setQueryData(queryKey, newImprovementData)
+      console.log('개선사항 자동채우기 정보가 성공적으로 반영되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/aging 성능점검시 검토사항 - 노후도
 export const useGetAging = (machineProjectId: string) => {
   const fetchAging: QueryFunction<MachinePerformanceReviewAgingReadResponseDtoType, string[]> = useCallback(
@@ -699,6 +1045,71 @@ export const useGetAging = (machineProjectId: string) => {
   })
 }
 
+// --- [6] Aging (노후도) Mutation ---
+
+const putAgingData = async ({
+  machineProjectId,
+  data
+}: {
+  machineProjectId: string
+  data: MachinePerformanceReviewAgingReadResponseDtoType
+}) => {
+  // 노후도의 응답 DTO는 Read DTO이지만, 업데이트 요청 시에도 동일한 DTO 형태를 사용할 수 있다고 가정합니다.
+  const response = await auth.put<{ data: MachinePerformanceReviewAgingReadResponseDtoType }>(
+    `/api/machine-projects/${machineProjectId}/machine-performance-review/aging`,
+    data
+  )
+
+  return response.data.data
+}
+
+export const useMutateAging = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_AGING(machineProjectId)
+
+  return useMutation<
+    MachinePerformanceReviewAgingReadResponseDtoType,
+    AxiosError,
+    MachinePerformanceReviewAgingReadResponseDtoType
+  >({
+    mutationFn: data => putAgingData({ machineProjectId, data }),
+
+    onSuccess: newAgingData => {
+      queryClient.setQueryData(queryKey, newAgingData)
+      console.log('노후도 정보가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
+// --- [6-A] Aging Auto Fill (노후도 자동채우기) Mutation ---
+export const useMutateAgingAutoFill = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_AGING(machineProjectId)
+
+  return useMutation<MachinePerformanceReviewAgingReadResponseDtoType, AxiosError>({
+    mutationFn: async () => {
+      const response = await auth.put<{ data: MachinePerformanceReviewAgingReadResponseDtoType }>(
+        `/api/machine-projects/${machineProjectId}/machine-performance-review/aging/auto-fill`
+      )
+
+      return response.data.data
+    },
+
+    onSuccess: newAgingData => {
+      queryClient.setQueryData(queryKey, newAgingData)
+      console.log('노후도 자동채우기 정보가 성공적으로 반영되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    }
+  })
+}
+
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/guide 성능점검시 검토사항 - 유지관리지침서
 export const useGetGuide = (machineProjectId: string) => {
   const fetchGuide: QueryFunction<MachinePerformanceReviewGuideResponseDtoType, string[]> = useCallback(
@@ -722,5 +1133,51 @@ export const useGetGuide = (machineProjectId: string) => {
     queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_GUIDE(machineProjectId),
     queryFn: fetchGuide,
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// --- [7] Guide (유지관리지침서) Mutation (기존 훅) ---
+export const useMutateGuide = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_GUIDE(machineProjectId)
+
+  // PUT 요청을 수행하는 함수
+  const putGuideData = async ({
+    machineProjectId,
+    data
+  }: {
+    machineProjectId: string
+    data: MachinePerformanceReviewGuideResponseDtoType
+  }) => {
+    const response = await auth.put<{ data: MachinePerformanceReviewGuideResponseDtoType }>(
+      `/api/machine-projects/${machineProjectId}/machine-performance-review/guide`,
+      data
+    )
+
+    return response.data.data
+  }
+
+  return useMutation<
+    MachinePerformanceReviewGuideResponseDtoType,
+    AxiosError,
+    MachinePerformanceReviewGuideResponseDtoType
+  >({
+    mutationFn: data => putGuideData({ machineProjectId, data }),
+
+    // 성공 시
+    onSuccess: newGuideData => {
+      // 쿼리 캐시를 최신 데이터로 업데이트 (옵션)
+      queryClient.setQueryData(queryKey, newGuideData)
+
+      // useGetGuide 쿼리를 무효화하여 최신 데이터를 다시 가져오도록 유도
+      // queryClient.invalidateQueries({ queryKey: queryKey })
+
+      console.log('유지관리지침서 정보가 성공적으로 저장되었습니다.')
+    },
+
+    // 실패 시
+    onError: error => {
+      console.log(error)
+    }
   })
 }

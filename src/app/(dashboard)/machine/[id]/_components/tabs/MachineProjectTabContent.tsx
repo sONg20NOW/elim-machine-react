@@ -16,6 +16,7 @@ import ChecklistResultSummaryModal from '../report/ChecklistResultSummaryModal'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
+import MachinePerformanceReviewModal from '../report/MachinePerformanceReviewModal'
 
 const BasicTabContent = ({}: {}) => {
   const router = useRouter()
@@ -95,16 +96,7 @@ const BasicTabContent = ({}: {}) => {
             입수자료
           </Button> */}
             <ChecklistResultSummaryModal machineProjectName={projectData.machineProjectName} />
-            <Button
-              variant='contained'
-              color='primary'
-              disabled={true}
-              onClick={() => {
-                console.log('?')
-              }}
-            >
-              성능점검시 검토사항
-            </Button>
+            <MachinePerformanceReviewModal machineProjectName={projectData.machineProjectName} />
 
             <EnergyReport />
             <Button
