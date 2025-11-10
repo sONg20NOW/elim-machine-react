@@ -60,5 +60,14 @@ export const QUERY_KEYS = {
   },
   MEMBER: {
     GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId]
+  },
+  MACHINE_PERFORMANCE_REVIEW: {
+    GET_RESULT_SUMMARY: (machineProjectId: string) => ['GET_RESULT_SUMMARY', machineProjectId],
+    GET_OPERATION_STATUS: (machineProjectId: string) => ['GET_OPERATION_STATUS', machineProjectId],
+    GET_YEARLY_PLAN: (machineProjectId: string) => ['GET_YEARLY_PLAN', machineProjectId],
+    GET_MEASUREMENT: (machineProjectId: string) => ['GET_MEASUREMENT', machineProjectId],
+    GET_IMPROVEMENT: (machineProjectId: string) => ['GET_IMPROVEMENT', machineProjectId],
+    GET_GUIDE: (machineProjectId: string) => ['GET_GUIDE', machineProjectId],
+    GET_AGING: (machineProjectId: string) => ['GET_AGING', machineProjectId]
   }
 }

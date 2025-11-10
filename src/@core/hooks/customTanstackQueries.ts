@@ -14,6 +14,13 @@ import type {
   MachineInspectionPageResponseDtoType,
   machineInspectionSummaryResponseDtoType,
   MachineLeafCategoryResponseDtoType,
+  MachinePerformanceReviewAgingReadResponseDtoType,
+  MachinePerformanceReviewGuideResponseDtoType,
+  MachinePerformanceReviewImprovementResponseDtoType,
+  MachinePerformanceReviewMeasurementResponseDtoType,
+  MachinePerformanceReviewOperationStatusResponseDtoType,
+  MachinePerformanceReviewSummaryResponseDtoType,
+  MachinePerformanceReviewYearlyPlanResponseDtoType,
   machineProjectEngineerDetailDtoType,
   MachineProjectPicReadResponseDtoType,
   MachineProjectResponseDtoType,
@@ -530,6 +537,190 @@ export const useGetSignleMember = (memberId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.MEMBER.GET_SINGLE_MEMBER(memberId),
     queryFn: fetchMember,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// ------------------------- 성능점검시 검토사항 관련 -------------------------
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/yearly-plan 연도별 계획
+export const useGetYearlyPlan = (machineProjectId: string) => {
+  const fetchYearlyPlan: QueryFunction<MachinePerformanceReviewYearlyPlanResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MachinePerformanceReviewYearlyPlanResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-performance-review/yearly-plan`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_YEARLY_PLAN(machineProjectId),
+    queryFn: fetchYearlyPlan,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/result-summary 성능점검시 검토사항 - 결과요약
+export const useGetResultSummary = (machineProjectId: string) => {
+  const fetchResultSummary: QueryFunction<MachinePerformanceReviewSummaryResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MachinePerformanceReviewSummaryResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-performance-review/result-summary`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_RESULT_SUMMARY(machineProjectId),
+    queryFn: fetchResultSummary,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/operation-status 성능점검시 검토사항 - 작동상태
+export const useGetOperationStatus = (machineProjectId: string) => {
+  const fetchOperationStatus: QueryFunction<MachinePerformanceReviewOperationStatusResponseDtoType, string[]> =
+    useCallback(
+      async data => {
+        const response = await auth
+          .get<{
+            data: MachinePerformanceReviewOperationStatusResponseDtoType
+          }>(`/api/machine-projects/${machineProjectId}/machine-performance-review/operation-status`)
+          .then(v => v.data.data)
+
+        const [keyType] = data.queryKey
+
+        console.log(`!!! queryFn ${keyType}:`, response)
+
+        return response
+      },
+      [machineProjectId]
+    )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_OPERATION_STATUS(machineProjectId),
+    queryFn: fetchOperationStatus,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/measurement 성능점검시 검토사항 - 측정값 일치
+export const useGetMeasurement = (machineProjectId: string) => {
+  const fetchMeasurement: QueryFunction<MachinePerformanceReviewMeasurementResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MachinePerformanceReviewMeasurementResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-performance-review/measurement`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_MEASUREMENT(machineProjectId),
+    queryFn: fetchMeasurement,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/improvement 성능점검시 검토사항 - 개선사항
+export const useGetImprovement = (machineProjectId: string) => {
+  const fetchImprovement: QueryFunction<MachinePerformanceReviewImprovementResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MachinePerformanceReviewImprovementResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-performance-review/improvement`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_IMPROVEMENT(machineProjectId),
+    queryFn: fetchImprovement,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/aging 성능점검시 검토사항 - 노후도
+export const useGetAging = (machineProjectId: string) => {
+  const fetchAging: QueryFunction<MachinePerformanceReviewAgingReadResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MachinePerformanceReviewAgingReadResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-performance-review/aging`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_AGING(machineProjectId),
+    queryFn: fetchAging,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/guide 성능점검시 검토사항 - 유지관리지침서
+export const useGetGuide = (machineProjectId: string) => {
+  const fetchGuide: QueryFunction<MachinePerformanceReviewGuideResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: MachinePerformanceReviewGuideResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-performance-review/guide`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [machineProjectId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_GUIDE(machineProjectId),
+    queryFn: fetchGuide,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
