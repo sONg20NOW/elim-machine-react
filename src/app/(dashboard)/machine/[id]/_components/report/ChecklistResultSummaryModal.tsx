@@ -171,7 +171,7 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
                   ))}
                 </TabList>
               </AppBar>
-              <TabPanel value={0} sx={{ height: '100%' }}>
+              <TabPanel value={0} sx={{ height: '100%', overflowY: 'auto' }}>
                 {inspectionSummary?.machineInspectionSummaryResponseDto?.summaryElements &&
                 inspectionSummary?.machineInspectionSummaryResponseDto?.summaryElements.length > 0 ? (
                   <table style={{ tableLayout: 'fixed' }}>
