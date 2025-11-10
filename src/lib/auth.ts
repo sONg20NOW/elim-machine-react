@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import type { LoginResponseDtoType } from '@/@core/types'
+import type { LoginResponseDtoType, TokenResponseDto } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 export const auth = axios.create({
@@ -47,28 +47,37 @@ auth.interceptors.request.use(config => {
   return config
 })
 
-// api.interceptors.response.use(
-//   response => response,
-//   async error => {
-//     if (error.response?.status === 401) {
-//       try {
-//         // RefreshToken은 쿠키에 있기 때문에 단순 호출만 해주면 됨
-//         const res = await api.post<{ data: TokenResponseDto }>('/auth/web/refresh')
-//         const newAccessToken = res.data.data.accessToken
+auth.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config
 
-//         localStorage.setItem('accessToken', newAccessToken)
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true // 무한 루프 방지 플래그 설정
 
-//         // 실패했던 요청 다시 실행
-//         error.config.headers.Authorization = `Bearer ${newAccessToken}`
+      try {
+        // RefreshToken은 쿠키에 있기 때문에 단순 호출만 해주면 됨
+        const res = await axios.post<{ data: TokenResponseDto }>(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/web/refresh`
+        )
 
-//         return api.request(error.config)
-//       } catch (err) {
-//         // Refresh도 실패 → 로그인 페이지로 이동
-//         localStorage.removeItem('accessToken')
-//         window.location.href = '/login'
-//       }
-//     }
+        const newAccessToken = res.data.data.accessToken
 
-//     return Promise.reject(error)
-//   }
-// )
+        localStorage.setItem('accessToken', newAccessToken)
+
+        // 실패했던 요청 다시 실행
+        error.config.headers.Authorization = `Bearer ${newAccessToken}`
+
+        return auth(originalRequest)
+      } catch (err) {
+        // Refresh도 실패 → 로그인 페이지로 이동
+        localStorage.removeItem('accessToken')
+        window.location.href = '/login'
+
+        return Promise.reject(err) // Refresh 실패 시 에러를 다시 던짐
+      }
+    }
+
+    return Promise.reject(error)
+  }
+)
