@@ -59,7 +59,8 @@ const AgingTab = forwardRef<refType, { rootCategories?: MachineInspectionRootCat
 
     const OperationRow = ({ categoryName, colSpan = 3 }: { categoryName: string; colSpan?: number }) => {
       const exists = rootCategories?.some(v => v.machineCategoryName === categoryName)
-      const agingEquipment = aging?.agingEquipments.find(v => v.machineRootCategoryName === categoryName) ?? null
+
+      const agingEquipment = aging?.agingEquipments?.find(v => v.machineRootCategoryName === categoryName) ?? null
 
       return exists && agingEquipment ? (
         <>
