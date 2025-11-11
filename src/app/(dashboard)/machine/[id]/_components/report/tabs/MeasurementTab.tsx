@@ -11,82 +11,82 @@ import { toast } from 'react-toastify'
 import styles from '@/app/_style/Table.module.css'
 import { centerStyle, StyledTextField, type refType } from '../MachinePerformanceReviewModal'
 import {
-  useGetOperationStatus,
-  useMutateOperationStatus,
-  useMutateOperationStatusAutoFill
+  useGetMeasurement,
+  useMutateMeasurement,
+  useMutateMeasurementAutoFill
 } from '@/@core/hooks/customTanstackQueries'
 import type {
   MachineInspectionRootCategoryResponseDtoType,
-  MachinePerformanceReviewOperationStatusResponseDtoType
+  MachinePerformanceReviewMeasurementResponseDtoType
 } from '@/@core/types'
 
-const OperationStatusTab = forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(
+const MeasurementTab = forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(
   ({ rootCategories }, ref) => {
     const machineProjectId = useParams().id?.toString()
 
     const theme = useTheme()
     const [autoFillTrigger, setAutoFillTrigger] = useState(true)
 
-    const { data: operationStatus } = useGetOperationStatus(machineProjectId!)
-    const { mutate } = useMutateOperationStatus(machineProjectId!)
-    const { mutate: mutateAutoFill } = useMutateOperationStatusAutoFill(machineProjectId!)
+    const { data: measurement } = useGetMeasurement(machineProjectId!)
+    const { mutate } = useMutateMeasurement(machineProjectId!)
+    const { mutate: mutateAutoFill } = useMutateMeasurementAutoFill(machineProjectId!)
 
-    const { register, control, getValues, reset } = useForm<MachinePerformanceReviewOperationStatusResponseDtoType>({
+    const { register, control, getValues, reset } = useForm<MachinePerformanceReviewMeasurementResponseDtoType>({
       defaultValues: {
         // Result 필드는 'NONE'으로 초기화
-        refrigeratorResult: operationStatus?.refrigeratorResult ?? 'NONE',
-        coolingTowerResult: operationStatus?.coolingTowerResult ?? 'NONE',
-        thermalStorageResult: operationStatus?.thermalStorageResult ?? 'NONE',
-        boilerResult: operationStatus?.boilerResult ?? 'NONE',
-        heatExchangerResult: operationStatus?.heatExchangerResult ?? 'NONE',
-        expansionTankResult: operationStatus?.expansionTankResult ?? 'NONE',
-        pumpResult: operationStatus?.pumpResult ?? 'NONE',
-        renewableEnergySystemResult: operationStatus?.renewableEnergySystemResult ?? 'NONE',
-        packageAirConditionerResult: operationStatus?.packageAirConditionerResult ?? 'NONE',
-        precisionAirConditionerResult: operationStatus?.precisionAirConditionerResult ?? 'NONE',
-        airHandlingUnitResult: operationStatus?.airHandlingUnitResult ?? 'NONE',
-        fanCoilUnitResult: operationStatus?.fanCoilUnitResult ?? 'NONE',
-        ventilationSystemResult: operationStatus?.ventilationSystemResult ?? 'NONE',
-        filterResult: operationStatus?.filterResult ?? 'NONE',
-        sanitaryFacilityResult: operationStatus?.sanitaryFacilityResult ?? 'NONE',
-        hotWaterSupplyResult: operationStatus?.hotWaterSupplyResult ?? 'NONE',
-        waterTankResult: operationStatus?.waterTankResult ?? 'NONE',
-        drainageResult: operationStatus?.drainageResult ?? 'NONE',
-        sewageTreatmentResult: operationStatus?.sewageTreatmentResult ?? 'NONE',
-        waterReuseResult: operationStatus?.waterReuseResult ?? 'NONE',
-        pipeLineResult: operationStatus?.pipeLineResult ?? 'NONE',
-        ductResult: operationStatus?.ductResult ?? 'NONE',
-        insulationResult: operationStatus?.insulationResult ?? 'NONE',
-        automaticControlResult: operationStatus?.automaticControlResult ?? 'NONE',
-        noiseVibrationSeismicResult: operationStatus?.noiseVibrationSeismicResult ?? 'NONE',
+        refrigeratorResult: measurement?.refrigeratorResult ?? 'NONE',
+        coolingTowerResult: measurement?.coolingTowerResult ?? 'NONE',
+        thermalStorageResult: measurement?.thermalStorageResult ?? 'NONE',
+        boilerResult: measurement?.boilerResult ?? 'NONE',
+        heatExchangerResult: measurement?.heatExchangerResult ?? 'NONE',
+        expansionTankResult: measurement?.expansionTankResult ?? 'NONE',
+        pumpResult: measurement?.pumpResult ?? 'NONE',
+        renewableEnergySystemResult: measurement?.renewableEnergySystemResult ?? 'NONE',
+        packageAirConditionerResult: measurement?.packageAirConditionerResult ?? 'NONE',
+        precisionAirConditionerResult: measurement?.precisionAirConditionerResult ?? 'NONE',
+        airHandlingUnitResult: measurement?.airHandlingUnitResult ?? 'NONE',
+        fanCoilUnitResult: measurement?.fanCoilUnitResult ?? 'NONE',
+        ventilationSystemResult: measurement?.ventilationSystemResult ?? 'NONE',
+        filterResult: measurement?.filterResult ?? 'NONE',
+        sanitaryFacilityResult: measurement?.sanitaryFacilityResult ?? 'NONE',
+        hotWaterSupplyResult: measurement?.hotWaterSupplyResult ?? 'NONE',
+        waterTankResult: measurement?.waterTankResult ?? 'NONE',
+        drainageResult: measurement?.drainageResult ?? 'NONE',
+        sewageTreatmentResult: measurement?.sewageTreatmentResult ?? 'NONE',
+        waterReuseResult: measurement?.waterReuseResult ?? 'NONE',
+        pipeLineResult: measurement?.pipeLineResult ?? 'NONE',
+        ductResult: measurement?.ductResult ?? 'NONE',
+        insulationResult: measurement?.insulationResult ?? 'NONE',
+        automaticControlResult: measurement?.automaticControlResult ?? 'NONE',
+        noiseVibrationSeismicResult: measurement?.noiseVibrationSeismicResult ?? 'NONE',
 
         // Remark 및 Opinion 필드는 ''으로 초기화
-        refrigeratorRemark: operationStatus?.refrigeratorRemark ?? '',
-        coolingTowerRemark: operationStatus?.coolingTowerRemark ?? '',
-        thermalStorageRemark: operationStatus?.thermalStorageRemark ?? '',
-        boilerRemark: operationStatus?.boilerRemark ?? '',
-        heatExchangerRemark: operationStatus?.heatExchangerRemark ?? '',
-        expansionTankRemark: operationStatus?.expansionTankRemark ?? '',
-        pumpRemark: operationStatus?.pumpRemark ?? '',
-        renewableEnergySystemRemark: operationStatus?.renewableEnergySystemRemark ?? '',
-        packageAirConditionerRemark: operationStatus?.packageAirConditionerRemark ?? '',
-        precisionAirConditionerRemark: operationStatus?.precisionAirConditionerRemark ?? '',
-        airHandlingUnitRemark: operationStatus?.airHandlingUnitRemark ?? '',
-        fanCoilUnitRemark: operationStatus?.fanCoilUnitRemark ?? '',
-        ventilationSystemRemark: operationStatus?.ventilationSystemRemark ?? '',
-        filterRemark: operationStatus?.filterRemark ?? '',
-        sanitaryFacilityRemark: operationStatus?.sanitaryFacilityRemark ?? '',
-        hotWaterSupplyRemark: operationStatus?.hotWaterSupplyRemark ?? '',
-        waterTankRemark: operationStatus?.waterTankRemark ?? '',
-        drainageRemark: operationStatus?.drainageRemark ?? '',
-        sewageTreatmentRemark: operationStatus?.sewageTreatmentRemark ?? '',
-        waterReuseRemark: operationStatus?.waterReuseRemark ?? '',
-        pipeLineRemark: operationStatus?.pipeLineRemark ?? '',
-        ductRemark: operationStatus?.ductRemark ?? '',
-        insulationRemark: operationStatus?.insulationRemark ?? '',
-        automaticControlRemark: operationStatus?.automaticControlRemark ?? '',
-        noiseVibrationSeismicRemark: operationStatus?.noiseVibrationSeismicRemark ?? '',
-        opinion: operationStatus?.opinion ?? ''
+        refrigeratorRemark: measurement?.refrigeratorRemark ?? '',
+        coolingTowerRemark: measurement?.coolingTowerRemark ?? '',
+        thermalStorageRemark: measurement?.thermalStorageRemark ?? '',
+        boilerRemark: measurement?.boilerRemark ?? '',
+        heatExchangerRemark: measurement?.heatExchangerRemark ?? '',
+        expansionTankRemark: measurement?.expansionTankRemark ?? '',
+        pumpRemark: measurement?.pumpRemark ?? '',
+        renewableEnergySystemRemark: measurement?.renewableEnergySystemRemark ?? '',
+        packageAirConditionerRemark: measurement?.packageAirConditionerRemark ?? '',
+        precisionAirConditionerRemark: measurement?.precisionAirConditionerRemark ?? '',
+        airHandlingUnitRemark: measurement?.airHandlingUnitRemark ?? '',
+        fanCoilUnitRemark: measurement?.fanCoilUnitRemark ?? '',
+        ventilationSystemRemark: measurement?.ventilationSystemRemark ?? '',
+        filterRemark: measurement?.filterRemark ?? '',
+        sanitaryFacilityRemark: measurement?.sanitaryFacilityRemark ?? '',
+        hotWaterSupplyRemark: measurement?.hotWaterSupplyRemark ?? '',
+        waterTankRemark: measurement?.waterTankRemark ?? '',
+        drainageRemark: measurement?.drainageRemark ?? '',
+        sewageTreatmentRemark: measurement?.sewageTreatmentRemark ?? '',
+        waterReuseRemark: measurement?.waterReuseRemark ?? '',
+        pipeLineRemark: measurement?.pipeLineRemark ?? '',
+        ductRemark: measurement?.ductRemark ?? '',
+        insulationRemark: measurement?.insulationRemark ?? '',
+        automaticControlRemark: measurement?.automaticControlRemark ?? '',
+        noiseVibrationSeismicRemark: measurement?.noiseVibrationSeismicRemark ?? '',
+        opinion: measurement?.opinion ?? ''
       }
     })
 
@@ -94,59 +94,59 @@ const OperationStatusTab = forwardRef<refType, { rootCategories?: MachineInspect
       console.log('RESET!')
       reset({
         // Result 필드는 'NONE'으로 초기화
-        refrigeratorResult: operationStatus?.refrigeratorResult ?? 'NONE',
-        coolingTowerResult: operationStatus?.coolingTowerResult ?? 'NONE',
-        thermalStorageResult: operationStatus?.thermalStorageResult ?? 'NONE',
-        boilerResult: operationStatus?.boilerResult ?? 'NONE',
-        heatExchangerResult: operationStatus?.heatExchangerResult ?? 'NONE',
-        expansionTankResult: operationStatus?.expansionTankResult ?? 'NONE',
-        pumpResult: operationStatus?.pumpResult ?? 'NONE',
-        renewableEnergySystemResult: operationStatus?.renewableEnergySystemResult ?? 'NONE',
-        packageAirConditionerResult: operationStatus?.packageAirConditionerResult ?? 'NONE',
-        precisionAirConditionerResult: operationStatus?.precisionAirConditionerResult ?? 'NONE',
-        airHandlingUnitResult: operationStatus?.airHandlingUnitResult ?? 'NONE',
-        fanCoilUnitResult: operationStatus?.fanCoilUnitResult ?? 'NONE',
-        ventilationSystemResult: operationStatus?.ventilationSystemResult ?? 'NONE',
-        filterResult: operationStatus?.filterResult ?? 'NONE',
-        sanitaryFacilityResult: operationStatus?.sanitaryFacilityResult ?? 'NONE',
-        hotWaterSupplyResult: operationStatus?.hotWaterSupplyResult ?? 'NONE',
-        waterTankResult: operationStatus?.waterTankResult ?? 'NONE',
-        drainageResult: operationStatus?.drainageResult ?? 'NONE',
-        waterReuseResult: operationStatus?.waterReuseResult ?? 'NONE',
-        pipeLineResult: operationStatus?.pipeLineResult ?? 'NONE',
-        ductResult: operationStatus?.ductResult ?? 'NONE',
-        insulationResult: operationStatus?.insulationResult ?? 'NONE',
-        automaticControlResult: operationStatus?.automaticControlResult ?? 'NONE',
-        noiseVibrationSeismicResult: operationStatus?.noiseVibrationSeismicResult ?? 'NONE',
+        refrigeratorResult: measurement?.refrigeratorResult ?? 'NONE',
+        coolingTowerResult: measurement?.coolingTowerResult ?? 'NONE',
+        thermalStorageResult: measurement?.thermalStorageResult ?? 'NONE',
+        boilerResult: measurement?.boilerResult ?? 'NONE',
+        heatExchangerResult: measurement?.heatExchangerResult ?? 'NONE',
+        expansionTankResult: measurement?.expansionTankResult ?? 'NONE',
+        pumpResult: measurement?.pumpResult ?? 'NONE',
+        renewableEnergySystemResult: measurement?.renewableEnergySystemResult ?? 'NONE',
+        packageAirConditionerResult: measurement?.packageAirConditionerResult ?? 'NONE',
+        precisionAirConditionerResult: measurement?.precisionAirConditionerResult ?? 'NONE',
+        airHandlingUnitResult: measurement?.airHandlingUnitResult ?? 'NONE',
+        fanCoilUnitResult: measurement?.fanCoilUnitResult ?? 'NONE',
+        ventilationSystemResult: measurement?.ventilationSystemResult ?? 'NONE',
+        filterResult: measurement?.filterResult ?? 'NONE',
+        sanitaryFacilityResult: measurement?.sanitaryFacilityResult ?? 'NONE',
+        hotWaterSupplyResult: measurement?.hotWaterSupplyResult ?? 'NONE',
+        waterTankResult: measurement?.waterTankResult ?? 'NONE',
+        drainageResult: measurement?.drainageResult ?? 'NONE',
+        waterReuseResult: measurement?.waterReuseResult ?? 'NONE',
+        pipeLineResult: measurement?.pipeLineResult ?? 'NONE',
+        ductResult: measurement?.ductResult ?? 'NONE',
+        insulationResult: measurement?.insulationResult ?? 'NONE',
+        automaticControlResult: measurement?.automaticControlResult ?? 'NONE',
+        noiseVibrationSeismicResult: measurement?.noiseVibrationSeismicResult ?? 'NONE',
 
         // Remark 및 Opinion 필드는 ''으로 초기화
-        refrigeratorRemark: operationStatus?.refrigeratorRemark ?? '',
-        coolingTowerRemark: operationStatus?.coolingTowerRemark ?? '',
-        thermalStorageRemark: operationStatus?.thermalStorageRemark ?? '',
-        boilerRemark: operationStatus?.boilerRemark ?? '',
-        heatExchangerRemark: operationStatus?.heatExchangerRemark ?? '',
-        expansionTankRemark: operationStatus?.expansionTankRemark ?? '',
-        pumpRemark: operationStatus?.pumpRemark ?? '',
-        renewableEnergySystemRemark: operationStatus?.renewableEnergySystemRemark ?? '',
-        packageAirConditionerRemark: operationStatus?.packageAirConditionerRemark ?? '',
-        precisionAirConditionerRemark: operationStatus?.precisionAirConditionerRemark ?? '',
-        airHandlingUnitRemark: operationStatus?.airHandlingUnitRemark ?? '',
-        fanCoilUnitRemark: operationStatus?.fanCoilUnitRemark ?? '',
-        ventilationSystemRemark: operationStatus?.ventilationSystemRemark ?? '',
-        filterRemark: operationStatus?.filterRemark ?? '',
-        sanitaryFacilityRemark: operationStatus?.sanitaryFacilityRemark ?? '',
-        hotWaterSupplyRemark: operationStatus?.hotWaterSupplyRemark ?? '',
-        waterTankRemark: operationStatus?.waterTankRemark ?? '',
-        drainageRemark: operationStatus?.drainageRemark ?? '',
-        waterReuseRemark: operationStatus?.waterReuseRemark ?? '',
-        pipeLineRemark: operationStatus?.pipeLineRemark ?? '',
-        ductRemark: operationStatus?.ductRemark ?? '',
-        insulationRemark: operationStatus?.insulationRemark ?? '',
-        automaticControlRemark: operationStatus?.automaticControlRemark ?? '',
-        noiseVibrationSeismicRemark: operationStatus?.noiseVibrationSeismicRemark ?? '',
-        opinion: operationStatus?.opinion ?? ''
+        refrigeratorRemark: measurement?.refrigeratorRemark ?? '',
+        coolingTowerRemark: measurement?.coolingTowerRemark ?? '',
+        thermalStorageRemark: measurement?.thermalStorageRemark ?? '',
+        boilerRemark: measurement?.boilerRemark ?? '',
+        heatExchangerRemark: measurement?.heatExchangerRemark ?? '',
+        expansionTankRemark: measurement?.expansionTankRemark ?? '',
+        pumpRemark: measurement?.pumpRemark ?? '',
+        renewableEnergySystemRemark: measurement?.renewableEnergySystemRemark ?? '',
+        packageAirConditionerRemark: measurement?.packageAirConditionerRemark ?? '',
+        precisionAirConditionerRemark: measurement?.precisionAirConditionerRemark ?? '',
+        airHandlingUnitRemark: measurement?.airHandlingUnitRemark ?? '',
+        fanCoilUnitRemark: measurement?.fanCoilUnitRemark ?? '',
+        ventilationSystemRemark: measurement?.ventilationSystemRemark ?? '',
+        filterRemark: measurement?.filterRemark ?? '',
+        sanitaryFacilityRemark: measurement?.sanitaryFacilityRemark ?? '',
+        hotWaterSupplyRemark: measurement?.hotWaterSupplyRemark ?? '',
+        waterTankRemark: measurement?.waterTankRemark ?? '',
+        drainageRemark: measurement?.drainageRemark ?? '',
+        waterReuseRemark: measurement?.waterReuseRemark ?? '',
+        pipeLineRemark: measurement?.pipeLineRemark ?? '',
+        ductRemark: measurement?.ductRemark ?? '',
+        insulationRemark: measurement?.insulationRemark ?? '',
+        automaticControlRemark: measurement?.automaticControlRemark ?? '',
+        noiseVibrationSeismicRemark: measurement?.noiseVibrationSeismicRemark ?? '',
+        opinion: measurement?.opinion ?? ''
       })
-    }, [operationStatus, reset, autoFillTrigger])
+    }, [measurement, reset, autoFillTrigger])
 
     // 내부 컴포넌트
     const OperationRow = ({
@@ -157,8 +157,8 @@ const OperationStatusTab = forwardRef<refType, { rootCategories?: MachineInspect
       rowSpan = 1
     }: {
       categoryName: string
-      resultFieldName: keyof MachinePerformanceReviewOperationStatusResponseDtoType
-      remarkFieldName: keyof MachinePerformanceReviewOperationStatusResponseDtoType
+      resultFieldName: keyof MachinePerformanceReviewMeasurementResponseDtoType
+      remarkFieldName: keyof MachinePerformanceReviewMeasurementResponseDtoType
       colSpan?: number
       rowSpan?: number
     }) => {
@@ -233,7 +233,7 @@ const OperationStatusTab = forwardRef<refType, { rootCategories?: MachineInspect
     return (
       <div className={`${styles.container} flex flex-col gap-4 items-center h-full justify-between `}>
         <div className='flex flex-col gap-1'>
-          <Typography variant='h5'>기계설비 시스템 작동상태 점검표</Typography>
+          <Typography variant='h5'>현황표 상의 설계값과 측정값 일치 여부 점검표</Typography>
           <table
             style={{
               tableLayout: 'fixed',
@@ -509,4 +509,4 @@ const OperationStatusTab = forwardRef<refType, { rootCategories?: MachineInspect
   }
 )
 
-export default OperationStatusTab
+export default MeasurementTab

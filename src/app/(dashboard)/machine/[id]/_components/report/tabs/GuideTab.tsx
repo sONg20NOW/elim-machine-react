@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Radio } from '@mui/material'
+import { Radio, useTheme } from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -13,6 +13,8 @@ import { useGetGuide, useMutateGuide } from '@/@core/hooks/customTanstackQueries
 
 const GuideTab = forwardRef<refType, {}>(({}, ref) => {
   const machineProjectId = useParams().id?.toString()
+
+  const theme = useTheme()
 
   const { data: guide } = useGetGuide(machineProjectId!)
 
@@ -78,7 +80,14 @@ const GuideTab = forwardRef<refType, {}>(({}, ref) => {
   return (
     <div className={`${styles.container} flex flex-col gap-4 items-center justify-between h-full`}>
       <div className='flex flex-col gap-4 items-center'>
-        <table style={{ tableLayout: 'fixed', width: '100%' }}>
+        <table
+          style={{
+            tableLayout: 'fixed',
+            width: '100%',
+            borderTop: '2px solid',
+            borderTopColor: theme.palette.primary.light
+          }}
+        >
           {/* Colgroup 완전히 제거 */}
           <thead>
             <tr>
@@ -126,7 +135,14 @@ const GuideTab = forwardRef<refType, {}>(({}, ref) => {
         {/*
         두 번째 테이블: 기술 기준 확인표
       */}
-        <table style={{ tableLayout: 'fixed', width: '100%' }}>
+        <table
+          style={{
+            tableLayout: 'fixed',
+            width: '100%',
+            borderTop: '2px solid',
+            borderTopColor: theme.palette.primary.light
+          }}
+        >
           {/* Colgroup 완전히 제거 */}
           <thead>
             <tr>

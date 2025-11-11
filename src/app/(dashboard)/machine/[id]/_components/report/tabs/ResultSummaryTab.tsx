@@ -2,18 +2,11 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContentText,
-  DialogTitle,
-  styled,
-  TextField,
-  Typography
-} from '@mui/material'
+import { styled, TextField, Typography, useTheme } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
+
+import { toast } from 'react-toastify'
 
 import styles from '@/app/_style/Table.module.css'
 import { centerStyle, type refType } from '../MachinePerformanceReviewModal'
@@ -39,6 +32,10 @@ const StyledTextField = styled(TextField)({
 
 const ResultSummaryTab = forwardRef<refType, {}>(({}, ref) => {
   const machineProjectId = useParams().id?.toString()
+
+  const theme = useTheme()
+
+  const [autoFillTrigger, setAutoFillTrigger] = useState(true)
 
   const { data: resultSummary } = useGetResultSummary(machineProjectId!)
   const { mutate } = useMutateResultSummary(machineProjectId!)
@@ -73,58 +70,23 @@ const ResultSummaryTab = forwardRef<refType, {}>(({}, ref) => {
       energyUsageByType: resultSummary?.energyUsageByType || '',
       energyEfficiencyOperationMethod: resultSummary?.energyEfficiencyOperationMethod || ''
     })
-  }, [resultSummary, reset])
+  }, [resultSummary, reset, autoFillTrigger])
 
   useImperativeHandle(ref, () => ({
     onSubmit: () => {
       mutate(getValues())
     },
+    onAutoFill: () => {
+      mutateAutoFill()
+      setAutoFillTrigger(prev => !prev)
+      toast.info('결과요약 자동채우기를 완료했습니다.')
+    },
     isDirty: isDirty // 수정 여부 상태
   }))
 
-  useEffect(() => {
-    console.log('is Dirty?', isDirty)
-  }, [isDirty])
-
-  // 자동 채우기 버튼
-  const AutoFillBtn = () => {
-    function handleAutoFill() {
-      mutateAutoFill()
-    }
-
-    const [open, setOpen] = useState(false)
-
-    return (
-      <>
-        <Button
-          variant='outlined'
-          type='button'
-          onClick={() => setOpen(true)}
-          sx={{ position: 'absolute', right: 0, bottom: 0 }}
-        >
-          자동 채우기
-        </Button>
-        <Dialog open={open}>
-          <DialogTitle>
-            이전 내용에 덮어씌워집니다.
-            <DialogContentText sx={{ mt: 1 }}>그래도 자동으로 채우겠습니까?</DialogContentText>
-          </DialogTitle>
-          <DialogActions>
-            <Button type='button' onClick={handleAutoFill}>
-              예
-            </Button>
-            <Button type='button' onClick={() => setOpen(false)} color='secondary'>
-              아니오
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </>
-    )
-  }
-
   return (
     <div className={`${styles.container} flex flex-col gap-4 items-center h-full justify-between `}>
-      <table style={{ tableLayout: 'fixed' }}>
+      <table style={{ tableLayout: 'fixed', borderTop: '2px solid', borderTopColor: theme.palette.primary.light }}>
         {/* 테이블 헤더 (총 13개 컬럼) */}
         <thead>
           <tr>
@@ -229,10 +191,7 @@ const ResultSummaryTab = forwardRef<refType, {}>(({}, ref) => {
           </tr>
         </tbody>
       </table>
-      <div className='w-full relative grid place-items-center'>
-        {!isDirty && <Typography color='warning.main'>※변경사항이 없습니다※</Typography>}
-        <AutoFillBtn />
-      </div>
+      {!isDirty && <Typography color='warning.main'>※결과요약의 변경사항이 없습니다※</Typography>}
     </div>
   )
 })
