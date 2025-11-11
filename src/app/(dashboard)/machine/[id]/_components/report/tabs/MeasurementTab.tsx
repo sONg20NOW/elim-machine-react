@@ -198,8 +198,8 @@ const MeasurementTab = forwardRef<refType, { rootCategories?: MachineInspectionR
                   value={field.value}
                   onChange={field.onChange}
                 >
-                  <MenuItem value='PASS'>O</MenuItem>
-                  <MenuItem value='FAIL'>X</MenuItem>
+                  <MenuItem value='MATCH'>O</MenuItem>
+                  <MenuItem value='MISMATCH'>X</MenuItem>
                   <MenuItem value='NONE'>/</MenuItem>
                 </Select>
               )}
