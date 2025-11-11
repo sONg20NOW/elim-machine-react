@@ -19,6 +19,7 @@ import type {
   machineInspectionSummaryResponseDtoType,
   MachineLeafCategoryResponseDtoType,
   MachinePerformanceReviewAgingReadResponseDtoType,
+  MachinePerformanceReviewAgingUpdateResponseDtoType,
   MachinePerformanceReviewGuideResponseDtoType,
   MachinePerformanceReviewImprovementResponseDtoType,
   MachinePerformanceReviewMeasurementResponseDtoType,
@@ -1052,10 +1053,10 @@ const putAgingData = async ({
   data
 }: {
   machineProjectId: string
-  data: MachinePerformanceReviewAgingReadResponseDtoType
+  data: MachinePerformanceReviewAgingUpdateResponseDtoType
 }) => {
   // 노후도의 응답 DTO는 Read DTO이지만, 업데이트 요청 시에도 동일한 DTO 형태를 사용할 수 있다고 가정합니다.
-  const response = await auth.put<{ data: MachinePerformanceReviewAgingReadResponseDtoType }>(
+  const response = await auth.put<{ data: MachinePerformanceReviewAgingUpdateResponseDtoType }>(
     `/api/machine-projects/${machineProjectId}/machine-performance-review/aging`,
     data
   )
@@ -1068,14 +1069,17 @@ export const useMutateAging = (machineProjectId: string) => {
   const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_AGING(machineProjectId)
 
   return useMutation<
-    MachinePerformanceReviewAgingReadResponseDtoType,
+    MachinePerformanceReviewAgingUpdateResponseDtoType,
     AxiosError,
-    MachinePerformanceReviewAgingReadResponseDtoType
+    MachinePerformanceReviewAgingUpdateResponseDtoType
   >({
     mutationFn: data => putAgingData({ machineProjectId, data }),
 
     onSuccess: newAgingData => {
-      queryClient.setQueryData(queryKey, newAgingData)
+      queryClient.setQueryData(queryKey, (prev: MachinePerformanceReviewAgingReadResponseDtoType) => ({
+        ...prev,
+        ...newAgingData
+      }))
       console.log('노후도 정보가 성공적으로 저장되었습니다.')
     },
 
@@ -1090,11 +1094,11 @@ export const useMutateAgingAutoFill = (machineProjectId: string) => {
   const queryClient = useQueryClient()
   const queryKey = QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_AGING(machineProjectId)
 
-  return useMutation<MachinePerformanceReviewAgingReadResponseDtoType, AxiosError>({
+  return useMutation<MachinePerformanceReviewAgingUpdateResponseDtoType, AxiosError>({
     mutationFn: async () => {
-      const response = await auth.put<{ data: MachinePerformanceReviewAgingReadResponseDtoType }>(
-        `/api/machine-projects/${machineProjectId}/machine-performance-review/aging/auto-fill`
-      )
+      const response = await auth.put<{
+        data: MachinePerformanceReviewAgingUpdateResponseDtoType
+      }>(`/api/machine-projects/${machineProjectId}/machine-performance-review/aging/auto-fill`)
 
       return response.data.data
     },

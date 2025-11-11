@@ -1008,6 +1008,8 @@ export interface MachinePerformanceReviewOperationStatusResponseDtoType {
   waterTankRemark: string
   drainageResult: string
   drainageRemark: string
+  sewageTreatmentResult: string
+  sewageTreatmentRemark: string
   waterReuseResult: string
   waterReuseRemark: string
   pipeLineResult: string
@@ -1061,6 +1063,8 @@ export interface MachinePerformanceReviewMeasurementResponseDtoType {
   waterTankRemark: string
   drainageResult: string
   drainageRemark: string
+  sewageTreatmentResult: string
+  sewageTreatmentRemark: string
   waterReuseResult: string
   waterReuseRemark: string
   pipeLineResult: string
@@ -1177,8 +1181,16 @@ export interface MachinePerformanceReviewAgingItemResponseDtoType {
   usedYear: number
   remark: string
 }
+
+export type agingStandardType = 'KOREA_REAL_ESTATE_BOARD' | 'PUBLIC_PROCUREMENT_SERVICE'
 export interface MachinePerformanceReviewAgingReadResponseDtoType {
   agingEquipments: MachinePerformanceReviewAgingItemResponseDtoType[]
+  agingStandard: agingStandardType
+  agingInspectionResult: string
+}
+
+export interface MachinePerformanceReviewAgingUpdateResponseDtoType {
+  agingStandard: agingStandardType
   agingInspectionResult: string
 }
 
