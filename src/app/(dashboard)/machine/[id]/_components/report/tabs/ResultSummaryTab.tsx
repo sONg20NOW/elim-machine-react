@@ -2,33 +2,20 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { styled, TextField, Typography, useTheme } from '@mui/material'
+import { Typography, useTheme } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'react-toastify'
 
 import styles from '@/app/_style/Table.module.css'
-import { centerStyle, type refType } from '../MachinePerformanceReviewModal'
+import { centerStyle, StyledTextField, type refType } from '../MachinePerformanceReviewModal'
 import {
   useGetResultSummary,
   useMutateResultSummary,
   useMutateResultSummaryAutoFill
 } from '@/@core/hooks/customTanstackQueries'
 import type { MachinePerformanceReviewSummaryResponseDtoType } from '@/@core/types'
-
-const StyledTextField = styled(TextField)({
-  width: '100%',
-  height: '100%',
-  '& .MuiInputBase-root': {
-    height: '100%',
-    boxSizing: 'border-box',
-    padding: '8px'
-  },
-  '& .MuiOutlinedInput-root': {
-    borderRadius: 0
-  }
-})
 
 const ResultSummaryTab = forwardRef<refType, {}>(({}, ref) => {
   const machineProjectId = useParams().id?.toString()

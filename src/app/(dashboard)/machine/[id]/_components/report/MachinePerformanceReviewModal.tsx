@@ -35,6 +35,7 @@ import OperationStatusTab from './tabs/OperationStatusTab'
 import MeasurementTab from './tabs/MeasurementTab'
 import AgingTab from './tabs/AgingTab'
 import ImprovementTab from './tabs/ImprovementTab'
+import YearlyPlanTab from './tabs/YearlyPlanTab'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -62,6 +63,16 @@ export const StyledTextField = styled(TextField)({
   },
   '& .MuiOutlinedInput-root': {
     borderRadius: 0
+
+    // '& fieldset': {
+    //   borderWidth: 0 // 기본 border 제거
+    // },
+    // '&:hover fieldset': {
+    //   borderWidth: 1 // hover 시 border 복구
+    // },
+    // '&.Mui-focused fieldset': {
+    //   borderWidth: 1 // focus 시 border 복구
+    // }
   }
 })
 
@@ -110,6 +121,7 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
   const measurementRef = useRef<refType>(null)
   const agingRef = useRef<refType>(null)
   const improvementRef = useRef<refType>(null)
+  const yearlyPlanRef = useRef<refType>(null)
 
   function handleSave() {
     const message: TabType[] = []
@@ -131,7 +143,7 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
 
     if (measurementRef.current && measurementRef.current.isDirty) {
       measurementRef.current.onSubmit()
-      message.push('작동상태')
+      message.push('측정값 일치')
     }
 
     if (agingRef.current && agingRef.current.isDirty) {
@@ -142,6 +154,11 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
     if (improvementRef.current && improvementRef.current.isDirty) {
       improvementRef.current.onSubmit()
       message.push('개선사항')
+    }
+
+    if (yearlyPlanRef.current && yearlyPlanRef.current.isDirty) {
+      yearlyPlanRef.current.onSubmit()
+      message.push('연도별 계획')
     }
 
     if (message.length > 0) {
@@ -165,6 +182,9 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
         break
       case '개선사항':
         improvementRef.current && improvementRef.current.onAutoFill && improvementRef.current.onAutoFill()
+        break
+      case '연도별 계획':
+        yearlyPlanRef.current && yearlyPlanRef.current.onAutoFill && yearlyPlanRef.current.onAutoFill()
         break
       default:
         break
@@ -267,6 +287,9 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
               </div>
               <div style={{ display: tabValue === '개선사항' ? 'block' : 'none', height: '100%' }}>
                 <ImprovementTab rootCategories={rootCategories} ref={improvementRef} />
+              </div>
+              <div style={{ display: tabValue === '연도별 계획' ? 'block' : 'none', height: '100%' }}>
+                <YearlyPlanTab rootCategories={rootCategories} ref={yearlyPlanRef} />
               </div>
             </div>
           </TabContext>
