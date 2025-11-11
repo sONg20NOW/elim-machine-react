@@ -250,7 +250,7 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
         </DialogTitle>
         <DialogContent
           className={`${styles.container}`}
-          sx={{ height: '70dvh', overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}
+          sx={{ height: '70dvh', overflowY: 'hidden', display: 'flex', flexDirection: 'column', pb: 0 }}
         >
           <TabContext value={tabValue}>
             <AppBar position='static' color='primary' sx={{ mb: 4 }}>
@@ -294,8 +294,14 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
             </div>
           </TabContext>
         </DialogContent>
-        <DialogActions className='flex items-center justify-center'>
-          {tabValue !== '유지관리지침서' && <AutoFillBtn />}
+        <DialogActions className='flex items-center justify-center' sx={{ boxShadow: 4, pt: '1rem !important' }}>
+          {tabValue !== '유지관리지침서' ? (
+            <AutoFillBtn />
+          ) : (
+            <Button variant='outlined' disabled sx={{ opacity: 0 }}>
+              자동 채우기
+            </Button>
+          )}
           <Button color='primary' variant='contained' type='button' onClick={handleSave}>
             저장
           </Button>

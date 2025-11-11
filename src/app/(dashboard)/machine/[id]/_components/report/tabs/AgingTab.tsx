@@ -262,7 +262,11 @@ const AgingTab = forwardRef<refType, { rootCategories?: MachineInspectionRootCat
             />
           </div>
         </div>
-        {!isDirty && <Typography color='warning.main'>※노후도의 변경사항이 없습니다※</Typography>}
+        {!isDirty && (
+          <Typography color='warning.main' sx={{ pb: 4 }}>
+            ※노후도의 변경사항이 없습니다※
+          </Typography>
+        )}
       </div>
     )
   }

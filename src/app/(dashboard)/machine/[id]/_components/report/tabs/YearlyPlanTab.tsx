@@ -145,7 +145,11 @@ const YearlyPlanTab = forwardRef<refType, { rootCategories?: MachineInspectionRo
         isDirty: isDirty // 수정 여부 상태
       }))
 
-      return !isDirty ? <Typography color='warning.main'>※연도별 계획의 변경사항이 없습니다※</Typography> : null
+      return !isDirty ? (
+        <Typography color='warning.main' sx={{ pb: 4 }}>
+          ※연도별 계획의 변경사항이 없습니다※
+        </Typography>
+      ) : null
     }
 
     return (

@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Radio, useTheme } from '@mui/material'
+import { Radio, Typography, useTheme } from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -167,7 +167,9 @@ const GuideTab = forwardRef<refType, {}>(({}, ref) => {
           </tbody>
         </table>
       </div>
-      {!isDirty && <span style={{ color: 'orange' }}>※변경사항이 없습니다※</span>}
+      {!isDirty && (
+        <Typography sx={{ color: 'warning.main', pb: 4 }}>※유지관리지침서의 변경사항이 없습니다※</Typography>
+      )}
     </div>
   )
 })

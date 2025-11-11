@@ -161,7 +161,11 @@ const ResultSummaryTab = forwardRef<refType, {}>(({}, ref) => {
           </tr>
         </tbody>
       </table>
-      {!isDirty && <Typography color='warning.main'>※결과요약의 변경사항이 없습니다※</Typography>}
+      {!isDirty && (
+        <Typography sx={{ pb: 5 }} color='warning.main'>
+          ※결과요약의 변경사항이 없습니다※
+        </Typography>
+      )}
     </div>
   )
 })
