@@ -19,6 +19,7 @@ import type {
   MachineInspectionRootCategoryResponseDtoType,
   MachinePerformanceReviewMeasurementResponseDtoType
 } from '@/@core/types'
+import { makeMeasurementSeed } from './utils/makeSeed'
 
 const MeasurementTab = forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(
   ({ rootCategories }, ref) => {
@@ -32,120 +33,11 @@ const MeasurementTab = forwardRef<refType, { rootCategories?: MachineInspectionR
     const { mutate: mutateAutoFill } = useMutateMeasurementAutoFill(machineProjectId!)
 
     const { register, control, getValues, reset } = useForm<MachinePerformanceReviewMeasurementResponseDtoType>({
-      defaultValues: {
-        // Result 필드는 'NONE'으로 초기화
-        refrigeratorResult: measurement?.refrigeratorResult ?? 'NONE',
-        coolingTowerResult: measurement?.coolingTowerResult ?? 'NONE',
-        thermalStorageResult: measurement?.thermalStorageResult ?? 'NONE',
-        boilerResult: measurement?.boilerResult ?? 'NONE',
-        heatExchangerResult: measurement?.heatExchangerResult ?? 'NONE',
-        expansionTankResult: measurement?.expansionTankResult ?? 'NONE',
-        pumpResult: measurement?.pumpResult ?? 'NONE',
-        renewableEnergySystemResult: measurement?.renewableEnergySystemResult ?? 'NONE',
-        packageAirConditionerResult: measurement?.packageAirConditionerResult ?? 'NONE',
-        precisionAirConditionerResult: measurement?.precisionAirConditionerResult ?? 'NONE',
-        airHandlingUnitResult: measurement?.airHandlingUnitResult ?? 'NONE',
-        fanCoilUnitResult: measurement?.fanCoilUnitResult ?? 'NONE',
-        ventilationSystemResult: measurement?.ventilationSystemResult ?? 'NONE',
-        filterResult: measurement?.filterResult ?? 'NONE',
-        sanitaryFacilityResult: measurement?.sanitaryFacilityResult ?? 'NONE',
-        hotWaterSupplyResult: measurement?.hotWaterSupplyResult ?? 'NONE',
-        waterTankResult: measurement?.waterTankResult ?? 'NONE',
-        drainageResult: measurement?.drainageResult ?? 'NONE',
-        sewageTreatmentResult: measurement?.sewageTreatmentResult ?? 'NONE',
-        waterReuseResult: measurement?.waterReuseResult ?? 'NONE',
-        pipeLineResult: measurement?.pipeLineResult ?? 'NONE',
-        ductResult: measurement?.ductResult ?? 'NONE',
-        insulationResult: measurement?.insulationResult ?? 'NONE',
-        automaticControlResult: measurement?.automaticControlResult ?? 'NONE',
-        noiseVibrationSeismicResult: measurement?.noiseVibrationSeismicResult ?? 'NONE',
-
-        // Remark 및 Opinion 필드는 ''으로 초기화
-        refrigeratorRemark: measurement?.refrigeratorRemark ?? '',
-        coolingTowerRemark: measurement?.coolingTowerRemark ?? '',
-        thermalStorageRemark: measurement?.thermalStorageRemark ?? '',
-        boilerRemark: measurement?.boilerRemark ?? '',
-        heatExchangerRemark: measurement?.heatExchangerRemark ?? '',
-        expansionTankRemark: measurement?.expansionTankRemark ?? '',
-        pumpRemark: measurement?.pumpRemark ?? '',
-        renewableEnergySystemRemark: measurement?.renewableEnergySystemRemark ?? '',
-        packageAirConditionerRemark: measurement?.packageAirConditionerRemark ?? '',
-        precisionAirConditionerRemark: measurement?.precisionAirConditionerRemark ?? '',
-        airHandlingUnitRemark: measurement?.airHandlingUnitRemark ?? '',
-        fanCoilUnitRemark: measurement?.fanCoilUnitRemark ?? '',
-        ventilationSystemRemark: measurement?.ventilationSystemRemark ?? '',
-        filterRemark: measurement?.filterRemark ?? '',
-        sanitaryFacilityRemark: measurement?.sanitaryFacilityRemark ?? '',
-        hotWaterSupplyRemark: measurement?.hotWaterSupplyRemark ?? '',
-        waterTankRemark: measurement?.waterTankRemark ?? '',
-        drainageRemark: measurement?.drainageRemark ?? '',
-        sewageTreatmentRemark: measurement?.sewageTreatmentRemark ?? '',
-        waterReuseRemark: measurement?.waterReuseRemark ?? '',
-        pipeLineRemark: measurement?.pipeLineRemark ?? '',
-        ductRemark: measurement?.ductRemark ?? '',
-        insulationRemark: measurement?.insulationRemark ?? '',
-        automaticControlRemark: measurement?.automaticControlRemark ?? '',
-        noiseVibrationSeismicRemark: measurement?.noiseVibrationSeismicRemark ?? '',
-        opinion: measurement?.opinion ?? ''
-      }
+      defaultValues: makeMeasurementSeed(measurement)
     })
 
     useEffect(() => {
-      console.log('RESET!')
-      reset({
-        // Result 필드는 'NONE'으로 초기화
-        refrigeratorResult: measurement?.refrigeratorResult ?? 'NONE',
-        coolingTowerResult: measurement?.coolingTowerResult ?? 'NONE',
-        thermalStorageResult: measurement?.thermalStorageResult ?? 'NONE',
-        boilerResult: measurement?.boilerResult ?? 'NONE',
-        heatExchangerResult: measurement?.heatExchangerResult ?? 'NONE',
-        expansionTankResult: measurement?.expansionTankResult ?? 'NONE',
-        pumpResult: measurement?.pumpResult ?? 'NONE',
-        renewableEnergySystemResult: measurement?.renewableEnergySystemResult ?? 'NONE',
-        packageAirConditionerResult: measurement?.packageAirConditionerResult ?? 'NONE',
-        precisionAirConditionerResult: measurement?.precisionAirConditionerResult ?? 'NONE',
-        airHandlingUnitResult: measurement?.airHandlingUnitResult ?? 'NONE',
-        fanCoilUnitResult: measurement?.fanCoilUnitResult ?? 'NONE',
-        ventilationSystemResult: measurement?.ventilationSystemResult ?? 'NONE',
-        filterResult: measurement?.filterResult ?? 'NONE',
-        sanitaryFacilityResult: measurement?.sanitaryFacilityResult ?? 'NONE',
-        hotWaterSupplyResult: measurement?.hotWaterSupplyResult ?? 'NONE',
-        waterTankResult: measurement?.waterTankResult ?? 'NONE',
-        drainageResult: measurement?.drainageResult ?? 'NONE',
-        waterReuseResult: measurement?.waterReuseResult ?? 'NONE',
-        pipeLineResult: measurement?.pipeLineResult ?? 'NONE',
-        ductResult: measurement?.ductResult ?? 'NONE',
-        insulationResult: measurement?.insulationResult ?? 'NONE',
-        automaticControlResult: measurement?.automaticControlResult ?? 'NONE',
-        noiseVibrationSeismicResult: measurement?.noiseVibrationSeismicResult ?? 'NONE',
-
-        // Remark 및 Opinion 필드는 ''으로 초기화
-        refrigeratorRemark: measurement?.refrigeratorRemark ?? '',
-        coolingTowerRemark: measurement?.coolingTowerRemark ?? '',
-        thermalStorageRemark: measurement?.thermalStorageRemark ?? '',
-        boilerRemark: measurement?.boilerRemark ?? '',
-        heatExchangerRemark: measurement?.heatExchangerRemark ?? '',
-        expansionTankRemark: measurement?.expansionTankRemark ?? '',
-        pumpRemark: measurement?.pumpRemark ?? '',
-        renewableEnergySystemRemark: measurement?.renewableEnergySystemRemark ?? '',
-        packageAirConditionerRemark: measurement?.packageAirConditionerRemark ?? '',
-        precisionAirConditionerRemark: measurement?.precisionAirConditionerRemark ?? '',
-        airHandlingUnitRemark: measurement?.airHandlingUnitRemark ?? '',
-        fanCoilUnitRemark: measurement?.fanCoilUnitRemark ?? '',
-        ventilationSystemRemark: measurement?.ventilationSystemRemark ?? '',
-        filterRemark: measurement?.filterRemark ?? '',
-        sanitaryFacilityRemark: measurement?.sanitaryFacilityRemark ?? '',
-        hotWaterSupplyRemark: measurement?.hotWaterSupplyRemark ?? '',
-        waterTankRemark: measurement?.waterTankRemark ?? '',
-        drainageRemark: measurement?.drainageRemark ?? '',
-        waterReuseRemark: measurement?.waterReuseRemark ?? '',
-        pipeLineRemark: measurement?.pipeLineRemark ?? '',
-        ductRemark: measurement?.ductRemark ?? '',
-        insulationRemark: measurement?.insulationRemark ?? '',
-        automaticControlRemark: measurement?.automaticControlRemark ?? '',
-        noiseVibrationSeismicRemark: measurement?.noiseVibrationSeismicRemark ?? '',
-        opinion: measurement?.opinion ?? ''
-      })
+      reset(makeMeasurementSeed(measurement))
     }, [measurement, reset, autoFillTrigger])
 
     // 내부 컴포넌트

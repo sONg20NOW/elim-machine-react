@@ -10,6 +10,7 @@ import { centerStyle, type refType } from '../MachinePerformanceReviewModal'
 import styles from '@/app/_style/Table.module.css'
 import type { MachinePerformanceReviewGuideResponseDtoType } from '@/@core/types'
 import { useGetGuide, useMutateGuide } from '@/@core/hooks/customTanstackQueries'
+import { makeGuideSeed } from './utils/makeSeed'
 
 const GuideTab = forwardRef<refType, {}>(({}, ref) => {
   const machineProjectId = useParams().id?.toString()
@@ -26,31 +27,11 @@ const GuideTab = forwardRef<refType, {}>(({}, ref) => {
     getValues,
     formState: { isDirty }
   } = useForm<MachinePerformanceReviewGuideResponseDtoType>({
-    defaultValues: {
-      builtDrawingYn: guide?.builtDrawingYn || 'Y',
-      specificationYn: guide?.specificationYn || 'Y',
-      loadCalculationYn: guide?.loadCalculationYn || 'Y',
-      operationManual: guide?.operationManual || 'Y',
-      manufacturerCertificateYn: guide?.manufacturerCertificateYn || 'Y',
-      techStandardForm3Yn: guide?.techStandardForm3Yn || 'Y',
-      techStandardForm4Yn: guide?.techStandardForm4Yn || 'Y',
-      techStandardForm5Yn: guide?.techStandardForm5Yn || 'Y',
-      techStandardForm6Yn: guide?.techStandardForm6Yn || 'Y'
-    }
+    defaultValues: makeGuideSeed(guide)
   })
 
   useEffect(() => {
-    reset({
-      builtDrawingYn: guide?.builtDrawingYn || 'Y',
-      specificationYn: guide?.specificationYn || 'Y',
-      loadCalculationYn: guide?.loadCalculationYn || 'Y',
-      operationManual: guide?.operationManual || 'Y',
-      manufacturerCertificateYn: guide?.manufacturerCertificateYn || 'Y',
-      techStandardForm3Yn: guide?.techStandardForm3Yn || 'Y',
-      techStandardForm4Yn: guide?.techStandardForm4Yn || 'Y',
-      techStandardForm5Yn: guide?.techStandardForm5Yn || 'Y',
-      techStandardForm6Yn: guide?.techStandardForm6Yn || 'Y'
-    })
+    reset(makeGuideSeed(guide))
   }, [guide, reset])
 
   useImperativeHandle(ref, () => ({

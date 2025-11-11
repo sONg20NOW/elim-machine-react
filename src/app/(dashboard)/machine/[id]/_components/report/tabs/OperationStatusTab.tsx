@@ -19,6 +19,7 @@ import type {
   MachineInspectionRootCategoryResponseDtoType,
   MachinePerformanceReviewOperationStatusResponseDtoType
 } from '@/@core/types'
+import { makeOperationStatusSeed } from './utils/makeSeed'
 
 const OperationStatusTab = forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(
   ({ rootCategories }, ref) => {
@@ -32,120 +33,12 @@ const OperationStatusTab = forwardRef<refType, { rootCategories?: MachineInspect
     const { mutate: mutateAutoFill } = useMutateOperationStatusAutoFill(machineProjectId!)
 
     const { register, control, getValues, reset } = useForm<MachinePerformanceReviewOperationStatusResponseDtoType>({
-      defaultValues: {
-        // Result 필드는 'NONE'으로 초기화
-        refrigeratorResult: operationStatus?.refrigeratorResult ?? 'NONE',
-        coolingTowerResult: operationStatus?.coolingTowerResult ?? 'NONE',
-        thermalStorageResult: operationStatus?.thermalStorageResult ?? 'NONE',
-        boilerResult: operationStatus?.boilerResult ?? 'NONE',
-        heatExchangerResult: operationStatus?.heatExchangerResult ?? 'NONE',
-        expansionTankResult: operationStatus?.expansionTankResult ?? 'NONE',
-        pumpResult: operationStatus?.pumpResult ?? 'NONE',
-        renewableEnergySystemResult: operationStatus?.renewableEnergySystemResult ?? 'NONE',
-        packageAirConditionerResult: operationStatus?.packageAirConditionerResult ?? 'NONE',
-        precisionAirConditionerResult: operationStatus?.precisionAirConditionerResult ?? 'NONE',
-        airHandlingUnitResult: operationStatus?.airHandlingUnitResult ?? 'NONE',
-        fanCoilUnitResult: operationStatus?.fanCoilUnitResult ?? 'NONE',
-        ventilationSystemResult: operationStatus?.ventilationSystemResult ?? 'NONE',
-        filterResult: operationStatus?.filterResult ?? 'NONE',
-        sanitaryFacilityResult: operationStatus?.sanitaryFacilityResult ?? 'NONE',
-        hotWaterSupplyResult: operationStatus?.hotWaterSupplyResult ?? 'NONE',
-        waterTankResult: operationStatus?.waterTankResult ?? 'NONE',
-        drainageResult: operationStatus?.drainageResult ?? 'NONE',
-        sewageTreatmentResult: operationStatus?.sewageTreatmentResult ?? 'NONE',
-        waterReuseResult: operationStatus?.waterReuseResult ?? 'NONE',
-        pipeLineResult: operationStatus?.pipeLineResult ?? 'NONE',
-        ductResult: operationStatus?.ductResult ?? 'NONE',
-        insulationResult: operationStatus?.insulationResult ?? 'NONE',
-        automaticControlResult: operationStatus?.automaticControlResult ?? 'NONE',
-        noiseVibrationSeismicResult: operationStatus?.noiseVibrationSeismicResult ?? 'NONE',
-
-        // Remark 및 Opinion 필드는 ''으로 초기화
-        refrigeratorRemark: operationStatus?.refrigeratorRemark ?? '',
-        coolingTowerRemark: operationStatus?.coolingTowerRemark ?? '',
-        thermalStorageRemark: operationStatus?.thermalStorageRemark ?? '',
-        boilerRemark: operationStatus?.boilerRemark ?? '',
-        heatExchangerRemark: operationStatus?.heatExchangerRemark ?? '',
-        expansionTankRemark: operationStatus?.expansionTankRemark ?? '',
-        pumpRemark: operationStatus?.pumpRemark ?? '',
-        renewableEnergySystemRemark: operationStatus?.renewableEnergySystemRemark ?? '',
-        packageAirConditionerRemark: operationStatus?.packageAirConditionerRemark ?? '',
-        precisionAirConditionerRemark: operationStatus?.precisionAirConditionerRemark ?? '',
-        airHandlingUnitRemark: operationStatus?.airHandlingUnitRemark ?? '',
-        fanCoilUnitRemark: operationStatus?.fanCoilUnitRemark ?? '',
-        ventilationSystemRemark: operationStatus?.ventilationSystemRemark ?? '',
-        filterRemark: operationStatus?.filterRemark ?? '',
-        sanitaryFacilityRemark: operationStatus?.sanitaryFacilityRemark ?? '',
-        hotWaterSupplyRemark: operationStatus?.hotWaterSupplyRemark ?? '',
-        waterTankRemark: operationStatus?.waterTankRemark ?? '',
-        drainageRemark: operationStatus?.drainageRemark ?? '',
-        sewageTreatmentRemark: operationStatus?.sewageTreatmentRemark ?? '',
-        waterReuseRemark: operationStatus?.waterReuseRemark ?? '',
-        pipeLineRemark: operationStatus?.pipeLineRemark ?? '',
-        ductRemark: operationStatus?.ductRemark ?? '',
-        insulationRemark: operationStatus?.insulationRemark ?? '',
-        automaticControlRemark: operationStatus?.automaticControlRemark ?? '',
-        noiseVibrationSeismicRemark: operationStatus?.noiseVibrationSeismicRemark ?? '',
-        opinion: operationStatus?.opinion ?? ''
-      }
+      defaultValues: makeOperationStatusSeed(operationStatus)
     })
 
     useEffect(() => {
       console.log('RESET!')
-      reset({
-        // Result 필드는 'NONE'으로 초기화
-        refrigeratorResult: operationStatus?.refrigeratorResult ?? 'NONE',
-        coolingTowerResult: operationStatus?.coolingTowerResult ?? 'NONE',
-        thermalStorageResult: operationStatus?.thermalStorageResult ?? 'NONE',
-        boilerResult: operationStatus?.boilerResult ?? 'NONE',
-        heatExchangerResult: operationStatus?.heatExchangerResult ?? 'NONE',
-        expansionTankResult: operationStatus?.expansionTankResult ?? 'NONE',
-        pumpResult: operationStatus?.pumpResult ?? 'NONE',
-        renewableEnergySystemResult: operationStatus?.renewableEnergySystemResult ?? 'NONE',
-        packageAirConditionerResult: operationStatus?.packageAirConditionerResult ?? 'NONE',
-        precisionAirConditionerResult: operationStatus?.precisionAirConditionerResult ?? 'NONE',
-        airHandlingUnitResult: operationStatus?.airHandlingUnitResult ?? 'NONE',
-        fanCoilUnitResult: operationStatus?.fanCoilUnitResult ?? 'NONE',
-        ventilationSystemResult: operationStatus?.ventilationSystemResult ?? 'NONE',
-        filterResult: operationStatus?.filterResult ?? 'NONE',
-        sanitaryFacilityResult: operationStatus?.sanitaryFacilityResult ?? 'NONE',
-        hotWaterSupplyResult: operationStatus?.hotWaterSupplyResult ?? 'NONE',
-        waterTankResult: operationStatus?.waterTankResult ?? 'NONE',
-        drainageResult: operationStatus?.drainageResult ?? 'NONE',
-        waterReuseResult: operationStatus?.waterReuseResult ?? 'NONE',
-        pipeLineResult: operationStatus?.pipeLineResult ?? 'NONE',
-        ductResult: operationStatus?.ductResult ?? 'NONE',
-        insulationResult: operationStatus?.insulationResult ?? 'NONE',
-        automaticControlResult: operationStatus?.automaticControlResult ?? 'NONE',
-        noiseVibrationSeismicResult: operationStatus?.noiseVibrationSeismicResult ?? 'NONE',
-
-        // Remark 및 Opinion 필드는 ''으로 초기화
-        refrigeratorRemark: operationStatus?.refrigeratorRemark ?? '',
-        coolingTowerRemark: operationStatus?.coolingTowerRemark ?? '',
-        thermalStorageRemark: operationStatus?.thermalStorageRemark ?? '',
-        boilerRemark: operationStatus?.boilerRemark ?? '',
-        heatExchangerRemark: operationStatus?.heatExchangerRemark ?? '',
-        expansionTankRemark: operationStatus?.expansionTankRemark ?? '',
-        pumpRemark: operationStatus?.pumpRemark ?? '',
-        renewableEnergySystemRemark: operationStatus?.renewableEnergySystemRemark ?? '',
-        packageAirConditionerRemark: operationStatus?.packageAirConditionerRemark ?? '',
-        precisionAirConditionerRemark: operationStatus?.precisionAirConditionerRemark ?? '',
-        airHandlingUnitRemark: operationStatus?.airHandlingUnitRemark ?? '',
-        fanCoilUnitRemark: operationStatus?.fanCoilUnitRemark ?? '',
-        ventilationSystemRemark: operationStatus?.ventilationSystemRemark ?? '',
-        filterRemark: operationStatus?.filterRemark ?? '',
-        sanitaryFacilityRemark: operationStatus?.sanitaryFacilityRemark ?? '',
-        hotWaterSupplyRemark: operationStatus?.hotWaterSupplyRemark ?? '',
-        waterTankRemark: operationStatus?.waterTankRemark ?? '',
-        drainageRemark: operationStatus?.drainageRemark ?? '',
-        waterReuseRemark: operationStatus?.waterReuseRemark ?? '',
-        pipeLineRemark: operationStatus?.pipeLineRemark ?? '',
-        ductRemark: operationStatus?.ductRemark ?? '',
-        insulationRemark: operationStatus?.insulationRemark ?? '',
-        automaticControlRemark: operationStatus?.automaticControlRemark ?? '',
-        noiseVibrationSeismicRemark: operationStatus?.noiseVibrationSeismicRemark ?? '',
-        opinion: operationStatus?.opinion ?? ''
-      })
+      reset(makeOperationStatusSeed(operationStatus))
     }, [operationStatus, reset, autoFillTrigger])
 
     // 내부 컴포넌트

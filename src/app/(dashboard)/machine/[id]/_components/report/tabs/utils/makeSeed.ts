@@ -1,7 +1,156 @@
 import type {
+  MachinePerformanceReviewGuideResponseDtoType,
   MachinePerformanceReviewImprovementResponseDtoType,
+  MachinePerformanceReviewMeasurementResponseDtoType,
+  MachinePerformanceReviewOperationStatusResponseDtoType,
+  MachinePerformanceReviewSummaryResponseDtoType,
   MachinePerformanceReviewYearlyPlanResponseDtoType
 } from '@/@core/types'
+
+export function makeResultSummarySeed(resultSummary?: MachinePerformanceReviewSummaryResponseDtoType) {
+  return {
+    maintenanceGuidelineAdequacy: resultSummary?.maintenanceGuidelineAdequacy || '',
+    systemOperationalStatus: resultSummary?.systemOperationalStatus || '',
+    designAndMeasuredValueConsistency: resultSummary?.designAndMeasuredValueConsistency || '',
+    equipmentAgingDegree: resultSummary?.equipmentAgingDegree || '',
+    inspectionDeficiencies: resultSummary?.inspectionDeficiencies || '',
+    improvementNeedsAndPlan: resultSummary?.improvementNeedsAndPlan || '',
+    energyUsageByType: resultSummary?.energyUsageByType || '',
+    energyEfficiencyOperationMethod: resultSummary?.energyEfficiencyOperationMethod || ''
+  }
+}
+
+export function makeGuideSeed(guide?: MachinePerformanceReviewGuideResponseDtoType) {
+  return {
+    builtDrawingYn: guide?.builtDrawingYn || 'Y',
+    specificationYn: guide?.specificationYn || 'Y',
+    loadCalculationYn: guide?.loadCalculationYn || 'Y',
+    operationManual: guide?.operationManual || 'Y',
+    manufacturerCertificateYn: guide?.manufacturerCertificateYn || 'Y',
+    techStandardForm3Yn: guide?.techStandardForm3Yn || 'Y',
+    techStandardForm4Yn: guide?.techStandardForm4Yn || 'Y',
+    techStandardForm5Yn: guide?.techStandardForm5Yn || 'Y',
+    techStandardForm6Yn: guide?.techStandardForm6Yn || 'Y'
+  }
+}
+
+export function makeOperationStatusSeed(operationStatus?: MachinePerformanceReviewOperationStatusResponseDtoType) {
+  return {
+    // Result 필드는 'NONE'으로 초기화
+    refrigeratorResult: operationStatus?.refrigeratorResult ?? 'NONE',
+    coolingTowerResult: operationStatus?.coolingTowerResult ?? 'NONE',
+    thermalStorageResult: operationStatus?.thermalStorageResult ?? 'NONE',
+    boilerResult: operationStatus?.boilerResult ?? 'NONE',
+    heatExchangerResult: operationStatus?.heatExchangerResult ?? 'NONE',
+    expansionTankResult: operationStatus?.expansionTankResult ?? 'NONE',
+    pumpResult: operationStatus?.pumpResult ?? 'NONE',
+    renewableEnergySystemResult: operationStatus?.renewableEnergySystemResult ?? 'NONE',
+    packageAirConditionerResult: operationStatus?.packageAirConditionerResult ?? 'NONE',
+    precisionAirConditionerResult: operationStatus?.precisionAirConditionerResult ?? 'NONE',
+    airHandlingUnitResult: operationStatus?.airHandlingUnitResult ?? 'NONE',
+    fanCoilUnitResult: operationStatus?.fanCoilUnitResult ?? 'NONE',
+    ventilationSystemResult: operationStatus?.ventilationSystemResult ?? 'NONE',
+    filterResult: operationStatus?.filterResult ?? 'NONE',
+    sanitaryFacilityResult: operationStatus?.sanitaryFacilityResult ?? 'NONE',
+    hotWaterSupplyResult: operationStatus?.hotWaterSupplyResult ?? 'NONE',
+    waterTankResult: operationStatus?.waterTankResult ?? 'NONE',
+    drainageResult: operationStatus?.drainageResult ?? 'NONE',
+    sewageTreatmentResult: operationStatus?.sewageTreatmentResult ?? 'NONE',
+    waterReuseResult: operationStatus?.waterReuseResult ?? 'NONE',
+    pipeLineResult: operationStatus?.pipeLineResult ?? 'NONE',
+    ductResult: operationStatus?.ductResult ?? 'NONE',
+    insulationResult: operationStatus?.insulationResult ?? 'NONE',
+    automaticControlResult: operationStatus?.automaticControlResult ?? 'NONE',
+    noiseVibrationSeismicResult: operationStatus?.noiseVibrationSeismicResult ?? 'NONE',
+
+    // Remark 및 Opinion 필드는 ''으로 초기화
+    refrigeratorRemark: operationStatus?.refrigeratorRemark ?? '',
+    coolingTowerRemark: operationStatus?.coolingTowerRemark ?? '',
+    thermalStorageRemark: operationStatus?.thermalStorageRemark ?? '',
+    boilerRemark: operationStatus?.boilerRemark ?? '',
+    heatExchangerRemark: operationStatus?.heatExchangerRemark ?? '',
+    expansionTankRemark: operationStatus?.expansionTankRemark ?? '',
+    pumpRemark: operationStatus?.pumpRemark ?? '',
+    renewableEnergySystemRemark: operationStatus?.renewableEnergySystemRemark ?? '',
+    packageAirConditionerRemark: operationStatus?.packageAirConditionerRemark ?? '',
+    precisionAirConditionerRemark: operationStatus?.precisionAirConditionerRemark ?? '',
+    airHandlingUnitRemark: operationStatus?.airHandlingUnitRemark ?? '',
+    fanCoilUnitRemark: operationStatus?.fanCoilUnitRemark ?? '',
+    ventilationSystemRemark: operationStatus?.ventilationSystemRemark ?? '',
+    filterRemark: operationStatus?.filterRemark ?? '',
+    sanitaryFacilityRemark: operationStatus?.sanitaryFacilityRemark ?? '',
+    hotWaterSupplyRemark: operationStatus?.hotWaterSupplyRemark ?? '',
+    waterTankRemark: operationStatus?.waterTankRemark ?? '',
+    drainageRemark: operationStatus?.drainageRemark ?? '',
+    sewageTreatmentRemark: operationStatus?.sewageTreatmentRemark ?? '',
+    waterReuseRemark: operationStatus?.waterReuseRemark ?? '',
+    pipeLineRemark: operationStatus?.pipeLineRemark ?? '',
+    ductRemark: operationStatus?.ductRemark ?? '',
+    insulationRemark: operationStatus?.insulationRemark ?? '',
+    automaticControlRemark: operationStatus?.automaticControlRemark ?? '',
+    noiseVibrationSeismicRemark: operationStatus?.noiseVibrationSeismicRemark ?? '',
+    opinion: operationStatus?.opinion ?? ''
+  }
+}
+
+export function makeMeasurementSeed(measurement?: MachinePerformanceReviewMeasurementResponseDtoType) {
+  return {
+    // Result 필드는 'NONE'으로 초기화
+    refrigeratorResult: measurement?.refrigeratorResult ?? 'NONE',
+    coolingTowerResult: measurement?.coolingTowerResult ?? 'NONE',
+    thermalStorageResult: measurement?.thermalStorageResult ?? 'NONE',
+    boilerResult: measurement?.boilerResult ?? 'NONE',
+    heatExchangerResult: measurement?.heatExchangerResult ?? 'NONE',
+    expansionTankResult: measurement?.expansionTankResult ?? 'NONE',
+    pumpResult: measurement?.pumpResult ?? 'NONE',
+    renewableEnergySystemResult: measurement?.renewableEnergySystemResult ?? 'NONE',
+    packageAirConditionerResult: measurement?.packageAirConditionerResult ?? 'NONE',
+    precisionAirConditionerResult: measurement?.precisionAirConditionerResult ?? 'NONE',
+    airHandlingUnitResult: measurement?.airHandlingUnitResult ?? 'NONE',
+    fanCoilUnitResult: measurement?.fanCoilUnitResult ?? 'NONE',
+    ventilationSystemResult: measurement?.ventilationSystemResult ?? 'NONE',
+    filterResult: measurement?.filterResult ?? 'NONE',
+    sanitaryFacilityResult: measurement?.sanitaryFacilityResult ?? 'NONE',
+    hotWaterSupplyResult: measurement?.hotWaterSupplyResult ?? 'NONE',
+    waterTankResult: measurement?.waterTankResult ?? 'NONE',
+    drainageResult: measurement?.drainageResult ?? 'NONE',
+    sewageTreatmentResult: measurement?.sewageTreatmentResult ?? 'NONE',
+    waterReuseResult: measurement?.waterReuseResult ?? 'NONE',
+    pipeLineResult: measurement?.pipeLineResult ?? 'NONE',
+    ductResult: measurement?.ductResult ?? 'NONE',
+    insulationResult: measurement?.insulationResult ?? 'NONE',
+    automaticControlResult: measurement?.automaticControlResult ?? 'NONE',
+    noiseVibrationSeismicResult: measurement?.noiseVibrationSeismicResult ?? 'NONE',
+
+    // Remark 및 Opinion 필드는 ''으로 초기화
+    refrigeratorRemark: measurement?.refrigeratorRemark ?? '',
+    coolingTowerRemark: measurement?.coolingTowerRemark ?? '',
+    thermalStorageRemark: measurement?.thermalStorageRemark ?? '',
+    boilerRemark: measurement?.boilerRemark ?? '',
+    heatExchangerRemark: measurement?.heatExchangerRemark ?? '',
+    expansionTankRemark: measurement?.expansionTankRemark ?? '',
+    pumpRemark: measurement?.pumpRemark ?? '',
+    renewableEnergySystemRemark: measurement?.renewableEnergySystemRemark ?? '',
+    packageAirConditionerRemark: measurement?.packageAirConditionerRemark ?? '',
+    precisionAirConditionerRemark: measurement?.precisionAirConditionerRemark ?? '',
+    airHandlingUnitRemark: measurement?.airHandlingUnitRemark ?? '',
+    fanCoilUnitRemark: measurement?.fanCoilUnitRemark ?? '',
+    ventilationSystemRemark: measurement?.ventilationSystemRemark ?? '',
+    filterRemark: measurement?.filterRemark ?? '',
+    sanitaryFacilityRemark: measurement?.sanitaryFacilityRemark ?? '',
+    hotWaterSupplyRemark: measurement?.hotWaterSupplyRemark ?? '',
+    waterTankRemark: measurement?.waterTankRemark ?? '',
+    drainageRemark: measurement?.drainageRemark ?? '',
+    sewageTreatmentRemark: measurement?.sewageTreatmentRemark ?? '',
+    waterReuseRemark: measurement?.waterReuseRemark ?? '',
+    pipeLineRemark: measurement?.pipeLineRemark ?? '',
+    ductRemark: measurement?.ductRemark ?? '',
+    insulationRemark: measurement?.insulationRemark ?? '',
+    automaticControlRemark: measurement?.automaticControlRemark ?? '',
+    noiseVibrationSeismicRemark: measurement?.noiseVibrationSeismicRemark ?? '',
+    opinion: measurement?.opinion ?? ''
+  }
+}
 
 export function makeImprovementSeed(improvement?: MachinePerformanceReviewImprovementResponseDtoType) {
   return {

@@ -16,6 +16,7 @@ import {
   useMutateResultSummaryAutoFill
 } from '@/@core/hooks/customTanstackQueries'
 import type { MachinePerformanceReviewSummaryResponseDtoType } from '@/@core/types'
+import { makeResultSummarySeed } from './utils/makeSeed'
 
 const ResultSummaryTab = forwardRef<refType, {}>(({}, ref) => {
   const machineProjectId = useParams().id?.toString()
@@ -34,29 +35,11 @@ const ResultSummaryTab = forwardRef<refType, {}>(({}, ref) => {
     reset,
     formState: { isDirty }
   } = useForm<MachinePerformanceReviewSummaryResponseDtoType>({
-    defaultValues: {
-      maintenanceGuidelineAdequacy: resultSummary?.maintenanceGuidelineAdequacy || '',
-      systemOperationalStatus: resultSummary?.systemOperationalStatus || '',
-      designAndMeasuredValueConsistency: resultSummary?.designAndMeasuredValueConsistency || '',
-      equipmentAgingDegree: resultSummary?.equipmentAgingDegree || '',
-      inspectionDeficiencies: resultSummary?.inspectionDeficiencies || '',
-      improvementNeedsAndPlan: resultSummary?.improvementNeedsAndPlan || '',
-      energyUsageByType: resultSummary?.energyUsageByType || '',
-      energyEfficiencyOperationMethod: resultSummary?.energyEfficiencyOperationMethod || ''
-    }
+    defaultValues: makeResultSummarySeed(resultSummary)
   })
 
   useEffect(() => {
-    reset({
-      maintenanceGuidelineAdequacy: resultSummary?.maintenanceGuidelineAdequacy || '',
-      systemOperationalStatus: resultSummary?.systemOperationalStatus || '',
-      designAndMeasuredValueConsistency: resultSummary?.designAndMeasuredValueConsistency || '',
-      equipmentAgingDegree: resultSummary?.equipmentAgingDegree || '',
-      inspectionDeficiencies: resultSummary?.inspectionDeficiencies || '',
-      improvementNeedsAndPlan: resultSummary?.improvementNeedsAndPlan || '',
-      energyUsageByType: resultSummary?.energyUsageByType || '',
-      energyEfficiencyOperationMethod: resultSummary?.energyEfficiencyOperationMethod || ''
-    })
+    reset(makeResultSummarySeed(resultSummary))
   }, [resultSummary, reset, autoFillTrigger])
 
   useImperativeHandle(ref, () => ({
