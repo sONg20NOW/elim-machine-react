@@ -89,6 +89,7 @@ const YearlyPlanTab = memo(
                   render={({ field }) => (
                     <Select
                       sx={{
+                        px: 4,
                         backgroundColor: 'transparent',
                         border: 'none',
                         '&:before, &:after': { display: 'none' }, // 밑줄 제거
@@ -100,8 +101,7 @@ const YearlyPlanTab = memo(
                           display: 'flex',
                           alignItems: 'center',
                           height: '100%', // 높이 최대
-                          py: 0,
-                          px: 2
+                          py: 0
                         }
                       }}
                       fullWidth
