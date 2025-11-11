@@ -179,14 +179,7 @@ export default function EngineerPage() {
   }
 
   const isChecked = (engineer: MachineEngineerPageResponseDtoType) => {
-    let exist = false
-
-    checked.forEach(v => {
-      if (JSON.stringify(v) === JSON.stringify({ engineerId: engineer.engineerId, version: engineer.version }))
-        exist = true
-    })
-
-    return exist
+    return checked.some(v => v.engineerId === engineer.engineerId)
   }
 
   // 여러 기술자 한번에 삭제
