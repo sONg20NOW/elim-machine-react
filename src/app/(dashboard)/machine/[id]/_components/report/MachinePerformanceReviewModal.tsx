@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 
 import {
   AppBar,
+  Backdrop,
   Box,
   Button,
   Dialog,
@@ -30,12 +31,12 @@ import { auth } from '@/lib/auth'
 import { handleSuccess } from '@/utils/errorHandler'
 import type { MachineInspectionRootCategoryResponseDtoType } from '@/@core/types'
 import ResultSummaryTab from './tabs/ResultSummaryTab'
-import GuideTab from './tabs/GuideTab'
 import OperationStatusTab from './tabs/OperationStatusTab'
 import MeasurementTab from './tabs/MeasurementTab'
 import AgingTab from './tabs/AgingTab'
 import ImprovementTab from './tabs/ImprovementTab'
 import YearlyPlanTab from './tabs/YearlyPlanTab'
+import { GuideTab } from './tabs/GuideTab'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -81,6 +82,7 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
   const machineProjectId = id?.toString()
 
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false) // ✅ 로딩 상태 추가
   const [tabValue, setTabValue] = useState<TabType>('결과요약')
   const [rootCategories, setRootCategories] = useState<MachineInspectionRootCategoryResponseDtoType[]>([])
 
@@ -106,12 +108,24 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
     scrollAreaRef.current && scrollAreaRef.current.scrollTo({ top: 0 })
   }, [tabValue])
 
-  // const { data: guide, refetch: refetchGuide } = useGetGuide(machineProjectId!)
-  // const { data: operationStatus, refetch: refetchOperationStatus } = useGetOperationStatus(machineProjectId!)
-  // const { data: measurement, refetch: refetchMeasurement } = useGetMeasurement(machineProjectId!)
-  // const { data: aging, refetch: refetchAging } = useGetAging(machineProjectId!)
-  // const { data: improvement, refetch: refetchImprovement } = useGetImprovement(machineProjectId!)
-  // const { data: yearlyPlan, refetch: refetchYearlyPlan } = useGetYearlyPlan(machineProjectId!)
+  const handleOpen = async () => {
+    // 1️⃣ 클릭 즉시 백드롭 표시
+    setLoading(true)
+
+    // 2️⃣ 약간의 지연 후 Dialog 오픈
+    setTimeout(() => {
+      setOpen(true)
+    }, 50) // 약간의 텀 (렌더 준비 시간)
+  }
+
+  const handleDialogEntered = () => {
+    // 3️⃣ 다이얼로그 애니메이션 끝나면 백드롭 해제
+    setLoading(false)
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+  }
 
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
@@ -226,23 +240,32 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
 
   return (
     <>
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={() => {
-          setOpen(true)
+      {/* ✅ 클릭 시 즉시 나타나는 백드롭 */}
+      <Backdrop
+        open={loading}
+        sx={{
+          color: '#fff',
+          zIndex: theme => theme.zIndex.modal - 1 // Dialog보다 위
         }}
-      >
+      />
+      <Button variant='contained' color='primary' onClick={handleOpen}>
         성능점검시 검토사항
       </Button>
-      <Dialog fullWidth maxWidth={'lg'} open={open}>
+      <Dialog
+        fullWidth
+        maxWidth={'lg'}
+        open={open}
+        slotProps={{
+          transition: { onEntered: handleDialogEntered } // ✅ 애니메이션 끝나면 loading 해제
+        }}
+      >
         <DialogTitle variant='h3' sx={{ position: 'relative' }}>
           <Box sx={{ display: 'flex', alignItems: 'end', gap: 2 }}>
             성능점검시 검토사항
             <Typography variant='h5' sx={{ color: 'gray' }}>
               {machineProjectName}
             </Typography>
-            <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
+            <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={handleClose}>
               <i className='tabler-x' />
             </IconButton>
           </Box>
@@ -308,7 +331,7 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
           {/* <Button color='success' variant='contained' type='button'>
               보고서 다운로드
             </Button> */}
-          <Button color='secondary' variant='contained' onClick={() => setOpen(false)} type='button'>
+          <Button color='secondary' variant='contained' onClick={handleClose} type='button'>
             닫기
           </Button>
         </DialogActions>

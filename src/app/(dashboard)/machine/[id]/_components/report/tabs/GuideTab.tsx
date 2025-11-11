@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle } from 'react'
+import { forwardRef, memo, useEffect, useImperativeHandle } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -12,7 +12,7 @@ import type { MachinePerformanceReviewGuideResponseDtoType } from '@/@core/types
 import { useGetGuide, useMutateGuide } from '@/@core/hooks/customTanstackQueries'
 import { makeGuideSeed } from './utils/makeSeed'
 
-const GuideTab = forwardRef<refType, {}>(({}, ref) => {
+const GuideTabInner = forwardRef<refType, {}>(({}, ref) => {
   const machineProjectId = useParams().id?.toString()
 
   const theme = useTheme()
@@ -174,4 +174,4 @@ const GuideTab = forwardRef<refType, {}>(({}, ref) => {
   )
 })
 
-export default GuideTab
+export const GuideTab = memo(GuideTabInner)
