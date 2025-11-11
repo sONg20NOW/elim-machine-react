@@ -1104,7 +1104,10 @@ export const useMutateAgingAutoFill = (machineProjectId: string) => {
     },
 
     onSuccess: newAgingData => {
-      queryClient.setQueryData(queryKey, newAgingData)
+      queryClient.setQueryData(queryKey, (prev: MachinePerformanceReviewAgingReadResponseDtoType) => ({
+        ...prev,
+        ...newAgingData
+      }))
       console.log('노후도 자동채우기 정보가 성공적으로 반영되었습니다.')
     },
 
