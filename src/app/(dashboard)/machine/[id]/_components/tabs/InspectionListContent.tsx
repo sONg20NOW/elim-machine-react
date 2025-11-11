@@ -138,7 +138,7 @@ const InspectionListContent = ({}) => {
   }, [getFilteredInspectionList, open, showAddModalOpen, showPictureListModal])
 
   //  체크 핸들러 (다중선택)
-  const handleCheckEngineer = (machine: MachineInspectionPageResponseDtoType) => {
+  const handleCheck = (machine: MachineInspectionPageResponseDtoType) => {
     const obj = { machineInspectionId: machine.machineInspectionId, version: machine.version }
     const checked = isChecked(machine)
 
@@ -150,7 +150,7 @@ const InspectionListContent = ({}) => {
   }
 
   // 한번에 선택
-  const handleCheckAllEngineers = (checked: boolean) => {
+  const handleCheckAll = (checked: boolean) => {
     if (checked) {
       setChecked(prev => {
         const newChecked = structuredClone(prev)
@@ -169,14 +169,9 @@ const InspectionListContent = ({}) => {
   }
 
   const isChecked = (machine: MachineInspectionPageResponseDtoType) => {
-    let exist = false
+    console.log(checked)
 
-    checked.forEach(v => {
-      if (JSON.stringify(v) === JSON.stringify({ newChecked: machine.machineInspectionId, version: machine.version }))
-        exist = true
-    })
-
-    return exist
+    return checked.some(v => v.machineInspectionId === machine.machineInspectionId)
   }
 
   // 여러개 한번에 삭제
@@ -305,7 +300,7 @@ const InspectionListContent = ({}) => {
                 color='secondary'
                 onClick={() => {
                   setShowCheckBox(prev => !prev)
-                  handleCheckAllEngineers(false)
+                  handleCheckAll(false)
                 }}
               >
                 취소
@@ -340,8 +335,8 @@ const InspectionListContent = ({}) => {
         error={error}
         showCheckBox={showCheckBox}
         isChecked={isChecked}
-        handleCheckItem={handleCheckEngineer}
-        handleCheckAllItems={handleCheckAllEngineers}
+        handleCheckItem={handleCheck}
+        handleCheckAllItems={handleCheckAll}
         onClickPicCount={async (machine: MachineInspectionPageResponseDtoType) => {
           await handleSelectInspection(machine, true)
           setShowPictureListModal(true)
