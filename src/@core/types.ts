@@ -790,387 +790,394 @@ export interface MachinePerformanceReviewSummaryResponseDtoType {
   energyEfficiencyOperationMethod: string
 }
 
+export type planYearType = 'INSPECTION' | 'REPLACEMENT' | 'REPAIR' | 'INSTALLATION' | 'NONE'
+export type resultType = 'PASS' | 'FAIL' | 'NONE'
+
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/yearly-plan 연도별 계획
 export interface MachinePerformanceReviewYearlyPlanResponseDtoType {
-  refrigeratorResult: string
+  refrigeratorResult: resultType
   refrigeratorDeficiency: string
-  refrigeratorPlanYear1: string
-  refrigeratorPlanYear2: string
-  refrigeratorPlanYear3: string
-  refrigeratorPlanYear4: string
-  refrigeratorPlanYear5: string
-  coolingTowerResult: string
+  refrigeratorPlanYear1: planYearType
+  refrigeratorPlanYear2: planYearType
+  refrigeratorPlanYear3: planYearType
+  refrigeratorPlanYear4: planYearType
+  refrigeratorPlanYear5: planYearType
+  coolingTowerResult: resultType
   coolingTowerDeficiency: string
-  coolingTowerPlanYear1: string
-  coolingTowerPlanYear2: string
-  coolingTowerPlanYear3: string
-  coolingTowerPlanYear4: string
-  coolingTowerPlanYear5: string
-  thermalStorageResult: string
+  coolingTowerPlanYear1: planYearType
+  coolingTowerPlanYear2: planYearType
+  coolingTowerPlanYear3: planYearType
+  coolingTowerPlanYear4: planYearType
+  coolingTowerPlanYear5: planYearType
+  thermalStorageResult: resultType
   thermalStorageDeficiency: string
-  thermalStoragePlanYear1: string
-  thermalStoragePlanYear2: string
-  thermalStoragePlanYear3: string
-  thermalStoragePlanYear4: string
-  thermalStoragePlanYear5: string
-  boilerResult: string
+  thermalStoragePlanYear1: planYearType
+  thermalStoragePlanYear2: planYearType
+  thermalStoragePlanYear3: planYearType
+  thermalStoragePlanYear4: planYearType
+  thermalStoragePlanYear5: planYearType
+  boilerResult: resultType
   boilerDeficiency: string
-  boilerPlanYear1: string
-  boilerPlanYear2: string
-  boilerPlanYear3: string
-  boilerPlanYear4: string
-  boilerPlanYear5: string
-  heatExchangerResult: string
+  boilerPlanYear1: planYearType
+  boilerPlanYear2: planYearType
+  boilerPlanYear3: planYearType
+  boilerPlanYear4: planYearType
+  boilerPlanYear5: planYearType
+  heatExchangerResult: resultType
   heatExchangerDeficiency: string
-  heatExchangerPlanYear1: string
-  heatExchangerPlanYear2: string
-  heatExchangerPlanYear3: string
-  heatExchangerPlanYear4: string
-  heatExchangerPlanYear5: string
-  expansionTankResult: string
+  heatExchangerPlanYear1: planYearType
+  heatExchangerPlanYear2: planYearType
+  heatExchangerPlanYear3: planYearType
+  heatExchangerPlanYear4: planYearType
+  heatExchangerPlanYear5: planYearType
+  expansionTankResult: resultType
   expansionTankDeficiency: string
-  expansionTankPlanYear1: string
-  expansionTankPlanYear2: string
-  expansionTankPlanYear3: string
-  expansionTankPlanYear4: string
-  expansionTankPlanYear5: string
-  pumpResult: string
+  expansionTankPlanYear1: planYearType
+  expansionTankPlanYear2: planYearType
+  expansionTankPlanYear3: planYearType
+  expansionTankPlanYear4: planYearType
+  expansionTankPlanYear5: planYearType
+  pumpResult: resultType
   pumpDeficiency: string
-  pumpPlanYear1: string
-  pumpPlanYear2: string
-  pumpPlanYear3: string
-  pumpPlanYear4: string
-  pumpPlanYear5: string
-  renewableEnergySystemResult: string
+  pumpPlanYear1: planYearType
+  pumpPlanYear2: planYearType
+  pumpPlanYear3: planYearType
+  pumpPlanYear4: planYearType
+  pumpPlanYear5: planYearType
+  renewableEnergySystemResult: resultType
   renewableEnergySystemDeficiency: string
-  renewableEnergySystemPlanYear1: string
-  renewableEnergySystemPlanYear2: string
-  renewableEnergySystemPlanYear3: string
-  renewableEnergySystemPlanYear4: string
-  renewableEnergySystemPlanYear5: string
-  packageAirConditionerResult: string
+  renewableEnergySystemPlanYear1: planYearType
+  renewableEnergySystemPlanYear2: planYearType
+  renewableEnergySystemPlanYear3: planYearType
+  renewableEnergySystemPlanYear4: planYearType
+  renewableEnergySystemPlanYear5: planYearType
+  packageAirConditionerResult: resultType
   packageAirConditionerDeficiency: string
-  packageAirConditionerPlanYear1: string
-  packageAirConditionerPlanYear2: string
-  packageAirConditionerPlanYear3: string
-  packageAirConditionerPlanYear4: string
-  packageAirConditionerPlanYear5: string
-  precisionAirConditionerResult: string
+  packageAirConditionerPlanYear1: planYearType
+  packageAirConditionerPlanYear2: planYearType
+  packageAirConditionerPlanYear3: planYearType
+  packageAirConditionerPlanYear4: planYearType
+  packageAirConditionerPlanYear5: planYearType
+  precisionAirConditionerResult: resultType
   precisionAirConditionerDeficiency: string
-  precisionAirConditionerPlanYear1: string
-  precisionAirConditionerPlanYear2: string
-  precisionAirConditionerPlanYear3: string
-  precisionAirConditionerPlanYear4: string
-  precisionAirConditionerPlanYear5: string
-  airHandlingUnitResult: string
+  precisionAirConditionerPlanYear1: planYearType
+  precisionAirConditionerPlanYear2: planYearType
+  precisionAirConditionerPlanYear3: planYearType
+  precisionAirConditionerPlanYear4: planYearType
+  precisionAirConditionerPlanYear5: planYearType
+  airHandlingUnitResult: resultType
   airHandlingUnitDeficiency: string
-  airHandlingUnitPlanYear1: string
-  airHandlingUnitPlanYear2: string
-  airHandlingUnitPlanYear3: string
-  airHandlingUnitPlanYear4: string
-  airHandlingUnitPlanYear5: string
-  fanCoilUnitResult: string
+  airHandlingUnitPlanYear1: planYearType
+  airHandlingUnitPlanYear2: planYearType
+  airHandlingUnitPlanYear3: planYearType
+  airHandlingUnitPlanYear4: planYearType
+  airHandlingUnitPlanYear5: planYearType
+  fanCoilUnitResult: resultType
   fanCoilUnitDeficiency: string
-  fanCoilUnitPlanYear1: string
-  fanCoilUnitPlanYear2: string
-  fanCoilUnitPlanYear3: string
-  fanCoilUnitPlanYear4: string
-  fanCoilUnitPlanYear5: string
-  ventilationSystemResult: string
+  fanCoilUnitPlanYear1: planYearType
+  fanCoilUnitPlanYear2: planYearType
+  fanCoilUnitPlanYear3: planYearType
+  fanCoilUnitPlanYear4: planYearType
+  fanCoilUnitPlanYear5: planYearType
+  ventilationSystemResult: resultType
   ventilationSystemDeficiency: string
-  ventilationSystemPlanYear1: string
-  ventilationSystemPlanYear2: string
-  ventilationSystemPlanYear3: string
-  ventilationSystemPlanYear4: string
-  ventilationSystemPlanYear5: string
-  filterResult: string
+  ventilationSystemPlanYear1: planYearType
+  ventilationSystemPlanYear2: planYearType
+  ventilationSystemPlanYear3: planYearType
+  ventilationSystemPlanYear4: planYearType
+  ventilationSystemPlanYear5: planYearType
+  filterResult: resultType
   filterDeficiency: string
-  filterPlanYear1: string
-  filterPlanYear2: string
-  filterPlanYear3: string
-  filterPlanYear4: string
-  filterPlanYear5: string
-  sanitaryFacilityResult: string
+  filterPlanYear1: planYearType
+  filterPlanYear2: planYearType
+  filterPlanYear3: planYearType
+  filterPlanYear4: planYearType
+  filterPlanYear5: planYearType
+  sanitaryFacilityResult: resultType
   sanitaryFacilityDeficiency: string
-  sanitaryFacilityPlanYear1: string
-  sanitaryFacilityPlanYear2: string
-  sanitaryFacilityPlanYear3: string
-  sanitaryFacilityPlanYear4: string
-  sanitaryFacilityPlanYear5: string
-  hotWaterSupplyResult: string
+  sanitaryFacilityPlanYear1: planYearType
+  sanitaryFacilityPlanYear2: planYearType
+  sanitaryFacilityPlanYear3: planYearType
+  sanitaryFacilityPlanYear4: planYearType
+  sanitaryFacilityPlanYear5: planYearType
+  hotWaterSupplyResult: resultType
   hotWaterSupplyDeficiency: string
-  hotWaterSupplyPlanYear1: string
-  hotWaterSupplyPlanYear2: string
-  hotWaterSupplyPlanYear3: string
-  hotWaterSupplyPlanYear4: string
-  hotWaterSupplyPlanYear5: string
-  waterTankResult: string
+  hotWaterSupplyPlanYear1: planYearType
+  hotWaterSupplyPlanYear2: planYearType
+  hotWaterSupplyPlanYear3: planYearType
+  hotWaterSupplyPlanYear4: planYearType
+  hotWaterSupplyPlanYear5: planYearType
+  waterTankResult: resultType
   waterTankDeficiency: string
-  waterTankPlanYear1: string
-  waterTankPlanYear2: string
-  waterTankPlanYear3: string
-  waterTankPlanYear4: string
-  waterTankPlanYear5: string
-  drainageResult: string
+  waterTankPlanYear1: planYearType
+  waterTankPlanYear2: planYearType
+  waterTankPlanYear3: planYearType
+  waterTankPlanYear4: planYearType
+  waterTankPlanYear5: planYearType
+  drainageResult: resultType
   drainageDeficiency: string
-  drainagePlanYear1: string
-  drainagePlanYear2: string
-  drainagePlanYear3: string
-  drainagePlanYear4: string
-  drainagePlanYear5: string
-  sewageTreatmentResult: string
+  drainagePlanYear1: planYearType
+  drainagePlanYear2: planYearType
+  drainagePlanYear3: planYearType
+  drainagePlanYear4: planYearType
+  drainagePlanYear5: planYearType
+  sewageTreatmentResult: resultType
   sewageTreatmentDeficiency: string
-  sewageTreatmentPlanYear1: string
-  sewageTreatmentPlanYear2: string
-  sewageTreatmentPlanYear3: string
-  sewageTreatmentPlanYear4: string
-  sewageTreatmentPlanYear5: string
-  waterReuseResult: string
+  sewageTreatmentPlanYear1: planYearType
+  sewageTreatmentPlanYear2: planYearType
+  sewageTreatmentPlanYear3: planYearType
+  sewageTreatmentPlanYear4: planYearType
+  sewageTreatmentPlanYear5: planYearType
+  waterReuseResult: resultType
   waterReuseDeficiency: string
-  waterReusePlanYear1: string
-  waterReusePlanYear2: string
-  waterReusePlanYear3: string
-  waterReusePlanYear4: string
-  waterReusePlanYear5: string
-  pipeLineResult: string
+  waterReusePlanYear1: planYearType
+  waterReusePlanYear2: planYearType
+  waterReusePlanYear3: planYearType
+  waterReusePlanYear4: planYearType
+  waterReusePlanYear5: planYearType
+  pipeLineResult: resultType
   pipeLineDeficiency: string
-  pipeLinePlanYear1: string
-  pipeLinePlanYear2: string
-  pipeLinePlanYear3: string
-  pipeLinePlanYear4: string
-  pipeLinePlanYear5: string
-  ductResult: string
+  pipeLinePlanYear1: planYearType
+  pipeLinePlanYear2: planYearType
+  pipeLinePlanYear3: planYearType
+  pipeLinePlanYear4: planYearType
+  pipeLinePlanYear5: planYearType
+  ductResult: resultType
   ductDeficiency: string
-  ductPlanYear1: string
-  ductPlanYear2: string
-  ductPlanYear3: string
-  ductPlanYear4: string
-  ductPlanYear5: string
-  insulationResult: string
+  ductPlanYear1: planYearType
+  ductPlanYear2: planYearType
+  ductPlanYear3: planYearType
+  ductPlanYear4: planYearType
+  ductPlanYear5: planYearType
+  insulationResult: resultType
   insulationDeficiency: string
-  insulationPlanYear1: string
-  insulationPlanYear2: string
-  insulationPlanYear3: string
-  insulationPlanYear4: string
-  insulationPlanYear5: string
-  automaticControlResult: string
+  insulationPlanYear1: planYearType
+  insulationPlanYear2: planYearType
+  insulationPlanYear3: planYearType
+  insulationPlanYear4: planYearType
+  insulationPlanYear5: planYearType
+  automaticControlResult: resultType
   automaticControlDeficiency: string
-  automaticControlPlanYear1: string
-  automaticControlPlanYear2: string
-  automaticControlPlanYear3: string
-  automaticControlPlanYear4: string
-  automaticControlPlanYear5: string
-  noiseVibrationSeismicResult: string
+  automaticControlPlanYear1: planYearType
+  automaticControlPlanYear2: planYearType
+  automaticControlPlanYear3: planYearType
+  automaticControlPlanYear4: planYearType
+  automaticControlPlanYear5: planYearType
+  noiseVibrationSeismicResult: resultType
   noiseVibrationSeismicDeficiency: string
-  noiseVibrationSeismicPlanYear1: string
-  noiseVibrationSeismicPlanYear2: string
-  noiseVibrationSeismicPlanYear3: string
-  noiseVibrationSeismicPlanYear4: string
-  noiseVibrationSeismicPlanYear5: string
+  noiseVibrationSeismicPlanYear1: planYearType
+  noiseVibrationSeismicPlanYear2: planYearType
+  noiseVibrationSeismicPlanYear3: planYearType
+  noiseVibrationSeismicPlanYear4: planYearType
+  noiseVibrationSeismicPlanYear5: planYearType
   note: string
 }
 
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/operation-status 작동상태
 export interface MachinePerformanceReviewOperationStatusResponseDtoType {
-  refrigeratorResult: string
+  refrigeratorResult: resultType
   refrigeratorRemark: string
-  coolingTowerResult: string
+  coolingTowerResult: resultType
   coolingTowerRemark: string
-  thermalStorageResult: string
+  thermalStorageResult: resultType
   thermalStorageRemark: string
-  boilerResult: string
+  boilerResult: resultType
   boilerRemark: string
-  heatExchangerResult: string
+  heatExchangerResult: resultType
   heatExchangerRemark: string
-  expansionTankResult: string
+  expansionTankResult: resultType
   expansionTankRemark: string
-  pumpResult: string
+  pumpResult: resultType
   pumpRemark: string
-  renewableEnergySystemResult: string
+  renewableEnergySystemResult: resultType
   renewableEnergySystemRemark: string
-  packageAirConditionerResult: string
+  packageAirConditionerResult: resultType
   packageAirConditionerRemark: string
-  precisionAirConditionerResult: string
+  precisionAirConditionerResult: resultType
   precisionAirConditionerRemark: string
-  airHandlingUnitResult: string
+  airHandlingUnitResult: resultType
   airHandlingUnitRemark: string
-  fanCoilUnitResult: string
+  fanCoilUnitResult: resultType
   fanCoilUnitRemark: string
-  ventilationSystemResult: string
+  ventilationSystemResult: resultType
   ventilationSystemRemark: string
-  filterResult: string
+  filterResult: resultType
   filterRemark: string
-  sanitaryFacilityResult: string
+  sanitaryFacilityResult: resultType
   sanitaryFacilityRemark: string
-  hotWaterSupplyResult: string
+  hotWaterSupplyResult: resultType
   hotWaterSupplyRemark: string
-  waterTankResult: string
+  waterTankResult: resultType
   waterTankRemark: string
-  drainageResult: string
+  drainageResult: resultType
   drainageRemark: string
-  sewageTreatmentResult: string
+  sewageTreatmentResult: resultType
   sewageTreatmentRemark: string
-  waterReuseResult: string
+  waterReuseResult: resultType
   waterReuseRemark: string
-  pipeLineResult: string
+  pipeLineResult: resultType
   pipeLineRemark: string
-  ductResult: string
+  ductResult: resultType
   ductRemark: string
-  insulationResult: string
+  insulationResult: resultType
   insulationRemark: string
-  automaticControlResult: string
+  automaticControlResult: resultType
   automaticControlRemark: string
-  noiseVibrationSeismicResult: string
+  noiseVibrationSeismicResult: resultType
   noiseVibrationSeismicRemark: string
   opinion: string
 }
 
+export type matchResultType = 'MATCH' | 'MISMATCH' | 'NONE'
+
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/measurement 측정값 일치
 export interface MachinePerformanceReviewMeasurementResponseDtoType {
-  refrigeratorResult: string
+  refrigeratorResult: matchResultType
   refrigeratorRemark: string
-  coolingTowerResult: string
+  coolingTowerResult: matchResultType
   coolingTowerRemark: string
-  thermalStorageResult: string
+  thermalStorageResult: matchResultType
   thermalStorageRemark: string
-  boilerResult: string
+  boilerResult: matchResultType
   boilerRemark: string
-  heatExchangerResult: string
+  heatExchangerResult: matchResultType
   heatExchangerRemark: string
-  expansionTankResult: string
+  expansionTankResult: matchResultType
   expansionTankRemark: string
-  pumpResult: string
+  pumpResult: matchResultType
   pumpRemark: string
-  renewableEnergySystemResult: string
+  renewableEnergySystemResult: matchResultType
   renewableEnergySystemRemark: string
-  packageAirConditionerResult: string
+  packageAirConditionerResult: matchResultType
   packageAirConditionerRemark: string
-  precisionAirConditionerResult: string
+  precisionAirConditionerResult: matchResultType
   precisionAirConditionerRemark: string
-  airHandlingUnitResult: string
+  airHandlingUnitResult: matchResultType
   airHandlingUnitRemark: string
-  fanCoilUnitResult: string
+  fanCoilUnitResult: matchResultType
   fanCoilUnitRemark: string
-  ventilationSystemResult: string
+  ventilationSystemResult: matchResultType
   ventilationSystemRemark: string
-  filterResult: string
+  filterResult: matchResultType
   filterRemark: string
-  sanitaryFacilityResult: string
+  sanitaryFacilityResult: matchResultType
   sanitaryFacilityRemark: string
-  hotWaterSupplyResult: string
+  hotWaterSupplyResult: matchResultType
   hotWaterSupplyRemark: string
-  waterTankResult: string
+  waterTankResult: matchResultType
   waterTankRemark: string
-  drainageResult: string
+  drainageResult: matchResultType
   drainageRemark: string
-  sewageTreatmentResult: string
+  sewageTreatmentResult: matchResultType
   sewageTreatmentRemark: string
-  waterReuseResult: string
+  waterReuseResult: matchResultType
   waterReuseRemark: string
-  pipeLineResult: string
+  pipeLineResult: matchResultType
   pipeLineRemark: string
-  ductResult: string
+  ductResult: matchResultType
   ductRemark: string
-  insulationResult: string
+  insulationResult: matchResultType
   insulationRemark: string
-  automaticControlResult: string
+  automaticControlResult: matchResultType
   automaticControlRemark: string
-  noiseVibrationSeismicResult: string
+  noiseVibrationSeismicResult: matchResultType
   noiseVibrationSeismicRemark: string
   opinion: string
 }
 
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/improvement 개선사항
 export interface MachinePerformanceReviewImprovementResponseDtoType {
-  refrigeratorResult: string
+  refrigeratorResult: resultType
   refrigeratorDeficiency: string
   refrigeratorImprovement: string
-  coolingTowerResult: string
+  coolingTowerResult: resultType
   coolingTowerDeficiency: string
   coolingTowerImprovement: string
-  thermalStorageResult: string
+  thermalStorageResult: resultType
   thermalStorageDeficiency: string
   thermalStorageImprovement: string
-  boilerResult: string
+  boilerResult: resultType
   boilerDeficiency: string
   boilerImprovement: string
-  heatExchangerResult: string
+  heatExchangerResult: resultType
   heatExchangerDeficiency: string
   heatExchangerImprovement: string
-  expansionTankResult: string
+  expansionTankResult: resultType
   expansionTankDeficiency: string
   expansionTankImprovement: string
-  pumpResult: string
+  pumpResult: resultType
   pumpDeficiency: string
   pumpImprovement: string
-  renewableEnergySystemResult: string
+  renewableEnergySystemResult: resultType
   renewableEnergySystemDeficiency: string
   renewableEnergySystemImprovement: string
-  packageAirConditionerResult: string
+  packageAirConditionerResult: resultType
   packageAirConditionerDeficiency: string
   packageAirConditionerImprovement: string
-  precisionAirConditionerResult: string
+  precisionAirConditionerResult: resultType
   precisionAirConditionerDeficiency: string
   precisionAirConditionerImprovement: string
-  airHandlingUnitResult: string
+  airHandlingUnitResult: resultType
   airHandlingUnitDeficiency: string
   airHandlingUnitImprovement: string
-  fanCoilUnitResult: string
+  fanCoilUnitResult: resultType
   fanCoilUnitDeficiency: string
   fanCoilUnitImprovement: string
-  ventilationSystemResult: string
+  ventilationSystemResult: resultType
   ventilationSystemDeficiency: string
   ventilationSystemImprovement: string
-  filterResult: string
+  filterResult: resultType
   filterDeficiency: string
   filterImprovement: string
-  sanitaryFacilityResult: string
+  sanitaryFacilityResult: resultType
   sanitaryFacilityDeficiency: string
   sanitaryFacilityImprovement: string
-  hotWaterSupplyResult: string
+  hotWaterSupplyResult: resultType
   hotWaterSupplyDeficiency: string
   hotWaterSupplyImprovement: string
-  waterTankResult: string
+  waterTankResult: resultType
   waterTankDeficiency: string
   waterTankImprovement: string
-  drainageResult: string
+  drainageResult: resultType
   drainageDeficiency: string
   drainageImprovement: string
-  sewageTreatmentResult: string
+  sewageTreatmentResult: resultType
   sewageTreatmentDeficiency: string
   sewageTreatmentImprovement: string
-  waterReuseResult: string
+  waterReuseResult: resultType
   waterReuseDeficiency: string
   waterReuseImprovement: string
-  pipeLineResult: string
+  pipeLineResult: resultType
   pipeLineDeficiency: string
   pipeLineImprovement: string
-  ductResult: string
+  ductResult: resultType
   ductDeficiency: string
   ductImprovement: string
-  insulationResult: string
+  insulationResult: resultType
   insulationDeficiency: string
   insulationImprovement: string
-  automaticControlResult: string
+  automaticControlResult: resultType
   automaticControlDeficiency: string
   automaticControlImprovement: string
-  noiseVibrationSeismicResult: string
+  noiseVibrationSeismicResult: resultType
   noiseVibrationSeismicDeficiency: string
   noiseVibrationSeismicImprovement: string
   note: string
 }
 
+export type ynResultType = 'Y' | 'N'
+
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/guide 검토가이드
 export interface MachinePerformanceReviewGuideResponseDtoType {
-  builtDrawingYn: string
-  specificationYn: string
-  loadCalculationYn: string
-  operationManual: string
-  manufacturerCertificateYn: string
-  techStandardForm3Yn: string
-  techStandardForm4Yn: string
-  techStandardForm5Yn: string
-  techStandardForm6Yn: string
+  builtDrawingYn: ynResultType
+  specificationYn: ynResultType
+  loadCalculationYn: ynResultType
+  operationManual: ynResultType
+  manufacturerCertificateYn: ynResultType
+  techStandardForm3Yn: ynResultType
+  techStandardForm4Yn: ynResultType
+  techStandardForm5Yn: ynResultType
+  techStandardForm6Yn: ynResultType
 }
 
 export interface MachinePerformanceReviewAgingItemResponseDtoType {
