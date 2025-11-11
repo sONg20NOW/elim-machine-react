@@ -20,6 +20,7 @@ import {
   useMutateImprovement,
   useMutateImprovementAutoFill
 } from '@/@core/hooks/customTanstackQueries'
+import { makeImprovementSeed } from './utils/makeSeed'
 
 const ImprovementTab = forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(
   ({ rootCategories }, ref) => {
@@ -33,147 +34,11 @@ const ImprovementTab = forwardRef<refType, { rootCategories?: MachineInspectionR
     const { mutate: mutateAutoFill } = useMutateImprovementAutoFill(machineProjectId!)
 
     const { register, control, reset, getValues } = useForm<MachinePerformanceReviewImprovementResponseDtoType>({
-      defaultValues: {
-        refrigeratorResult: improvement?.refrigeratorResult ?? 'NONE',
-        coolingTowerResult: improvement?.coolingTowerResult ?? 'NONE',
-        thermalStorageResult: improvement?.thermalStorageResult ?? 'NONE',
-        boilerResult: improvement?.boilerResult ?? 'NONE',
-        heatExchangerResult: improvement?.heatExchangerResult ?? 'NONE',
-        expansionTankResult: improvement?.expansionTankResult ?? 'NONE',
-        pumpResult: improvement?.pumpResult ?? 'NONE',
-        renewableEnergySystemResult: improvement?.renewableEnergySystemResult ?? 'NONE',
-        packageAirConditionerResult: improvement?.packageAirConditionerResult ?? 'NONE',
-        precisionAirConditionerResult: improvement?.precisionAirConditionerResult ?? 'NONE',
-        airHandlingUnitResult: improvement?.airHandlingUnitResult ?? 'NONE',
-        fanCoilUnitResult: improvement?.fanCoilUnitResult ?? 'NONE',
-        ventilationSystemResult: improvement?.ventilationSystemResult ?? 'NONE',
-        filterResult: improvement?.filterResult ?? 'NONE',
-        sanitaryFacilityResult: improvement?.sanitaryFacilityResult ?? 'NONE',
-        hotWaterSupplyResult: improvement?.hotWaterSupplyResult ?? 'NONE',
-        waterTankResult: improvement?.waterTankResult ?? 'NONE',
-        drainageResult: improvement?.drainageResult ?? 'NONE',
-        sewageTreatmentResult: improvement?.sewageTreatmentResult ?? 'NONE',
-        waterReuseResult: improvement?.waterReuseResult ?? 'NONE',
-        pipeLineResult: improvement?.pipeLineResult ?? 'NONE',
-        ductResult: improvement?.ductResult ?? 'NONE',
-        insulationResult: improvement?.insulationResult ?? 'NONE',
-        automaticControlResult: improvement?.automaticControlResult ?? 'NONE',
-        noiseVibrationSeismicResult: improvement?.noiseVibrationSeismicResult ?? 'NONE',
-
-        // Deficiency 및 Opinion 필드는 ''으로 초기화
-        refrigeratorDeficiency: improvement?.refrigeratorDeficiency ?? '',
-        coolingTowerDeficiency: improvement?.coolingTowerDeficiency ?? '',
-        thermalStorageDeficiency: improvement?.thermalStorageDeficiency ?? '',
-        boilerDeficiency: improvement?.boilerDeficiency ?? '',
-        heatExchangerDeficiency: improvement?.heatExchangerDeficiency ?? '',
-        expansionTankDeficiency: improvement?.expansionTankDeficiency ?? '',
-        pumpDeficiency: improvement?.pumpDeficiency ?? '',
-        renewableEnergySystemDeficiency: improvement?.renewableEnergySystemDeficiency ?? '',
-        packageAirConditionerDeficiency: improvement?.packageAirConditionerDeficiency ?? '',
-        precisionAirConditionerDeficiency: improvement?.precisionAirConditionerDeficiency ?? '',
-        airHandlingUnitDeficiency: improvement?.airHandlingUnitDeficiency ?? '',
-        fanCoilUnitDeficiency: improvement?.fanCoilUnitDeficiency ?? '',
-        ventilationSystemDeficiency: improvement?.ventilationSystemDeficiency ?? '',
-        filterDeficiency: improvement?.filterDeficiency ?? '',
-        sanitaryFacilityDeficiency: improvement?.sanitaryFacilityDeficiency ?? '',
-        hotWaterSupplyDeficiency: improvement?.hotWaterSupplyDeficiency ?? '',
-        waterTankDeficiency: improvement?.waterTankDeficiency ?? '',
-        drainageDeficiency: improvement?.drainageDeficiency ?? '',
-        sewageTreatmentDeficiency: improvement?.sewageTreatmentDeficiency ?? '',
-        waterReuseDeficiency: improvement?.waterReuseDeficiency ?? '',
-        pipeLineDeficiency: improvement?.pipeLineDeficiency ?? '',
-        ductDeficiency: improvement?.ductDeficiency ?? '',
-        insulationDeficiency: improvement?.insulationDeficiency ?? '',
-        automaticControlDeficiency: improvement?.automaticControlDeficiency ?? '',
-        noiseVibrationSeismicDeficiency: improvement?.noiseVibrationSeismicDeficiency ?? '',
-        note: improvement?.note ?? ''
-      }
+      defaultValues: makeImprovementSeed(improvement)
     })
 
     useEffect(() => {
-      reset({
-        refrigeratorResult: improvement?.refrigeratorResult ?? 'NONE',
-        coolingTowerResult: improvement?.coolingTowerResult ?? 'NONE',
-        thermalStorageResult: improvement?.thermalStorageResult ?? 'NONE',
-        boilerResult: improvement?.boilerResult ?? 'NONE',
-        heatExchangerResult: improvement?.heatExchangerResult ?? 'NONE',
-        expansionTankResult: improvement?.expansionTankResult ?? 'NONE',
-        pumpResult: improvement?.pumpResult ?? 'NONE',
-        renewableEnergySystemResult: improvement?.renewableEnergySystemResult ?? 'NONE',
-        packageAirConditionerResult: improvement?.packageAirConditionerResult ?? 'NONE',
-        precisionAirConditionerResult: improvement?.precisionAirConditionerResult ?? 'NONE',
-        airHandlingUnitResult: improvement?.airHandlingUnitResult ?? 'NONE',
-        fanCoilUnitResult: improvement?.fanCoilUnitResult ?? 'NONE',
-        ventilationSystemResult: improvement?.ventilationSystemResult ?? 'NONE',
-        filterResult: improvement?.filterResult ?? 'NONE',
-        sanitaryFacilityResult: improvement?.sanitaryFacilityResult ?? 'NONE',
-        hotWaterSupplyResult: improvement?.hotWaterSupplyResult ?? 'NONE',
-        waterTankResult: improvement?.waterTankResult ?? 'NONE',
-        drainageResult: improvement?.drainageResult ?? 'NONE',
-        sewageTreatmentResult: improvement?.sewageTreatmentResult ?? 'NONE',
-        waterReuseResult: improvement?.waterReuseResult ?? 'NONE',
-        pipeLineResult: improvement?.pipeLineResult ?? 'NONE',
-        ductResult: improvement?.ductResult ?? 'NONE',
-        insulationResult: improvement?.insulationResult ?? 'NONE',
-        automaticControlResult: improvement?.automaticControlResult ?? 'NONE',
-        noiseVibrationSeismicResult: improvement?.noiseVibrationSeismicResult ?? 'NONE',
-
-        // Deficiency 및 Opinion 필드는 ''으로 초기화
-        refrigeratorDeficiency: improvement?.refrigeratorDeficiency ?? '',
-        coolingTowerDeficiency: improvement?.coolingTowerDeficiency ?? '',
-        thermalStorageDeficiency: improvement?.thermalStorageDeficiency ?? '',
-        boilerDeficiency: improvement?.boilerDeficiency ?? '',
-        heatExchangerDeficiency: improvement?.heatExchangerDeficiency ?? '',
-        expansionTankDeficiency: improvement?.expansionTankDeficiency ?? '',
-        pumpDeficiency: improvement?.pumpDeficiency ?? '',
-        renewableEnergySystemDeficiency: improvement?.renewableEnergySystemDeficiency ?? '',
-        packageAirConditionerDeficiency: improvement?.packageAirConditionerDeficiency ?? '',
-        precisionAirConditionerDeficiency: improvement?.precisionAirConditionerDeficiency ?? '',
-        airHandlingUnitDeficiency: improvement?.airHandlingUnitDeficiency ?? '',
-        fanCoilUnitDeficiency: improvement?.fanCoilUnitDeficiency ?? '',
-        ventilationSystemDeficiency: improvement?.ventilationSystemDeficiency ?? '',
-        filterDeficiency: improvement?.filterDeficiency ?? '',
-        sanitaryFacilityDeficiency: improvement?.sanitaryFacilityDeficiency ?? '',
-        hotWaterSupplyDeficiency: improvement?.hotWaterSupplyDeficiency ?? '',
-        waterTankDeficiency: improvement?.waterTankDeficiency ?? '',
-        drainageDeficiency: improvement?.drainageDeficiency ?? '',
-        sewageTreatmentDeficiency: improvement?.sewageTreatmentDeficiency ?? '',
-        waterReuseDeficiency: improvement?.waterReuseDeficiency ?? '',
-        pipeLineDeficiency: improvement?.pipeLineDeficiency ?? '',
-        ductDeficiency: improvement?.ductDeficiency ?? '',
-        insulationDeficiency: improvement?.insulationDeficiency ?? '',
-        automaticControlDeficiency: improvement?.automaticControlDeficiency ?? '',
-        noiseVibrationSeismicDeficiency: improvement?.noiseVibrationSeismicDeficiency ?? '',
-
-        // Deficiency 및 Opinion 필드는 ''으로 초기화
-        refrigeratorImprovement: improvement?.refrigeratorImprovement ?? '',
-        coolingTowerImprovement: improvement?.coolingTowerImprovement ?? '',
-        thermalStorageImprovement: improvement?.thermalStorageImprovement ?? '',
-        boilerImprovement: improvement?.boilerImprovement ?? '',
-        heatExchangerImprovement: improvement?.heatExchangerImprovement ?? '',
-        expansionTankImprovement: improvement?.expansionTankImprovement ?? '',
-        pumpImprovement: improvement?.pumpImprovement ?? '',
-        renewableEnergySystemImprovement: improvement?.renewableEnergySystemImprovement ?? '',
-        packageAirConditionerImprovement: improvement?.packageAirConditionerImprovement ?? '',
-        precisionAirConditionerImprovement: improvement?.precisionAirConditionerImprovement ?? '',
-        airHandlingUnitImprovement: improvement?.airHandlingUnitImprovement ?? '',
-        fanCoilUnitImprovement: improvement?.fanCoilUnitImprovement ?? '',
-        ventilationSystemImprovement: improvement?.ventilationSystemImprovement ?? '',
-        filterImprovement: improvement?.filterImprovement ?? '',
-        sanitaryFacilityImprovement: improvement?.sanitaryFacilityImprovement ?? '',
-        hotWaterSupplyImprovement: improvement?.hotWaterSupplyImprovement ?? '',
-        waterTankImprovement: improvement?.waterTankImprovement ?? '',
-        drainageImprovement: improvement?.drainageImprovement ?? '',
-        sewageTreatmentImprovement: improvement?.sewageTreatmentImprovement ?? '',
-        waterReuseImprovement: improvement?.waterReuseImprovement ?? '',
-        pipeLineImprovement: improvement?.pipeLineImprovement ?? '',
-        ductImprovement: improvement?.ductImprovement ?? '',
-        insulationImprovement: improvement?.insulationImprovement ?? '',
-        automaticControlImprovement: improvement?.automaticControlImprovement ?? '',
-        noiseVibrationSeismicImprovement: improvement?.noiseVibrationSeismicImprovement ?? '',
-
-        note: improvement?.note ?? ''
-      })
+      reset(makeImprovementSeed(improvement))
     }, [improvement, reset, autoFillTrigger])
 
     const OperationRow = ({
