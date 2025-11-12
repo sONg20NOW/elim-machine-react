@@ -1,23 +1,21 @@
 'use client'
 
-import type { Dispatch, SetStateAction } from 'react'
+import { useEffect, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Button, Card, MenuItem, TextField, Tooltip } from '@mui/material'
+import { Button, Card, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
 
 import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
 import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 
 interface basicTabContentProps<T> {
-  selectedMachineData: T
   editData: T
   setEditData: Dispatch<SetStateAction<T>>
   isEditing: boolean
 }
 
 export default function BasicTabContent({
-  selectedMachineData,
   editData,
   setEditData,
   isEditing
@@ -27,9 +25,15 @@ export default function BasicTabContent({
 
   const { data: participatedEngineerList } = useGetParticipatedEngineerList(machineProjectId)
 
+  useEffect(() => {
+    if (!isEditing) {
+      setEditData(prev => ({ ...prev, engineerIds: prev.engineerIds.filter(id => id > 0) }))
+    }
+  }, [isEditing, setEditData])
+
   return (
     <div className='flex flex-col gap-5'>
-      <table style={{ tableLayout: 'fixed' }}>
+      <table style={{ tableLayout: 'fixed' }} className='[&>tbody>tr>td]:py-0'>
         <tbody>
           <tr>
             <th>설비명</th>
@@ -38,6 +42,7 @@ export default function BasicTabContent({
                 editData.machineInspectionResponseDto.machineInspectionName
               ) : (
                 <TextField
+                  slotProps={{ htmlInput: { sx: { p: 0 } } }}
                   size='small'
                   value={editData.machineInspectionResponseDto.machineInspectionName}
                   onChange={e =>
@@ -56,24 +61,30 @@ export default function BasicTabContent({
             <th>
               {!isEditing ? (
                 { INSTALL: '설치일', MANUFACTURE: '제조일', USE: '사용일', null: '-' }[
-                  editData.machineInspectionResponseDto.equipmentPhase
+                  editData.machineInspectionResponseDto.equipmentPhase ?? 'null'
                 ]
               ) : (
                 <TextField
                   select
+                  variant='standard'
                   size='small'
                   value={editData.machineInspectionResponseDto.equipmentPhase ?? ''}
-                  slotProps={{ htmlInput: { sx: { py: '5px !important' } } }}
+                  sx={{ '& .MuiSelect-select': { p: '0px !important' } }}
+                  slotProps={{ htmlInput: { sx: { p: 0 } }, select: { IconComponent: () => null, displayEmpty: true } }}
                   onChange={e =>
                     setEditData(prev => ({
                       ...prev,
                       machineInspectionResponseDto: {
                         ...prev.machineInspectionResponseDto,
-                        equipmentPhase: e.target.value as 'INSTALL' | 'MANUFACTURE' | 'USE'
+                        equipmentPhase:
+                          e.target.value !== '' ? (e.target.value as 'INSTALL' | 'MANUFACTURE' | 'USE') : null
                       }
                     }))
                   }
                 >
+                  <MenuItem value=''>
+                    <Typography color='lightgray'>미정</Typography>
+                  </MenuItem>
                   <MenuItem value='INSTALL'>설치일</MenuItem>
                   <MenuItem value='MANUFACTURE'>제조일</MenuItem>
                   <MenuItem value='USE'>사용일</MenuItem>
@@ -85,6 +96,7 @@ export default function BasicTabContent({
                 editData.machineInspectionResponseDto.equipmentPhaseDate
               ) : (
                 <TextField
+                  slotProps={{ htmlInput: { sx: { p: 0 } } }}
                   type='date'
                   size='small'
                   value={editData.machineInspectionResponseDto.equipmentPhaseDate ?? ''}
@@ -115,6 +127,7 @@ export default function BasicTabContent({
                 editData.machineInspectionResponseDto.checkDate
               ) : (
                 <TextField
+                  slotProps={{ htmlInput: { sx: { p: 0 } } }}
                   type='date'
                   size='small'
                   value={editData.machineInspectionResponseDto.checkDate ?? ''}
@@ -140,6 +153,7 @@ export default function BasicTabContent({
               ) : (
                 <TextField
                   size='small'
+                  slotProps={{ htmlInput: { sx: { p: 0 } } }}
                   value={editData.machineInspectionResponseDto.purpose}
                   onChange={e =>
                     setEditData(prev => ({
@@ -160,6 +174,7 @@ export default function BasicTabContent({
                 editData.machineInspectionResponseDto.location
               ) : (
                 <TextField
+                  slotProps={{ htmlInput: { sx: { p: 0 } } }}
                   size='small'
                   value={editData.machineInspectionResponseDto.location}
                   onChange={e =>
@@ -183,7 +198,7 @@ export default function BasicTabContent({
         <span className='font-bold ps-1'>점검자 목록</span>
         <div className='grid grid-cols-4 gap-2'>
           {!isEditing
-            ? (selectedMachineData.engineerIds || []).map((id, idx) => {
+            ? (editData.engineerIds || []).map((id, idx) => {
                 const engineer = participatedEngineerList?.find(value => value.engineerId === id)
 
                 return (
@@ -199,45 +214,41 @@ export default function BasicTabContent({
                   const engineer = participatedEngineerList?.find(value => value.engineerId === id)
 
                   return (
-                    <Card key={idx} variant='outlined' sx={{ px: 2, py: 2, border: '1px solid #d1d5db' }}>
-                      <TextField
-                        slotProps={{
-                          htmlInput: { sx: { padding: 0 } }
-                        }}
-                        fullWidth
-                        SelectProps={{ IconComponent: () => null }}
-                        value={engineer?.engineerId ?? ''}
-                        select
-                        variant='standard'
-                        onChange={e => {
-                          editData.engineerIds.splice(idx, 1, Number(e.target.value))
+                    <TextField
+                      key={idx}
+                      sx={{ '& .MuiSelect-select': { px: '16px !important', py: '8px' } }}
+                      fullWidth
+                      SelectProps={{ IconComponent: () => null }}
+                      value={engineer?.engineerId ?? ''}
+                      select
+                      onChange={e => {
+                        editData.engineerIds.splice(idx, 1, Number(e.target.value))
 
+                        setEditData(prev => ({
+                          ...prev,
+                          engineerIds: prev.engineerIds
+                        }))
+                      }}
+                    >
+                      {participatedEngineerList?.map(engineer => (
+                        <MenuItem
+                          key={engineer.engineerId}
+                          value={engineer.engineerId}
+                          disabled={editData.engineerIds.includes(engineer.engineerId)}
+                        >{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</MenuItem>
+                      ))}
+                      <MenuItem
+                        sx={{ color: 'white', bgcolor: 'error.light' }}
+                        onClick={() =>
                           setEditData(prev => ({
                             ...prev,
-                            engineerIds: prev.engineerIds
+                            engineerIds: prev.engineerIds.filter((id, index) => idx !== index)
                           }))
-                        }}
+                        }
                       >
-                        {participatedEngineerList?.map(engineer => (
-                          <MenuItem
-                            key={engineer.engineerId}
-                            value={engineer.engineerId}
-                            disabled={editData.engineerIds.includes(engineer.engineerId)}
-                          >{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</MenuItem>
-                        ))}
-                        <MenuItem
-                          sx={{ color: 'white', bgcolor: 'error.light' }}
-                          onClick={() =>
-                            setEditData(prev => ({
-                              ...prev,
-                              engineerIds: prev.engineerIds.filter((id, index) => idx !== index)
-                            }))
-                          }
-                        >
-                          삭제
-                        </MenuItem>
-                      </TextField>
-                    </Card>
+                        삭제
+                      </MenuItem>
+                    </TextField>
                   )
                 })
                 .concat(

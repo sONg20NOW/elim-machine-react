@@ -438,7 +438,7 @@ export interface MachineInspectionResponseDtoType {
   machineCategoryName: string
   purpose: string
   location: string
-  equipmentPhase: equipmentPhaseType
+  equipmentPhase: equipmentPhaseType | null
   equipmentPhaseDate: string
   checkDate: string
   remark: string

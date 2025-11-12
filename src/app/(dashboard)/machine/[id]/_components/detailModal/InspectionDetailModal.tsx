@@ -11,14 +11,7 @@ import TabList from '@mui/lab/TabList'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import type {
-  GasMeasurementResponseDtoType,
-  MachineInspectionChecklistItemResultUpdateRequestDtoType,
-  MachineInspectionDetailResponseDtoType,
-  MachineInspectionResponseDtoType,
-  PipeMeasurementResponseDtoType,
-  WindMeasurementResponseDtoType
-} from '@/@core/types'
+import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
@@ -33,9 +26,16 @@ import { WindTabContent } from './tabs/WindTabContent'
 import PipeTabContent from './tabs/PipeTabContent'
 import PicTabContent from './tabs/PicTabContent'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
-import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import {
+  useGetSingleInspection,
+  useMutateEngineerIds,
+  useMutateGasMeasurementResponseDto,
+  useMutateMachineInspectionChecklistItemResultUpdateRequestDto,
+  useMutateMachineInspectionResponseDto,
+  useMutatePipeMeasurementResponseDto,
+  useMutateWindMeasurementResponseDto
+} from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
-import { auth } from '@/lib/auth'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -76,7 +76,29 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
   const machineProjectId = useParams().id?.toString() as string
   const currentInspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
 
-  const { data: selectedInspection, refetch: refetchSelectedInspection } = useGetSingleInspection(
+  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
+
+  const { mutate: mutateMachineInspectionResponseDto } = useMutateMachineInspectionResponseDto(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const { mutate: mutateEngineerIds } = useMutateEngineerIds(machineProjectId, currentInspectionId.toString())
+
+  const { mutate: mutateMachineInspectionChecklistItemResultUpdateRequestDto } =
+    useMutateMachineInspectionChecklistItemResultUpdateRequestDto(machineProjectId, currentInspectionId.toString())
+
+  const { mutate: mutateGasMeasurementResponseDto } = useMutateGasMeasurementResponseDto(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const { mutate: mutateWindMeasurementResponseDto } = useMutateWindMeasurementResponseDto(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const { mutate: mutatePipeMeasurementResponseDto } = useMutatePipeMeasurementResponseDto(
     machineProjectId,
     currentInspectionId.toString()
   )
@@ -86,9 +108,7 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
   }
 
   // 수정 시 변경되는 데이터 (저장되기 전) - 깊은 복사
-  const [editData, setEditData] = useState<MachineInspectionDetailResponseDtoType>(
-    JSON.parse(JSON.stringify(selectedInspection))
-  )
+  const [editData, setEditData] = useState<MachineInspectionDetailResponseDtoType>(structuredClone(selectedInspection))
 
   const [showAlertModal, setShowAlertModal] = useState(false)
   const [showPictureListModal, setShowPictureListModal] = useState(false)
@@ -100,12 +120,12 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
   const [isEditing, setIsEditing] = useState(false)
 
   // 저장되었을 경우(selectedMachineData가 바뀐 경우) 최신화
-  useEffect(() => setEditData(JSON.parse(JSON.stringify(selectedInspection))), [selectedInspection])
+  useEffect(() => setEditData(structuredClone(selectedInspection)), [selectedInspection])
 
   // ? 미흡사항이 변경되었을 때도 version이 달라서 차이가 발생하므로 version 제외하고 비교.
   const existChange =
-    JSON.stringify(stripVersion(selectedInspection)) !==
-    JSON.stringify(stripVersion({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) }))
+    JSON.stringify(selectedInspection) !==
+    JSON.stringify({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) })
 
   // 저장 시 각 탭에 따라 다르게 동작 (! 기본 정보 수정 시 )
   // 1. PUT 보내고 -> 2. selectedMachine, editData 최신화
@@ -114,70 +134,50 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
       try {
         switch (tabValue) {
           case 'BASIC':
-            await auth.put<{ data: MachineInspectionResponseDtoType }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}`,
-              editData.machineInspectionResponseDto
-            )
+            mutateMachineInspectionResponseDto(editData.machineInspectionResponseDto)
 
             // 참여기술진 변경사항이 있다면 POST.
             if (
               JSON.stringify(editData.engineerIds.filter(id => id > 0)) !==
               JSON.stringify(selectedInspection.engineerIds)
             ) {
-              await auth.put<{ data: { engineerIds: number[] } }>(
-                `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-engineers`,
-                { engineerIds: editData.engineerIds.filter(id => id > 0) }
-              )
+              mutateEngineerIds(editData.engineerIds.filter(id => id > 0))
             }
-
-            refetchSelectedInspection()
 
             break
 
           case 'PIC':
-            await auth.put<{
-              data: {
-                machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultUpdateRequestDtoType[]
-              }
-            }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
-              {
-                machineInspectionChecklistItemResultUpdateRequestDtos:
-                  editData.machineChecklistItemsWithPicCountResponseDtos.map(
-                    v => v.machineInspectionChecklistItemResultBasicResponseDto
-                  )
-              }
-            )
-            refetchSelectedInspection()
+            const changedBasics = editData.machineChecklistItemsWithPicCountResponseDtos
+              .filter(v => {
+                const originalBasic = selectedInspection.machineChecklistItemsWithPicCountResponseDtos.find(
+                  p =>
+                    p.machineInspectionChecklistItemResultBasicResponseDto.id ===
+                    v.machineInspectionChecklistItemResultBasicResponseDto.id
+                )?.machineInspectionChecklistItemResultBasicResponseDto
+
+                return (
+                  JSON.stringify(originalBasic) !==
+                  JSON.stringify(v.machineInspectionChecklistItemResultBasicResponseDto)
+                )
+              })
+              .map(v => v.machineInspectionChecklistItemResultBasicResponseDto)
+
+            console.log('changed:', JSON.stringify(changedBasics))
+
+            mutateMachineInspectionChecklistItemResultUpdateRequestDto(changedBasics)
 
             break
           case 'GAS':
-            await auth.put<{
-              data: GasMeasurementResponseDtoType
-            }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/gasMeasurement`,
-              editData.gasMeasurementResponseDto
-            )
+            mutateGasMeasurementResponseDto(editData.gasMeasurementResponseDto)
 
-            refetchSelectedInspection()
             break
           case 'WIND':
-            await auth.put<{
-              data: { windMeasurementUpdateResponseDtos: WindMeasurementResponseDtoType[] }
-            }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/windMeasurements`,
-              { windMeasurementUpdateRequestDtos: editData.windMeasurementResponseDtos }
-            )
-            refetchSelectedInspection()
+            mutateWindMeasurementResponseDto(editData.windMeasurementResponseDtos)
+
             break
           case 'PIPE':
-            await auth.put<{
-              data: { pipeMeasurementUpdateResponseDtos: PipeMeasurementResponseDtoType[] }
-            }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/pipeMeasurements`,
-              { pipeMeasurementUpdateRequestDtos: editData.pipeMeasurementResponseDtos }
-            )
-            refetchSelectedInspection()
+            mutatePipeMeasurementResponseDto(editData.pipeMeasurementResponseDtos)
+
             break
           default:
             break
@@ -189,7 +189,19 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
         handleApiError(error)
       }
     }
-  }, [editData, existChange, machineProjectId, selectedInspection, refetchSelectedInspection, tabValue, thisTabInfo])
+  }, [
+    editData,
+    existChange,
+    mutateMachineInspectionResponseDto,
+    mutateEngineerIds,
+    mutateMachineInspectionChecklistItemResultUpdateRequestDto,
+    mutateGasMeasurementResponseDto,
+    mutateWindMeasurementResponseDto,
+    mutatePipeMeasurementResponseDto,
+    selectedInspection,
+    tabValue,
+    thisTabInfo
+  ])
 
   return (
     selectedInspection && (
@@ -288,44 +300,24 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
             </Button> */}
           </div>
           <TabPanel value={'BASIC'}>
-            <BasicTabContent
-              selectedMachineData={selectedInspection}
-              editData={editData}
-              setEditData={setEditData}
-              isEditing={isEditing}
-            />
+            <BasicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
           </TabPanel>
           <TabPanel value={'PIC'}>
             <PicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
           </TabPanel>
           {editData.gasMeasurementResponseDto && (
             <TabPanel value={'GAS'}>
-              <GasTabContent
-                selectedMachineData={selectedInspection}
-                editData={editData}
-                setEditData={setEditData}
-                isEditing={isEditing}
-              />
+              <GasTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
             </TabPanel>
           )}
           {editData.windMeasurementResponseDtos && (
             <TabPanel value={'WIND'}>
-              <WindTabContent
-                selectedMachineData={selectedInspection}
-                editData={editData}
-                setEditData={setEditData}
-                isEditing={isEditing}
-              />
+              <WindTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
             </TabPanel>
           )}
           {editData.pipeMeasurementResponseDtos && (
             <TabPanel value={'PIPE'}>
-              <PipeTabContent
-                selectedMachineData={selectedInspection}
-                editData={editData}
-                setEditData={setEditData}
-                isEditing={isEditing}
-              />
+              <PipeTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
             </TabPanel>
           )}
         </div>
@@ -347,19 +339,3 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
 }
 
 export default InspectionDetailModal
-
-// util 함수: 배열 안 객체에서 version 제거
-const stripVersion = (data: MachineInspectionDetailResponseDtoType) => {
-  return {
-    ...data,
-    machineChecklistItemsWithPicCountDtos: data.machineChecklistItemsWithPicCountResponseDtos?.map(
-      v => ({
-        ...v,
-        machineInspectionChecklistItemResultBasicResponseDto: {
-          id: v.machineInspectionChecklistItemResultBasicResponseDto.id,
-          inspectionResult: v.machineInspectionChecklistItemResultBasicResponseDto.inspectionResult
-        }
-      }) // version 제거
-    )
-  }
-}

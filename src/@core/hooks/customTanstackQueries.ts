@@ -163,7 +163,7 @@ export const useMutateEngineerIds = (machineProjectId: string, machineInspection
   const putMachineInspectionResponseDto = async ({ data }: { data: number[] }) => {
     const response = await auth.put<{ data: { engineerIds: number[] } }>(
       `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-inspection-engineers`,
-      data
+      { engineerIds: data }
     )
 
     return response.data.data.engineerIds
@@ -229,7 +229,11 @@ export const useMutateMachineInspectionChecklistItemResultUpdateRequestDto = (
             machineChecklistItemsWithPicCountResponseDtos: prev.machineChecklistItemsWithPicCountResponseDtos.map(v => {
               const f = data.find(p => p.id === v.machineInspectionChecklistItemResultBasicResponseDto.id)
 
-              return f ? f : v
+              if (f) {
+                console.log('found!', JSON.stringify(f))
+              }
+
+              return f ? { ...v, machineInspectionChecklistItemResultBasicResponseDto: f } : v
             })
           }) as MachineInspectionDetailResponseDtoType
       )
@@ -284,7 +288,7 @@ export const useMutateWindMeasurementResponseDto = (machineProjectId: string, ma
   const putMachineInspectionResponseDto = async ({ data }: { data: WindMeasurementResponseDtoType[] }) => {
     const response = await auth.put<{ data: { windMeasurementUpdateResponseDtos: WindMeasurementResponseDtoType[] } }>(
       `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/windMeasurements`,
-      data
+      { windMeasurementUpdateRequestDtos: data }
     )
 
     return response.data.data.windMeasurementUpdateResponseDtos
@@ -315,18 +319,19 @@ export const useMutatePipeMeasurementResponseDto = (machineProjectId: string, ma
   const queryKey = QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId)
 
   const putMachineInspectionResponseDto = async ({ data }: { data: PipeMeasurementResponseDtoType[] }) => {
-    const response = await auth.put<{ data: { pipeMeasurementUpdateRequestDtos: PipeMeasurementResponseDtoType[] } }>(
+    const response = await auth.put<{ data: { pipeMeasurementUpdateResponseDtos: PipeMeasurementResponseDtoType[] } }>(
       `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/pipeMeasurements`,
-      data
+      { pipeMeasurementUpdateRequestDtos: data }
     )
 
-    return response.data.data.pipeMeasurementUpdateRequestDtos
+    return response.data.data.pipeMeasurementUpdateResponseDtos
   }
 
   return useMutation<PipeMeasurementResponseDtoType[], AxiosError, PipeMeasurementResponseDtoType[]>({
     mutationFn: data => putMachineInspectionResponseDto({ data }),
 
     onSuccess: data => {
+      console.log(data)
       queryClient.setQueryData(
         queryKey,
         (prev: MachineInspectionDetailResponseDtoType) =>
