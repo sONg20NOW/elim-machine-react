@@ -185,8 +185,8 @@ export function GasTabContent({
                 ['', '', 'NOx', 'nox']
               ].map(([label1, key1, label2, key2], i) => (
                 <tr key={i}>
-                  {label1 && <th>{label1}</th>}
-                  {key1 && (
+                  {label1 ? <th>{label1}</th> : <th style={{ border: 'none', backgroundColor: 'inherit' }} />}
+                  {key1 ? (
                     <td>
                       <TextField
                         size='small'
@@ -206,6 +206,8 @@ export function GasTabContent({
                         variant='standard'
                       />
                     </td>
+                  ) : (
+                    <td style={{ border: 'none', backgroundColor: 'inherit' }} />
                   )}
                   {label2 && <th>{label2}</th>}
                   {key2 && (
