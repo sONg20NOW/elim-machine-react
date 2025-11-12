@@ -11,12 +11,15 @@ import { toast } from 'react-toastify'
 import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
+  GasMeasurementResponseDtoType,
   MachineCategoryResponseDtoType,
   MachineEnergyTypeResponseDtoType,
   MachineEngineerOptionResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
+  MachineInspectionChecklistItemResultUpdateRequestDtoType,
   MachineInspectionDetailResponseDtoType,
   MachineInspectionPageResponseDtoType,
+  MachineInspectionResponseDtoType,
   MachineInspectionRootCategoryResponseDtoType,
   machineInspectionSummaryResponseDtoType,
   MachineLeafCategoryResponseDtoType,
@@ -35,7 +38,9 @@ import type {
   MachineReportCategoryReadResponseDtoType,
   MachineReportStatusResponseDtoType,
   MemberDetailResponseDtoType,
-  targetType
+  PipeMeasurementResponseDtoType,
+  targetType,
+  WindMeasurementResponseDtoType
 } from '@/@core/types' // 타입 임포트
 import { handleApiError } from '@/utils/errorHandler'
 
@@ -114,6 +119,226 @@ export const useGetSingleInspection = (machineProjectId: string, machineInspecti
     queryFn: fetchSingleInspection,
     staleTime: 1000 * 60 * 5, // 5분
     enabled: Number(machineInspectionId) > 0
+  })
+}
+
+// machineInspectionResponseDto 수정
+export const useMutateMachineInspectionResponseDto = (machineProjectId: string, machineInspectionId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId)
+
+  const putMachineInspectionResponseDto = async ({ data }: { data: MachineInspectionResponseDtoType }) => {
+    const response = await auth.put<{ data: MachineInspectionResponseDtoType }>(
+      `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}`,
+      data
+    )
+
+    return response.data.data
+  }
+
+  return useMutation<MachineInspectionResponseDtoType, AxiosError, MachineInspectionResponseDtoType>({
+    mutationFn: data => putMachineInspectionResponseDto({ data }),
+
+    onSuccess: data => {
+      queryClient.setQueryData(
+        queryKey,
+        (prev: MachineInspectionDetailResponseDtoType) =>
+          ({ ...prev, machineInspectionResponseDto: data }) as MachineInspectionDetailResponseDtoType
+      )
+      console.log('MachineInspectionResponseDto가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    },
+    throwOnError: true
+  })
+}
+
+// engineerIds 수정
+export const useMutateEngineerIds = (machineProjectId: string, machineInspectionId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId)
+
+  const putMachineInspectionResponseDto = async ({ data }: { data: number[] }) => {
+    const response = await auth.put<{ data: { engineerIds: number[] } }>(
+      `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-inspection-engineers`,
+      data
+    )
+
+    return response.data.data.engineerIds
+  }
+
+  return useMutation<number[], AxiosError, number[]>({
+    mutationFn: data => putMachineInspectionResponseDto({ data }),
+
+    onSuccess: data => {
+      queryClient.setQueryData(
+        queryKey,
+        (prev: MachineInspectionDetailResponseDtoType) =>
+          ({ ...prev, engineerIds: data }) as MachineInspectionDetailResponseDtoType
+      )
+      console.log('engineerIds가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    },
+    throwOnError: true
+  })
+}
+
+// MachineInspectionChecklistItemResultUpdateRequestDto 수정
+export const useMutateMachineInspectionChecklistItemResultUpdateRequestDto = (
+  machineProjectId: string,
+  machineInspectionId: string
+) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId)
+
+  const putMachineInspectionResponseDto = async ({
+    data
+  }: {
+    data: MachineInspectionChecklistItemResultUpdateRequestDtoType[]
+  }) => {
+    const response = await auth.put<{
+      data: {
+        machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultUpdateRequestDtoType[]
+      }
+    }>(
+      `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-inspection-checklist-item-results`,
+      { machineInspectionChecklistItemResultUpdateRequestDtos: data }
+    )
+
+    return response.data.data.machineInspectionChecklistItemResultUpdateResponseDtos
+  }
+
+  return useMutation<
+    MachineInspectionChecklistItemResultUpdateRequestDtoType[],
+    AxiosError,
+    MachineInspectionChecklistItemResultUpdateRequestDtoType[]
+  >({
+    mutationFn: data => putMachineInspectionResponseDto({ data }),
+
+    onSuccess: data => {
+      queryClient.setQueryData(
+        queryKey,
+        (prev: MachineInspectionDetailResponseDtoType) =>
+          ({
+            ...prev,
+            machineChecklistItemsWithPicCountResponseDtos: prev.machineChecklistItemsWithPicCountResponseDtos.map(v => {
+              const f = data.find(p => p.id === v.machineInspectionChecklistItemResultBasicResponseDto.id)
+
+              return f ? f : v
+            })
+          }) as MachineInspectionDetailResponseDtoType
+      )
+      console.log('MachineInspectionChecklistItemResultUpdateRequestDto가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    },
+    throwOnError: true
+  })
+}
+
+// GasMeasurementResponseDto 수정
+export const useMutateGasMeasurementResponseDto = (machineProjectId: string, machineInspectionId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId)
+
+  const putMachineInspectionResponseDto = async ({ data }: { data: GasMeasurementResponseDtoType }) => {
+    const response = await auth.put<{ data: GasMeasurementResponseDtoType }>(
+      `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/gasMeasurement`,
+      data
+    )
+
+    return response.data.data
+  }
+
+  return useMutation<GasMeasurementResponseDtoType, AxiosError, GasMeasurementResponseDtoType>({
+    mutationFn: data => putMachineInspectionResponseDto({ data }),
+
+    onSuccess: data => {
+      queryClient.setQueryData(
+        queryKey,
+        (prev: MachineInspectionDetailResponseDtoType) =>
+          ({ ...prev, gasMeasurementResponseDto: data }) as MachineInspectionDetailResponseDtoType
+      )
+      console.log('GasMeasurementResponseDto가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    },
+    throwOnError: true
+  })
+}
+
+// WindMeasurementResponseDto 수정
+export const useMutateWindMeasurementResponseDto = (machineProjectId: string, machineInspectionId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId)
+
+  const putMachineInspectionResponseDto = async ({ data }: { data: WindMeasurementResponseDtoType[] }) => {
+    const response = await auth.put<{ data: { windMeasurementUpdateResponseDtos: WindMeasurementResponseDtoType[] } }>(
+      `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/windMeasurements`,
+      data
+    )
+
+    return response.data.data.windMeasurementUpdateResponseDtos
+  }
+
+  return useMutation<WindMeasurementResponseDtoType[], AxiosError, WindMeasurementResponseDtoType[]>({
+    mutationFn: data => putMachineInspectionResponseDto({ data }),
+
+    onSuccess: data => {
+      queryClient.setQueryData(
+        queryKey,
+        (prev: MachineInspectionDetailResponseDtoType) =>
+          ({ ...prev, windMeasurementResponseDtos: data }) as MachineInspectionDetailResponseDtoType
+      )
+      console.log('WindMeasurementResponseDto가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    },
+    throwOnError: true
+  })
+}
+
+// PipeMeasurementResponseDto 수정
+export const useMutatePipeMeasurementResponseDto = (machineProjectId: string, machineInspectionId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTION_INFO(machineProjectId, machineInspectionId)
+
+  const putMachineInspectionResponseDto = async ({ data }: { data: PipeMeasurementResponseDtoType[] }) => {
+    const response = await auth.put<{ data: { pipeMeasurementUpdateRequestDtos: PipeMeasurementResponseDtoType[] } }>(
+      `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/pipeMeasurements`,
+      data
+    )
+
+    return response.data.data.pipeMeasurementUpdateRequestDtos
+  }
+
+  return useMutation<PipeMeasurementResponseDtoType[], AxiosError, PipeMeasurementResponseDtoType[]>({
+    mutationFn: data => putMachineInspectionResponseDto({ data }),
+
+    onSuccess: data => {
+      queryClient.setQueryData(
+        queryKey,
+        (prev: MachineInspectionDetailResponseDtoType) =>
+          ({ ...prev, pipeMeasurementResponseDtos: data }) as MachineInspectionDetailResponseDtoType
+      )
+      console.log('pipeMeasurementResponseDto가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    },
+    throwOnError: true
   })
 }
 
