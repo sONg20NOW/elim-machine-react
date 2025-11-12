@@ -32,7 +32,7 @@ import type { AxiosRequestConfig } from 'axios'
 import { toast } from 'react-toastify'
 
 import type {
-  machineChecklistItemsWithPicCountResponseDtosType,
+  MachineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicCursorType
 } from '@/@core/types'
@@ -46,7 +46,7 @@ import { auth } from '@/lib/auth'
 type InspectionPicListModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  clickedPicCate?: machineChecklistItemsWithPicCountResponseDtosType
+  clickedPicCate?: MachineChecklistItemsWithPicCountResponseDtosType
   ToggleProjectPic: () => void
 }
 

@@ -1,23 +1,20 @@
-import type { Dispatch, SetStateAction } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Button, IconButton, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
+import { IconButton, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
 
 import PictureListModal from '../../pictureUpdateModal/PictureListModal'
 import type {
-  MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionDetailResponseDtoType,
-  machineChecklistItemsWithPicCountResponseDtosType
+  MachineChecklistItemsWithPicCountResponseDtosType,
+  MachineInspectionChecklistItemResultBasicResponseDtoType
 } from '@/@core/types'
-import AlertModal from '@/@core/components/custom/AlertModal'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
 import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
-import { auth } from '@/lib/auth'
 
 interface PicTabContentProps<T> {
   editData: T
@@ -33,26 +30,11 @@ export default function PicTabContent({
   const machineProjectId = useParams().id?.toString() as string
   const currentInspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
 
-  const { data: selectedInspection, refetch: refetchSelectedInspection } = useGetSingleInspection(
-    machineProjectId,
-    currentInspectionId.toString()
-  )
+  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
 
   // 점검사진 모달
   const [openPicModal, setOpenPicModal] = useState<boolean>(false)
-  const [clickedPicCate, setClickedPicCate] = useState<machineChecklistItemsWithPicCountResponseDtosType>()
-
-  // 미흡사항 모달
-  const [showDfModal, setShowDfModal] = useState(false)
-
-  // 선택된 점검항목의 result ID (기본적으로 0 - 아무 동작 X)
-  const [selectedDfId, setSelectedDfId] = useState<number>(0)
-
-  // 한 번 이상 방문한 점검항목결과 (GET을 최소화하기 위한 상태)
-  const [knownDfs, setKnownDfs] = useState<MachineInspectionChecklistItemResultResponseDtoType[]>([])
-
-  // 한 번 이상 수정된 점검항목결과에서 선택된 점검항목
-  const selectedDf = knownDfs.find(df => df.id === selectedDfId)
+  const [clickedPicCate, setClickedPicCate] = useState<MachineChecklistItemsWithPicCountResponseDtosType>()
 
   // clickedPicCate가 존재한다면, selectedMachine이 변경될 때마다 clickedPicCate도 최신화.
   useEffect(() => {
@@ -64,215 +46,6 @@ export default function PicTabContent({
       )
     }
   }, [selectedInspection, clickedPicCate])
-
-  useEffect(() => {
-    // 미흡사항 버튼이 클릭됐을 때(selectedDfId가 변경될 때) 해당 id에 대한 정보가 없는 경우 GET.
-    async function getDf(id: number) {
-      if (id > 0 && !knownDfs.find(difficiency => difficiency.id === id)) {
-        try {
-          const response = await auth.get<{ data: MachineInspectionChecklistItemResultResponseDtoType }>(
-            `/api/machine-projects/${machineProjectId}/machine-inspections/${currentInspectionId}/machine-inspection-checklist-item-results/${id}`
-          )
-
-          setKnownDfs(prev => prev.concat(response.data.data))
-        } catch (error) {
-          handleApiError(error)
-        }
-      }
-    }
-
-    getDf(selectedDfId)
-  }, [selectedDfId, currentInspectionId, knownDfs, machineProjectId])
-
-  // 변경된 Df들만 저장.
-  const handleSaveDf = useCallback(
-    async (dfs: MachineInspectionChecklistItemResultResponseDtoType[]) => {
-      try {
-        const response = await auth.put<{
-          data: {
-            machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultResponseDtoType[]
-          }
-        }>(
-          `/api/machine-projects/${machineProjectId}/machine-inspections/${currentInspectionId}/machine-inspection-checklist-item-results`,
-          {
-            machineInspectionChecklistItemResultUpdateRequestDtos: dfs.map(df => ({ ...df, inspectionResult: 'FAIL' }))
-          }
-        )
-
-        const resDfs = response.data.data.machineInspectionChecklistItemResultUpdateResponseDtos
-
-        // knownDfs 최신화
-        const newKnownDfs = Array.from(knownDfs)
-
-        resDfs.map(df => {
-          const idx = knownDfs.findIndex(knownDf => knownDf.id === df.id)
-
-          newKnownDfs.splice(idx, 1, df)
-        })
-        setKnownDfs(newKnownDfs)
-
-        // // editData 버전 최신화
-        // const newEditDataResultList = Array.from(editData.machineChecklistItemsWithPicCountResponseDtos)
-
-        // resDfs.map(df => {
-        //   const idx = editData.machineChecklistItemsWithPicCountResponseDtos.findIndex(
-        //     checklist => checklist.machineInspectionChecklistItemResultBasicResponseDto.id === df.id
-        //   )
-
-        //   newEditDataResultList.splice(idx, 1, {
-        //     ...newEditDataResultList[idx],
-        //     machineInspectionChecklistItemResultBasicResponseDto: {
-        //       ...newEditDataResultList[idx].machineInspectionChecklistItemResultBasicResponseDto,
-        //       version: df.version
-        //     }
-        //   })
-        // })
-        // setEditData(prev => ({ ...prev, machineChecklistItemsWithPicCountResponseDtos: newEditDataResultList }))
-        refetchSelectedInspection()
-        handleSuccess('미흡사항이 반영되었습니다.')
-      } catch (error) {
-        handleApiError(error)
-      }
-    },
-    [machineProjectId, currentInspectionId, knownDfs, refetchSelectedInspection]
-  )
-
-  // 미흡사항 클립보드 클릭 시 나오는 모달
-  function DeficiencyModal() {
-    const [isEditingDf, setIsEditingDf] = useState(false)
-    const [showDfAlertModal, setShowDfAlertModal] = useState(false)
-
-    const [dfEditData, setDfEditData] = useState<MachineInspectionChecklistItemResultResponseDtoType>(
-      JSON.parse(JSON.stringify(selectedDf))
-    )
-
-    const existDfChange = JSON.stringify(dfEditData) !== JSON.stringify(selectedDf)
-
-    return (
-      selectedInspection && (
-        <DefaultModal
-          size='sm'
-          title={
-            <Typography variant='h3' fontWeight={600}>
-              {selectedInspection!.machineChecklistItemsWithPicCountResponseDtos.find(
-                cate => cate.machineInspectionChecklistItemResultBasicResponseDto.id === selectedDfId
-              )?.machineChecklistItemName ?? '미흡사항'}
-            </Typography>
-          }
-          open={showDfModal}
-          setOpen={setShowDfModal}
-          onClose={() => {
-            if (existDfChange) {
-              setShowDfAlertModal(true)
-            } else {
-              setShowDfModal(false)
-              setSelectedDfId(0)
-            }
-          }}
-          primaryButton={
-            <Button
-              variant='contained'
-              onClick={() => {
-                setIsEditingDf(prev => !prev)
-
-                if (isEditingDf && existDfChange) {
-                  handleSaveDf([dfEditData])
-                }
-              }}
-            >
-              {!isEditingDf ? '수정' : '저장'}
-            </Button>
-          }
-          secondaryButton={
-            isEditingDf ? (
-              <Button
-                variant='contained'
-                color='secondary'
-                onClick={() => {
-                  if (existDfChange) {
-                    setShowDfAlertModal(true)
-                  } else {
-                    setIsEditingDf(false)
-                    setDfEditData(JSON.parse(JSON.stringify(selectedDfId)))
-                  }
-                }}
-              >
-                취소
-              </Button>
-            ) : (
-              <Button variant='contained' color='secondary' onClick={() => setShowDfModal(false)}>
-                닫기
-              </Button>
-            )
-          }
-        >
-          {selectedDfId && knownDfs.find(d => d.id === selectedDfId) ? (
-            <div className='flex flex-col gap-4'>
-              <div className='flex flex-col gap-1'>
-                <Typography variant='h5'>미흡사항</Typography>
-                {isEditingDf ? (
-                  <TextField
-                    minRows={3}
-                    multiline
-                    slotProps={{ input: { sx: { padding: 4 } } }}
-                    value={dfEditData?.deficiencies ?? ''}
-                    onChange={e => setDfEditData(prev => ({ ...prev, deficiencies: e.target.value }))}
-                  />
-                ) : (
-                  <Typography
-                    sx={{
-                      border: 'solid 1px lightgray',
-                      borderRadius: 1,
-                      padding: 3,
-                      whiteSpace: 'pre-line',
-                      color: selectedDf?.actionRequired ? '' : 'lightgray'
-                    }}
-                  >
-                    {selectedDf?.deficiencies ?? '내용 없음'}
-                  </Typography>
-                )}
-              </div>
-              <div className='flex flex-col gap-1'>
-                <Typography variant='h5'>조치필요사항</Typography>
-                {isEditingDf ? (
-                  <TextField
-                    minRows={3}
-                    multiline
-                    slotProps={{ input: { sx: { padding: 4 } } }}
-                    value={dfEditData?.actionRequired ?? ''}
-                    onChange={e => setDfEditData(prev => ({ ...prev, actionRequired: e.target.value }))}
-                  />
-                ) : (
-                  <Typography
-                    sx={{
-                      border: 'solid 1px lightgray',
-                      borderRadius: 1,
-                      padding: 3,
-                      whiteSpace: 'pre-line',
-                      color: selectedDf?.actionRequired ? '' : 'lightgray'
-                    }}
-                  >
-                    {selectedDf?.actionRequired ?? '내용 없음'}
-                  </Typography>
-                )}
-              </div>
-              {showDfAlertModal && selectedDf && (
-                <AlertModal<MachineInspectionChecklistItemResultResponseDtoType>
-                  showAlertModal={showDfAlertModal}
-                  setShowAlertModal={setShowDfAlertModal}
-                  setEditData={setDfEditData}
-                  setIsEditing={setIsEditingDf}
-                  originalData={selectedDf}
-                />
-              )}
-            </div>
-          ) : (
-            <Typography>미흡사항 데이터를 불러오는 데 실패했습니다.</Typography>
-          )}
-        </DefaultModal>
-      )
-    )
-  }
 
   return (
     selectedInspection && (
@@ -342,16 +115,12 @@ export default function PicTabContent({
                       </Typography>
                     </Tooltip>
                     {cate.machineInspectionChecklistItemResultBasicResponseDto.inspectionResult === 'FAIL' && (
-                      <IconButton
-                        className='absolute right-1 top-[50%] -translate-y-1/2'
-                        size='small'
-                        onClick={() => {
-                          setSelectedDfId(cate.machineInspectionChecklistItemResultBasicResponseDto.id)
-                          setShowDfModal(true)
-                        }}
-                      >
-                        <i className='tabler-clipboard' />
-                      </IconButton>
+                      <DeficiencyModal
+                        checklistItemId={cate.machineChecklistItemId}
+                        editData={editData}
+                        setEditData={setEditData}
+                        isEditing={isEditing}
+                      />
                     )}
                   </td>
                   <td
@@ -420,7 +189,6 @@ export default function PicTabContent({
             }
           )}
         </tbody>
-        {showDfModal && selectedDf && <DeficiencyModal />}
         {openPicModal && clickedPicCate && (
           <PictureListModal open={openPicModal} setOpen={setOpenPicModal} clickedPicCate={clickedPicCate} />
         )}
@@ -428,3 +196,150 @@ export default function PicTabContent({
     )
   )
 }
+
+interface DeficiencyModalProps<T> {
+  editData: T
+  setEditData: Dispatch<SetStateAction<T>>
+  isEditing: boolean
+  checklistItemId: number
+}
+
+// 미흡사항 클립보드 클릭 시 나오는 모달
+const DeficiencyModal = memo(
+  ({
+    checklistItemId,
+    editData,
+    setEditData,
+    isEditing
+  }: DeficiencyModalProps<MachineInspectionDetailResponseDtoType>) => {
+    const machineProjectId = useParams().id?.toString() as string
+    const currentInspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
+
+    const { data: selectedInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
+
+    const [open, setOpen] = useState(false)
+
+    const currentChecklist = editData.machineChecklistItemsWithPicCountResponseDtos.find(
+      v => v.machineChecklistItemId === checklistItemId
+    )
+
+    const currentChecklistResult = currentChecklist?.machineInspectionChecklistItemResultBasicResponseDto
+
+    function handleChange(
+      e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      fieldName: 'actionRequired' | 'deficiencies'
+    ) {
+      currentChecklistResult &&
+        setEditData(prev => {
+          const newBasicDto: MachineInspectionChecklistItemResultBasicResponseDtoType = {
+            ...currentChecklistResult,
+            [fieldName]: e.target.value
+          }
+
+          return {
+            ...prev,
+            machineChecklistItemsWithPicCountResponseDtos: prev.machineChecklistItemsWithPicCountResponseDtos.map(v =>
+              v.machineChecklistItemId === currentChecklist?.machineChecklistItemId
+                ? { ...v, machineInspectionChecklistItemResultBasicResponseDto: newBasicDto }
+                : v
+            )
+          }
+        })
+    }
+
+    return (
+      selectedInspection && (
+        <>
+          <IconButton
+            className='absolute right-1 top-[50%] -translate-y-1/2'
+            size='small'
+            onClick={() => {
+              setOpen(true)
+            }}
+          >
+            <i className='tabler-clipboard' />
+          </IconButton>
+          <DefaultModal
+            size='sm'
+            title={
+              <Typography variant='h3' fontWeight={600}>
+                {currentChecklist?.machineChecklistItemName ?? '미흡사항'}
+              </Typography>
+            }
+            open={open}
+            setOpen={setOpen}
+            onClose={() => {
+              setOpen(false)
+            }}
+          >
+            {currentChecklistResult ? (
+              isEditing ? (
+                <div className='flex flex-col gap-4'>
+                  <div className='flex flex-col gap-1'>
+                    <Typography variant='h5'>미흡사항</Typography>
+                    <TextField
+                      minRows={3}
+                      multiline
+                      slotProps={{ input: { sx: { padding: 4 } } }}
+                      value={currentChecklistResult.deficiencies ?? ''}
+                      onChange={e => handleChange(e, 'deficiencies')}
+                    />
+                  </div>
+                  <div className='flex flex-col gap-1'>
+                    <Typography variant='h5'>조치필요사항</Typography>
+                    <TextField
+                      minRows={3}
+                      multiline
+                      slotProps={{ input: { sx: { padding: 4 } } }}
+                      value={currentChecklistResult.actionRequired ?? ''}
+                      onChange={e => handleChange(e, 'actionRequired')}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className='flex flex-col gap-4'>
+                  <div className='flex flex-col gap-1'>
+                    <Typography variant='h5'>미흡사항</Typography>
+                    <Tooltip
+                      arrow
+                      placement='right'
+                      title={
+                        <Typography color='warning.main' sx={{ whiteSpace: 'pre-line' }}>
+                          {`수정을 원하시면 먼저\n이 창을 닫고 수정 버튼을 눌러주세요`}
+                        </Typography>
+                      }
+                    >
+                      <Typography sx={{ wordBreak: 'break-all', width: 'fit-content', px: 2 }}>
+                        {(currentChecklistResult.deficiencies ?? '' !== '') ? currentChecklistResult.deficiencies : '-'}
+                      </Typography>
+                    </Tooltip>
+                  </div>
+                  <div className='flex flex-col gap-1'>
+                    <Typography variant='h5'>조치필요사항</Typography>
+                    <Tooltip
+                      arrow
+                      placement='right'
+                      title={
+                        <Typography color='warning.main' sx={{ whiteSpace: 'pre-line' }}>
+                          {`수정을 원하시면 먼저\n이 창을 닫고 수정 버튼을 눌러주세요`}
+                        </Typography>
+                      }
+                    >
+                      <Typography sx={{ wordBreak: 'break-all', width: 'fit-content', px: 2 }}>
+                        {(currentChecklistResult.actionRequired ?? '' !== '')
+                          ? currentChecklistResult.actionRequired
+                          : '-'}
+                      </Typography>
+                    </Tooltip>
+                  </div>
+                </div>
+              )
+            ) : (
+              <Typography>미흡사항 데이터를 불러오는 데 실패했습니다.</Typography>
+            )}
+          </DefaultModal>
+        </>
+      )
+    )
+  }
+)

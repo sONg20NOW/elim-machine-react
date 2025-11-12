@@ -3,7 +3,7 @@
 // React Imports
 import { useState } from 'react'
 
-import type { machineChecklistItemsWithPicCountResponseDtosType } from '@/@core/types'
+import type { MachineChecklistItemsWithPicCountResponseDtosType } from '@/@core/types'
 
 import InspectionPicListModal from './InspectionPicListModal'
 import ProjectPicListModal from './ProjectPicListModal'
@@ -11,7 +11,7 @@ import ProjectPicListModal from './ProjectPicListModal'
 type PictureListModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  clickedPicCate?: machineChecklistItemsWithPicCountResponseDtosType
+  clickedPicCate?: MachineChecklistItemsWithPicCountResponseDtosType
   projectPic?: boolean
 }
 

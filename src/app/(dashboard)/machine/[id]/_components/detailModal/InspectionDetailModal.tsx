@@ -13,12 +13,13 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import type {
   GasMeasurementResponseDtoType,
-  machineInspectionChecklistItemResultBasicResponseDtoType,
+  MachineInspectionChecklistItemResultUpdateRequestDtoType,
   MachineInspectionDetailResponseDtoType,
   MachineInspectionResponseDtoType,
   PipeMeasurementResponseDtoType,
   WindMeasurementResponseDtoType
 } from '@/@core/types'
+
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
@@ -134,31 +135,20 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
             break
 
           case 'PIC':
-            // 점검결과(machineChecklistItemInspectionResult)에 변경이 감지되었을 때만 requestBody에 포함시키기.
-            const changedCates: { id: number; version: number; inspectionResult: string }[] = []
-
-            editData.machineChecklistItemsWithPicCountResponseDtos?.map((cate, idx) => {
-              const originalCate = selectedInspection.machineChecklistItemsWithPicCountResponseDtos[idx]
-
-              if (
-                cate.machineInspectionChecklistItemResultBasicResponseDto !==
-                originalCate.machineInspectionChecklistItemResultBasicResponseDto
-              ) {
-                changedCates.push(cate.machineInspectionChecklistItemResultBasicResponseDto)
+            await auth.put<{
+              data: {
+                machineInspectionChecklistItemResultUpdateResponseDtos: MachineInspectionChecklistItemResultUpdateRequestDtoType[]
               }
-            })
-
-            if (changedCates) {
-              await auth.put<{
-                data: {
-                  machineInspectionChecklistItemResultUpdateResponseDtos: machineInspectionChecklistItemResultBasicResponseDtoType[]
-                }
-              }>(
-                `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
-                { machineInspectionChecklistItemResultUpdateRequestDtos: changedCates }
-              )
-              refetchSelectedInspection()
-            }
+            }>(
+              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
+              {
+                machineInspectionChecklistItemResultUpdateRequestDtos:
+                  editData.machineChecklistItemsWithPicCountResponseDtos.map(
+                    v => v.machineInspectionChecklistItemResultBasicResponseDto
+                  )
+              }
+            )
+            refetchSelectedInspection()
 
             break
           case 'GAS':

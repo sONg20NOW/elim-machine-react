@@ -62,7 +62,7 @@ export default function BasicTabContent({
                 <TextField
                   select
                   size='small'
-                  value={editData.machineInspectionResponseDto.equipmentPhase}
+                  value={editData.machineInspectionResponseDto.equipmentPhase ?? ''}
                   slotProps={{ htmlInput: { sx: { py: '5px !important' } } }}
                   onChange={e =>
                     setEditData(prev => ({
