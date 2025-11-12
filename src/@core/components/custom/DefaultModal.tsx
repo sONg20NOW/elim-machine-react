@@ -93,6 +93,7 @@ export default function DefaultModal({
 
       {/* 제목 */}
       <DialogTitle
+        sx={{ pt: '1.5rem !important' }}
         variant='h4'
         className={classNames(
           ' flex items-center gap-0 sm:gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16',
