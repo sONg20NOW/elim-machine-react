@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 
 import Grid from '@mui/material/Grid2'
 
-import { Box, Button, InputAdornment, MenuItem } from '@mui/material'
+import { Box, Button, InputAdornment, MenuItem, Typography } from '@mui/material'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import YNSelectBox from './YNSelectBox'
@@ -258,21 +258,23 @@ function InputBoxContent() {
         <div className='relative'>
           <CustomTextField
             required={showLabel && required}
-            slotProps={{ htmlInput: { name: tabFieldKey } }}
+            slotProps={{
+              htmlInput: { name: tabFieldKey },
+              input: {
+                endAdornment: (
+                  <InputAdornment position='end'>
+                    <Button onClick={() => setShowMapModal(true)} variant='contained' size='small'>
+                      <Typography sx={{ color: 'white !important' }}>검색</Typography>
+                    </Button>
+                  </InputAdornment>
+                )
+              }
+            }}
             id={tabFieldKey}
             disabled={disabled}
             label={label}
             value={value ?? ''}
             onChange={e => onChange(e.target.value)}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <Button onClick={() => setShowMapModal(true)} variant='contained' size='small'>
-                    검색
-                  </Button>
-                </InputAdornment>
-              )
-            }}
           />
           {<PostCodeDialog open={showMapModal} setOpen={setShowMapModal} ElementId={tabFieldKey} onChange={onChange} />}
         </div>
