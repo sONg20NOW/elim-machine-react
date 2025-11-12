@@ -6,8 +6,6 @@ import { MenuItem, Select, Typography, useTheme } from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { toast } from 'react-toastify'
-
 import styles from '@/app/_style/Table.module.css'
 import type { refType } from '../MachinePerformanceReviewModal'
 import { centerStyle, StyledTextField } from '../MachinePerformanceReviewModal'
@@ -49,7 +47,6 @@ const AgingTab = memo(
         onAutoFill: () => {
           mutateAutoFill()
           setAutoFillTrigger(prev => !prev)
-          toast.info('노후도 자동채우기를 완료했습니다.')
         },
         isDirty: isDirty
       }))

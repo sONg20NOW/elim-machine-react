@@ -6,8 +6,6 @@ import { Typography, useTheme } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import { toast } from 'react-toastify'
-
 import styles from '@/app/_style/Table.module.css'
 import { centerStyle, StyledTextField, type refType } from '../MachinePerformanceReviewModal'
 import {
@@ -50,7 +48,6 @@ const ResultSummaryTab = memo(
       onAutoFill: () => {
         mutateAutoFill()
         setAutoFillTrigger(prev => !prev)
-        toast.info('결과요약 자동채우기를 완료했습니다.')
       },
       isDirty: isDirty // 수정 여부 상태
     }))

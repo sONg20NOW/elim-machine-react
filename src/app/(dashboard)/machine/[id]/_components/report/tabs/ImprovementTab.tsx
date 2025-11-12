@@ -6,8 +6,6 @@ import { MenuItem, Select, Typography, useTheme } from '@mui/material'
 
 import { Controller, useForm, useFormState } from 'react-hook-form'
 
-import { toast } from 'react-toastify'
-
 import styles from '@/app/_style/Table.module.css'
 import type { refType } from '../MachinePerformanceReviewModal'
 import { centerStyle, StyledTextField } from '../MachinePerformanceReviewModal'
@@ -107,7 +105,6 @@ const ImprovementTab = memo(
           onAutoFill: () => {
             mutateAutoFill()
             setAutoFillTrigger(prev => !prev)
-            toast.info('개선사항 자동채우기를 완료했습니다.')
           },
           isDirty: isDirty // 수정 여부 상태
         }))
