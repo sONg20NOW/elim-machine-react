@@ -11,6 +11,8 @@ import TabList from '@mui/lab/TabList'
 
 import TabPanel from '@mui/lab/TabPanel'
 
+import { toast } from 'react-toastify'
+
 import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
@@ -36,6 +38,8 @@ import {
   useMutateWindMeasurementResponseDto
 } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
+import { auth } from '@/lib/auth'
+import DeleteModal from '@/@core/components/custom/DeleteModal'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -111,6 +115,7 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
   const [editData, setEditData] = useState<MachineInspectionDetailResponseDtoType>(structuredClone(selectedInspection))
 
   const [showAlertModal, setShowAlertModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showPictureListModal, setShowPictureListModal] = useState(false)
 
   // 탭
@@ -203,11 +208,28 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
     thisTabInfo
   ])
 
+  const handleDelete = async () => {
+    await auth.delete(`/api/machine-projects/${machineProjectId}/machine-inspections`, {
+      // @ts-ignore
+      data: {
+        machineInspectionDeleteRequestDtos: [
+          {
+            machineInspectionId: selectedInspection.machineInspectionResponseDto.id,
+            version: selectedInspection.machineInspectionResponseDto.version
+          }
+        ]
+      }
+    })
+
+    setOpen(false)
+    toast.info(`${selectedInspection.machineInspectionResponseDto.machineInspectionName}이 삭제되었습니다`)
+  }
+
   return (
     selectedInspection && (
       <DefaultModal
         modifyButton={
-          <Button variant='contained' color='error'>
+          <Button variant='contained' color='error' onClick={() => setShowDeleteModal(true)}>
             삭제
           </Button>
         }
@@ -322,15 +344,18 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
           )}
         </div>
 
-        {showAlertModal && (
-          <AlertModal<MachineInspectionDetailResponseDtoType>
-            showAlertModal={showAlertModal}
-            setShowAlertModal={setShowAlertModal}
-            setEditData={setEditData}
-            setIsEditing={setIsEditing}
-            originalData={selectedInspection}
-          />
-        )}
+        <AlertModal<MachineInspectionDetailResponseDtoType>
+          showAlertModal={showAlertModal}
+          setShowAlertModal={setShowAlertModal}
+          setEditData={setEditData}
+          setIsEditing={setIsEditing}
+          originalData={selectedInspection}
+        />
+        <DeleteModal
+          showDeleteModal={showDeleteModal}
+          setShowDeleteModal={setShowDeleteModal}
+          onDelete={handleDelete}
+        />
         {/* 갤러리 버튼 클릭 시 동작 */}
         {showPictureListModal && <PictureListModal open={showPictureListModal} setOpen={setShowPictureListModal} />}
       </DefaultModal>
