@@ -421,7 +421,7 @@ export interface MachineInspectionDetailResponseDtoType {
     | 'PIPE_MEASUREMENT'
   machineInspectionResponseDto: MachineInspectionResponseDtoType
   engineerIds: number[]
-  machineChecklistItemsWithPicCountResponseDtos: machineChecklistItemsWithPicCountResponseDtosType[]
+  machineChecklistItemsWithPicCountResponseDtos: MachineChecklistItemsWithPicCountResponseDtosType[]
   gasMeasurementResponseDto: GasMeasurementResponseDtoType
   pipeMeasurementResponseDtos: PipeMeasurementResponseDtoType[]
   windMeasurementResponseDtos: WindMeasurementResponseDtoType[]
@@ -445,20 +445,24 @@ export interface MachineInspectionResponseDtoType {
 }
 
 // 점검 항목 + 사진 개수 등의 정보 목록
-export interface machineChecklistItemsWithPicCountResponseDtosType {
+export interface MachineChecklistItemsWithPicCountResponseDtosType {
   machineChecklistItemId: number
   machineChecklistItemName: string
   checklistSubItems: MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType[]
   totalMachinePicCount: number
-  machineInspectionChecklistItemResultBasicResponseDto: machineInspectionChecklistItemResultBasicResponseDtoType
+  machineInspectionChecklistItemResultBasicResponseDto: MachineInspectionChecklistItemResultBasicResponseDtoType
 }
 
-export interface machineInspectionChecklistItemResultBasicResponseDtoType {
+// 점검 결과 수정 요청 DTO
+export type MachineInspectionChecklistItemResultUpdateRequestDtoType =
+  MachineInspectionChecklistItemResultBasicResponseDtoType
+
+export interface MachineInspectionChecklistItemResultBasicResponseDtoType {
   id: number
   version: number
   inspectionResult: string
-  deficiencies: string
-  actionRequired: string
+  deficiencies: string | null
+  actionRequired: string | null
 }
 
 // 점검 항목의 하위 항목 및 사진 개수 응답 DTO
