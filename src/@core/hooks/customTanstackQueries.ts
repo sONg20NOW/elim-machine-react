@@ -6,6 +6,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 // @ts-ignore
 import type { AxiosError } from 'axios'
 
+import { toast } from 'react-toastify'
+
 import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
@@ -35,6 +37,7 @@ import type {
   MemberDetailResponseDtoType,
   targetType
 } from '@/@core/types' // 타입 임포트
+import { handleApiError } from '@/utils/errorHandler'
 
 // ------------------------- MachineInspection 관련 -------------------------
 // GET /api/machine-projects/${machineProjectId}/machine-inspections : 특정 프로젝트의 설비목록 가져오기
@@ -628,6 +631,7 @@ export const useMutateYearlyPlan = (machineProjectId: string) => {
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -649,10 +653,12 @@ export const useMutateYearlyPlanAutoFill = (machineProjectId: string) => {
     onSuccess: newYearlyPlanData => {
       queryClient.setQueryData(queryKey, newYearlyPlanData)
       console.log('연도별 계획 자동채우기 정보가 성공적으로 반영되었습니다.')
+      toast.info('연도별 계획 자동채우기를 완료했습니다.')
     },
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -718,6 +724,7 @@ export const useMutateResultSummary = (machineProjectId: string) => {
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -740,10 +747,12 @@ export const useMutateResultSummaryAutoFill = (machineProjectId: string) => {
     onSuccess: newSummaryData => {
       queryClient.setQueryData(queryKey, newSummaryData)
       console.log('결과요약 자동채우기 정보가 성공적으로 반영되었습니다.')
+      toast.info('연도별 계획 자동채우기를 완료했습니다.')
     },
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -810,6 +819,7 @@ export const useMutateOperationStatus = (machineProjectId: string) => {
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -832,10 +842,12 @@ export const useMutateOperationStatusAutoFill = (machineProjectId: string) => {
     onSuccess: newStatusData => {
       queryClient.setQueryData(queryKey, newStatusData)
       console.log('작동상태 자동채우기 정보가 성공적으로 반영되었습니다.')
+      toast.info('작동상태 자동채우기를 완료했습니다.')
     },
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -862,7 +874,8 @@ export const useGetMeasurement = (machineProjectId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.MACHINE_PERFORMANCE_REVIEW.GET_MEASUREMENT(machineProjectId),
     queryFn: fetchMeasurement,
-    staleTime: 1000 * 60 * 5 // 5분
+    staleTime: 1000 * 60 * 5, // 5분
+    throwOnError: true
   })
 }
 
@@ -901,6 +914,7 @@ export const useMutateMeasurement = (machineProjectId: string) => {
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -922,10 +936,12 @@ export const useMutateMeasurementAutoFill = (machineProjectId: string) => {
     onSuccess: newMeasurementData => {
       queryClient.setQueryData(queryKey, newMeasurementData)
       console.log('측정값 일치 자동채우기 정보가 성공적으로 반영되었습니다.')
+      toast.info('측정값 일치 자동채우기를 완료했습니다.')
     },
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -991,6 +1007,7 @@ export const useMutateImprovement = (machineProjectId: string) => {
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -1012,10 +1029,12 @@ export const useMutateImprovementAutoFill = (machineProjectId: string) => {
     onSuccess: newImprovementData => {
       queryClient.setQueryData(queryKey, newImprovementData)
       console.log('개선사항 자동채우기 정보가 성공적으로 반영되었습니다.')
+      toast.info('개선사항 자동채우기를 완료했습니다.')
     },
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -1085,6 +1104,7 @@ export const useMutateAging = (machineProjectId: string) => {
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -1109,10 +1129,12 @@ export const useMutateAgingAutoFill = (machineProjectId: string) => {
         ...newAgingData
       }))
       console.log('노후도 자동채우기 정보가 성공적으로 반영되었습니다.')
+      toast.info('노후도 자동채우기를 완료했습니다.')
     },
 
     onError: error => {
       console.error(error)
+      handleApiError(error)
     }
   })
 }
@@ -1185,6 +1207,7 @@ export const useMutateGuide = (machineProjectId: string) => {
     // 실패 시
     onError: error => {
       console.log(error)
+      handleApiError(error)
     }
   })
 }
