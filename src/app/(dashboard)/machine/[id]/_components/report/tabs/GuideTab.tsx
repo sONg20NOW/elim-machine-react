@@ -174,4 +174,6 @@ const GuideTabInner = forwardRef<refType, {}>(({}, ref) => {
   )
 })
 
-export const GuideTab = memo(GuideTabInner)
+const GuideTab = memo(GuideTabInner)
+
+export default GuideTab

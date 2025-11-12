@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
+import dynamic from 'next/dynamic'
+
 import {
   AppBar,
   Backdrop,
@@ -30,13 +32,15 @@ import styles from '@/app/_style/Table.module.css'
 import { auth } from '@/lib/auth'
 import { handleSuccess } from '@/utils/errorHandler'
 import type { MachineInspectionRootCategoryResponseDtoType } from '@/@core/types'
-import ResultSummaryTab from './tabs/ResultSummaryTab'
-import OperationStatusTab from './tabs/OperationStatusTab'
-import MeasurementTab from './tabs/MeasurementTab'
-import AgingTab from './tabs/AgingTab'
-import ImprovementTab from './tabs/ImprovementTab'
-import YearlyPlanTab from './tabs/YearlyPlanTab'
-import { GuideTab } from './tabs/GuideTab'
+
+// ✅ 각 탭을 dynamic import로 로딩 (Next.js에서만 가능)
+const ResultSummaryTab = dynamic(() => import('./tabs/ResultSummaryTab'))
+const GuideTab = dynamic(() => import('./tabs/GuideTab'))
+const OperationStatusTab = dynamic(() => import('./tabs/OperationStatusTab'))
+const MeasurementTab = dynamic(() => import('./tabs/MeasurementTab'))
+const AgingTab = dynamic(() => import('./tabs/AgingTab'))
+const ImprovementTab = dynamic(() => import('./tabs/ImprovementTab'))
+const YearlyPlanTab = dynamic(() => import('./tabs/YearlyPlanTab'))
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -83,6 +87,7 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
 
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false) // ✅ 로딩 상태 추가
+  const [mountedTabs, setMountedTabs] = useState<Set<string>>(new Set(['결과요약'])) // ✅ Lazy mount 상태
   const [tabValue, setTabValue] = useState<TabType>('결과요약')
   const [rootCategories, setRootCategories] = useState<MachineInspectionRootCategoryResponseDtoType[]>([])
 
@@ -106,6 +111,11 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
 
   useEffect(() => {
     scrollAreaRef.current && scrollAreaRef.current.scrollTo({ top: 0 })
+  }, [tabValue])
+
+  // ✅ 탭이 바뀌면 그 탭을 mountedTabs에 추가
+  useEffect(() => {
+    setMountedTabs(prev => new Set(prev).add(tabValue))
   }, [tabValue])
 
   const handleOpen = async () => {
@@ -291,29 +301,43 @@ export default function MachinePerformanceReviewModal({ machineProjectName }: { 
                 ))}
               </TabList>
             </AppBar>
-            {/* 탭이 이동해도 언마운트 되지 않도록 TabPanel이 아닌 div로 구현 */}
-            <div style={{ height: '100%', overflowY: 'auto' }} ref={scrollAreaRef}>
-              <div style={{ display: tabValue === '결과요약' ? 'block' : 'none', height: '100%' }}>
-                <ResultSummaryTab ref={resultSummaryRef} />
-              </div>
-              <div style={{ display: tabValue === '유지관리지침서' ? 'block' : 'none', height: '100%' }}>
-                <GuideTab ref={guideRef} />
-              </div>
-              <div style={{ display: tabValue === '작동상태' ? 'block' : 'none', height: '100%' }}>
-                <OperationStatusTab rootCategories={rootCategories} ref={operationStatusRef} />
-              </div>
-              <div style={{ display: tabValue === '측정값 일치' ? 'block' : 'none', height: '100%' }}>
-                <MeasurementTab rootCategories={rootCategories} ref={measurementRef} />
-              </div>
-              <div style={{ display: tabValue === '노후도' ? 'block' : 'none', height: '100%' }}>
-                <AgingTab rootCategories={rootCategories} ref={agingRef} />
-              </div>
-              <div style={{ display: tabValue === '개선사항' ? 'block' : 'none', height: '100%' }}>
-                <ImprovementTab rootCategories={rootCategories} ref={improvementRef} />
-              </div>
-              <div style={{ display: tabValue === '연도별 계획' ? 'block' : 'none', height: '100%' }}>
-                <YearlyPlanTab rootCategories={rootCategories} ref={yearlyPlanRef} />
-              </div>
+            {/* ✅ Lazy Mounting */}
+            <div ref={scrollAreaRef} style={{ height: '100%', overflowY: 'auto' }}>
+              {mountedTabs.has('결과요약') && (
+                <div style={{ display: tabValue === '결과요약' ? 'block' : 'none', height: '100%' }}>
+                  <ResultSummaryTab ref={resultSummaryRef} />
+                </div>
+              )}
+              {mountedTabs.has('유지관리지침서') && (
+                <div style={{ display: tabValue === '유지관리지침서' ? 'block' : 'none', height: '100%' }}>
+                  <GuideTab ref={guideRef} />
+                </div>
+              )}
+              {mountedTabs.has('작동상태') && (
+                <div style={{ display: tabValue === '작동상태' ? 'block' : 'none', height: '100%' }}>
+                  <OperationStatusTab ref={operationStatusRef} rootCategories={rootCategories} />
+                </div>
+              )}
+              {mountedTabs.has('측정값 일치') && (
+                <div style={{ display: tabValue === '측정값 일치' ? 'block' : 'none', height: '100%' }}>
+                  <MeasurementTab ref={measurementRef} rootCategories={rootCategories} />
+                </div>
+              )}
+              {mountedTabs.has('노후도') && (
+                <div style={{ display: tabValue === '노후도' ? 'block' : 'none', height: '100%' }}>
+                  <AgingTab ref={agingRef} rootCategories={rootCategories} />
+                </div>
+              )}
+              {mountedTabs.has('개선사항') && (
+                <div style={{ display: tabValue === '개선사항' ? 'block' : 'none', height: '100%' }}>
+                  <ImprovementTab ref={improvementRef} rootCategories={rootCategories} />
+                </div>
+              )}
+              {mountedTabs.has('연도별 계획') && (
+                <div style={{ display: tabValue === '연도별 계획' ? 'block' : 'none', height: '100%' }}>
+                  <YearlyPlanTab ref={yearlyPlanRef} rootCategories={rootCategories} />
+                </div>
+              )}
             </div>
           </TabContext>
         </DialogContent>
