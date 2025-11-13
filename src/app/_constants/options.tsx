@@ -104,16 +104,16 @@ export const genderOption = [
 ]
 
 export const careerYearOption = [
-  { value: '1', label: '1년차' },
-  { value: '2', label: '2년차' },
-  { value: '3', label: '3년차' },
-  { value: '4', label: '4년차' },
-  { value: '5', label: '5년차' },
-  { value: '6', label: '6년차' },
-  { value: '7', label: '7년차' },
-  { value: '8', label: '8년차' },
-  { value: '9', label: '9년차' },
-  { value: '10', label: '10년차' }
+  { value: '1', label: '1년차 이상' },
+  { value: '2', label: '2년차 이상' },
+  { value: '3', label: '3년차 이상' },
+  { value: '4', label: '4년차 이상' },
+  { value: '5', label: '5년차 이상' },
+  { value: '6', label: '6년차 이상' },
+  { value: '7', label: '7년차 이상' },
+  { value: '8', label: '8년차 이상' },
+  { value: '9', label: '9년차 이상' },
+  { value: '10', label: '10년차 이상' }
 ]
 
 // machine - project
