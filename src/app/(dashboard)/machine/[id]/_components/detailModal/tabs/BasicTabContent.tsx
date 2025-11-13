@@ -4,7 +4,7 @@ import { useEffect, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Button, Card, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
+import { Button, Card, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
 
 import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
 import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
@@ -64,13 +64,25 @@ export default function BasicTabContent({
                 (equipmentPhaseOption.find(opt => opt.value === editData.machineInspectionResponseDto.equipmentPhase)
                   ?.label ?? '-')
               ) : (
-                <TextField
-                  select
+                <Select
                   variant='standard'
                   size='small'
                   value={editData.machineInspectionResponseDto.equipmentPhase ?? ''}
                   sx={{ '& .MuiSelect-select': { p: '0px !important' } }}
-                  slotProps={{ htmlInput: { sx: { p: 0 } }, select: { IconComponent: () => null, displayEmpty: true } }}
+                  IconComponent={() => null}
+                  displayEmpty
+                  renderValue={value => {
+                    const found = equipmentPhaseOption.find(opt => opt.value === value)?.label
+
+                    return found ? (
+                      <Typography variant='inherit'>{found}</Typography>
+                    ) : (
+                      <Typography variant='inherit' sx={{ opacity: '60%' }}>
+                        미정
+                      </Typography>
+                    )
+                  }}
+                  slotProps={{ input: { sx: { p: 0 } } }}
                   onChange={e =>
                     setEditData(prev => ({
                       ...prev,
@@ -82,15 +94,12 @@ export default function BasicTabContent({
                     }))
                   }
                 >
-                  <MenuItem value=''>
-                    <Typography color='lightgray'>미정</Typography>
-                  </MenuItem>
                   {equipmentPhaseOption.map(opt => (
                     <MenuItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </MenuItem>
                   ))}
-                </TextField>
+                </Select>
               )}
             </th>
             <td colSpan={2}>

@@ -163,11 +163,17 @@ const InspectionForm = memo(
                     }}
                     size={isMobile ? 'small' : 'medium'}
                     displayEmpty
-                    renderValue={value => (
-                      <Typography sx={{ fontSize: 18 }}>
-                        {equipmentPhaseOption.find(opt => opt.value === value)?.label ?? '미정'}
-                      </Typography>
-                    )}
+                    renderValue={value => {
+                      const found = equipmentPhaseOption.find(opt => opt.value === value)?.label
+
+                      return found ? (
+                        <Typography sx={{ fontSize: 18 }}>{found}</Typography>
+                      ) : (
+                        <Typography sx={{ fontSize: 18, opacity: '60%', fontStyle: 'italic' }} variant='inherit'>
+                          미정
+                        </Typography>
+                      )
+                    }}
                   >
                     {equipmentPhaseOption.map(v => (
                       <MenuItem value={v.value} key={v.value}>
