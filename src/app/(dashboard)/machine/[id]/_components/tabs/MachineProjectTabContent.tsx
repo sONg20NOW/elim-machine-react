@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
-import { Button } from '@mui/material'
+import { Button, Checkbox, Typography } from '@mui/material'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/@core/components/custom/InputBox'
@@ -343,11 +343,39 @@ const BasicTabContent = ({}: {}) => {
                       />
                     </td>
                   </tr>
+                  {/* 요청사항 */}
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      요청사항
+                    </th>
+                    <td colSpan={3} className='pe-4'>
+                      <InputBox
+                        showLabel={false}
+                        tabFieldKey='requirement'
+                        value={editData.requirement ?? ''}
+                        onChange={value => setEditData(prev => ({ ...prev, requirement: value }))}
+                        tabInfos={MACHINE_INPUT_INFO}
+                      />
+                    </td>
+                  </tr>
                   {/* 유지관리자/담당자 */}
                   <tr style={{ background: '#f3f4f6' }}>
-                    <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
+                    <th colSpan={3} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
                       계약사항 및 책임자
                     </th>
+                    <td className='grid place-items-end items-center'>
+                      <div className='flex items-center'>
+                        <Typography color='primary.dark' variant='h6'>
+                          부가세 포함
+                        </Typography>
+                        <Checkbox
+                          checked={editData.vatIncludedYn === 'Y'}
+                          onChange={(_, checked) => {
+                            setEditData(prev => ({ ...prev, vatIncludedYn: checked ? 'Y' : 'N' }))
+                          }}
+                        />
+                      </div>
+                    </td>
                   </tr>
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -460,22 +488,6 @@ const BasicTabContent = ({}: {}) => {
                         tabFieldKey='contractPartnerEmail'
                         value={editData.contractPartnerEmail ?? ''}
                         onChange={value => setEditData(prev => ({ ...prev, contractPartnerEmail: value }))}
-                        tabInfos={MACHINE_INPUT_INFO}
-                      />
-                    </td>
-                  </tr>
-
-                  {/* 요구사항 */}
-                  <tr>
-                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                      요구사항
-                    </th>
-                    <td colSpan={3} className='pe-4'>
-                      <InputBox
-                        showLabel={false}
-                        tabFieldKey='requirement'
-                        value={editData.requirement ?? ''}
-                        onChange={value => setEditData(prev => ({ ...prev, requirement: value }))}
                         tabInfos={MACHINE_INPUT_INFO}
                       />
                     </td>
@@ -631,10 +643,26 @@ const BasicTabContent = ({}: {}) => {
                         {editData.completeDate ? new Date(editData.completeDate).toLocaleDateString() : '-'}
                       </td>
                     </tr>
+                    <tr style={{ height: '114px' }}>
+                      <th rowSpan={1} align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                        요청사항
+                      </th>
+                      <td rowSpan={1} colSpan={3} style={{ padding: '10px 12px', minHeight: 200 }}>
+                        <p>{editData.requirement ? editData.requirement : '-'}</p>
+                      </td>
+                    </tr>
                     <tr style={{ background: '#f3f4f6' }}>
-                      <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
+                      <th colSpan={3} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
                         계약사항 및 책임자
                       </th>
+                      <td className='grid place-items-end items-center'>
+                        <div className='flex items-center'>
+                          <Typography color='primary.dark' variant='h6' sx={{ opacity: '70%' }}>
+                            부가세 포함
+                          </Typography>
+                          <Checkbox checked={editData.vatIncludedYn === 'Y'} disabled />
+                        </div>
+                      </td>
                     </tr>
                     <tr>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -649,15 +677,6 @@ const BasicTabContent = ({}: {}) => {
                       <td style={{ padding: '10px 12px' }}>
                         {editData.projectStatusDescription ? editData.projectStatusDescription : '-'}
                       </td>
-                      {/* <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                      계약금액
-                    </th>
-                    <td style={{ padding: '10px 12px' }}>
-                      {editData.machineProjectResponseDto.contractPrice?.toLocaleString()} 원
-                      {editData.machineProjectResponseDto.vatIncludedYn === 'Y' && (
-                        <span style={{ color: '#888', marginLeft: 8 }}>(VAT포함)</span>
-                      )}
-                    </td> */}
                     </tr>
                     <tr>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -707,14 +726,7 @@ const BasicTabContent = ({}: {}) => {
                         </span>
                       </td>
                     </tr>
-                    <tr>
-                      <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                        요구사항
-                      </th>
-                      <td colSpan={3} style={{ padding: '10px 12px', minHeight: 200 }}>
-                        <p>{editData.requirement ? editData.requirement : '-'}</p>
-                      </td>
-                    </tr>
+
                     <tr style={{ background: '#f3f4f6' }}>
                       <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
                         유지관리자 및 담당자
