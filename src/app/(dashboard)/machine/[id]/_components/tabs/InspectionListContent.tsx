@@ -133,8 +133,16 @@ const InspectionListContent = ({}) => {
   }, [filters, sorting, page, pageSize, machineCategoryName, location, machineProjectId])
 
   useEffect(() => {
-    getFilteredInspectionList()
-  }, [getFilteredInspectionList, open, showAddModalOpen, showPictureListModal])
+    if (!open) getFilteredInspectionList()
+  }, [getFilteredInspectionList, open])
+
+  useEffect(() => {
+    if (!showAddModalOpen) getFilteredInspectionList()
+  }, [getFilteredInspectionList, showAddModalOpen])
+
+  useEffect(() => {
+    if (!showPictureListModal) getFilteredInspectionList()
+  }, [getFilteredInspectionList, showPictureListModal])
 
   useEffect(() => {
     if (!open) {
@@ -386,7 +394,13 @@ const InspectionListContent = ({}) => {
           setOpen={setShowAddModalOpen}
         />
       )}
-      {showPictureListModal && <PictureListModal open={showPictureListModal} setOpen={setShowPictureListModal} />}
+      {showPictureListModal && (
+        <PictureListModal
+          open={showPictureListModal}
+          setOpen={setShowPictureListModal}
+          defaultPicInspectionId={currentInspectionId}
+        />
+      )}
     </div>
   )
 }
