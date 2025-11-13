@@ -433,7 +433,7 @@ export interface MachineInspectionDetailResponseDtoType {
   windMeasurementResponseDtos: WindMeasurementResponseDtoType[]
 }
 
-type equipmentPhaseType = 'INSTALL' | 'MANUFACTURE' | 'USE'
+export type equipmentPhaseType = 'INSTALL' | 'MANUFACTURE' | 'USE'
 
 // 점검 설비 기본 정보 응답 DTO
 export interface MachineInspectionResponseDtoType {

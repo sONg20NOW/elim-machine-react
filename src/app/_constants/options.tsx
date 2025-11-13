@@ -1,3 +1,5 @@
+import type { equipmentPhaseType } from '@/@core/types'
+
 // member
 export const companyNameOption = [
   { value: '엘림기술원(주)', label: '엘림기술원(주)' },
@@ -182,7 +184,7 @@ export const workStatusOption = [
 ]
 
 // 설비 정보
-export const equipmentPhaseOption = [
+export const equipmentPhaseOption: { label: string; value: equipmentPhaseType }[] = [
   { label: '설치일', value: 'INSTALL' },
   { label: '제조일', value: 'MANUFACTURE' },
   { label: '사용일', value: 'USE' }
