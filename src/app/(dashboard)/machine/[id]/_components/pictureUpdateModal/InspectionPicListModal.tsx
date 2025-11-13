@@ -182,8 +182,6 @@ const InspectionPicListModal = ({
   }
 
   const handleDeletePics = useCallback(async () => {
-    if (!selectedSubItem) return
-
     try {
       await auth.delete(`/api/machine-projects/${machineProjectId}/machine-pics`, {
         data: { machinePicDeleteRequestDtos: picturesToDelete }
@@ -197,12 +195,13 @@ const InspectionPicListModal = ({
 
       // 삭제 예정 리스트 리셋
       setPicturesToDelete([])
+      setShowCheck(false)
 
       handleSuccess('선택된 사진들이 일괄삭제되었습니다.')
     } catch (error) {
       handleApiError(error)
     }
-  }, [machineProjectId, picturesToDelete, selectedSubItem, refetchSelectedInspection])
+  }, [machineProjectId, picturesToDelete, refetchSelectedInspection])
 
   async function MovePicture(dir: 'next' | 'previous') {
     const currentPictureIdx = pictures.findIndex(v => v.machinePicId === selectedPic?.machinePicId)
