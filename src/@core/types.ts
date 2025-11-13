@@ -397,6 +397,12 @@ export interface EngineerFilterType {
 }
 
 // ----------- 설비목록 -----------
+// GET inspections simple
+export interface MachineInspectionSimpleResponseDtoType {
+  id: number
+  name: string
+}
+
 // GET api/machine-projects/{machineProjectId}/machine-inspections: 점검 설비 리스트 조회 (설비 목록 조회)
 export interface MachineInspectionPageResponseDtoType {
   machineInspectionId: number

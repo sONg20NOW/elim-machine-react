@@ -21,6 +21,7 @@ import type {
   MachineInspectionPageResponseDtoType,
   MachineInspectionResponseDtoType,
   MachineInspectionRootCategoryResponseDtoType,
+  MachineInspectionSimpleResponseDtoType,
   machineInspectionSummaryResponseDtoType,
   MachineLeafCategoryResponseDtoType,
   MachinePerformanceReviewAgingReadResponseDtoType,
@@ -46,10 +47,6 @@ import { handleApiError } from '@/utils/errorHandler'
 
 // ------------------------- MachineInspection 관련 -------------------------
 // GET /api/machine-projects/${machineProjectId}/machine-inspections : 특정 프로젝트의 설비목록 가져오기
-interface MachineInspectionSimpleResponseDtoType {
-  id: number
-  name: string
-}
 
 // GET /api/machine-projects/${machineProjectId}/machine-inspections/simple : 설비 목록 조회 (SIMPLE)
 export const useGetInspectionsSimple = (machineProjectId: string) => {
@@ -228,10 +225,6 @@ export const useMutateMachineInspectionChecklistItemResultUpdateRequestDto = (
             ...prev,
             machineChecklistItemsWithPicCountResponseDtos: prev.machineChecklistItemsWithPicCountResponseDtos.map(v => {
               const f = data.find(p => p.id === v.machineInspectionChecklistItemResultBasicResponseDto.id)
-
-              if (f) {
-                console.log('found!', JSON.stringify(f))
-              }
 
               return f ? { ...v, machineInspectionChecklistItemResultBasicResponseDto: f } : v
             })
