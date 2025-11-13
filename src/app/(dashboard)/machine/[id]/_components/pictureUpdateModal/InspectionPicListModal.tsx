@@ -39,7 +39,6 @@ import type {
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
-import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 
@@ -48,18 +47,28 @@ type InspectionPicListModalProps = {
   setOpen: (open: boolean) => void
   clickedPicCate?: MachineChecklistItemsWithPicCountResponseDtosType
   ToggleProjectPic: () => void
+  defaultPicInspectionId?: number
 }
 
-const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPic }: InspectionPicListModalProps) => {
+const InspectionPicListModal = ({
+  open,
+  setOpen,
+  clickedPicCate,
+  ToggleProjectPic,
+  defaultPicInspectionId
+}: InspectionPicListModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
-  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore(set => set)
+
+  const { data: inspections } = useGetInspectionsSimple(machineProjectId)
+
+  const [picInspectionId, setPicInspectionId] = useState(
+    defaultPicInspectionId ?? (inspections ? inspections[0].id : 0)
+  )
 
   const { data: selectedInspection, refetch: refetchSelectedInspection } = useGetSingleInspection(
     machineProjectId,
-    currentInspectionId.toString()
+    picInspectionId.toString()
   )
-
-  const { data: inspections } = useGetInspectionsSimple(machineProjectId)
 
   // 사진 리스트
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
@@ -240,12 +249,14 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
   // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
   const getPictures = useCallback(
     async (pageSize = 10) => {
-      if (!hasNextRef.current || isLoadingRef.current) return
+      if (!hasNextRef.current || isLoadingRef.current || !picInspectionId) return
 
       isLoadingRef.current = true
 
+      console.log(`★ picInspId in getPictures(): ${picInspectionId}`)
+
       const requestBody = {
-        machineInspectionId: selectedInspection?.machineInspectionResponseDto.id,
+        machineInspectionId: picInspectionId,
         machineChecklistItemId: selectedItemId !== 0 ? selectedItemId : null,
         ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
       }
@@ -271,7 +282,7 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
         isLoadingRef.current = false
       }
     },
-    [selectedItemId, machineProjectId, selectedInspection]
+    [selectedItemId, machineProjectId, picInspectionId]
   )
 
   // 최초에 전체 사진 가져오기
@@ -302,13 +313,14 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
 
   useEffect(() => setShowCheck(false), [selectedSubItem])
 
-  // 설비 변경 시
   useEffect(() => {
-    if (!clickedPicCate) {
-      setSelectedItemId(0)
-      resetCursor()
-    }
-  }, [currentInspectionId, clickedPicCate])
+    console.log('changed!', picInspectionId)
+    resetCursor()
+  }, [picInspectionId])
+
+  useEffect(() => {
+    if (!open) setPicInspectionId(0)
+  }, [open, setPicInspectionId])
 
   // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
 
@@ -420,30 +432,28 @@ const InspectionPicListModal = ({ open, setOpen, clickedPicCate, ToggleProjectPi
           </div>
         </div>
         <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {clickedPicCate ? (
-            <Typography sx={{ fontWeight: 700, fontSize: { xs: 20, sm: 30 }, paddingInlineEnd: 5 }}>
-              {inspections.find(i => i.id === currentInspectionId)?.name}
-            </Typography>
-          ) : (
-            <TextField
-              size='small'
-              select
-              value={currentInspectionId}
-              onChange={e => setCurrentInspectionId(Number(e.target.value))}
-              sx={{ width: 'fit-content' }}
-              slotProps={{
-                select: {
-                  sx: { fontWeight: 700, fontSize: { xs: 20, sm: 30 }, paddingInlineEnd: 5 }
-                }
-              }}
-            >
-              {inspections?.map(inspection => (
-                <MenuItem key={inspection.id} value={inspection.id}>
-                  {inspection.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          )}
+          <TextField
+            size='small'
+            select
+            value={picInspectionId}
+            onChange={e => {
+              setSelectedItemId(0)
+              console.log('☆ Select CHANGE!: ', Number(e.target.value))
+              setPicInspectionId(Number(e.target.value))
+            }}
+            sx={{ width: 'fit-content' }}
+            slotProps={{
+              select: {
+                sx: { fontWeight: 700, fontSize: { xs: 20, sm: 30 }, paddingInlineEnd: 5 }
+              }
+            }}
+          >
+            {inspections?.map(inspection => (
+              <MenuItem key={inspection.id} value={inspection.id}>
+                {inspection.name}
+              </MenuItem>
+            ))}
+          </TextField>
           <Grid item xs={12}>
             <Typography sx={{ fontWeight: 600, mb: 1, px: 1, fontSize: { xs: 14, sm: 18 } }} variant='h6'>
               점검항목 선택

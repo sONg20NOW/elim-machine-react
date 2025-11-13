@@ -38,7 +38,6 @@ import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { auth } from '@/lib/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
-import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 
 type ProjectPicListModalProps = {
   open: boolean
@@ -48,8 +47,6 @@ type ProjectPicListModalProps = {
 
 const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicListModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
-
-  const setCurrentInspectionId = useCurrentInspectionIdStore(set => set.setCurrentInspectionId)
 
   // 사진 리스트
   const [pictures, setPictures] = useState<MachineProjectPicReadResponseDtoType[]>([])
@@ -302,7 +299,6 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
             onClick={() => {
               if (!inspections) return
 
-              setCurrentInspectionId(inspections[0].id)
               ToggleProjectPic()
             }}
             disabled={(inspections?.length ?? 0) === 0}

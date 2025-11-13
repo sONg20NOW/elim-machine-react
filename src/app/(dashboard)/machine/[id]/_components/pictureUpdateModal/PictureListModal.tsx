@@ -13,9 +13,16 @@ type PictureListModalProps = {
   setOpen: (open: boolean) => void
   clickedPicCate?: MachineChecklistItemsWithPicCountResponseDtosType
   projectPic?: boolean
+  defaultPicInspectionId?: number
 }
 
-const PictureListModal = ({ open, setOpen, clickedPicCate, projectPic = false }: PictureListModalProps) => {
+const PictureListModal = ({
+  open,
+  setOpen,
+  clickedPicCate,
+  projectPic = false,
+  defaultPicInspectionId
+}: PictureListModalProps) => {
   const [isProjectPic, setIsProjectPic] = useState(projectPic)
 
   function ToggleProjectPic() {
@@ -30,6 +37,7 @@ const PictureListModal = ({ open, setOpen, clickedPicCate, projectPic = false }:
       setOpen={setOpen}
       clickedPicCate={clickedPicCate}
       ToggleProjectPic={ToggleProjectPic}
+      defaultPicInspectionId={defaultPicInspectionId}
     />
   )
 }

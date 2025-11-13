@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Button, Tab } from '@mui/material'
+import { Button, MenuItem, Select, Tab, Typography } from '@mui/material'
 
 import TabList from '@mui/lab/TabList'
 
@@ -13,7 +13,7 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { toast } from 'react-toastify'
 
-import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
+import type { MachineInspectionDetailResponseDtoType, MachineInspectionSimpleResponseDtoType } from '@/@core/types'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
@@ -29,6 +29,7 @@ import PipeTabContent from './tabs/PipeTabContent'
 import PicTabContent from './tabs/PicTabContent'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import {
+  useGetInspectionsSimple,
   useGetSingleInspection,
   useMutateEngineerIds,
   useMutateGasMeasurementResponseDto,
@@ -78,9 +79,40 @@ type InspectionDetailModalProps = {
 
 const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
-  const currentInspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
+  const inspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
 
-  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
+  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, inspectionId.toString())
+  const { data: inspectionsSimple } = useGetInspectionsSimple(machineProjectId)
+
+  return (
+    selectedInspection &&
+    inspectionsSimple && (
+      <InspectionDetailModalInner
+        open={open}
+        setOpen={setOpen}
+        selectedInspection={selectedInspection}
+        inspectionsSimple={inspectionsSimple}
+      />
+    )
+  )
+}
+
+type InspectionDetailModalInnerProps = {
+  open: boolean
+  setOpen: (open: boolean) => void
+  selectedInspection: MachineInspectionDetailResponseDtoType
+  inspectionsSimple: MachineInspectionSimpleResponseDtoType[]
+}
+
+const InspectionDetailModalInner = ({
+  open,
+  setOpen,
+  selectedInspection,
+  inspectionsSimple
+}: InspectionDetailModalInnerProps) => {
+  const machineProjectId = useParams().id?.toString() as string
+
+  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
 
   const { mutate: mutateMachineInspectionResponseDto } = useMutateMachineInspectionResponseDto(
     machineProjectId,
@@ -236,7 +268,28 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
         value={tabValue}
         open={open}
         setOpen={setOpen}
-        title={`${selectedInspection.machineInspectionResponseDto.machineInspectionName || ''}   성능점검표`}
+        title={
+          <div className='flex items-center'>
+            <Select
+              IconComponent={() => null}
+              variant='standard'
+              value={currentInspectionId}
+              onChange={e => {
+                setCurrentInspectionId(Number(e.target.value))
+              }}
+              renderValue={value => (
+                <Typography variant='h3'>{inspectionsSimple.find(v => v.id === value)!.name}</Typography>
+              )}
+            >
+              {inspectionsSimple.map(v => (
+                <MenuItem key={v.id} value={v.id}>
+                  <Typography>{v.name}</Typography>
+                </MenuItem>
+              ))}
+            </Select>{' '}
+            <Typography variant='inherit'>{'성능점검표'}</Typography>
+          </div>
+        }
         primaryButton={
           <div style={{ display: 'flex', gap: 1 }}>
             <Button
@@ -325,7 +378,12 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
             <BasicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
           </TabPanel>
           <TabPanel value={'PIC'}>
-            <PicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+            <PicTabContent
+              editData={editData}
+              setEditData={setEditData}
+              isEditing={isEditing}
+              handleChangeChecklistItemResult={mutateMachineInspectionChecklistItemResultUpdateRequestDto}
+            />
           </TabPanel>
           {editData.gasMeasurementResponseDto && (
             <TabPanel value={'GAS'}>
@@ -357,7 +415,13 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
           onDelete={handleDelete}
         />
         {/* 갤러리 버튼 클릭 시 동작 */}
-        {showPictureListModal && <PictureListModal open={showPictureListModal} setOpen={setShowPictureListModal} />}
+        {showPictureListModal && (
+          <PictureListModal
+            open={showPictureListModal}
+            setOpen={setShowPictureListModal}
+            defaultPicInspectionId={currentInspectionId}
+          />
+        )}
       </DefaultModal>
     )
   )

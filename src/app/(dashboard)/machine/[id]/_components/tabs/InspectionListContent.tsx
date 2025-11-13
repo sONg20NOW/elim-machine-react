@@ -30,7 +30,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import AddInspectionModal from '../AddInspectionModal'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
-import { useGetParticipatedEngineerList, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
+import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import { auth } from '@/lib/auth'
 
@@ -50,7 +50,6 @@ const InspectionListContent = ({}) => {
   const disabled = loading || error
 
   const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
-  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
 
   // 페이지네이션 상태
   const [page, setPage] = useState(0)
@@ -379,7 +378,7 @@ const InspectionListContent = ({}) => {
       />
 
       {/* 모달 */}
-      {open && selectedInspection && <InspectionDetailModal open={open} setOpen={setOpen} />}
+      {open && currentInspectionId && <InspectionDetailModal open={open} setOpen={setOpen} />}
       {showAddModalOpen && (
         <AddInspectionModal
           getFilteredInspectionList={getFilteredInspectionList}
