@@ -32,7 +32,7 @@ const Layout = async (props: ChildrenType) => {
         <Header />
         <div className='flex flex-auto relative h-full'>
           <Navigation mode={mode} />
-          <div className='flex flex-col w-full pb-[10px] gap-[5px] h-full'>
+          <div className='w-full pb-[10px]'>
             <div className='px-[10px] flex flex-col w-full justify-between h-full'>
               <div className='flex-auto w-full pt-[10px] pb-[10px]'>{children}</div>
               <VerticalFooter />

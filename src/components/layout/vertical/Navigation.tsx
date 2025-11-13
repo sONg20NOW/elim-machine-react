@@ -97,7 +97,12 @@ const Navigation = (props: Props) => {
     // eslint-disable-next-line lines-around-comment
     // Sidebar Vertical Menu
     <VerticalNav
-      customStyles={navigationCustomStyles(verticalNavOptions, theme)}
+      customStyles={{
+        ...navigationCustomStyles(verticalNavOptions, theme),
+        height: '100%', // ✅ 핵심
+        position: 'sticky', // optional (원하면 fixed → sticky로 변경)
+        top: 0
+      }}
       collapsedWidth={71}
       backgroundColor='var(--mui-palette-background-paper)'
       // eslint-disable-next-line lines-around-comment
