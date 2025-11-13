@@ -56,18 +56,19 @@ export default function Header() {
       position='static'
     >
       <Toolbar className='flex justify-between'>
-        <div className='flex gap-4'>
+        <div className='flex gap-2'>
+          {isTablet && (
+            <IconButton edge='end' onClick={() => setOpen(true)}>
+              <i className='tabler-menu-2 text-white' />
+            </IconButton>
+          )}
           <div onClick={() => router.push('/machine')} className='cursor-pointer'>
             {/* <Logo /> */}
             <Typography color='white' variant='h4' sx={{ paddingInlineStart: 4 }}>
               엘림 주식회사
             </Typography>
           </div>
-          {isTablet && (
-            <IconButton edge='end' onClick={() => setOpen(true)}>
-              <i className='tabler-menu-2 text-white' />
-            </IconButton>
-          )}
+
           {/* <SearchBar placeholder='검색어를 입력하세요' setSearchKeyword={name => setKeyword(name)} /> */}
         </div>
         {!isTablet && (
@@ -116,7 +117,7 @@ export default function Header() {
                     color='white'
                     onClick={() => console.log(document.cookie.split(';'))}
                   >
-                    {username}
+                    {username}님
                   </Typography>
                 </div>
 
