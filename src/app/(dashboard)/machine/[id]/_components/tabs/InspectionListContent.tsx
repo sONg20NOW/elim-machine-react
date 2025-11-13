@@ -50,7 +50,7 @@ const InspectionListContent = ({}) => {
   const disabled = loading || error
 
   const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
-  const { data: currentInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
+  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, currentInspectionId.toString())
 
   // 페이지네이션 상태
   const [page, setPage] = useState(0)
@@ -136,6 +136,12 @@ const InspectionListContent = ({}) => {
   useEffect(() => {
     getFilteredInspectionList()
   }, [getFilteredInspectionList, open, showAddModalOpen, showPictureListModal])
+
+  useEffect(() => {
+    if (!open) {
+      setCurrentInspectionId(0)
+    }
+  }, [setCurrentInspectionId, open])
 
   //  체크 핸들러 (다중선택)
   const handleCheck = (machine: MachineInspectionPageResponseDtoType) => {
@@ -373,7 +379,7 @@ const InspectionListContent = ({}) => {
       />
 
       {/* 모달 */}
-      {open && currentInspection && <InspectionDetailModal open={open} setOpen={setOpen} />}
+      {open && selectedInspection && <InspectionDetailModal open={open} setOpen={setOpen} />}
       {showAddModalOpen && (
         <AddInspectionModal
           getFilteredInspectionList={getFilteredInspectionList}
@@ -381,9 +387,7 @@ const InspectionListContent = ({}) => {
           setOpen={setShowAddModalOpen}
         />
       )}
-      {showPictureListModal && currentInspection && (
-        <PictureListModal open={showPictureListModal} setOpen={setShowPictureListModal} />
-      )}
+      {showPictureListModal && <PictureListModal open={showPictureListModal} setOpen={setShowPictureListModal} />}
     </div>
   )
 }
