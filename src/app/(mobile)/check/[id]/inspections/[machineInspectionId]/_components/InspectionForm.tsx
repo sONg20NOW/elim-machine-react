@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import { InputLabel, MenuItem, TextField } from '@mui/material'
+import { InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -18,12 +18,13 @@ import type { FormComponentHandle } from '../page'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import { useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
+import { equipmentPhaseOption } from '@/app/_constants/options'
 
 export interface formType {
   machineInspectionName: string
   location: string
   purpose: string
-  equipmentPhase: 'INSTALL' | 'MANUFACTURE' | 'USE'
+  equipmentPhase: 'INSTALL' | 'MANUFACTURE' | 'USE' | null
   equipmentPhaseDate: string
   checkDate: string
   remark: string
@@ -154,25 +155,26 @@ const InspectionForm = memo(
                 control={control}
                 name='equipmentPhase'
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    slotProps={{
-                      select: { sx: { width: 'fit-content', paddingRight: 2, fontSize: 18 } }
+                  <Select
+                    value={field.value ?? ''}
+                    onChange={e => field.onChange(e.target.value === '' ? null : e.target.value)}
+                    sx={{
+                      flex: 1
                     }}
-                    select
-                    sx={{ flex: 1 }}
                     size={isMobile ? 'small' : 'medium'}
+                    displayEmpty
+                    renderValue={value => (
+                      <Typography sx={{ fontSize: 18 }}>
+                        {equipmentPhaseOption.find(opt => opt.value === value)?.label ?? '미정'}
+                      </Typography>
+                    )}
                   >
-                    {[
-                      { label: '설치일', value: 'INSTALL' },
-                      { label: '제조일', value: 'MANUFACTURE' },
-                      { label: '사용일', value: 'USE' }
-                    ].map(v => (
+                    {equipmentPhaseOption.map(v => (
                       <MenuItem value={v.value} key={v.value}>
                         {v.label}
                       </MenuItem>
                     ))}
-                  </TextField>
+                  </Select>
                 )}
               />
             }

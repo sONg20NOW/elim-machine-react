@@ -8,6 +8,7 @@ import { Button, Card, MenuItem, TextField, Tooltip, Typography } from '@mui/mat
 
 import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
 import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
+import { equipmentPhaseOption } from '@/app/_constants/options'
 
 interface basicTabContentProps<T> {
   editData: T
@@ -60,9 +61,8 @@ export default function BasicTabContent({
             </td>
             <th>
               {!isEditing ? (
-                { INSTALL: '설치일', MANUFACTURE: '제조일', USE: '사용일', null: '-' }[
-                  editData.machineInspectionResponseDto.equipmentPhase ?? 'null'
-                ]
+                (equipmentPhaseOption.find(opt => opt.value === editData.machineInspectionResponseDto.equipmentPhase)
+                  ?.label ?? '-')
               ) : (
                 <TextField
                   select
@@ -85,9 +85,11 @@ export default function BasicTabContent({
                   <MenuItem value=''>
                     <Typography color='lightgray'>미정</Typography>
                   </MenuItem>
-                  <MenuItem value='INSTALL'>설치일</MenuItem>
-                  <MenuItem value='MANUFACTURE'>제조일</MenuItem>
-                  <MenuItem value='USE'>사용일</MenuItem>
+                  {equipmentPhaseOption.map(opt => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
                 </TextField>
               )}
             </th>

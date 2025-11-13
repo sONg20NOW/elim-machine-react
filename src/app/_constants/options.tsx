@@ -181,6 +181,13 @@ export const workStatusOption = [
   { value: 'RESERVED', label: '예약' }
 ]
 
+// 설비 정보
+export const equipmentPhaseOption = [
+  { label: '설치일', value: 'INSTALL' },
+  { label: '제조일', value: 'MANUFACTURE' },
+  { label: '사용일', value: 'USE' }
+]
+
 // 공통
 export const PageSizeOptions = [15, 20, 25, 30, 50, 100]
 
