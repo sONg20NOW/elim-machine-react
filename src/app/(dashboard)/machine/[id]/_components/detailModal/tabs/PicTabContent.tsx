@@ -1,7 +1,13 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import { IconButton, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
+import { useParams } from 'next/navigation'
+
+import { Button, IconButton, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
+
+import { useForm } from 'react-hook-form'
+
+import { toast } from 'react-toastify'
 
 import PictureListModal from '../../pictureUpdateModal/PictureListModal'
 import type {
@@ -10,6 +16,8 @@ import type {
 } from '@/@core/types'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
+import { useMutateMachineInspectionChecklistItemResultUpdateRequestDto } from '@/@core/hooks/customTanstackQueries'
+import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 
 interface PicTabContentProps<T> {
   editData: T
@@ -89,12 +97,7 @@ export default function PicTabContent({
                   </Typography>
                 </Tooltip>
                 {cate.machineInspectionChecklistItemResultBasicResponseDto?.inspectionResult === 'FAIL' && (
-                  <DeficiencyModal
-                    checklistItemId={cate.machineChecklistItemId}
-                    editData={editData}
-                    setEditData={setEditData}
-                    isEditing={isEditing}
-                  />
+                  <DeficiencyModal checklistItemId={cate.machineChecklistItemId} editData={editData} />
                 )}
               </td>
               <td
@@ -172,18 +175,17 @@ export default function PicTabContent({
 
 interface DeficiencyModalProps<T> {
   editData: T
-  setEditData: Dispatch<SetStateAction<T>>
-  isEditing: boolean
   checklistItemId: number
 }
 
 // 미흡사항 클립보드 클릭 시 나오는 모달
 const DeficiencyModal = ({
   checklistItemId,
-  editData,
-  setEditData,
-  isEditing
+  editData
 }: DeficiencyModalProps<MachineInspectionDetailResponseDtoType>) => {
+  const machineProjectId = useParams().id?.toString() as string
+  const currentInspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
+
   const [open, setOpen] = useState(false)
 
   const currentChecklist = editData.machineChecklistItemsWithPicCountResponseDtos.find(
@@ -194,20 +196,49 @@ const DeficiencyModal = ({
 
   const [basicDto, setBasicDto] = useState(currentChecklistResult)
 
+  type formType = { deficiencies: string; actionRequired: string }
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isDirty }
+  } = useForm<formType>({
+    defaultValues: {
+      deficiencies: basicDto?.deficiencies ?? '',
+      actionRequired: basicDto?.actionRequired ?? ''
+    }
+  })
+
+  const { mutate } = useMutateMachineInspectionChecklistItemResultUpdateRequestDto(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const handleSave = useCallback(
+    (data: formType) => {
+      if (currentChecklistResult) {
+        mutate([{ ...currentChecklistResult, ...data }])
+        setOpen(false)
+        setTimeout(() => {
+          reset(data)
+        }, 100)
+      } else {
+        toast.error(`점검결과를 찾을 수 업습니다\n관리자에게 문의하세요`)
+      }
+    },
+    [currentChecklistResult, mutate, reset]
+  )
+
   useEffect(() => {
     setBasicDto(currentChecklistResult)
   }, [currentChecklistResult])
 
   function handleClose() {
-    basicDto &&
-      setEditData(prev => ({
-        ...prev,
-        machineChecklistItemsWithPicCountResponseDtos: prev.machineChecklistItemsWithPicCountResponseDtos.map(v =>
-          v.machineChecklistItemId === currentChecklist?.machineChecklistItemId
-            ? { ...v, machineInspectionChecklistItemResultBasicResponseDto: basicDto }
-            : v
-        )
-      }))
+    setOpen(false)
+    setTimeout(() => {
+      reset({ deficiencies: basicDto?.deficiencies ?? '', actionRequired: basicDto?.actionRequired ?? '' })
+    }, 100)
   }
 
   return (
@@ -231,74 +262,49 @@ const DeficiencyModal = ({
           }
           open={open}
           setOpen={setOpen}
-          onClose={() => {
-            handleClose()
-            setOpen(false)
-          }}
+          onClose={handleClose}
+          primaryButton={
+            <Button variant='contained' disabled={!isDirty} onClick={handleSubmit(handleSave)}>
+              확인
+            </Button>
+          }
+          secondaryButton={
+            <Button variant='contained' color='secondary' onClick={handleClose}>
+              취소
+            </Button>
+          }
         >
           {currentChecklistResult ? (
-            isEditing ? (
-              <div className='flex flex-col gap-4'>
-                <div className='flex flex-col gap-1'>
-                  <Typography variant='h5'>미흡사항</Typography>
-                  <TextField
-                    minRows={3}
-                    multiline
-                    slotProps={{ input: { sx: { padding: 4 } } }}
-                    value={basicDto.deficiencies ?? ''}
-                    onChange={e => setBasicDto(prev => prev && { ...prev, deficiencies: e.target.value })}
-                  />
-                </div>
-                <div className='flex flex-col gap-1'>
-                  <Typography variant='h5'>조치필요사항</Typography>
-                  <TextField
-                    minRows={3}
-                    multiline
-                    slotProps={{ input: { sx: { padding: 4 } } }}
-                    value={basicDto.actionRequired ?? ''}
-                    onChange={e => setBasicDto(prev => prev && { ...prev, actionRequired: e.target.value })}
-                  />
-                </div>
+            <div className='flex flex-col gap-4'>
+              <div className='flex flex-col gap-1'>
+                <Typography variant='h5'>미흡사항</Typography>
+                <TextField
+                  {...register('deficiencies')}
+                  minRows={3}
+                  multiline
+                  slotProps={{ input: { sx: { padding: 4 } } }}
+                />
               </div>
-            ) : (
-              <div className='flex flex-col gap-4'>
-                <div className='flex flex-col gap-1'>
-                  <Typography variant='h5'>미흡사항</Typography>
-                  <Tooltip
-                    arrow
-                    placement='right'
-                    title={
-                      <Typography color='warning.main' sx={{ whiteSpace: 'pre-line' }}>
-                        {`수정을 원하시면 먼저\n이 창을 닫고 수정 버튼을 눌러주세요`}
-                      </Typography>
-                    }
-                  >
-                    <Typography sx={{ wordBreak: 'break-all', width: 'fit-content', px: 2 }}>
-                      {(basicDto.deficiencies ?? '' !== '') ? basicDto.deficiencies : '-'}
-                    </Typography>
-                  </Tooltip>
-                </div>
-                <div className='flex flex-col gap-1'>
-                  <Typography variant='h5'>조치필요사항</Typography>
-                  <Tooltip
-                    arrow
-                    placement='right'
-                    title={
-                      <Typography color='warning.main' sx={{ whiteSpace: 'pre-line' }}>
-                        {`수정을 원하시면 먼저\n이 창을 닫고 수정 버튼을 눌러주세요`}
-                      </Typography>
-                    }
-                  >
-                    <Typography sx={{ wordBreak: 'break-all', width: 'fit-content', px: 2 }}>
-                      {(basicDto.actionRequired ?? '' !== '') ? basicDto.actionRequired : '-'}
-                    </Typography>
-                  </Tooltip>
-                </div>
+              <div className='flex flex-col gap-1'>
+                <Typography variant='h5'>조치필요사항</Typography>
+                <TextField
+                  {...register('actionRequired')}
+                  minRows={3}
+                  multiline
+                  slotProps={{ input: { sx: { padding: 4 } } }}
+                />
               </div>
-            )
+            </div>
           ) : (
             <Typography>미흡사항 데이터를 불러오는 데 실패했습니다.</Typography>
           )}
+          {
+            <div className='grid place-items-center'>
+              <Typography color='warning.main' sx={{ opacity: !isDirty ? '' : '0%' }}>
+                ※변경사항이 없습니다※
+              </Typography>
+            </div>
+          }
         </DefaultModal>
       </>
     )
