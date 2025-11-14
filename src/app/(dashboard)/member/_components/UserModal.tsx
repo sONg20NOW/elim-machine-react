@@ -177,7 +177,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
         headerDescription={selectedUserData?.memberBasicResponseDto?.companyName || '사용자 정보 수정'}
         primaryButton={
           isEditing ? (
-            <Button variant='contained' onClick={onSubmitHandler} type='submit'>
+            <Button variant='contained' onClick={onSubmitHandler} type='submit' color='success'>
               저장
             </Button>
           ) : (
