@@ -34,7 +34,7 @@ import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQuer
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import { auth } from '@/lib/auth'
 
-const InspectionListContent = ({}) => {
+const InspectionListTabContent = ({}) => {
   const machineProjectId = useParams().id?.toString() as string
 
   // 모달 상태
@@ -405,4 +405,4 @@ const InspectionListContent = ({}) => {
   )
 }
 
-export default InspectionListContent
+export default InspectionListTabContent

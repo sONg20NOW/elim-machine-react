@@ -22,7 +22,7 @@ import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithToo
 import BasicTabContent from './_components/tabs/MachineProjectTabContent'
 import ScheduleAndEngineerTabContent from './_components/tabs/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/tabs/NoteTabContent'
-import InspectionListContent from './_components/tabs/InspectionListContent'
+import InspectionListTabContent from './_components/tabs/InspectionListTabContent'
 import type { MachineTabValue } from '@/@core/utils/useMachineTabValueStore'
 import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 import { useGetEngineerList, useGetMachineProject, useGetScheduleTab } from '@/@core/hooks/customTanstackQueries'
@@ -178,7 +178,7 @@ const MachineUpdatePage = () => {
             )}
           </TabPanel>
           <TabPanel value='설비목록'>
-            <InspectionListContent />
+            <InspectionListTabContent />
           </TabPanel>
           <TabPanel value='전체사진'>
             <PictureListTabContent />
