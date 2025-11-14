@@ -29,7 +29,7 @@ const Footer = () => {
         </p>
 
         {process.env.NEXT_PUBLIC_VERSION && (
-          <p className='text-textSecondary'>`version ${process.env.NEXT_PUBLIC_VERSION}` </p>
+          <p className='text-textSecondary'>{`version ${process.env.NEXT_PUBLIC_VERSION}`} </p>
         )}
       </div>
       <Link href='/check' className={`text-color-primary`}>
