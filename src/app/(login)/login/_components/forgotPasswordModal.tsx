@@ -81,7 +81,7 @@ export default function ForgotPasswordPage({
       setOpen={setOpen}
       title={
         <Typography variant='h5' sx={{ fontWeight: 600 }}>
-          {{ forgot: '비밀번호 찾기', verify: '인증 코드 확인', reset: '새 비밀번호 설정' }[step]}
+          {{ forgot: '비밀번호 변경', verify: '인증 코드 확인', reset: '새 비밀번호 설정' }[step]}
         </Typography>
       }
     >

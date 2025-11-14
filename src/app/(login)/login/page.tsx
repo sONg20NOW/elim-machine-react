@@ -114,7 +114,7 @@ export default function LoginPage() {
             <Button variant='contained' sx={{ width: 'fit-content' }} type='submit' disabled={isSubmitting}>
               {isSubmitting ? '로그인 중...' : '로그인'}
             </Button>
-            <Button onClick={() => setShowForgotPasswordModal(true)}>비밀번호 찾기</Button>
+            <Button onClick={() => setShowForgotPasswordModal(true)}>비밀번호 변경</Button>
           </div>
         </div>
       </form>
