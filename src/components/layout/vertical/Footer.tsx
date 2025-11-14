@@ -27,10 +27,6 @@ const Footer = () => {
           <span className='text-textSecondary'>{`© ${new Date().getFullYear()}, Made `}</span>
           <span className='text-textSecondary'>{` by Elim`}</span>
         </p>
-
-        {process.env.NEXT_PUBLIC_VERSION && (
-          <p className='text-textSecondary'>{`version ${process.env.NEXT_PUBLIC_VERSION}`} </p>
-        )}
       </div>
       <Link href='/check' className={`text-color-primary`}>
         성능점검 앱
