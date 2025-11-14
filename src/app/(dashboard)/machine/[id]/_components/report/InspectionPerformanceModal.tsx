@@ -109,9 +109,9 @@ export default function InspectionPerformanceModal({
           </table>
         </DialogContent>
         <DialogActions className='flex items-center justify-center pt-4' sx={{ boxShadow: 10 }}>
-          <Button variant='contained' className='bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300' disabled>
+          {/* <Button variant='contained' className='bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300'>
             전체 다운로드
-          </Button>
+          </Button> */}
         </DialogActions>
       </Dialog>
     )
@@ -137,15 +137,18 @@ const InspectionTableRow = memo(
     )?.id as number
 
     const aRef = useRef<HTMLAnchorElement>(null)
+    const [loading, setLoading] = useState(false)
 
     const ourStatus = statuses.filter(status => status.machineCategoryId === machineCategory.id)
     const myStatus = ourStatus?.find(status => status.machineCategoryId === machineCategory.id)
 
-    const disabled = myStatus?.reportStatus !== 'COMPLETED'
+    const disabled = myStatus?.reportStatus !== 'COMPLETED' || loading
 
     const getReportPresignedUrl = useCallback(
       async (machineCategoryId: number) => {
         try {
+          setLoading(true)
+
           const presignedUrl = await auth
             .get<{
               data: { presignedUrl: string }
@@ -159,6 +162,8 @@ const InspectionTableRow = memo(
           return presignedUrl
         } catch (e) {
           handleApiError(e)
+        } finally {
+          setLoading(false)
         }
       },
       [machineProjectId, MACHINE_INSPECTION_PERFORMANCE_ID]

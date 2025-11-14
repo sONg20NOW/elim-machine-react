@@ -12,7 +12,6 @@ import {
   Divider,
   IconButton,
   Snackbar,
-  TextField,
   Tooltip,
   Typography
 } from '@mui/material'
@@ -113,10 +112,10 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
             </table>
           </DialogContent>
           <DialogActions className='flex items-center justify-center pt-4' sx={{ boxShadow: 10 }}>
-            <Button variant='contained' className='bg-sky-500 hover:bg-sky-600'>
+            {/* <Button variant='contained' className='bg-sky-500 hover:bg-sky-600'>
               전체 다운로드
             </Button>
-            <SettingButton />
+            <SettingButton /> */}
           </DialogActions>
         </Dialog>
         {openInspModal && <InspectionPerformanceModal open={openInspModal} setOpen={setOpenInspModal} />}
@@ -140,14 +139,17 @@ const TableRow = memo(
     const machineProjectId = useParams().id?.toString()
 
     const aRef = useRef<HTMLAnchorElement>(null)
+    const [loading, setLoading] = useState(false)
 
     const myStatus = statuses.find(status => status.machineReportCategoryId === category.id)
 
-    const disabled = myStatus?.reportStatus !== 'COMPLETED'
+    const disabled = myStatus?.reportStatus !== 'COMPLETED' || loading
 
     const getReportPresignedUrl = useCallback(
       async (machineReportCategoryId: number) => {
         try {
+          setLoading(true)
+
           const presignedUrl = await auth
             .get<{
               data: { presignedUrl: string }
@@ -161,6 +163,8 @@ const TableRow = memo(
           return presignedUrl
         } catch (e) {
           handleApiError(e)
+        } finally {
+          setLoading(false)
         }
       },
       [machineProjectId]
@@ -243,41 +247,41 @@ const TableRow = memo(
   }
 )
 
-function SettingButton() {
-  const [open, setOpen] = useState(false)
+// function SettingButton() {
+//   const [open, setOpen] = useState(false)
 
-  return (
-    <>
-      <Button variant='contained' color='warning' onClick={() => setOpen(true)}>
-        환경설정
-      </Button>
-      {open && (
-        <Dialog open={open} maxWidth='xs' fullWidth>
-          <DialogTitle variant='h3'>
-            보고서 설정
-            <Divider />
-          </DialogTitle>
-          <DialogContent>
-            <div className='grid'>
-              <Typography variant='h6'>점검사진 (가로x세로)</Typography>
-              <div className='flex items-center'>
-                <TextField sx={{ maxWidth: '20%' }} size='small' />
-                <Typography sx={{ fontSize: 18, px: 2 }}>{'X'}</Typography>
-                <TextField sx={{ maxWidth: '20%' }} size='small' />
-                <Typography sx={{ fontSize: 18, paddingInlineStart: 2 }}>{'px'}</Typography>
-              </div>
-            </div>
-          </DialogContent>
-          <DialogActions>
-            <Button type='submit' variant='contained' className='bg-blue-400'>
-              확인
-            </Button>
-            <Button type='button' variant='contained' color='secondary' onClick={() => setOpen(false)}>
-              취소
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-    </>
-  )
-}
+//   return (
+//     <>
+//       <Button variant='contained' color='warning' onClick={() => setOpen(true)}>
+//         환경설정
+//       </Button>
+//       {open && (
+//         <Dialog open={open} maxWidth='xs' fullWidth>
+//           <DialogTitle variant='h3'>
+//             보고서 설정
+//             <Divider />
+//           </DialogTitle>
+//           <DialogContent>
+//             <div className='grid'>
+//               <Typography variant='h6'>점검사진 (가로x세로)</Typography>
+//               <div className='flex items-center'>
+//                 <TextField sx={{ maxWidth: '20%' }} size='small' />
+//                 <Typography sx={{ fontSize: 18, px: 2 }}>{'X'}</Typography>
+//                 <TextField sx={{ maxWidth: '20%' }} size='small' />
+//                 <Typography sx={{ fontSize: 18, paddingInlineStart: 2 }}>{'px'}</Typography>
+//               </div>
+//             </div>
+//           </DialogContent>
+//           <DialogActions>
+//             <Button type='submit' variant='contained' className='bg-blue-400'>
+//               확인
+//             </Button>
+//             <Button type='button' variant='contained' color='secondary' onClick={() => setOpen(false)}>
+//               취소
+//             </Button>
+//           </DialogActions>
+//         </Dialog>
+//       )}
+//     </>
+//   )
+// }
