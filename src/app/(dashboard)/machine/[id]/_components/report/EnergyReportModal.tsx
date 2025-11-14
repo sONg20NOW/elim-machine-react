@@ -173,6 +173,8 @@ export default function EnergyReport() {
       })
     })
 
+    if (allData.length === 0) return
+
     try {
       await auth.put(`/api/machine-projects/${params.id}/machine-energy-usages`, {
         machineEnergyTypeId: currentEnergyType?.machineEnergyTypeId,
