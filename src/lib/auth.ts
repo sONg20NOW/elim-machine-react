@@ -58,10 +58,14 @@ auth.interceptors.response.use(
       try {
         // RefreshToken은 쿠키에 있기 때문에 단순 호출만 해주면 됨
         const res = await axios.post<{ data: TokenResponseDto }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/refresh`
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/refresh`,
+          null,
+          { withCredentials: true }
         )
 
         const newAccessToken = res.data.data.accessToken
+
+        console.log('NEW!:', newAccessToken)
 
         localStorage.setItem('accessToken', newAccessToken)
 
@@ -70,11 +74,11 @@ auth.interceptors.response.use(
 
         return auth(originalRequest)
       } catch (err) {
+        // ! 나중에 주석 풀어야함
         // Refresh도 실패 → 로그인 페이지로 이동
-        localStorage.removeItem('accessToken')
-        window.location.href = '/login'
-
-        return Promise.reject(err) // Refresh 실패 시 에러를 다시 던짐
+        // localStorage.removeItem('accessToken')
+        // window.location.href = '/login'
+        // return Promise.reject(err) // Refresh 실패 시 에러를 다시 던짐
       }
     }
 
