@@ -19,18 +19,14 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 // Utils
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import TableFilters from '@/@core/components/custom/TableFilters'
-import type {
-  MachineInspectionFilterType,
-  MachineInspectionPageResponseDtoType,
-  successResponseDtoType
-} from '@/@core/types'
+import type { MachineInspectionFilterType, MachineInspectionPageResponseDtoType } from '@/@core/types'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import AddInspectionModal from '../AddInspectionModal'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
-import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
+import { useGetInspections, useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import { auth } from '@/lib/auth'
 
@@ -41,13 +37,6 @@ const InspectionListTabContent = ({}) => {
   const [open, setOpen] = useState(false)
   const [showAddModalOpen, setShowAddModalOpen] = useState(false)
   const [showPictureListModal, setShowPictureListModal] = useState(false)
-
-  // 데이터 상태
-  const [filteredInspectionList, setFilteredInspectionList] = useState<MachineInspectionPageResponseDtoType[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(false)
-
-  const disabled = loading || error
 
   const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
 
@@ -60,6 +49,14 @@ const InspectionListTabContent = ({}) => {
   const [filters, setFilters] = useState<MachineInspectionFilterType>({
     engineerName: ''
   })
+
+  const [queryParams, setQueryParams] = useState('')
+
+  const { data: inspectionsPage, isError, isLoading } = useGetInspections(machineProjectId, queryParams.toString())
+
+  const filteredInspectionList = inspectionsPage?.content
+
+  const disabled = isLoading || isError
 
   const [machineCategoryName, setMachineCategoryName] = useState('')
   const [location, setLocation] = useState('')
@@ -82,67 +79,57 @@ const InspectionListTabContent = ({}) => {
     [setCurrentInspectionId]
   )
 
-  // 데이터 불러오기
-  const getFilteredInspectionList = useCallback(async () => {
+  // queryParams 세팅 -> tanstack query 작동 -> 데이터 불러오기
+  const handleSetQueryParams = useCallback(async () => {
     const queryParams = new URLSearchParams()
 
-    setLoading(true)
-    setError(false)
+    // 필터링
+    Object.keys(filters).forEach(prop => {
+      const key = prop as keyof typeof filters
 
-    try {
-      // 필터링
-      Object.keys(filters).forEach(prop => {
-        const key = prop as keyof typeof filters
+      filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
+    })
 
-        filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
-      })
+    // 정렬
+    sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
 
-      // 정렬
-      sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
+    // 설비분류 검색
+    machineCategoryName
+      ? queryParams.set('machineCategoryName', machineCategoryName)
+      : queryParams.delete('machineCategoryName')
 
-      // 설비분류 검색
-      machineCategoryName
-        ? queryParams.set('machineCategoryName', machineCategoryName)
-        : queryParams.delete('machineCategoryName')
+    // 위치 검색
+    location ? queryParams.set('location', location) : queryParams.delete('location')
 
-      // 위치 검색
-      location ? queryParams.set('location', location) : queryParams.delete('location')
+    // 페이지 설정
+    queryParams.set('page', page.toString())
+    queryParams.set('size', pageSize.toString())
 
-      // 페이지 설정
-      queryParams.set('page', page.toString())
-      queryParams.set('size', pageSize.toString())
-
-      // axios GET 요청
-      const response = await auth.get<{ data: successResponseDtoType<MachineInspectionPageResponseDtoType[]> }>(
-        `/api/machine-projects/${machineProjectId}/machine-inspections?${queryParams.toString()}`
-      )
-
-      const result = response.data.data
-
-      // 상태 업데이트 (engineernames만 따로 빼서)
-      setFilteredInspectionList(result.content ?? [])
-      if (page !== result.page.number) setPage(result.page.number)
-      if (pageSize !== result.page.size) setPageSize(result.page.size)
-      setTotalCount(result.page.totalElements)
-    } catch (error) {
-      handleApiError(error, '데이터 조회에 실패했습니다.')
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [filters, sorting, page, pageSize, machineCategoryName, location, machineProjectId])
+    setQueryParams(queryParams.toString())
+  }, [filters, sorting, page, pageSize, machineCategoryName, location])
 
   useEffect(() => {
-    if (!open) getFilteredInspectionList()
-  }, [getFilteredInspectionList, open])
+    if (!inspectionsPage) return
+
+    // 상태 업데이트 (engineernames만 따로 빼서)
+    setTotalCount(inspectionsPage.page.totalElements)
+  }, [inspectionsPage])
+
+  // useEffect(() => {
+  //   handleApiError(error)
+  // }, [error])
 
   useEffect(() => {
-    if (!showAddModalOpen) getFilteredInspectionList()
-  }, [getFilteredInspectionList, showAddModalOpen])
+    if (!open) handleSetQueryParams()
+  }, [handleSetQueryParams, open])
 
   useEffect(() => {
-    if (!showPictureListModal) getFilteredInspectionList()
-  }, [getFilteredInspectionList, showPictureListModal])
+    if (!showAddModalOpen) handleSetQueryParams()
+  }, [handleSetQueryParams, showAddModalOpen])
+
+  useEffect(() => {
+    if (!showPictureListModal) handleSetQueryParams()
+  }, [handleSetQueryParams, showPictureListModal])
 
   useEffect(() => {
     if (!open) {
@@ -164,6 +151,8 @@ const InspectionListTabContent = ({}) => {
 
   // 한번에 선택
   const handleCheckAll = (checked: boolean) => {
+    if (!filteredInspectionList) return
+
     if (checked) {
       setChecked(prev => {
         const newChecked = structuredClone(prev)
@@ -202,7 +191,7 @@ const InspectionListTabContent = ({}) => {
       setMachineCategoryName('')
       setLocation('')
       setPage(0)
-      getFilteredInspectionList()
+      handleSetQueryParams()
       handleSuccess(`선택된 설비목록 ${checked.length}개가 성공적으로 삭제되었습니다.`)
       setChecked([])
       setShowCheckBox(false)
@@ -292,7 +281,7 @@ const InspectionListTabContent = ({}) => {
             }}
             disabled={disabled}
           />
-          <Button variant='contained' color='info' disabled={true || loading || error}>
+          <Button variant='contained' color='info' disabled={true || isLoading || isError}>
             점검대상 및 수량
           </Button>
         </div>
@@ -338,14 +327,14 @@ const InspectionListTabContent = ({}) => {
       <BasicTable<MachineInspectionPageResponseDtoType>
         listException={['engineerNames']}
         header={HEADERS.machineInspection}
-        data={filteredInspectionList}
+        data={filteredInspectionList ?? []}
         handleRowClick={handleSelectInspection}
         page={page}
         pageSize={pageSize}
         sorting={sorting}
         setSorting={setSorting}
-        loading={loading}
-        error={error}
+        loading={isLoading}
+        error={isError}
         showCheckBox={showCheckBox}
         isChecked={isChecked}
         handleCheckItem={handleCheck}
@@ -389,7 +378,7 @@ const InspectionListTabContent = ({}) => {
       {open && currentInspectionId && <InspectionDetailModal open={open} setOpen={setOpen} />}
       {showAddModalOpen && (
         <AddInspectionModal
-          getFilteredInspectionList={getFilteredInspectionList}
+          getFilteredInspectionList={handleSetQueryParams}
           open={showAddModalOpen}
           setOpen={setShowAddModalOpen}
         />
