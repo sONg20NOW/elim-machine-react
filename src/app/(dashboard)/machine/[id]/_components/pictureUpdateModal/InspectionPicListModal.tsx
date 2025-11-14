@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -22,7 +22,6 @@ import {
   ImageList,
   ImageListItem,
   ImageListItemBar,
-  useMediaQuery,
   Paper
 } from '@mui/material'
 
@@ -41,6 +40,7 @@ import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 type InspectionPicListModalProps = {
   open: boolean
@@ -104,7 +104,7 @@ const InspectionPicListModal = ({
 
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
-  const [showPicModal, setShowPicModal] = useState(false)
+  const [openPicModal, setOpenPicModal] = useState(false)
 
   const filteredPics = pictures.filter(
     pic =>
@@ -113,7 +113,7 @@ const InspectionPicListModal = ({
   )
 
   // 반응형을 위한 미디어쿼리
-  const isMobile = useMediaQuery('(max-width:600px)')
+  const isMobile = useContext(isMobileContext)
 
   const resetCursor = () => {
     hasNextRef.current = true
@@ -252,8 +252,6 @@ const InspectionPicListModal = ({
 
       isLoadingRef.current = true
 
-      console.log(`★ picInspId in getPictures(): ${picInspectionId}`)
-
       const requestBody = {
         machineInspectionId: picInspectionId,
         machineChecklistItemId: selectedItemId !== 0 ? selectedItemId : null,
@@ -313,13 +311,20 @@ const InspectionPicListModal = ({
   useEffect(() => setShowCheck(false), [selectedSubItem])
 
   useEffect(() => {
-    console.log('changed!', picInspectionId)
     resetCursor()
   }, [picInspectionId])
 
   useEffect(() => {
-    if (!open) setPicInspectionId(0)
-  }, [open, setPicInspectionId])
+    if (!openPicModal) {
+      refetchSelectedInspection()
+      resetCursor()
+      getPictures()
+    }
+  }, [openPicModal, refetchSelectedInspection, getPictures])
+
+  // useEffect(() => {
+  //   if (!open) setPicInspectionId(0)
+  // }, [open, setPicInspectionId])
 
   // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
 
@@ -348,7 +353,7 @@ const InspectionPicListModal = ({
               }
             } else {
               setSelectedPic(pic)
-              setShowPicModal(true)
+              setOpenPicModal(true)
             }
           }}
         >
@@ -766,8 +771,8 @@ const InspectionPicListModal = ({
         {selectedPic && (
           <InspectionPicZoomModal
             MovePicture={MovePicture}
-            open={showPicModal}
-            setOpen={setShowPicModal}
+            open={openPicModal}
+            setOpen={setOpenPicModal}
             selectedPic={selectedPic}
             selectedInspection={selectedInspection}
             setPictures={setPictures}

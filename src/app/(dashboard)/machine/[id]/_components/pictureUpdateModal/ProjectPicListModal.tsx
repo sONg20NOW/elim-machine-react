@@ -187,11 +187,6 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     }
   }
 
-  // 최초에 전체 사진 가져오기
-  useEffect(() => {
-    getPictures()
-  }, [getPictures])
-
   // 사진 카드 컴포넌트
   function PictureCard({ pic }: { pic: MachineProjectPicReadResponseDtoType }) {
     return (
@@ -267,12 +262,22 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     )
   }
 
-  // useEffect(() => {
-  //   if (!showPicModal) {
-  //     resetCursor()
-  //     getPictures()
-  //   }
-  // }, [showPicModal, getPictures])
+  const firstRender = useRef(true)
+
+  useEffect(() => {
+    if (firstRender.current) {
+      return
+    }
+
+    if (!showPicModal) {
+      getPictures()
+      console.log('hi')
+    }
+  }, [showPicModal, getPictures])
+
+  useEffect(() => {
+    firstRender.current = false
+  }, [])
 
   return (
     <Dialog
