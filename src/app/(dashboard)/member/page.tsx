@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useContext } from 'react'
+import { useEffect, useState, useCallback, useContext, useRef } from 'react'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -131,6 +131,24 @@ export default function MemberPage() {
   useEffect(() => {
     getFilteredData()
   }, [filters, getFilteredData])
+
+  // 모달 닫힐 때마다 목록 새로 고침
+  const firstRender = useRef(true)
+  const openModal = addUserModalOpen || userDetailModalOpen
+
+  useEffect(() => {
+    if (firstRender.current) {
+      return
+    }
+
+    if (!openModal) {
+      getFilteredData()
+    }
+  }, [openModal, getFilteredData])
+
+  useEffect(() => {
+    firstRender.current = false
+  }, [])
 
   // 사용자 선택 핸들러 (디테일 모달)
   const handleUserClick = async (user: memberPageDtoType) => {
