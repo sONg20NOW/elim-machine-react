@@ -41,6 +41,7 @@ import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures
 import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { DEFAULT_PIC_PAGESIZE } from '@/app/_constants/options'
 
 type InspectionPicListModalProps = {
   open: boolean
@@ -247,7 +248,7 @@ const InspectionPicListModal = ({
 
   // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
   const getPictures = useCallback(
-    async (pageSize = 10) => {
+    async (pageSize = DEFAULT_PIC_PAGESIZE) => {
       if (!hasNextRef.current || isLoadingRef.current || !picInspectionId) return
 
       isLoadingRef.current = true

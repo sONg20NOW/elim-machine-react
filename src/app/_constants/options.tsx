@@ -194,3 +194,5 @@ export const equipmentPhaseOption: { label: string; value: equipmentPhaseType }[
 export const PageSizeOptions = [15, 20, 25, 30, 50, 100]
 
 export const DEFAULT_PAGESIZE = 15
+
+export const DEFAULT_PIC_PAGESIZE = 30
