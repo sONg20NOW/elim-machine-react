@@ -36,8 +36,6 @@ export default function InspectionPerformanceModal({
     v => v.reportTemplateCode === 'MACHINE_INSPECTION_PERFORMANCE'
   )?.id as number
 
-  // const [loading, setLoading] = useState(false)
-
   const reloadRef = useRef<HTMLElement>(null)
 
   const { data: everyCategories } = useGetLeafCategories()
@@ -92,9 +90,6 @@ export default function InspectionPerformanceModal({
                   machineCategory={machineCategory}
                   idx={idx}
                   statuses={statuses ?? []}
-
-                  // setStatuses={setStatuses}
-                  // setLoading={setLoading}
                 />
               ))}
             </tbody>
@@ -105,9 +100,6 @@ export default function InspectionPerformanceModal({
             전체 다운로드
           </Button>
         </DialogActions>
-        {/* <Backdrop open={loading} sx={{ color: 'white' }}>
-          <CircularProgress size={60} color='inherit' />
-        </Backdrop> */}
       </Dialog>
     )
   )
@@ -118,16 +110,10 @@ const InspectionTableRow = memo(
     machineCategory,
     idx,
     statuses
-
-    // setStatuses,
-    // setLoading
   }: {
     machineCategory: MachineLeafCategoryResponseDtoType
     idx: number
     statuses: MachineReportStatusResponseDtoType[]
-
-    // setStatuses: Dispatch<SetStateAction<MachineReportStatusResponseDtoType[]>>
-    // setLoading: (loading: boolean) => void
   }) => {
     const machineProjectId = useParams().id?.toString()
 
@@ -180,122 +166,6 @@ const InspectionTableRow = memo(
       setPresignedUrl()
     }, [myStatus, machineCategory.id, getReportPresignedUrl])
 
-    // const requestReportCreate = useCallback(
-    //   async (machineCategoryId: number) => {
-    //     try {
-    //       await auth.post(`api/machine-projects/${machineProjectId}/machine-reports/inspection-performance`, {
-    //         machineProjectId: Number(machineProjectId),
-    //         machineReportCategoryId: MACHINE_INSPECTION_PERFORMANCE_ID,
-    //         machineCategoryId: machineCategoryId
-    //       })
-
-    //       console.log('보고서 생성 요청 완료')
-
-    //       return true
-
-    //       // 보고서 생성 후 버튼에 href 추가.
-    //       // URLS.current[machineReportCategoryId] =
-    //     } catch (e) {
-    //       handleApiError(e)
-
-    //       return false
-    //     }
-    //   },
-    //   [machineProjectId, MACHINE_INSPECTION_PERFORMANCE_ID]
-    // )
-
-    // const getReportStatusUnit = useCallback(
-    //   async (machineCategoryId: number) => {
-    //     try {
-    //       const reports = await auth
-    //         .get<{
-    //           data: { machineReports: MachineReportStatusResponseDtoType[] }
-    //         }>(
-    //           `/api/machine-projects/${machineProjectId}/machine-reports/status?machineReportCategoryIds=${MACHINE_INSPECTION_PERFORMANCE_ID}`
-    //         )
-    //         .then(v => v.data.data.machineReports)
-
-    //       const report = reports.find(report => report.machineCategoryId === machineCategoryId)
-
-    //       console.log('특정 보고서 상태 가져오기', report)
-
-    //       if (report) {
-    //         setStatuses(prevStatuses => {
-    //           const index = prevStatuses.findIndex(v => v.machineCategoryId === machineCategoryId)
-
-    //           if (index !== -1) {
-    //             // 1. 기존 항목이 배열에 있으면 교체
-    //             return prevStatuses.map((v, i) => (i === index ? report : v))
-    //           } else {
-    //             // 2. 기존 항목이 배열에 없으면 추가 (새로운 상태)
-    //             return [...prevStatuses, report]
-    //           }
-    //         })
-    //         console.log('보고서 상태 변화 감지 및 업데이트 완료!')
-    //       }
-
-    //       return report
-    //     } catch (e) {
-    //       handleApiError(e)
-    //     }
-    //   },
-    //   [machineProjectId, setStatuses, MACHINE_INSPECTION_PERFORMANCE_ID]
-    // )
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // const handleCreate = useCallback(
-    //   async (machineCategoryId: number) => {
-    //     if (!aRef.current) return
-
-    //     try {
-    //       // 1. POST 날려서 리포트 생성
-    //       const isReportCreated = await requestReportCreate(machineCategoryId)
-
-    //       if (!isReportCreated) return
-
-    //       setLoading(true)
-
-    //       let isIntervalActive = true // 인터벌이 활성화되었다고 가정
-
-    //       const intervalId = setInterval(async () => {
-    //         // 2. 매 0.5초마다 report 상태 확인
-    //         const machineReport = await getReportStatusUnit(machineCategoryId)
-
-    //         if (!machineReport) {
-    //           throw new Error(`보고서 생성 API가 실행되지 않았습니다\n관리자에게 문의해주세요`)
-    //         }
-
-    //         if (machineReport.reportStatus === 'COMPLETED') {
-    //           isIntervalActive = false
-
-    //           const presignedUrl = await getReportPresignedUrl(machineCategoryId)
-
-    //           if (!presignedUrl) return
-
-    //           aRef.current!.href = presignedUrl
-
-    //           toast.success('보고서 생성이 완료되었습니다.')
-    //           setLoading(false)
-    //           clearInterval(intervalId)
-    //         }
-    //       }, 500)
-
-    //       setTimeout(() => {
-    //         if (intervalId && isIntervalActive) {
-    //           clearInterval(intervalId)
-    //           setLoading(false) // 로딩 상태 해제
-
-    //           // ⭐ 사용자에게 시간 초과 피드백 제공
-    //           toast.error(`보고서 생성 확인 시간 초과\n(3초 경과)`)
-    //         }
-    //       }, 3000)
-    //     } catch (e) {
-    //       handleApiError(e)
-    //     }
-    //   },
-    //   [getReportPresignedUrl, getReportStatusUnit, requestReportCreate, setLoading]
-    // )
-
     return (
       <tr key={machineCategory.id}>
         <th colSpan={1}>{idx + 1}</th>
@@ -325,28 +195,6 @@ const InspectionTableRow = memo(
             </Tooltip>
           </div>
         </td>
-        {/* <td colSpan={1} className='px-0'>
-          <div className='grid place-items-center relative'>
-            <Button
-              variant='contained'
-              color='success'
-              onClick={async () => {
-                handleCreate(machineCategory.id)
-              }}
-            >
-              생성
-            </Button>
-
-            {disabled && (
-              <div className='absolute top-[-3] right-[1.8px]'>
-                <span className='relative flex size-3'>
-                  <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75'></span>
-                  <span className='relative inline-flex size-3 rounded-full bg-red-500 opacity-90'></span>
-                </span>
-              </div>
-            )}
-          </div>
-        </td> */}
         <td colSpan={1} className='px-0'>
           <div className='grid place-items-center'>
             <a ref={aRef} download={'hi'}>
