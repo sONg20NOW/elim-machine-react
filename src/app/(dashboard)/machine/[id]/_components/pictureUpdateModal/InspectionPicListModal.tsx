@@ -334,39 +334,50 @@ const InspectionPicListModal = ({
   // 사진 카드 컴포넌트
   function PictureCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
     return (
-      <Paper
-        key={pic.machinePicId}
-        elevation={3}
-        sx={{
-          p: 1,
-          position: 'relative',
-          cursor: 'pointer',
-          border: '1px solid lightgray',
-          m: 1,
-          ':hover': { boxShadow: 4 }
-        }}
-      >
-        <ImageListItem
-          onClick={() => {
-            if (showCheck) {
-              if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                setPicturesToDelete(prev => [...prev, { machinePicId: pic.machinePicId, version: pic.version }])
-              } else {
-                setPicturesToDelete(prev => prev.filter(v => v.machinePicId !== pic.machinePicId))
-              }
-            } else {
-              setSelectedPic(pic)
-              setOpenPicModal(true)
-            }
+      <div className='flex flex-col items-center'>
+        <Paper
+          key={pic.machinePicId}
+          elevation={3}
+          sx={{
+            width: '100%',
+            p: 1,
+            position: 'relative',
+            cursor: 'pointer',
+            border: '1px solid lightgray',
+            m: 1,
+            ':hover': { boxShadow: 10 }
           }}
         >
-          <img
-            src={pic.presignedUrl}
-            alt={pic.originalFileName}
-            style={{ width: '100%', height: '50%', objectFit: 'cover' }}
-          />
-          <ImageListItemBar title={pic.originalFileName} sx={{ textAlign: 'center' }} />
-        </ImageListItem>
+          <ImageListItem
+            onClick={() => {
+              if (showCheck) {
+                if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+                  setPicturesToDelete(prev => [...prev, { machinePicId: pic.machinePicId, version: pic.version }])
+                } else {
+                  setPicturesToDelete(prev => prev.filter(v => v.machinePicId !== pic.machinePicId))
+                }
+              } else {
+                setSelectedPic(pic)
+                setOpenPicModal(true)
+              }
+            }}
+          >
+            <img
+              src={pic.presignedUrl}
+              alt={pic.originalFileName}
+              style={{ width: '100%', height: '50%', objectFit: 'cover' }}
+            />
+            <ImageListItemBar title={pic.originalFileName} sx={{ textAlign: 'center' }} />
+          </ImageListItem>
+
+          {showCheck && (
+            <Checkbox
+              color='error'
+              sx={{ position: 'absolute', left: 0, top: 0 }}
+              checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
+            />
+          )}
+        </Paper>
         <div className='flex flex-col items-center py-1'>
           <Typography className='text-green-600'>{pic.machineChecklistItemName}</Typography>
           <Typography
@@ -378,14 +389,7 @@ const InspectionPicListModal = ({
           <Typography className='text-blue-500'>{pic.alternativeSubTitle}</Typography>
           <Typography className='text-red-500'>{pic.measuredValue}</Typography>
         </div>
-        {showCheck && (
-          <Checkbox
-            color='error'
-            sx={{ position: 'absolute', left: 0, top: 0 }}
-            checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
-          />
-        )}
-      </Paper>
+      </div>
     )
   }
 
