@@ -52,7 +52,12 @@ const InspectionListTabContent = ({}) => {
 
   const [queryParams, setQueryParams] = useState('')
 
-  const { data: inspectionsPage, isError, isLoading } = useGetInspections(machineProjectId, queryParams.toString())
+  const {
+    data: inspectionsPage,
+    refetch: refetchInspections,
+    isError,
+    isLoading
+  } = useGetInspections(machineProjectId, queryParams.toString())
 
   const filteredInspectionList = inspectionsPage?.content
 
@@ -120,16 +125,16 @@ const InspectionListTabContent = ({}) => {
   // }, [error])
 
   useEffect(() => {
-    if (!open) handleSetQueryParams()
-  }, [handleSetQueryParams, open])
+    if (!open) refetchInspections()
+  }, [refetchInspections, open])
 
   useEffect(() => {
-    if (!showAddModalOpen) handleSetQueryParams()
-  }, [handleSetQueryParams, showAddModalOpen])
+    if (!showAddModalOpen) refetchInspections()
+  }, [refetchInspections, showAddModalOpen])
 
   useEffect(() => {
-    if (!showPictureListModal) handleSetQueryParams()
-  }, [handleSetQueryParams, showPictureListModal])
+    if (!showPictureListModal) refetchInspections()
+  }, [refetchInspections, showPictureListModal])
 
   useEffect(() => {
     if (!open) {
