@@ -74,5 +74,8 @@ export const QUERY_KEYS = {
     GET_IMPROVEMENT: (machineProjectId: string) => ['GET_IMPROVEMENT', machineProjectId],
     GET_GUIDE: (machineProjectId: string) => ['GET_GUIDE', machineProjectId],
     GET_AGING: (machineProjectId: string) => ['GET_AGING', machineProjectId]
+  },
+  LICENSE: {
+    GET_LICENSES_NAMES: ['GET_LICENSES_NAMES']
   }
 }

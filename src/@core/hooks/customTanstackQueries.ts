@@ -46,6 +46,27 @@ import type {
 } from '@/@core/types' // 타입 임포트
 import { handleApiError } from '@/utils/errorHandler'
 
+// ------------------------- License 관련 -------------------------
+export const useGetLicenseNames = () => {
+  return useQuery({
+    queryKey: QUERY_KEYS.LICENSE.GET_LICENSES_NAMES,
+    queryFn: async data => {
+      const [keyType] = data.queryKey
+
+      const response = await auth
+        .get<{
+          data: { licenseIdAndNameResponseDtos: { id: number; companyName: string }[] }
+        }>(`/api/licenses/names`)
+        .then(v => v.data.data.licenseIdAndNameResponseDtos)
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
 // ------------------------- MachineInspection 관련 -------------------------
 // GET /api/machine-projects/${machineProjectId}/machine-inspections : 특정 프로젝트의 설비목록 가져오기
 
