@@ -30,7 +30,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
-import AddUserModal from './_components/AddUserModal'
+import AddUserModal from './_components/AddModall'
 
 export default function MemberPage() {
   const isTablet = useContext(isTabletContext)
