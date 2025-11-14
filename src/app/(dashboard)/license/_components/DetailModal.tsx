@@ -40,8 +40,8 @@ const groups = {
 
 const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }: DetailModalProps) => {
   const [editData, setEditData] = useState<LicenseResponseDtoType>(JSON.parse(JSON.stringify(initialData)))
-
   const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
@@ -65,6 +65,7 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
   const handleModifyData = async () => {
     if (existChange) {
       try {
+        setLoading(true)
         const response = await auth.put<{ data: LicenseResponseDtoType }>(`/api/licenses/${licenseId}`, editData)
 
         const returnData = response.data.data
@@ -77,6 +78,8 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
         reloadData()
       } catch (error: any) {
         handleApiError(error)
+      } finally {
+        setLoading(false)
       }
     } else {
       setIsEditing(false)
@@ -100,11 +103,11 @@ const DetailModal = ({ open, setOpen, initialData, setInitialData, reloadData }:
       headerDescription={initialData.bizno}
       primaryButton={
         !isEditing ? (
-          <Button variant='contained' onClick={() => setIsEditing(true)} type='submit'>
-            수정하기
+          <Button variant='contained' onClick={() => setIsEditing(true)} type='submit' disabled={loading}>
+            수정
           </Button>
         ) : (
-          <Button variant='contained' onClick={() => handleModifyData()} type='submit'>
+          <Button variant='contained' onClick={() => handleModifyData()} type='submit' color='success'>
             저장
           </Button>
         )

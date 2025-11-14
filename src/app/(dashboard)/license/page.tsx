@@ -18,7 +18,7 @@ import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import AddModal from './_components/addModal'
+import AddModal from './_components/AddLicenseModal'
 import DetailModal from './_components/DetailModal'
 import { auth } from '@/lib/auth'
 

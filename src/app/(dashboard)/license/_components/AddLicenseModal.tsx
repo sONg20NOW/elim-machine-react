@@ -34,10 +34,12 @@ const groups = {
 
 const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
   const [data, setData] = useState<LicenseCreateRequestDto>(LicenseInitialData)
+  const [loading, setLoading] = useState(false)
 
   // 추가 핸들러
   const onSubmitHandler = async () => {
     try {
+      setLoading(true)
       const response = await auth.post<{ data: { licenseId: number } }>(`/api/licenses`, data)
 
       console.log(`LicenseId:${response.data.data.licenseId} new license added`)
@@ -47,6 +49,8 @@ const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
       setOpen(false)
     } catch (error: any) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -57,7 +61,7 @@ const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
       setOpen={setOpen}
       title={'신규 라이선스 추가'}
       primaryButton={
-        <Button variant='contained' onClick={() => onSubmitHandler()} type='submit'>
+        <Button variant='contained' onClick={() => onSubmitHandler()} type='submit' disabled={loading}>
           추가
         </Button>
       }
