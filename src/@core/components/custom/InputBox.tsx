@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 import Grid from '@mui/material/Grid2'
 
@@ -11,6 +11,7 @@ import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
 import PostCodeDialog from '@/@core/utils/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
+import { useGetLicenseNames } from '@/@core/hooks/customTanstackQueries'
 
 interface InputBoxProps {
   isEditing?: boolean
@@ -67,27 +68,8 @@ function InputBoxContent() {
   const disabled = props?.disabled ?? tabField?.disabled ?? false
 
   // 회사명 옵션
-  const [companyNameOption, setCompanyNameOption] = useState<{ value: string; label: string }[]>([])
-
-  const getCompanyNameOption = useCallback(async () => {
-    try {
-      const response = await auth.get<{
-        data: { licenseIdAndNameResponseDtos: { id: number; companyName: string }[] }
-      }>(`/api/licenses/names`)
-
-      setCompanyNameOption(
-        response.data.data.licenseIdAndNameResponseDtos.map(v => ({ value: v.companyName, label: v.companyName }))
-      )
-    } catch (error) {
-      handleApiError(error)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (tabFieldKey === 'companyName') {
-      getCompanyNameOption()
-    }
-  }, [tabFieldKey, getCompanyNameOption])
+  const { data: licenseNames } = useGetLicenseNames()
+  const companyNameOption = licenseNames?.map(v => ({ value: v.companyName, label: v.companyName }))
 
   // 주소 모달 상태
   const [showMapModal, setShowMapModal] = useState(false)
