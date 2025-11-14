@@ -292,19 +292,28 @@ const InspectionDetailModalInner = ({
         }
         primaryButton={
           <div style={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant='contained'
-              color='primary'
-              onClick={() => {
-                if (!isEditing || !existChange) {
-                  setIsEditing(prev => !prev)
-                } else {
+            {isEditing ? (
+              <Button
+                variant='contained'
+                color='success'
+                disabled={!existChange}
+                onClick={() => {
                   handleSave()
-                }
-              }}
-            >
-              {!isEditing ? '수정' : '저장'}
-            </Button>
+                }}
+              >
+                {existChange ? '저장' : '변경사항 없음'}
+              </Button>
+            ) : (
+              <Button
+                variant='contained'
+                color='primary'
+                onClick={() => {
+                  setIsEditing(prev => !prev)
+                }}
+              >
+                수정
+              </Button>
+            )}
 
             {isEditing ? (
               <Button
