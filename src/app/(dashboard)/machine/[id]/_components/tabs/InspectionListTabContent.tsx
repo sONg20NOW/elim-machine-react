@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 
 // MUI Imports
 import { useParams } from 'next/navigation'
@@ -127,18 +127,19 @@ const InspectionListTabContent = ({}) => {
   // useEffect(() => {
   //   handleApiError(error)
   // }, [error])
+  const firstRender = useRef(true)
 
   useEffect(() => {
-    if (!open) refetchInspections()
-  }, [refetchInspections, open])
+    if (firstRender.current) {
+      firstRender.current = false
 
-  useEffect(() => {
-    if (!showAddModalOpen) refetchInspections()
-  }, [refetchInspections, showAddModalOpen])
+      return
+    }
 
-  useEffect(() => {
-    if (!showPictureListModal) refetchInspections()
-  }, [refetchInspections, showPictureListModal])
+    if (!open || !showAddModalOpen || !showPictureListModal) {
+      refetchInspections()
+    }
+  }, [open, showAddModalOpen, showPictureListModal, refetchInspections])
 
   useEffect(() => {
     if (!open) {
