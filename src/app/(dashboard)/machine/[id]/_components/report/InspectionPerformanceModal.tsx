@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -11,6 +11,7 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Snackbar,
   Tooltip,
   Typography
 } from '@mui/material'
@@ -37,14 +38,25 @@ export default function InspectionPerformanceModal({
   )?.id as number
 
   const reloadRef = useRef<HTMLElement>(null)
+  const [openSnackBar, setOpenSnackBar] = useState(false)
+  const [disableReload, setDialbleReload] = useState(false)
 
   const { data: everyCategories } = useGetLeafCategories()
 
   const categories = everyCategories
 
-  const { data: statuses, refetch: refetchStatuses } = useGetReportStatuses(`${machineProjectId}`, [
-    MACHINE_INSPECTION_PERFORMANCE_ID
-  ])
+  const { data: statuses, refetch } = useGetReportStatuses(`${machineProjectId}`, [MACHINE_INSPECTION_PERFORMANCE_ID])
+
+  const refetchStatuses = useCallback(async () => {
+    reloadRef.current?.classList.add('animate-spin')
+    setDialbleReload(true)
+    setTimeout(() => {
+      reloadRef.current?.classList.remove('animate-spin')
+      setDialbleReload(false)
+    }, 1000)
+    await refetch()
+    setOpenSnackBar(true)
+  }, [refetch])
 
   return (
     everyCategories && (
@@ -57,19 +69,20 @@ export default function InspectionPerformanceModal({
           </IconButton>
           <div className='flex items-center justify-between'>
             <DialogContentText>※버튼이 비활성화된 경우 먼저 GUI에서 생성을 요청해주세요</DialogContentText>
-            <IconButton size='medium'>
-              <i
-                ref={reloadRef}
-                className='tabler-reload text-2xl text-green-500'
-                onClick={() => {
-                  reloadRef.current?.classList.add('animate-spin')
-                  setTimeout(() => {
-                    reloadRef.current?.classList.remove('animate-spin')
-                  }, 1000)
-                  refetchStatuses()
-                }}
-              />
+            <IconButton size='medium' disabled={disableReload}>
+              <i ref={reloadRef} className='tabler-reload text-2xl text-green-500' onClick={refetchStatuses} />
             </IconButton>
+            <Snackbar
+              open={openSnackBar}
+              autoHideDuration={1000}
+              onClose={() => setOpenSnackBar(false)}
+              message={
+                <Typography variant='inherit' sx={{ fontSize: '16px' }}>
+                  새로고침되었습니다
+                </Typography>
+              }
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            />
           </div>
           <Divider />
         </DialogTitle>
