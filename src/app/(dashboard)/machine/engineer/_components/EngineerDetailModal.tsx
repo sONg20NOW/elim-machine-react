@@ -44,6 +44,7 @@ export const MemberIdContext = createContext<number>(0)
 const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const {
     register,
@@ -59,6 +60,8 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
 
   const handleDeleteUser = async () => {
     try {
+      setLoading(true)
+
       await auth.delete(`/api/engineers`, {
         // @ts-ignore
         data: { engineerDeleteRequestDtos: [{ engineerId: engineerId, version: watchedVersion }] }
@@ -70,11 +73,15 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
       reloadData()
     } catch (error) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleSaveUser = async (data: EngineerResponseDtoType) => {
     try {
+      setLoading(true)
+
       const response = await auth.put<{ data: EngineerResponseDtoType }>(`/api/engineers/${engineerId}`, data)
 
       const returnData = response.data.data
@@ -87,6 +94,8 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
       reloadData()
     } catch (error: any) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -111,7 +120,7 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
           <div className='flex justify-end gap-2 w-full'>
             <div className='flex items-end gap-1'>
               {!isDirty && <Typography color='error.main'>변경사항이 없습니다</Typography>}
-              <Button variant='contained' type='submit' disabled={!isDirty} form={'submit-engineer-form'}>
+              <Button variant='contained' type='submit' disabled={!isDirty || loading} form={'submit-engineer-form'}>
                 저장
               </Button>
             </div>
@@ -121,7 +130,13 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
           </div>
         }
         modifyButton={
-          <Button variant='contained' color='error' type='reset' onClick={() => setShowDeleteModal(true)}>
+          <Button
+            variant='contained'
+            color='error'
+            type='reset'
+            onClick={() => setShowDeleteModal(true)}
+            disabled={loading}
+          >
             삭제
           </Button>
         }

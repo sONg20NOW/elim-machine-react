@@ -35,6 +35,7 @@ type AddUserModalProps = {
 const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
   const [userData, setUserData] = useState<MachineEngineerCreateRequestDtoType>(EngineerInitialData)
   const [memberList, setMemberList] = useState<memberLookupResponseDtoType[]>([])
+  const [loading, setLoading] = useState(false)
 
   // 멤버 리스트 가져오기
   const getMemberList = useCallback(async () => {
@@ -58,6 +59,7 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
   // 추가 핸들러
   const onSubmitHandler = async () => {
     try {
+      setLoading(true)
       const response = await auth.post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, userData)
 
       console.log('new member added', response.data.data)
@@ -67,6 +69,8 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
       setOpen(false)
     } catch (error: any) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -77,7 +81,7 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
       setOpen={setOpen}
       title={'신규 설비인력 추가'}
       primaryButton={
-        <Button variant='contained' onClick={() => onSubmitHandler()} type='submit'>
+        <Button variant='contained' onClick={() => onSubmitHandler()} type='submit' disabled={loading}>
           추가
         </Button>
       }

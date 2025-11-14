@@ -13,8 +13,8 @@ import MenuItem from '@mui/material/MenuItem'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import UserModal from './_components/UserModal'
-import AddUserModal from './_components/addUserModal'
+import UserModal from './_components/EngineerDetailModal'
+import AddUserModal from './_components/AddEngineerModal'
 import type {
   EngineerFilterType,
   EngineerResponseDtoType,
@@ -187,6 +187,7 @@ export default function EngineerPage() {
     if (!checked.length) return
 
     try {
+      setLoading(true)
       await auth.delete(`/api/engineers`, {
         //@ts-ignore
         data: { engineerDeleteRequestDtos: checked }
@@ -201,6 +202,8 @@ export default function EngineerPage() {
       setShowCheckBox(false)
     } catch (error) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
