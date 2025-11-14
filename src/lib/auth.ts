@@ -58,7 +58,7 @@ auth.interceptors.response.use(
       try {
         // RefreshToken은 쿠키에 있기 때문에 단순 호출만 해주면 됨
         const res = await axios.post<{ data: TokenResponseDto }>(
-          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/web/refresh`
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/refresh`
         )
 
         const newAccessToken = res.data.data.accessToken
