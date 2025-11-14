@@ -107,6 +107,8 @@ const InspectionPicListModal = ({
   const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
   const [openPicModal, setOpenPicModal] = useState(false)
 
+  const [selectAll, setSelectAll] = useState(true)
+
   const filteredPics = pictures.filter(
     pic =>
       (selectedItemId === 0 || pic.machineChecklistItemId === selectedItemId) &&
@@ -365,6 +367,17 @@ const InspectionPicListModal = ({
           />
           <ImageListItemBar title={pic.originalFileName} sx={{ textAlign: 'center' }} />
         </ImageListItem>
+        <div className='flex flex-col items-center py-1'>
+          <Typography className='text-green-600'>{pic.machineChecklistItemName}</Typography>
+          <Typography
+            className='text-gray-700'
+            style={pic.alternativeSubTitle ? { textDecoration: 'line-through', opacity: '60%' } : {}}
+          >
+            {pic.machineChecklistSubItemName}
+          </Typography>
+          <Typography className='text-blue-500'>{pic.alternativeSubTitle}</Typography>
+          <Typography className='text-red-500'>{pic.measuredValue}</Typography>
+        </div>
         {showCheck && (
           <Checkbox
             color='error'
@@ -559,14 +572,24 @@ const InspectionPicListModal = ({
                       size='small'
                       color='warning'
                       onClick={async () => {
-                        setPicturesToDelete(
-                          pictures
-                            .concat(await getPictures(1000).then(v => v?.content ?? []))
-                            .filter(pic => pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
-                        )
+                        if (selectAll) {
+                          setPicturesToDelete(
+                            pictures
+                              .concat(await getPictures(1000).then(v => v?.content ?? []))
+                              .filter(pic =>
+                                selectedSubItem
+                                  ? pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId
+                                  : true
+                              )
+                          )
+                        } else {
+                          setPicturesToDelete([])
+                        }
+
+                        setSelectAll(prev => !prev)
                       }}
                     >
-                      전체선택
+                      {selectAll ? '전체선택' : '전체해제'}
                     </Button>,
                     <Button key={2} size='small' color='error' onClick={() => handleDeletePics()}>
                       일괄삭제({picturesToDelete.length})
