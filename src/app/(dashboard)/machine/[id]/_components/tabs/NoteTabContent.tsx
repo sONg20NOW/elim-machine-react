@@ -66,7 +66,7 @@ const NoteTabContent = ({}) => {
             rows={4}
             multiline
             label=''
-            placeholder='참고 사항을 입력해 주세요'
+            placeholder='참고 사항을 입력해 주세요 (최대 글자수 500)'
             value={note}
             onChange={e => setNote(e.target.value)}
             onFocus={() => setIsEditing(true)}
@@ -88,20 +88,29 @@ const NoteTabContent = ({}) => {
           </Typography>
         )}
         <div className='flex gap-2 mt-4'>
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={() => {
-              if (isEditing) {
+          {isEditing ? (
+            <Button
+              variant='contained'
+              color='success'
+              onClick={() => {
                 handleSave()
-              } else {
+              }}
+              disabled={isSaving}
+            >
+              저장
+            </Button>
+          ) : (
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={() => {
                 setIsEditing(true)
-              }
-            }}
-            disabled={isSaving}
-          >
-            {isEditing ? '저장' : '수정'}
-          </Button>
+              }}
+              disabled={isSaving}
+            >
+              수정
+            </Button>
+          )}
           {isEditing && (
             <Button
               variant='contained'

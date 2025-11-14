@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Box, Button, IconButton, MenuItem } from '@mui/material'
+import { Box, Button, IconButton, MenuItem, Typography } from '@mui/material'
 
 import type {
   machineProjectEngineerDetailDtoType,
@@ -48,9 +48,12 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
     return { value: engineer.engineerId, label: `${engineer.engineerName}` }
   })
 
+  const [loading, setLoading] = useState(false)
+
   // 실제 API 호출 부분 (PUT/PATCH 등)
   const handleSave = async () => {
     try {
+      setLoading(true)
       await auth.put(`/api/machine-projects/${machineProjectId}/schedule`, editData)
 
       await auth.put(`/api/machine-projects/${machineProjectId}/machine-project-engineers`, {
@@ -64,6 +67,8 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
       handleSuccess('저장되었습니다.')
     } catch (error) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -107,7 +112,12 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                         점검일정
                       </th>
                       <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px', gap: '2px' }}>
-                        <div className='justify-end flex gap-2'>
+                        <div className='justify-end flex gap-2 items-end'>
+                          {!existChange && (
+                            <Typography variant='caption' color='warning.main'>
+                              변경사항이 없습니다
+                            </Typography>
+                          )}
                           <Button
                             variant='contained'
                             color='success'
@@ -116,6 +126,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                               handleSave()
                               setIsEditing(false)
                             }}
+                            disabled={loading || !existChange}
                           >
                             저장
                           </Button>

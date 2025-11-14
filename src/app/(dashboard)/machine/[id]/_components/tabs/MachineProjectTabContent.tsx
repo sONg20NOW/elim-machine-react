@@ -22,6 +22,7 @@ const BasicTabContent = ({}: {}) => {
   const router = useRouter()
 
   const { isEditing, setIsEditing } = useMachineIsEditingStore()
+  const [loading, setLoading] = useState(false)
 
   const params = useParams()
   const machineProjectId = params?.id as string
@@ -44,6 +45,8 @@ const BasicTabContent = ({}: {}) => {
 
   const handleSave = async () => {
     try {
+      setLoading(true)
+
       const result = await auth.put<{ data: MachineProjectResponseDtoType }>(
         `/api/machine-projects/${machineProjectId}`,
         editData
@@ -57,8 +60,8 @@ const BasicTabContent = ({}: {}) => {
       handleSuccess('수정되었습니다.')
     } catch (error: any) {
       handleApiError(error, '데이터 저장에 실패했습니다.')
-
-      return
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -151,7 +154,7 @@ const BasicTabContent = ({}: {}) => {
                     </th>
                     <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
                       <div className='justify-end flex gap-2'>
-                        <Button color='success' variant='contained' type='submit'>
+                        <Button color='success' variant='contained' type='submit' disabled={loading}>
                           저장
                         </Button>
                         <Button
