@@ -127,19 +127,18 @@ const InspectionListTabContent = ({}) => {
   // useEffect(() => {
   //   handleApiError(error)
   // }, [error])
-  const firstRender = useRef(true)
+  const isFirst = useRef(true)
+  const openModal = open || showAddModalOpen || showPictureListModal
 
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
+    if (isFirst.current) return
+    if (!openModal) refetchInspections()
+  }, [openModal, refetchInspections])
 
-      return
-    }
-
-    if (!open || !showAddModalOpen || !showPictureListModal) {
-      refetchInspections()
-    }
-  }, [open, showAddModalOpen, showPictureListModal, refetchInspections])
+  // 첫 렌더 이후 한 번만 실행
+  useEffect(() => {
+    isFirst.current = false
+  }, [])
 
   useEffect(() => {
     if (!open) {
