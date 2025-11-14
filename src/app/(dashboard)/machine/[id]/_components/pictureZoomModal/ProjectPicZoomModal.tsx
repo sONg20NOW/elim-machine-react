@@ -67,6 +67,7 @@ export default function ProjectPicZoomModal({
   const watchedOriginalFileName = watch('originalFileName')
 
   const [presignedUrl, setPresignedUrl] = useState(selectedPic.presignedUrl)
+  const [saving, setSaving] = useState(false)
 
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
@@ -98,6 +99,8 @@ export default function ProjectPicZoomModal({
     const updateRequest = dirtyFields.s3Key ? data : { ...data, s3Key: null }
 
     try {
+      setSaving(true)
+
       const response = await auth
         .put<{
           data: MachineProjectPicUpdateRequestDtoType
@@ -112,6 +115,8 @@ export default function ProjectPicZoomModal({
       )
     } catch (error) {
       handleApiError(error)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -277,7 +282,7 @@ export default function ProjectPicZoomModal({
               variant='contained'
               type='submit'
               form='picture-form'
-              disabled={!isDirty || !watchedMachineProjectPicType}
+              disabled={!isDirty || !watchedMachineProjectPicType || saving}
             >
               저장
             </Button>
