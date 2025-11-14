@@ -80,7 +80,7 @@ export default function InspectionPicZoomModal({
 
   // 사진 정보 수정을 위한 상태관리
   const [urlInspectionId, setUrlInspectionId] = useState(selectedPic.machineInspectionId)
-  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
 
@@ -127,7 +127,7 @@ export default function InspectionPicZoomModal({
     const updateRequest = dirtyFields.s3Key ? data : { ...data, s3Key: null }
 
     try {
-      setLoading(true)
+      setSaving(true)
 
       const response = await auth
         .put<{
@@ -150,7 +150,7 @@ export default function InspectionPicZoomModal({
     } catch (error) {
       handleApiError(error)
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
 
@@ -386,7 +386,7 @@ export default function InspectionPicZoomModal({
                 variant='contained'
                 type='submit'
                 form='picture-form'
-                disabled={!isDirty || !watchedSubItemId || loading}
+                disabled={!isDirty || !watchedSubItemId || saving}
               >
                 저장
               </Button>
