@@ -641,7 +641,12 @@ const InspectionPicListModal = ({
                           >
                             # {item.machineChecklistItemName}
                           </Typography>
-                          <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+                          <ImageList
+                            sx={{ overflow: 'visible' }}
+                            cols={isMobile ? 1 : 4}
+                            gap={0}
+                            rowHeight={isMobile ? 150 : 250}
+                          >
                             {picsByItem.map((pic, idx) => (
                               <PictureCard key={idx} pic={pic} />
                             ))}

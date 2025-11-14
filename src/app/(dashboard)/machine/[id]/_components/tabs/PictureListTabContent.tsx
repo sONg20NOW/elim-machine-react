@@ -40,7 +40,7 @@ import { auth } from '@/lib/auth'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/MachineProjectPictureCategory'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
 
 const PictureListTabContent = () => {
   const machineProjectId = useParams().id?.toString() as string
@@ -74,7 +74,7 @@ const PictureListTabContent = () => {
   const reloadIconRef = useRef<HTMLElement>(null)
 
   // 반응형을 위한 미디어쿼리
-  const isMobile = useContext(isMobileContext)
+  const isTablet = useContext(isTabletContext)
 
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedInspectionPic, setSelectedInspectionPic] = useState<MachinePicPresignedUrlResponseDtoType>()
@@ -525,7 +525,7 @@ const PictureListTabContent = () => {
     <div className='flex flex-col gap-5'>
       {/* 상단 필터링, 검색, 선택 삭제 등 */}
       <div className='flex justify-between'>
-        <div className={classNames('flex gap-3', { 'flex-col': isMobile })}>
+        <div className={classNames('flex gap-3', { 'flex-col': isTablet })}>
           <SearchBar placeholder='검색' setSearchKeyword={name => setKeyword(name)} />
           {inspectionList && (
             <TextField
@@ -589,11 +589,11 @@ const PictureListTabContent = () => {
             )
           } */}
         </div>
-        <div className='flex gap-2'>
+        <div className='flex gap-2 items-start'>
           <Button variant='outlined' type='button' color='success' onClick={() => setOpen(true)}>
             현장사진 추가
           </Button>
-          <div className={classNames('flex gap-1', { 'flex-col': isMobile })}>
+          <div className={classNames('flex gap-1', { 'flex-col': isTablet })}>
             {showCheck && [
               <Button
                 key={1}
@@ -647,7 +647,7 @@ const PictureListTabContent = () => {
         {handlefilterProjectPics(projectPics) && handlefilterProjectPics(projectPics).length > 0 && (
           <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Typography variant='h3'>현장사진</Typography>
-            <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 4} rowHeight={isMobile ? 180 : 300} gap={15}>
+            <ImageList sx={{ overflow: 'visible' }} cols={isTablet ? 1 : 4} rowHeight={isTablet ? 180 : 300} gap={15}>
               {handlefilterProjectPics(projectPics).map(pic => {
                 return <ProjectPicCard key={pic.id} pic={pic} />
               })}
@@ -669,8 +669,8 @@ const PictureListTabContent = () => {
                   </div>
                   <ImageList
                     sx={{ overflow: 'visible' }}
-                    cols={isMobile ? 1 : 4}
-                    rowHeight={isMobile ? 180 : 300}
+                    cols={isTablet ? 1 : 4}
+                    rowHeight={isTablet ? 180 : 300}
                     gap={15}
                   >
                     {handlefilterInspectionPics(inspectionsPic).map(pic => {
