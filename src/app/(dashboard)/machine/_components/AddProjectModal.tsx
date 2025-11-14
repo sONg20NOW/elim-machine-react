@@ -22,9 +22,11 @@ type AddMachineProjectModalProps = {
 
 export default function AddMachineProjectModal({ open, setOpen, reloadPage }: AddMachineProjectModalProps) {
   const [newData, setNewData] = useState<MachineProjectCreateRequestDtoType>(MachineProjectInitialData)
+  const [loading, setLoading] = useState(false)
 
   const onSubmitHandler = async () => {
     try {
+      setLoading(true)
       const response = await auth.post<{ data: MachineProjectCreateRequestDtoType }>(`/api/machine-projects`, newData)
 
       console.log('new machine project added', response.data.data)
@@ -34,6 +36,8 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
       setOpen(false)
     } catch (error: any) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -44,7 +48,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
       setOpen={setOpen}
       title='신규 기계설비현장 추가'
       primaryButton={
-        <Button variant='contained' onClick={onSubmitHandler} type='submit'>
+        <Button variant='contained' onClick={onSubmitHandler} type='submit' disabled={loading}>
           추가
         </Button>
       }

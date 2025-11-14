@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react'
+import { useState, type Dispatch, type SetStateAction } from 'react'
 
 import { Button } from '@mui/material'
 
@@ -12,6 +12,8 @@ interface DeleteModalProps {
 }
 
 export default function DeleteModal({ showDeleteModal, setShowDeleteModal, onDelete, title }: DeleteModalProps) {
+  const [loading, setLoading] = useState(false)
+
   return (
     <DefaultModal
       size='xs'
@@ -22,9 +24,13 @@ export default function DeleteModal({ showDeleteModal, setShowDeleteModal, onDel
       primaryButton={
         <Button
           variant='contained'
-          className='bg-color-warning hover:bg-color-warning-light'
-          onClick={onDelete}
+          className='bg-color-warning disabled:bg-color-warning-light hover:bg-color-warning-light'
+          onClick={async () => {
+            setLoading(true)
+            await onDelete()
+          }}
           type='submit'
+          disabled={loading}
         >
           삭제
         </Button>
