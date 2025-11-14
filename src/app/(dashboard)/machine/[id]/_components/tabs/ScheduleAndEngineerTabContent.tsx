@@ -348,7 +348,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                             size='small'
                             variant='contained'
                             type='button'
-                            color='primary'
+                            color='info'
                             onClick={() => {
                               setEditData(prev => ({
                                 ...prev,
@@ -356,8 +356,11 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                                   ...prev.engineers,
                                   {
                                     ...MachineProjectEngineerInitialData,
-                                    beginDate: editData.beginDate,
-                                    endDate: editData.endDate
+                                    beginDate:
+                                      editData.engineers?.[editData.engineers.length - 1]?.beginDate ??
+                                      editData.beginDate,
+                                    endDate:
+                                      editData.engineers?.[editData.engineers.length - 1]?.endDate ?? editData.endDate
                                   }
                                 ]
                               }))
@@ -526,7 +529,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                         <Button
                           type='button'
                           variant='contained'
-                          color='success'
+                          color='primary'
                           onClick={() => {
                             setIsEditing(true)
                           }}
@@ -602,39 +605,56 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                         참여기술진
                       </th>
                     </tr>
-                    <tr className='py-1'>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>성명</th>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>등급</th>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                        수첩발급번호
-                      </th>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }} colSpan={2}>
-                        참여기간
-                      </th>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>비고</th>
-                    </tr>
-                    {(scheduleData.engineers || []).map((eng, idx) => (
-                      <tr key={eng.engineerId || idx}>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.engineerName}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.gradeDescription}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.engineerLicenseNum}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.beginDate}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.endDate}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.note}</p>
+                    {(scheduleData?.engineers.length ?? 0 > 0) ? (
+                      <>
+                        <tr className='py-1'>
+                          <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>성명</th>
+                          <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>등급</th>
+                          <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                            수첩발급번호
+                          </th>
+                          <th
+                            style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}
+                            colSpan={2}
+                          >
+                            참여기간
+                          </th>
+                          <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>비고</th>
+                        </tr>
+                        {(scheduleData.engineers || []).map((eng, idx) => (
+                          <tr key={eng.engineerId || idx}>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.engineerName}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.gradeDescription}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.engineerLicenseNum}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.beginDate}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.endDate}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.note}</p>
+                            </td>
+                          </tr>
+                        ))}
+                      </>
+                    ) : (
+                      <tr>
+                        <td colSpan={6}>
+                          <div className='grid place-items-center p-4'>
+                            <Typography color='warning.main'>
+                              해당 기계설비현장에 참여 중인 기술진이 없습니다
+                            </Typography>
+                          </div>
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
