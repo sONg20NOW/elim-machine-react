@@ -622,9 +622,7 @@ export const useGetReportStatuses = (machineProjectId: string, machineReportCate
         )
         .then(v => v.data.data.machineReports)
 
-      const [keyType] = data.queryKey
-
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${data.queryKey}:`, response)
 
       return response
     },
@@ -632,8 +630,9 @@ export const useGetReportStatuses = (machineProjectId: string, machineReportCate
   )
 
   return useQuery({
-    queryKey: QUERY_KEYS.MACHINE_REPORT.GET_MACHINE_REPORT_STATUS(machineProjectId, machineReportCategoryIds),
+    queryKey: QUERY_KEYS.MACHINE_REPORT.GET_MACHINE_REPORT_STATUSES(machineProjectId, machineReportCategoryIds),
     queryFn: fetchReportStatuses,
+    enabled: machineReportCategoryIds.length > 0,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }

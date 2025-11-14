@@ -34,15 +34,15 @@ export const QUERY_KEYS = {
       'GET_ENERGY_USAGES',
       machineProjectId,
       machineEnergyTypeId,
-      ...years.map(year => year.toString())
+      years.join(',')
     ]
   },
   MACHINE_REPORT_CATEGORY_CONTROLLER: ['MACHINE_REPORT_CATEGORY_CONTROLLER'],
   MACHINE_REPORT: {
-    GET_MACHINE_REPORT_STATUS: (machineProjectId: string, machineReportCategoryIds: number[]) => [
-      'GET_MACHINE_REPORT_STATUS',
+    GET_MACHINE_REPORT_STATUSES: (machineProjectId: string, machineReportCategoryIds: number[]) => [
+      'GET_MACHINE_REPORT_STATUSES',
       machineProjectId,
-      ...machineReportCategoryIds.map(v => v.toString())
+      machineReportCategoryIds.join(',')
     ]
   },
   MACHINE_INSPECTION_OPINION: {
