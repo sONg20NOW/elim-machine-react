@@ -9,6 +9,8 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/ReactToastify.css'
 
+import { SpeedInsights } from '@vercel/speed-insights/next'
+
 // Type Imports
 import type { ChildrenType } from '@/@core/types'
 
@@ -47,7 +49,8 @@ const RootLayout = async (props: ChildrenType) => {
       <body className='flex is-full min-bs-full flex-auto flex-col'>
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
         {children}
-        <ToastContainer autoClose={3000} />
+        <SpeedInsights />
+        <ToastContainer autoClose={3000} position='bottom-right' />
       </body>
     </html>
   )
