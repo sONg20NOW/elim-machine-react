@@ -84,6 +84,8 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
 
   const [isEditing, setIsEditing] = useState(false)
 
+  const [loading, setLoading] = useState(false)
+
   const [onQuit, setOnQuit] = useState<() => void>()
 
   // 수정사항 여부
@@ -135,6 +137,8 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
     }
 
     try {
+      setLoading(true)
+
       const response = await auth.put<{ data: MemberDetailResponseDtoType }>(
         `/api/members/${memberId}${requestRule[value].url}`,
         { ...editData[requestRule[value].dtoKey] }
@@ -156,6 +160,8 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
       reloadData && reloadData()
     } catch (error: any) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -177,7 +183,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
         headerDescription={selectedUserData?.memberBasicResponseDto?.companyName || '사용자 정보 수정'}
         primaryButton={
           isEditing ? (
-            <Button variant='contained' onClick={onSubmitHandler} type='submit' color='success'>
+            <Button variant='contained' onClick={onSubmitHandler} type='submit' color='success' disabled={loading}>
               저장
             </Button>
           ) : (

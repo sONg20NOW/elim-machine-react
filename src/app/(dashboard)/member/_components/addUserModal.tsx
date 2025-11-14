@@ -24,9 +24,11 @@ type AddUserModalProps = {
 
 const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) => {
   const [userData, setUserData] = useState<MemberCreateRequestDtoType>(MemberInitialData)
+  const [loading, setLoading] = useState(false)
 
   const onSubmitHandler = async () => {
     try {
+      setLoading(true)
       const response = await auth.post<{ data: MemberCreateRequestDtoType }>(`/api/members`, userData)
 
       console.log('new member added', response.data.data)
@@ -36,6 +38,8 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
       setOpen(false)
     } catch (error: any) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -45,7 +49,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
       setOpen={setOpen}
       title='신규 직원 추가'
       primaryButton={
-        <Button variant='contained' onClick={onSubmitHandler} type='submit'>
+        <Button variant='contained' onClick={onSubmitHandler} type='submit' disabled={loading}>
           추가
         </Button>
       }

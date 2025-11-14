@@ -15,7 +15,6 @@ import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import UserModal from './_components/UserModal'
-import AddUserModal from './_components/addUserModal'
 import type {
   MemberDetailResponseDtoType,
   MemberFilterType,
@@ -31,6 +30,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
+import AddUserModal from './_components/AddUserModal'
 
 export default function MemberPage() {
   const isTablet = useContext(isTabletContext)
