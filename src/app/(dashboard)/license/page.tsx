@@ -63,7 +63,7 @@ export default function Licensepage() {
 
   // 데이터 페치에 사용되는 쿼리 URL
 
-  // 직원 리스트 호출 API 함수
+  // 라이선스 리스트 호출 API 함수
   const getFilteredData = useCallback(async () => {
     setLoading(true)
     setError(false)
@@ -146,7 +146,7 @@ export default function Licensepage() {
     }
   }
 
-  const handleCheckAllEngineers = (checked: boolean) => {
+  const handleCheckAllLicenses = (checked: boolean) => {
     if (checked) {
       setChecked(prev => {
         const newSet = new Set(prev)
@@ -164,8 +164,8 @@ export default function Licensepage() {
     return checked.has(license.licenseId)
   }
 
-  // 여러 기술자 한번에 삭제
-  async function handleDeleteEngineers() {
+  // 여러 라이선스 한번에 삭제
+  async function handleDeleteLicenses() {
     try {
       const list = Array.from(checked).map(licenseId => {
         return {
@@ -180,6 +180,9 @@ export default function Licensepage() {
       })
 
       handleSuccess('선택된 라이선스들이 성공적으로 삭제되었습니다.')
+      getFilteredData()
+      setChecked(new Set([]))
+      setShowCheckBox(false)
     } catch (error) {
       handleApiError(error)
     }
@@ -263,7 +266,7 @@ export default function Licensepage() {
               </Button>
             ) : (
               <div className='flex gap-1'>
-                <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
+                <Button variant='contained' color='error' onClick={() => handleDeleteLicenses()}>
                   {`(${checked.size}) 삭제`}
                 </Button>
                 <Button
@@ -271,7 +274,7 @@ export default function Licensepage() {
                   color='secondary'
                   onClick={() => {
                     setShowCheckBox(prev => !prev)
-                    handleCheckAllEngineers(false)
+                    handleCheckAllLicenses(false)
                   }}
                 >
                   취소
@@ -305,7 +308,7 @@ export default function Licensepage() {
           showCheckBox={showCheckBox}
           isChecked={isChecked}
           handleCheckItem={handleCheckLicense}
-          handleCheckAllItems={handleCheckAllEngineers}
+          handleCheckAllItems={handleCheckAllLicenses}
         />
 
         {/* 페이지네이션 */}
