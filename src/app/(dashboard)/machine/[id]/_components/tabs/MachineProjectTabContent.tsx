@@ -104,7 +104,7 @@ const BasicTabContent = ({}: {}) => {
             <EnergyReport />
             <Button
               variant='contained'
-              color='info'
+              className='bg-blue-500 hover:bg-blue-600 hover:shadow-3'
               onClick={() => {
                 setShowDownloadModal(true)
               }}
@@ -567,7 +567,7 @@ const BasicTabContent = ({}: {}) => {
                       <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
                         <Button
                           variant='contained'
-                          color='success'
+                          color='primary'
                           onClick={() => {
                             setIsEditing(true)
                           }}
