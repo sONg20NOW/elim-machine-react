@@ -40,6 +40,7 @@ import type {
   MachineReportStatusResponseDtoType,
   MemberDetailResponseDtoType,
   PipeMeasurementResponseDtoType,
+  successResponseDtoType,
   targetType,
   WindMeasurementResponseDtoType
 } from '@/@core/types' // 타입 임포트
@@ -70,19 +71,40 @@ export const useGetInspectionsSimple = (machineProjectId: string) => {
   })
 }
 
-// GET /api/machine-projects/${machineProjectId}/machine-inspections : 설비 목록 조회
+export const useGetInspections = (machineProjectId: string, queryParams: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS(machineProjectId, queryParams),
+    queryFn: async data => {
+      const [keyType, machineProjectId, queryParams] = data.queryKey
+
+      const response = await auth
+        .get<{
+          data: successResponseDtoType<MachineInspectionPageResponseDtoType[]>
+        }>(`/api/machine-projects/${machineProjectId}/machine-inspections?${queryParams.toString()}`)
+        .then(v => v.data.data)
+
+      console.log(`!!! queryFn ${keyType} in ${machineProjectId}:`, response)
+
+      return response
+    },
+    staleTime: 1000 * 60 * 1 // 5분
+  })
+}
+
+// GET /api/machine-projects/${machineProjectId}/machine-inspections : 설비 목록 조회 (모바일 설비 변경 Select용)
 export const useGetEveryInspections = (machineProjectId: string) => {
   const maxCnt = 100
+  const queryParams = `size=${maxCnt}`
 
   return useQuery({
-    queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS_SIMPLE(machineProjectId),
+    queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS(machineProjectId, queryParams),
     queryFn: async data => {
       const [keytype, machineProjectId] = data.queryKey
 
       const response = await auth
         .get<{
           data: { content: MachineInspectionPageResponseDtoType[] }
-        }>(`/api/machine-projects/${machineProjectId}/machine-inspections?size=${maxCnt}`)
+        }>(`/api/machine-projects/${machineProjectId}/machine-inspections?${queryParams}`)
         .then(v => v.data.data.content)
 
       console.log(`!!! queryFn ${keytype}:`, response)
