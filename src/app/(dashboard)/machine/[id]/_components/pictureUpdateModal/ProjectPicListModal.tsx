@@ -363,7 +363,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
             <div className='flex justify-between items-center'>
               <div className='flex items-center mb-2'>
                 <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
-                  현장 사진 목록
+                  사진 목록
                 </Typography>
                 <IconButton
                   onClick={() => {

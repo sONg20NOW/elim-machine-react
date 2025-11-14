@@ -553,7 +553,7 @@ const InspectionPicListModal = ({
               <div className='flex justify-between items-center'>
                 <div className='flex items-center mb-2'>
                   <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
-                    설비 사진 목록
+                    사진 목록
                   </Typography>
                   <IconButton
                     onClick={() => {
