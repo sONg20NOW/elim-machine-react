@@ -76,9 +76,10 @@ auth.interceptors.response.use(
       } catch (err) {
         // ! 나중에 주석 풀어야함
         // Refresh도 실패 → 로그인 페이지로 이동
-        // localStorage.removeItem('accessToken')
-        // window.location.href = '/login'
-        // return Promise.reject(err) // Refresh 실패 시 에러를 다시 던짐
+        localStorage.removeItem('accessToken')
+        window.location.href = '/login'
+
+        return Promise.reject(err) // Refresh 실패 시 에러를 다시 던짐
       }
     }
 
