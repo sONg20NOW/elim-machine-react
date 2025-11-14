@@ -20,10 +20,9 @@ import { auth } from '@/lib/auth'
 type AddInspectionModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
-  getFilteredInspectionList: () => void
 }
 
-const AddInspectionModal = ({ getFilteredInspectionList, open, setOpen }: AddInspectionModalProps) => {
+const AddInspectionModal = ({ open, setOpen }: AddInspectionModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
 
   const [newData, setNewData] = useState<MachineInspectionCreateRequestDtoType>({
@@ -64,7 +63,6 @@ const AddInspectionModal = ({ getFilteredInspectionList, open, setOpen }: AddIns
 
       setOpen(false)
       refetchInspections()
-      getFilteredInspectionList()
     } catch (error) {
       handleApiError(error)
     }

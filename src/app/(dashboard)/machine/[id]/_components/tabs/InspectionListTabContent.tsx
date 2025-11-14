@@ -50,7 +50,7 @@ const InspectionListTabContent = ({}) => {
     engineerName: ''
   })
 
-  const [queryParams, setQueryParams] = useState('')
+  const [queryParams, setQueryParams] = useState(`page=0&size=${DEFAULT_PAGESIZE}`)
 
   const {
     data: inspectionsPage,
@@ -112,6 +112,10 @@ const InspectionListTabContent = ({}) => {
 
     setQueryParams(queryParams.toString())
   }, [filters, sorting, page, pageSize, machineCategoryName, location])
+
+  useEffect(() => {
+    handleSetQueryParams()
+  }, [handleSetQueryParams])
 
   useEffect(() => {
     if (!inspectionsPage) return
@@ -196,7 +200,7 @@ const InspectionListTabContent = ({}) => {
       setMachineCategoryName('')
       setLocation('')
       setPage(0)
-      handleSetQueryParams()
+      refetchInspections()
       handleSuccess(`선택된 설비목록 ${checked.length}개가 성공적으로 삭제되었습니다.`)
       setChecked([])
       setShowCheckBox(false)
@@ -381,13 +385,7 @@ const InspectionListTabContent = ({}) => {
 
       {/* 모달 */}
       {open && currentInspectionId && <InspectionDetailModal open={open} setOpen={setOpen} />}
-      {showAddModalOpen && (
-        <AddInspectionModal
-          getFilteredInspectionList={handleSetQueryParams}
-          open={showAddModalOpen}
-          setOpen={setShowAddModalOpen}
-        />
-      )}
+      {showAddModalOpen && <AddInspectionModal open={showAddModalOpen} setOpen={setShowAddModalOpen} />}
       {showPictureListModal && (
         <PictureListModal
           open={showPictureListModal}
