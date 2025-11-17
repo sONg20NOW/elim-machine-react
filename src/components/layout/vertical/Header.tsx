@@ -1,6 +1,6 @@
 'use client'
 
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -16,24 +16,11 @@ import { isMobileContext, isTabletContext } from '@/@core/components/custom/Prot
 export default function Header() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [keyword, setKeyword] = useState<string>()
 
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
 
   const username = '송강규'
-
-  useEffect(() => {
-    if (keyword) {
-      localStorage.setItem('headerKeyword', keyword)
-      const searchBar = document.getElementById('검색어를 입력하세요') as HTMLInputElement
-
-      searchBar.value = ''
-      setKeyword(undefined)
-
-      router.push('/machine')
-    }
-  }, [keyword, router])
 
   return (
     <AppBar
@@ -55,8 +42,6 @@ export default function Header() {
               엘림 주식회사
             </Typography>
           </div>
-
-          {/* <SearchBar placeholder='검색어를 입력하세요' setSearchKeyword={name => setKeyword(name)} /> */}
         </div>
         {!isTablet && (
           <div className='flex gap-5 items-center overflow-visible'>
