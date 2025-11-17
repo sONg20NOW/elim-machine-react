@@ -21,6 +21,8 @@ import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
 
+import ImageZoom from 'react-image-zooom'
+
 import { Controller, useForm } from 'react-hook-form'
 
 import type {
@@ -154,17 +156,14 @@ export default function InspectionPicZoomModal({
     }
   }
 
+  const onClose = () => {
+    setOpen(false)
+  }
+
   return (
     inspectionList && (
       <form onSubmit={handleSubmit(handleSave)} id='picture-form'>
-        <Dialog
-          maxWidth='xl'
-          fullWidth
-          open={open}
-          onClose={() => {
-            setOpen(false)
-          }}
-        >
+        <Dialog maxWidth='xl' fullWidth open={open} onClose={onClose} disableScrollLock>
           <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
             <div className='flex justify-between'>
               <div className='flex gap-4 items-center'>
@@ -172,7 +171,7 @@ export default function InspectionPicZoomModal({
                   type='button'
                   sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
                   size='small'
-                  onClick={() => setOpen(false)}
+                  onClick={onClose}
                 >
                   <i className='tabler-x' />
                 </IconButton>
@@ -181,7 +180,7 @@ export default function InspectionPicZoomModal({
           </DialogTitle>
           <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <div
-              className={classNames('flex gap-4 w-full', {
+              className={classNames('flex gap-4 w-full min-h-[50dvh] max-h-[60dvh]', {
                 'flex-col': isMobile
               })}
             >
@@ -203,7 +202,7 @@ export default function InspectionPicZoomModal({
                 </div>
               )}
 
-              <div className='flex-1 flex flex-col gap-2 w-full items-start relative border-4 p-2 rounded-lg border-[1px solid lightgray]'>
+              <div className='flex-1 flex flex-col gap-2 w-full items-start relative border-4 p-2 rounded-lg overflow-visible'>
                 <TextField
                   {...register('originalFileName')}
                   variant='standard'
@@ -220,16 +219,19 @@ export default function InspectionPicZoomModal({
                   }}
                   id='new-picture-name-input'
                 />
-                <img
-                  src={presignedUrl}
-                  alt={watchedAlternativeSubTitle}
-                  style={{
-                    width: '100%',
-                    minHeight: '50dvh',
-                    maxHeight: '60dvh',
-                    objectFit: 'contain'
-                  }}
-                />
+                <ImageZoom src={presignedUrl} alt={watchedAlternativeSubTitle} zoom={300} />
+                {/* <Zoom onZoomChange={handleZoomChange} zoomMargin={1}>
+                  <img
+                    src={presignedUrl}
+                    alt={watchedAlternativeSubTitle}
+                    style={{
+                      width: '100%',
+                      minHeight: '50dvh',
+                      maxHeight: '60dvh',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </Zoom> */}
                 <Button
                   type='button'
                   sx={{
