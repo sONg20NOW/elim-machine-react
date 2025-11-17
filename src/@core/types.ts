@@ -107,82 +107,106 @@ export type MemberDetailResponseDtoType = {
   memberOfficeResponseDto: MemberOfficeDtoType
   memberPrivacyResponseDto: MemberPrivacyDtoType
 }
+
+export type memberStatusType = 'NORMAL' | 'QUIT' | 'PENDING' | 'LEAVE'
+
 export interface MemberBasicDtoType {
-  companyName: string
-  email: string
   memberId: number
-  memberStatus: string
-  memberStatusDescription: string
-  name: string
-  note: string
-  role: string
-  roleDescription: string
-  storedFileName: string | null
   version: number
+  companyName: string
+  name: string
+  memberStatus: memberStatusType
+  email: string
+  s3Key: string
+  note: string
 }
+
+export interface MemberPrivacyDtoType {
+  version: number
+  foreignYn: ynResultType
+  juminNum: string
+  birthday: string
+  phoneNumber: string
+  emerNum1: string
+  emerNum2: string
+  roadAddress: string | null
+  jibunAddress: string | null
+  detailAddress: string | null
+  educationLevel: string
+  educationMajor: string
+  familyCnt: number
+  carYn: ynResultType
+  carNumber: string
+  religion: string
+  bankName: string
+  bankNumber: string
+}
+
+export type officePositionType =
+  | 'TEMPORARY'
+  | 'INTERN'
+  | 'STAFF'
+  | 'JUNIOR_STAFF'
+  | 'ASSISTANT_MANAGER'
+  | 'SENIOR_ASSISTANT_MANAGER'
+  | 'RESPONSIBLE'
+  | 'TEAM_LEADER'
+  | 'SECTION_CHIEF'
+  | 'DEPUTY_GENERAL_MANAGER'
+  | 'MANAGER'
+  | 'SENIOR_MANAGER'
+  | 'DEPUTY_MANAGER'
+  | 'DIRECTOR'
+  | 'EXECUTIVE_DIRECTOR'
+  | 'SENIOR_EXECUTIVE_DIRECTOR'
+  | 'ADVISOR'
+  | 'VICE_PRESIDENT'
+  | 'PRESIDENT'
+
+export type contractTypeType = 'REGULAR' | 'CONTRACT_1Y' | 'CONTRACT_2Y' | 'NON_REGULAR' | 'DAILY' | 'TEMPORARY'
+export type laborFormType = 'RESIDENT' | 'NON_RESIDENT'
+export type workFormType = 'DEEMED' | 'SPECIAL'
+
+export interface MemberOfficeDtoType {
+  version: number
+  staffNum: string
+  officeDepartmentId: number
+  officeDepartmentName: string
+  officePosition: officePositionType
+  contractType: contractTypeType
+  apprentice: string
+  workForm: workFormType
+  laborForm: laborFormType
+  contractYn: ynResultType
+  staffCardYn: ynResultType
+  fieldworkYn: ynResultType
+  joinDate: string
+  resignDate: string | null
+  insuranceAcquisitionDate: string
+  insuranceLostDate: string | null
+  groupInsuranceYn: ynResultType
+}
+
 export interface MemberCareerDtoType {
-  grade: string
-  gradeDescription: string
-  industryOtherMonth: number
-  industrySameMonth: number
+  grade: gradeType
+  version: number
   jobField: string
   licenseName1: string
   licenseName2: string
-  version: number
+  industrySameMonth: number
+  industryOtherMonth: number
 }
 export interface MemberEtcDtoType {
-  employedType: string
+  version: number
+  youthJobLeap: string
+  youthEmploymentIncentive: string
+  youthDigital: string
+  seniorInternship: string
+  newMiddleAgedJobs: string
   incomeTaxReducedBeginDate: string
   incomeTaxReducedEndDate: string
+  employedType: string
   militaryPeriod: string
-  newMiddleAgedJobs: string
-  seniorInternship: string
-  youthDigital: string
-  youthEmploymentIncentive: string
-  youthJobLeap: string
-  version: number
-}
-export interface MemberOfficeDtoType {
-  apprentice: string
-  contractType: string
-  contractTypeDescription: string
-  contractYn: string
-  fieldworkYn: string
-  groupInsuranceYn: string
-  insuranceAcquisitionDate: string
-  insuranceLostDate: string | null
-  joinDate: string
-  laborForm: string
-  laborFormDescription: string
-  officeDepartmentId: number
-  officeDepartmentName: string
-  officePosition: string
-  officePositionDescription: string
-  resignDate: string | null
-  staffCardYn: string
-  staffNum: string
-  version: number
-  workForm: string
-  workFormDescription: string
-}
-export interface MemberPrivacyDtoType {
-  roadAddress: string | null
-  detailAddress: string | null
-  bankName: string
-  bankNumber: string
-  birthday: string
-  carNumber: string
-  carYn: string
-  educationLevel: string
-  educationMajor: string
-  emerNum1: string
-  emerNum2: string
-  familyCnt: number
-  foreignYn: string
-  juminNum: string
-  phoneNumber: string
-  religion: string
-  version: number
 }
 
 export type MemberLookupResponseDtoType = {
@@ -298,11 +322,13 @@ export type MachineProjectScheduleAndEngineerResponseDtoType = {
   engineers: machineProjectEngineerDetailDtoType[]
 }
 
+export type gradeType = 'ASSIST' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
+
 // 엔지니어 정보
 export interface machineProjectEngineerDetailDtoType {
   engineerId: number
   engineerName: string
-  grade: string
+  grade: gradeType
   gradeDescription: string
   engineerLicenseNum: string
   beginDate: string

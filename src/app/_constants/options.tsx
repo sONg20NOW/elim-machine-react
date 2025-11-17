@@ -1,4 +1,11 @@
-import type { equipmentPhaseType } from '@/@core/types'
+import type {
+  contractTypeType,
+  equipmentPhaseType,
+  gradeType,
+  laborFormType,
+  officePositionType,
+  workFormType
+} from '@/@core/types'
 
 // member
 export const companyNameOption = [
@@ -51,7 +58,7 @@ export const officeDepartmentNameOption = [
   { value: '토목부', label: '토목부' }
 ]
 
-export const officePositionOption = [
+export const officePositionOption: { value: officePositionType; label: string }[] = [
   { value: 'TEMPORARY', label: '단기' },
   { value: 'INTERN', label: '인턴' },
   { value: 'STAFF', label: '사원' },
@@ -73,7 +80,7 @@ export const officePositionOption = [
   { value: 'PRESIDENT', label: '사장' }
 ]
 
-export const contractTypeOption = [
+export const contractTypeOption: { value: contractTypeType; label: string }[] = [
   { value: 'REGULAR', label: '정규직' },
   { value: 'CONTRACT_1Y', label: '계약직1년' },
   { value: 'CONTRACT_2Y', label: '계약직2년' },
@@ -82,17 +89,17 @@ export const contractTypeOption = [
   { value: 'TEMPORARY', label: '단기시급' }
 ]
 
-export const laborFormOption = [
+export const laborFormOption: { value: laborFormType; label: string }[] = [
   { value: 'RESIDENT', label: '상근' },
   { value: 'NON_RESIDENT', label: '비상근' }
 ]
 
-export const workFormOption = [
+export const workFormOption: { value: workFormType; label: string }[] = [
   { value: 'DEEMED', label: '간주근로' },
   { value: 'SPECIAL', label: '별정근로' }
 ]
 
-export const gradeOption = [
+export const gradeOption: { value: gradeType; label: string }[] = [
   { value: 'ASSIST', label: '보조' },
   { value: 'BEGINNER', label: '초급' },
   { value: 'INTERMEDIATE', label: '중급' },
