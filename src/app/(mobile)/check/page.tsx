@@ -31,7 +31,7 @@ import type { MachineProjectPageDtoType, successResponseDtoType } from '@/@core/
 import { handleApiError } from '@/utils/errorHandler'
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
-import { auth } from '@/lib/auth'
+import { auth, logout } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 export default function MachinePage() {
@@ -138,18 +138,6 @@ export default function MachinePage() {
   useEffect(() => {
     getFilteredData()
   }, [getFilteredData])
-
-  const handleLogout = async () => {
-    try {
-      // ! CSRF token 같이 넣어서 POST
-      await auth.post(`/api/authentication/web/logout`)
-    } catch (e) {
-      handleApiError(e)
-    } finally {
-      localStorage.removeItem('accessToken')
-      router.push('/login')
-    }
-  }
 
   // 기계설비현장 선택 핸들러
   const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
@@ -311,7 +299,7 @@ export default function MachinePage() {
               fullWidth
               sx={{ display: 'flex', justifyContent: 'start', boxShadow: 4, color: 'dimgray', borderColor: 'dimgray' }}
               variant='outlined'
-              onClick={() => handleLogout()}
+              onClick={logout}
             >
               <i className='tabler-logout text-[30px]' />
               <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>

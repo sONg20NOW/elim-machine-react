@@ -1,7 +1,10 @@
+import { redirect } from 'next/navigation'
+
 import axios from 'axios'
 
 import type { LoginResponseDtoType, TokenResponseDto } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import useAuthStore from '@/@core/utils/useAuthStore'
 
 export const auth = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}`,
@@ -21,8 +24,7 @@ export async function login(email: string, password: string) {
       const accessToken = res.data.data.tokenResponseDto.accessToken // JSON body에서 가져옴
 
       // console.log(atob(accessToken))
-
-      localStorage.setItem('accessToken', accessToken)
+      useAuthStore.getState().setAccessToken(accessToken)
       handleSuccess('로그인에 성공했습니다.')
 
       return res.data.code
@@ -34,14 +36,29 @@ export async function login(email: string, password: string) {
   }
 }
 
+export async function logout() {
+  try {
+    // ! CSRF token 같이 넣어서 POST
+    await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/logout`, null, {
+      withCredentials: true
+    })
+    handleSuccess('로그아웃되었습니다.')
+  } catch (e) {
+    handleApiError(e)
+  } finally {
+    useAuthStore.getState().setAccessToken(null)
+    redirect('/login')
+  }
+}
+
 // 헤더에 access token 추가
 auth.interceptors.request.use(config => {
-  const token = localStorage.getItem('accessToken')
+  const accessToken = useAuthStore.getState().accessToken
 
-  if (token) {
-    config.headers!.Authorization = `Bearer ${token}`
+  if (accessToken) {
+    config.headers!.Authorization = `Bearer ${accessToken}`
   } else {
-    throw new Error('there is no access token!')
+    console.log('no access token')
   }
 
   return config
@@ -65,9 +82,7 @@ auth.interceptors.response.use(
 
         const newAccessToken = res.data.data.accessToken
 
-        console.log('NEW!:', newAccessToken)
-
-        localStorage.setItem('accessToken', newAccessToken)
+        useAuthStore.getState().setAccessToken(newAccessToken)
 
         // 실패했던 요청 다시 실행
         error.config.headers.Authorization = `Bearer ${newAccessToken}`
@@ -76,10 +91,10 @@ auth.interceptors.response.use(
       } catch (err) {
         // ! 나중에 주석 풀어야함
         // Refresh도 실패 → 로그인 페이지로 이동
-        localStorage.removeItem('accessToken')
-        window.location.href = '/login'
+        useAuthStore.getState().setAccessToken(null)
 
-        return Promise.reject(err) // Refresh 실패 시 에러를 다시 던짐
+        // redirect('/login')
+        console.log('refresh failed!')
       }
     }
 

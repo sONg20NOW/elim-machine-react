@@ -8,8 +8,7 @@ import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography, Link } fr
 
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
-import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
+import { logout } from '@/lib/auth'
 import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
 
 // import Logo from '@components/layout/shared/Logo'
@@ -23,18 +22,6 @@ export default function Header() {
   const isMobile = useContext(isMobileContext)
 
   const username = '송강규'
-
-  const handleLogout = async () => {
-    try {
-      // ! CSRF token 같이 넣어서 POST
-      await auth.post(`/api/authentication/web/logout`)
-    } catch (e) {
-      handleApiError(e)
-    } finally {
-      localStorage.removeItem('accessToken')
-      router.push('/login')
-    }
-  }
 
   useEffect(() => {
     if (keyword) {
@@ -80,7 +67,7 @@ export default function Header() {
               size='small'
               sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
               variant='contained'
-              onClick={() => handleLogout()}
+              onClick={logout}
             >
               <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
             </Button>
@@ -125,7 +112,7 @@ export default function Header() {
                   size='small'
                   sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
                   variant='contained'
-                  onClick={() => handleLogout()}
+                  onClick={logout}
                 >
                   <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
                 </Button>

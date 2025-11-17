@@ -84,16 +84,6 @@ export default function MachinePage() {
   // const [showCheckBox, setShowCheckBox] = useState(false)
   // const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
-  // 페이지 첫 로딩 시 localstorage에 headerKeyword가 있으면 해당 키워드를 이름으로 검색
-  const headerKeyword = localStorage.getItem('headerKeyword')
-
-  useEffect(() => {
-    if (headerKeyword) {
-      setProjectName(headerKeyword)
-      localStorage.removeItem('headerKeyword')
-    }
-  }, [headerKeyword])
-
   const getEngineers = useCallback(async () => {
     setLoading(true)
     setError(false)
