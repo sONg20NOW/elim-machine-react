@@ -219,7 +219,7 @@ const InspectionTableRow = memo(
           <div className='grid place-items-center'>
             <a ref={aRef} download={'hi'}>
               <Button className='bg-blue-500 hover:bg-blue-600 text-white  disabled:opacity-60' disabled={disabled}>
-                HWPX
+                HWP
               </Button>
             </a>
           </div>
