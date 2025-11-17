@@ -39,7 +39,10 @@ import type {
   MachineReportCategoryReadResponseDtoType,
   MachineReportStatusResponseDtoType,
   MemberBasicDtoType,
+  MemberCareerDtoType,
   MemberDetailResponseDtoType,
+  MemberEtcDtoType,
+  MemberOfficeDtoType,
   MemberPrivacyDtoType,
   PipeMeasurementResponseDtoType,
   successResponseDtoType,
@@ -812,7 +815,7 @@ export const useGetEngineerList = () => {
 }
 
 // ------------------------- Member 관련 -------------------------
-export const useGetSignleMember = (memberId: string) => {
+export const useGetSingleMember = (memberId: string) => {
   const fetchMember: QueryFunction<MemberDetailResponseDtoType, string[]> = useCallback(
     async data => {
       const response = await auth
@@ -872,15 +875,26 @@ export const useMutateSingleMemberBasic = (memberId: string) => {
   })
 }
 
-type MemberType = 'basic' | 'privacy' | 'office' | 'career' | 'etc'
+export type MemberType = 'basic' | 'privacy' | 'office' | 'career' | 'etc'
+
+const memberRequestInfo: Record<MemberType, { url: string; dtoKey: keyof MemberDetailResponseDtoType }> = {
+  basic: { url: '', dtoKey: 'memberBasicResponseDto' },
+  privacy: { url: '/member-privacy', dtoKey: 'memberPrivacyResponseDto' },
+  office: { url: '/member-office', dtoKey: 'memberOfficeResponseDto' },
+  career: { url: '/member-career', dtoKey: 'memberCareerResponseDto' },
+  etc: { url: '/member-etc', dtoKey: 'memberEtcResponseDto' }
+}
 
 // 직원 수정 단일화
-export const useMutateSingleMember = <T = MemberBasicDtoType | MemberPrivacyDtoType>(
+export const useMutateSingleMember = <
+  T = MemberBasicDtoType | MemberPrivacyDtoType | MemberOfficeDtoType | MemberCareerDtoType | MemberEtcDtoType
+>(
   memberId: string,
   memberType: MemberType
 ) => {
   const queryClient = useQueryClient()
   const queryKey = QUERY_KEYS.MEMBER.GET_SINGLE_MEMBER(memberId)
+  const requestInfo = memberRequestInfo[memberType]
 
   const putSingleMember = async (memberId: string, data: T) => {
     if (Number(memberId) <= 0) {
@@ -890,10 +904,7 @@ export const useMutateSingleMember = <T = MemberBasicDtoType | MemberPrivacyDtoT
     const response = await auth
       .put<{
         data: T
-      }>(
-        `/api/members/${memberId}${{ basic: '', privacy: '/member-privacy', office: '/member-office', career: '/member-career', etc: '/member-etc' }[memberType]}`,
-        data
-      )
+      }>(`/api/members/${memberId}${requestInfo.url}`, data)
       .then(v => v.data.data)
 
     return response
@@ -902,12 +913,12 @@ export const useMutateSingleMember = <T = MemberBasicDtoType | MemberPrivacyDtoT
   return useMutation<T, AxiosError, T>({
     mutationFn: data => putSingleMember(memberId, data),
 
-    onSuccess: newMemberBasicData => {
+    onSuccess: data => {
       queryClient.setQueryData(queryKey, (prev: MemberDetailResponseDtoType) => ({
         ...prev,
-        memberBasicResponseDto: newMemberBasicData
+        [requestInfo.dtoKey]: data
       }))
-      console.log('member basic info가 성공적으로 저장되었습니다.')
+      console.log(`member ${memberType} info가 성공적으로 저장되었습니다.`)
     },
 
     onError: error => {

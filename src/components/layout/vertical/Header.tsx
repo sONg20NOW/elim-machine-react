@@ -10,9 +10,8 @@ import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 import { logout } from '@/lib/auth'
 import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
-import type { MemberDetailResponseDtoType } from '@/@core/types'
-import { useGetSignleMember } from '@/@core/hooks/customTanstackQueries'
 import UserModal from '@/app/(dashboard)/member/_components/UserModal'
+import { useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
 
 // import Logo from '@components/layout/shared/Logo'
 
@@ -20,15 +19,14 @@ export default function Header() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [openUser, setOpenUser] = useState(false)
-  const [userData, setUserData] = useState<MemberDetailResponseDtoType>()
   const [memberId, setMemberId] = useState<number>(0)
 
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
 
-  const { data: MemberData } = useGetSignleMember(memberId.toString())
+  const { data: userData } = useGetSingleMember(memberId.toString())
 
-  const username = MemberData?.memberBasicResponseDto?.name
+  const username = userData?.memberBasicResponseDto?.name
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('user') ?? '{}')
@@ -37,10 +35,6 @@ export default function Header() {
       setMemberId(stored.memberId)
     }
   }, [])
-
-  useEffect(() => {
-    setUserData(MemberData)
-  }, [MemberData])
 
   return (
     <AppBar
@@ -291,14 +285,7 @@ export default function Header() {
           </Box>
         </Drawer>
       )}
-      {userData && openUser && (
-        <UserModal
-          open={openUser}
-          setOpen={setOpenUser}
-          selectedUserData={userData}
-          setSelectedUserData={setUserData}
-        />
-      )}
+      {userData && openUser && <UserModal open={openUser} setOpen={setOpenUser} selectedUserData={userData} />}
     </AppBar>
   )
 }

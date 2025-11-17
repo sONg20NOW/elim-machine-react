@@ -1,7 +1,6 @@
 'use client'
 
 // React Imports
-import type { Dispatch, SetStateAction } from 'react'
 import { createContext, useState } from 'react'
 
 // MUI Imports
@@ -17,17 +16,26 @@ import { toast } from 'react-toastify'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import MemberTabContent from './memberTabContent'
-import type { MemberDetailResponseDtoType } from '@/@core/types'
+import type {
+  MemberBasicDtoType,
+  MemberCareerDtoType,
+  MemberEtcDtoType,
+  MemberOfficeDtoType,
+  MemberPrivacyDtoType,
+  MemberDetailResponseDtoType
+} from '@/@core/types'
+
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
 import { auth } from '@/lib/auth'
-import { useMutateSingleMemberBasic } from '@/@core/hooks/customTanstackQueries'
+import type { MemberType } from '@/@core/hooks/customTanstackQueries'
+import { useMutateSingleMember } from '@/@core/hooks/customTanstackQueries'
 
 type requestRuleBodyType = {
   url: string
-  value: string
+  value: MemberType
   label: string
   dtoKey: keyof MemberDetailResponseDtoType
 }
@@ -71,13 +79,12 @@ type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
   selectedUserData: MemberDetailResponseDtoType
-  setSelectedUserData: Dispatch<SetStateAction<MemberDetailResponseDtoType | undefined>>
   reloadData?: () => void
 }
 
 export const MemberIdContext = createContext<number>(0)
 
-const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloadData }: EditUserInfoProps) => {
+const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfoProps) => {
   const [tabValue, setTabValue] = useState<tabType>('1')
   const [editData, setEditData] = useState<MemberDetailResponseDtoType>(structuredClone(selectedUserData))
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -95,7 +102,17 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
   const memberId = { ...editData?.memberBasicResponseDto }.memberId
   const juminNum = { ...editData?.memberPrivacyResponseDto }.juminNum
 
-  const { mutateAsync: mutateBasicAsync } = useMutateSingleMemberBasic(memberId.toString())
+  // const { mutateAsync: mutateBasicAsync } = useMutateSingleMemberBasic(memberId.toString())
+  const { mutateAsync: mutateBasicAsync } = useMutateSingleMember<MemberBasicDtoType>(memberId.toString(), 'basic')
+
+  const { mutateAsync: mutatePrivacyAsync } = useMutateSingleMember<MemberPrivacyDtoType>(
+    memberId.toString(),
+    'privacy'
+  )
+
+  const { mutateAsync: mutateOfficeAsync } = useMutateSingleMember<MemberOfficeDtoType>(memberId.toString(), 'office')
+  const { mutateAsync: mutateCareerAsync } = useMutateSingleMember<MemberCareerDtoType>(memberId.toString(), 'career')
+  const { mutateAsync: mutateEtcAsync } = useMutateSingleMember<MemberEtcDtoType>(memberId.toString(), 'etc')
 
   const handleDeleteUser = async () => {
     const version = editData.memberBasicResponseDto?.version
@@ -141,37 +158,56 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
 
     try {
       setLoading(true)
+      const requestInfo = requestRule[tabValue]
 
-      if (tabValue === '1') {
-        const newBasic = await mutateBasicAsync(editData.memberBasicResponseDto)
+      switch (tabValue) {
+        case '1':
+          const newBasic = await mutateBasicAsync(editData.memberBasicResponseDto)
 
-        setEditData({ ...editData, memberBasicResponseDto: newBasic })
-        setSelectedUserData({ ...selectedUserData, memberBasicResponseDto: newBasic })
-        console.log(`${requestRule[tabValue].value} info saved: `, newBasic)
-        handleSuccess(`${requestRule[tabValue].label}가 수정되었습니다.`)
-        setIsEditing(false)
-        reloadData && reloadData()
-      } else {
-        const d = editData[requestRule[tabValue].dtoKey]
+          setEditData({ ...editData, memberBasicResponseDto: newBasic })
+          console.log(`${requestInfo.value} info saved: `, newBasic)
+          handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
+          setIsEditing(false)
+          reloadData && reloadData()
+          break
+        case '2':
+          const newPrivacy = await mutatePrivacyAsync(editData.memberPrivacyResponseDto)
 
-        const response = await auth.put<{ data: typeof d }>(`/api/members/${memberId}${requestRule[tabValue].url}`, {
-          ...editData[requestRule[tabValue].dtoKey]
-        })
+          setEditData({ ...editData, memberPrivacyResponseDto: newPrivacy })
+          console.log(`${requestInfo.value} info saved: `, newPrivacy)
+          handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
+          setIsEditing(false)
+          reloadData && reloadData()
+          break
+        case '3':
+          const newOffice = await mutateOfficeAsync(editData.memberOfficeResponseDto)
 
-        const returnData = response.data.data
+          setEditData({ ...editData, memberOfficeResponseDto: newOffice })
+          console.log(`${requestInfo.value} info saved: `, newOffice)
+          handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
+          setIsEditing(false)
+          reloadData && reloadData()
+          break
+        case '4':
+          const newCareer = await mutateCareerAsync(editData.memberCareerResponseDto)
 
-        setEditData({
-          ...editData,
-          [requestRule[tabValue].dtoKey]: returnData
-        })
-        setSelectedUserData({
-          ...selectedUserData,
-          [requestRule[tabValue].dtoKey]: returnData
-        })
-        console.log(`${requestRule[tabValue].value} info saved: `, returnData)
-        handleSuccess(`${requestRule[tabValue].label}가 수정되었습니다.`)
-        setIsEditing(false)
-        reloadData && reloadData()
+          setEditData({ ...editData, memberCareerResponseDto: newCareer })
+          console.log(`${requestInfo.value} info saved: `, newCareer)
+          handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
+          setIsEditing(false)
+          reloadData && reloadData()
+          break
+        case '5':
+          const newEtc = await mutateEtcAsync(editData.memberEtcResponseDto)
+
+          setEditData({ ...editData, memberEtcResponseDto: newEtc })
+          console.log(`${requestInfo.value} info saved: `, newEtc)
+          handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
+          setIsEditing(false)
+          reloadData && reloadData()
+          break
+        default:
+          break
       }
     } catch (error: any) {
       handleApiError(error)

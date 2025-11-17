@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // MUI Imports
 import { useRouter } from 'next/navigation'
@@ -27,11 +27,9 @@ import type { CalendarColors, CalendarType } from '@/types/apps/calendarTypes'
 
 // Slice Imports
 import { fetchEvents, filterEvents, updateEvent } from '@/redux-store/slices/calendar'
-import type { MemberDetailResponseDtoType } from '@/@core/types'
-import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
 import UserModal from '../../member/_components/UserModal'
 import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
+import { useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
 
 type CalenderProps = {
   calendarStore: CalendarType
@@ -67,21 +65,10 @@ const Calendar = (props: CalenderProps) => {
   const router = useRouter()
 
   const [open, setOpen] = useState(false)
-  const [selectedUserData, setSelectedUserData] = useState<MemberDetailResponseDtoType>()
+  const [memberId, setMemberId] = useState('0')
+  const { data: selectedUserData } = useGetSingleMember(memberId.toString())
 
   const setTabValue = useMachineTabValueStore(set => set.setTabValue)
-
-  const getSingleMember = useCallback(async (memberId: number) => {
-    try {
-      const response = await auth
-        .get<{ data: MemberDetailResponseDtoType }>(`/api/members/${memberId}`)
-        .then(v => v.data.data)
-
-      setSelectedUserData(response)
-    } catch (e) {
-      handleApiError(e)
-    }
-  }, [])
 
   // Hooks
   const theme = useTheme()
@@ -188,7 +175,7 @@ const Calendar = (props: CalenderProps) => {
       } else if (event.extendedProps['type'] === '생일') {
         const memberId = event.id
 
-        await getSingleMember(Number(memberId))
+        setMemberId(memberId)
         setOpen(true)
       }
 
@@ -257,14 +244,7 @@ const Calendar = (props: CalenderProps) => {
   return (
     <>
       <FullCalendar height='100%' ref={calendarRef} {...calendarOptions} />
-      {open && selectedUserData && (
-        <UserModal
-          selectedUserData={selectedUserData}
-          setSelectedUserData={setSelectedUserData}
-          open={open}
-          setOpen={setOpen}
-        />
-      )}
+      {open && selectedUserData && <UserModal open={open} setOpen={setOpen} selectedUserData={selectedUserData} />}
     </>
   )
 }

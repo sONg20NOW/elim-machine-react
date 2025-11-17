@@ -15,12 +15,7 @@ import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import UserModal from './_components/UserModal'
-import type {
-  MemberDetailResponseDtoType,
-  MemberFilterType,
-  memberPageDtoType,
-  successResponseDtoType
-} from '@/@core/types'
+import type { MemberFilterType, memberPageDtoType, successResponseDtoType } from '@/@core/types'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
@@ -31,6 +26,7 @@ import { auth } from '@/lib/auth'
 import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
 import AddUserModal from './_components/AddUserModall'
+import { useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
 
 export default function MemberPage() {
   const isTablet = useContext(isTabletContext)
@@ -63,7 +59,9 @@ export default function MemberPage() {
   // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<MemberDetailResponseDtoType>()
+  const [memberId, setMemberId] = useState(0)
+
+  const { data: selectedUser } = useGetSingleMember(memberId.toString())
 
   // 필터 상태 - 컬럼에 맞게 수정
   const [filters, setFilters] = useState(MemeberInitialFilters)
@@ -163,9 +161,7 @@ export default function MemberPage() {
     //   toast.error(data.message)
     // }
     try {
-      const response = await auth.get<{ data: MemberDetailResponseDtoType }>(`/api/members/${user?.memberId}`)
-
-      setSelectedUser(response.data.data)
+      setMemberId(user.memberId)
       setUserDetailModalOpen(true)
     } catch (error) {
       handleApiError(error)
@@ -409,7 +405,6 @@ export default function MemberPage() {
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           selectedUserData={selectedUser}
-          setSelectedUserData={setSelectedUser}
           reloadData={() => getFilteredData()}
         />
       )}
