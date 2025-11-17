@@ -28,7 +28,7 @@ export default function Header() {
 
   const { data: MemberData } = useGetSignleMember(memberId.toString())
 
-  const username = MemberData?.memberBasicResponseDto.name ?? '<사용자>'
+  const username = MemberData?.memberBasicResponseDto?.name
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('user') ?? '{}')
@@ -291,7 +291,7 @@ export default function Header() {
           </Box>
         </Drawer>
       )}
-      {userData && (
+      {userData && openUser && (
         <UserModal
           open={openUser}
           setOpen={setOpenUser}

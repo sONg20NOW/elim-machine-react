@@ -23,6 +23,7 @@ import AlertModal from '@/@core/components/custom/AlertModal'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
 import { auth } from '@/lib/auth'
+import { useMutateSingleMemberBasic } from '@/@core/hooks/customTanstackQueries'
 
 type requestRuleBodyType = {
   url: string
@@ -78,7 +79,7 @@ export const MemberIdContext = createContext<number>(0)
 
 const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloadData }: EditUserInfoProps) => {
   const [tabValue, setTabValue] = useState<tabType>('1')
-  const [editData, setEditData] = useState<MemberDetailResponseDtoType>(JSON.parse(JSON.stringify(selectedUserData)))
+  const [editData, setEditData] = useState<MemberDetailResponseDtoType>(structuredClone(selectedUserData))
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
 
@@ -93,6 +94,8 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
 
   const memberId = { ...editData?.memberBasicResponseDto }.memberId
   const juminNum = { ...editData?.memberPrivacyResponseDto }.juminNum
+
+  const { mutateAsync: mutateBasicAsync } = useMutateSingleMemberBasic(memberId.toString())
 
   const handleDeleteUser = async () => {
     const version = editData.memberBasicResponseDto?.version
@@ -138,26 +141,38 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
 
     try {
       setLoading(true)
-      const d = editData[requestRule[tabValue].dtoKey]
 
-      const response = await auth.put<{ data: typeof d }>(`/api/members/${memberId}${requestRule[tabValue].url}`, {
-        ...editData[requestRule[tabValue].dtoKey]
-      })
+      if (tabValue === '1') {
+        const newBasic = await mutateBasicAsync(editData.memberBasicResponseDto)
 
-      const returnData = response.data.data
+        setEditData({ ...editData, memberBasicResponseDto: newBasic })
+        setSelectedUserData({ ...selectedUserData, memberBasicResponseDto: newBasic })
+        console.log(`${requestRule[tabValue].value} info saved: `, newBasic)
+        handleSuccess(`${requestRule[tabValue].label}가 수정되었습니다.`)
+        setIsEditing(false)
+        reloadData && reloadData()
+      } else {
+        const d = editData[requestRule[tabValue].dtoKey]
 
-      setEditData({
-        ...editData,
-        [requestRule[tabValue].dtoKey]: returnData
-      })
-      setSelectedUserData({
-        ...selectedUserData,
-        [requestRule[tabValue].dtoKey]: returnData
-      })
-      console.log(`${requestRule[tabValue].value} info saved: `, returnData)
-      handleSuccess(`${requestRule[tabValue].label}가 수정되었습니다.`)
-      setIsEditing(false)
-      reloadData && reloadData()
+        const response = await auth.put<{ data: typeof d }>(`/api/members/${memberId}${requestRule[tabValue].url}`, {
+          ...editData[requestRule[tabValue].dtoKey]
+        })
+
+        const returnData = response.data.data
+
+        setEditData({
+          ...editData,
+          [requestRule[tabValue].dtoKey]: returnData
+        })
+        setSelectedUserData({
+          ...selectedUserData,
+          [requestRule[tabValue].dtoKey]: returnData
+        })
+        console.log(`${requestRule[tabValue].value} info saved: `, returnData)
+        handleSuccess(`${requestRule[tabValue].label}가 수정되었습니다.`)
+        setIsEditing(false)
+        reloadData && reloadData()
+      }
     } catch (error: any) {
       handleApiError(error)
     } finally {

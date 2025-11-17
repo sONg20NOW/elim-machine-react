@@ -38,7 +38,9 @@ import type {
   MachineProjectScheduleAndEngineerResponseDtoType,
   MachineReportCategoryReadResponseDtoType,
   MachineReportStatusResponseDtoType,
+  MemberBasicDtoType,
   MemberDetailResponseDtoType,
+  MemberPrivacyDtoType,
   PipeMeasurementResponseDtoType,
   successResponseDtoType,
   targetType,
@@ -833,6 +835,85 @@ export const useGetSignleMember = (memberId: string) => {
     queryFn: fetchMember,
     enabled: Number(memberId) > 0,
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+export const useMutateSingleMemberBasic = (memberId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MEMBER.GET_SINGLE_MEMBER(memberId)
+
+  const putSingleMemberBasic = async (memberId: string, data: MemberBasicDtoType) => {
+    if (Number(memberId) <= 0) {
+      throw new Error('수정하려는 memberId가 0 이하입니다')
+    }
+
+    const response = await auth
+      .put<{ data: MemberBasicDtoType }>(`/api/members/${memberId}`, data)
+      .then(v => v.data.data)
+
+    return response
+  }
+
+  return useMutation<MemberBasicDtoType, AxiosError, MemberBasicDtoType>({
+    mutationFn: data => putSingleMemberBasic(memberId, data),
+
+    onSuccess: newMemberBasicData => {
+      queryClient.setQueryData(queryKey, (prev: MemberDetailResponseDtoType) => ({
+        ...prev,
+        memberBasicResponseDto: newMemberBasicData
+      }))
+      console.log('member basic info가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
+type MemberType = 'basic' | 'privacy' | 'office' | 'career' | 'etc'
+
+// 직원 수정 단일화
+export const useMutateSingleMember = <T = MemberBasicDtoType | MemberPrivacyDtoType>(
+  memberId: string,
+  memberType: MemberType
+) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MEMBER.GET_SINGLE_MEMBER(memberId)
+
+  const putSingleMember = async (memberId: string, data: T) => {
+    if (Number(memberId) <= 0) {
+      throw new Error('수정하려는 memberId가 0 이하입니다')
+    }
+
+    const response = await auth
+      .put<{
+        data: T
+      }>(
+        `/api/members/${memberId}${{ basic: '', privacy: '/member-privacy', office: '/member-office', career: '/member-career', etc: '/member-etc' }[memberType]}`,
+        data
+      )
+      .then(v => v.data.data)
+
+    return response
+  }
+
+  return useMutation<T, AxiosError, T>({
+    mutationFn: data => putSingleMember(memberId, data),
+
+    onSuccess: newMemberBasicData => {
+      queryClient.setQueryData(queryKey, (prev: MemberDetailResponseDtoType) => ({
+        ...prev,
+        memberBasicResponseDto: newMemberBasicData
+      }))
+      console.log('member basic info가 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
   })
 }
 
