@@ -51,7 +51,7 @@ const PictureListTabContent = () => {
   const [inspectionPics, setInspectionPics] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [projectPics, setProjectPics] = useState<MachineProjectPicReadResponseDtoType[]>([])
   const [open, setOpen] = useState(false)
-  const defaultPageSize = 4
+  const defaultPageSize = 30
 
   const [inspectionPicsToDelete, setInspectionPicsToDelete] = useState<{ machinePicId: number; version: number }[]>([])
   const [projectPicsToDelete, setProjectPicsToDelete] = useState<{ id: number; version: number }[]>([])
