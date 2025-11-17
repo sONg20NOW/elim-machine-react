@@ -6,7 +6,7 @@ import { Box, Button, InputAdornment, MenuItem, Typography } from '@mui/material
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import YNSelectBox from './YNSelectBox'
-import type { BoxSizeType, InputFieldType } from '@/@core/types'
+import type { BoxSizeType, InputFieldType, ynResultType } from '@/@core/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
 import PostCodeDialog from '@/@core/utils/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
@@ -100,7 +100,9 @@ function InputBoxContent() {
         : tabField.type === 'yn'
           ? value === 'Y'
             ? '예'
-            : '아니오'
+            : value === 'N'
+              ? '아니오'
+              : '_'
           : value
 
     return (
@@ -178,7 +180,7 @@ function InputBoxContent() {
           id={tabFieldKey}
           disabled={disabled}
           label={label}
-          value={value ?? ''}
+          value={(value as ynResultType | null) ?? ''}
           onChange={e => onChange(e.target.value)}
         />
       )

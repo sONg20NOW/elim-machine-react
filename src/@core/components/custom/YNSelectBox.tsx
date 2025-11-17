@@ -1,14 +1,15 @@
 import type { ChangeEventHandler } from 'react'
 
-import { MenuItem } from '@mui/material'
+import { MenuItem, Typography } from '@mui/material'
 
 import CustomTextField from '@/@core/components/mui/TextField'
+import type { ynResultType } from '@/@core/types'
 
 interface YNSelectBoxProps {
   name?: string
   id?: string
   label?: string | false
-  value: string
+  value: ynResultType | ''
   disabled?: boolean
   onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
   required?: boolean
@@ -18,20 +19,31 @@ const YNSelectBox = ({ name, id, label, value, disabled = false, onChange, requi
   return (
     <CustomTextField
       required={required ?? false}
-      slotProps={{ htmlInput: { name: name }, inputLabel: { sx: { color: required ? '#cc4c4cff !important' : '' } } }}
+      slotProps={{
+        htmlInput: { name: name },
+        inputLabel: { sx: { color: required ? '#cc4c4cff !important' : '' } },
+        select: {
+          renderValue: v => {
+            if (v == null || v === '')
+              return (
+                <Typography variant='inherit' sx={{ opacity: '40%' }}>
+                  미정
+                </Typography>
+              )
+
+            return <Typography variant='inherit'>{v === 'Y' ? '예' : '아니오'}</Typography>
+          },
+          displayEmpty: true
+        }
+      }}
       select
       fullWidth
       id={id}
       label={label}
-      value={value === '' ? '전체' : (value ?? '전체')}
+      value={value}
       onChange={onChange}
       disabled={disabled}
     >
-      {value === '' && (
-        <MenuItem disabled={true} value='전체'>
-          전체
-        </MenuItem>
-      )}
       <MenuItem value='Y'>예</MenuItem>
       <MenuItem value='N'>아니오</MenuItem>
     </CustomTextField>
