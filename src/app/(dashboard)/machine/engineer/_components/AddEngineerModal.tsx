@@ -19,7 +19,7 @@ import {
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { InputBox } from '@/@core/components/custom/InputBox'
-import type { memberLookupResponseDtoType, MachineEngineerCreateRequestDtoType } from '@/@core/types'
+import type { MemberLookupResponseDtoType, MachineEngineerCreateRequestDtoType } from '@/@core/types'
 
 import { EngineerInitialData } from '@/app/_constants/EngineerSeed'
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/EngineerInputInfo'
@@ -34,13 +34,13 @@ type AddUserModalProps = {
 
 const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
   const [userData, setUserData] = useState<MachineEngineerCreateRequestDtoType>(EngineerInitialData)
-  const [memberList, setMemberList] = useState<memberLookupResponseDtoType[]>([])
+  const [memberList, setMemberList] = useState<MemberLookupResponseDtoType[]>([])
   const [loading, setLoading] = useState(false)
 
   // 멤버 리스트 가져오기
   const getMemberList = useCallback(async () => {
     try {
-      const response = await auth.get<{ data: { memberLookupResponseDtos: memberLookupResponseDtoType[] } }>(
+      const response = await auth.get<{ data: { memberLookupResponseDtos: MemberLookupResponseDtoType[] } }>(
         `/api/members/lookup`
       )
 

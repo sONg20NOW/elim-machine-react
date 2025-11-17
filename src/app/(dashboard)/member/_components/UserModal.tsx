@@ -77,7 +77,7 @@ type EditUserInfoProps = {
 export const MemberIdContext = createContext<number>(0)
 
 const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloadData }: EditUserInfoProps) => {
-  const [value, setValue] = useState<tabType>('1')
+  const [tabValue, setTabValue] = useState<tabType>('1')
   const [editData, setEditData] = useState<MemberDetailResponseDtoType>(JSON.parse(JSON.stringify(selectedUserData)))
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAlertModal, setShowAlertModal] = useState(false)
@@ -138,24 +138,24 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
 
     try {
       setLoading(true)
+      const d = editData[requestRule[tabValue].dtoKey]
 
-      const response = await auth.put<{ data: MemberDetailResponseDtoType }>(
-        `/api/members/${memberId}${requestRule[value].url}`,
-        { ...editData[requestRule[value].dtoKey] }
-      )
+      const response = await auth.put<{ data: typeof d }>(`/api/members/${memberId}${requestRule[tabValue].url}`, {
+        ...editData[requestRule[tabValue].dtoKey]
+      })
 
       const returnData = response.data.data
 
       setEditData({
         ...editData,
-        [requestRule[value].dtoKey]: returnData
+        [requestRule[tabValue].dtoKey]: returnData
       })
       setSelectedUserData({
         ...selectedUserData,
-        [requestRule[value].dtoKey]: returnData
+        [requestRule[tabValue].dtoKey]: returnData
       })
-      console.log(`${requestRule[value].value} info saved: `, returnData)
-      handleSuccess(`${requestRule[value].label}가 수정되었습니다.`)
+      console.log(`${requestRule[tabValue].value} info saved: `, returnData)
+      handleSuccess(`${requestRule[tabValue].label}가 수정되었습니다.`)
       setIsEditing(false)
       reloadData && reloadData()
     } catch (error: any) {
@@ -168,7 +168,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
   return (
     <MemberIdContext.Provider value={memberId ?? 0}>
       <DefaultModal
-        value={value}
+        value={tabValue}
         onClose={() => {
           if (existChange) {
             setOnQuit(() => () => setOpen(false))
@@ -241,7 +241,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
             if (existChange) {
               setShowAlertModal(true)
             } else {
-              setValue(newValue)
+              setTabValue(newValue)
             }
           }}
           aria-label='centered tabs example'
@@ -249,7 +249,7 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
           {Object.keys(requestRule).map(item => {
             const key = item as keyof typeof requestRule
 
-            return existChange && value !== key ? (
+            return existChange && tabValue !== key ? (
               <DisabledTabWithTooltip key={key} value={key} label={requestRule[key].label} />
             ) : (
               <Tab key={key} value={key} label={requestRule[key].label} />

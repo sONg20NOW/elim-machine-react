@@ -101,13 +101,13 @@ export type memberPageDtoType = {
 
 // GET api/members/[memberId]
 export type MemberDetailResponseDtoType = {
-  memberBasicResponseDto: memberBasicDtoType
-  memberCareerResponseDto: memberCareerDtoType
-  memberEtcResponseDto: memberEtcDtoType
-  memberOfficeResponseDto: memberOfficeDtoType
-  memberPrivacyResponseDto: memberPrivacyDtoType
+  memberBasicResponseDto: MemberBasicDtoType
+  memberCareerResponseDto: MemberCareerDtoType
+  memberEtcResponseDto: MemberEtcDtoType
+  memberOfficeResponseDto: MemberOfficeDtoType
+  memberPrivacyResponseDto: MemberPrivacyDtoType
 }
-interface memberBasicDtoType {
+export interface MemberBasicDtoType {
   companyName: string
   email: string
   memberId: number
@@ -120,7 +120,7 @@ interface memberBasicDtoType {
   storedFileName: string | null
   version: number
 }
-interface memberCareerDtoType {
+export interface MemberCareerDtoType {
   grade: string
   gradeDescription: string
   industryOtherMonth: number
@@ -130,7 +130,7 @@ interface memberCareerDtoType {
   licenseName2: string
   version: number
 }
-interface memberEtcDtoType {
+export interface MemberEtcDtoType {
   employedType: string
   incomeTaxReducedBeginDate: string
   incomeTaxReducedEndDate: string
@@ -142,7 +142,7 @@ interface memberEtcDtoType {
   youthJobLeap: string
   version: number
 }
-interface memberOfficeDtoType {
+export interface MemberOfficeDtoType {
   apprentice: string
   contractType: string
   contractTypeDescription: string
@@ -165,7 +165,7 @@ interface memberOfficeDtoType {
   workForm: string
   workFormDescription: string
 }
-export interface memberPrivacyDtoType {
+export interface MemberPrivacyDtoType {
   roadAddress: string | null
   detailAddress: string | null
   bankName: string
@@ -185,7 +185,7 @@ export interface memberPrivacyDtoType {
   version: number
 }
 
-export type memberLookupResponseDtoType = {
+export type MemberLookupResponseDtoType = {
   memberId: number
   email: string
   name: string
