@@ -21,6 +21,8 @@ import type { CalendarOptions } from '@fullcalendar/core'
 // Type Imports
 import { Typography } from '@mui/material'
 
+import dayjs from 'dayjs'
+
 import type { CalendarColors, CalendarType } from '@/types/apps/calendarTypes'
 
 // Slice Imports
@@ -94,7 +96,10 @@ const Calendar = (props: CalenderProps) => {
 
   // calendarOptions(Props)
   const calendarOptions: CalendarOptions = {
-    events: calendarStore.events,
+    events: calendarStore.events.map(event => ({
+      ...event,
+      end: dayjs(event.end?.toString()).add(1, 'day').format('YYYY-MM-DD')
+    })),
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     initialView: 'dayGridMonth',
     headerToolbar: {
@@ -244,6 +249,10 @@ const Calendar = (props: CalenderProps) => {
     locale: 'ko',
     direction: theme.direction
   }
+
+  useEffect(() => {
+    console.log(JSON.stringify(calendarOptions.events))
+  }, [calendarOptions.events])
 
   return (
     <>
