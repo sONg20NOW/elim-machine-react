@@ -21,21 +21,20 @@ export default function Header() {
   const [open, setOpen] = useState(false)
   const [openUser, setOpenUser] = useState(false)
   const [userData, setUserData] = useState<MemberDetailResponseDtoType>()
-  const [userInfo, setUserInfo] = useState<{ memberId: number; name: string }>()
+  const [memberId, setMemberId] = useState<number>(0)
 
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
 
-  const username = userInfo?.name ?? '<사용자>'
-  const memberId = userInfo?.memberId ?? 0
-
   const { data: MemberData } = useGetSignleMember(memberId.toString())
+
+  const username = MemberData?.memberBasicResponseDto.name ?? '<사용자>'
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('user') ?? '{}')
 
     if (stored) {
-      setUserInfo(stored)
+      setMemberId(stored.memberId)
     }
   }, [])
 
