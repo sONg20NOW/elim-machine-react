@@ -1,6 +1,6 @@
 'use client'
 
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -10,17 +10,38 @@ import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 import { logout } from '@/lib/auth'
 import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
+import type { MemberDetailResponseDtoType } from '@/@core/types'
+import { useGetSignleMember } from '@/@core/hooks/customTanstackQueries'
+import UserModal from '@/app/(dashboard)/member/_components/UserModal'
 
 // import Logo from '@components/layout/shared/Logo'
 
 export default function Header() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [openUser, setOpenUser] = useState(false)
+  const [userData, setUserData] = useState<MemberDetailResponseDtoType>()
+  const [userInfo, setUserInfo] = useState<{ memberId: number; name: string }>()
 
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
 
-  const username = '송강규'
+  const username = userInfo?.name ?? '<사용자>'
+  const memberId = userInfo?.memberId ?? 0
+
+  const { data: MemberData } = useGetSignleMember(memberId.toString())
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem('user') ?? '{}')
+
+    if (stored) {
+      setUserInfo(stored)
+    }
+  }, [])
+
+  useEffect(() => {
+    setUserData(MemberData)
+  }, [MemberData])
 
   return (
     <AppBar
@@ -45,8 +66,16 @@ export default function Header() {
         </div>
         {!isTablet && (
           <div className='flex gap-5 items-center overflow-visible'>
-            <Typography color='white' onClick={() => console.log(document.cookie.split(';'))}>
-              반갑습니다, {username}님
+            <Typography
+              color='white'
+              onClick={() => console.log(document.cookie.split(';'))}
+              sx={{ alignItems: 'center', display: 'flex' }}
+            >
+              반갑습니다,{' '}
+              <Button color='inherit' type='button' onClick={() => setOpenUser(true)}>
+                {username}
+              </Button>
+              님
             </Typography>
             <Button
               size='small'
@@ -72,35 +101,43 @@ export default function Header() {
             {isTablet && (
               <Box
                 sx={{ backgroundColor: 'primary.dark' }}
-                className='flex justify-between items-center overflow-visible p-3'
+                className='flex flex-col justify-between items-start overflow-visible p-3'
               >
-                <div className='flex flex-col gap-1'>
+                <div className='flex justify-between w-full'>
                   <Typography color='white' onClick={() => console.log(document.cookie.split(';'))}>
                     반갑습니다,
                   </Typography>
-                  <Typography
-                    maxWidth={3}
+                  <Button
+                    size='small'
                     sx={{
-                      overflow: 'hidden', // width 넘으면 숨김
-                      textOverflow: 'ellipsis', // 넘는 텍스트는 ... 처리
-                      whiteSpace: 'nowrap', // 줄바꿈 방지
-                      maxWidth: 120
+                      backgroundColor: 'white',
+                      verticalAlign: 'start',
+                      ':hover': { boxShadow: 5, backgroundColor: 'lightgray' }
                     }}
-                    color='white'
-                    onClick={() => console.log(document.cookie.split(';'))}
+                    variant='contained'
+                    onClick={logout}
                   >
-                    {username}님
-                  </Typography>
+                    <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
+                  </Button>
                 </div>
-
-                <Button
-                  size='small'
-                  sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
-                  variant='contained'
-                  onClick={logout}
+                <Typography
+                  maxWidth={3}
+                  sx={{
+                    overflow: 'hidden', // width 넘으면 숨김
+                    textOverflow: 'ellipsis', // 넘는 텍스트는 ... 처리
+                    whiteSpace: 'nowrap', // 줄바꿈 방지
+                    maxWidth: 220,
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  color='white'
+                  onClick={() => console.log(document.cookie.split(';'))}
                 >
-                  <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
-                </Button>
+                  <Button color='inherit' type='button' onClick={() => setOpenUser(true)} sx={{ p: 0 }}>
+                    {username}
+                  </Button>
+                  님
+                </Typography>
               </Box>
             )}
             <Menu renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}>
@@ -254,6 +291,14 @@ export default function Header() {
             </Link>
           </Box>
         </Drawer>
+      )}
+      {userData && (
+        <UserModal
+          open={openUser}
+          setOpen={setOpenUser}
+          selectedUserData={userData}
+          setSelectedUserData={setUserData}
+        />
       )}
     </AppBar>
   )

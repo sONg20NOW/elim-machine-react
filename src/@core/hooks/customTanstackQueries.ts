@@ -831,6 +831,7 @@ export const useGetSignleMember = (memberId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.MEMBER.GET_SINGLE_MEMBER(memberId),
     queryFn: fetchMember,
+    enabled: Number(memberId) > 0,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }

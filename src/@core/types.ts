@@ -1215,6 +1215,10 @@ export interface MachinePerformanceReviewAgingUpdateResponseDtoType {
 // POST /api/auth/web/login
 export interface LoginResponseDtoType {
   tokenResponseDto: TokenResponseDto
+  loginMemberResponseDto: {
+    memberId: number
+    name: string
+  }
 }
 
 // JWT 토큰 발급 DTO

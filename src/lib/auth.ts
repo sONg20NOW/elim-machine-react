@@ -23,8 +23,12 @@ export async function login(email: string, password: string) {
     if (res.data.code === 200) {
       const accessToken = res.data.data.tokenResponseDto.accessToken // JSON body에서 가져옴
 
-      // console.log(atob(accessToken))
       useAuthStore.getState().setAccessToken(accessToken)
+
+      const UserInfo = res.data.data.loginMemberResponseDto
+
+      localStorage.setItem('user', JSON.stringify(UserInfo))
+
       handleSuccess('로그인에 성공했습니다.')
 
       return res.data.code
@@ -42,6 +46,7 @@ export async function logout() {
     await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/logout`, null, {
       withCredentials: true
     })
+    localStorage.removeItem('user')
     handleSuccess('로그아웃되었습니다.')
   } catch (e) {
     handleApiError(e)
