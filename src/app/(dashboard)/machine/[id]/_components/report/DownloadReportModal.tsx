@@ -67,7 +67,9 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
               <i className='tabler-x' />
             </IconButton>
             <div className='flex items-center justify-between'>
-              <DialogContentText>※버튼이 비활성화된 경우 먼저 GUI에서 생성을 요청해주세요</DialogContentText>
+              <DialogContentText>
+                ※버튼이 비활성화된 경우 개인 PC에서 보고서 생성 후 업로드를 완료해주세요
+              </DialogContentText>
               <IconButton size='medium' disabled={disableReload}>
                 <i ref={reloadRef} className='tabler-reload text-2xl text-green-500' onClick={refetchStatuses} />
               </IconButton>
