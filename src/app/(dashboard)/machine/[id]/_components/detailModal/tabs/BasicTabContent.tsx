@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useEffect, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -31,6 +31,11 @@ export default function BasicTabContent({
       setEditData(prev => ({ ...prev, engineerIds: prev.engineerIds.filter(id => id > 0) }))
     }
   }, [isEditing, setEditData])
+
+  const AddEveryParticipatedEngs = useCallback(() => {
+    if (!participatedEngineerList) return
+    setEditData(prev => ({ ...prev, engineerIds: participatedEngineerList.map(v => v.engineerId) }))
+  }, [participatedEngineerList, setEditData])
 
   return (
     <div className='flex flex-col gap-5'>
@@ -205,8 +210,15 @@ export default function BasicTabContent({
         </tbody>
       </table>
 
-      <div>
-        <span className='font-bold ps-1'>점검자 목록</span>
+      <div className='flex flex-col gap-2'>
+        <div className='flex justify-between items-center'>
+          <Typography variant='h5'>점검자 목록</Typography>
+          {isEditing && (
+            <Button type='button' color='success' onClick={AddEveryParticipatedEngs}>
+              참여기술진 모두 추가
+            </Button>
+          )}
+        </div>
         <div className='grid grid-cols-4 gap-2'>
           {!isEditing
             ? (editData.engineerIds || []).map((id, idx) => {
