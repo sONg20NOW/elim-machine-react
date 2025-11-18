@@ -4,7 +4,7 @@ import axios from 'axios'
 
 import type { LoginResponseDtoType, TokenResponseDto } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import useAuthStore from '@/@core/utils/useAuthStore'
+import useAccessTokenStore from '@/@core/utils/useAuthStore'
 
 export const auth = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}`,
@@ -23,7 +23,7 @@ export async function login(email: string, password: string) {
     if (res.data.code === 200) {
       const accessToken = res.data.data.tokenResponseDto.accessToken // JSON body에서 가져옴
 
-      useAuthStore.getState().setAccessToken(accessToken)
+      useAccessTokenStore.getState().setAccessToken(accessToken)
 
       const UserInfo = res.data.data.loginMemberResponseDto
 
@@ -51,14 +51,14 @@ export async function logout() {
   } catch (e) {
     handleApiError(e)
   } finally {
-    useAuthStore.getState().setAccessToken(null)
+    useAccessTokenStore.getState().setAccessToken(null)
     redirect('/login')
   }
 }
 
 // 헤더에 access token 추가
 auth.interceptors.request.use(config => {
-  const accessToken = useAuthStore.getState().accessToken
+  const accessToken = useAccessTokenStore.getState().accessToken
 
   if (accessToken) {
     config.headers!.Authorization = `Bearer ${accessToken}`
@@ -87,7 +87,7 @@ auth.interceptors.response.use(
 
         const newAccessToken = res.data.data.accessToken
 
-        useAuthStore.getState().setAccessToken(newAccessToken)
+        useAccessTokenStore.getState().setAccessToken(newAccessToken)
 
         // 실패했던 요청 다시 실행
         error.config.headers.Authorization = `Bearer ${newAccessToken}`
@@ -96,10 +96,9 @@ auth.interceptors.response.use(
       } catch (err) {
         // ! 나중에 주석 풀어야함
         // Refresh도 실패 → 로그인 페이지로 이동
-        useAuthStore.getState().setAccessToken(null)
-
-        // redirect('/login')
+        useAccessTokenStore.getState().setAccessToken(null)
         console.log('refresh failed!')
+        window.location.href = '/login'
       }
     }
 

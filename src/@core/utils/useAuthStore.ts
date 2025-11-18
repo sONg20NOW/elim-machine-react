@@ -7,7 +7,7 @@ interface AccessTokenState {
   setAccessToken: (value: string | null) => void
 }
 
-const useAuthStore = create<AccessTokenState>(set => ({
+const useAccessTokenStore = create<AccessTokenState>(set => ({
   // ⭐ 초기 상태 (State)
   accessToken: '',
 
@@ -18,4 +18,4 @@ const useAuthStore = create<AccessTokenState>(set => ({
   }
 }))
 
-export default useAuthStore
+export default useAccessTokenStore
