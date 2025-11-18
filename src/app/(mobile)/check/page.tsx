@@ -31,6 +31,8 @@ import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth, logout } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
+import { gradeOption } from '@/app/_constants/options'
 
 export default function MachinePage() {
   const router = useRouter()
@@ -66,19 +68,9 @@ export default function MachinePage() {
   const rounded = useTransform(() => Math.round(count.get()))
   const theme = useTheme()
 
-  useEffect(() => {
-    const controls = animate(count, totalElements, { duration: 1 })
+  const [memberId, setMemberId] = useState<number>(0)
 
-    return () => controls.stop()
-  }, [totalElements, count])
-
-  // ! 나중에 accessToken 디코딩해서 실제 정보로
-  const currentUser = {
-    name: '테스트슈퍼관리자20',
-    gradeDescription: '보조',
-    engineerLicenseNum: '259-1004',
-    companyName: '엘림주식회사(주)'
-  }
+  const { data: currentUser } = useGetSingleMember(memberId.toString())
 
   const CustomSwitch = styled(Switch)(({ theme }) => ({
     '& .MuiSwitch-switchBase.Mui-checked': {
@@ -102,7 +94,9 @@ export default function MachinePage() {
 
     try {
       projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
-      myProject ? queryParams.set('engineerName', currentUser.name) : queryParams.delete('engineerName')
+      myProject
+        ? queryParams.set('engineerName', currentUser?.memberBasicResponseDto.name ?? '')
+        : queryParams.delete('engineerName')
 
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
@@ -132,10 +126,26 @@ export default function MachinePage() {
     // eslint-disable-next-line
   }, [page, size, projectName, myProject])
 
+  useEffect(() => {
+    const controls = animate(count, totalElements, { duration: 1 })
+
+    return () => controls.stop()
+  }, [totalElements, count])
+
   // API 호출
   useEffect(() => {
     getFilteredData()
   }, [getFilteredData])
+
+  useEffect(() => {
+    const stored = localStorage.getItem('user')
+
+    if (stored) {
+      setMemberId((JSON.parse(stored) as { memberId: number }).memberId)
+    } else {
+      setMemberId(0)
+    }
+  }, [])
 
   // 기계설비현장 선택 핸들러
   const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
@@ -145,7 +155,7 @@ export default function MachinePage() {
   }
 
   // 기계설비현장 카드
-  function MachineProjectCard({ machineProject, idx }: { machineProject: MachineProjectPageDtoType; idx: number }) {
+  function MachineProjectCard({ machineProject }: { machineProject: MachineProjectPageDtoType }) {
     const engineerCnt = machineProject.engineerNames.length
 
     return (
@@ -275,16 +285,16 @@ export default function MachinePage() {
             </div>
             <div className='flex gap-2'>
               <Typography variant='h4' color='white'>
-                {`[${currentUser.gradeDescription}] ${currentUser.name}`}
+                {`[${gradeOption.find(v => v.value === (currentUser?.memberCareerResponseDto.grade ?? 'BEGINNER'))?.label}] ${currentUser?.memberBasicResponseDto.name ?? ''}`}
               </Typography>
             </div>
             <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
-              {currentUser.companyName}
+              {currentUser?.memberBasicResponseDto.companyName}
             </Typography>
 
-            <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
-              수첩발급번호: {currentUser.engineerLicenseNum}
-            </Typography>
+            {/* <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+              수첩발급번호: {currentUser?.memberPrivacyResponseDto.}
+            </Typography> */}
           </Box>
         </Box>
         <div className='flex flex-col justify-between h-full'>
