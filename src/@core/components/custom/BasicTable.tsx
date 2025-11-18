@@ -281,7 +281,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     !(isTablet && header[key].hideOnTablet) && (
                       <TableCell
                         size={isMobile ? 'small' : 'medium'}
-                        key={key.toString()}
+                        key={key?.toString()}
                         align='center'
                         sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
                       >

@@ -136,7 +136,7 @@ export default function MachinePage() {
       })
 
       sorting.sort
-        ? queryParams.append('sort', `${sorting.target},${sorting.sort}`.toString())
+        ? queryParams.append('sort', `${sorting.target},${sorting.sort}`?.toString())
         : queryParams.delete('sort')
 
       projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
@@ -155,7 +155,7 @@ export default function MachinePage() {
 
       const response = await auth.get<{
         data: successResponseDtoType<MachineProjectPageDtoType[]>
-      }>(`/api/machine-projects?${queryParams.toString()}`)
+      }>(`/api/machine-projects?${queryParams?.toString()}`)
 
       const result = response.data.data
 
