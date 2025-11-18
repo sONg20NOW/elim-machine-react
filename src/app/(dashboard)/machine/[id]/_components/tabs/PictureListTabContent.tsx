@@ -85,10 +85,6 @@ const PictureListTabContent = () => {
 
   const [selectedInspection, setSelectedInspection] = useState<MachineInspectionDetailResponseDtoType>()
 
-  useEffect(() => {
-    console.log(selectedProjectPic)
-  }, [selectedProjectPic])
-
   // 클릭된 사진이 속한 inspection 정보 가져오기. (사진 모달에 검사항목.하위항목을 위해 필요)
   const getInspectionByPic = useCallback(
     async (pic: MachinePicPresignedUrlResponseDtoType) => {
