@@ -45,7 +45,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
   const existChange = JSON.stringify(editData) !== JSON.stringify(scheduleData)
 
   const engineerMenuOption = engineerList?.map(engineer => {
-    return { value: engineer.engineerId, label: `${engineer.engineerName}` }
+    return { value: engineer.engineerId, label: `${engineer.engineerName} [${engineer.gradeDescription}]` }
   })
 
   const [loading, setLoading] = useState(false)
@@ -419,7 +419,14 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                               }
                             }}
                             slotProps={{
-                              select: { displayEmpty: true },
+                              select: {
+                                displayEmpty: true,
+                                renderValue: value => (
+                                  <Typography variant='inherit'>
+                                    {engineerList?.find(v => v.engineerId === value)?.engineerName ?? '-'}
+                                  </Typography>
+                                )
+                              },
                               htmlInput: { name: name }
                             }}
                           >
