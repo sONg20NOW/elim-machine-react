@@ -404,7 +404,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                                 ...newEngineerInfo,
                                 grade:
                                   gradeOption.find(value => value.label === newEngineerInfo?.gradeDescription)?.value ??
-                                  ''
+                                  gradeOption[0].value
                               }
 
                               if (newEngineer) {
