@@ -354,64 +354,63 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           </TextField>
         </Grid>
       </DialogTitle>
-
       <Divider />
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 0 }}>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', paddingBottom: 0 }}>
         {/* 기존 사진 목록 */}
-        <Grid item xs={12} sx={{ flex: 1, overflowY: 'scroll' }}>
-          <Paper sx={{ p: 4, borderColor: 'lightgray', display: 'grid', gap: 2 }} elevation={3}>
-            <div className='flex justify-between items-center'>
-              <div className='flex items-center mb-2'>
-                <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
-                  사진 목록
-                </Typography>
-                <IconButton
-                  onClick={() => {
-                    if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
+        <Box className='flex justify-between items-center' sx={{ borderBottom: '1px solid lightgray' }}>
+          <div className='flex items-center mb-2'>
+            <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
+              사진 목록
+            </Typography>
+            <IconButton
+              onClick={() => {
+                if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
 
-                    reloadIconRef.current.classList.add('animate-spin')
-                    setTimeout(() => {
-                      reloadIconRef.current?.classList.remove('animate-spin')
-                    }, 1000)
-                    getPictures()
-                  }}
-                >
-                  <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
-                </IconButton>
-              </div>
-              <div className='flex gap-1 top-2 right-1'>
-                {showCheck && [
-                  <Button
-                    key={1}
-                    size='small'
-                    color='warning'
-                    onClick={async () => {
-                      setPicturesToDelete(filteredPics)
-                    }}
-                  >
-                    전체선택
-                  </Button>,
-                  <Button key={2} size='small' color='error' onClick={() => handleDeletePics()}>
-                    일괄삭제({picturesToDelete.length})
-                  </Button>
-                ]}
-                {filteredPics.length > 0 && (
-                  <Button
-                    color={showCheck ? 'secondary' : 'primary'}
-                    size='small'
-                    onClick={() => {
-                      if (showCheck) {
-                        setPicturesToDelete([])
-                      }
+                reloadIconRef.current.classList.add('animate-spin')
+                setTimeout(() => {
+                  reloadIconRef.current?.classList.remove('animate-spin')
+                }, 1000)
+                getPictures()
+              }}
+            >
+              <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
+            </IconButton>
+          </div>
+          <div className='flex gap-1 top-2 right-1 items-center'>
+            {showCheck && [
+              <Button
+                key={1}
+                size='small'
+                color='warning'
+                onClick={async () => {
+                  setPicturesToDelete(filteredPics)
+                }}
+              >
+                전체선택
+              </Button>,
+              <Button key={2} size='small' color='error' onClick={() => handleDeletePics()}>
+                일괄삭제({picturesToDelete.length})
+              </Button>
+            ]}
+            {filteredPics.length > 0 && (
+              <Button
+                color={showCheck ? 'secondary' : 'primary'}
+                size='small'
+                onClick={() => {
+                  if (showCheck) {
+                    setPicturesToDelete([])
+                  }
 
-                      setShowCheck(prev => !prev)
-                    }}
-                  >
-                    {showCheck ? '취소' : '선택삭제'}
-                  </Button>
-                )}
-              </div>
-            </div>
+                  setShowCheck(prev => !prev)
+                }}
+              >
+                {showCheck ? '취소' : '선택삭제'}
+              </Button>
+            )}
+          </div>
+        </Box>
+        <Grid item xs={12} sx={{ flex: 1, overflowY: 'auto', paddingTop: 2 }}>
+          <div className='flex-1 h-full overflowX-visible overflowY-auto'>
             {selectedPicType !== '전체' ? (
               filteredPics.length > 0 ? (
                 <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
@@ -477,31 +476,44 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 <Typography>등록된 검사 사진이 없습니다.</Typography>
               </Box>
             )}
-          </Paper>
+          </div>
         </Grid>
+        <Divider />
         {/* 사진 업로드 영역 */}
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{ maxHeight: '60%' }}>
           <Paper
             sx={{
               p: 4,
               position: 'relative',
-              borderColor: 'lightgray',
-              borderWidth: '1px'
+              borderWidth: '1px',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
             }}
-            elevation={3}
+            elevation={4}
           >
             {/* 선택된 파일 미리보기 */}
             {filesToUpload.length > 0 && (
-              <div>
-                <Typography color='black' variant='subtitle1' gutterBottom>
-                  미리보기
-                </Typography>
-                <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+              <>
+                <div className='flex gap-2 items-end pb-2'>
+                  <Typography color='black' variant='subtitle1'>
+                    미리보기
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary'>
+                    {filesToUpload.length}개 파일 선택됨
+                  </Typography>
+                </div>
+                <ImageList
+                  sx={{ overflowY: 'auto', height: '100%' }}
+                  cols={isMobile ? 1 : 4}
+                  gap={0}
+                  rowHeight={isMobile ? 150 : 250}
+                >
                   {filesToUpload.map((file, index) => (
                     <PicturePreviewCard key={index} file={file} index={index} />
                   ))}
                 </ImageList>
-              </div>
+              </>
             )}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 5 }}>
               <input
@@ -527,9 +539,15 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 {isUploading ? '업로드 중...' : '사진 업로드'}
               </Button>
 
-              <Typography variant='body2' color='text.secondary'>
-                {filesToUpload.length}개 파일 선택됨
-              </Typography>
+              <Button
+                variant='contained'
+                color='secondary'
+                type='button'
+                onClick={() => setFilesToUpload([])}
+                disabled={filesToUpload.length === 0}
+              >
+                취소
+              </Button>
             </Box>
           </Paper>
         </Grid>
