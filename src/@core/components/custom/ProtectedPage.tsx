@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext } from 'react'
+import { createContext, useEffect, useState } from 'react'
 
 import { Backdrop, CircularProgress, Typography, useMediaQuery, useTheme } from '@mui/material'
 
@@ -14,14 +14,23 @@ export default function ProtectedPage({ children }: { children: React.ReactNode 
   const isTablet = useMediaQuery(theme.breakpoints.down('md'))
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
+  const [dotCnt, setDotCnt] = useState<0 | 1 | 2 | 3>(0)
+
   const accessToken = useAccessTokenStore(set => set.accessToken)
+
+  useEffect(() => {
+    const intervalId = setInterval(() => setDotCnt(prev => (prev === 3 ? 0 : ((prev + 1) as 1 | 2 | 3))), 500)
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   return (
     <>
       <Backdrop sx={theme => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={!accessToken}>
         <div className='flex flex-col gap-3 items-center'>
-          <Typography color='white' variant='h6'>
-            허용되지 않은 접근입니다
+          <Typography color='white' variant='h4'>
+            사용자 인증 중{Array(dotCnt).fill('.')}
+            <span className='opacity-[0%]'>{Array(3 - dotCnt).fill('.')}</span>
           </Typography>
           <CircularProgress sx={{ color: 'white' }} />
         </div>
