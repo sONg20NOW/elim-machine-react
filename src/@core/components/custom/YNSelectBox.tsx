@@ -24,7 +24,7 @@ const YNSelectBox = ({ name, id, label, value, disabled = false, onChange, requi
         inputLabel: { sx: { color: required ? '#cc4c4cff !important' : '' } },
         select: {
           renderValue: v => {
-            if (v == null || v === '')
+            if (v === null || v === '' || v === undefined)
               return (
                 <Typography variant='inherit' sx={{ opacity: '40%' }}>
                   미정
