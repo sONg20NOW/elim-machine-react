@@ -328,7 +328,7 @@ export type gradeType = 'ASSIST' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'E
 export interface machineProjectEngineerDetailDtoType {
   engineerId: number
   engineerName: string
-  grade: gradeType
+  grade: gradeType | ''
   gradeDescription: string
   engineerLicenseNum: string
   beginDate: string
