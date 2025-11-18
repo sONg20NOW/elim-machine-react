@@ -10,8 +10,6 @@ import Button from '@mui/material/Button'
 
 import { animate, motion, useMotionValue, useTransform } from 'motion/react'
 
-const MotionCard = motion.create(Card)
-
 // Component Imports
 import {
   alpha,
@@ -151,10 +149,7 @@ export default function MachinePage() {
     const engineerCnt = machineProject.engineerNames.length
 
     return (
-      <MotionCard
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: idx / 20 }}
+      <Card
         sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
         elevation={10}
         onClick={() => handleMachineProjectClick(machineProject)}
@@ -193,7 +188,7 @@ export default function MachinePage() {
             </Typography>
           </Box>
         </Box>
-      </MotionCard>
+      </Card>
     )
   }
 
@@ -211,15 +206,14 @@ export default function MachinePage() {
           backgroundColor: 'white'
         }}
       >
-        <MotionCard
-          initial={{ x: myProject ? 0 : '100%' }}
-          animate={{ x: myProject ? '100%' : 0 }}
+        <Card
           sx={{
             position: 'absolute',
             backgroundColor: 'primary.main',
             borderRadius: isMobile ? 1 : 10,
             width: isMobile ? '90%' : '47%',
             height: isMobile ? '45%' : '80%',
+            translate: myProject ? '100%' : '',
             boxShadow: 2,
             color: 'white'
           }}
@@ -363,8 +357,8 @@ export default function MachinePage() {
               overflowX: 'hidden'
             }}
           >
-            {data.map((machineProject, idx) => (
-              <MachineProjectCard key={machineProject.machineProjectId} idx={idx} machineProject={machineProject} />
+            {data.map(machineProject => (
+              <MachineProjectCard key={machineProject.machineProjectId} machineProject={machineProject} />
             ))}
           </Box>
         ) : (

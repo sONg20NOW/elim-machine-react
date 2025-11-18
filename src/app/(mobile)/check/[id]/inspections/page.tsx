@@ -6,8 +6,6 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { Box, Card, IconButton, Pagination, Typography } from '@mui/material'
 
-import { motion } from 'motion/react'
-
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { handleApiError } from '@/utils/errorHandler'
 import type {
@@ -20,8 +18,6 @@ import type { projectSummaryType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
-
-const MotionCard = motion.create(Card)
 
 export interface inspectionSummaryType {
   machineProjectName: string
@@ -131,54 +127,49 @@ export default function InspectionsPage() {
   }
 
   // 설비 카드 컴포넌트
-  const InspectionInfoCard = memo(
-    ({ inspection, idx }: { inspection: MachineInspectionPageResponseDtoType; idx: number }) => {
-      const engineerCnt = inspection.engineerNames.length
+  const InspectionInfoCard = memo(({ inspection }: { inspection: MachineInspectionPageResponseDtoType }) => {
+    const engineerCnt = inspection.engineerNames.length
 
-      return (
-        <MotionCard
-          transition={{ delay: idx / 20 }}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
-          elevation={10}
-          onClick={() => handleInspectionClick(inspection)}
+    return (
+      <Card
+        sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
+        elevation={10}
+        onClick={() => handleInspectionClick(inspection)}
+      >
+        <div className='flex-1'>
+          <i className='tabler-photo-bolt w-full h-full' />
+        </div>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            px: !isMobile ? 5 : 2,
+            py: !isMobile ? 10 : 5,
+            gap: !isMobile ? 3 : 1,
+            flex: !isMobile ? 3 : 2
+          }}
         >
-          <div className='flex-1'>
-            <i className='tabler-photo-bolt w-full h-full' />
-          </div>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              px: !isMobile ? 5 : 2,
-              py: !isMobile ? 10 : 5,
-              gap: !isMobile ? 3 : 1,
-              flex: !isMobile ? 3 : 2
-            }}
-          >
-            <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
-              {inspection.machineInspectionName ?? '이름없는 설비'}
+          <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
+            {inspection.machineInspectionName ?? '이름없는 설비'}
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
+            <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate ?? '점검날짜'}</Typography>
+            <Typography sx={{ fontWeight: 500 }}>{inspection.location ?? '설치위치'}</Typography>
+            <Typography>
+              {engineerCnt > 2
+                ? inspection.engineerNames
+                    .slice(0, 2)
+                    .join(', ')
+                    .concat(`외 ${engineerCnt - 2}명`)
+                : engineerCnt === 0
+                  ? '배정된 점검진 없음'
+                  : inspection.engineerNames.join(', ')}
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
-              <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate ?? '점검날짜'}</Typography>
-              <Typography sx={{ fontWeight: 500 }}>{inspection.location ?? '설치위치'}</Typography>
-              <Typography>
-                {engineerCnt > 2
-                  ? inspection.engineerNames
-                      .slice(0, 2)
-                      .join(', ')
-                      .concat(`외 ${engineerCnt - 2}명`)
-                  : engineerCnt === 0
-                    ? '배정된 점검진 없음'
-                    : inspection.engineerNames.join(', ')}
-              </Typography>
-            </Box>
           </Box>
-        </MotionCard>
-      )
-    }
-  )
+        </Box>
+      </Card>
+    )
+  })
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
@@ -204,7 +195,9 @@ export default function InspectionsPage() {
       {/* 스크롤이 생기는 메인 영역 */}
       <Box ref={listRef} sx={{ flex: 1, overflowY: 'auto', p: 5 }}>
         {inspections.length > 0 ? (
-          inspections.map((inspection, idx) => <InspectionInfoCard key={idx} idx={idx} inspection={inspection} />)
+          inspections.map(inspection => (
+            <InspectionInfoCard key={inspection.machineInspectionId} inspection={inspection} />
+          ))
         ) : (
           <Box sx={{ display: 'grid', placeItems: 'center', height: '100%' }}>
             <div className='flex flex-col gap-3 items-center'>
