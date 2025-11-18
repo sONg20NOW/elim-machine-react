@@ -67,14 +67,16 @@ export const StyledTextField = styled(TextField)({
     padding: '8px'
   },
   '& .MuiOutlinedInput-root': {
-    borderRadius: 0
+    borderRadius: 0,
 
-    // '& fieldset': {
-    //   borderWidth: 0 // 기본 border 제거
-    // },
-    // '&:hover fieldset': {
-    //   borderWidth: 1 // hover 시 border 복구
-    // },
+    '& fieldset': {
+      borderWidth: 0 // 기본 border 제거
+    },
+
+    '&:hover fieldset': {
+      borderWidth: 1 // hover 시 border 복구
+    }
+
     // '&.Mui-focused fieldset': {
     //   borderWidth: 1 // focus 시 border 복구
     // }

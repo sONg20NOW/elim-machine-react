@@ -246,7 +246,7 @@ const AgingTab = memo(
               <Typography variant='h5'>노후도 점검결과</Typography>
               <StyledTextField
                 {...register('agingInspectionResult')}
-                sx={{ borderTop: '2px solid', borderTopColor: 'primary.light' }}
+                sx={{ border: '1px solid lightgray', borderTop: '2px solid', borderTopColor: 'primary.light' }}
                 fullWidth
                 multiline
                 rows={4}

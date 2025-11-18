@@ -430,7 +430,7 @@ const YearlyPlanTab = memo(
               <Typography variant='h5'>비고</Typography>
               <StyledTextField
                 {...register('note')}
-                sx={{ borderTop: '2px solid', borderTopColor: 'primary.light' }}
+                sx={{ border: '1px solid lightgray', borderTop: '2px solid', borderTopColor: 'primary.light' }}
                 fullWidth
                 multiline
                 rows={4}

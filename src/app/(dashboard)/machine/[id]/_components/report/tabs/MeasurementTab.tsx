@@ -385,7 +385,7 @@ const MeasurementTab = memo(
             <div className='flex flex-col gap-1 w-full'>
               <Typography variant='h5'>조치사항 의견</Typography>
               <StyledTextField
-                sx={{ borderTop: '2px solid', borderTopColor: 'primary.light' }}
+                sx={{ border: '1px solid lightgray', borderTop: '2px solid', borderTopColor: 'primary.light' }}
                 fullWidth
                 multiline
                 rows={4}
