@@ -29,10 +29,12 @@ export default function Header() {
   const username = userData?.memberBasicResponseDto?.name
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('user') ?? '{memberId: 0}')
+    const stored = localStorage.getItem('user')
 
     if (stored) {
-      setMemberId(stored.memberId)
+      setMemberId((JSON.parse(stored) as { memberId: number }).memberId)
+    } else {
+      setMemberId(0)
     }
   }, [])
 
