@@ -112,7 +112,7 @@ export default function BasicTabContent({
                 editData.machineInspectionResponseDto.equipmentPhaseDate
               ) : (
                 <TextField
-                  slotProps={{ htmlInput: { sx: { p: 0 } } }}
+                  slotProps={{ htmlInput: { sx: { p: 0 }, max: '2999-01-01', min: '1900-01-01' } }}
                   type='date'
                   size='small'
                   value={editData.machineInspectionResponseDto.equipmentPhaseDate ?? ''}
@@ -143,7 +143,7 @@ export default function BasicTabContent({
                 editData.machineInspectionResponseDto.checkDate
               ) : (
                 <TextField
-                  slotProps={{ htmlInput: { sx: { p: 0 } } }}
+                  slotProps={{ htmlInput: { sx: { p: 0 }, max: '2999-01-01', min: '1900-01-01' } }}
                   type='date'
                   size='small'
                   value={editData.machineInspectionResponseDto.checkDate ?? ''}
