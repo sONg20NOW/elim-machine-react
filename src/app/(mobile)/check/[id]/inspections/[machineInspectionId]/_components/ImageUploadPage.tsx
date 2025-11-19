@@ -44,6 +44,16 @@ export default function ImageUploadPage() {
   const [checklistItemId, setChecklistItemId] = useState(0)
   const [uploading, setUploading] = useState(false)
 
+  const emptyCameraRef = useRef<HTMLInputElement>(null)
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || !machineProjectId || !machineInspectionId) return
+
+    const file = event.target.files[0]
+
+    setFilesToUpload(prev => [...prev, file])
+  }
+
   const checklistForm = useForm<checklistFormType>({
     defaultValues: {
       checklistSubItemId: 0
@@ -142,6 +152,14 @@ export default function ImageUploadPage() {
           }}
           className='hidden'
         />
+        <input
+          type='file'
+          capture='environment'
+          className='hidden'
+          accept='image/*'
+          ref={emptyCameraRef}
+          onChange={handleImageUpload}
+        />
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
           <div className='flex flex-col gap-1'>
             <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
@@ -213,9 +231,15 @@ export default function ImageUploadPage() {
           )}
           <Box sx={{ display: 'flex', justifyContent: 'end', gap: 2 }}>
             <Typography alignContent={'end'}>{filesToUpload.length}개 선택됨</Typography>
-            <Button type='button' variant='contained' onClick={() => inputRef.current?.click()}>
-              파일 선택
-            </Button>
+            <div className='flex gap-2'>
+              <Button color='success' variant='contained' type='button' onClick={() => emptyCameraRef.current?.click()}>
+                카메라
+              </Button>
+
+              <Button type='button' variant='contained' onClick={() => inputRef.current?.click()}>
+                갤러리
+              </Button>
+            </div>
             <Button
               type='submit'
               variant='contained'
