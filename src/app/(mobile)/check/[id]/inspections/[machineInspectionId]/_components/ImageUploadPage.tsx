@@ -229,8 +229,16 @@ export default function ImageUploadPage() {
               <Typography>업로드할 파일이 없습니다.</Typography>
             </Box>
           )}
-          <Box sx={{ display: 'flex', justifyContent: 'end', gap: 2 }}>
-            <Typography alignContent={'end'}>{filesToUpload.length}개 선택됨</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              ...(isMobile && { flexDirection: 'column' }),
+              justifyContent: 'end',
+              gap: 2,
+              alignItems: 'end'
+            }}
+          >
+            <Typography>{filesToUpload.length}개 선택됨</Typography>
             <div className='flex gap-2'>
               <Button color='success' variant='contained' type='button' onClick={() => emptyCameraRef.current?.click()}>
                 카메라
@@ -239,15 +247,15 @@ export default function ImageUploadPage() {
               <Button type='button' variant='contained' onClick={() => inputRef.current?.click()}>
                 갤러리
               </Button>
+              <Button
+                type='submit'
+                variant='contained'
+                color='secondary'
+                disabled={filesToUpload.length === 0 || watchedChecklistSubItemId === 0}
+              >
+                사진 업로드
+              </Button>
             </div>
-            <Button
-              type='submit'
-              variant='contained'
-              color='secondary'
-              disabled={filesToUpload.length === 0 || watchedChecklistSubItemId === 0}
-            >
-              사진 업로드
-            </Button>
           </Box>
         </Box>
       </Box>
