@@ -103,6 +103,10 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
   const memberId = { ...editData?.memberBasicResponseDto }.memberId
   const juminNum = { ...editData?.memberPrivacyResponseDto }.juminNum
 
+  // 로그인한 사용자의 userModal인지 파악
+  const currentuserId = useCurrentUserStore(set => set.currentUser)?.memberId
+  const isYours = selectedUserData.memberBasicResponseDto.memberId === currentuserId
+
   // const { mutateAsync: mutateBasicAsync } = useMutateSingleMemberBasic(memberId.toString())
   const { mutateAsync: mutateBasicAsync } = useMutateSingleMember<MemberBasicDtoType>(memberId.toString(), 'basic')
 
@@ -260,16 +264,28 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           )
         }
         modifyButton={
-          <Button
-            variant='contained'
-            color='error'
-            type='reset'
-            onClick={() => {
-              setShowDeleteModal(true)
-            }}
-          >
-            삭제
-          </Button>
+          <>
+            <Button
+              variant='contained'
+              color='error'
+              type='reset'
+              onClick={() => {
+                setShowDeleteModal(true)
+              }}
+            >
+              삭제
+            </Button>
+            {isYours && (
+              <Button
+                color='warning'
+                onClick={() => {
+                  toast.warning('곧 추가될 기능입니다')
+                }}
+              >
+                비밀번호 변경
+              </Button>
+            )}
+          </>
         }
         secondaryButton={
           isEditing ? (
