@@ -32,6 +32,7 @@ import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithToo
 import { auth } from '@/lib/auth'
 import type { MemberType } from '@/@core/hooks/customTanstackQueries'
 import { useMutateSingleMember } from '@/@core/hooks/customTanstackQueries'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 
 type requestRuleBodyType = {
   url: string
@@ -114,6 +115,8 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
   const { mutateAsync: mutateCareerAsync } = useMutateSingleMember<MemberCareerDtoType>(memberId.toString(), 'career')
   const { mutateAsync: mutateEtcAsync } = useMutateSingleMember<MemberEtcDtoType>(memberId.toString(), 'etc')
 
+  const { currentUser, setCurrentUserName } = useCurrentUserStore()
+
   const handleDeleteUser = async () => {
     const version = editData.memberBasicResponseDto?.version
 
@@ -167,6 +170,12 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           setEditData({ ...editData, memberBasicResponseDto: newBasic })
           console.log(`${requestInfo.value} info saved: `, newBasic)
           handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
+
+          // 헤더에서 사용하는 정보 업데이트 (현재 로그인 중인 사용자의 정보라면)
+          if (currentUser && currentUser.memberId === newBasic.memberId) {
+            setCurrentUserName(newBasic.name)
+          }
+
           setIsEditing(false)
           reloadData && reloadData()
           break

@@ -1,6 +1,6 @@
 'use client'
 
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -12,6 +12,7 @@ import { logout } from '@/lib/auth'
 import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
 import UserModal from '@/app/(dashboard)/member/_components/UserModal'
 import { useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 
 // import Logo from '@components/layout/shared/Logo'
 
@@ -19,24 +20,17 @@ export default function Header() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [openUser, setOpenUser] = useState(false)
-  const [memberId, setMemberId] = useState<number>(0)
 
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
 
-  const { data: userData } = useGetSingleMember(memberId.toString())
+  const currentUser = useCurrentUserStore(set => set.currentUser)
 
-  const username = userData?.memberBasicResponseDto?.name
+  function UserModalContainer() {
+    const { data: userData } = useGetSingleMember((currentUser?.memberId ?? 0).toString())
 
-  useEffect(() => {
-    const stored = localStorage.getItem('user')
-
-    if (stored) {
-      setMemberId((JSON.parse(stored) as { memberId: number }).memberId)
-    } else {
-      setMemberId(0)
-    }
-  }, [])
+    return userData && <UserModal open={openUser} setOpen={setOpenUser} selectedUserData={userData} />
+  }
 
   return (
     <AppBar
@@ -61,17 +55,19 @@ export default function Header() {
         </div>
         {!isTablet && (
           <div className='flex gap-5 items-center overflow-visible'>
-            <Typography
-              color='white'
-              onClick={() => console.log(document.cookie.split(';'))}
-              sx={{ alignItems: 'center', display: 'flex' }}
-            >
-              반갑습니다,{' '}
-              <Button color='inherit' type='button' onClick={() => setOpenUser(true)}>
-                {username}
-              </Button>
-              님
-            </Typography>
+            {currentUser && (
+              <Typography
+                color='white'
+                onClick={() => console.log(document.cookie.split(';'))}
+                sx={{ alignItems: 'center', display: 'flex' }}
+              >
+                반갑습니다,{' '}
+                <Button color='inherit' type='button' onClick={() => setOpenUser(true)}>
+                  {currentUser.name}
+                </Button>
+                님
+              </Typography>
+            )}
             <Button
               size='small'
               sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
@@ -129,7 +125,7 @@ export default function Header() {
                   onClick={() => console.log(document.cookie.split(';'))}
                 >
                   <Button color='inherit' type='button' onClick={() => setOpenUser(true)} sx={{ p: 0 }}>
-                    {username}
+                    {currentUser?.name ?? ''}
                   </Button>
                   님
                 </Typography>
@@ -287,7 +283,7 @@ export default function Header() {
           </Box>
         </Drawer>
       )}
-      {userData && openUser && <UserModal open={openUser} setOpen={setOpenUser} selectedUserData={userData} />}
+      {openUser && currentUser && <UserModalContainer />}
     </AppBar>
   )
 }

@@ -31,8 +31,7 @@ import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth, logout } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
-import { gradeOption } from '@/app/_constants/options'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 
 export default function MachinePage() {
   const router = useRouter()
@@ -56,9 +55,11 @@ export default function MachinePage() {
   // 전체현장 / 나의현장 토글
   const [myProject, setMyProject] = useState(false)
 
-  const isMobile = useContext(isMobileContext)
-
   const [open, setOpen] = useState(false)
+
+  const currentUser = useCurrentUserStore(set => set.currentUser)
+
+  const isMobile = useContext(isMobileContext)
 
   // 페이지 변경 시 스크롤 업을 위한 Ref
   const listRef = useRef<HTMLDivElement>(null)
@@ -67,10 +68,6 @@ export default function MachinePage() {
   const count = useMotionValue(0)
   const rounded = useTransform(() => Math.round(count.get()))
   const theme = useTheme()
-
-  const [memberId, setMemberId] = useState<number>(0)
-
-  const { data: currentUser } = useGetSingleMember(memberId.toString())
 
   const CustomSwitch = styled(Switch)(({ theme }) => ({
     '& .MuiSwitch-switchBase.Mui-checked': {
@@ -94,9 +91,7 @@ export default function MachinePage() {
 
     try {
       projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
-      myProject
-        ? queryParams.set('engineerName', currentUser?.memberBasicResponseDto.name ?? '')
-        : queryParams.delete('engineerName')
+      myProject ? queryParams.set('engineerName', currentUser?.name ?? '') : queryParams.delete('engineerName')
 
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
@@ -136,16 +131,6 @@ export default function MachinePage() {
   useEffect(() => {
     getFilteredData()
   }, [getFilteredData])
-
-  useEffect(() => {
-    const stored = localStorage.getItem('user')
-
-    if (stored) {
-      setMemberId((JSON.parse(stored) as { memberId: number }).memberId)
-    } else {
-      setMemberId(0)
-    }
-  }, [])
 
   // 기계설비현장 선택 핸들러
   const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
@@ -260,62 +245,71 @@ export default function MachinePage() {
   return (
     <>
       {/* Drawer 부분 */}
-      <Drawer
-        open={open}
-        onClose={() => setOpen(false)}
-        slotProps={{
-          paper: { sx: { width: isMobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
-          root: { sx: { position: 'relative' } }
-        }}
-        anchor='left'
-      >
-        <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', right: 0, top: 0 }}>
-          <i className='tabler-x text-white' />
-        </IconButton>
-        <Box>
-          <Box
-            sx={{
-              backgroundColor: 'primary.light',
-              p: 2
-            }}
-          >
-            {/* ! 유저 이미지로 변경 */}
-            <div className='w-[70px] h-[70px] bg-white rounded-full m-3'>
-              <i className='tabler-user text-[70px]' />
-            </div>
-            <div className='flex gap-2'>
-              <Typography variant='h4' color='white'>
-                {`[${gradeOption.find(v => v.value === (currentUser?.memberCareerResponseDto.grade ?? 'BEGINNER'))?.label}] ${currentUser?.memberBasicResponseDto.name ?? ''}`}
-              </Typography>
-            </div>
-            <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+      {currentUser && (
+        <Drawer
+          open={open}
+          onClose={() => setOpen(false)}
+          slotProps={{
+            paper: { sx: { width: isMobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
+            root: { sx: { position: 'relative' } }
+          }}
+          anchor='left'
+        >
+          <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', right: 0, top: 0 }}>
+            <i className='tabler-x text-white' />
+          </IconButton>
+          <Box>
+            <Box
+              sx={{
+                backgroundColor: 'primary.light',
+                p: 2
+              }}
+            >
+              {/* ! 유저 이미지로 변경 */}
+              <div className='w-[70px] h-[70px] bg-white rounded-full m-3'>
+                <i className='tabler-user text-[70px]' />
+              </div>
+              <div className='flex gap-2'>
+                <Typography variant='h4' color='white'>
+                  {/* {`[${gradeOption.find(v => v.value === (currentUser?.memberCareerResponseDto.grade ?? 'BEGINNER'))?.label}] ${currentUser.name}`} */}
+                  {`${currentUser.name}`}
+                </Typography>
+              </div>
+              {/* <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
               {currentUser?.memberBasicResponseDto.companyName}
-            </Typography>
+            </Typography> */}
 
-            {/* <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+              {/* <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
               수첩발급번호: {currentUser?.memberPrivacyResponseDto.}
             </Typography> */}
+            </Box>
           </Box>
-        </Box>
-        <div className='flex flex-col justify-between h-full'>
-          <Box sx={{ p: 5, mt: 5 }}>
-            <Button
-              fullWidth
-              sx={{ display: 'flex', justifyContent: 'start', boxShadow: 4, color: 'dimgray', borderColor: 'dimgray' }}
-              variant='outlined'
-              onClick={logout}
-            >
-              <i className='tabler-logout text-[30px]' />
-              <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>
-                로그아웃
-              </Typography>
-            </Button>
-          </Box>
-          <Link sx={{ textAlign: 'end', py: 3, px: 5 }} href='/machine'>
-            웹으로 보기
-          </Link>
-        </div>
-      </Drawer>
+          <div className='flex flex-col justify-between h-full'>
+            <Box sx={{ p: 5, mt: 5 }}>
+              <Button
+                fullWidth
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'start',
+                  boxShadow: 4,
+                  color: 'dimgray',
+                  borderColor: 'dimgray'
+                }}
+                variant='outlined'
+                onClick={logout}
+              >
+                <i className='tabler-logout text-[30px]' />
+                <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>
+                  로그아웃
+                </Typography>
+              </Button>
+            </Box>
+            <Link sx={{ textAlign: 'end', py: 3, px: 5 }} href='/machine'>
+              웹으로 보기
+            </Link>
+          </div>
+        </Drawer>
+      )}
 
       {/* 렌더링 될 화면 */}
       <Box className='flex flex-col w-full' sx={{ height: '100dvh' }}>
@@ -325,7 +319,7 @@ export default function MachinePage() {
               <IconButton sx={{ boxShadow: 3, backgroundColor: 'white' }} onClick={() => setOpen(true)}>
                 <i className='tabler-user' />
               </IconButton>
-              {!isMobile && <ProjectToggle />}
+              {/* {!isMobile && <ProjectToggle />} */}
             </>
           }
           title={
