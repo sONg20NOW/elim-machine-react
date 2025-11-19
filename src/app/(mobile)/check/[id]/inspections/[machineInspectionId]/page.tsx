@@ -141,6 +141,7 @@ export default function CheckInspectionDetailPage() {
 
                   // htmlInput: { sx: { p: 0 } },
                   select: {
+                    IconComponent: () => null,
                     displayEmpty: true,
                     renderValue: selectedValue => {
                       const item = inspectionList?.find(
