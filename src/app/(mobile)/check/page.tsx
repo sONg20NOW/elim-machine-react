@@ -167,9 +167,10 @@ export default function MachinePage() {
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
             <Typography sx={{ fontWeight: 500 }}>
-              {machineProject.fieldBeginDate &&
+              {(machineProject.fieldBeginDate &&
                 machineProject.fieldEndDate &&
-                `${machineProject.fieldBeginDate} ~ ${machineProject.fieldEndDate.slice(5)}`}
+                `${machineProject.fieldBeginDate} ~ ${machineProject.fieldEndDate.slice(5)}`) ??
+                '~'}
             </Typography>
             <Typography>
               {engineerCnt > 2
