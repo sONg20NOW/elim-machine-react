@@ -16,6 +16,9 @@ import {
   Typography
 } from '@mui/material'
 
+import JSZip from 'jszip'
+import { saveAs } from 'file-saver'
+
 import style from '@/app/_style/Table.module.css'
 import { useGetReportCategories, useGetReportStatuses } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
@@ -32,6 +35,10 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
 
   const reloadRef = useRef<HTMLElement>(null)
   const [disableReload, setDialbleReload] = useState(false)
+
+  const [loading, setLoading] = useState(false)
+
+  const presignedMap = useRef<{ categoryId: number; index: number; url: string }[]>([])
 
   const { data: totalReportCategories } = useGetReportCategories()
 
@@ -55,6 +62,42 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
     await refetch()
     setOpenSnackBar(true)
   }, [refetch])
+
+  const handleSetPresigned = useCallback((categoryId: number, index: number, url: string) => {
+    presignedMap.current = [...presignedMap.current, { url, categoryId, index }]
+  }, [])
+
+  const handleDownloadAll = async () => {
+    if (!reportCategories) return
+
+    setLoading(true)
+    const zip = new JSZip()
+
+    // 병렬 다운로드 (presigned URL -> Blob)
+    const filePromises = presignedMap.current.map(async ({ categoryId, url, index }) => {
+      const res = await fetch(url)
+
+      if (res.status !== 200) {
+        return
+      }
+
+      const blob = await res.blob()
+
+      // 파일 이름 안전하게 처리
+      const category = reportCategories.find(v => v.id === Number(categoryId))!
+      const safeName = category.name.replace(/[\/\\?%*:|"<>]/g, '-')
+
+      zip.file(`${index}. ${safeName}.hwp`, blob)
+    })
+
+    await Promise.all(filePromises)
+
+    const content = await zip.generateAsync({ type: 'blob' })
+
+    saveAs(content, '전체보고서.zip')
+    console.log(presignedMap.current)
+    setLoading(false)
+  }
 
   return (
     reportCategories && (
@@ -105,6 +148,7 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
                     idx={idx}
                     statuses={statuses ?? []}
                     setOpenInspModal={setOpenInspModal}
+                    onPresignedLoaded={handleSetPresigned}
 
                     // setStatuses={setStatuses}
                     // setLoading={setLoading}
@@ -114,13 +158,28 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
             </table>
           </DialogContent>
           <DialogActions className='flex items-center justify-center pt-4' sx={{ boxShadow: 10 }}>
-            {/* <Button variant='contained' className='bg-sky-500 hover:bg-sky-600'>
-              전체 다운로드
+            <Button
+              variant='contained'
+              className='bg-sky-500 hover:bg-sky-600 flex flex-col items-center'
+              onClick={handleDownloadAll}
+              disabled={loading}
+            >
+              <Typography variant='inherit'>전체 다운로드(ZIP)</Typography>
+              <Typography variant='subtitle2' color='white'>
+                설비별 성능점검표 제외
+              </Typography>
             </Button>
-            <SettingButton /> */}
+            {/* <Button
+              variant='contained'
+              className='bg-blue-500 hover:bg-blue-600 flex flex-col items-center'
+              onClick={() => null}
+            >
+              <Typography variant='inherit'>전체 다운로드</Typography>
+            </Button> */}
+            {/* <SettingButton /> */}
           </DialogActions>
         </Dialog>
-        {openInspModal && <InspectionPerformanceModal open={openInspModal} setOpen={setOpenInspModal} />}
+        <InspectionPerformanceModal open={openInspModal} setOpen={setOpenInspModal} />
       </>
     )
   )
@@ -131,12 +190,14 @@ const TableRow = memo(
     category,
     idx,
     statuses,
-    setOpenInspModal
+    setOpenInspModal,
+    onPresignedLoaded
   }: {
     category: MachineReportCategoryReadResponseDtoType
     idx: number
     statuses: MachineReportStatusResponseDtoType[]
     setOpenInspModal: (open: boolean) => void
+    onPresignedLoaded: (categoryId: number, index: number, url: string) => void
   }) => {
     const machineProjectId = useParams().id?.toString()
 
@@ -181,11 +242,13 @@ const TableRow = memo(
 
           if (!presignedUrl) return
           aRef.current.href = presignedUrl
+
+          onPresignedLoaded(category.id, idx + 1, presignedUrl)
         }
       }
 
       setPresignedUrl()
-    }, [myStatus, category.id, getReportPresignedUrl])
+    }, [myStatus, category.id, getReportPresignedUrl, onPresignedLoaded, idx])
 
     return (
       <tr key={category.id}>
@@ -221,8 +284,8 @@ const TableRow = memo(
           <>
             <td colSpan={1} className='px-0'>
               <div className='grid place-items-center'>
-                <a ref={aRef} download={'hi'}>
-                  <Button className='bg-blue-500 hover:bg-blue-600 text-white  disabled:opacity-60' disabled={disabled}>
+                <a ref={aRef}>
+                  <Button className='bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-60' disabled={disabled}>
                     HWP
                   </Button>
                 </a>
