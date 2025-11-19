@@ -4,6 +4,7 @@ const manifest = (): MetadataRoute.Manifest => {
   return {
     short_name: 'ELIM',
     name: 'ELIM 기계설비현장 웹앱',
+    orientation: 'portrait',
     icons: [
       {
         src: '/images/icons/apple-touch-icon-57x57.png',
