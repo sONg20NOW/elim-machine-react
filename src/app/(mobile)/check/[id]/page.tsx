@@ -19,13 +19,8 @@ import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from './_components/ProjectInfoCard'
-
-export interface projectSummaryType {
-  machineProjectName: string | null
-  beginDate: string | null
-  endDate: string | null
-  engineerNames: string[] | null
-}
+import type { projectSummaryType } from '@/@core/utils/useProjectSummaryStore'
+import useProjectSummaryStore from '@/@core/utils/useProjectSummaryStore'
 
 interface ProjectFormType {
   machineProjectName: string | null
@@ -41,10 +36,10 @@ const CheckDetailPage = () => {
 
   const isMobile = useContext(isMobileContext)
 
+  const { projectSummary, setProjectSummary, removeProjectSummary } = useProjectSummaryStore()
+
   // ! 대표 이미지, 마지막 업로드 추가
-  const [projectSummaryData, setProjectSummaryData] = useState<projectSummaryType | undefined>(
-    localStorage.getItem('projectSummary') !== null ? JSON.parse(localStorage.getItem('projectSummary')!) : undefined
-  )
+  const [projectSummaryData, setProjectSummaryData] = useState<projectSummaryType>(projectSummary)
 
   const versionRef = useRef(0)
 
@@ -142,9 +137,9 @@ const CheckDetailPage = () => {
   // projectSummaryData가 바뀔 때마다 localStorage에 저장.
   useEffect(() => {
     if (projectSummaryData) {
-      localStorage.setItem('projectSummary', JSON.stringify(projectSummaryData))
+      setProjectSummary(projectSummaryData)
     }
-  }, [projectSummaryData])
+  }, [projectSummaryData, setProjectSummary])
 
   // ! api 하나로 통일
   const handleSave = useCallback(
@@ -204,7 +199,7 @@ const CheckDetailPage = () => {
               sx={{ p: 0 }}
               onClick={() => {
                 router.back()
-                localStorage.removeItem('projectSummary')
+                removeProjectSummary()
               }}
             >
               <i className='tabler-chevron-left text-white text-3xl' />

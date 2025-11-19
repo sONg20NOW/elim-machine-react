@@ -14,10 +14,10 @@ import type {
   successResponseDtoType
 } from '@/@core/types'
 import { auth } from '@/lib/auth'
-import type { projectSummaryType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
+import useProjectSummaryStore from '@/@core/utils/useProjectSummaryStore'
 
 export interface inspectionSummaryType {
   machineProjectName: string
@@ -54,11 +54,12 @@ export default function InspectionsPage() {
   // 설비 추가 모달
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>()
 
-  // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
-  if (!localStorage.getItem('projectSummary')) router.back()
+  const projectSummaryData = useProjectSummaryStore(set => set.projectSummary)
 
-  // ! 로컬 스토리지에서 데이터 가져오기
-  const projectSummaryData: projectSummaryType = JSON.parse(localStorage.getItem('projectSummary')!)
+  useEffect(() => {
+    // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
+    if (!projectSummaryData) router.back()
+  }, [projectSummaryData, router])
 
   // 참여기술진 목록 가져오기
   const getParticipatedEngineerList = useCallback(async () => {
@@ -153,8 +154,16 @@ export default function InspectionsPage() {
             {inspection.machineInspectionName ?? '이름없는 설비'}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
-            <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate ?? '점검날짜'}</Typography>
-            <Typography sx={{ fontWeight: 500 }}>{inspection.location ?? '설치위치'}</Typography>
+            {inspection.checkDate && inspection.checkDate !== '' ? (
+              <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate}</Typography>
+            ) : (
+              <Typography sx={{ color: 'lightgray' }}>점검날짜</Typography>
+            )}
+            {inspection.location && inspection.location !== '' ? (
+              <Typography sx={{ fontWeight: 500 }}>{inspection.location}</Typography>
+            ) : (
+              <Typography sx={{ color: 'lightgray' }}>점검위치</Typography>
+            )}
             <Typography>
               {engineerCnt > 2
                 ? inspection.engineerNames
