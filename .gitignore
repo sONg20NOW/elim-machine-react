@@ -42,3 +42,7 @@ src/assets/iconify-icons/generated-icons.css
 
 # vscode
 .vscode/*
+
+#PWA service worker
+/public/sw.js
+/public/workbox-*.js
