@@ -51,7 +51,13 @@ const CheckDetailPage = () => {
     formState: { isSubmitting, isDirty },
     handleSubmit,
     reset
-  } = useForm<ProjectFormType>()
+  } = useForm<ProjectFormType>({
+    defaultValues: {
+      machineProjectName: '',
+      requirement: '',
+      note: ''
+    }
+  })
 
   useEffect(() => {
     if (projectSummaryData) return
@@ -126,7 +132,11 @@ const CheckDetailPage = () => {
 
     setInspectionCnt(await getInspectionCnt())
 
-    reset(projectData)
+    reset({
+      machineProjectName: projectData.machineProjectName ?? '',
+      requirement: projectData.requirement ?? '',
+      note: projectData.note ?? ''
+    })
   }, [getProjectData, getScheduleData, getInspectionCnt, reset])
 
   // projectData와 scheduleData 중 썸네일에 필요한 정보를 projectSummaryData에 저장.
@@ -209,7 +219,7 @@ const CheckDetailPage = () => {
           right={
             <IconButton sx={{ p: 0 }} type='submit' disabled={isSubmitting || !isDirty}>
               {isDirty ? (
-                <i className=' tabler-device-floppy text-white text-3xl animate-ring ' />
+                <i className='tabler-device-floppy text-white text-3xl animate-ring' />
               ) : (
                 <i className='tabler-device-floppy text-white text-3xl' />
               )}

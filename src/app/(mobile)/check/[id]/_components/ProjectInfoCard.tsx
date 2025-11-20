@@ -4,10 +4,9 @@ import { Box, IconButton, Typography } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
-import type { projectSummaryType } from '../page'
-
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { useGetOverviewPics } from '@/@core/hooks/customTanstackQueries'
+import type { projectSummaryType } from '@/@core/utils/useProjectSummaryStore'
 
 export default function ProjectInfoCard({
   projectSummaryData,
@@ -86,7 +85,7 @@ export default function ProjectInfoCard({
           width={'fit-content'}
           variant='inherit'
         >{`${projectSummaryData?.beginDate ?? '시작날짜'} ~ ${projectSummaryData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
-        {projectSummaryData.engineerNames && (
+        {projectSummaryData?.engineerNames && (
           <Typography width={'fit-content'} variant='inherit'>
             {(projectSummaryData?.engineerNames.length ?? 0) > 2
               ? `${projectSummaryData?.engineerNames.slice(0, 2).join(', ')} 외 ${projectSummaryData!.engineerNames.length - 2}명`
