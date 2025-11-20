@@ -53,7 +53,8 @@ export const QUERY_KEYS = {
     GET_INSPECTION_OPINION: (machineProjectId: string) => ['GET_INSPECTION_OPINION', machineProjectId]
   },
   ENGINEER: {
-    GET_ENGINEERS_OPTIONS: ['GET_ENGINEERS_OPTIONS']
+    GET_ENGINEERS_OPTIONS: ['GET_ENGINEERS_OPTIONS'],
+    GET_ENGINEER_BY_MEMBERID: (memberId: string) => ['GET_ENGINEER_BY_MEMBERID', memberId]
   },
   MACHINE_PROJECT: {
     GET_MACHINE_PROJECT_ENGINEERS: (machineProjectId: string) => ['GET_MACHINE_PROJECT_ENGINEERS', machineProjectId],
