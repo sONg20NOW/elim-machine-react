@@ -49,7 +49,7 @@ const manifest = (): MetadataRoute.Manifest => {
         type: 'image/png'
       }
     ],
-    start_url: './check',
+    start_url: './login',
     display: 'standalone',
     theme_color: '#8F85F3',
     background_color: '#8F85F3'
