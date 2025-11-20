@@ -38,6 +38,9 @@ const RootLayout = async (props: ChildrenType) => {
   const systemMode = 'light'
 
   // const direction = i18n.langDirection[params.lang]
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+  }
 
   return (
     <html id='__next' suppressHydrationWarning>
