@@ -44,6 +44,7 @@ const RootLayout = async (props: ChildrenType) => {
       <head>
         <meta name='viewport' content='width=device-width,initial-scale=1' />
         <link rel='icon' href='/images/elim_icon.png?v=2' />
+        <link rel='manifest' href='/manifest.json' />
       </head>
       <Script src='//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'></Script>
       <body className='flex is-full min-bs-full flex-auto flex-col'>
