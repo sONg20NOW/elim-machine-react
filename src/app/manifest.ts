@@ -4,6 +4,7 @@ const manifest = (): MetadataRoute.Manifest => {
   return {
     short_name: 'ELIM 기계설비',
     name: 'ELIM 기계설비현장 웹앱',
+    description: '2025 하반기 기계설비현장 현장 점검 PWA입니다',
     orientation: 'portrait',
     icons: [
       {
