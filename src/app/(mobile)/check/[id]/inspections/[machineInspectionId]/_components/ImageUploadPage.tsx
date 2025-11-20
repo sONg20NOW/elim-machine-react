@@ -22,6 +22,8 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { toast } from 'react-toastify'
 
+import { enqueueSnackbar } from 'notistack'
+
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
@@ -99,6 +101,7 @@ export default function ImageUploadPage() {
       )
 
       if (result) {
+        enqueueSnackbar(`${result}개 사진 업로드가 완료되었습니다`, { variant: 'success', autoHideDuration: 1200 })
         setFilesToUpload([])
         refetch()
       }
@@ -256,6 +259,7 @@ export default function ImageUploadPage() {
                 사진 업로드
               </Button>
             </div>
+            {watchedChecklistSubItemId === 0 && <Typography color='warning.main'>하위항목을 지정해주세요</Typography>}
           </Box>
         </Box>
       </Box>

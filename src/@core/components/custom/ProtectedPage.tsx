@@ -4,6 +4,8 @@ import { createContext, useEffect, useState } from 'react'
 
 import { Backdrop, CircularProgress, Typography, useMediaQuery, useTheme } from '@mui/material'
 
+import { SnackbarProvider } from 'notistack'
+
 import useAccessTokenStore from '@/@core/utils/useAuthStore'
 
 export const isTabletContext = createContext<boolean | null>(null)
@@ -36,9 +38,11 @@ export default function ProtectedPage({ children }: { children: React.ReactNode 
         </div>
       </Backdrop>
 
-      <isTabletContext.Provider value={isTablet}>
-        <isMobileContext.Provider value={isMobile}>{children}</isMobileContext.Provider>
-      </isTabletContext.Provider>
+      <SnackbarProvider>
+        <isTabletContext.Provider value={isTablet}>
+          <isMobileContext.Provider value={isMobile}>{children}</isMobileContext.Provider>
+        </isTabletContext.Provider>
+      </SnackbarProvider>
     </>
   )
 }

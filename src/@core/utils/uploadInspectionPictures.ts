@@ -1,5 +1,4 @@
 import { auth } from '@/lib/auth'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from './getS3Key'
 
 export const uploadInspectionPictures = async (
@@ -42,11 +41,10 @@ export const uploadInspectionPictures = async (
     const uploadedPicIds = dbResponse.data.data.machinePicIds
 
     console.log('DB 기록 완료:', uploadedPicIds)
-    handleSuccess(`${uploadedPicIds.length}개 사진이 성공적으로 업로드되었습니다.`)
 
-    return true
+    return uploadedPicIds.length
   } catch (e) {
-    handleApiError(e)
+    console.log('사진 업로드 실패', e)
 
     return false
   }

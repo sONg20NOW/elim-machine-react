@@ -14,9 +14,10 @@ import {
   Fab,
   useScrollTrigger,
   Fade,
-  Checkbox,
-  Snackbar
+  Checkbox
 } from '@mui/material'
+
+import { enqueueSnackbar } from 'notistack'
 
 import { handleApiError } from '@/utils/errorHandler'
 import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/@core/types'
@@ -62,7 +63,6 @@ const PictureTable = memo(
     const [isLoading, setIsLoading] = useState(false) // eslint-disable-line
 
     const [emptyMode, setEmptyMode] = useState(false)
-    const [openSnackBar, setOpenSnackBar] = useState(false)
 
     const trigger = useScrollTrigger({ target: scrollableAreaRef.current })
 
@@ -238,7 +238,7 @@ const PictureTable = memo(
           )
         ) {
           refetch()
-          setOpenSnackBar(true)
+          enqueueSnackbar('사진 업로드가 완료되었습니다', { variant: 'success', autoHideDuration: 1000 })
         } else {
           handleApiError('사진 업로드에 실패했습니다')
         }
@@ -300,12 +300,6 @@ const PictureTable = memo(
 
     return (
       <div className='flex flex-col gap-8'>
-        <Snackbar
-          open={openSnackBar}
-          onClose={() => setOpenSnackBar(false)}
-          autoHideDuration={1000}
-          message={`✅️ 사진 업로드 완료`}
-        />
         <Checkbox
           size='small'
           sx={{ position: 'absolute', right: 0, top: 0, zIndex: 5 }}
