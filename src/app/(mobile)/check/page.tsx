@@ -32,6 +32,8 @@ import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth, logout } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
+import { useGetEngineerByMemberId } from '@/@core/hooks/customTanstackQueries'
+import { gradeOption } from '@/app/_constants/options'
 
 export default function MachinePage() {
   const router = useRouter()
@@ -58,6 +60,7 @@ export default function MachinePage() {
   const [open, setOpen] = useState(false)
 
   const currentUser = useCurrentUserStore(set => set.currentUser)
+  const { data: engineerInfo } = useGetEngineerByMemberId((currentUser?.memberId ?? 0).toString())
 
   const isMobile = useContext(isMobileContext)
 
@@ -266,23 +269,40 @@ export default function MachinePage() {
                 p: 2
               }}
             >
-              {/* ! 유저 이미지로 변경 */}
-              <div className='w-[70px] h-[70px] bg-white rounded-full m-3'>
-                <i className='tabler-user text-[70px]' />
-              </div>
-              <div className='flex gap-2'>
-                <Typography variant='h4' color='white'>
-                  {/* {`[${gradeOption.find(v => v.value === (currentUser?.memberCareerResponseDto.grade ?? 'BEGINNER'))?.label}] ${currentUser.name}`} */}
-                  {`${currentUser.name}`}
-                </Typography>
-              </div>
-              {/* <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
-              {currentUser?.memberBasicResponseDto.companyName}
-            </Typography> */}
+              {engineerInfo ? (
+                <>
+                  <div className='flex gap-2 m-3 items-end'>
+                    {/* ! 유저 이미지로 변경 */}
+                    <div className='w-[70px] h-[70px] bg-white rounded-full'>
+                      <i className='tabler-user text-[70px]' />
+                    </div>
+                    {gradeOption.find(v => v.value === engineerInfo.grade)?.label && (
+                      <Typography variant='h4' color='white'>
+                        {`[${gradeOption.find(v => v.value === engineerInfo.grade)?.label}] `}
+                      </Typography>
+                    )}
+                    <Typography variant='h4' color='white'>
+                      {engineerInfo.memberName}
+                    </Typography>
+                  </div>
+                  <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+                    {engineerInfo.companyName}
+                  </Typography>
 
-              {/* <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
-              수첩발급번호: {currentUser?.memberPrivacyResponseDto.}
-            </Typography> */}
+                  <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+                    수첩발급번호: {engineerInfo?.engineerLicenseNum ?? '-'}
+                  </Typography>
+                </>
+              ) : (
+                <div className='flex gap-2 items-end m-3'>
+                  <div className='w-[70px] h-[70px] bg-white rounded-full'>
+                    <i className='tabler-user text-[70px]' />
+                  </div>
+                  <Typography variant='h4' color='white'>
+                    {currentUser.name}
+                  </Typography>
+                </div>
+              )}
             </Box>
           </Box>
           <div className='flex flex-col justify-between h-full'>

@@ -219,7 +219,12 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           <img
             src={pic.presignedUrl}
             alt={pic.originalFileName}
-            style={{ width: '100%', height: '50%', objectFit: 'cover' }}
+            style={{
+              width: '100%',
+              height: '50%',
+              objectFit: 'contain',
+              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))'
+            }}
           />
           <ImageListItemBar title={pic.originalFileName} sx={{ textAlign: 'center' }} />
         </ImageListItem>
@@ -251,7 +256,12 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           <img
             src={URL.createObjectURL(file)}
             alt={file.name}
-            style={{ width: '100%', height: '50%', objectFit: 'cover' }}
+            style={{
+              width: '100%',
+              height: '50%',
+              objectFit: 'contain',
+              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))'
+            }}
           />
           <ImageListItemBar title={file.name} sx={{ textAlign: 'center' }} />
         </ImageListItem>

@@ -61,7 +61,8 @@ export default function ProjectInfoCard({
         position: 'relative',
 
         backgroundImage: getBackgroundImageStyle(),
-        backgroundSize: 'cover',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
 
         // backgroundBlendMode: 'normal',
@@ -94,9 +95,9 @@ export default function ProjectInfoCard({
                 : '배정된 점검진 없음'}
           </Typography>
         )}
-        <Typography width={'fit-content'} variant='inherit'>
+        {/* <Typography width={'fit-content'} variant='inherit'>
           마지막 업로드: {'없음'}
-        </Typography>
+        </Typography> */}
       </div>
       {canChange && (
         <div className='absolute right-1 top-1'>
