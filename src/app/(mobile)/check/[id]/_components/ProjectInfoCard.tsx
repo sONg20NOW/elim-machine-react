@@ -11,7 +11,7 @@ import type { projectSummaryType } from '@/@core/utils/useProjectSummaryStore'
 export default function ProjectInfoCard({
   projectSummaryData,
   machineProjectId,
-  canChange = false
+  canChange = true
 }: {
   projectSummaryData: projectSummaryType
   machineProjectId: string
