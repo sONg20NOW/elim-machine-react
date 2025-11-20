@@ -4,7 +4,7 @@ import type { QueryFunction } from '@tanstack/react-query'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 // @ts-ignore
-import { AxiosError } from 'axios'
+import type { AxiosError } from 'axios'
 
 import { toast } from 'react-toastify'
 
@@ -1595,16 +1595,6 @@ export const useGetEngineerByMemberId = (memberId: string) => {
     queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEER_BY_MEMBERID(memberId),
     queryFn: fetchEngineer,
     staleTime: 1000 * 60 * 5, // 5분
-    enabled: Number(memberId) > 0,
-    retry: (failureCount, error) => {
-      // 에러가 AxiosError 타입이고, HTTP 상태 코드가 404인 경우
-      // @ts-ignore
-      if (error instanceof AxiosError && error.response?.status === 404) {
-        return false // 재시도 하지 않음
-      }
-
-      // 그 외의 에러(네트워크 오류, 5xx 등)의 경우 기본 재시도 정책을 따름 (true)
-      return failureCount < 3 // 기본 재시도 횟수를 3회로 가정 (원하는 대로 설정 가능)
-    }
+    enabled: Number(memberId) > 0
   })
 }

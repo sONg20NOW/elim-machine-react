@@ -1,5 +1,7 @@
 import Script from 'next/script'
 
+import type { Metadata } from 'next'
+
 // MUI Imports
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
 
@@ -21,9 +23,11 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
-import { BROWER_TAB_DESCRIPTION, BROWER_TAB_TITLE } from './_constants/table/TableHeader'
 
-export const metadata = {
+const BROWER_TAB_TITLE = 'ELIM'
+const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
+
+export const metadata: Metadata = {
   title: BROWER_TAB_TITLE,
   description: BROWER_TAB_DESCRIPTION
 }
@@ -38,9 +42,9 @@ const RootLayout = async (props: ChildrenType) => {
   const systemMode = 'light'
 
   // const direction = i18n.langDirection[params.lang]
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-  }
+  // if ('serviceWorker' in navigator) {
+  //   navigator.serviceWorker.register('/sw.js')
+  // }
 
   return (
     <html id='__next' suppressHydrationWarning>
