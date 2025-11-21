@@ -1,10 +1,5 @@
 import type { NextConfig } from 'next'
 
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  maximumFileSizeToCacheInBytes: 7000000
-})
-
 const nextConfig: NextConfig = {
   basePath: process.env.BASEPATH,
 
@@ -35,7 +30,5 @@ const nextConfig: NextConfig = {
   // IP주소로 접속 가능
   allowedDevOrigins: ['http://192.168.0.50', '192.168.0.50']
 }
-
-module.exports = withPWA(nextConfig)
 
 export default nextConfig
