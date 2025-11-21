@@ -50,6 +50,15 @@ export const uploadInspectionPictures = async (
   }
 }
 
+/**
+ * 사진 파일과 추가 정보를 받아서 S3Key를 만들고 이미지 새롭게 업로드
+ * @param machineProjectId
+ * @param inspectionId
+ * @param file
+ * @param checklistItemId
+ * @param checklistSubItemId
+ * @returns
+ */
 export const uploadSingleInspectionPic = async (
   machineProjectId: string,
   inspectionId: string,

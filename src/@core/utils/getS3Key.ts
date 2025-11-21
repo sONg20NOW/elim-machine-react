@@ -3,6 +3,20 @@ import axios from 'axios'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 
+/**
+ * S3 Bucket에 사진들을 등록하고 s3Key 정보를 받는 함수
+ * @param machineProjectId 필수
+ * @param files 필수
+ * @param inspectionId (설비사진 필수)
+ * @param checklistItemId (설비사진 필수)
+ * @param checklistSubItemId (설비사진 필수)
+ * @param machineProjectPicType (현장사진 필수)
+ * @returns s3Key 정보를 담은 객체 배열 {
+    fileName: string;
+    s3Key: string;
+    uploadSuccess: boolean;
+}[]
+ */
 export default async function getS3Key(
   machineProjectId: string,
   files: File[],
