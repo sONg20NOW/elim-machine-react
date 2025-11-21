@@ -23,6 +23,7 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
 
 const BROWER_TAB_TITLE = 'ELIM'
 const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
@@ -54,6 +55,8 @@ const RootLayout = (props: ChildrenType) => {
       </head>
       <Script src='//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'></Script>
       <body className='flex is-full min-bs-full flex-auto flex-col'>
+        {/* 클라이언트 전용 SW 등록 컴포넌트 */}
+        <ServiceWorkerRegister />
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
         {children}
         <SpeedInsights />
