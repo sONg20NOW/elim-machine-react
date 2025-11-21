@@ -7,7 +7,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { Box, Card, IconButton, Pagination, Typography } from '@mui/material'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
-import { handleApiError } from '@/utils/errorHandler'
 import type {
   MachineInspectionPageResponseDtoType,
   machineProjectEngineerDetailDtoType,
@@ -18,6 +17,7 @@ import AddInspectionModal from '../_components/AddInspectionModal'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
 import useProjectSummaryStore from '@/@core/utils/useProjectSummaryStore'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 export interface inspectionSummaryType {
   machineProjectName: string
@@ -70,7 +70,7 @@ export default function InspectionsPage() {
 
       setParticipatedEngineerList(response.data.data.machineProjectEngineerResponseDtos)
     } catch (error) {
-      handleApiError(error)
+      printErrorSnackbar(error)
     }
   }, [machineProjectId])
 
@@ -110,7 +110,7 @@ export default function InspectionsPage() {
         listRef.current.scrollTo({ top: 0, behavior: 'smooth' })
       }
     } catch (error) {
-      handleApiError(error, '데이터 조회에 실패했습니다.')
+      printErrorSnackbar(error, '데이터 조회에 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)

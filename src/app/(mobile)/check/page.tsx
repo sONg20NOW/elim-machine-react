@@ -26,7 +26,6 @@ import {
 } from '@mui/material'
 
 import type { MachineProjectPageDtoType, successResponseDtoType } from '@/@core/types'
-import { handleApiError } from '@/utils/errorHandler'
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth, logout } from '@/lib/auth'
@@ -34,6 +33,7 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 import { useGetEngineerByMemberId } from '@/@core/hooks/customTanstackQueries'
 import { gradeOption } from '@/app/_constants/options'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 export default function MachinePage() {
   const router = useRouter()
@@ -116,7 +116,7 @@ export default function MachinePage() {
         listRef.current.scrollTo({ top: 0, behavior: 'smooth' })
       }
     } catch (error) {
-      handleApiError(error, '필터링된 데이터를 불러오는 데 실패했습니다.')
+      printErrorSnackbar(error, '필터링된 데이터를 불러오는 데 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)

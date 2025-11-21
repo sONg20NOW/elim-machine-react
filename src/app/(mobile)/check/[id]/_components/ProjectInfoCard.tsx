@@ -2,11 +2,10 @@ import { useRef } from 'react'
 
 import { Box, IconButton, Typography } from '@mui/material'
 
-import { toast } from 'react-toastify'
-
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { useGetOverviewPics } from '@/@core/hooks/customTanstackQueries'
 import type { projectSummaryType } from '@/@core/utils/useProjectSummaryStore'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 export default function ProjectInfoCard({
   projectSummaryData,
@@ -30,7 +29,7 @@ export default function ProjectInfoCard({
     const file = event.target.files?.[0]
 
     if (!file) {
-      toast.warning('파일 처리에 문제가 발생했습니다.')
+      printErrorSnackbar('', '파일 처리에 문제가 발생했습니다.')
 
       return
     }

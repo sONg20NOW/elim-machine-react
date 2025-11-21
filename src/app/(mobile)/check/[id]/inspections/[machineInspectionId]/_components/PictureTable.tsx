@@ -17,15 +17,13 @@ import {
   Checkbox
 } from '@mui/material'
 
-import { enqueueSnackbar } from 'notistack'
-
-import { handleApiError } from '@/utils/errorHandler'
 import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/@core/types'
 
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadSingleInspectionPic } from '@/@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
+import { printErrorSnackbar, printSuccessSnackbar } from '@/@core/utils/snackbarHandler'
 
 const PictureTable = memo(
   ({
@@ -101,7 +99,7 @@ const PictureTable = memo(
 
           return response.data.data
         } catch (err) {
-          handleApiError(err)
+          printErrorSnackbar(err)
 
           isLoadingRef.current = false
           setIsLoading(false)
@@ -239,9 +237,9 @@ const PictureTable = memo(
           )
         ) {
           refetch()
-          enqueueSnackbar('사진 업로드가 완료되었습니다', { variant: 'success', autoHideDuration: 1000 })
+          printSuccessSnackbar('사진 업로드가 완료되었습니다')
         } else {
-          handleApiError('사진 업로드에 실패했습니다')
+          printErrorSnackbar('', '사진 업로드에 실패했습니다')
         }
       }
 

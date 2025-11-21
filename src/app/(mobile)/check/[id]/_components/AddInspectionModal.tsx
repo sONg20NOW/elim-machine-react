@@ -4,16 +4,14 @@ import { useEffect, useState } from 'react'
 
 import { Grid, MenuItem, Button, Typography, IconButton } from '@mui/material'
 
-import { toast } from 'react-toastify'
-
 import { NumberField } from '@base-ui-components/react/number-field'
 
 import CustomTextField from '@/@core/components/mui/TextField'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import { useGetCategories } from '@/@core/hooks/customTanstackQueries'
+import { printErrorSnackbar, printSuccessSnackbar } from '@/@core/utils/snackbarHandler'
 
 type AddInspectionModalProps = {
   disabled: boolean
@@ -54,7 +52,7 @@ const AddInspectionModal = ({ disabled, getFilteredInspectionList, machineProjec
   // 추후에 engineer 추가 가능하도록.
   const handleSubmit = async () => {
     if (!newData.machineCategoryId) {
-      toast.error('종류를 선택해주세요.')
+      printErrorSnackbar('', '종류를 선택해주세요.')
 
       return
     }
@@ -63,10 +61,10 @@ const AddInspectionModal = ({ disabled, getFilteredInspectionList, machineProjec
       await auth.post(`/api/machine-projects/${machineProjectId}/machine-inspections`, { inspections: [newData] })
 
       setOpen(false)
-      handleSuccess('설비 목록이 추가되었습니다')
+      printSuccessSnackbar('설비 목록이 추가되었습니다')
       getFilteredInspectionList()
     } catch (error) {
-      handleApiError(error)
+      printErrorSnackbar(error)
     }
   }
 
@@ -116,7 +114,7 @@ const AddInspectionModal = ({ disabled, getFilteredInspectionList, machineProjec
                 </NumberField.Increment>
               </NumberField.Group>
             </NumberField.Root>
-            <Button variant='contained' onClick={handleSubmit} sx={{ mr: 1 }}>
+            <Button variant='contained' onClick={handleSubmit} sx={{ mr: 1 }} disabled={!newData.machineCategoryId}>
               추가
             </Button>
           </div>

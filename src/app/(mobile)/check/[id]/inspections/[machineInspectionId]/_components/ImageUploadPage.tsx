@@ -20,13 +20,10 @@ import {
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { toast } from 'react-toastify'
-
-import { enqueueSnackbar } from 'notistack'
-
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
+import { printSuccessSnackbar, printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 
 interface checklistFormType {
   checklistSubItemId: number
@@ -76,13 +73,13 @@ export default function ImageUploadPage() {
 
   const handleUploadPictures = (data: checklistFormType) => {
     if (!(machineProjectId && machineInspectionId)) {
-      toast.warning('기계정보와 설비정보가 없습니다.')
+      printWarningSnackbar('기계정보와 설비정보가 없습니다.')
 
       return
     }
 
     if (!checklistForm.getValues().checklistSubItemId) {
-      toast.warning('하위항목을 먼저 지정해주세요')
+      printWarningSnackbar('하위항목을 먼저 지정해주세요')
 
       return
     }
@@ -101,7 +98,7 @@ export default function ImageUploadPage() {
       )
 
       if (result) {
-        enqueueSnackbar(`${result}개 사진 업로드가 완료되었습니다`, { variant: 'success', autoHideDuration: 1200 })
+        printSuccessSnackbar(`${result}개 사진 업로드가 완료되었습니다`, 1200)
         setFilesToUpload([])
         refetch()
       }

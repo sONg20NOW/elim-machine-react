@@ -14,13 +14,13 @@ import type {
   MachineProjectScheduleAndEngineerResponseDtoType,
   successResponseDtoType
 } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from './_components/ProjectInfoCard'
 import type { projectSummaryType } from '@/@core/utils/useProjectSummaryStore'
 import useProjectSummaryStore from '@/@core/utils/useProjectSummaryStore'
+import { printErrorSnackbar, printSuccessSnackbar } from '@/@core/utils/snackbarHandler'
 
 interface ProjectFormType {
   machineProjectName: string | null
@@ -80,7 +80,7 @@ const CheckDetailPage = () => {
 
       return response.data.data
     } catch (error) {
-      handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
+      printErrorSnackbar(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
     }
   }, [machineProjectId])
 
@@ -93,7 +93,7 @@ const CheckDetailPage = () => {
 
       return response.data.data.page.totalElements
     } catch (error) {
-      handleApiError(error, '설비개수를 불러오는 데 실패했습니다.')
+      printErrorSnackbar(error, '설비개수를 불러오는 데 실패했습니다.')
 
       return 0
     }
@@ -108,7 +108,7 @@ const CheckDetailPage = () => {
 
       return response.data.data
     } catch (error) {
-      handleApiError(error, '점검일정/참여기술진 정보를 불러오는 데 실패했습니다.')
+      printErrorSnackbar(error, '점검일정/참여기술진 정보를 불러오는 데 실패했습니다.')
     }
   }, [machineProjectId])
 
@@ -191,9 +191,9 @@ const CheckDetailPage = () => {
               note: data.note
             }
         )
-        handleSuccess('변경사항이 저장되었습니다.')
+        printSuccessSnackbar('변경사항이 저장되었습니다.')
       } catch (err) {
-        handleApiError(err)
+        printErrorSnackbar(err)
       }
     },
     [machineProjectId, reset]

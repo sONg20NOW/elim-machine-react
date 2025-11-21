@@ -8,10 +8,12 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContentText,
   DialogTitle,
+  Fab,
   IconButton,
   InputLabel,
   MenuItem,
@@ -21,7 +23,7 @@ import {
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { toast } from 'react-toastify'
+import { IconCamera, IconChevronLeft } from '@tabler/icons-react'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
@@ -31,9 +33,9 @@ import type {
   MachinePicPresignedUrlResponseDtoType,
   MachinePicUpdateResponseDtoType
 } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
 import getS3Key from '@/@core/utils/getS3Key'
+import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 
 const max_pic = 100
 
@@ -199,7 +201,7 @@ export default function PicturePage() {
 
       setOpenAlert(false)
     } catch (e) {
-      handleApiError(e)
+      printErrorSnackbar(e)
     }
 
     return
@@ -208,7 +210,7 @@ export default function PicturePage() {
   const handleSave = useCallback(
     async (data: formType) => {
       if (!watchedSubItemId) {
-        toast.warning('수정을 위해서는 하위항목을 지정해주세요.')
+        printWarningSnackbar('수정을 위해서는 하위항목을 지정해주세요.')
 
         return
       }
@@ -232,9 +234,9 @@ export default function PicturePage() {
         )
         reset({ ...response })
         console.log('updated picture:', response)
-        handleSuccess(`사진정보가 수정되었습니다.`)
+        printSuccessSnackbar(`사진정보가 수정되었습니다.`)
       } catch (e) {
-        handleApiError(e)
+        printErrorSnackbar(e)
       }
     },
     [
@@ -288,14 +290,14 @@ export default function PicturePage() {
         {/* 헤더 */}
         <MobileHeader
           left={
-            <Button type='button' sx={{ p: 0, display: 'flex', gap: 2 }} onClick={() => router.back()}>
-              <i className='tabler-chevron-left text-white text-3xl' />
+            <Button type='button' sx={{ p: 0, display: 'flex', gap: 2, minWidth: 0 }} onClick={() => router.back()}>
+              <IconChevronLeft color='white' size={30} />
               {!isMobile && <Typography color='white'>{currentInspectioin?.machineInspectionName}</Typography>}
             </Button>
           }
           right={
             <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
-              <IconButton type='submit' sx={{ p: 0 }} disabled={!isDirty}>
+              <IconButton type='submit' sx={{ p: 0 }} disabled={!isDirty || !watchedSubItemId}>
                 <i
                   ref={saveButtonRef}
                   className={`tabler-device-floppy text-white text-3xl ${isDirty ? 'animate-ring' : ''}`}
@@ -309,140 +311,172 @@ export default function PicturePage() {
           title={`사진(${pictures.length})`}
         />
         {/* 본 컨텐츠 (스크롤 가능 영역)*/}
-        <Box
-          ref={scrollableAreaRef}
-          sx={{
-            flex: 1,
-            overflowY: 'auto',
-            py: !isMobile ? 10 : 4,
-            px: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 5
-          }}
-        >
+        {watchedPresignedUrl && checklistList ? (
           <Box
+            ref={scrollableAreaRef}
             sx={{
-              height: isMobile ? '35dvh' : '48dvh',
-              border: '1px solid lightgray',
-              borderRadius: 2,
-              p: 2,
-              position: 'relative'
+              flex: 1,
+              overflowY: 'auto',
+              py: !isMobile ? 10 : 4,
+              px: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 5
             }}
           >
-            <IconButton type='button' sx={{ position: 'absolute', right: 8, top: 8, color: 'primary.main' }}>
-              <i className='tabler-camera text-4xl' onClick={() => imageInputRef.current?.click()} />
-            </IconButton>
-            <input
-              type='file'
-              hidden
-              ref={imageInputRef}
-              accept='image/*' // 이미지 파일만 허용
-              capture='environment'
-              onChange={handleImageChange}
-            />
-
-            {watchedPresignedUrl ? (
+            <Box
+              sx={{
+                minHeight: isMobile ? '35dvh' : '48dvh',
+                height: isMobile ? '35dvh' : '48dvh',
+                border: '1px solid lightgray',
+                borderRadius: 2,
+                p: 2,
+                position: 'relative',
+                background: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3))'
+              }}
+            >
+              <Fab
+                size='small'
+                type='button'
+                sx={{ position: 'absolute', right: 14, top: 14, backgroundColor: '#ffffff9f' }}
+              >
+                <IconCamera color='white' size={30} onClick={() => imageInputRef.current?.click()} />
+              </Fab>
+              <input
+                type='file'
+                hidden
+                ref={imageInputRef}
+                accept='image/*' // 이미지 파일만 허용
+                capture='environment'
+                onChange={handleImageChange}
+              />
               <img
                 src={watchedPresignedUrl}
                 alt={getValues().alternativeSubTitle}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
-            ) : (
-              <Typography>이미지 오류!</Typography>
-            )}
-          </Box>
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>파일 이름</InputLabel>
-            <TextField
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('originalFileName')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
-          </div>
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
-            <TextField
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-              value={machineChecklistItemId}
-              onChange={e => setMachineChecklistItemId(Number(e.target.value))}
-              fullWidth
-              select
-            >
-              {checklistList &&
-                checklistList
+            </Box>
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>파일 이름</InputLabel>
+              <TextField
+                size={isMobile ? 'small' : 'medium'}
+                fullWidth
+                {...register('originalFileName')}
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+            <div className='flex flex-col gap-1'>
+              <InputLabel required sx={{ px: 2 }}>
+                점검항목
+              </InputLabel>
+              <TextField
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+                value={machineChecklistItemId}
+                onChange={e => setMachineChecklistItemId(Number(e.target.value))}
+                fullWidth
+                size={isMobile ? 'small' : 'medium'}
+                select
+              >
+                {checklistList
                   .filter(p => p.checklistSubItems.length !== 0)
                   .map(v => (
                     <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
                       {v.machineChecklistItemName}
                     </MenuItem>
                   ))}
-            </TextField>
-          </div>
-          {machineChecklistItemId && !!subItems.length && (
+              </TextField>
+            </div>
+            {machineChecklistItemId && !!subItems.length && (
+              <div className='flex flex-col gap-1'>
+                <InputLabel required sx={{ px: 2 }}>
+                  하위항목
+                </InputLabel>
+                <Controller
+                  control={control}
+                  name={'machineChecklistSubItemId'}
+                  render={({ field: { ref, onChange, value } }) => (
+                    <TextField
+                      ref={ref}
+                      onChange={e => onChange(Number(e.target.value))}
+                      value={value}
+                      fullWidth
+                      select
+                      size={isMobile ? 'small' : 'medium'}
+                      slotProps={{
+                        input: { sx: { fontSize: 18 } },
+                        select: {
+                          displayEmpty: true,
+                          renderValue: value => {
+                            if (!value || value === '') {
+                              return (
+                                <Typography variant='inherit' color='error'>
+                                  하위 항목은 필수 입력입니다
+                                </Typography>
+                              )
+                            }
+
+                            return (
+                              <Typography variant='inherit'>
+                                {subItems.find(v => v.machineChecklistSubItemId === value)?.checklistSubItemName}
+                              </Typography>
+                            )
+                          }
+                        }
+                      }}
+                    >
+                      {subItems.map(v => (
+                        <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
+                          {v.checklistSubItemName}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </div>
+            )}
+
             <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>하위항목</InputLabel>
-              <Controller
-                control={control}
-                name={'machineChecklistSubItemId'}
-                render={({ field: { ref, onChange, value } }) => (
-                  <TextField
-                    ref={ref}
-                    onChange={e => onChange(Number(e.target.value))}
-                    value={value}
-                    fullWidth
-                    select
-                    slotProps={{ input: { sx: { fontSize: 18 } } }}
-                  >
-                    {subItems.map(v => (
-                      <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
-                        {v.checklistSubItemName}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
+              <InputLabel sx={{ px: 2 }}>대체타이틀</InputLabel>
+              <TextField
+                size={isMobile ? 'small' : 'medium'}
+                fullWidth
+                {...register('alternativeSubTitle')}
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
               />
             </div>
-          )}
-
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>대체타이틀</InputLabel>
-            <TextField
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('alternativeSubTitle')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>측정값</InputLabel>
+              <TextField
+                size={isMobile ? 'small' : 'medium'}
+                fullWidth
+                {...register('measuredValue')}
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>비고</InputLabel>
+              <TextField
+                minRows={3}
+                size={isMobile ? 'small' : 'medium'}
+                fullWidth
+                {...register('remark')}
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+          </Box>
+        ) : (
+          <div className='w-full h-full grid place-items-center'>
+            <CircularProgress />
           </div>
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>측정값</InputLabel>
-            <TextField
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('measuredValue')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
-          </div>
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>비고</InputLabel>
-            <TextField
-              minRows={3}
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('remark')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
-          </div>
-        </Box>
+        )}
         {/* 탭 리스트 */}
         <Box
           sx={{

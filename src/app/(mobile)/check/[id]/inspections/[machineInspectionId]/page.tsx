@@ -10,15 +10,12 @@ import TabList from '@mui/lab/TabList'
 
 import TabContext from '@mui/lab/TabContext'
 
-import { toast } from 'react-toastify'
-
 import TabPanel from '@mui/lab/TabPanel'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 
 import { auth } from '@/lib/auth'
 
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import ChecklistForm from './_components/ChecklistForm'
 import InspectionForm from './_components/InspectionForm'
@@ -32,6 +29,7 @@ import EmptyPictureTable from './_components/EmptyPictureTable'
 import EmptyCategorySelector from './_components/EmptyCategorySelector'
 import type { CheckTabValueType } from '@/@core/utils/useCheckTabValueStore'
 import useCheckTabValueStore from '@/@core/utils/useCheckTabValueStore'
+import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 
 export interface FormComponentHandle {
   submit: () => Promise<boolean>
@@ -82,7 +80,7 @@ export default function CheckInspectionDetailPage() {
       })
       router.back()
     } catch (error) {
-      handleApiError(error)
+      printErrorSnackbar(error)
     }
   }, [machineProjectId, machineInspectionId, router])
 
@@ -98,11 +96,11 @@ export default function CheckInspectionDetailPage() {
     }
 
     if (successMessage.length) {
-      handleSuccess(
+      printSuccessSnackbar(
         `${successMessage.map(v => ({ result: '점검결과', info: '설비정보' })[v]).join('와 ')}가 저장되었습니다.`
       )
     } else {
-      toast.warning('변동사항이 없습니다')
+      printWarningSnackbar('변동사항이 없습니다')
     }
   }
 
@@ -253,9 +251,7 @@ export default function CheckInspectionDetailPage() {
               sx={{ display: 'flex', px: isMobile ? '' : 20 }}
               centered
               onChange={(event: React.SyntheticEvent, newValue: CheckTabValueType) => {
-                if (form1Ref.current?.isDirty || form2Ref.current?.isDirty) {
-                  toast.warning('먼저 변경사항을 저장해주세요', { autoClose: 1500 })
-                } else setTabValue(newValue)
+                setTabValue(newValue)
               }}
             >
               <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />} />

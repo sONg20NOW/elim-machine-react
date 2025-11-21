@@ -1,0 +1,15 @@
+import { enqueueSnackbar } from 'notistack'
+
+import { getErrorMessage } from '@/utils/errorHandler'
+
+export function printSuccessSnackbar(message: string, autoHideDuration = 1000) {
+  enqueueSnackbar(message, { variant: 'success', autoHideDuration: autoHideDuration })
+}
+
+export function printErrorSnackbar(error: any, message = '처리 중 오류가 발생했습니다', autoHideDuration = 1000) {
+  enqueueSnackbar(getErrorMessage(error, message), { variant: 'error', autoHideDuration: autoHideDuration })
+}
+
+export function printWarningSnackbar(message: string, autoHideDuration = 1000) {
+  enqueueSnackbar(message, { variant: 'warning', autoHideDuration: autoHideDuration })
+}

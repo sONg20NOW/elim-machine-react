@@ -11,8 +11,8 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/@core/types'
 import type { FormComponentHandle } from '../page'
 import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
 import { useGetChecklistInfo, useGetChecklistResult } from '@/@core/hooks/customTanstackQueries'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 interface formType {
   deficiencies: string
@@ -85,7 +85,7 @@ const ChecklistForm = memo(
 
           return true
         } catch (e) {
-          handleApiError(e)
+          printErrorSnackbar(e)
 
           return false
         }
