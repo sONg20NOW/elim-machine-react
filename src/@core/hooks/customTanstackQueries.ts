@@ -11,6 +11,7 @@ import { toast } from 'react-toastify'
 import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
+  EngineerBasicResponseDtoType,
   GasMeasurementResponseDtoType,
   MachineCategoryResponseDtoType,
   MachineEnergyTypeResponseDtoType,
@@ -1567,5 +1568,33 @@ export const useMutateGuide = (machineProjectId: string) => {
       console.log(error)
       handleApiError(error)
     }
+  })
+}
+
+// ----------------- 모바일 관련 -----------------
+// GET /api/engineers/by-member/{memberId}
+export const useGetEngineerByMemberId = (memberId: string) => {
+  const fetchEngineer: QueryFunction<EngineerBasicResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: EngineerBasicResponseDtoType
+        }>(`/api/engineers/by-member/${memberId}`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [memberId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEER_BY_MEMBERID(memberId),
+    queryFn: fetchEngineer,
+    staleTime: 1000 * 60 * 5, // 5분
+    enabled: Number(memberId) > 0
   })
 }

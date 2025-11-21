@@ -10,8 +10,6 @@ import Button from '@mui/material/Button'
 
 import { animate, motion, useMotionValue, useTransform } from 'motion/react'
 
-const MotionCard = motion.create(Card)
-
 // Component Imports
 import {
   alpha,
@@ -28,11 +26,14 @@ import {
 } from '@mui/material'
 
 import type { MachineProjectPageDtoType, successResponseDtoType } from '@/@core/types'
-import { handleApiError } from '@/utils/errorHandler'
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { auth, logout } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
+import { useGetEngineerByMemberId } from '@/@core/hooks/customTanstackQueries'
+import { gradeOption } from '@/app/_constants/options'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 export default function MachinePage() {
   const router = useRouter()
@@ -56,9 +57,12 @@ export default function MachinePage() {
   // 전체현장 / 나의현장 토글
   const [myProject, setMyProject] = useState(false)
 
-  const isMobile = useContext(isMobileContext)
-
   const [open, setOpen] = useState(false)
+
+  const currentUser = useCurrentUserStore(set => set.currentUser)
+  const { data: engineerInfo } = useGetEngineerByMemberId((currentUser?.memberId ?? 0).toString())
+
+  const isMobile = useContext(isMobileContext)
 
   // 페이지 변경 시 스크롤 업을 위한 Ref
   const listRef = useRef<HTMLDivElement>(null)
@@ -67,20 +71,6 @@ export default function MachinePage() {
   const count = useMotionValue(0)
   const rounded = useTransform(() => Math.round(count.get()))
   const theme = useTheme()
-
-  useEffect(() => {
-    const controls = animate(count, totalElements, { duration: 1 })
-
-    return () => controls.stop()
-  }, [totalElements, count])
-
-  // ! 나중에 accessToken 디코딩해서 실제 정보로
-  const currentUser = {
-    name: '테스트슈퍼관리자20',
-    gradeDescription: '보조',
-    engineerLicenseNum: '259-1004',
-    companyName: '엘림주식회사(주)'
-  }
 
   const CustomSwitch = styled(Switch)(({ theme }) => ({
     '& .MuiSwitch-switchBase.Mui-checked': {
@@ -104,7 +94,7 @@ export default function MachinePage() {
 
     try {
       projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
-      myProject ? queryParams.set('engineerName', currentUser.name) : queryParams.delete('engineerName')
+      myProject ? queryParams.set('engineerName', currentUser?.name ?? '') : queryParams.delete('engineerName')
 
       queryParams.set('page', page.toString())
       queryParams.set('size', size.toString())
@@ -126,13 +116,19 @@ export default function MachinePage() {
         listRef.current.scrollTo({ top: 0, behavior: 'smooth' })
       }
     } catch (error) {
-      handleApiError(error, '필터링된 데이터를 불러오는 데 실패했습니다.')
+      printErrorSnackbar(error, '필터링된 데이터를 불러오는 데 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
     }
     // eslint-disable-next-line
   }, [page, size, projectName, myProject])
+
+  useEffect(() => {
+    const controls = animate(count, totalElements, { duration: 1 })
+
+    return () => controls.stop()
+  }, [totalElements, count])
 
   // API 호출
   useEffect(() => {
@@ -147,14 +143,11 @@ export default function MachinePage() {
   }
 
   // 기계설비현장 카드
-  function MachineProjectCard({ machineProject, idx }: { machineProject: MachineProjectPageDtoType; idx: number }) {
+  function MachineProjectCard({ machineProject }: { machineProject: MachineProjectPageDtoType }) {
     const engineerCnt = machineProject.engineerNames.length
 
     return (
-      <MotionCard
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: idx / 20 }}
+      <Card
         sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
         elevation={10}
         onClick={() => handleMachineProjectClick(machineProject)}
@@ -177,9 +170,10 @@ export default function MachinePage() {
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
             <Typography sx={{ fontWeight: 500 }}>
-              {machineProject.fieldBeginDate &&
+              {(machineProject.fieldBeginDate &&
                 machineProject.fieldEndDate &&
-                `${machineProject.fieldBeginDate} ~ ${machineProject.fieldEndDate.slice(5)}`}
+                `${machineProject.fieldBeginDate} ~ ${machineProject.fieldEndDate.slice(5)}`) ??
+                '~'}
             </Typography>
             <Typography>
               {engineerCnt > 2
@@ -193,7 +187,7 @@ export default function MachinePage() {
             </Typography>
           </Box>
         </Box>
-      </MotionCard>
+      </Card>
     )
   }
 
@@ -211,15 +205,14 @@ export default function MachinePage() {
           backgroundColor: 'white'
         }}
       >
-        <MotionCard
-          initial={{ x: myProject ? 0 : '100%' }}
-          animate={{ x: myProject ? '100%' : 0 }}
+        <Card
           sx={{
             position: 'absolute',
             backgroundColor: 'primary.main',
             borderRadius: isMobile ? 1 : 10,
             width: isMobile ? '90%' : '47%',
             height: isMobile ? '45%' : '80%',
+            translate: myProject ? '100%' : '',
             boxShadow: 2,
             color: 'white'
           }}
@@ -256,62 +249,88 @@ export default function MachinePage() {
   return (
     <>
       {/* Drawer 부분 */}
-      <Drawer
-        open={open}
-        onClose={() => setOpen(false)}
-        slotProps={{
-          paper: { sx: { width: isMobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
-          root: { sx: { position: 'relative' } }
-        }}
-        anchor='left'
-      >
-        <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', right: 0, top: 0 }}>
-          <i className='tabler-x text-white' />
-        </IconButton>
-        <Box>
-          <Box
-            sx={{
-              backgroundColor: 'primary.light',
-              p: 2
-            }}
-          >
-            {/* ! 유저 이미지로 변경 */}
-            <div className='w-[70px] h-[70px] bg-white rounded-full m-3'>
-              <i className='tabler-user text-[70px]' />
-            </div>
-            <div className='flex gap-2'>
-              <Typography variant='h4' color='white'>
-                {`[${currentUser.gradeDescription}] ${currentUser.name}`}
-              </Typography>
-            </div>
-            <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
-              {currentUser.companyName}
-            </Typography>
-
-            <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
-              수첩발급번호: {currentUser.engineerLicenseNum}
-            </Typography>
-          </Box>
-        </Box>
-        <div className='flex flex-col justify-between h-full'>
-          <Box sx={{ p: 5, mt: 5 }}>
-            <Button
-              fullWidth
-              sx={{ display: 'flex', justifyContent: 'start', boxShadow: 4, color: 'dimgray', borderColor: 'dimgray' }}
-              variant='outlined'
-              onClick={logout}
+      {currentUser && (
+        <Drawer
+          open={open}
+          onClose={() => setOpen(false)}
+          slotProps={{
+            paper: { sx: { width: isMobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
+            root: { sx: { position: 'relative' } }
+          }}
+          anchor='left'
+        >
+          <IconButton onClick={() => setOpen(false)} sx={{ position: 'absolute', right: 0, top: 0 }}>
+            <i className='tabler-x text-white' />
+          </IconButton>
+          <Box>
+            <Box
+              sx={{
+                backgroundColor: 'primary.light',
+                p: 2
+              }}
             >
-              <i className='tabler-logout text-[30px]' />
-              <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>
-                로그아웃
-              </Typography>
-            </Button>
+              {engineerInfo ? (
+                <>
+                  <div className='flex gap-2 m-3 items-end'>
+                    {/* ! 유저 이미지로 변경 */}
+                    <div className='w-[70px] h-[70px] bg-white rounded-full'>
+                      <i className='tabler-user text-[70px]' />
+                    </div>
+                    {gradeOption.find(v => v.value === engineerInfo.grade)?.label && (
+                      <Typography variant='h4' color='white'>
+                        {`[${gradeOption.find(v => v.value === engineerInfo.grade)?.label}] `}
+                      </Typography>
+                    )}
+                    <Typography variant='h4' color='white'>
+                      {engineerInfo.memberName}
+                    </Typography>
+                  </div>
+                  <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+                    {engineerInfo.companyName}
+                  </Typography>
+
+                  <Typography variant='h5' color='white' sx={{ fontWeight: 300 }}>
+                    수첩발급번호: {engineerInfo?.engineerLicenseNum ?? '-'}
+                  </Typography>
+                </>
+              ) : (
+                <div className='flex gap-2 items-end m-3'>
+                  <div className='w-[70px] h-[70px] bg-white rounded-full'>
+                    <i className='tabler-user text-[70px]' />
+                  </div>
+                  <Typography variant='h4' color='white'>
+                    {currentUser.name}
+                  </Typography>
+                </div>
+              )}
+            </Box>
           </Box>
-          <Link sx={{ textAlign: 'end', py: 3, px: 5 }} href='/machine'>
-            웹으로 보기
-          </Link>
-        </div>
-      </Drawer>
+          <div className='flex flex-col justify-between h-full'>
+            <Box sx={{ p: 5, mt: 5 }}>
+              <Button
+                fullWidth
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'start',
+                  boxShadow: 4,
+                  color: 'dimgray',
+                  borderColor: 'dimgray'
+                }}
+                variant='outlined'
+                onClick={logout}
+              >
+                <i className='tabler-logout text-[30px]' />
+                <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>
+                  로그아웃
+                </Typography>
+              </Button>
+            </Box>
+            <Link sx={{ textAlign: 'end', py: 3, px: 5 }} href='/machine'>
+              웹으로 보기
+            </Link>
+          </div>
+        </Drawer>
+      )}
 
       {/* 렌더링 될 화면 */}
       <Box className='flex flex-col w-full' sx={{ height: '100dvh' }}>
@@ -321,7 +340,7 @@ export default function MachinePage() {
               <IconButton sx={{ boxShadow: 3, backgroundColor: 'white' }} onClick={() => setOpen(true)}>
                 <i className='tabler-user' />
               </IconButton>
-              {!isMobile && <ProjectToggle />}
+              {/* {!isMobile && <ProjectToggle />} */}
             </>
           }
           title={
@@ -363,8 +382,8 @@ export default function MachinePage() {
               overflowX: 'hidden'
             }}
           >
-            {data.map((machineProject, idx) => (
-              <MachineProjectCard key={machineProject.machineProjectId} idx={idx} machineProject={machineProject} />
+            {data.map(machineProject => (
+              <MachineProjectCard key={machineProject.machineProjectId} machineProject={machineProject} />
             ))}
           </Box>
         ) : (

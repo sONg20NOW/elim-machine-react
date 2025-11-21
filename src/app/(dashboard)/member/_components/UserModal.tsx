@@ -32,6 +32,7 @@ import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithToo
 import { auth } from '@/lib/auth'
 import type { MemberType } from '@/@core/hooks/customTanstackQueries'
 import { useMutateSingleMember } from '@/@core/hooks/customTanstackQueries'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 
 type requestRuleBodyType = {
   url: string
@@ -102,6 +103,10 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
   const memberId = { ...editData?.memberBasicResponseDto }.memberId
   const juminNum = { ...editData?.memberPrivacyResponseDto }.juminNum
 
+  // 로그인한 사용자의 userModal인지 파악
+  const currentuserId = useCurrentUserStore(set => set.currentUser)?.memberId
+  const isYours = selectedUserData.memberBasicResponseDto.memberId === currentuserId
+
   // const { mutateAsync: mutateBasicAsync } = useMutateSingleMemberBasic(memberId.toString())
   const { mutateAsync: mutateBasicAsync } = useMutateSingleMember<MemberBasicDtoType>(memberId.toString(), 'basic')
 
@@ -113,6 +118,8 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
   const { mutateAsync: mutateOfficeAsync } = useMutateSingleMember<MemberOfficeDtoType>(memberId.toString(), 'office')
   const { mutateAsync: mutateCareerAsync } = useMutateSingleMember<MemberCareerDtoType>(memberId.toString(), 'career')
   const { mutateAsync: mutateEtcAsync } = useMutateSingleMember<MemberEtcDtoType>(memberId.toString(), 'etc')
+
+  const { currentUser, setCurrentUserName } = useCurrentUserStore()
 
   const handleDeleteUser = async () => {
     const version = editData.memberBasicResponseDto?.version
@@ -167,6 +174,12 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           setEditData({ ...editData, memberBasicResponseDto: newBasic })
           console.log(`${requestInfo.value} info saved: `, newBasic)
           handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
+
+          // 헤더에서 사용하는 정보 업데이트 (현재 로그인 중인 사용자의 정보라면)
+          if (currentUser && currentUser.memberId === newBasic.memberId) {
+            setCurrentUserName(newBasic.name)
+          }
+
           setIsEditing(false)
           reloadData && reloadData()
           break
@@ -251,16 +264,28 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           )
         }
         modifyButton={
-          <Button
-            variant='contained'
-            color='error'
-            type='reset'
-            onClick={() => {
-              setShowDeleteModal(true)
-            }}
-          >
-            삭제
-          </Button>
+          <>
+            <Button
+              variant='contained'
+              color='error'
+              type='reset'
+              onClick={() => {
+                setShowDeleteModal(true)
+              }}
+            >
+              삭제
+            </Button>
+            {isYours && (
+              <Button
+                color='warning'
+                onClick={() => {
+                  toast.warning('곧 추가될 기능입니다')
+                }}
+              >
+                비밀번호 변경
+              </Button>
+            )}
+          </>
         }
         secondaryButton={
           isEditing ? (

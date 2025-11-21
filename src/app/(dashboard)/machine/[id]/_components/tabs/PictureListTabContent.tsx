@@ -409,7 +409,8 @@ const PictureListTabContent = () => {
               style={{
                 width: '100%',
                 height: '50%',
-                objectFit: 'cover',
+                objectFit: 'contain',
+                background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
                 borderTopLeftRadius: 5,
                 borderTopRightRadius: 5
               }}
@@ -490,7 +491,8 @@ const PictureListTabContent = () => {
               style={{
                 width: '100%',
                 height: '50%',
-                objectFit: 'cover',
+                objectFit: 'contain',
+                background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
                 borderTopLeftRadius: 5,
                 borderTopRightRadius: 5
               }}

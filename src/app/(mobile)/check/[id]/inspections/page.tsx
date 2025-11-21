@@ -6,22 +6,18 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { Box, Card, IconButton, Pagination, Typography } from '@mui/material'
 
-import { motion } from 'motion/react'
-
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
-import { handleApiError } from '@/utils/errorHandler'
 import type {
   MachineInspectionPageResponseDtoType,
   machineProjectEngineerDetailDtoType,
   successResponseDtoType
 } from '@/@core/types'
 import { auth } from '@/lib/auth'
-import type { projectSummaryType } from '../page'
 import AddInspectionModal from '../_components/AddInspectionModal'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
-
-const MotionCard = motion.create(Card)
+import useProjectSummaryStore from '@/@core/utils/useProjectSummaryStore'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 export interface inspectionSummaryType {
   machineProjectName: string
@@ -58,11 +54,12 @@ export default function InspectionsPage() {
   // 설비 추가 모달
   const [participatedEngineerList, setParticipatedEngineerList] = useState<machineProjectEngineerDetailDtoType[]>()
 
-  // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
-  if (!localStorage.getItem('projectSummary')) router.back()
+  const projectSummaryData = useProjectSummaryStore(set => set.projectSummary)
 
-  // ! 로컬 스토리지에서 데이터 가져오기
-  const projectSummaryData: projectSummaryType = JSON.parse(localStorage.getItem('projectSummary')!)
+  useEffect(() => {
+    // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
+    if (!projectSummaryData) router.back()
+  }, [projectSummaryData, router])
 
   // 참여기술진 목록 가져오기
   const getParticipatedEngineerList = useCallback(async () => {
@@ -73,7 +70,7 @@ export default function InspectionsPage() {
 
       setParticipatedEngineerList(response.data.data.machineProjectEngineerResponseDtos)
     } catch (error) {
-      handleApiError(error)
+      printErrorSnackbar(error)
     }
   }, [machineProjectId])
 
@@ -113,7 +110,7 @@ export default function InspectionsPage() {
         listRef.current.scrollTo({ top: 0, behavior: 'smooth' })
       }
     } catch (error) {
-      handleApiError(error, '데이터 조회에 실패했습니다.')
+      printErrorSnackbar(error, '데이터 조회에 실패했습니다.')
       setError(true)
     } finally {
       setLoading(false)
@@ -131,54 +128,57 @@ export default function InspectionsPage() {
   }
 
   // 설비 카드 컴포넌트
-  const InspectionInfoCard = memo(
-    ({ inspection, idx }: { inspection: MachineInspectionPageResponseDtoType; idx: number }) => {
-      const engineerCnt = inspection.engineerNames.length
+  const InspectionInfoCard = memo(({ inspection }: { inspection: MachineInspectionPageResponseDtoType }) => {
+    const engineerCnt = inspection.engineerNames.length
 
-      return (
-        <MotionCard
-          transition={{ delay: idx / 20 }}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
-          elevation={10}
-          onClick={() => handleInspectionClick(inspection)}
+    return (
+      <Card
+        sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
+        elevation={10}
+        onClick={() => handleInspectionClick(inspection)}
+      >
+        <div className='flex-1'>
+          <i className='tabler-photo-bolt w-full h-full' />
+        </div>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            px: !isMobile ? 5 : 2,
+            py: !isMobile ? 10 : 5,
+            gap: !isMobile ? 3 : 1,
+            flex: !isMobile ? 3 : 2
+          }}
         >
-          <div className='flex-1'>
-            <i className='tabler-photo-bolt w-full h-full' />
-          </div>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              px: !isMobile ? 5 : 2,
-              py: !isMobile ? 10 : 5,
-              gap: !isMobile ? 3 : 1,
-              flex: !isMobile ? 3 : 2
-            }}
-          >
-            <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
-              {inspection.machineInspectionName ?? '이름없는 설비'}
+          <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
+            {inspection.machineInspectionName ?? '이름없는 설비'}
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
+            {inspection.checkDate && inspection.checkDate !== '' ? (
+              <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate}</Typography>
+            ) : (
+              <Typography sx={{ color: 'lightgray' }}>점검날짜</Typography>
+            )}
+            {inspection.location && inspection.location !== '' ? (
+              <Typography sx={{ fontWeight: 500 }}>{inspection.location}</Typography>
+            ) : (
+              <Typography sx={{ color: 'lightgray' }}>점검위치</Typography>
+            )}
+            <Typography>
+              {engineerCnt > 2
+                ? inspection.engineerNames
+                    .slice(0, 2)
+                    .join(', ')
+                    .concat(`외 ${engineerCnt - 2}명`)
+                : engineerCnt === 0
+                  ? '배정된 점검진 없음'
+                  : inspection.engineerNames.join(', ')}
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
-              <Typography sx={{ fontWeight: 500 }}>{inspection.checkDate ?? '점검날짜'}</Typography>
-              <Typography sx={{ fontWeight: 500 }}>{inspection.location ?? '설치위치'}</Typography>
-              <Typography>
-                {engineerCnt > 2
-                  ? inspection.engineerNames
-                      .slice(0, 2)
-                      .join(', ')
-                      .concat(`외 ${engineerCnt - 2}명`)
-                  : engineerCnt === 0
-                    ? '배정된 점검진 없음'
-                    : inspection.engineerNames.join(', ')}
-              </Typography>
-            </Box>
           </Box>
-        </MotionCard>
-      )
-    }
-  )
+        </Box>
+      </Card>
+    )
+  })
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
@@ -204,7 +204,9 @@ export default function InspectionsPage() {
       {/* 스크롤이 생기는 메인 영역 */}
       <Box ref={listRef} sx={{ flex: 1, overflowY: 'auto', p: 5 }}>
         {inspections.length > 0 ? (
-          inspections.map((inspection, idx) => <InspectionInfoCard key={idx} idx={idx} inspection={inspection} />)
+          inspections.map(inspection => (
+            <InspectionInfoCard key={inspection.machineInspectionId} inspection={inspection} />
+          ))
         ) : (
           <Box sx={{ display: 'grid', placeItems: 'center', height: '100%' }}>
             <div className='flex flex-col gap-3 items-center'>

@@ -16,9 +16,9 @@ import type { FormComponentHandle } from '../page'
 // import { engineerListContext } from '../page'
 // import EngineerCard from '../_components/EngineerCard'
 import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
 import { useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
 import { equipmentPhaseOption } from '@/app/_constants/options'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 export interface formType {
   machineInspectionName: string
@@ -82,7 +82,7 @@ const InspectionForm = memo(
 
           return true
         } catch (e) {
-          handleApiError(e)
+          printErrorSnackbar(e)
 
           return false
         }

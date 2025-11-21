@@ -1237,6 +1237,17 @@ export interface MachinePerformanceReviewAgingUpdateResponseDtoType {
   agingInspectionResult: string
 }
 
+// ----------- 모바일 -----------
+// GET /api/engineers/by-member/{memberId}
+
+export interface EngineerBasicResponseDtoType {
+  engineerId: number
+  companyName: string
+  memberName: string
+  grade: gradeType
+  engineerLicenseNum: string
+}
+
 // ----------- 로그인 -----------
 // POST /api/auth/web/login
 export interface LoginResponseDtoType {

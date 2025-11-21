@@ -8,9 +8,6 @@ import type {
   MachineInspectionPageResponseDtoType
 } from '../../../@core/types'
 
-export const BROWER_TAB_TITLE = 'ELIM'
-export const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
-
 // TODO: 추후 input info와 연동..? 타입들에 대해서 번역한 단어를 저장해두는 것도 좋을 듯..
 // table 생성 중 헤더 생성에 필요.
 export const HEADERS = {

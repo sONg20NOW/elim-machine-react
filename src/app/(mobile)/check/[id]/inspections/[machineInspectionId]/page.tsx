@@ -10,15 +10,12 @@ import TabList from '@mui/lab/TabList'
 
 import TabContext from '@mui/lab/TabContext'
 
-import { toast } from 'react-toastify'
-
 import TabPanel from '@mui/lab/TabPanel'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 
 import { auth } from '@/lib/auth'
 
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import ChecklistForm from './_components/ChecklistForm'
 import InspectionForm from './_components/InspectionForm'
@@ -28,8 +25,11 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import PictureTable from './_components/PictureTable'
 import ImageUploadPage from './_components/ImageUploadPage'
 import { useGetChecklistInfo, useGetEveryInspections } from '@/@core/hooks/customTanstackQueries'
-
-type currentTabType = 'pictures' | 'info' | 'gallery' | 'camera'
+import EmptyPictureTable from './_components/EmptyPictureTable'
+import EmptyCategorySelector from './_components/EmptyCategorySelector'
+import type { CheckTabValueType } from '@/@core/utils/useCheckTabValueStore'
+import useCheckTabValueStore from '@/@core/utils/useCheckTabValueStore'
+import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 
 export interface FormComponentHandle {
   submit: () => Promise<boolean>
@@ -52,7 +52,7 @@ export default function CheckInspectionDetailPage() {
   const TabListRef = useRef<HTMLElement>(null)
   const scrollableAreaRef = useRef<HTMLElement>(null)
 
-  const [currentTab, setCurrentTab] = useState<currentTabType>('pictures')
+  const { tabValue, setTabValue } = useCheckTabValueStore()
 
   // 설비 삭제 경고 창
   const [openAlert, setOpenAlert] = useState(false)
@@ -60,9 +60,6 @@ export default function CheckInspectionDetailPage() {
   const [category, setCategory] = useState<string>('전체')
 
   const saveButtonRef = useRef<HTMLElement>(null)
-
-  // 해당 페이지에 접속했는데 localStorage에 정보가 없다면 뒤로 가기
-  if (!localStorage.getItem('projectSummary')) router.back()
 
   const { data: inspectionList } = useGetEveryInspections(`${machineProjectId}`)
 
@@ -83,7 +80,7 @@ export default function CheckInspectionDetailPage() {
       })
       router.back()
     } catch (error) {
-      handleApiError(error)
+      printErrorSnackbar(error)
     }
   }, [machineProjectId, machineInspectionId, router])
 
@@ -99,11 +96,11 @@ export default function CheckInspectionDetailPage() {
     }
 
     if (successMessage.length) {
-      handleSuccess(
+      printSuccessSnackbar(
         `${successMessage.map(v => ({ result: '점검결과', info: '설비정보' })[v]).join('와 ')}가 저장되었습니다.`
       )
     } else {
-      toast.warning('변동사항이 없습니다')
+      printWarningSnackbar('변동사항이 없습니다')
     }
   }
 
@@ -113,13 +110,19 @@ export default function CheckInspectionDetailPage() {
         {/* 헤더 */}
         <MobileHeader
           left={
-            <IconButton sx={{ p: 0 }} onClick={() => router.back()}>
+            <IconButton
+              sx={{ p: 0 }}
+              onClick={() => {
+                router.back()
+                setTabValue('pictures')
+              }}
+            >
               <i className='tabler-chevron-left text-white text-3xl' />
             </IconButton>
           }
           right={
             <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
-              <IconButton disabled={currentTab === 'gallery'} sx={{ p: 0 }} onClick={globalSubmit}>
+              <IconButton disabled={tabValue === 'upload'} sx={{ p: 0 }} onClick={globalSubmit}>
                 <i ref={saveButtonRef} className=' tabler-device-floppy text-white text-3xl' />
               </IconButton>
               <IconButton sx={{ p: 0 }} onClick={() => setOpenAlert(true)}>
@@ -141,6 +144,7 @@ export default function CheckInspectionDetailPage() {
 
                   // htmlInput: { sx: { p: 0 } },
                   select: {
+                    IconComponent: () => null,
                     displayEmpty: true,
                     renderValue: selectedValue => {
                       const item = inspectionList?.find(
@@ -188,7 +192,7 @@ export default function CheckInspectionDetailPage() {
             </div>
           }
         />
-        <TabContext value={currentTab}>
+        <TabContext value={tabValue}>
           {/* 본 컨텐츠 (스크롤 가능 영역)*/}
           <Box ref={scrollableAreaRef} sx={{ flex: 1, overflowY: 'auto', py: !isMobile ? 10 : 4, px: 10 }}>
             <TabPanel
@@ -212,9 +216,25 @@ export default function CheckInspectionDetailPage() {
                 tabHeight={TabListRef.current?.clientHeight ?? 0}
               />
             </TabPanel>
+            <TabPanel
+              value={'empty'}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: !isMobile ? 8 : 5,
+                position: 'relative'
+              }}
+            >
+              <EmptyCategorySelector category={category} setCategory={setCategory} />
+              <EmptyPictureTable
+                machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
+                scrollableAreaRef={scrollableAreaRef}
+                tabHeight={TabListRef.current?.clientHeight ?? 0}
+              />
+            </TabPanel>
             <InspectionForm ref={form2Ref} saveButtonRef={saveButtonRef} inspectionVersion={inspectionVersion} />
             <TabPanel
-              value={'gallery'}
+              value={'upload'}
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -230,15 +250,14 @@ export default function CheckInspectionDetailPage() {
             <TabList
               sx={{ display: 'flex', px: isMobile ? '' : 20 }}
               centered
-              onChange={(event: React.SyntheticEvent, newValue: currentTabType) => {
-                if (form1Ref.current?.isDirty || form2Ref.current?.isDirty) {
-                  toast.warning('먼저 변경사항을 저장해주세요', { autoClose: 1500 })
-                } else setCurrentTab(newValue)
+              onChange={(event: React.SyntheticEvent, newValue: CheckTabValueType) => {
+                setTabValue(newValue)
               }}
             >
               <Tab sx={{ flex: 1 }} value={'pictures'} label={<i className='tabler-photo text-4xl' />} />
+              <Tab sx={{ flex: 1 }} value={'empty'} label={<i className='tabler-photo-filled text-4xl' />} />
               <Tab sx={{ flex: 1 }} value={'info'} label={<i className='tabler-info-circle text-4xl' />} />
-              <Tab sx={{ flex: 1 }} value={'gallery'} label={<i className='tabler-library-photo text-4xl' />} />
+              <Tab sx={{ flex: 1 }} value={'upload'} label={<i className='tabler-library-photo text-4xl' />} />
             </TabList>
           </Box>
         </TabContext>

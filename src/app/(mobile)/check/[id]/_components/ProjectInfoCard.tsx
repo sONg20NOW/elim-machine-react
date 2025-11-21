@@ -2,17 +2,15 @@ import { useRef } from 'react'
 
 import { Box, IconButton, Typography } from '@mui/material'
 
-import { toast } from 'react-toastify'
-
-import type { projectSummaryType } from '../page'
-
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { useGetOverviewPics } from '@/@core/hooks/customTanstackQueries'
+import type { projectSummaryType } from '@/@core/utils/useProjectSummaryStore'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 export default function ProjectInfoCard({
   projectSummaryData,
   machineProjectId,
-  canChange = false
+  canChange = true
 }: {
   projectSummaryData: projectSummaryType
   machineProjectId: string
@@ -31,7 +29,7 @@ export default function ProjectInfoCard({
     const file = event.target.files?.[0]
 
     if (!file) {
-      toast.warning('파일 처리에 문제가 발생했습니다.')
+      printErrorSnackbar('', '파일 처리에 문제가 발생했습니다.')
 
       return
     }
@@ -62,7 +60,8 @@ export default function ProjectInfoCard({
         position: 'relative',
 
         backgroundImage: getBackgroundImageStyle(),
-        backgroundSize: 'cover',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
 
         // backgroundBlendMode: 'normal',
@@ -86,7 +85,7 @@ export default function ProjectInfoCard({
           width={'fit-content'}
           variant='inherit'
         >{`${projectSummaryData?.beginDate ?? '시작날짜'} ~ ${projectSummaryData?.endDate?.slice(5) ?? '종료날짜'}`}</Typography>
-        {projectSummaryData.engineerNames && (
+        {projectSummaryData?.engineerNames && (
           <Typography width={'fit-content'} variant='inherit'>
             {(projectSummaryData?.engineerNames.length ?? 0) > 2
               ? `${projectSummaryData?.engineerNames.slice(0, 2).join(', ')} 외 ${projectSummaryData!.engineerNames.length - 2}명`
@@ -95,9 +94,9 @@ export default function ProjectInfoCard({
                 : '배정된 점검진 없음'}
           </Typography>
         )}
-        <Typography width={'fit-content'} variant='inherit'>
+        {/* <Typography width={'fit-content'} variant='inherit'>
           마지막 업로드: {'없음'}
-        </Typography>
+        </Typography> */}
       </div>
       {canChange && (
         <div className='absolute right-1 top-1'>

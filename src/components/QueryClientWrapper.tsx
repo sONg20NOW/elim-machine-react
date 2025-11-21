@@ -8,7 +8,17 @@ import ReduxProvider from '@/redux-store/ReduxProvider' // Redux도 클라이언
 import type { ChildrenType } from '@/@core/types'
 
 // QueryClient 인스턴스는 한 번만 생성되도록 파일 범위에 정의
-const queryClient = new QueryClient()
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      networkMode: 'offlineFirst',
+      refetchOnWindowFocus: true,
+      retry: false
+    }
+  }
+})
 
 export default function QueryClientWrapper({ children }: ChildrenType) {
   return (

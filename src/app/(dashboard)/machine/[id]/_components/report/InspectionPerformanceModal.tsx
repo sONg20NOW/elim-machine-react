@@ -16,6 +16,10 @@ import {
   Typography
 } from '@mui/material'
 
+import JSZip from 'jszip'
+
+import { saveAs } from 'file-saver'
+
 import style from '@/app/_style/Table.module.css'
 import { useGetLeafCategories, useGetReportCategories, useGetReportStatuses } from '@/@core/hooks/customTanstackQueries'
 import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
@@ -40,10 +44,11 @@ export default function InspectionPerformanceModal({
   const reloadRef = useRef<HTMLElement>(null)
   const [openSnackBar, setOpenSnackBar] = useState(false)
   const [disableReload, setDialbleReload] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const reportURLs = useRef<{ machineCategoryId: number; index: number; url: string }[]>([])
 
   const { data: everyCategories } = useGetLeafCategories()
-
-  const categories = everyCategories
 
   const { data: statuses, refetch } = useGetReportStatuses(`${machineProjectId}`, [MACHINE_INSPECTION_PERFORMANCE_ID])
 
@@ -57,6 +62,42 @@ export default function InspectionPerformanceModal({
     await refetch()
     setOpenSnackBar(true)
   }, [refetch])
+
+  const handleSetPresigned = useCallback((machineCategoryId: number, index: number, url: string) => {
+    reportURLs.current = [...reportURLs.current, { url, machineCategoryId, index }]
+  }, [])
+
+  const handleDownloadAll = async () => {
+    if (!everyCategories) return
+
+    setLoading(true)
+    const zip = new JSZip()
+
+    // 병렬 다운로드 (presigned URL -> Blob)
+    const filePromises = reportURLs.current.map(async ({ machineCategoryId, url, index }) => {
+      const res = await fetch(url)
+
+      if (res.status !== 200) {
+        return
+      }
+
+      const blob = await res.blob()
+
+      // 파일 이름 안전하게 처리
+      const category = everyCategories.find(v => v.id === Number(machineCategoryId))!
+      const safeName = category.name.replace(/[\/\\?%*:|"<>]/g, '-')
+
+      zip.file(`${MACHINE_INSPECTION_PERFORMANCE_ID}-${index}. ${safeName}.hwp`, blob)
+    })
+
+    await Promise.all(filePromises)
+
+    const content = await zip.generateAsync({ type: 'blob' })
+
+    saveAs(content, '설비별 성능점검표 전체 보고서.zip')
+    console.log(reportURLs.current)
+    setLoading(false)
+  }
 
   return (
     everyCategories && (
@@ -99,21 +140,28 @@ export default function InspectionPerformanceModal({
               </tr>
             </thead>
             <tbody>
-              {categories?.map((machineCategory, idx) => (
+              {everyCategories?.map((machineCategory, idx) => (
                 <InspectionTableRow
                   key={machineCategory.id}
                   machineCategory={machineCategory}
                   idx={idx}
                   statuses={statuses ?? []}
+                  onPresignedLoaded={handleSetPresigned}
                 />
               ))}
             </tbody>
           </table>
         </DialogContent>
         <DialogActions className='flex items-center justify-center pt-4' sx={{ boxShadow: 10 }}>
-          {/* <Button variant='contained' className='bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300'>
-            전체 다운로드
-          </Button> */}
+          <Button
+            variant='contained'
+            className='bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300'
+            type='button'
+            onClick={handleDownloadAll}
+            disabled={loading}
+          >
+            전체 다운로드(ZIP)
+          </Button>
         </DialogActions>
       </Dialog>
     )
@@ -124,11 +172,13 @@ const InspectionTableRow = memo(
   ({
     machineCategory,
     idx,
-    statuses
+    statuses,
+    onPresignedLoaded
   }: {
     machineCategory: MachineLeafCategoryResponseDtoType
     idx: number
     statuses: MachineReportStatusResponseDtoType[]
+    onPresignedLoaded: (machineCategoryId: number, index: number, url: string) => void
   }) => {
     const machineProjectId = useParams().id?.toString()
 
@@ -180,11 +230,13 @@ const InspectionTableRow = memo(
 
           if (!presignedUrl) return
           aRef.current.href = presignedUrl
+
+          onPresignedLoaded(machineCategory.id, idx + 1, presignedUrl)
         }
       }
 
       setPresignedUrl()
-    }, [myStatus, machineCategory.id, getReportPresignedUrl])
+    }, [myStatus, machineCategory.id, getReportPresignedUrl, idx, onPresignedLoaded])
 
     return (
       <tr key={machineCategory.id}>

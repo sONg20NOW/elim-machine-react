@@ -5,6 +5,7 @@ import axios from 'axios'
 import type { LoginResponseDtoType, TokenResponseDto } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import useAccessTokenStore from '@/@core/utils/useAuthStore'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 
 export const auth = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}`,
@@ -27,7 +28,7 @@ export async function login(email: string, password: string) {
 
       const UserInfo = res.data.data.loginMemberResponseDto
 
-      localStorage.setItem('user', JSON.stringify(UserInfo))
+      useCurrentUserStore.getState().setCurrentUser(UserInfo)
 
       handleSuccess('로그인에 성공했습니다.')
 
@@ -46,7 +47,7 @@ export async function logout() {
     await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/logout`, null, {
       withCredentials: true
     })
-    localStorage.removeItem('user')
+    useCurrentUserStore.getState().setCurrentUser(null)
     handleSuccess('로그아웃되었습니다.')
   } catch (e) {
     handleApiError(e)
