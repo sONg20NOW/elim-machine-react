@@ -33,7 +33,7 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 import { useGetEngineerByMemberId } from '@/@core/hooks/customTanstackQueries'
 import { gradeOption } from '@/app/_constants/options'
-import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
+import { printErrorSnackbar, printInfoSnackbar } from '@/@core/utils/snackbarHandler'
 
 export default function MachinePage() {
   const router = useRouter()
@@ -62,7 +62,12 @@ export default function MachinePage() {
   const currentUser = useCurrentUserStore(set => set.currentUser)
   const { data: engineerInfo } = useGetEngineerByMemberId((currentUser?.memberId ?? 0).toString())
 
+  const [mobile, setMobile] = useState(true)
   const isMobile = useContext(isMobileContext)
+
+  useEffect(() => {
+    setMobile(isMobile ?? true)
+  }, [isMobile])
 
   // 페이지 변경 시 스크롤 업을 위한 Ref
   const listRef = useRef<HTMLDivElement>(null)
@@ -142,13 +147,18 @@ export default function MachinePage() {
     router.push(`/check/${machineProject.machineProjectId}`)
   }
 
+  const handleLogout = useCallback(async () => {
+    printInfoSnackbar('로그아웃되었습니다')
+    await logout()
+  }, [])
+
   // 기계설비현장 카드
   function MachineProjectCard({ machineProject }: { machineProject: MachineProjectPageDtoType }) {
     const engineerCnt = machineProject.engineerNames.length
 
     return (
       <Card
-        sx={{ mb: 5, display: 'flex', gap: !isMobile ? 5 : 0 }}
+        sx={{ mb: 5, display: 'flex', gap: !mobile ? 5 : 0 }}
         elevation={10}
         onClick={() => handleMachineProjectClick(machineProject)}
       >
@@ -159,16 +169,16 @@ export default function MachinePage() {
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            px: !isMobile ? 5 : 2,
-            py: !isMobile ? 10 : 5,
-            gap: !isMobile ? 3 : 1,
-            flex: !isMobile ? 3 : 2
+            px: !mobile ? 5 : 2,
+            py: !mobile ? 10 : 5,
+            gap: !mobile ? 3 : 1,
+            flex: !mobile ? 3 : 2
           }}
         >
-          <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
+          <Typography variant={mobile ? 'h6' : 'h4'} sx={{ fontWeight: 600 }}>
             {machineProject.machineProjectName !== '' ? machineProject.machineProjectName : '이름없는 현장'}
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 0 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: !mobile ? 2 : 0 }}>
             <Typography sx={{ fontWeight: 500 }}>
               {(machineProject.fieldBeginDate &&
                 machineProject.fieldEndDate &&
@@ -193,14 +203,14 @@ export default function MachinePage() {
 
   // 전체 현장 / 나의 현장 토글 버튼
   const ProjectToggle = () =>
-    !isMobile ? (
+    !mobile ? (
       <Box
         sx={{
           border: '1px solid lightgray',
-          borderRadius: isMobile ? 1 : 10,
+          borderRadius: mobile ? 1 : 10,
           p: 1,
           display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
+          flexDirection: mobile ? 'column' : 'row',
           position: 'relative',
           backgroundColor: 'white'
         }}
@@ -209,9 +219,9 @@ export default function MachinePage() {
           sx={{
             position: 'absolute',
             backgroundColor: 'primary.main',
-            borderRadius: isMobile ? 1 : 10,
-            width: isMobile ? '90%' : '47%',
-            height: isMobile ? '45%' : '80%',
+            borderRadius: mobile ? 1 : 10,
+            width: mobile ? '90%' : '47%',
+            height: mobile ? '45%' : '80%',
             translate: myProject ? '100%' : '',
             boxShadow: 2,
             color: 'white'
@@ -220,13 +230,13 @@ export default function MachinePage() {
 
         <Button
           onClick={() => setMyProject(prev => !prev)}
-          sx={!myProject ? { color: 'white', borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
+          sx={!myProject ? { color: 'white', borderRadius: mobile ? 1 : 10 } : { color: 'primary.main' }}
         >
           전체 현장
         </Button>
         <Button
           onClick={() => setMyProject(prev => !prev)}
-          sx={myProject ? { color: 'white', borderRadius: isMobile ? 1 : 10 } : { color: 'primary.main' }}
+          sx={myProject ? { color: 'white', borderRadius: mobile ? 1 : 10 } : { color: 'primary.main' }}
         >
           나의 현장
         </Button>
@@ -254,7 +264,7 @@ export default function MachinePage() {
           open={open}
           onClose={() => setOpen(false)}
           slotProps={{
-            paper: { sx: { width: isMobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
+            paper: { sx: { width: mobile ? '80%' : '40%', borderTopRightRadius: 8, borderBottomRightRadius: 8 } },
             root: { sx: { position: 'relative' } }
           }}
           anchor='left'
@@ -317,7 +327,7 @@ export default function MachinePage() {
                   borderColor: 'dimgray'
                 }}
                 variant='outlined'
-                onClick={logout}
+                onClick={handleLogout}
               >
                 <i className='tabler-logout text-[30px]' />
                 <Typography variant='h4' sx={{ fontWeight: 600, marginLeft: 2 }} color='inherit'>
@@ -345,19 +355,19 @@ export default function MachinePage() {
           }
           title={
             <div className='flex items-center'>
-              <Typography variant={isMobile ? 'h4' : 'h3'} color='white'>
+              <Typography variant={mobile ? 'h4' : 'h3'} color='white'>
                 현장목록(
               </Typography>
-              <motion.pre style={{ ...(isMobile ? theme.typography.h4 : theme.typography.h3), color: 'white' }}>
+              <motion.pre style={{ ...(mobile ? theme.typography.h4 : theme.typography.h3), color: 'white' }}>
                 {rounded}
               </motion.pre>
-              <Typography variant={isMobile ? 'h4' : 'h3'} color='white'>
+              <Typography variant={mobile ? 'h4' : 'h3'} color='white'>
                 )
               </Typography>
             </div>
           }
           right={
-            isMobile ? (
+            mobile ? (
               <ProjectToggle />
             ) : (
               <SearchBar
