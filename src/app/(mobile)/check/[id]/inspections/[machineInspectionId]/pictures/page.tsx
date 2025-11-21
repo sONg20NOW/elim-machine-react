@@ -34,14 +34,12 @@ import type {
   MachinePicUpdateResponseDtoType
 } from '@/@core/types'
 import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
-import getS3Key from '@/@core/utils/getS3Key'
 import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@/@core/utils/snackbarHandler'
+import getS3Key from '@/@core/utils/getS3Key'
 
 const max_pic = 100
 
 interface formType {
-  s3Key: string
-  presignedUrl: string
   version: number
   machinePicId: number
   machineInspectionId: number
@@ -87,7 +85,6 @@ export default function PicturePage() {
     formState: { isDirty }
   } = useForm<formType>({
     defaultValues: {
-      presignedUrl: '',
       machinePicId: 0,
       version: 0,
       machineInspectionId: 0,
@@ -99,7 +96,6 @@ export default function PicturePage() {
     }
   })
 
-  const watchedPresignedUrl = watch('presignedUrl')
   const watchedSubItemId = watch('machineChecklistSubItemId')
 
   const subItems = useMemo(() => {
@@ -117,7 +113,6 @@ export default function PicturePage() {
 
     if (selectedPic) {
       reset({
-        presignedUrl: selectedPic.presignedUrl,
         version: selectedPic.version,
         machinePicId: selectedPic.machinePicId,
         machineInspectionId: selectedPic.machineInspectionId,
@@ -160,25 +155,48 @@ export default function PicturePage() {
     const files = e.target.files
 
     if (!files) return
-    const file = files[0]
+    const file: File = files[0]
 
-    setValue('presignedUrl', URL.createObjectURL(file), {
-      shouldDirty: true,
-      shouldValidate: true
-    })
-
-    const S3KeyResult = await getS3Key(
+    const s3Key = await getS3Key(
       `${machineProjectId}`,
       [file],
       `${machineInspectionId}`,
-      machineChecklistItemId,
-      watchedSubItemId,
-      undefined
-    )
+      selectedPic?.machineChecklistItemId,
+      selectedPic?.machineChecklistSubItemId
+    ).then(v => v && v[0])
 
-    if (!S3KeyResult) return
-    setValue('s3Key', S3KeyResult[0].s3Key)
-    setValue('originalFileName', S3KeyResult[0].fileName)
+    if (!s3Key?.uploadSuccess) {
+      return
+    }
+
+    try {
+      const response = await auth
+        .put<{
+          data: MachinePicUpdateResponseDtoType
+        }>(
+          `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-pics/${selectedPicId}`,
+          { version: getValues().version, s3Key: s3Key.s3Key }
+        )
+        .then(v => v.data.data)
+
+      setPictures(prev =>
+        prev.map(v =>
+          v.machinePicId === selectedPicId
+            ? {
+                ...v,
+                ...response,
+                machineChecklistItemId: machineChecklistItemId,
+                presignedUrl: URL.createObjectURL(file)
+              }
+            : v
+        )
+      )
+      reset({ ...response })
+      console.log('updated picture:', response)
+      printSuccessSnackbar(`사진이 변경되었습니다`)
+    } catch (e) {
+      printErrorSnackbar(e, '사진 변경에 실패했습니다')
+    }
   }
 
   const handleDeletePicture = useCallback(async () => {
@@ -227,9 +245,7 @@ export default function PicturePage() {
 
         setPictures(prev =>
           prev.map(v =>
-            v.machinePicId === selectedPicId
-              ? { ...v, ...response, machineChecklistItemId: machineChecklistItemId, presignedUrl: watchedPresignedUrl }
-              : v
+            v.machinePicId === selectedPicId ? { ...v, ...response, machineChecklistItemId: machineChecklistItemId } : v
           )
         )
         reset({ ...response })
@@ -239,15 +255,7 @@ export default function PicturePage() {
         printErrorSnackbar(e)
       }
     },
-    [
-      machineProjectId,
-      selectedPicId,
-      machineInspectionId,
-      reset,
-      watchedSubItemId,
-      watchedPresignedUrl,
-      machineChecklistItemId
-    ]
+    [machineProjectId, selectedPicId, machineInspectionId, reset, watchedSubItemId, machineChecklistItemId]
   )
 
   function TinyImgCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
@@ -311,7 +319,7 @@ export default function PicturePage() {
           title={`사진(${pictures.length})`}
         />
         {/* 본 컨텐츠 (스크롤 가능 영역)*/}
-        {watchedPresignedUrl && checklistList ? (
+        {checklistList ? (
           <Box
             ref={scrollableAreaRef}
             sx={{
@@ -324,38 +332,43 @@ export default function PicturePage() {
               gap: 5
             }}
           >
-            <Box
-              sx={{
-                minHeight: isMobile ? '35dvh' : '48dvh',
-                height: isMobile ? '35dvh' : '48dvh',
-                border: '1px solid lightgray',
-                borderRadius: 2,
-                p: 2,
-                position: 'relative',
-                background: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3))'
-              }}
-            >
-              <Fab
-                size='small'
-                type='button'
-                sx={{ position: 'absolute', right: 14, top: 14, backgroundColor: '#ffffff9f' }}
+            <div className='flex flex-col'>
+              <Typography variant='h5' sx={{ paddingInlineStart: 2 }}>
+                # {currentInspectioin?.machineInspectionName}
+              </Typography>
+              <Box
+                sx={{
+                  minHeight: isMobile ? '35dvh' : '48dvh',
+                  height: isMobile ? '35dvh' : '48dvh',
+                  border: '1px solid lightgray',
+                  borderRadius: 2,
+                  p: 2,
+                  position: 'relative',
+                  background: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3))'
+                }}
               >
-                <IconCamera color='white' size={30} onClick={() => imageInputRef.current?.click()} />
-              </Fab>
-              <input
-                type='file'
-                hidden
-                ref={imageInputRef}
-                accept='image/*' // 이미지 파일만 허용
-                capture='environment'
-                onChange={handleImageChange}
-              />
-              <img
-                src={watchedPresignedUrl}
-                alt={getValues().alternativeSubTitle}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
-            </Box>
+                <Fab
+                  size='small'
+                  type='button'
+                  sx={{ position: 'absolute', right: 14, top: 14, backgroundColor: '#ffffff9f' }}
+                >
+                  <IconCamera color='white' size={30} onClick={() => imageInputRef.current?.click()} />
+                </Fab>
+                <input
+                  type='file'
+                  hidden
+                  ref={imageInputRef}
+                  accept='image/*' // 이미지 파일만 허용
+                  capture='environment'
+                  onChange={handleImageChange}
+                />
+                <img
+                  src={selectedPic?.presignedUrl}
+                  alt={getValues().alternativeSubTitle}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              </Box>
+            </div>
             <div className='flex flex-col gap-1'>
               <InputLabel sx={{ px: 2 }}>파일 이름</InputLabel>
               <TextField
