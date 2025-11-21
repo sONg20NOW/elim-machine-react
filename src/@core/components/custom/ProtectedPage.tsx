@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation'
 
 import { Backdrop, Button, CircularProgress, Typography, useMediaQuery, useTheme } from '@mui/material'
 
-import { SnackbarProvider } from 'notistack'
-
 import useAccessTokenStore from '@/@core/utils/useAuthStore'
 
 export const isTabletContext = createContext<boolean | null>(null)
@@ -20,6 +18,7 @@ export default function ProtectedPage({ children }: { children: React.ReactNode 
   const router = useRouter()
 
   const [dotCnt, setDotCnt] = useState<0 | 1 | 2 | 3>(0)
+  const [showRelogin, setShowRelogin] = useState(false)
 
   const accessToken = useAccessTokenStore(set => set.accessToken)
 
@@ -29,6 +28,10 @@ export default function ProtectedPage({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     const intervalId = setInterval(() => setDotCnt(prev => (prev === 3 ? 0 : ((prev + 1) as 1 | 2 | 3))), 500)
+
+    setTimeout(() => {
+      setShowRelogin(true)
+    }, 3000)
 
     return () => clearInterval(intervalId)
   }, [])
@@ -42,17 +45,17 @@ export default function ProtectedPage({ children }: { children: React.ReactNode 
             <span className='opacity-[0%]'>{Array(3 - dotCnt).fill('.')}</span>
           </Typography>
           <CircularProgress sx={{ color: 'white' }} />
-          <Button variant='contained' type='button' onClick={routeToLoginPage}>
-            다시 로그인
-          </Button>
+          {showRelogin && (
+            <Button variant='contained' type='button' onClick={routeToLoginPage}>
+              다시 로그인
+            </Button>
+          )}
         </div>
       </Backdrop>
 
-      <SnackbarProvider>
-        <isTabletContext.Provider value={isTablet}>
-          <isMobileContext.Provider value={isMobile}>{children}</isMobileContext.Provider>
-        </isTabletContext.Provider>
-      </SnackbarProvider>
+      <isTabletContext.Provider value={isTablet}>
+        <isMobileContext.Provider value={isMobile}>{children}</isMobileContext.Provider>
+      </isTabletContext.Provider>
     </>
   )
 }

@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import axios from 'axios'
 
 import type { LoginResponseDtoType, TokenResponseDto } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import useAccessTokenStore from '@/@core/utils/useAuthStore'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 
@@ -30,14 +29,12 @@ export async function login(email: string, password: string) {
 
       useCurrentUserStore.getState().setCurrentUser(UserInfo)
 
-      handleSuccess('로그인에 성공했습니다.')
-
       return res.data.code
     } else {
       throw new Error()
     }
   } catch (error) {
-    handleApiError(error)
+    return 400
   }
 }
 
@@ -47,11 +44,12 @@ export async function logout() {
     await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/authentication/web/logout`, null, {
       withCredentials: true
     })
-    useCurrentUserStore.getState().setCurrentUser(null)
-    handleSuccess('로그아웃되었습니다.')
+
+    console.log('로그아웃되었습니다.')
   } catch (e) {
-    handleApiError(e)
+    console.error(e)
   } finally {
+    useCurrentUserStore.getState().setCurrentUser(null)
     useAccessTokenStore.getState().setAccessToken(null)
     redirect('/login')
   }

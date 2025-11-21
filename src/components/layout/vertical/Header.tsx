@@ -1,10 +1,12 @@
 'use client'
 
-import { useContext, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
 import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography, Link } from '@mui/material'
+
+import { toast } from 'react-toastify'
 
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
@@ -31,6 +33,11 @@ export default function Header() {
 
     return userData && <UserModal open={openUser} setOpen={setOpenUser} selectedUserData={userData} />
   }
+
+  const handleLogout = useCallback(() => {
+    toast.info('로그아웃되었습니다.')
+    logout()
+  }, [])
 
   return (
     <AppBar
@@ -72,7 +79,7 @@ export default function Header() {
               size='small'
               sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
               variant='contained'
-              onClick={logout}
+              onClick={handleLogout}
             >
               <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
             </Button>
@@ -106,7 +113,7 @@ export default function Header() {
                       ':hover': { boxShadow: 5, backgroundColor: 'lightgray' }
                     }}
                     variant='contained'
-                    onClick={logout}
+                    onClick={handleLogout}
                   >
                     <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
                   </Button>

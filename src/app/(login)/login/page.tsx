@@ -22,6 +22,9 @@ import ForgotPasswordPage from './_components/forgotPasswordModal'
 import { login } from '@/lib/auth'
 
 import 'react-toastify/ReactToastify.css'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { printErrorSnackbar, printSuccessSnackbar } from '@/@core/utils/snackbarHandler'
 
 type LoginFormInputs = {
   email: string
@@ -50,10 +53,22 @@ export default function LoginPage() {
     const response = await login(email, password)
 
     if (response === 200) {
+      const userInfo = useCurrentUserStore.getState().currentUser
+      const userName = userInfo?.name
+
       if (isTablet) {
         router.push('/check')
+
+        printSuccessSnackbar(`환영합니다${userName ? `,\n${userName}님` : ''}`)
       } else {
         router.push('/')
+        handleSuccess(`환영합니다${userName ? `,\n${userName}님` : ''}`)
+      }
+    } else {
+      if (isTablet) {
+        printErrorSnackbar('로그인 오류')
+      } else {
+        handleApiError('로그인 오류')
       }
     }
   }
