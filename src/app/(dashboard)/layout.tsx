@@ -29,17 +29,18 @@ const Layout = async (props: ChildrenType) => {
   return (
     <Providers>
       <ProtectedPage>
-        <Header />
-        <div className='flex flex-auto relative h-full'>
-          <Navigation mode={mode} />
-          <div className='w-full pb-[10px]'>
-            <div className='px-[10px] flex flex-col w-full justify-between h-full'>
-              <div className='flex-auto w-full pt-[10px] pb-[10px]'>{children}</div>
+        <div className='h-[100dvh] flex flex-col'>
+          <Header />
+          {/* 내비게이션 바 + 메인 영역 */}
+          <div className='flex-1 flex overflow-y-hidden'>
+            <Navigation mode={mode} />
+            <div className='flex-1 p-3 h-full flex flex-col gap-4 bg-indigo-100/50'>
+              <div className='w-full flex-1 overflow-y-hidden'>{children}</div>
               <VerticalFooter />
             </div>
           </div>
+          <ScrollToTopButton />
         </div>
-        <ScrollToTopButton />
       </ProtectedPage>
     </Providers>
   )

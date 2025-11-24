@@ -19,7 +19,7 @@ const Footer = () => {
     <div
       className={classnames(
         verticalLayoutClasses.footerContent,
-        'pl-[10px] flex items-center justify-between flex-wrap  hidden md:flex'
+        'px-[10px] flex items-center justify-between flex-wrap  hidden md:flex'
       )}
     >
       <div className='flex items-center gap-6'>

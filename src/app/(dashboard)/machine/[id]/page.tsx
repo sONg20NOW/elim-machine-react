@@ -92,7 +92,7 @@ const MachineUpdatePage = () => {
   }, [machineProjectId, tabValue, refetchProjectData, refetchScheduleData, engineerList, projectData, scheduleData])
 
   return (
-    <Card>
+    <Card className='h-full flex flex-col'>
       <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-5': !isMobile })}>
         <CardHeader
           title={
@@ -155,7 +155,7 @@ const MachineUpdatePage = () => {
         />
       </div>
 
-      <CardContent>
+      <CardContent className='flex-1 flex flex-col overflow-y-hidden p-0"'>
         <TabContext value={tabValue}>
           {/* 탭 목록 */}
           <TabList onChange={handleChange} aria-label='nav tabs example'>
@@ -167,25 +167,27 @@ const MachineUpdatePage = () => {
               )
             })}
           </TabList>
-          <TabPanel value='현장정보'>
-            {projectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
-          </TabPanel>
-          <TabPanel value='점검일정/참여기술진'>
-            {scheduleData ? (
-              <ScheduleAndEngineerTabContent />
-            ) : (
-              <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
-            )}
-          </TabPanel>
-          <TabPanel value='설비목록'>
-            <InspectionListTabContent />
-          </TabPanel>
-          <TabPanel value='전체사진'>
-            <PictureListTabContent />
-          </TabPanel>
-          <TabPanel value='특이사항'>
-            {projectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
-          </TabPanel>
+          <div className='flex-1 overflow-y-hidden pt-4'>
+            <TabPanel value='현장정보' className='h-full overflow-y-hidden'>
+              {projectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
+            </TabPanel>
+            <TabPanel value='점검일정/참여기술진'>
+              {scheduleData ? (
+                <ScheduleAndEngineerTabContent />
+              ) : (
+                <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
+              )}
+            </TabPanel>
+            <TabPanel value='설비목록'>
+              <InspectionListTabContent />
+            </TabPanel>
+            <TabPanel value='전체사진'>
+              <PictureListTabContent />
+            </TabPanel>
+            <TabPanel value='특이사항'>
+              {projectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
+            </TabPanel>
+          </div>
         </TabContext>
       </CardContent>
     </Card>

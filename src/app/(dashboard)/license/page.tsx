@@ -190,7 +190,7 @@ export default function Licensepage() {
 
   return (
     <>
-      <Card>
+      <Card className='h-full flex flex-col'>
         {/* 탭 제목 */}
         <CardHeader title={`라이선스관리 (${totalCount})`} className='pbe-4' />
         {/* <TableFilters<EngineerFilterType>
@@ -295,21 +295,23 @@ export default function Licensepage() {
         </div>
 
         {/* 테이블 */}
-        <BasicTable<LicensePageResponseDtoType>
-          header={HEADERS.licenses}
-          data={data}
-          handleRowClick={handleLicenseClick}
-          page={page}
-          pageSize={size}
-          sorting={sorting}
-          setSorting={setSorting}
-          loading={loading}
-          error={error}
-          showCheckBox={showCheckBox}
-          isChecked={isChecked}
-          handleCheckItem={handleCheckLicense}
-          handleCheckAllItems={handleCheckAllLicenses}
-        />
+        <div className='flex-1 overflow-y-hidden'>
+          <BasicTable<LicensePageResponseDtoType>
+            header={HEADERS.licenses}
+            data={data}
+            handleRowClick={handleLicenseClick}
+            page={page}
+            pageSize={size}
+            sorting={sorting}
+            setSorting={setSorting}
+            loading={loading}
+            error={error}
+            showCheckBox={showCheckBox}
+            isChecked={isChecked}
+            handleCheckItem={handleCheckLicense}
+            handleCheckAllItems={handleCheckAllLicenses}
+          />
+        </div>
 
         {/* 페이지네이션 */}
         <TablePagination

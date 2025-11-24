@@ -112,8 +112,12 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   }
 
   return (
-    <TableContainer sx={{ overflowX: 'auto' }} className='px-2'>
-      <Table aria-label='simple table' className='relative'>
+    <TableContainer sx={{ px: 2, overflowY: 'auto', maxHeight: '100%' }}>
+      <Table
+        stickyHeader
+        aria-label='simple table'
+        sx={{ border: '1px solid lightgray', position: 'relative', height: '100%' }}
+      >
         <TableHead className='select-none'>
           <TableRow>
             {showCheckBox && handleCheckAllItems && (
@@ -141,7 +145,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   key={key}
                   align='center'
                   className={classNames(
-                    'relative text-base',
+                    ' text-base',
                     {
                       'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
                       'font-bold select-none': header[k].canSort,
@@ -152,11 +156,10 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
                   onClick={!(loading || error) && header[k].canSort ? () => toggleOrder(key) : undefined}
                 >
-                  <div className='flex'></div>
-                  <span>{header[k].label}</span>
+                  {header[k].label}
                   {header[k].canSort && sorting.target === k && (
                     <i
-                      className={classNames('absolute text-xl top-[30%] text-color-primary-dark', {
+                      className={classNames('absolute text-xl top-[50%] -translate-y-1/2 text-color-primary-dark', {
                         'tabler-square-chevron-down': sorting.sort === 'desc',
                         'tabler-square-chevron-up': sorting.sort === 'asc'
                       })}

@@ -233,7 +233,7 @@ export default function MemberPage() {
 
   return (
     <>
-      <Card className='relative'>
+      <Card className='relative h-full flex flex-col'>
         {/* 탭 제목 */}
         <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
@@ -262,7 +262,7 @@ export default function MemberPage() {
             필터 초기화
           </Button>
         )}
-        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
+        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
           <div className='flex gap-2'>
             {/* 페이지당 행수 */}
             <CustomTextField
@@ -349,23 +349,24 @@ export default function MemberPage() {
         </div>
 
         {/* 테이블 */}
-        <BasicTable<memberPageDtoType>
-          header={HEADERS.member}
-          data={data}
-          handleRowClick={handleUserClick}
-          page={page}
-          pageSize={size}
-          multiException={{ age: ['age', 'genderDescription'] }}
-          sorting={sorting}
-          setSorting={setSorting}
-          loading={loading}
-          error={error}
-          showCheckBox={showCheckBox}
-          isChecked={isChecked}
-          handleCheckItem={handleCheckUser}
-          handleCheckAllItems={handleCheckAllUsers}
-        />
-
+        <div className='flex-1 overflow-y-hidden'>
+          <BasicTable<memberPageDtoType>
+            header={HEADERS.member}
+            data={data}
+            handleRowClick={handleUserClick}
+            page={page}
+            pageSize={size}
+            multiException={{ age: ['age', 'genderDescription'] }}
+            sorting={sorting}
+            setSorting={setSorting}
+            loading={loading}
+            error={error}
+            showCheckBox={showCheckBox}
+            isChecked={isChecked}
+            handleCheckItem={handleCheckUser}
+            handleCheckAllItems={handleCheckAllUsers}
+          />
+        </div>
         {/* 페이지네이션 */}
         <TablePagination
           rowsPerPageOptions={PageSizeOptions}

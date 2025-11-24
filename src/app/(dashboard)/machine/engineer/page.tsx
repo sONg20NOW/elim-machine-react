@@ -209,7 +209,7 @@ export default function EngineerPage() {
 
   return (
     <>
-      <Card className='relative'>
+      <Card className='relative h-full flex flex-col'>
         {/* 탭 제목 */}
         <CardHeader title={`기계설비 기술자 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
@@ -320,22 +320,24 @@ export default function EngineerPage() {
         </div>
 
         {/* 테이블 */}
-        <BasicTable<MachineEngineerPageResponseDtoType>
-          multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
-          header={HEADERS.engineers}
-          data={data}
-          handleRowClick={handleEngineerClick}
-          page={page}
-          pageSize={size}
-          sorting={sorting}
-          setSorting={setSorting}
-          loading={loading}
-          error={error}
-          showCheckBox={showCheckBox}
-          isChecked={isChecked}
-          handleCheckItem={handleCheckEngineer}
-          handleCheckAllItems={handleCheckAllEngineers}
-        />
+        <div className='flex-1 overflow-y-hidden'>
+          <BasicTable<MachineEngineerPageResponseDtoType>
+            multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
+            header={HEADERS.engineers}
+            data={data}
+            handleRowClick={handleEngineerClick}
+            page={page}
+            pageSize={size}
+            sorting={sorting}
+            setSorting={setSorting}
+            loading={loading}
+            error={error}
+            showCheckBox={showCheckBox}
+            isChecked={isChecked}
+            handleCheckItem={handleCheckEngineer}
+            handleCheckAllItems={handleCheckAllEngineers}
+          />
+        </div>
 
         {/* 페이지네이션 */}
         <TablePagination

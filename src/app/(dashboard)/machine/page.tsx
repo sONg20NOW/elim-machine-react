@@ -285,7 +285,7 @@ export default function MachinePage() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ko'>
-      <Card className='relative'>
+      <Card className='relative h-full flex flex-col'>
         <CardHeader title={`기계설비현장 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
         <TableFilters<MachineFilterType>
@@ -444,27 +444,29 @@ export default function MachinePage() {
         </div>
 
         {/* 테이블 */}
-        <BasicTable<MachineProjectPageDtoType>
-          header={HEADERS.machine}
-          data={data}
-          RowRightClickMenu={[
-            { iconClass: 'tabler-copy-plus-filled', label: '복사', handleClick: handleCopyRow },
-            { iconClass: 'tabler-square-rounded-minus-filled', label: '삭제', handleClick: handleDeleteRow }
-          ]}
-          handleRowClick={handleMachineProjectClick}
-          page={page}
-          pageSize={size}
-          sorting={sorting}
-          setSorting={setSorting}
-          loading={loading}
-          error={error}
-          listException={['engineerNames']}
+        <div className='flex-1 overflow-y-hidden'>
+          <BasicTable<MachineProjectPageDtoType>
+            header={HEADERS.machine}
+            data={data}
+            RowRightClickMenu={[
+              { iconClass: 'tabler-copy-plus-filled', label: '복사', handleClick: handleCopyRow },
+              { iconClass: 'tabler-square-rounded-minus-filled', label: '삭제', handleClick: handleDeleteRow }
+            ]}
+            handleRowClick={handleMachineProjectClick}
+            page={page}
+            pageSize={size}
+            sorting={sorting}
+            setSorting={setSorting}
+            loading={loading}
+            error={error}
+            listException={['engineerNames']}
 
-          // showCheckBox={showCheckBox}
-          // isChecked={isChecked}
-          // handleCheckItem={handleCheckMachineProject}
-          // handleCheckAllItems={handleCheckAllMachineProjects}
-        />
+            // showCheckBox={showCheckBox}
+            // isChecked={isChecked}
+            // handleCheckItem={handleCheckMachineProject}
+            // handleCheckAllItems={handleCheckAllMachineProjects}
+          />
+        </div>
 
         <TablePagination
           rowsPerPageOptions={PageSizeOptions} // 1 추가 (테스트용)

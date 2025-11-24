@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Button, Fade, useScrollTrigger } from '@mui/material'
+import { IconArrowUp } from '@tabler/icons-react'
 
 export default function ScrollToTopButton() {
   const trigger = useScrollTrigger({
@@ -23,7 +24,7 @@ export default function ScrollToTopButton() {
           variant='contained'
           className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center hidden sm:flex'
         >
-          <i className='tabler-arrow-up' />
+          <IconArrowUp />
         </Button>
       </Box>
     </Fade>
