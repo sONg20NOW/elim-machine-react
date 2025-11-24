@@ -84,10 +84,10 @@ const BasicTabContent = ({}: {}) => {
 
   return (
     projectData && (
-      <div>
+      <div className='h-full flex flex-col'>
+        {/* 상단 버튼들 : 점검의견서, 성능점검시 검토사항 ... */}
         <div className='flex mb-4 justify-between'>
           <div className='flex gap-[4px]'>
-            {/* TODO: 버튼 구현 */}
             {/* <Button
             variant='contained'
             color='info'
@@ -130,7 +130,8 @@ const BasicTabContent = ({}: {}) => {
             overflow: 'hidden',
             background: '#fafbfc',
             fontSize: 15,
-            marginBottom: 16
+            marginBottom: 16,
+            overflowY: 'auto'
           }}
         >
           <form
