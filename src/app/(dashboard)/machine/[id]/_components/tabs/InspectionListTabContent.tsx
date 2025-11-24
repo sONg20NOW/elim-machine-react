@@ -210,41 +210,44 @@ const InspectionListTabContent = ({}) => {
   }
 
   return (
-    <div className='relative'>
+    <div className='relative h-full flex flex-col'>
       {/* 필터바 */}
-      <TableFilters<MachineInspectionFilterType>
-        filterInfo={{
-          engineerName: {
-            label: '점검자',
-            type: 'multi',
-            options: participatedEngineerList?.map(engineer => ({
-              value: engineer.engineerName,
-              label: `${engineer.engineerName} (${engineer.gradeDescription})`
-            }))
-          }
-        }}
-        filters={filters}
-        onFiltersChange={setFilters}
-        disabled={disabled}
-        setPage={setPage}
-      />
-      {/* 필터 초기화 버튼 */}
-      <Button
-        startIcon={<i className='tabler-reload' />}
-        onClick={() => {
-          setFilters({
-            engineerName: ''
-          })
-          setMachineCategoryName('')
-          setLocation('')
-          setPage(0)
-        }}
-        className='max-sm:is-full absolute right-8 top-8'
-        disabled={disabled}
-      >
-        필터 초기화
-      </Button>
-      <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+      <div>
+        <TableFilters<MachineInspectionFilterType>
+          filterInfo={{
+            engineerName: {
+              label: '점검자',
+              type: 'multi',
+              options: participatedEngineerList?.map(engineer => ({
+                value: engineer.engineerName,
+                label: `${engineer.engineerName} (${engineer.gradeDescription})`
+              }))
+            }
+          }}
+          filters={filters}
+          onFiltersChange={setFilters}
+          disabled={disabled}
+          setPage={setPage}
+        />
+        {/* 필터 초기화 버튼 */}
+        <Button
+          startIcon={<i className='tabler-reload' />}
+          onClick={() => {
+            setFilters({
+              engineerName: ''
+            })
+            setMachineCategoryName('')
+            setLocation('')
+            setPage(0)
+          }}
+          className='max-sm:is-full absolute right-8 top-8'
+          disabled={disabled}
+        >
+          필터 초기화
+        </Button>
+      </div>
+      {/* 상단 기능 요소들: 페이지 당 행수, 설비분류 검색, 위치 검색, 선택삭제, 추가 */}
+      <div className='flex flex-col justify-between items-start md:flex-row md:items-center p-6 border-bs gap-4'>
         <div className='flex gap-2'>
           {/* 페이지당 행수 */}
           <CustomTextField
@@ -333,26 +336,28 @@ const InspectionListTabContent = ({}) => {
       </div>
 
       {/* 테이블 */}
-      <BasicTable<MachineInspectionPageResponseDtoType>
-        listException={['engineerNames']}
-        header={HEADERS.machineInspection}
-        data={filteredInspectionList ?? []}
-        handleRowClick={handleSelectInspection}
-        page={page}
-        pageSize={pageSize}
-        sorting={sorting}
-        setSorting={setSorting}
-        loading={isLoading}
-        error={isError}
-        showCheckBox={showCheckBox}
-        isChecked={isChecked}
-        handleCheckItem={handleCheck}
-        handleCheckAllItems={handleCheckAll}
-        onClickPicCount={async (machine: MachineInspectionPageResponseDtoType) => {
-          await handleSelectInspection(machine, true)
-          setShowPictureListModal(true)
-        }}
-      />
+      <div className='flex-1 overflow-y-hidden'>
+        <BasicTable<MachineInspectionPageResponseDtoType>
+          listException={['engineerNames']}
+          header={HEADERS.machineInspection}
+          data={filteredInspectionList ?? []}
+          handleRowClick={handleSelectInspection}
+          page={page}
+          pageSize={pageSize}
+          sorting={sorting}
+          setSorting={setSorting}
+          loading={isLoading}
+          error={isError}
+          showCheckBox={showCheckBox}
+          isChecked={isChecked}
+          handleCheckItem={handleCheck}
+          handleCheckAllItems={handleCheckAll}
+          onClickPicCount={async (machine: MachineInspectionPageResponseDtoType) => {
+            await handleSelectInspection(machine, true)
+            setShowPictureListModal(true)
+          }}
+        />
+      </div>
 
       {/* 페이지네이션 */}
       <TablePagination

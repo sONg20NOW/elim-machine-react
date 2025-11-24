@@ -178,7 +178,7 @@ const MachineUpdatePage = () => {
                 <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
               )}
             </TabPanel>
-            <TabPanel value='설비목록'>
+            <TabPanel value='설비목록' className='h-full overflow-y-hidden'>
               <InspectionListTabContent />
             </TabPanel>
             <TabPanel value='전체사진'>
