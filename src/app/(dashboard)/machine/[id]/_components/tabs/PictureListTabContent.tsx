@@ -274,6 +274,57 @@ const PictureListTabContent = () => {
     }
   }, [machineProjectId, inspectionPicsToDelete, projectPicsToDelete, refetchPictures])
 
+  function handleClickInspectionPicCard(pic: MachinePicPresignedUrlResponseDtoType) {
+    // 일괄선택 활성화 시 클릭 동작
+    if (showCheck) {
+      if (!inspectionPicsToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+        setInspectionPicsToDelete(prev => {
+          const newList = prev.map(v => ({ ...v }))
+
+          return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
+        })
+      } else {
+        setInspectionPicsToDelete(prev => {
+          const newList = prev.map(v => ({ ...v }))
+
+          return newList.filter(v => v.machinePicId !== pic.machinePicId)
+        })
+      }
+    }
+
+    // 일괄선택 비활성화 시 클릭 동작
+    else {
+      getInspectionByPic(pic)
+      setSelectedInspectionPic(pic)
+      setShowInspecitonPicModal(true)
+    }
+  }
+
+  function handleClickProjectPicCard(pic: MachineProjectPicReadResponseDtoType) {
+    // 일괄선택 활성화 시 클릭 동작
+    if (showCheck) {
+      if (!projectPicsToDelete.find(v => v.id === pic.id)) {
+        setProjectPicsToDelete(prev => {
+          const newList = prev.map(v => ({ ...v }))
+
+          return newList.concat({ id: pic.id, version: pic.version })
+        })
+      } else {
+        setProjectPicsToDelete(prev => {
+          const newList = prev.map(v => ({ ...v }))
+
+          return newList.filter(v => v.id !== pic.id)
+        })
+      }
+    }
+
+    // 일괄선택 비활성화 시 클릭 동작
+    else {
+      setSelectedProjectPic(pic)
+      setShowProjectPicModal(true)
+    }
+  }
+
   async function MoveInspectionPic(dir: 'next' | 'previous') {
     const currentPictureIdx = inspectionPics.findIndex(v => v.machinePicId === selectedInspectionPic?.machinePicId)
 
@@ -406,164 +457,6 @@ const PictureListTabContent = () => {
     }
   }, [open, refetchPictures])
 
-  // ! 설비 사진 컴포넌트 분리 (함수 props로 전달)
-  function InspectionPicCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
-    return (
-      <div className='flex flex-col items-center'>
-        <Paper
-          sx={{
-            width: '100%',
-            position: 'relative',
-            cursor: 'pointer',
-            borderColor: 'lightgray',
-            borderWidth: '1px',
-            ':hover': { boxShadow: 10 }
-          }}
-          variant='outlined'
-          onClick={() => {
-            // 일괄선택 활성화 시 클릭 동작
-            if (showCheck) {
-              if (!inspectionPicsToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                setInspectionPicsToDelete(prev => {
-                  const newList = prev.map(v => ({ ...v }))
-
-                  return newList.concat({ machinePicId: pic.machinePicId, version: pic.version })
-                })
-              } else {
-                setInspectionPicsToDelete(prev => {
-                  const newList = prev.map(v => ({ ...v }))
-
-                  return newList.filter(v => v.machinePicId !== pic.machinePicId)
-                })
-              }
-            }
-
-            // 일괄선택 비활성화 시 클릭 동작
-            else {
-              getInspectionByPic(pic)
-              setSelectedInspectionPic(pic)
-              setShowInspecitonPicModal(true)
-            }
-          }}
-        >
-          <ImageListItem>
-            <img
-              src={pic.presignedUrl}
-              alt={pic.originalFileName}
-              style={{
-                width: '100%',
-                height: '50%',
-                objectFit: 'contain',
-                background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
-                borderTopLeftRadius: 5,
-                borderTopRightRadius: 5
-              }}
-            />
-            <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
-          </ImageListItem>
-
-          {showCheck && (
-            <Checkbox
-              color='error'
-              sx={{
-                position: 'absolute',
-                left: 0,
-                top: 0
-              }}
-              checked={inspectionPicsToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
-            />
-          )}
-        </Paper>
-        <div className='flex flex-col items-center py-1'>
-          <Typography className='text-green-600'>{pic.machineChecklistItemName}</Typography>
-          <Typography
-            className='text-gray-700'
-            style={pic.alternativeSubTitle ? { textDecoration: 'line-through', opacity: '60%' } : {}}
-          >
-            {pic.machineChecklistSubItemName}
-          </Typography>
-          <Typography className='text-blue-500'>{pic.alternativeSubTitle}</Typography>
-          <Typography className='text-red-500'>{pic.measuredValue}</Typography>
-        </div>
-      </div>
-    )
-  }
-
-  // ! 현장사진 컴포넌트 분리 (함수 props로 전달)
-  function ProjectPicCard({ pic }: { pic: MachineProjectPicReadResponseDtoType }) {
-    return (
-      <div className='flex flex-col items-center'>
-        <Paper
-          sx={{
-            width: '100%',
-            position: 'relative',
-            cursor: 'pointer',
-            borderColor: 'lightgray',
-            borderWidth: '1px',
-            ':hover': { boxShadow: 10 }
-          }}
-          variant='outlined'
-          key={`${pic.id}`}
-          onClick={() => {
-            // 일괄선택 활성화 시 클릭 동작
-            if (showCheck) {
-              if (!projectPicsToDelete.find(v => v.id === pic.id)) {
-                setProjectPicsToDelete(prev => {
-                  const newList = prev.map(v => ({ ...v }))
-
-                  return newList.concat({ id: pic.id, version: pic.version })
-                })
-              } else {
-                setProjectPicsToDelete(prev => {
-                  const newList = prev.map(v => ({ ...v }))
-
-                  return newList.filter(v => v.id !== pic.id)
-                })
-              }
-            }
-
-            // 일괄선택 비활성화 시 클릭 동작
-            else {
-              setSelectedProjectPic(pic)
-              setShowProjectPicModal(true)
-            }
-          }}
-        >
-          <ImageListItem>
-            <img
-              src={pic.presignedUrl}
-              alt={pic.originalFileName}
-              style={{
-                width: '100%',
-                height: '50%',
-                objectFit: 'contain',
-                background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
-                borderTopLeftRadius: 5,
-                borderTopRightRadius: 5
-              }}
-            />
-            <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
-          </ImageListItem>
-
-          {showCheck && (
-            <Checkbox
-              color='error'
-              sx={{
-                position: 'absolute',
-                left: 0,
-                top: 0
-              }}
-              checked={projectPicsToDelete.find(v => v.id === pic.id) ? true : false}
-            />
-          )}
-        </Paper>
-        <div className='flex flex-col items-center py-1'>
-          <Typography className='text-green-600'>{`${projectPicOption.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className='h-full flex flex-col gap-5'>
       {/* 상단 필터링, 검색, 선택 삭제 등 */}
@@ -693,7 +586,15 @@ const PictureListTabContent = () => {
             <Typography variant='h3'>현장사진</Typography>
             <ImageList sx={{ overflow: 'visible' }} cols={isTablet ? 1 : 4} rowHeight={isTablet ? 180 : 300} gap={15}>
               {handlefilterProjectPics(projectPics).map(pic => {
-                return <ProjectPicCard key={pic.id} pic={pic} />
+                return (
+                  <ProjectPicCard
+                    key={pic.id}
+                    pic={pic}
+                    showCheck={showCheck}
+                    checked={projectPicsToDelete.find(v => v.id === pic.id) ? true : false}
+                    handleClick={handleClickProjectPicCard}
+                  />
+                )
               })}
             </ImageList>
             {/* 더 이상 데이터가 없을 때 메시지 */}
@@ -718,7 +619,15 @@ const PictureListTabContent = () => {
                     gap={15}
                   >
                     {handlefilterInspectionPics(inspectionsPic).map(pic => {
-                      return <InspectionPicCard key={pic.machinePicId} pic={pic} />
+                      return (
+                        <InspectionPicCard
+                          key={pic.machinePicId}
+                          pic={pic}
+                          showCheck={showCheck}
+                          checked={inspectionPicsToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
+                          handleClick={handleClickInspectionPicCard}
+                        />
+                      )
                     })}
                   </ImageList>
                   {/* 더 이상 데이터가 없을 때 메시지 */}
@@ -759,6 +668,141 @@ const PictureListTabContent = () => {
         />
       )}
       {open && <PictureListModal open={open} setOpen={setOpen} projectPic />}
+    </div>
+  )
+}
+
+// 설비사진 카드 컴포넌트
+function InspectionPicCard({
+  pic,
+  showCheck,
+  checked,
+  handleClick
+}: {
+  pic: MachinePicPresignedUrlResponseDtoType
+  showCheck: boolean
+  checked: boolean
+  handleClick: (pic: MachinePicPresignedUrlResponseDtoType) => void
+}) {
+  return (
+    <div className='flex flex-col items-center'>
+      <Paper
+        sx={{
+          width: '100%',
+          position: 'relative',
+          cursor: 'pointer',
+          borderColor: 'lightgray',
+          borderWidth: '1px',
+          ':hover': { boxShadow: 10 }
+        }}
+        variant='outlined'
+        onClick={() => {
+          handleClick(pic)
+        }}
+      >
+        <ImageListItem>
+          <img
+            src={pic.presignedUrl}
+            alt={pic.originalFileName}
+            style={{
+              width: '100%',
+              height: '50%',
+              objectFit: 'contain',
+              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
+              borderTopLeftRadius: 5,
+              borderTopRightRadius: 5
+            }}
+          />
+          <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
+        </ImageListItem>
+
+        {showCheck && (
+          <Checkbox
+            color='error'
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0
+            }}
+            checked={checked}
+          />
+        )}
+      </Paper>
+      <div className='flex flex-col items-center py-1'>
+        <Typography className='text-green-600'>{pic.machineChecklistItemName}</Typography>
+        <Typography
+          className='text-gray-700'
+          style={pic.alternativeSubTitle ? { textDecoration: 'line-through', opacity: '60%' } : {}}
+        >
+          {pic.machineChecklistSubItemName}
+        </Typography>
+        <Typography className='text-blue-500'>{pic.alternativeSubTitle}</Typography>
+        <Typography className='text-red-500'>{pic.measuredValue}</Typography>
+      </div>
+    </div>
+  )
+}
+
+// 현장사진 카드 컴포넌트
+function ProjectPicCard({
+  pic,
+  showCheck,
+  checked,
+  handleClick
+}: {
+  pic: MachineProjectPicReadResponseDtoType
+  showCheck: boolean
+  checked: boolean
+  handleClick: (pic: MachineProjectPicReadResponseDtoType) => void
+}) {
+  return (
+    <div className='flex flex-col items-center'>
+      <Paper
+        sx={{
+          width: '100%',
+          position: 'relative',
+          cursor: 'pointer',
+          borderColor: 'lightgray',
+          borderWidth: '1px',
+          ':hover': { boxShadow: 10 }
+        }}
+        variant='outlined'
+        key={`${pic.id}`}
+        onClick={() => {
+          handleClick(pic)
+        }}
+      >
+        <ImageListItem>
+          <img
+            src={pic.presignedUrl}
+            alt={pic.originalFileName}
+            style={{
+              width: '100%',
+              height: '50%',
+              objectFit: 'contain',
+              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
+              borderTopLeftRadius: 5,
+              borderTopRightRadius: 5
+            }}
+          />
+          <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
+        </ImageListItem>
+
+        {showCheck && (
+          <Checkbox
+            color='error'
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0
+            }}
+            checked={checked}
+          />
+        )}
+      </Paper>
+      <div className='flex flex-col items-center py-1'>
+        <Typography className='text-green-600'>{`${projectPicOption.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
+      </div>
     </div>
   )
 }
