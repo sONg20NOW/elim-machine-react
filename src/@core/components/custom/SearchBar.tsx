@@ -3,6 +3,7 @@ import { IconButton, Input } from '@mui/material'
 interface SearchBarProps {
   placeholder: string
   setSearchKeyword: (name: string) => void
+  defaultValue?: string
   disabled?: boolean
   className?: string
 }
@@ -13,7 +14,13 @@ interface SearchBarProps {
  * e.target.value를 인자로 넣는 함수
  * @returns
  */
-export default function SearchBar({ placeholder, setSearchKeyword, disabled = false, className }: SearchBarProps) {
+export default function SearchBar({
+  placeholder,
+  setSearchKeyword,
+  defaultValue,
+  disabled = false,
+  className
+}: SearchBarProps) {
   return (
     <div className={`relative ${className} flex gap-1`}>
       <Input
@@ -23,6 +30,7 @@ export default function SearchBar({ placeholder, setSearchKeyword, disabled = fa
             setSearchKeyword(e.target.value)
           }
         }}
+        defaultValue={defaultValue}
         placeholder={placeholder}
         disabled={disabled}
         sx={{
