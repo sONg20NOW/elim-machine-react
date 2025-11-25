@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useContext, useEffect, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -9,6 +9,7 @@ import { Button, Card, MenuItem, Select, TextField, Tooltip, Typography } from '
 import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
 import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 import { equipmentPhaseOption } from '@/app/_constants/options'
+import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 
 interface basicTabContentProps<T> {
   editData: T
@@ -25,6 +26,8 @@ export default function BasicTabContent({
   const machineProjectId = params?.id as string
 
   const { data: participatedEngineerList } = useGetParticipatedEngineerList(machineProjectId)
+
+  const isMobile = useContext(isMobileContext)
 
   useEffect(() => {
     if (!isEditing) {
@@ -241,7 +244,8 @@ export default function BasicTabContent({
                       key={idx}
                       sx={{ '& .MuiSelect-select': { px: '16px !important', py: '8px' } }}
                       fullWidth
-                      SelectProps={{ IconComponent: () => null }}
+                      size='small'
+                      slotProps={{ ...(isMobile && { select: { IconComponent: () => null } }) }}
                       value={engineer?.engineerId ?? ''}
                       select
                       onChange={e => {
@@ -261,7 +265,7 @@ export default function BasicTabContent({
                         >{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</MenuItem>
                       ))}
                       <MenuItem
-                        sx={{ color: 'white', bgcolor: 'error.light' }}
+                        sx={{ color: 'white', bgcolor: 'error.main', ':hover': { bgcolor: 'error.light' } }}
                         onClick={() =>
                           setEditData(prev => ({
                             ...prev,
