@@ -57,7 +57,7 @@ const InspectionListTabContent = ({}) => {
     refetch: refetchInspections,
     isError,
     isLoading
-  } = useGetInspections(machineProjectId, queryParams.toString())
+  } = useGetInspections(machineProjectId, queryParams)
 
   const filteredInspectionList = inspectionsPage?.content
 
@@ -124,27 +124,18 @@ const InspectionListTabContent = ({}) => {
     setTotalCount(inspectionsPage.page.totalElements)
   }, [inspectionsPage])
 
-  // useEffect(() => {
-  //   handleApiError(error)
-  // }, [error])
-  const isFirst = useRef(true)
+  // 모달이 닫힐 때마다 inspections 데이터 다시 가져오기 (모달이 열린 적이 없다면 제외)
+  const wasOpened = useRef(false)
   const openModal = open || showAddModalOpen || showPictureListModal
 
   useEffect(() => {
-    if (isFirst.current) return
-    if (!openModal) refetchInspections()
-  }, [openModal, refetchInspections])
-
-  // 첫 렌더 이후 한 번만 실행
-  useEffect(() => {
-    isFirst.current = false
-  }, [])
-
-  useEffect(() => {
-    if (!open) {
-      setCurrentInspectionId(0)
+    if (openModal) {
+      wasOpened.current = true
+    } else if (wasOpened.current) {
+      refetchInspections()
+      wasOpened.current = false
     }
-  }, [setCurrentInspectionId, open])
+  }, [openModal, refetchInspections])
 
   //  체크 핸들러 (다중선택)
   const handleCheck = (machine: MachineInspectionPageResponseDtoType) => {
