@@ -53,7 +53,18 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
     control,
     watch,
     formState: { isDirty }
-  } = useForm<EngineerResponseDtoType>({ defaultValues: data })
+  } = useForm<EngineerResponseDtoType>({
+    defaultValues: {
+      id: data.id,
+      version: data.version,
+      name: data.name ?? '',
+      email: data.email ?? '',
+      phoneNumber: data.phoneNumber ?? '',
+      grade: data.grade ?? '',
+      engineerLicenseNum: data.engineerLicenseNum ?? '',
+      remark: data.remark ?? ''
+    }
+  })
 
   const watchedVersion = watch('version')
   const engineerId = data.id
@@ -119,7 +130,11 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
         primaryButton={
           <div className='flex justify-end gap-2 w-full'>
             <div className='flex items-end gap-1'>
-              {!isDirty && <Typography color='error.main'>변경사항이 없습니다</Typography>}
+              {!isDirty && (
+                <Typography color='warning.main' sx={{ paddingInlineEnd: 2 }}>
+                  ※변경사항이 없습니다
+                </Typography>
+              )}
               <Button variant='contained' type='submit' disabled={!isDirty || loading} form={'submit-engineer-form'}>
                 저장
               </Button>
@@ -191,7 +206,22 @@ const UserModal = ({ open, setOpen, data, setData, reloadData }: UserModalProps)
                     name='grade'
                     render={({ field }) => (
                       <TextField
-                        slotProps={{ input: { sx: { paddingInlineEnd: 5, fontSize: 'inherit' } } }}
+                        slotProps={{
+                          input: { sx: { paddingInlineEnd: 5, fontSize: 'inherit' } },
+                          select: {
+                            displayEmpty: true,
+                            renderValue: value =>
+                              value === '' ? (
+                                <Typography variant='inherit' color='lightgray'>
+                                  미정
+                                </Typography>
+                              ) : (
+                                <Typography variant='inherit'>
+                                  {gradeOption.find(v => v.value === value)?.label}
+                                </Typography>
+                              )
+                          }
+                        }}
                         value={field.value}
                         onChange={field.onChange}
                         select
