@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef, useContext } from 'react'
 
-import { useParams } from 'next/navigation'
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import {
   Box,
@@ -25,6 +25,8 @@ import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
 
+import { IconReload } from '@tabler/icons-react'
+
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import type {
   MachineInspectionDetailResponseDtoType,
@@ -38,15 +40,22 @@ import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 import PictureListModal from '../pictureUpdateModal/PictureListModal'
-import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/MachineProjectPictureCategory'
+import { projectPicOption } from '@/app/_constants/options'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
 
 const PictureListTabContent = () => {
+  const router = useRouter()
   const machineProjectId = useParams().id?.toString() as string
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  // 반응형을 위한 미디어쿼리
+  const isTablet = useContext(isTabletContext)
 
   // 이름으로 검색 필터 (파일 이름, 카테고리 이름, 체크 아이템, 섭아이템 이름에 포함된 것만 필터링 하기.)
-  const [keyword, setKeyword] = useState('')
+  const keyword = searchParams.get('keyword')
+  const inspectionId = Number(searchParams.get('inspectionId'))
 
   const [inspectionPics, setInspectionPics] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [projectPics, setProjectPics] = useState<MachineProjectPicReadResponseDtoType[]>([])
@@ -60,21 +69,22 @@ const PictureListTabContent = () => {
 
   // inspection으로 필터링하기 위한 옵션
   const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
-  const [inspectionId, setInspectionId] = useState(0)
 
   // ! 추후 세부 필터링 추가
   // const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
   // const [machineChecklistSubItemId, setMachineChecklistSubItemId] = useState(0)
 
   // 무한스크롤 관련 Ref들
-  const isLoadingRef = useRef(false)
+  const loadingInspectionPicsRef = useRef(false)
+  const loadingProjectPicsRef = useRef(false)
+
+  const isLoading = loadingInspectionPicsRef.current || loadingProjectPicsRef.current
+
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
-  const reloadIconRef = useRef<HTMLElement>(null)
-
-  // 반응형을 위한 미디어쿼리
-  const isTablet = useContext(isTabletContext)
+  const reloadIconRef = useRef<HTMLDivElement>(null)
+  const listContainerRef = useRef<HTMLDivElement>(null)
 
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedInspectionPic, setSelectedInspectionPic] = useState<MachinePicPresignedUrlResponseDtoType>()
@@ -85,7 +95,40 @@ const PictureListTabContent = () => {
 
   const [selectedInspection, setSelectedInspection] = useState<MachineInspectionDetailResponseDtoType>()
 
-  // 클릭된 사진이 속한 inspection 정보 가져오기. (사진 모달에 검사항목.하위항목을 위해 필요)
+  /**
+   * set searchParam 'keyword' for searching keyword
+   * @param keyword
+   */
+  const setKeywordSearchParam = useCallback(
+    (keyword: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+
+      params.set('keyword', keyword)
+
+      router.push(pathname + '?' + params.toString())
+    },
+    [searchParams, router, pathname]
+  )
+
+  /**
+   * set searchParam 'inspectionId' for searching
+   * @param keyword
+   */
+  const setInspectionIDSearchParam = useCallback(
+    (inspectionId: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+
+      params.set('inspectionId', inspectionId)
+
+      router.push(pathname + '?' + params.toString())
+    },
+    [searchParams, router, pathname]
+  )
+
+  /**
+   * set SelectedInspection to data using picture's inspection id
+   * @param pic
+   */
   const getInspectionByPic = useCallback(
     async (pic: MachinePicPresignedUrlResponseDtoType) => {
       try {
@@ -101,7 +144,10 @@ const PictureListTabContent = () => {
     [machineProjectId]
   )
 
-  // 현장사진을 가져오는 함수. (무한 스크롤 X)
+  /**
+   * get project pictures at once
+   * @description no infinite scroll
+   */
   const getProjectPics = useCallback(async () => {
     try {
       const response = await auth
@@ -113,6 +159,7 @@ const PictureListTabContent = () => {
         .then(v => v.data.data.machineProjectPics)
 
       setProjectPics(response)
+      console.log('get project pics:', response)
 
       return response
     } catch (err) {
@@ -121,12 +168,15 @@ const PictureListTabContent = () => {
     }
   }, [machineProjectId])
 
-  // 현재 커서 정보에 기반해서 사진을 가져오는 함수. (설비 사진)
+  /**
+   * get inspection pictures based on current cursor information
+   * @description current cursor information = hasNextRef, nextCursorRef
+   */
   const getInspectionPics = useCallback(
     async (pageSize = defaultPageSize) => {
-      if (!hasNextRef.current || isLoadingRef.current) return
+      if (!hasNextRef.current || loadingInspectionPicsRef.current) return
 
-      isLoadingRef.current = true
+      loadingInspectionPicsRef.current = true
 
       const requestBody = {
         ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
@@ -141,7 +191,7 @@ const PictureListTabContent = () => {
           }
         }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
 
-        console.log('get pictures: ', response.data.data.content)
+        console.log('get inspection pictures: ', response.data.data.content)
         setInspectionPics(prev => prev.concat(response.data.data.content))
         hasNextRef.current = response.data.data.hasNext
         nextCursorRef.current = response.data.data.nextCursor
@@ -150,7 +200,7 @@ const PictureListTabContent = () => {
       } catch (err) {
         handleApiError(err)
       } finally {
-        isLoadingRef.current = false
+        loadingInspectionPicsRef.current = false
       }
     },
     [machineProjectId]
@@ -159,14 +209,15 @@ const PictureListTabContent = () => {
   const handlefilterInspectionPics = useCallback(
     (pictures: MachinePicPresignedUrlResponseDtoType[]) => {
       const picturesFilterdWithKeyword = pictures
-        .filter(
-          pic =>
-            pic.machineCategoryName.includes(keyword) ||
-            pic.originalFileName.includes(keyword) ||
-            pic.machineChecklistItemName.includes(keyword) ||
-            pic.machineChecklistSubItemName.includes(keyword)
+        .filter(pic =>
+          keyword
+            ? pic.machineCategoryName.includes(keyword) ||
+              pic.originalFileName.includes(keyword) ||
+              pic.machineChecklistItemName.includes(keyword) ||
+              pic.machineChecklistSubItemName.includes(keyword)
+            : true
         )
-        .filter(v => (inspectionId === 0 ? true : v.machineInspectionId === inspectionId))
+        .filter(v => (!inspectionId ? true : v.machineInspectionId === inspectionId))
 
       return picturesFilterdWithKeyword
     },
@@ -176,7 +227,12 @@ const PictureListTabContent = () => {
   const handlefilterProjectPics = useCallback(
     (pictures: MachineProjectPicReadResponseDtoType[]) => {
       const picturesFilterdWithKeyword = pictures.filter(
-        pic => pic.originalFileName.includes(keyword) && inspectionId === 0
+        pic =>
+          !inspectionId &&
+          (keyword
+            ? pic.originalFileName.includes(keyword) ||
+              projectPicOption.find(v => v.value === pic.machineProjectPicType)?.label.includes(keyword)
+            : true)
       )
 
       return picturesFilterdWithKeyword
@@ -194,8 +250,6 @@ const PictureListTabContent = () => {
     resetCursor()
     await getInspectionPics(defaultPageSize)
     await getProjectPics()
-
-    return
   }, [getInspectionPics, getProjectPics])
 
   const handleDeletePics = useCallback(async () => {
@@ -304,6 +358,17 @@ const PictureListTabContent = () => {
     }
   }
 
+  const handleScrollInside = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget
+    const scrollTop = target.scrollTop
+    const scrollHeight = target.scrollHeight
+    const clientHeight = target.clientHeight
+
+    if (scrollTop + clientHeight >= scrollHeight - 100 && !loadingInspectionPicsRef.current && hasNextRef.current) {
+      getInspectionPics(defaultPageSize)
+    }
+  }
+
   useEffect(() => {
     getProjectPics()
   }, [getProjectPics])
@@ -312,50 +377,28 @@ const PictureListTabContent = () => {
     getInspectionPics(defaultPageSize)
   }, [getInspectionPics])
 
-  // 스크롤 이벤트 핸들러
-  const handleScroll = useCallback(() => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-    const scrollHeight = document.documentElement.scrollHeight
-    const clientHeight = window.innerHeight
-
-    // 스크롤이 하단에서 100px 이내에 도달했을 때 다음 페이지 로드
-    if (scrollTop + clientHeight >= scrollHeight - 100 && !isLoadingRef.current && hasNextRef.current) {
-      getInspectionPics(defaultPageSize)
-    }
-  }, [getInspectionPics])
-
   useEffect(() => {
+    //check if current scroll height is shorter than client height. If so, get inspection pictures
     const checkAndLoad = () => {
-      const scrollHeight = document.documentElement.scrollHeight
-      const clientHeight = window.innerHeight
+      const container = listContainerRef.current
 
-      // 스크롤이 아예 없거나 화면보다 내용이 적을 때
-      if (scrollHeight <= clientHeight && hasNextRef.current && !isLoadingRef.current) {
+      if (!container) return
+
+      if (container.scrollHeight <= container.clientHeight && hasNextRef.current && !loadingInspectionPicsRef.current) {
         getInspectionPics(defaultPageSize)
       }
     }
 
     // 초기 렌더링 직후, 데이터 불러오고 난 직후에도 체크
     checkAndLoad()
-
-    window.addEventListener('scroll', handleScroll)
-
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [handleScroll, getInspectionPics, inspectionPics])
+  }, [getInspectionPics, inspectionPics])
 
   // 검색 시 자동으로 fetch 시도.
   useEffect(() => {
-    if (hasNextRef.current && !isLoadingRef.current) {
+    if (hasNextRef.current && !loadingInspectionPicsRef.current) {
       getInspectionPics(defaultPageSize)
     }
   }, [handlefilterInspectionPics, getInspectionPics])
-
-  // useEffect(() => {
-  //   if (!showPicModal) {
-  //     resetCursor()
-  //     getPictures(defaultPageSize)
-  //   }
-  // }, [showPicModal, getPictures])
 
   useEffect(() => {
     if (!open) {
@@ -363,6 +406,7 @@ const PictureListTabContent = () => {
     }
   }, [open, refetchPictures])
 
+  // ! 설비 사진 컴포넌트 분리 (함수 props로 전달)
   function InspectionPicCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
     return (
       <div className='flex flex-col items-center'>
@@ -445,6 +489,7 @@ const PictureListTabContent = () => {
     )
   }
 
+  // ! 현장사진 컴포넌트 분리 (함수 props로 전달)
   function ProjectPicCard({ pic }: { pic: MachineProjectPicReadResponseDtoType }) {
     return (
       <div className='flex flex-col items-center'>
@@ -513,18 +558,18 @@ const PictureListTabContent = () => {
           )}
         </Paper>
         <div className='flex flex-col items-center py-1'>
-          <Typography className='text-green-600'>{`${MACHINE_PROJECT_PICTURE_TYPE.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
+          <Typography className='text-green-600'>{`${projectPicOption.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
         </div>
       </div>
     )
   }
 
   return (
-    <div className='flex flex-col gap-5'>
+    <div className='h-full flex flex-col gap-5'>
       {/* 상단 필터링, 검색, 선택 삭제 등 */}
       <div className='flex justify-between'>
         <div className={classNames('flex gap-3', { 'flex-col': isTablet })}>
-          <SearchBar placeholder='검색' setSearchKeyword={name => setKeyword(name)} />
+          <SearchBar placeholder='검색' setSearchKeyword={setKeywordSearchParam} defaultValue={keyword ?? undefined} />
           {inspectionList && (
             <TextField
               label='설비명으로 검색'
@@ -532,7 +577,7 @@ const PictureListTabContent = () => {
               select
               size='small'
               value={inspectionId}
-              onChange={e => setInspectionId(Number(e.target.value))}
+              onChange={e => setInspectionIDSearchParam(e.target.value)}
               fullWidth
             >
               <MenuItem key={0} value={0}>
@@ -555,11 +600,11 @@ const PictureListTabContent = () => {
                   reloadIconRef.current?.classList.remove('animate-spin')
                 }, 1000)
                 refetchPictures()
-                setKeyword('')
-                setInspectionId(0)
               }}
             >
-              <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
+              <div ref={reloadIconRef} className='grid place-items-center'>
+                <IconReload className='text-lime-600' />
+              </div>
             </IconButton>
           </Tooltip>
           {/* ! 추후구현
@@ -641,7 +686,8 @@ const PictureListTabContent = () => {
           </div>
         </div>
       </div>
-      <div className='flex flex-col gap-8'>
+      {/* 사진 리스트 부분 */}
+      <div className='flex-1 flex flex-col gap-8 overflow-y-auto' ref={listContainerRef} onScroll={handleScrollInside}>
         {handlefilterProjectPics(projectPics) && handlefilterProjectPics(projectPics).length > 0 && (
           <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Typography variant='h3'>현장사진</Typography>
@@ -685,13 +731,14 @@ const PictureListTabContent = () => {
             <Typography variant='body1'>사진 데이터가 존재하지 않습니다</Typography>
           </Box>
         )}
+        {/* 로딩 인디케이터 */}
+        {isLoading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <CircularProgress size={24} />
+          </Box>
+        )}
       </div>
-      {/* 로딩 인디케이터 */}
-      {isLoadingRef.current && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <CircularProgress size={24} />
-        </Box>
-      )}
+
       {selectedInspectionPic && selectedInspection && (
         <InspectionPicZoomModal
           open={showInspecitonPicModal}
