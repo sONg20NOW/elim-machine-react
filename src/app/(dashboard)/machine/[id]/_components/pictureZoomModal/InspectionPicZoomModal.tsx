@@ -23,6 +23,8 @@ import { toast } from 'react-toastify'
 
 import { Controller, useForm } from 'react-hook-form'
 
+import ImageZoom from 'react-image-zooom'
+
 import type {
   MachineInspectionDetailResponseDtoType,
   MachinePicPresignedUrlResponseDtoType,
@@ -160,8 +162,14 @@ export default function InspectionPicZoomModal({
 
   return (
     inspectionList && (
-      <form onSubmit={handleSubmit(handleSave)} id='picture-form'>
+      <form className='hidden' onSubmit={handleSubmit(handleSave)} id='picture-form'>
         <Dialog maxWidth='xl' fullWidth open={open} onClose={handleClose}>
+          <style>
+            {`#imageZoom {
+              object-fit: contain;
+              height: 100%;
+            }`}
+          </style>
           <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
             <div className='flex justify-between'>
               <div className='flex gap-4 items-center'>
@@ -200,49 +208,38 @@ export default function InspectionPicZoomModal({
                 </div>
               )}
 
-              <div className='flex-1 flex flex-col gap-2 w-full items-start relative border-4 p-2 rounded-lg'>
-                <TextField
-                  {...register('originalFileName')}
-                  variant='standard'
-                  fullWidth
-                  size='small'
-                  sx={{ width: '50%' }}
-                  slotProps={{
-                    htmlInput: {
-                      sx: {
-                        fontWeight: 700,
-                        fontSize: isMobile ? 20 : 24
+              <div className='flex-1 flex flex-col gap-2 w-full items-center h-full border-4 p-2 rounded-lg'>
+                <div className='flex justify-between w-full'>
+                  <TextField
+                    {...register('originalFileName')}
+                    variant='standard'
+                    fullWidth
+                    size='small'
+                    sx={{ width: '50%' }}
+                    slotProps={{
+                      htmlInput: {
+                        sx: {
+                          fontWeight: 700,
+                          fontSize: isMobile ? 20 : 24
+                        }
                       }
-                    }
-                  }}
-                  id='new-picture-name-input'
-                />
-                <div className='w-full grid place-items-center h-full overflow-auto '>
-                  {/* <ImageZoom src={presignedUrl} alt={watchedAlternativeSubTitle} zoom={300} /> */}
-                  <img
-                    src={presignedUrl}
-                    alt={watchedAlternativeSubTitle}
-                    style={{
-                      width: '100%',
-                      objectFit: 'contain',
-                      paddingBottom: 5
                     }}
+                    id='new-picture-name-input'
                   />
+                  <Button
+                    type='button'
+                    sx={{
+                      color: 'white',
+                      boxShadow: 10,
+                      backgroundColor: 'primary.dark',
+                      zIndex: 5
+                    }}
+                    onClick={() => cameraInputRef.current?.click()}
+                  >
+                    사진 변경
+                  </Button>
                 </div>
-                <Button
-                  type='button'
-                  sx={{
-                    color: 'white',
-                    boxShadow: 10,
-                    position: 'absolute',
-                    top: 6,
-                    right: 6,
-                    backgroundColor: 'primary.dark'
-                  }}
-                  onClick={() => cameraInputRef.current?.click()}
-                >
-                  사진 변경
-                </Button>
+                <ImageZoom src={presignedUrl} alt={watchedAlternativeSubTitle} />
               </div>
               <Box>
                 <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>

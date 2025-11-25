@@ -706,7 +706,7 @@ function InspectionPicCard({
             alt={pic.originalFileName}
             style={{
               width: '100%',
-              height: '50%',
+              height: '100%',
               objectFit: 'contain',
               background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
               borderTopLeftRadius: 5,

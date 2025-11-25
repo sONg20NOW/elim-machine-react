@@ -21,6 +21,8 @@ import classNames from 'classnames'
 
 import { Controller, useForm } from 'react-hook-form'
 
+import ImageZoom from 'react-image-zooom'
+
 import type { MachineProjectPicReadResponseDtoType, MachineProjectPicUpdateRequestDtoType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
@@ -125,7 +127,13 @@ export default function ProjectPicZoomModal({
   }
 
   return (
-    <form onSubmit={handleSubmit(handleSave)} id='picture-form'>
+    <form className='hidden' onSubmit={handleSubmit(handleSave)} id='picture-form'>
+      <style>
+        {`#imageZoom {
+          object-fit: contain;
+          height: 100%;
+        }`}
+      </style>
       <Dialog maxWidth='xl' fullWidth open={open} onClose={handleClose}>
         <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
           <div className='flex justify-between'>
@@ -165,48 +173,38 @@ export default function ProjectPicZoomModal({
               </div>
             )}
 
-            <div className='flex-1 flex flex-col gap-2 w-full items-start relative border-4 p-2 rounded-lg'>
-              <TextField
-                {...register('originalFileName')}
-                variant='standard'
-                fullWidth
-                size='small'
-                sx={{ width: '50%' }}
-                slotProps={{
-                  htmlInput: {
-                    sx: {
-                      fontWeight: 700,
-                      fontSize: isMobile ? 20 : 24
+            <div className='flex-1 flex flex-col gap-2 w-full items-center h-full border-4 p-2 rounded-lg'>
+              <div className='flex justify-between w-full'>
+                <TextField
+                  {...register('originalFileName')}
+                  variant='standard'
+                  fullWidth
+                  size='small'
+                  sx={{ width: '50%' }}
+                  slotProps={{
+                    htmlInput: {
+                      sx: {
+                        fontWeight: 700,
+                        fontSize: isMobile ? 20 : 24
+                      }
                     }
-                  }
-                }}
-                id='new-picture-name-input'
-              />
-              <div className='w-full grid place-items-center h-full overflow-auto '>
-                <img
-                  src={presignedUrl}
-                  alt={watchedOriginalFileName}
-                  style={{
-                    width: '100%',
-                    objectFit: 'contain',
-                    paddingBottom: 5
                   }}
+                  id='new-picture-name-input'
                 />
+                <Button
+                  type='button'
+                  sx={{
+                    color: 'white',
+                    boxShadow: 10,
+                    backgroundColor: 'primary.dark',
+                    zIndex: 5
+                  }}
+                  onClick={() => cameraInputRef.current?.click()}
+                >
+                  사진 변경
+                </Button>
               </div>
-              <Button
-                type='button'
-                sx={{
-                  color: 'white',
-                  boxShadow: 10,
-                  position: 'absolute',
-                  top: 6,
-                  right: 6,
-                  backgroundColor: 'primary.dark'
-                }}
-                onClick={() => cameraInputRef.current?.click()}
-              >
-                사진 변경
-              </Button>
+              <ImageZoom src={presignedUrl} alt={watchedOriginalFileName} zoom={200} />
             </div>
             <Box>
               <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
