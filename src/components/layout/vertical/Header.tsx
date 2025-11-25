@@ -4,7 +4,7 @@ import { useCallback, useContext, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography, Link } from '@mui/material'
+import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
@@ -283,11 +283,11 @@ export default function Header() {
               </MenuSection>
             </Menu>
           </Box>
-          <Box sx={{ width: 'full', textAlign: 'right' }}>
+          {/* <Box sx={{ width: 'full', textAlign: 'right' }}>
             <Link href='/check' className={`text-color-primary`} width={'fit-content'} sx={{ py: 1, px: 3 }}>
               성능점검 앱
             </Link>
-          </Box>
+          </Box> */}
         </Drawer>
       )}
       {openUser && currentUser && <UserModalContainer />}

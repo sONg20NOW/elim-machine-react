@@ -1,8 +1,6 @@
 'use client'
 
 // Component Imports
-import Link from 'next/link'
-
 import classnames from 'classnames'
 
 // Next Imports
@@ -28,9 +26,9 @@ const Footer = () => {
           <span className='text-textSecondary'>{` by Elim`}</span>
         </p>
       </div>
-      <Link href='/check' className={`text-color-primary`}>
+      {/* <Link href='/check' className={`text-color-primary`}>
         성능점검 앱
-      </Link>
+      </Link> */}
     </div>
   )
 }
