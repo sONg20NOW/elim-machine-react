@@ -38,9 +38,11 @@ import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures
 import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { DEFAULT_PIC_PAGESIZE } from '@/app/_constants/options'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
+import ReloadButton from '../ReloadButton'
+
+const DEFAULT_PAGESIZE = 1000
 
 type InspectionPicListModalProps = {
   open: boolean
@@ -60,6 +62,9 @@ const InspectionPicListModal = ({
   const machineProjectId = useParams().id?.toString() as string
 
   const { data: inspections } = useGetInspectionsSimple(machineProjectId)
+
+  // 반응형을 위한 미디어쿼리
+  const isMobile = useContext(isMobileContext)
 
   const [picInspectionId, setPicInspectionId] = useState(
     defaultPicInspectionId ?? (inspections ? inspections[0].id : 0)
@@ -100,11 +105,9 @@ const InspectionPicListModal = ({
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
-  const reloadIconRef = useRef<HTMLElement>(null)
-
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
-  const [openPicModal, setOpenPicModal] = useState(false)
+  const [openPicZoom, setOpenPicZoom] = useState(false)
 
   const [selectAll, setSelectAll] = useState(true)
 
@@ -113,15 +116,6 @@ const InspectionPicListModal = ({
       (selectedItemId === 0 || pic.machineChecklistItemId === selectedItemId) &&
       (selectedSubItemId === 0 || pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
   )
-
-  // 반응형을 위한 미디어쿼리
-  const isMobile = useContext(isMobileContext)
-
-  const resetCursor = () => {
-    hasNextRef.current = true
-    nextCursorRef.current = undefined
-    setPictures([])
-  }
 
   const handleClose = () => {
     setOpen(false)
@@ -136,6 +130,54 @@ const InspectionPicListModal = ({
       setFilesToUpload(prev => [...prev, ...newFiles])
     }
   }
+
+  const resetCursor = () => {
+    hasNextRef.current = true
+    nextCursorRef.current = undefined
+    setPictures([])
+  }
+
+  // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
+  // (API 자체는 무한 스크롤로 구현되어 있지만 사용자 편의성을 위해 한번에 다 가져오는 것으로 결정) - 최초에 1000개
+  const getPictures = useCallback(
+    async (pageSize = DEFAULT_PAGESIZE) => {
+      if (!hasNextRef.current || isLoadingRef.current || !picInspectionId) return
+
+      isLoadingRef.current = true
+
+      const requestBody = {
+        machineInspectionId: picInspectionId,
+        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
+      }
+
+      try {
+        const response = await auth.post<{
+          data: {
+            content: MachinePicPresignedUrlResponseDtoType[]
+            hasNext: boolean
+            nextCursor: MachinePicCursorType | null
+          }
+        }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
+
+        console.log('get pictures: ', response.data.data.content)
+        setPictures(prev => prev.concat(response.data.data.content))
+        hasNextRef.current = response.data.data.hasNext
+        nextCursorRef.current = response.data.data.nextCursor
+
+        return response.data.data
+      } catch (err) {
+        handleApiError(err)
+      } finally {
+        isLoadingRef.current = false
+      }
+    },
+    [machineProjectId, picInspectionId]
+  )
+
+  const refetchPictures = useCallback(async () => {
+    resetCursor()
+    await getPictures()
+  }, [getPictures])
 
   const handleFileUpload = async () => {
     if (!selectedInspection) return
@@ -167,19 +209,21 @@ const InspectionPicListModal = ({
     )
 
     if (result) {
-      setFilesToUpload([])
-
       // 디테일 모달 테이블의 해당 목록 정보 최신화 - selcetedMachine 최신화
-      refetchSelectedInspection()
+      await refetchSelectedInspection()
 
-      // 커서 리셋
-      resetCursor()
+      // 사진 목록 최신화
+      await refetchPictures()
+      toast.success(`${filesToUpload.length}개 사진이 성공적으로 업로드되었습니다.`)
+      setFilesToUpload([])
+    } else {
+      toast.error('사진 업로드에 문제가 발생했습니다.')
     }
 
     setIsUploading(false)
   }
 
-  const removeFile = (index: number) => {
+  const removePreviewFile = (index: number) => {
     setFilesToUpload(prev => prev.filter((_, i) => i !== index))
   }
 
@@ -193,7 +237,7 @@ const InspectionPicListModal = ({
         }
       } else {
         setSelectedPic(pic)
-        setOpenPicModal(true)
+        setOpenPicZoom(true)
       }
     },
     [showCheck, picturesToDelete]
@@ -208,8 +252,7 @@ const InspectionPicListModal = ({
       // 성공했다면 업로드 때와 마찬가지로 selectedMachine 최신화.
       refetchSelectedInspection()
 
-      // 커서 리셋
-      resetCursor()
+      setPictures(prev => prev.filter(v => !picturesToDelete.find(k => k.machinePicId === v.machinePicId)))
 
       // 삭제 예정 리스트 리셋
       setPicturesToDelete([])
@@ -263,82 +306,10 @@ const InspectionPicListModal = ({
     }
   }
 
-  // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
-  const getPictures = useCallback(
-    async (pageSize = DEFAULT_PIC_PAGESIZE) => {
-      if (!hasNextRef.current || isLoadingRef.current || !picInspectionId) return
-
-      isLoadingRef.current = true
-
-      const requestBody = {
-        machineInspectionId: picInspectionId,
-        machineChecklistItemId: selectedItemId !== 0 ? selectedItemId : null,
-        ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {})
-      }
-
-      try {
-        const response = await auth.post<{
-          data: {
-            content: MachinePicPresignedUrlResponseDtoType[]
-            hasNext: boolean
-            nextCursor: MachinePicCursorType | null
-          }
-        }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
-
-        console.log('get pictures: ', response.data.data.content)
-        setPictures(prev => prev.concat(response.data.data.content))
-        hasNextRef.current = response.data.data.hasNext
-        nextCursorRef.current = response.data.data.nextCursor
-
-        return response.data.data
-      } catch (err) {
-        handleApiError(err)
-      } finally {
-        isLoadingRef.current = false
-      }
-    },
-    [selectedItemId, machineProjectId, picInspectionId]
-  )
-
-  // 최초에 전체 사진 가져오기
+  // 설비변경 될 때(최초 포함) 사진 가져오기
   useEffect(() => {
-    getPictures()
-  }, [getPictures])
-
-  useEffect(() => {
-    // 정보에 있는 사진 개수(selectedSubItem)보다 실제로 있는 사진 개수(pictures)가 적다면 getPictures.
-    if (
-      !isUploading &&
-      (selectedSubItem
-        ? selectedSubItem.machinePicCount !==
-          pictures.filter(pic => pic.machineChecklistSubItemId === selectedSubItem.machineChecklistSubItemId).length
-        : selectedItem?.totalMachinePicCount !== pictures.length)
-    ) {
-      getPictures()
-    }
-  }, [
-    isUploading,
-    selectedSubItem,
-    selectedItem,
-    pictures,
-    selectedInspection?.machineInspectionResponseDto.id,
-    machineProjectId,
-    getPictures
-  ])
-
-  useEffect(() => setShowCheck(false), [selectedSubItem])
-
-  useEffect(() => {
-    resetCursor()
-  }, [picInspectionId])
-
-  useEffect(() => {
-    if (!openPicModal) {
-      refetchSelectedInspection()
-      resetCursor()
-      getPictures()
-    }
-  }, [openPicModal, refetchSelectedInspection, getPictures])
+    refetchPictures()
+  }, [refetchPictures])
 
   return (
     selectedInspection &&
@@ -400,7 +371,6 @@ const InspectionPicListModal = ({
               select
               value={selectedItem?.machineChecklistItemId ?? 0}
               onChange={e => {
-                resetCursor()
                 setSelectedSubItemId(0)
                 setSelectedItemId(Number(e.target.value))
               }}
@@ -466,19 +436,7 @@ const InspectionPicListModal = ({
               <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
                 사진 목록
               </Typography>
-              <IconButton
-                onClick={() => {
-                  if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
-
-                  reloadIconRef.current.classList.add('animate-spin')
-                  setTimeout(() => {
-                    reloadIconRef.current?.classList.remove('animate-spin')
-                  }, 1000)
-                  resetCursor()
-                }}
-              >
-                <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
-              </IconButton>
+              <ReloadButton handleClick={refetchPictures} tooltipText='설비사진 새로고침' />
             </div>
             <div className='flex gap-1 top-2 right-1 items-center'>
               {showCheck && [
@@ -558,7 +516,7 @@ const InspectionPicListModal = ({
                           <ImageList
                             sx={{ overflow: 'visible' }}
                             cols={isMobile ? 1 : 4}
-                            gap={0}
+                            gap={10}
                             rowHeight={isMobile ? 150 : 250}
                           >
                             {picsByItem.map((pic, idx) => (
@@ -705,7 +663,7 @@ const InspectionPicListModal = ({
                     rowHeight={isMobile ? 150 : 250}
                   >
                     {filesToUpload.map((file, index) => (
-                      <PicPreviewCard key={index} file={file} handleClickX={() => removeFile(index)} />
+                      <PicPreviewCard key={index} file={file} handleClickX={() => removePreviewFile(index)} />
                     ))}
                   </ImageList>
                 </>
@@ -755,8 +713,8 @@ const InspectionPicListModal = ({
         {selectedPic && (
           <InspectionPicZoomModal
             MovePicture={MovePicture}
-            open={openPicModal}
-            setOpen={setOpenPicModal}
+            open={openPicZoom}
+            setOpen={setOpenPicZoom}
             selectedPic={selectedPic}
             selectedInspection={selectedInspection}
             setPictures={setPictures}
