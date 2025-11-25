@@ -18,10 +18,7 @@ import {
   MenuItem,
   Divider,
   IconButton,
-  Checkbox,
   ImageList,
-  ImageListItem,
-  ImageListItemBar,
   Paper
 } from '@mui/material'
 
@@ -38,6 +35,8 @@ import { auth } from '@/lib/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
 import { projectPicOption } from '@/app/_constants/options'
+import ProjectPicCard from '../pictureCard/ProjectPicCard'
+import PicPreviewCard from '../pictureCard/PicPreviewCard'
 
 type ProjectPicListModalProps = {
   open: boolean
@@ -135,7 +134,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     setIsUploading(false)
   }
 
-  const removeFile = (index: number) => {
+  const removePreviewFile = (index: number) => {
     setFilesToUpload(prev => prev.filter((_, i) => i !== index))
   }
 
@@ -187,90 +186,21 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     }
   }
 
-  // 사진 카드 컴포넌트
-  function PictureCard({ pic }: { pic: MachineProjectPicReadResponseDtoType }) {
-    return (
-      <Paper
-        key={pic.id}
-        elevation={3}
-        sx={{
-          p: 1,
-          position: 'relative',
-          cursor: 'pointer',
-          border: '1px solid lightgray',
-          m: 1,
-          ':hover': { boxShadow: 4 }
-        }}
-      >
-        <ImageListItem
-          onClick={() => {
-            if (showCheck) {
-              if (!picturesToDelete.find(v => v.id === pic.id)) {
-                setPicturesToDelete(prev => [...prev, { id: pic.id, version: pic.version }])
-              } else {
-                setPicturesToDelete(prev => prev.filter(v => v.id !== pic.id))
-              }
-            } else {
-              setSelectedPic(pic)
-              setShowPicModal(true)
-            }
-          }}
-        >
-          <img
-            src={pic.presignedUrl}
-            alt={pic.originalFileName}
-            style={{
-              width: '100%',
-              height: '50%',
-              objectFit: 'contain',
-              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))'
-            }}
-          />
-          <ImageListItemBar title={pic.originalFileName} sx={{ textAlign: 'center' }} />
-        </ImageListItem>
-        {showCheck && (
-          <Checkbox
-            color='error'
-            sx={{ position: 'absolute', left: 0, top: 0 }}
-            checked={picturesToDelete.some(v => v.id === pic.id)}
-          />
-        )}
-      </Paper>
-    )
-  }
-
-  // 미리보기 사진 카드 컴포넌트
-  function PicturePreviewCard({ file, index }: { file: File; index: number }) {
-    return (
-      <Paper
-        elevation={3}
-        sx={{
-          p: 1,
-          position: 'relative',
-          border: '1px solid lightgray',
-          m: 1,
-          ':hover': { boxShadow: 4 }
-        }}
-      >
-        <ImageListItem>
-          <img
-            src={URL.createObjectURL(file)}
-            alt={file.name}
-            style={{
-              width: '100%',
-              height: '50%',
-              objectFit: 'contain',
-              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))'
-            }}
-          />
-          <ImageListItemBar title={file.name} sx={{ textAlign: 'center' }} />
-        </ImageListItem>
-        <IconButton sx={{ position: 'absolute', right: 0, top: 0 }} onClick={() => removeFile(index)}>
-          <i className='tabler-x text-xl text-error' />
-        </IconButton>
-      </Paper>
-    )
-  }
+  const handleClickPicCard = useCallback(
+    (pic: MachineProjectPicReadResponseDtoType) => {
+      if (showCheck) {
+        if (!picturesToDelete.find(v => v.id === pic.id)) {
+          setPicturesToDelete(prev => [...prev, { id: pic.id, version: pic.version }])
+        } else {
+          setPicturesToDelete(prev => prev.filter(v => v.id !== pic.id))
+        }
+      } else {
+        setSelectedPic(pic)
+        setShowPicModal(true)
+      }
+    },
+    [showCheck, picturesToDelete]
+  )
 
   const firstRender = useRef(true)
 
@@ -421,57 +351,56 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
         </Box>
         <Grid item xs={12} sx={{ flex: 1, overflowY: 'auto', paddingTop: 2 }}>
           <div className='flex-1 h-full overflowX-visible overflowY-auto'>
-            {selectedPicType !== '전체' ? (
-              filteredPics.length > 0 ? (
+            {filteredPics.length > 0 ? (
+              selectedPicType !== '전체' ? (
                 <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
                   {filteredPics.map(pic => (
-                    <PictureCard key={pic.id} pic={pic} />
+                    <ProjectPicCard
+                      key={pic.id}
+                      pic={pic}
+                      showCheck={showCheck}
+                      checked={picturesToDelete.some(v => v.id === pic.id)}
+                      handleClick={handleClickPicCard}
+                    />
                   ))}
                 </ImageList>
               ) : (
-                <Box
-                  sx={{
-                    textAlign: 'center',
-                    py: 4,
-                    border: '2px dashed #e0e0e0',
-                    borderRadius: 1,
-                    color: 'text.secondary'
-                  }}
-                >
-                  <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
-                  <Typography>등록된 검사 사진이 없습니다.</Typography>
-                </Box>
-              )
-            ) : pictures.length > 0 ? (
-              projectPicOption.map(v => {
-                const label = v.label
-                const type = v.value
-                const picsByItem = pictures.filter(pic => pic.machineProjectPicType === type)
+                projectPicOption.map(v => {
+                  const label = v.label
+                  const type = v.value
+                  const picsByItem = pictures.filter(pic => pic.machineProjectPicType === type)
 
-                return (
-                  picsByItem.length > 0 && (
-                    <Box key={type} sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                      <Typography
-                        variant='h5'
-                        paddingInlineStart={2}
-                        onClick={() => setSelectedPicType(type)}
-                        sx={{
-                          cursor: 'pointer',
-                          ':hover': { textDecoration: 'underline', textUnderlineOffset: '3px' },
-                          width: 'fit-content'
-                        }}
-                      >
-                        # {label}
-                      </Typography>
-                      <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
-                        {picsByItem.map((pic, idx) => (
-                          <PictureCard key={idx} pic={pic} />
-                        ))}
-                      </ImageList>
-                    </Box>
+                  return (
+                    picsByItem.length > 0 && (
+                      <Box key={type} sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                        <Typography
+                          variant='h5'
+                          paddingInlineStart={2}
+                          onClick={() => setSelectedPicType(type)}
+                          sx={{
+                            cursor: 'pointer',
+                            ':hover': { textDecoration: 'underline', textUnderlineOffset: '3px' },
+                            width: 'fit-content'
+                          }}
+                        >
+                          # {label}
+                        </Typography>
+                        <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+                          {picsByItem.map((pic, idx) => (
+                            <ProjectPicCard
+                              key={idx}
+                              pic={pic}
+                              showCheck={showCheck}
+                              checked={picturesToDelete.some(v => v.id === pic.id)}
+                              handleClick={handleClickPicCard}
+                            />
+                          ))}
+                        </ImageList>
+                      </Box>
+                    )
                   )
-                )
-              })
+                })
+              )
             ) : (
               <Box
                 sx={{
@@ -520,7 +449,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                   rowHeight={isMobile ? 150 : 250}
                 >
                   {filesToUpload.map((file, index) => (
-                    <PicturePreviewCard key={index} file={file} index={index} />
+                    <PicPreviewCard key={index} file={file} handleClickX={() => removePreviewFile(index)} />
                   ))}
                 </ImageList>
               </>

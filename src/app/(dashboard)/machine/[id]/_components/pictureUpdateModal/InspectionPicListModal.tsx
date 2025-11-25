@@ -18,10 +18,7 @@ import {
   MenuItem,
   Divider,
   IconButton,
-  Checkbox,
   ImageList,
-  ImageListItem,
-  ImageListItemBar,
   Paper
 } from '@mui/material'
 
@@ -42,6 +39,8 @@ import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/c
 import { auth } from '@/lib/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { DEFAULT_PIC_PAGESIZE } from '@/app/_constants/options'
+import InspectionPicCard from '../pictureCard/InspectionPicCard'
+import PicPreviewCard from '../pictureCard/PicPreviewCard'
 
 type InspectionPicListModalProps = {
   open: boolean
@@ -184,6 +183,22 @@ const InspectionPicListModal = ({
     setFilesToUpload(prev => prev.filter((_, i) => i !== index))
   }
 
+  const handleClickInspectionPicCard = useCallback(
+    (pic: MachinePicPresignedUrlResponseDtoType) => {
+      if (showCheck) {
+        if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
+          setPicturesToDelete(prev => [...prev, { machinePicId: pic.machinePicId, version: pic.version }])
+        } else {
+          setPicturesToDelete(prev => prev.filter(v => v.machinePicId !== pic.machinePicId))
+        }
+      } else {
+        setSelectedPic(pic)
+        setOpenPicModal(true)
+      }
+    },
+    [showCheck, picturesToDelete]
+  )
+
   const handleDeletePics = useCallback(async () => {
     try {
       await auth.delete(`/api/machine-projects/${machineProjectId}/machine-pics`, {
@@ -325,118 +340,6 @@ const InspectionPicListModal = ({
     }
   }, [openPicModal, refetchSelectedInspection, getPictures])
 
-  // useEffect(() => {
-  //   if (!open) setPicInspectionId(0)
-  // }, [open, setPicInspectionId])
-
-  // useEffect(() => setSelectedPic(prev => pictures.find(pic => prev?.machinePicId === pic.machinePicId)), [pictures])
-
-  // 사진 카드 컴포넌트
-  function PictureCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
-    return (
-      <div className='flex flex-col items-center'>
-        <Paper
-          key={pic.machinePicId}
-          elevation={3}
-          sx={{
-            width: '100%',
-            p: 1,
-            position: 'relative',
-            cursor: 'pointer',
-            border: '1px solid lightgray',
-            m: 1,
-            ':hover': { boxShadow: 10 }
-          }}
-        >
-          <ImageListItem
-            onClick={() => {
-              if (showCheck) {
-                if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-                  setPicturesToDelete(prev => [...prev, { machinePicId: pic.machinePicId, version: pic.version }])
-                } else {
-                  setPicturesToDelete(prev => prev.filter(v => v.machinePicId !== pic.machinePicId))
-                }
-              } else {
-                setSelectedPic(pic)
-                setOpenPicModal(true)
-              }
-            }}
-          >
-            <img
-              src={pic.presignedUrl}
-              alt={pic.originalFileName}
-              style={{
-                width: '100%',
-                height: '50%',
-                objectFit: 'contain',
-                background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))'
-              }}
-            />
-            <ImageListItemBar title={pic.originalFileName} sx={{ textAlign: 'center' }} />
-          </ImageListItem>
-
-          {showCheck && (
-            <Checkbox
-              color='error'
-              sx={{ position: 'absolute', left: 0, top: 0 }}
-              checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
-            />
-          )}
-        </Paper>
-        <div className='flex flex-col items-center py-1'>
-          <Typography className='text-green-600'>{pic.machineChecklistItemName}</Typography>
-          <Typography
-            className='text-gray-700'
-            style={pic.alternativeSubTitle ? { textDecoration: 'line-through', opacity: '60%' } : {}}
-          >
-            {pic.machineChecklistSubItemName}
-          </Typography>
-          <Typography className='text-blue-500'>{pic.alternativeSubTitle}</Typography>
-          <Typography className='text-red-500'>{pic.measuredValue}</Typography>
-        </div>
-      </div>
-    )
-  }
-
-  // 미리보기 사진 카드 컴포넌트
-  function PicturePreviewCard({ file, index }: { file: File; index: number }) {
-    return (
-      <Paper
-        elevation={3}
-        sx={{
-          p: 1,
-          position: 'relative',
-          border: '1px solid lightgray',
-          m: 1,
-          ':hover': { boxShadow: 4 }
-        }}
-      >
-        <ImageListItem>
-          <img
-            src={URL.createObjectURL(file)}
-            alt={file.name}
-            style={{
-              width: '100%',
-              height: '50%',
-              objectFit: 'contain',
-              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))'
-            }}
-          />
-          <ImageListItemBar title={file.name} sx={{ textAlign: 'center' }} />
-        </ImageListItem>
-        <IconButton sx={{ position: 'absolute', right: 0, top: 0 }} onClick={() => removeFile(index)}>
-          <i className='tabler-x text-xl text-error' />
-        </IconButton>
-      </Paper>
-    )
-  }
-
-  // useEffect(() => {
-  //   if (!showPicModal) {
-  //     resetCursor()
-  //   }
-  // }, [showPicModal])
-
   return (
     selectedInspection &&
     inspections && (
@@ -527,6 +430,7 @@ const InspectionPicListModal = ({
               하위항목 선택
             </Typography>
             <TextField
+              disabled={!selectedItem}
               slotProps={{ htmlInput: { sx: { display: 'flex', alignItems: 'center', gap: 1 } } }}
               size='small'
               fullWidth
@@ -658,7 +562,13 @@ const InspectionPicListModal = ({
                             rowHeight={isMobile ? 150 : 250}
                           >
                             {picsByItem.map((pic, idx) => (
-                              <PictureCard key={idx} pic={pic} />
+                              <InspectionPicCard
+                                key={idx}
+                                pic={pic}
+                                showCheck={showCheck}
+                                checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
+                                handleClick={handleClickInspectionPicCard}
+                              />
                             ))}
                           </ImageList>
                         </Box>
@@ -707,7 +617,13 @@ const InspectionPicListModal = ({
                           </Typography>
                           <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
                             {picBySubItems.map((pic, idx) => (
-                              <PictureCard key={idx} pic={pic} />
+                              <InspectionPicCard
+                                key={idx}
+                                pic={pic}
+                                showCheck={showCheck}
+                                checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
+                                handleClick={handleClickInspectionPicCard}
+                              />
                             ))}
                           </ImageList>
                         </Box>
@@ -732,7 +648,13 @@ const InspectionPicListModal = ({
                 //해당 하위항목의 사진이 존재하는 경우
                 <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
                   {filteredPics.map((pic, idx) => (
-                    <PictureCard key={idx} pic={pic} />
+                    <InspectionPicCard
+                      key={idx}
+                      pic={pic}
+                      showCheck={showCheck}
+                      checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
+                      handleClick={handleClickInspectionPicCard}
+                    />
                   ))}
                 </ImageList>
               ) : (
@@ -783,7 +705,7 @@ const InspectionPicListModal = ({
                     rowHeight={isMobile ? 150 : 250}
                   >
                     {filesToUpload.map((file, index) => (
-                      <PicturePreviewCard key={index} file={file} index={index} />
+                      <PicPreviewCard key={index} file={file} handleClickX={() => removeFile(index)} />
                     ))}
                   </ImageList>
                 </>

@@ -7,13 +7,9 @@ import {
   Typography,
   CircularProgress,
   ImageList,
-  ImageListItem,
-  ImageListItemBar,
   Button,
-  Checkbox,
   TextField,
   MenuItem,
-  Paper,
   IconButton,
   Tooltip
 } from '@mui/material'
@@ -43,6 +39,8 @@ import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { projectPicOption } from '@/app/_constants/options'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
+import ProjectPicCard from '../pictureCard/ProjectPicCard'
+import InspectionPicCard from '../pictureCard/InspectionPicCard'
 
 const PictureListTabContent = () => {
   const router = useRouter()
@@ -581,10 +579,11 @@ const PictureListTabContent = () => {
       </div>
       {/* 사진 리스트 부분 */}
       <div className='flex-1 flex flex-col gap-8 overflow-y-auto' ref={listContainerRef} onScroll={handleScrollInside}>
+        {/* 현장사진 리스트 */}
         {handlefilterProjectPics(projectPics) && handlefilterProjectPics(projectPics).length > 0 && (
           <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Typography variant='h3'>현장사진</Typography>
-            <ImageList sx={{ overflow: 'visible' }} cols={isTablet ? 1 : 4} rowHeight={isTablet ? 180 : 300} gap={15}>
+            <ImageList sx={{ overflow: 'visible' }} cols={isTablet ? 1 : 4} rowHeight={isTablet ? 150 : 250} gap={10}>
               {handlefilterProjectPics(projectPics).map(pic => {
                 return (
                   <ProjectPicCard
@@ -601,6 +600,7 @@ const PictureListTabContent = () => {
           </Box>
         )}
 
+        {/* 설비사진 리스트 */}
         {inspectionList &&
           inspectionList.map(insp => {
             const inspectionsPic = inspectionPics.filter(pic => pic.machineInspectionId === insp.id)
@@ -615,8 +615,8 @@ const PictureListTabContent = () => {
                   <ImageList
                     sx={{ overflow: 'visible' }}
                     cols={isTablet ? 1 : 4}
-                    rowHeight={isTablet ? 180 : 300}
-                    gap={15}
+                    rowHeight={isTablet ? 150 : 250}
+                    gap={10}
                   >
                     {handlefilterInspectionPics(inspectionsPic).map(pic => {
                       return (
@@ -668,141 +668,6 @@ const PictureListTabContent = () => {
         />
       )}
       {open && <PictureListModal open={open} setOpen={setOpen} projectPic />}
-    </div>
-  )
-}
-
-// 설비사진 카드 컴포넌트
-function InspectionPicCard({
-  pic,
-  showCheck,
-  checked,
-  handleClick
-}: {
-  pic: MachinePicPresignedUrlResponseDtoType
-  showCheck: boolean
-  checked: boolean
-  handleClick: (pic: MachinePicPresignedUrlResponseDtoType) => void
-}) {
-  return (
-    <div className='flex flex-col items-center'>
-      <Paper
-        sx={{
-          width: '100%',
-          position: 'relative',
-          cursor: 'pointer',
-          borderColor: 'lightgray',
-          borderWidth: '1px',
-          ':hover': { boxShadow: 10 }
-        }}
-        variant='outlined'
-        onClick={() => {
-          handleClick(pic)
-        }}
-      >
-        <ImageListItem>
-          <img
-            src={pic.presignedUrl}
-            alt={pic.originalFileName}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
-              borderTopLeftRadius: 5,
-              borderTopRightRadius: 5
-            }}
-          />
-          <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
-        </ImageListItem>
-
-        {showCheck && (
-          <Checkbox
-            color='error'
-            sx={{
-              position: 'absolute',
-              left: 0,
-              top: 0
-            }}
-            checked={checked}
-          />
-        )}
-      </Paper>
-      <div className='flex flex-col items-center py-1'>
-        <Typography className='text-green-600'>{pic.machineChecklistItemName}</Typography>
-        <Typography
-          className='text-gray-700'
-          style={pic.alternativeSubTitle ? { textDecoration: 'line-through', opacity: '60%' } : {}}
-        >
-          {pic.machineChecklistSubItemName}
-        </Typography>
-        <Typography className='text-blue-500'>{pic.alternativeSubTitle}</Typography>
-        <Typography className='text-red-500'>{pic.measuredValue}</Typography>
-      </div>
-    </div>
-  )
-}
-
-// 현장사진 카드 컴포넌트
-function ProjectPicCard({
-  pic,
-  showCheck,
-  checked,
-  handleClick
-}: {
-  pic: MachineProjectPicReadResponseDtoType
-  showCheck: boolean
-  checked: boolean
-  handleClick: (pic: MachineProjectPicReadResponseDtoType) => void
-}) {
-  return (
-    <div className='flex flex-col items-center'>
-      <Paper
-        sx={{
-          width: '100%',
-          position: 'relative',
-          cursor: 'pointer',
-          borderColor: 'lightgray',
-          borderWidth: '1px',
-          ':hover': { boxShadow: 10 }
-        }}
-        variant='outlined'
-        key={`${pic.id}`}
-        onClick={() => {
-          handleClick(pic)
-        }}
-      >
-        <ImageListItem>
-          <img
-            src={pic.presignedUrl}
-            alt={pic.originalFileName}
-            style={{
-              width: '100%',
-              height: '50%',
-              objectFit: 'contain',
-              background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
-              borderTopLeftRadius: 5,
-              borderTopRightRadius: 5
-            }}
-          />
-          <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
-        </ImageListItem>
-
-        {showCheck && (
-          <Checkbox
-            color='error'
-            sx={{
-              position: 'absolute',
-              left: 0,
-              top: 0
-            }}
-            checked={checked}
-          />
-        )}
-      </Paper>
-      <div className='flex flex-col items-center py-1'>
-        <Typography className='text-green-600'>{`${projectPicOption.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
-      </div>
     </div>
   )
 }
