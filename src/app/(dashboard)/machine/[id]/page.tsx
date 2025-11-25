@@ -168,7 +168,7 @@ const MachineUpdatePage = () => {
             })}
           </TabList>
           <div className='flex-1 overflow-y-hidden pt-4'>
-            <TabPanel value='현장정보' className='h-full overflow-y-hidden'>
+            <TabPanel value='현장정보' className='h-full'>
               {projectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
             </TabPanel>
             <TabPanel value='점검일정/참여기술진'>
@@ -178,10 +178,10 @@ const MachineUpdatePage = () => {
                 <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
               )}
             </TabPanel>
-            <TabPanel value='설비목록' className='h-full overflow-y-hidden'>
+            <TabPanel value='설비목록' className='h-full'>
               <InspectionListTabContent />
             </TabPanel>
-            <TabPanel value='전체사진'>
+            <TabPanel value='전체사진' className='h-full'>
               <PictureListTabContent />
             </TabPanel>
             <TabPanel value='특이사항'>
