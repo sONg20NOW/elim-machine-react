@@ -22,6 +22,8 @@ import dayjs from 'dayjs'
 
 import { IconReload } from '@tabler/icons-react'
 
+import { Typography } from '@mui/material'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 import type {
@@ -444,7 +446,9 @@ export default function MachinePage() {
             </Button>
           </div>
         </div>
-
+        <Typography color='warning.main' sx={{ px: 3 }}>
+          ※우클릭으로 현장을 삭제하거나 복사할 수 있습니다
+        </Typography>
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<MachineProjectPageDtoType>
