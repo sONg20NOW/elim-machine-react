@@ -4,6 +4,7 @@ import type {
   gradeType,
   laborFormType,
   officePositionType,
+  ProjectPicType,
   workFormType
 } from '@/@core/types'
 
@@ -188,6 +189,13 @@ export const workStatusOption = [
   { value: 'ONSITE', label: '현장' },
   { value: 'WORKING', label: '작업' },
   { value: 'RESERVED', label: '예약' }
+]
+
+// machine project pic (현장사진)
+export const MACHINE_PROJECT_PICTURE_TYPE: { label: string; value: ProjectPicType }[] = [
+  { label: '전경사진', value: 'OVERVIEW' },
+  { label: '위치도', value: 'LOCATION_MAP' },
+  { label: '기타', value: 'ETC' }
 ]
 
 // 설비 정보

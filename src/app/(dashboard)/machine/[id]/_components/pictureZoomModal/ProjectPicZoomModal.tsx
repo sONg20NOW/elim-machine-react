@@ -26,7 +26,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { auth } from '@/lib/auth'
-import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/MachineProjectPictureCategory'
+import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/options'
 
 interface ProjectPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void

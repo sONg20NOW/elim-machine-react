@@ -32,12 +32,12 @@ import { toast } from 'react-toastify'
 
 import type { MachineProjectPicReadResponseDtoType, ProjectPicType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/MachineProjectPictureCategory'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { auth } from '@/lib/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
+import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/options'
 
 type ProjectPicListModalProps = {
   open: boolean
