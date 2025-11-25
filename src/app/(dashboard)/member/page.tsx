@@ -10,6 +10,8 @@ import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
+import { IconReload } from '@tabler/icons-react'
+
 import TableFilters from '../../../@core/components/custom/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
@@ -249,7 +251,7 @@ export default function MemberPage() {
         {/* 필터 초기화 버튼 */}
         {!isTablet && (
           <Button
-            startIcon={<i className='tabler-reload' />}
+            startIcon={<IconReload />}
             onClick={() => {
               setFilters(MemeberInitialFilters)
               setName('')

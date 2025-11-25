@@ -10,6 +10,8 @@ import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
+import { IconReload } from '@tabler/icons-react'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
@@ -222,7 +224,7 @@ export default function EngineerPage() {
         />
         {/* 필터 초기화 버튼 */}
         <Button
-          startIcon={<i className='tabler-reload' />}
+          startIcon={<IconReload />}
           onClick={() => {
             setFilters(EngineerInitialFilters)
             setPage(0)

@@ -201,7 +201,7 @@ export default function Licensepage() {
           setPage={setPage}
         />
         <Button
-          startIcon={<i className='tabler-reload' />}
+          startIcon={<IconReload />}
           onClick={() => {
             setCompanyName('')
             setRegion('')

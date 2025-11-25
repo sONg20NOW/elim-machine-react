@@ -11,6 +11,8 @@ import TablePagination from '@mui/material/TablePagination'
 // Component Imports
 import { MenuItem } from '@mui/material'
 
+import { IconReload } from '@tabler/icons-react'
+
 import InspectionDetailModal from '../detailModal/InspectionDetailModal'
 
 // Constants
@@ -222,7 +224,7 @@ const InspectionListTabContent = ({}) => {
         />
         {/* 필터 초기화 버튼 */}
         <Button
-          startIcon={<i className='tabler-reload' />}
+          startIcon={<IconReload />}
           onClick={() => {
             setFilters({
               engineerName: ''

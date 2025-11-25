@@ -20,6 +20,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 
+import { IconReload } from '@tabler/icons-react'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 import type {
@@ -297,7 +299,7 @@ export default function MachinePage() {
         />
         {/* 필터 초기화 버튼 */}
         <Button
-          startIcon={<i className='tabler-reload' />}
+          startIcon={<IconReload />}
           onClick={() => {
             setFilters(MachineInitialFilters)
             setSorting(createInitialSorting<MachineProjectPageDtoType>)
