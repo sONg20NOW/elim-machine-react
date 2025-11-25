@@ -33,6 +33,7 @@ export default function InspectionPicCard({
       >
         <ImageListItem>
           <img
+            loading='lazy'
             src={pic.presignedUrl}
             alt={pic.originalFileName}
             style={{
