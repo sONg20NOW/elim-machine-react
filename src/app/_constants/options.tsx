@@ -192,7 +192,7 @@ export const workStatusOption = [
 ]
 
 // machine project pic (현장사진)
-export const MACHINE_PROJECT_PICTURE_TYPE: { label: string; value: ProjectPicType }[] = [
+export const projectPicOption: { label: string; value: ProjectPicType }[] = [
   { label: '전경사진', value: 'OVERVIEW' },
   { label: '위치도', value: 'LOCATION_MAP' },
   { label: '기타', value: 'ETC' }

@@ -26,7 +26,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { auth } from '@/lib/auth'
-import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/options'
+import { projectPicOption } from '@/app/_constants/options'
 
 interface ProjectPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
@@ -227,7 +227,7 @@ export default function ProjectPicZoomModal({
                           size='small'
                           fullWidth
                         >
-                          {MACHINE_PROJECT_PICTURE_TYPE.map(v => (
+                          {projectPicOption.map(v => (
                             <MenuItem key={v.value} value={v.value}>
                               {v.label}
                             </MenuItem>

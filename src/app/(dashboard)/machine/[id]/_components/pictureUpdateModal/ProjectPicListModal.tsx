@@ -37,7 +37,7 @@ import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { auth } from '@/lib/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
-import { MACHINE_PROJECT_PICTURE_TYPE } from '@/app/_constants/options'
+import { projectPicOption } from '@/app/_constants/options'
 
 type ProjectPicListModalProps = {
   open: boolean
@@ -351,7 +351,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 {totalPicCount ? `(${totalPicCount})` : ''}
               </Typography> */}
             </MenuItem>
-            {MACHINE_PROJECT_PICTURE_TYPE.map(item => (
+            {projectPicOption.map(item => (
               <MenuItem key={item.value} value={item.value}>
                 <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {item.label}
@@ -443,7 +443,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 </Box>
               )
             ) : pictures.length > 0 ? (
-              MACHINE_PROJECT_PICTURE_TYPE.map(v => {
+              projectPicOption.map(v => {
                 const label = v.label
                 const type = v.value
                 const picsByItem = pictures.filter(pic => pic.machineProjectPicType === type)
