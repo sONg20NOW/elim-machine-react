@@ -37,6 +37,7 @@ import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
 import { projectPicOption } from '@/app/_constants/options'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
+import ReloadButton from '../ReloadButton'
 
 type ProjectPicListModalProps = {
   open: boolean
@@ -52,8 +53,6 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
 
-  const reloadIconRef = useRef<HTMLElement>(null)
-
   // 프로젝트 사진 관련
   const [selectedPicType, setSelectedPicType] = useState<ProjectPicType | '전체'>('전체')
 
@@ -65,7 +64,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
 
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedPic, setSelectedPic] = useState<MachineProjectPicReadResponseDtoType>()
-  const [showPicModal, setShowPicModal] = useState(false)
+  const [showPicZoom, setShowPicZoom] = useState(false)
 
   const filteredPics = pictures.filter(pic =>
     selectedPicType !== '전체' ? selectedPicType === pic.machineProjectPicType : true
@@ -196,28 +195,22 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
         }
       } else {
         setSelectedPic(pic)
-        setShowPicModal(true)
+        setShowPicZoom(true)
       }
     },
     [showCheck, picturesToDelete]
   )
 
-  const firstRender = useRef(true)
+  // 이전에 PicZoom modal이 열린 적 있을 때만 닫혔을 때 사진 새로 가져오기 (showPicZoom의 default값이 false라 최초에 두 번 가져오는 것 방지)
+  const wasOpened = useRef(false)
 
   useEffect(() => {
-    if (firstRender.current) {
-      return
-    }
-
-    if (!showPicModal) {
+    if (!wasOpened.current) {
+      wasOpened.current = true
+    } else if (!showPicZoom) {
       getPictures()
-      console.log('hi')
     }
-  }, [showPicModal, getPictures])
-
-  useEffect(() => {
-    firstRender.current = false
-  }, [])
+  }, [showPicZoom, getPictures])
 
   return (
     <Dialog
@@ -302,19 +295,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
             <Typography sx={{ fontWeight: 700 }} color='primary.dark' variant='h4'>
               사진 목록
             </Typography>
-            <IconButton
-              onClick={() => {
-                if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
-
-                reloadIconRef.current.classList.add('animate-spin')
-                setTimeout(() => {
-                  reloadIconRef.current?.classList.remove('animate-spin')
-                }, 1000)
-                getPictures()
-              }}
-            >
-              <i ref={reloadIconRef} className='tabler-reload text-lime-600' />
-            </IconButton>
+            <ReloadButton handleClick={getPictures} tooltipText='현장사진 새로고침' />
           </div>
           <div className='flex gap-1 top-2 right-1 items-center'>
             {showCheck && [
@@ -353,7 +334,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           <div className='flex-1 h-full overflowX-visible overflowY-auto'>
             {filteredPics.length > 0 ? (
               selectedPicType !== '전체' ? (
-                <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+                <ImageList cols={isMobile ? 1 : 4} gap={10} rowHeight={isMobile ? 150 : 250}>
                   {filteredPics.map(pic => (
                     <ProjectPicCard
                       key={pic.id}
@@ -385,7 +366,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                         >
                           # {label}
                         </Typography>
-                        <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
+                        <ImageList cols={isMobile ? 1 : 4} gap={10} rowHeight={isMobile ? 150 : 250}>
                           {picsByItem.map((pic, idx) => (
                             <ProjectPicCard
                               key={idx}
@@ -445,7 +426,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 <ImageList
                   sx={{ overflowY: 'auto', height: '100%' }}
                   cols={isMobile ? 1 : 4}
-                  gap={0}
+                  gap={10}
                   rowHeight={isMobile ? 150 : 250}
                 >
                   {filesToUpload.map((file, index) => (
@@ -500,8 +481,8 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
       {selectedPic && (
         <ProjectPicZoomModal
           MovePicture={MovePicture}
-          open={showPicModal}
-          setOpen={setShowPicModal}
+          open={showPicZoom}
+          setOpen={setShowPicZoom}
           selectedPic={selectedPic}
           setPictures={setPictures}
         />

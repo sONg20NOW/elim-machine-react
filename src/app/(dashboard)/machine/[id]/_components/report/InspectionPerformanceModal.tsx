@@ -25,6 +25,7 @@ import { useGetLeafCategories, useGetReportCategories, useGetReportStatuses } fr
 import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
+import ReloadButton from '../ReloadButton'
 
 export default function InspectionPerformanceModal({
   open,
@@ -41,9 +42,6 @@ export default function InspectionPerformanceModal({
     v => v.reportTemplateCode === 'MACHINE_INSPECTION_PERFORMANCE'
   )?.id as number
 
-  const reloadRef = useRef<HTMLElement>(null)
-  const [openSnackBar, setOpenSnackBar] = useState(false)
-  const [disableReload, setDialbleReload] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const reportURLs = useRef<{ machineCategoryId: number; index: number; url: string }[]>([])
@@ -51,17 +49,6 @@ export default function InspectionPerformanceModal({
   const { data: everyCategories } = useGetLeafCategories()
 
   const { data: statuses, refetch } = useGetReportStatuses(`${machineProjectId}`, [MACHINE_INSPECTION_PERFORMANCE_ID])
-
-  const refetchStatuses = useCallback(async () => {
-    reloadRef.current?.classList.add('animate-spin')
-    setDialbleReload(true)
-    setTimeout(() => {
-      reloadRef.current?.classList.remove('animate-spin')
-      setDialbleReload(false)
-    }, 1000)
-    await refetch()
-    setOpenSnackBar(true)
-  }, [refetch])
 
   const handleSetPresigned = useCallback((machineCategoryId: number, index: number, url: string) => {
     reportURLs.current = [...reportURLs.current, { url, machineCategoryId, index }]
@@ -112,20 +99,7 @@ export default function InspectionPerformanceModal({
             <DialogContentText>
               ※버튼이 비활성화된 경우 개인 PC에서 보고서 생성 후 업로드를 완료해주세요
             </DialogContentText>
-            <IconButton size='medium' disabled={disableReload}>
-              <i ref={reloadRef} className='tabler-reload text-2xl text-green-500' onClick={refetchStatuses} />
-            </IconButton>
-            <Snackbar
-              open={openSnackBar}
-              autoHideDuration={1000}
-              onClose={() => setOpenSnackBar(false)}
-              message={
-                <Typography variant='inherit' sx={{ fontSize: '16px' }}>
-                  새로고침되었습니다
-                </Typography>
-              }
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            />
+            <ReloadButton handleClick={refetch} tooltipText='보고서 상태 새로고침' />
           </div>
           <Divider />
         </DialogTitle>

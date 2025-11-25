@@ -2,17 +2,7 @@ import { useEffect, useState, useCallback, useRef, useContext } from 'react'
 
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  ImageList,
-  Button,
-  TextField,
-  MenuItem,
-  IconButton,
-  Tooltip
-} from '@mui/material'
+import { Box, Typography, CircularProgress, ImageList, Button, TextField, MenuItem } from '@mui/material'
 
 // @ts-ignore
 import type { AxiosRequestConfig } from 'axios'
@@ -20,8 +10,6 @@ import type { AxiosRequestConfig } from 'axios'
 import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
-
-import { IconReload } from '@tabler/icons-react'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import type {
@@ -41,6 +29,7 @@ import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
+import ReloadButton from '../ReloadButton'
 
 const PictureListTabContent = () => {
   const router = useRouter()
@@ -81,7 +70,6 @@ const PictureListTabContent = () => {
   const hasNextRef = useRef(true)
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
-  const reloadIconRef = useRef<HTMLDivElement>(null)
   const listContainerRef = useRef<HTMLDivElement>(null)
 
   // 사진 클릭 기능 구현을 위한 상태
@@ -481,23 +469,7 @@ const PictureListTabContent = () => {
               ))}
             </TextField>
           )}
-          <Tooltip arrow title='사진 새로고침'>
-            <IconButton
-              onClick={() => {
-                if (!reloadIconRef.current || reloadIconRef.current.classList.contains('animate-spin')) return
-
-                reloadIconRef.current.classList.add('animate-spin')
-                setTimeout(() => {
-                  reloadIconRef.current?.classList.remove('animate-spin')
-                }, 1000)
-                refetchPictures()
-              }}
-            >
-              <div ref={reloadIconRef} className='grid place-items-center'>
-                <IconReload className='text-lime-600' />
-              </div>
-            </IconButton>
-          </Tooltip>
+          <ReloadButton handleClick={refetchPictures} tooltipText='사진 새로고침' />
           {/* ! 추후구현
            {
             inspectionId !== 0 && filterPics(pictures).length !== 0

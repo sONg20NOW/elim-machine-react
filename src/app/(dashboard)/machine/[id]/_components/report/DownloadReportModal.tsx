@@ -11,7 +11,6 @@ import {
   DialogTitle,
   Divider,
   IconButton,
-  Snackbar,
   Tooltip,
   Typography
 } from '@mui/material'
@@ -25,16 +24,13 @@ import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import InspectionPerformanceModal from './InspectionPerformanceModal'
 import type { MachineReportCategoryReadResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
+import ReloadButton from '../ReloadButton'
 
 export default function DownloadReportModal({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const machineProjectId = useParams().id?.toString()
 
   // 설비별 성능점검표 모달
   const [openInspModal, setOpenInspModal] = useState(false)
-  const [openSnackBar, setOpenSnackBar] = useState(false)
-
-  const reloadRef = useRef<HTMLElement>(null)
-  const [disableReload, setDialbleReload] = useState(false)
 
   const [loading, setLoading] = useState(false)
 
@@ -51,17 +47,6 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
     `${machineProjectId}`,
     reportCategories?.map(v => v.id) ?? []
   )
-
-  const refetchStatuses = useCallback(async () => {
-    reloadRef.current?.classList.add('animate-spin')
-    setDialbleReload(true)
-    setTimeout(() => {
-      reloadRef.current?.classList.remove('animate-spin')
-      setDialbleReload(false)
-    }, 1000)
-    await refetch()
-    setOpenSnackBar(true)
-  }, [refetch])
 
   const handleSetPresigned = useCallback((categoryId: number, index: number, url: string) => {
     presignedMap.current = [...presignedMap.current, { url, categoryId, index }]
@@ -113,20 +98,7 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
               <DialogContentText>
                 ※버튼이 비활성화된 경우 개인 PC에서 보고서 생성 후 업로드를 완료해주세요
               </DialogContentText>
-              <IconButton size='medium' disabled={disableReload}>
-                <i ref={reloadRef} className='tabler-reload text-2xl text-green-500' onClick={refetchStatuses} />
-              </IconButton>
-              <Snackbar
-                open={openSnackBar}
-                autoHideDuration={1000}
-                onClose={() => setOpenSnackBar(false)}
-                message={
-                  <Typography variant='inherit' sx={{ fontSize: '16px' }}>
-                    새로고침되었습니다
-                  </Typography>
-                }
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-              />
+              <ReloadButton handleClick={refetch} tooltipText='보고서 상태 새로고침' />
             </div>
             <Divider />
           </DialogTitle>
