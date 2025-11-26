@@ -45,8 +45,6 @@ const InspectionListTabContent = () => {
 
   const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
 
-  const [totalCount, setTotalCount] = useState(0)
-
   // 검색 조건
   const page = Number(searchParams.get('page') ?? 0)
   const pageSize = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)
@@ -61,6 +59,7 @@ const InspectionListTabContent = () => {
   } = useGetInspections(machineProjectId, searchParams.toString())
 
   const filteredInspectionList = inspectionsPage?.content
+  const totalCount = inspectionsPage?.page.totalElements ?? 0
 
   const disabled = isLoading || isError
 
@@ -139,13 +138,6 @@ const InspectionListTabContent = () => {
     },
     [updateParams]
   )
-
-  useEffect(() => {
-    if (!inspectionsPage) return
-
-    // 상태 업데이트 (engineernames만 따로 빼서)
-    setTotalCount(inspectionsPage.page.totalElements)
-  }, [inspectionsPage])
 
   // 모달이 닫힐 때마다 inspections 데이터 다시 가져오기 (모달이 열린 적이 없다면 제외)
   const wasOpened = useRef(false)
@@ -371,7 +363,6 @@ const InspectionListTabContent = () => {
           const newsize = parseInt(event.target.value, 10)
 
           setSizeQueryParam(newsize)
-          setPageQueryParam(0)
         }}
         disabled={disabled}
         showFirstButton
