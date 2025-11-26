@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 // MUI Imports
-import { useParams } from 'next/navigation'
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
@@ -20,9 +20,8 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 
 // Utils
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import TableFilters from '@/@core/components/custom/TableFilters'
 import type { MachineInspectionFilterType, MachineInspectionPageResponseDtoType } from '@/@core/types'
-import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
+import { HEADERS } from '@/app/_constants/table/TableHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import CustomTextField from '@/@core/components/mui/TextField'
 import BasicTable from '@/@core/components/custom/BasicTable'
@@ -31,9 +30,13 @@ import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { useGetInspections, useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import { auth } from '@/lib/auth'
+import TableFilterWithSearchParams from '@/@core/components/custom/TableFilterWithSearchParams'
 
-const InspectionListTabContent = ({}) => {
+const InspectionListTabContent = () => {
   const machineProjectId = useParams().id?.toString() as string
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
 
   // 모달 상태
   const [open, setOpen] = useState(false)
@@ -42,33 +45,24 @@ const InspectionListTabContent = ({}) => {
 
   const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
 
-  // 페이지네이션 상태
-  const [page, setPage] = useState(0)
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [totalCount, setTotalCount] = useState(0)
 
-  // 필터링
-  const [filters, setFilters] = useState<MachineInspectionFilterType>({
-    engineerName: ''
-  })
-
-  const [queryParams, setQueryParams] = useState(`page=0&size=${DEFAULT_PAGESIZE}`)
+  // 검색 조건
+  const page = Number(searchParams.get('page') ?? 0)
+  const pageSize = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)
+  const machineCategoryName = searchParams.get('machineCategoryName')
+  const location = searchParams.get('location')
 
   const {
     data: inspectionsPage,
     refetch: refetchInspections,
     isError,
     isLoading
-  } = useGetInspections(machineProjectId, queryParams)
+  } = useGetInspections(machineProjectId, searchParams.toString())
 
   const filteredInspectionList = inspectionsPage?.content
 
   const disabled = isLoading || isError
-
-  const [machineCategoryName, setMachineCategoryName] = useState('')
-  const [location, setLocation] = useState('')
-
-  const [sorting, setSorting] = useState(createInitialSorting<MachineInspectionPageResponseDtoType>)
 
   const { data: participatedEngineerList } = useGetParticipatedEngineerList(machineProjectId)
 
@@ -86,38 +80,65 @@ const InspectionListTabContent = ({}) => {
     [setCurrentInspectionId]
   )
 
-  // queryParams 세팅 -> tanstack query 작동 -> 데이터 불러오기
-  const handleSetQueryParams = useCallback(async () => {
-    const queryParams = new URLSearchParams()
+  // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
+  const updateParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams)
 
-    // 필터링
-    Object.keys(filters).forEach(prop => {
-      const key = prop as keyof typeof filters
+      updater(params)
+      router.replace(pathname + '?' + params.toString())
+    },
+    [router, pathname, searchParams]
+  )
 
-      filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
+  // 공통 함수 활용
+  const resetQueryParams = useCallback(() => {
+    updateParams(params => {
+      params.delete('page')
+      params.delete('machineCategoryName')
+      params.delete('location')
+      params.delete('engineerName')
     })
+  }, [updateParams])
 
-    // 정렬
-    sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
+  const setPageQueryParam = useCallback(
+    (page: number) => {
+      updateParams(params => {
+        params.set('page', `${page}`)
+      })
+    },
+    [updateParams]
+  )
 
-    // 설비분류 검색
-    machineCategoryName
-      ? queryParams.set('machineCategoryName', machineCategoryName)
-      : queryParams.delete('machineCategoryName')
+  const setSizeQueryParam = useCallback(
+    (size: number) => {
+      updateParams(params => {
+        params.set('size', `${size}`)
+        params.set('page', '0')
+      })
+    },
+    [updateParams]
+  )
 
-    // 위치 검색
-    location ? queryParams.set('location', location) : queryParams.delete('location')
+  const setCategoryQueryParam = useCallback(
+    (category: string) => {
+      updateParams(params => {
+        params.set('machineCategoryName', category)
+        params.set('page', '0')
+      })
+    },
+    [updateParams]
+  )
 
-    // 페이지 설정
-    queryParams.set('page', page.toString())
-    queryParams.set('size', pageSize.toString())
-
-    setQueryParams(queryParams.toString())
-  }, [filters, sorting, page, pageSize, machineCategoryName, location])
-
-  useEffect(() => {
-    handleSetQueryParams()
-  }, [handleSetQueryParams])
+  const setLocationQueryParam = useCallback(
+    (location: string) => {
+      updateParams(params => {
+        params.set('location', location)
+        params.set('page', '0')
+      })
+    },
+    [updateParams]
+  )
 
   useEffect(() => {
     if (!inspectionsPage) return
@@ -187,12 +208,7 @@ const InspectionListTabContent = ({}) => {
         //@ts-ignore
         data: { machineInspectionDeleteRequestDtos: checked }
       })
-      setFilters({
-        engineerName: ''
-      })
-      setMachineCategoryName('')
-      setLocation('')
-      setPage(0)
+      setPageQueryParam(0)
       refetchInspections()
       handleSuccess(`선택된 설비목록 ${checked.length}개가 성공적으로 삭제되었습니다.`)
       setChecked([])
@@ -206,7 +222,7 @@ const InspectionListTabContent = ({}) => {
     <div className='relative h-full flex flex-col'>
       {/* 필터바 */}
       <div>
-        <TableFilters<MachineInspectionFilterType>
+        <TableFilterWithSearchParams<MachineInspectionFilterType>
           filterInfo={{
             engineerName: {
               label: '점검자',
@@ -217,26 +233,18 @@ const InspectionListTabContent = ({}) => {
               }))
             }
           }}
-          filters={filters}
-          onFiltersChange={setFilters}
           disabled={disabled}
-          setPage={setPage}
         />
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<IconReload />}
           onClick={() => {
-            setFilters({
-              engineerName: ''
-            })
-            setMachineCategoryName('')
-            setLocation('')
-            setPage(0)
+            resetQueryParams()
           }}
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
         >
-          필터 초기화
+          검색조건 초기화
         </Button>
       </div>
       {/* 상단 기능 요소들: 페이지 당 행수, 설비분류 검색, 위치 검색, 선택삭제, 추가 */}
@@ -248,8 +256,7 @@ const InspectionListTabContent = ({}) => {
             select
             value={pageSize.toString()}
             onChange={e => {
-              setPageSize(Number(e.target.value))
-              setPage(0)
+              setSizeQueryParam(Number(e.target.value))
             }}
             className='gap-[5px]'
             disabled={disabled}
@@ -270,19 +277,21 @@ const InspectionListTabContent = ({}) => {
           </CustomTextField>
           {/* 이름으로 검색 */}
           <SearchBar
+            key={`machineCategoryName_${machineCategoryName}`} // 검색조건 초기화 시 새로 렌더링 되도록 키 지정
+            defaultValue={machineCategoryName ?? ''}
             placeholder='설비분류로 검색'
             setSearchKeyword={machineCateName => {
-              setMachineCategoryName(machineCateName)
-              setPage(0)
+              setCategoryQueryParam(machineCateName)
             }}
             disabled={disabled}
           />
           {/* 현장명으로 검색 */}
           <SearchBar
+            key={`location_${location}`}
+            defaultValue={location ?? ''}
             placeholder='위치로 검색'
             setSearchKeyword={location => {
-              setLocation(location)
-              setPage(0)
+              setLocationQueryParam(location)
             }}
             disabled={disabled}
           />
@@ -337,8 +346,6 @@ const InspectionListTabContent = ({}) => {
           handleRowClick={handleSelectInspection}
           page={page}
           pageSize={pageSize}
-          sorting={sorting}
-          setSorting={setSorting}
           loading={isLoading}
           error={isError}
           showCheckBox={showCheckBox}
@@ -359,12 +366,12 @@ const InspectionListTabContent = ({}) => {
         count={totalCount}
         rowsPerPage={pageSize}
         page={page}
-        onPageChange={(_, newPage) => setPage(newPage)}
+        onPageChange={(_, newPage) => setPageQueryParam(newPage)}
         onRowsPerPageChange={event => {
           const newsize = parseInt(event.target.value, 10)
 
-          setPageSize(newsize)
-          setPage(0)
+          setSizeQueryParam(newsize)
+          setPageQueryParam(0)
         }}
         disabled={disabled}
         showFirstButton
