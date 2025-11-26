@@ -103,11 +103,16 @@ export const useGetInspections = (machineProjectId: string, queryParams: string)
     queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS(machineProjectId, queryParams),
     queryFn: async data => {
       const [keyType, machineProjectId, queryParams] = data.queryKey
+      const params = new URLSearchParams(queryParams)
+
+      if (!params.get('size')) {
+        params.set('size', '15')
+      }
 
       const response = await auth
         .get<{
           data: successResponseDtoType<MachineInspectionPageResponseDtoType[]>
-        }>(`/api/machine-projects/${machineProjectId}/machine-inspections?${queryParams.toString()}`)
+        }>(`/api/machine-projects/${machineProjectId}/machine-inspections?${params}`)
         .then(v => v.data.data)
 
       console.log(`!!! queryFn ${keyType} in ${machineProjectId}:`, response)
