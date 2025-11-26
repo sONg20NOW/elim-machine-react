@@ -62,7 +62,8 @@ export const QUERY_KEYS = {
       'GET_MACHINE_PROJECT_SCHEDULE_TAB',
       machineProjectId
     ],
-    GET_MACHINE_PROJECT: (machineProjectId: string) => ['GET_MACHINE_PROJECT', machineProjectId]
+    GET_MACHINE_PROJECT: (machineProjectId: string) => ['GET_MACHINE_PROJECT', machineProjectId],
+    GET_MACHINE_PROJECTS: (queryParams: string) => ['GET_MACHINE_PROJECTS', queryParams]
   },
   MEMBER: {
     GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId]

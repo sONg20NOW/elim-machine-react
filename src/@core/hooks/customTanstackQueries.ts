@@ -34,6 +34,7 @@ import type {
   MachinePerformanceReviewSummaryResponseDtoType,
   MachinePerformanceReviewYearlyPlanResponseDtoType,
   machineProjectEngineerDetailDtoType,
+  MachineProjectPageDtoType,
   MachineProjectPicReadResponseDtoType,
   MachineProjectResponseDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType,
@@ -105,7 +106,7 @@ export const useGetInspections = (machineProjectId: string, queryParams: string)
       const [keyType, machineProjectId, queryParams] = data.queryKey
       const params = new URLSearchParams(queryParams)
 
-      if (!params.get('size')) {
+      if (!params.has('size')) {
         params.set('size', '15')
       }
 
@@ -793,6 +794,32 @@ export const useGetMachineProject = (machineProjectId: string) => {
     queryKey: QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECT(machineProjectId),
     queryFn: fetchMachineProjectData,
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/machine-projects
+export const useGetMachineProjects = (queryParams: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECTS(queryParams),
+    queryFn: async data => {
+      const [keyType, queryParams] = data.queryKey
+      const params = new URLSearchParams(queryParams)
+
+      if (!params.has('size')) {
+        params.set('size', '15')
+      }
+
+      const response = await auth
+        .get<{
+          data: successResponseDtoType<MachineProjectPageDtoType[]>
+        }>(`/api/machine-projects?${params}`)
+        .then(v => v.data.data)
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    staleTime: 1000 * 60 * 1 // 5분
   })
 }
 
