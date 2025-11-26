@@ -1,4 +1,7 @@
-import { type Dispatch, type SetStateAction, type MouseEvent, useContext, useState } from 'react'
+import type { MouseEvent } from 'react'
+import { useCallback, useContext, useState } from 'react'
+
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -11,52 +14,57 @@ import classNames from 'classnames'
 
 import { Checkbox, Divider, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material'
 
-import type { HeaderType, SortInfoType } from '@/@core/types'
+import type { HeaderType } from '@/@core/types'
 import { isMobileContext, isTabletContext } from './ProtectedPage'
 
 interface BasicTableProps<T> {
   header: HeaderType<T>
   data: T[]
-  RowRightClickMenu?: { iconClass: string; label: string; handleClick: (row: T) => void }[]
   handleRowClick: (row: T) => Promise<void>
   page: number
   pageSize: number
-  sorting?: SortInfoType<T>
-  setSorting?: Dispatch<SetStateAction<SortInfoType<T>>>
-  multiException?: Partial<Record<keyof T, Array<keyof T>>>
-  listException?: Array<keyof T>
   loading: boolean
   error: boolean
+  multiException?: Partial<Record<keyof T, Array<keyof T>>>
+  listException?: Array<keyof T>
   showCheckBox?: boolean
   isChecked?: (item: T) => boolean
   handleCheckItem?: (item: T) => void
   handleCheckAllItems?: (checked: boolean) => void
   onClickPicCount?: (row: T) => void
+  rightClickMenuHeader?: (contextMenu: { mouseX: number; mouseY: number; row: T }) => JSX.Element
+  rightClickMenu?: { icon: JSX.Element; label: string; handleClick: (row: T) => void }[]
 }
 
 /**
- * @param header
- * 테이블 헤더를 정의 (ex. {name: {label: '이름', canSort: true}, ...})
- * @type HeaderType<T>
- * @param listException
- * 리스트 데이터를 가진 데이터를 표시
- * @param multiException
- * 해당 열에 표시할 데이터 객체
- * @param headerTextSize
- * (optional) 헤더의 텍스트 크기 (tailwind className)
+ * @type 데이터 배열 요소의 타입
+ * @param header* 테이블 헤더 정보 (ex. {name: {label: '이름', canSort: true}, ...})
+ * @param data*
+ * @param handleRowClick*
+ * @param page*
+ * @param pageSize*
+ * @param loading*
+ * @param error*
+ * @param multiException 하나의 column에 여러 데이터 표시 예외처리
+ * @param listException 리스트 타입의 데이터 예외처리
+ * @param isChecked
+ * @param showCheckBox
+ * @param handleCheckItem
+ * @param handleCheckAllItems 체크박스 props
+ * @param rightClickMenuHeader
+ * @param rightClickMenu 우클릭 props
+ * @param onClickPicCount 테이블의 picCount 클릭 동작 함수
  *
- * (ex. {age: ['age', 'genderDescription']}) => 나이 항목에 나이와 성별을 동시에 표시.
- * @returns
+ * @returns prop으로 받은 테이블 정보로 테이블 생성
  */
 export default function BasicTable<T extends Record<keyof T, string | number | string[]>>({
   header,
   data,
-  RowRightClickMenu,
+  rightClickMenuHeader,
+  rightClickMenu,
   handleRowClick,
   page,
   pageSize,
-  sorting,
-  setSorting,
   multiException,
   listException,
   loading,
@@ -69,6 +77,11 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
 }: BasicTableProps<T>) {
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const sort = searchParams.get('sort')?.split(',')
 
   const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number; row: T } | null>(null)
 
@@ -90,28 +103,29 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
     setContextMenu(null)
   }
 
-  const toggleOrder = (key: string) => {
-    if (!(sorting && setSorting)) return
+  const toggleOrder = useCallback(
+    (key: string) => {
+      const params = new URLSearchParams(searchParams)
 
-    // 로딩이 끝나고 에러가 없으면 not disabled
-    if (key !== sorting.target) {
-      setSorting({ target: key as keyof T, sort: 'asc' })
-    } else {
-      switch (sorting.sort) {
-        case '':
-          setSorting({ ...sorting, sort: 'asc' })
-          break
-        case 'asc':
-          setSorting({ ...sorting, sort: 'desc' })
-          break
-        case 'desc':
-          setSorting({ ...sorting, sort: '' })
-          break
-        default:
-          break
+      if (!sort) {
+        params.set('sort', `${key},asc`)
+      } else {
+        switch (sort[1]) {
+          case 'asc':
+            params.set('sort', `${key},desc`)
+            break
+          case 'desc':
+            params.delete('sort')
+            break
+          default:
+            break
+        }
       }
-    }
-  }
+
+      router.replace(pathname + '?' + params.toString())
+    },
+    [sort, searchParams, router, pathname]
+  )
 
   return (
     <TableContainer sx={{ px: 2, overflowY: 'auto', maxHeight: '100%' }}>
@@ -159,11 +173,11 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   onClick={!(loading || error) && header[k].canSort ? () => toggleOrder(key) : undefined}
                 >
                   {header[k].label}
-                  {header[k].canSort && sorting?.target === k && (
+                  {header[k].canSort && sort && sort[0] === k && (
                     <i
                       className={classNames('absolute text-xl top-[50%] -translate-y-1/2 text-color-primary-dark', {
-                        'tabler-square-chevron-down': sorting.sort === 'desc',
-                        'tabler-square-chevron-up': sorting.sort === 'asc'
+                        'tabler-square-chevron-down': sort[1] === 'desc',
+                        'tabler-square-chevron-up': sort[1] === 'asc'
                       })}
                     />
                   )}
@@ -190,7 +204,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   }
                 }}
                 onContextMenu={e => {
-                  RowRightClickMenu && handleContextMenu(e, info)
+                  rightClickMenu && handleContextMenu(e, info)
                 }}
               >
                 {contextMenu && (
@@ -202,17 +216,16 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                       contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
                     }
                   >
-                    <MenuItem
-                      onClick={() => handleRowClick(contextMenu.row)}
-                      sx={{ display: 'flex', alignItems: 'center' }}
-                    >
-                      <ListItemIcon className='grid place-items-center'>
-                        <i className={`tabler-exclamation-circle-filled text-blue-500`} />
-                      </ListItemIcon>
-                      <Typography variant='h5'>{contextMenu.row['machineProjectName' as keyof T]}</Typography>
-                    </MenuItem>
+                    {
+                      <MenuItem
+                        onClick={() => handleRowClick(contextMenu.row)}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {rightClickMenuHeader && rightClickMenuHeader(contextMenu)}
+                      </MenuItem>
+                    }
                     <Divider />
-                    {RowRightClickMenu?.map(v => (
+                    {rightClickMenu?.map(v => (
                       <MenuItem
                         sx={{ display: 'flex', alignItems: 'center' }}
                         key={v.label}
@@ -221,9 +234,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                           setContextMenu(null)
                         }}
                       >
-                        <ListItemIcon className='grid place-items-center'>
-                          <i className={`${v.iconClass} text-gray-500`} />
-                        </ListItemIcon>
+                        <ListItemIcon className='grid place-items-center'>{v.icon}</ListItemIcon>
                         <Typography variant='h6' className='text-gray-500'>
                           {v.label}
                         </Typography>
