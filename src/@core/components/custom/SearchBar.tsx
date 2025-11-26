@@ -37,7 +37,7 @@ export default function SearchBar({
         sx={{
           border: '1px solid var(--mui-palette-customColors-inputBorder)',
           borderRadius: 6,
-          background: 'transparent',
+          background: 'white',
           boxShadow: 'none',
           '&:hover': {
             borderColor: 'var(--mui-palette-primary-main)'
