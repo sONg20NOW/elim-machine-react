@@ -21,8 +21,8 @@ interface BasicTableProps<T> {
   handleRowClick: (row: T) => Promise<void>
   page: number
   pageSize: number
-  sorting: SortInfoType<T>
-  setSorting: Dispatch<SetStateAction<SortInfoType<T>>>
+  sorting?: SortInfoType<T>
+  setSorting?: Dispatch<SetStateAction<SortInfoType<T>>>
   multiException?: Partial<Record<keyof T, Array<keyof T>>>
   listException?: Array<keyof T>
   loading: boolean
@@ -37,7 +37,7 @@ interface BasicTableProps<T> {
 /**
  * @param header
  * 테이블 헤더를 정의 (ex. {name: {label: '이름', canSort: true}, ...})
- * @type HeaderTpye<T>
+ * @type HeaderType<T>
  * @param listException
  * 리스트 데이터를 가진 데이터를 표시
  * @param multiException
@@ -90,7 +90,9 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
     setContextMenu(null)
   }
 
-  function toggleOrder(key: string) {
+  const toggleOrder = (key: string) => {
+    if (!(sorting && setSorting)) return
+
     // 로딩이 끝나고 에러가 없으면 not disabled
     if (key !== sorting.target) {
       setSorting({ target: key as keyof T, sort: 'asc' })
@@ -157,7 +159,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   onClick={!(loading || error) && header[k].canSort ? () => toggleOrder(key) : undefined}
                 >
                   {header[k].label}
-                  {header[k].canSort && sorting.target === k && (
+                  {header[k].canSort && sorting?.target === k && (
                     <i
                       className={classNames('absolute text-xl top-[50%] -translate-y-1/2 text-color-primary-dark', {
                         'tabler-square-chevron-down': sorting.sort === 'desc',
