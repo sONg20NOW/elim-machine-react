@@ -1,4 +1,5 @@
 import { IconButton, Input } from '@mui/material'
+import { IconSearch } from '@tabler/icons-react'
 
 interface SearchBarProps {
   placeholder: string
@@ -63,7 +64,7 @@ export default function SearchBar({
         color='primary'
         className='absolute right-0'
       >
-        <i className='tabler-search' />
+        <IconSearch />
       </IconButton>
     </div>
   )
