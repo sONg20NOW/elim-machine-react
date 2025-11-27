@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback, useContext, useRef } from 'react'
 
 // MUI Imports
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
@@ -12,51 +14,42 @@ import MenuItem from '@mui/material/MenuItem'
 // Component Imports
 import { IconReload } from '@tabler/icons-react'
 
-import TableFilters from '../../../@core/components/custom/TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import UserModal from './_components/UserModal'
-import type { MemberFilterType, memberPageDtoType, successResponseDtoType } from '@/@core/types'
+import type { MemberFilterType, MemberPageDtoType } from '@/@core/types'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
-import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
-import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
+import { HEADERS } from '@/app/_constants/table/TableHeader'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
 import AddUserModal from './_components/AddUserModall'
-import { useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
+import { useGetMembers, useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
+import TableFilterWithSearchParams from '@/@core/components/custom/TableFilterWithSearchParams'
 
 export default function MemberPage() {
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+
   const isTablet = useContext(isTabletContext)
 
-  // 데이터 리스트
-  const [data, setData] = useState<memberPageDtoType[]>([])
+  const { data: membersPages, refetch, isLoading, isError } = useGetMembers(searchParams.toString())
 
-  // 로딩 시도 중 = true, 로딩 끝 = false
-  const [loading, setLoading] = useState(false)
+  const data = membersPages?.content ?? []
 
-  // 에러 발생 시 true
-  const [error, setError] = useState(false)
+  const page = Number(searchParams.get('page') ?? 0)
+  const size = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)
+  const name = searchParams.get('name')
+  const region = searchParams.get('region')
 
-  // 로딩이 끝나고 에러가 없으면 not disabled
-  const disabled = loading || error
+  const disabled = isLoading || isError
 
-  // 전체 데이터 개수 => fetching한 데이터에서 추출
-  const [totalCount, setTotalCount] = useState(0)
-
-  // 이름 검색 인풋
-  const [name, setName] = useState('')
-
-  // 지역 검색 인풋
-  const [region, setRegion] = useState('')
-
-  // 페이지네이션 관련
-  const [page, setPage] = useState(0)
-  const [size, setSize] = useState(DEFAULT_PAGESIZE)
+  const totalCount = membersPages?.page.totalElements ?? 0
 
   // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
@@ -65,72 +58,9 @@ export default function MemberPage() {
 
   const { data: selectedUser } = useGetSingleMember(memberId.toString())
 
-  // 필터 상태 - 컬럼에 맞게 수정
-  const [filters, setFilters] = useState(MemeberInitialFilters)
-
-  // 정렬 상태
-  const [sorting, setSorting] = useState(createInitialSorting<memberPageDtoType>)
-
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<{ memberId: number; version: number }[]>([])
-
-  // 직원 리스트 호출 API 함수
-  const getFilteredData = useCallback(async () => {
-    setLoading(true)
-    setError(false)
-
-    // 데이터 페치에 사용되는 쿼리 URL
-    const queryParams = new URLSearchParams()
-
-    try {
-      // 필터링
-      Object.keys(filters).forEach(prop => {
-        const key = prop as keyof MemberFilterType
-
-        filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
-      })
-
-      // 정렬
-      sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
-
-      // 이름 검색
-      name ? queryParams.set('name', name) : queryParams.delete('name')
-
-      // 지역 검색
-      region ? queryParams.set('region', region) : queryParams.delete('region')
-
-      // 페이지 설정
-      queryParams.set('page', page.toString())
-      queryParams.set('size', size.toString())
-
-      // axios GET 요청
-      // const response = await auth.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
-      //   `/api/members?${queryParams.toString()}`
-      // )
-      const response = await auth.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
-        `/api/members?${queryParams.toString()}`
-      )
-
-      const result = response.data.data
-
-      // 상태 업데이트
-      setData(result.content ?? [])
-      setPage(result.page.number)
-      setSize(result.page.size)
-      setTotalCount(result.page.totalElements)
-    } catch (error: any) {
-      handleApiError(error, '데이터 조회에 실패했습니다.')
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [filters, sorting, page, size, name, region])
-
-  // 필터 변경 시 API 호출
-  useEffect(() => {
-    getFilteredData()
-  }, [filters, getFilteredData])
 
   // 모달 닫힐 때마다 목록 새로 고침
   const firstRender = useRef(true)
@@ -142,26 +72,57 @@ export default function MemberPage() {
     }
 
     if (!openModal) {
-      getFilteredData()
+      refetch()
     }
-  }, [openModal, getFilteredData])
+  }, [openModal, refetch])
 
   useEffect(() => {
     firstRender.current = false
   }, [])
 
+  // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
+  const updateParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams)
+
+      updater(params)
+      router.replace(pathname + '?' + params.toString())
+    },
+    [router, pathname, searchParams]
+  )
+
+  type paramType = 'page' | 'size' | 'name' | 'region'
+
+  const setQueryParams = useCallback(
+    (pairs: Partial<Record<paramType, string | number>>) => {
+      if (!pairs) return
+
+      updateParams(params => {
+        Object.entries(pairs).forEach(([key, value]) => {
+          const t_key = key as paramType
+
+          params.set(t_key, value.toString())
+        })
+      })
+    },
+    [updateParams]
+  )
+
+  const resetQueryParams = useCallback(() => {
+    updateParams(params => {
+      params.delete('page')
+      params.delete('name')
+      params.delete('region')
+      params.delete('sort')
+
+      const filterKeys = Object.keys(MEMBER_FILTER_INFO)
+
+      filterKeys.forEach(v => params.delete(v))
+    })
+  }, [updateParams])
+
   // 사용자 선택 핸들러 (디테일 모달)
-  const handleUserClick = async (user: memberPageDtoType) => {
-    // const response = await auth.get(`/api/members/${user?.memberId}`)
-
-    // const data = await response.json()
-
-    // if (response.ok) {
-    //   setSelectedUser(data.data)
-    //   setUserDetailModalOpen(true)
-    // } else {
-    //   toast.error(data.message)
-    // }
+  const handleUserClick = async (user: MemberPageDtoType) => {
     try {
       setMemberId(user.memberId)
       setUserDetailModalOpen(true)
@@ -171,7 +132,7 @@ export default function MemberPage() {
   }
 
   // 사용자 체크 핸들러 (다중선택)
-  const handleCheckUser = (user: memberPageDtoType) => {
+  const handleCheckUser = (user: MemberPageDtoType) => {
     const obj = { memberId: user.memberId, version: user.version }
     const checked = isChecked(user)
 
@@ -200,7 +161,7 @@ export default function MemberPage() {
     }
   }
 
-  const isChecked = (user: memberPageDtoType) => {
+  const isChecked = (user: MemberPageDtoType) => {
     let exist = false
 
     checked.forEach(v => {
@@ -219,12 +180,10 @@ export default function MemberPage() {
         //@ts-ignore
         data: { memberDeleteRequestDtos: checked }
       })
-      setFilters(MemeberInitialFilters)
-      setName('')
-      setRegion('')
-      setPage(0)
 
-      getFilteredData()
+      // ! 동작 맞는지 점검
+      resetQueryParams()
+      refetch()
       handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
       setShowCheckBox(false)
       setChecked([])
@@ -240,23 +199,14 @@ export default function MemberPage() {
         <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
         {!isTablet && (
-          <TableFilters<MemberFilterType>
-            filterInfo={MEMBER_FILTER_INFO}
-            filters={filters}
-            onFiltersChange={setFilters}
-            disabled={disabled}
-            setPage={setPage}
-          />
+          <TableFilterWithSearchParams<MemberFilterType> filterInfo={MEMBER_FILTER_INFO} disabled={disabled} />
         )}
         {/* 필터 초기화 버튼 */}
         {!isTablet && (
           <Button
             startIcon={<IconReload />}
             onClick={() => {
-              setFilters(MemeberInitialFilters)
-              setName('')
-              setPage(0)
-              setRegion('')
+              resetQueryParams()
             }}
             className='max-sm:is-full absolute right-8 top-8'
             disabled={disabled}
@@ -272,8 +222,7 @@ export default function MemberPage() {
               select
               value={size.toString()}
               onChange={e => {
-                setSize(Number(e.target.value))
-                setPage(0)
+                setQueryParams({ size: e.target.value, page: 0 })
               }}
               className='gap-[5px]'
               disabled={disabled}
@@ -294,20 +243,22 @@ export default function MemberPage() {
             </CustomTextField>
             {/* 이름으로 검색 */}
             <SearchBar
+              key={`name_${name}`}
+              defaultValue={name ?? ''}
               placeholder='이름으로 검색'
               setSearchKeyword={name => {
-                setName(name)
-                setPage(0)
+                setQueryParams({ name: name, page: 0 })
               }}
               disabled={disabled}
             />
             {/* 지역으로 검색 */}
             {!isTablet && (
               <SearchBar
+                key={`region${region}`}
+                defaultValue={region ?? ''}
                 placeholder='지역으로 검색'
                 setSearchKeyword={region => {
-                  setRegion(region)
-                  setPage(0)
+                  setQueryParams({ region: region, page: 0 })
                 }}
                 disabled={disabled}
               />
@@ -352,17 +303,15 @@ export default function MemberPage() {
 
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
-          <BasicTable<memberPageDtoType>
+          <BasicTable<MemberPageDtoType>
             header={HEADERS.member}
             data={data}
             handleRowClick={handleUserClick}
             page={page}
             pageSize={size}
             multiException={{ age: ['age', 'genderDescription'] }}
-            sorting={sorting}
-            setSorting={setSorting}
-            loading={loading}
-            error={error}
+            loading={isLoading}
+            error={isError}
             showCheckBox={showCheckBox}
             isChecked={isChecked}
             handleCheckItem={handleCheckUser}
@@ -376,12 +325,11 @@ export default function MemberPage() {
           count={totalCount}
           rowsPerPage={size}
           page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
+          onPageChange={(_, newPage) => setQueryParams({ page: newPage })}
           onRowsPerPageChange={event => {
-            const newsize = parseInt(event.target.value, 10)
+            const newSize = parseInt(event.target.value, 10)
 
-            setSize(newsize)
-            setPage(0)
+            setQueryParams({ size: newSize, page: 0 })
           }}
           disabled={disabled}
           showFirstButton
@@ -401,14 +349,18 @@ export default function MemberPage() {
 
       {/* 모달들 */}
       {addUserModalOpen && (
-        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} handlePageChange={() => setPage(0)} />
+        <AddUserModal
+          open={addUserModalOpen}
+          setOpen={setAddUserModalOpen}
+          handlePageChange={() => setQueryParams({ page: 0 })}
+        />
       )}
       {userDetailModalOpen && selectedUser && (
         <UserModal
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           selectedUserData={selectedUser}
-          reloadData={() => getFilteredData()}
+          reloadData={() => refetch()}
         />
       )}
     </>
