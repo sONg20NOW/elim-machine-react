@@ -137,7 +137,7 @@ const UserModal = ({ open, setOpen, selectedUserData, adjustPage, removeQueryCac
         console.log(`memberId: ${memberId} user is deleted successfully`)
         handleSuccess('해당 직원이 삭제되었습니다.')
         adjustPage && adjustPage(-1)
-        removeQueryCaches && removeQueryCaches()
+        onClose()
       } catch (error) {
         handleApiError(error)
       }
