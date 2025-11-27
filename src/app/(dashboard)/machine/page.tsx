@@ -105,6 +105,23 @@ export default function MachinePage() {
     [router, pathname, searchParams]
   )
 
+  type paramType = 'page' | 'size' | 'projectName' | 'region' | 'fieldBeginDate' | 'fieldEndDate'
+
+  const setQueryParams = useCallback(
+    (pairs: Partial<Record<paramType, string | number>>) => {
+      if (!pairs) return
+
+      updateParams(params => {
+        Object.entries(pairs).forEach(([key, value]) => {
+          const t_key = key as paramType
+
+          params.set(t_key, value.toString())
+        })
+      })
+    },
+    [updateParams]
+  )
+
   const resetQueryParams = useCallback(() => {
     updateParams(params => {
       params.delete('page')
@@ -121,80 +138,6 @@ export default function MachinePage() {
 
     setCurMonth(null)
   }, [updateParams, MACHINE_FILTER_INFO_WITH_ENGINEERS])
-
-  const setPageQueryParam = useCallback(
-    (page: number) => {
-      updateParams(params => {
-        params.set('page', `${page}`)
-      })
-    },
-    [updateParams]
-  )
-
-  const setSizeQueryParam = useCallback(
-    (size: number) => {
-      updateParams(params => {
-        params.set('size', `${size}`)
-        params.set('page', '0')
-      })
-    },
-    [updateParams]
-  )
-
-  const setProjectNameQueryParam = useCallback(
-    (projectName: string) => {
-      updateParams(params => {
-        params.set('projectName', projectName)
-        params.set('page', '0')
-      })
-    },
-    [updateParams]
-  )
-
-  const setRegionQueryParam = useCallback(
-    (region: string) => {
-      updateParams(params => {
-        params.set('region', region)
-        params.set('page', '0')
-      })
-    },
-    [updateParams]
-  )
-
-  const setFieldBeginDateQueryParam = useCallback(
-    (fieldBeginDate: string) => {
-      updateParams(params => {
-        params.set('fieldBeginDate', fieldBeginDate)
-        params.set('page', '0')
-      })
-      setCurMonth(null)
-    },
-    [updateParams]
-  )
-
-  const setFieldEndDateQueryParam = useCallback(
-    (fieldEndDate: string) => {
-      updateParams(params => {
-        params.set('fieldEndDate', fieldEndDate)
-        params.set('page', '0')
-      })
-      setCurMonth(null)
-    },
-    [updateParams]
-  )
-
-  const setFieldDateQueryParam = useCallback(
-    (month: number) => {
-      const currentTime = dayjs()
-
-      updateParams(params => {
-        params.set('fieldBeginDate', currentTime.subtract(month, 'month').format('YYYY-MM-DD'))
-        params.set('fieldEndDate', currentTime.format('YYYY-MM-DD'))
-        params.set('page', '0')
-      })
-    },
-    [updateParams]
-  )
 
   const clearDateQueryParam = useCallback(() => {
     updateParams(params => {
@@ -220,7 +163,13 @@ export default function MachinePage() {
     if (month === 0) {
       clearDateQueryParam()
     } else {
-      setFieldDateQueryParam(month)
+      const currentTime = dayjs()
+
+      setQueryParams({
+        fieldBeginDate: currentTime.subtract(month, 'month').format('YYYY-MM-DD'),
+        fieldEndDate: currentTime.format('YYYY-MM-DD'),
+        page: 0
+      })
     }
 
     setCurMonth(month)
@@ -271,7 +220,7 @@ export default function MachinePage() {
                 select
                 value={size.toString()}
                 onChange={e => {
-                  setSizeQueryParam(Number(e.target.value))
+                  setQueryParams({ size: Number(e.target.value), page: 0 })
                 }}
                 className='gap-[5px]'
                 disabled={disabled}
@@ -296,17 +245,17 @@ export default function MachinePage() {
                 placeholder='이름으로 검색'
                 defaultValue={projectName ?? ''}
                 setSearchKeyword={projectName => {
-                  setProjectNameQueryParam(projectName)
+                  setQueryParams({ projectName: projectName, page: 0 })
                 }}
                 disabled={disabled}
               />
               {/* 지역으로 검색 */}
               <SearchBar
-                key={`region${projectName}`}
+                key={`region_${region}`}
                 placeholder='지역으로 검색'
                 defaultValue={region ?? ''}
                 setSearchKeyword={region => {
-                  setRegionQueryParam(region)
+                  setQueryParams({ region: region, page: 0 })
                 }}
                 disabled={disabled}
               />
@@ -320,7 +269,10 @@ export default function MachinePage() {
                   label='점검 시작일'
                   value={fieldBeginDate ? dayjs(fieldBeginDate) : null}
                   format={'YYYY.MM.DD'}
-                  onChange={date => setFieldBeginDateQueryParam(dayjs(date).format('YYYY-MM-DD'))}
+                  onChange={date => {
+                    setQueryParams({ fieldBeginDate: dayjs(date).format('YYYY-MM-DD'), page: 0 })
+                    setCurMonth(null)
+                  }}
                   showDaysOutsideCurrentMonth
                   slotProps={{ textField: { size: 'small' } }}
                   sx={{ p: 0, m: 0, width: 150 }}
@@ -331,7 +283,10 @@ export default function MachinePage() {
                   label='점검 종료일'
                   value={fieldEndDate ? dayjs(fieldEndDate) : null}
                   format={'YYYY.MM.DD'}
-                  onChange={date => setFieldEndDateQueryParam(dayjs(date).format('YYYY-MM-DD'))}
+                  onChange={date => {
+                    setQueryParams({ fieldEndDate: dayjs(date).format('YYYY-MM-DD'), page: 0 })
+                    setCurMonth(null)
+                  }}
                   showDaysOutsideCurrentMonth
                   slotProps={{ textField: { size: 'small' } }}
                   sx={{ p: 0, m: 0, width: 150 }}
@@ -407,11 +362,11 @@ export default function MachinePage() {
           count={totalCount}
           rowsPerPage={size}
           page={page}
-          onPageChange={(_, newPage) => setPageQueryParam(newPage)}
+          onPageChange={(_, newPage) => setQueryParams({ page: newPage })}
           onRowsPerPageChange={event => {
             const newPageSize = parseInt(event.target.value, 10)
 
-            setSizeQueryParam(newPageSize)
+            setQueryParams({ size: newPageSize, page: 0 })
           }}
           disabled={disabled}
           showFirstButton
