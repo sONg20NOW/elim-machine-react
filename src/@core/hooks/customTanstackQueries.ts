@@ -16,6 +16,7 @@ import type {
   MachineCategoryResponseDtoType,
   MachineEnergyTypeResponseDtoType,
   MachineEngineerOptionResponseDtoType,
+  MachineEngineerPageResponseDtoType,
   MachineInspectionChecklistItemResultResponseDtoType,
   MachineInspectionChecklistItemResultUpdateRequestDtoType,
   MachineInspectionDetailResponseDtoType,
@@ -845,8 +846,61 @@ export const useGetEngineersOptions = () => {
 
   return useQuery({
     queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS_OPTIONS,
+    queryFn: fetchEngineersOptions,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/engineers
+export const useGetEngineers = (queryParams: string) => {
+  const fetchEngineers: QueryFunction<
+    successResponseDtoType<MachineEngineerPageResponseDtoType[]>,
+    string[]
+  > = useCallback(async data => {
+    const [keyType, queryParams] = data.queryKey
+
+    const response = await auth
+      .get<{
+        data: successResponseDtoType<MachineEngineerPageResponseDtoType[]>
+      }>(`/api/engineers/?${queryParams}`)
+      .then(v => v.data.data)
+
+    console.log(`!!! queryFn ${keyType} ${queryParams}:`, response)
+
+    return response
+  }, [])
+
+  return useQuery({
+    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS(queryParams),
     queryFn: fetchEngineers,
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/engineers/by-member/{memberId}
+export const useGetEngineerByMemberId = (memberId: string) => {
+  const fetchEngineer: QueryFunction<EngineerBasicResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: EngineerBasicResponseDtoType
+        }>(`/api/engineers/by-member/${memberId}`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`, response)
+
+      return response
+    },
+    [memberId]
+  )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEER_BY_MEMBERID(memberId),
+    queryFn: fetchEngineer,
+    staleTime: 1000 * 60 * 5, // 5분
+    enabled: Number(memberId) > 0
   })
 }
 
@@ -1603,33 +1657,5 @@ export const useMutateGuide = (machineProjectId: string) => {
       console.log(error)
       handleApiError(error)
     }
-  })
-}
-
-// ----------------- 모바일 관련 -----------------
-// GET /api/engineers/by-member/{memberId}
-export const useGetEngineerByMemberId = (memberId: string) => {
-  const fetchEngineer: QueryFunction<EngineerBasicResponseDtoType, string[]> = useCallback(
-    async data => {
-      const response = await auth
-        .get<{
-          data: EngineerBasicResponseDtoType
-        }>(`/api/engineers/by-member/${memberId}`)
-        .then(v => v.data.data)
-
-      const [keyType] = data.queryKey
-
-      console.log(`!!! queryFn ${keyType}:`, response)
-
-      return response
-    },
-    [memberId]
-  )
-
-  return useQuery({
-    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEER_BY_MEMBERID(memberId),
-    queryFn: fetchEngineer,
-    staleTime: 1000 * 60 * 5, // 5분
-    enabled: Number(memberId) > 0
   })
 }
