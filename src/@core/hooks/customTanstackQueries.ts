@@ -862,7 +862,7 @@ export const useGetEngineers = (queryParams: string) => {
     const response = await auth
       .get<{
         data: successResponseDtoType<MachineEngineerPageResponseDtoType[]>
-      }>(`/api/engineers/?${queryParams}`)
+      }>(`/api/engineers?${queryParams}`)
       .then(v => v.data.data)
 
     console.log(`!!! queryFn ${keyType} ${queryParams}:`, response)
