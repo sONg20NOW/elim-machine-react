@@ -1,4 +1,4 @@
-import type { MemberCreateRequestDtoType, MemberFilterType } from '@/@core/types'
+import type { MemberCreateRequestDtoType } from '@/@core/types'
 
 export const MemberInitialData: MemberCreateRequestDtoType = {
   name: '',
@@ -8,18 +8,4 @@ export const MemberInitialData: MemberCreateRequestDtoType = {
   // role: '',
   memberStatus: '',
   note: ''
-}
-
-export const MemeberInitialFilters: MemberFilterType = {
-  // role: '',
-  companyName: '',
-  officeDepartmentName: '',
-  officePosition: '',
-  memberStatus: '',
-  careerYear: '',
-  contractType: '',
-  laborForm: '',
-  workForm: '',
-  gender: '',
-  foreignYn: ''
 }
