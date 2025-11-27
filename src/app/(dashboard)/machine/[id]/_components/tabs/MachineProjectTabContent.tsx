@@ -421,7 +421,7 @@ const BasicTabContent = ({}: {}) => {
                       />
                     </td>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                      점검 업체
+                      점검업체
                     </th>
                     <td className='pe-4'>
                       <InputBox
