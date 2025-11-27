@@ -9,13 +9,8 @@ import type {
 } from '@/@core/types'
 
 // member
-export const companyNameOption = [
-  { value: '엘림기술원(주)', label: '엘림기술원(주)' },
-  { value: '엘림주식회사', label: '엘림주식회사' },
-  { value: '엘림테크원(주)', label: '엘림테크원(주)' },
-  { value: '이엘엔지니어링(주)', label: '이엘엔지니어링(주)' },
-  { value: '이엘테크원(주)', label: '이엘테크원(주)' }
-]
+// 해당 옵션은 실제로 사용되지 않음. InputBox에서 실제 라이선스 리스트를 가져와서 사용하기 때문.
+export const companyNameOption = []
 
 export const roleOption = [
   { value: 'GUEST', label: '게스트' },
