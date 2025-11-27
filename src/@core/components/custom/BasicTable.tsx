@@ -14,6 +14,8 @@ import classNames from 'classnames'
 
 import { Checkbox, Divider, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material'
 
+import { IconChevronDown, IconChevronUp, IconExclamationCircleFilled } from '@tabler/icons-react'
+
 import type { HeaderType } from '@/@core/types'
 import { isMobileContext, isTabletContext } from './ProtectedPage'
 
@@ -32,7 +34,7 @@ interface BasicTableProps<T> {
   handleCheckItem?: (item: T) => void
   handleCheckAllItems?: (checked: boolean) => void
   onClickPicCount?: (row: T) => void
-  rightClickMenuHeader?: (contextMenu: { mouseX: number; mouseY: number; row: T }) => JSX.Element
+  rightClickMenuHeader?: (contextMenu: { mouseX: number; mouseY: number; row: T }) => string
   rightClickMenu?: { icon: JSX.Element; label: string; handleClick: (row: T) => void }[]
 }
 
@@ -47,12 +49,12 @@ interface BasicTableProps<T> {
  * @param error*
  * @param multiException 하나의 column에 여러 데이터 표시 예외처리
  * @param listException 리스트 타입의 데이터 예외처리
- * @param isChecked
- * @param showCheckBox
- * @param handleCheckItem
- * @param handleCheckAllItems 체크박스 props
- * @param rightClickMenuHeader
- * @param rightClickMenu 우클릭 props
+ * @param isChecked 체크박스 prop
+ * @param showCheckBox 체크박스 prop
+ * @param handleCheckItem 체크박스 prop
+ * @param handleCheckAllItems 체크박스 prop
+ * @param rightClickMenuHeader 우클릭 prop: 우클릭 시 보이는 헤더 문자열
+ * @param rightClickMenu 우클릭 prop: 우클릭 시 보이는 메뉴별 아이콘, 이름, 클릭 함수
  * @param onClickPicCount 테이블의 picCount 클릭 동작 함수
  *
  * @returns prop으로 받은 테이블 정보로 테이블 생성
@@ -103,13 +105,13 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
     setContextMenu(null)
   }
 
-  const toggleOrder = useCallback(
+  const handleSorting = useCallback(
     (key: string) => {
       const params = new URLSearchParams(searchParams)
 
       if (!sort) {
         params.set('sort', `${key},asc`)
-      } else {
+      } else if (sort[0] === key) {
         switch (sort[1]) {
           case 'asc':
             params.set('sort', `${key},desc`)
@@ -120,6 +122,8 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
           default:
             break
         }
+      } else {
+        params.set('sort', `${key},asc`)
       }
 
       router.replace(pathname + '?' + params.toString())
@@ -161,7 +165,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   key={key}
                   align='center'
                   className={classNames(
-                    ' text-base',
+                    'text-base z-0',
                     {
                       'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
                       'font-bold select-none': header[k].canSort,
@@ -170,17 +174,17 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     { hidden: isTablet && header[k].hideOnTablet }
                   )}
                   sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
-                  onClick={!(loading || error) && header[k].canSort ? () => toggleOrder(key) : undefined}
+                  onClick={!(loading || error) && header[k].canSort ? () => handleSorting(key) : undefined}
                 >
                   {header[k].label}
-                  {header[k].canSort && sort && sort[0] === k && (
-                    <i
-                      className={classNames('absolute text-xl top-[50%] -translate-y-1/2 text-color-primary-dark', {
-                        'tabler-square-chevron-down': sort[1] === 'desc',
-                        'tabler-square-chevron-up': sort[1] === 'asc'
-                      })}
-                    />
-                  )}
+                  {header[k].canSort &&
+                    sort &&
+                    sort[0] === k &&
+                    (sort[1] === 'desc' ? (
+                      <IconChevronDown className='absolute text-xl  top-[50%] -translate-y-1/2 text-color-primary-dark' />
+                    ) : (
+                      <IconChevronUp className='absolute text-xl  top-[50%] -translate-y-1/2 text-color-primary-dark' />
+                    ))}
                 </TableCell>
               )
             })}
@@ -221,7 +225,14 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                         onClick={() => handleRowClick(contextMenu.row)}
                         sx={{ display: 'flex', alignItems: 'center' }}
                       >
-                        {rightClickMenuHeader && rightClickMenuHeader(contextMenu)}
+                        {rightClickMenuHeader && (
+                          <div className='flex gap-2'>
+                            <ListItemIcon className='grid place-items-center'>
+                              <IconExclamationCircleFilled size={26} className='text-blue-500' />
+                            </ListItemIcon>
+                            <Typography variant='h5'>{rightClickMenuHeader(contextMenu)}</Typography>
+                          </div>
+                        )}
                       </MenuItem>
                     }
                     <Divider />
