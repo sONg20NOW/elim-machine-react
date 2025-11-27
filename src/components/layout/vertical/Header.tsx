@@ -8,6 +8,23 @@ import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography } from '@m
 
 import { toast } from 'react-toastify'
 
+import {
+  IconCalendar,
+  IconCircle,
+  IconClipboard,
+  IconClipboardCheck,
+  IconHeartHandshake,
+  IconHistory,
+  IconMenu2,
+  IconPaperclip,
+  IconSettings,
+  IconShield,
+  IconSpeakerphone,
+  IconUsers,
+  IconUsersPlus,
+  IconZoomQuestion
+} from '@tabler/icons-react'
+
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 import { logout } from '@/lib/auth'
@@ -50,7 +67,7 @@ export default function Header() {
         <div className='flex gap-2'>
           {isTablet && (
             <IconButton edge='end' onClick={() => setOpen(true)}>
-              <i className='tabler-menu-2 text-white' />
+              <IconMenu2 color='white' />
             </IconButton>
           )}
           <div onClick={() => router.push('/machine')} className='cursor-pointer'>
@@ -138,10 +155,10 @@ export default function Header() {
                 </Typography>
               </Box>
             )}
-            <Menu renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}>
+            <Menu renderExpandedMenuItemIcon={{ icon: <IconCircle className='text-xs' /> }}>
               <MenuItem
                 href={`/calendar`}
-                icon={<i className='tabler-calendar' />}
+                icon={<IconCalendar />}
                 className='ps-2 pe-3 bg-white '
                 style={{
                   borderRadius: 5
@@ -153,7 +170,7 @@ export default function Header() {
               <MenuSection label='기계설비점검'>
                 <MenuItem
                   href={`/machine`}
-                  icon={<i className='tabler-settings' />}
+                  icon={<IconSettings />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -164,7 +181,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/machine/engineer`}
-                  icon={<i className='tabler-users' />}
+                  icon={<IconUsers />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -175,7 +192,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/machine/template`}
-                  icon={<i className='tabler-clipboard' />}
+                  icon={<IconClipboard />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -188,7 +205,7 @@ export default function Header() {
               <MenuSection label='안전진단전검'>
                 <MenuItem
                   href={`/safety`}
-                  icon={<i className='tabler-shield' />}
+                  icon={<IconShield />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -201,7 +218,7 @@ export default function Header() {
               <MenuSection label='문의'>
                 <MenuItem
                   href={`/board/notice`}
-                  icon={<i className='tabler-speakerphone' />}
+                  icon={<IconSpeakerphone />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -212,7 +229,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/board/files`}
-                  icon={<i className='tabler-paperclip' />}
+                  icon={<IconPaperclip />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -223,7 +240,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/board/faq`}
-                  icon={<i className='tabler-clipboard-check' />}
+                  icon={<IconClipboardCheck />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -234,7 +251,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/board/qna`}
-                  icon={<i className='tabler-zoom-question' />}
+                  icon={<IconZoomQuestion />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -247,7 +264,7 @@ export default function Header() {
               <MenuSection label='관리'>
                 <MenuItem
                   href={`/member`}
-                  icon={<i className='tabler-users-plus' />}
+                  icon={<IconUsersPlus />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -258,7 +275,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/loginlog`}
-                  icon={<i className='tabler-history' />}
+                  icon={<IconHistory />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -271,7 +288,7 @@ export default function Header() {
               <MenuSection label='라이선스'>
                 <MenuItem
                   href={`/license`}
-                  icon={<i className='tabler-heart-handshake' />}
+                  icon={<IconHeartHandshake />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
