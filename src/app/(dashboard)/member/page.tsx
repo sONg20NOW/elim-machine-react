@@ -29,7 +29,7 @@ import { HEADERS } from '@/app/_constants/table/TableHeader'
 import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
 import AddUserModal from './_components/AddUserModall'
 import { useGetMembers, useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
-import TableFilterWithSearchParams from '@/@core/components/custom/TableFilterWithSearchParams'
+import TableFilter from '@/@core/components/custom/TableFilter'
 
 export default function MemberPage() {
   const searchParams = useSearchParams()
@@ -197,9 +197,7 @@ export default function MemberPage() {
         {/* 탭 제목 */}
         <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        {!isTablet && (
-          <TableFilterWithSearchParams<MemberFilterType> filterInfo={MEMBER_FILTER_INFO} disabled={disabled} />
-        )}
+        {!isTablet && <TableFilter<MemberFilterType> filterInfo={MEMBER_FILTER_INFO} disabled={disabled} />}
         {/* 필터 초기화 버튼 */}
         {!isTablet && (
           <Button

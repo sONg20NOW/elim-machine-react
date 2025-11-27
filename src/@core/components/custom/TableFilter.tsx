@@ -7,7 +7,7 @@ import Grid from '@mui/material/Grid2'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import type { InputFieldType } from '@/@core/types'
 
-interface TableFilterWithSearchParamsProps<T> {
+interface TableFilterProps<T> {
   filterInfo: Record<keyof T, InputFieldType>
   disabled: boolean
 }
@@ -19,7 +19,7 @@ interface TableFilterWithSearchParamsProps<T> {
  * @type 필터 타입 (ex. MemberFilterType, ...)
  * @returns
  */
-export default function TableFilterWithSearchParams<T>({ filterInfo, disabled }: TableFilterWithSearchParamsProps<T>) {
+export default function TableFilter<T>({ filterInfo, disabled }: TableFilterProps<T>) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()

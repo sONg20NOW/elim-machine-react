@@ -30,7 +30,7 @@ import PictureListModal from '../pictureUpdateModal/PictureListModal'
 import { useGetInspections, useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import { auth } from '@/lib/auth'
-import TableFilterWithSearchParams from '@/@core/components/custom/TableFilterWithSearchParams'
+import TableFilter from '@/@core/components/custom/TableFilter'
 
 const InspectionListTabContent = () => {
   const machineProjectId = useParams().id?.toString() as string
@@ -214,7 +214,7 @@ const InspectionListTabContent = () => {
     <div className='relative h-full flex flex-col'>
       {/* 필터바 */}
       <div>
-        <TableFilterWithSearchParams<MachineInspectionFilterType>
+        <TableFilter<MachineInspectionFilterType>
           filterInfo={{
             engineerName: {
               label: '점검자',

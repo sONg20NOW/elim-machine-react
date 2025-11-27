@@ -28,7 +28,7 @@ import { ENGINEER_FILTER_INFO } from '@/app/_constants/filter/EngineerFilterInfo
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import { useGetEngineers } from '@/@core/hooks/customTanstackQueries'
-import TableFilterWithSearchParams from '@/@core/components/custom/TableFilterWithSearchParams'
+import TableFilter from '@/@core/components/custom/TableFilter'
 
 /**
  * @type T
@@ -188,7 +188,7 @@ export default function EngineerPage() {
         {/* 탭 제목 */}
         <CardHeader title={`기계설비 기술자 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        <TableFilterWithSearchParams<EngineerFilterType> filterInfo={ENGINEER_FILTER_INFO} disabled={disabled} />
+        <TableFilter<EngineerFilterType> filterInfo={ENGINEER_FILTER_INFO} disabled={disabled} />
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<IconReload />}

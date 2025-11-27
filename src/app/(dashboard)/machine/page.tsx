@@ -35,7 +35,7 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 import { auth } from '@/lib/auth'
-import TableFilterWithSearchParams from '@/@core/components/custom/TableFilterWithSearchParams'
+import TableFilter from '@/@core/components/custom/TableFilter'
 import { useGetEngineersOptions, useGetMachineProjects } from '@/@core/hooks/customTanstackQueries'
 
 // datepicker 한글화
@@ -196,10 +196,7 @@ export default function MachinePage() {
       <Card className='relative h-full flex flex-col'>
         <CardHeader title={`기계설비현장 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        <TableFilterWithSearchParams<MachineFilterType>
-          filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS}
-          disabled={disabled}
-        />
+        <TableFilter<MachineFilterType> filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS} disabled={disabled} />
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<IconReload />}
