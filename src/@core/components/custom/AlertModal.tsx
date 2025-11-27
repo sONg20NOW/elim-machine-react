@@ -1,8 +1,8 @@
 import type { Dispatch, SetStateAction } from 'react'
 
-import { Button } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogTitle, Typography } from '@mui/material'
 
-import DefaultModal from './DefaultModal'
+import { IconAlertCircleFilled } from '@tabler/icons-react'
 
 interface AlertModalProps<T> {
   showAlertModal: boolean
@@ -21,33 +21,36 @@ export default function AlertModal<T>({
   originalData,
   onQuit
 }: AlertModalProps<T>) {
+  const handleClose = () => setShowAlertModal(false)
+
   return (
-    <DefaultModal
-      size='xs'
-      open={showAlertModal}
-      setOpen={setShowAlertModal}
-      title={'변경사항이\n저장되지 않았습니다'}
-      headerDescription={`지금까지 수정한 내용이 저장되지 않습니다.\n그래도 나가시겠습니까?`}
-      primaryButton={
+    <Dialog open={showAlertModal} onClose={handleClose} fullWidth maxWidth='xs'>
+      {/* Icon Title */}
+      <DialogTitle sx={{ textAlign: 'center' }}>
+        <IconAlertCircleFilled size={40} className='text-red-400 mx-auto' />
+        <Typography variant='inherit'>지금까지 수정한 내용이 저장되지 않습니다.</Typography>
+        <Typography variant='inherit'>그래도 나가시겠습니까?</Typography>
+      </DialogTitle>
+
+      {/* Buttons */}
+      <DialogActions>
         <Button
           variant='contained'
           className='bg-color-warning hover:bg-color-warning-light'
           onClick={() => {
-            setEditData(JSON.parse(JSON.stringify(originalData)))
+            setEditData(structuredClone(originalData))
             setShowAlertModal(false)
             setIsEditing(false)
             onQuit && onQuit()
           }}
-          type='submit'
         >
           저장하지 않음
         </Button>
-      }
-      secondaryButton={
-        <Button variant='contained' color='secondary' type='reset' onClick={() => setShowAlertModal(false)}>
+
+        <Button variant='contained' color='secondary' onClick={handleClose}>
           취소
         </Button>
-      }
-    />
+      </DialogActions>
+    </Dialog>
   )
 }
