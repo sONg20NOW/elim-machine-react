@@ -63,7 +63,7 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
       const response = await auth.post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, userData)
 
       console.log('new member added', response.data.data)
-      handleSuccess('새 직원이 추가되었습니다.')
+      handleSuccess('새 설비인력이 추가되었습니다.')
 
       reloadPage()
       setOpen(false)
