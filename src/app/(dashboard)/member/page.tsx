@@ -66,7 +66,7 @@ export default function MemberPage() {
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<{ memberId: number; version: number }[]>([])
 
-  // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
+  // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅해주는 함수
   const updateParams = useCallback(
     (updater: (params: URLSearchParams) => void) => {
       const params = new URLSearchParams(searchParams)
@@ -79,6 +79,7 @@ export default function MemberPage() {
 
   type paramType = 'page' | 'size' | 'name' | 'region'
 
+  // 객체 형식으로 데이터를 전달받으면 그에 따라 searchParams를 설정하고 라우팅하는 함수
   const setQueryParams = useCallback(
     (pairs: Partial<Record<paramType, string | number>>) => {
       if (!pairs) return
@@ -107,25 +108,20 @@ export default function MemberPage() {
     })
   }, [updateParams])
 
-  const getLastPageAfter = useCallback(
-    (offset: number) => {
-      return Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
-    },
-    [totalCount, size]
-  )
-
+  // offset만큼 요소수가 변화했을 때 valid한 페이지 param을 책임지는 함수
   const adjustPage = useCallback(
     (offset = 0) => {
-      const lastPageAfter = getLastPageAfter(offset)
+      const lastPageAfter = Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
 
       if (offset > 0 || page > lastPageAfter) {
         setQueryParams({ page: lastPageAfter })
       }
     },
-    [getLastPageAfter, page, setQueryParams]
+    [page, setQueryParams, totalCount, size]
   )
 
-  const handleRemoveQueries = useCallback(() => {
+  // tanstack query cache 삭제 및 refetch
+  const removeQueryCaches = useCallback(() => {
     refetchPages()
 
     queryClient.removeQueries({
@@ -198,7 +194,7 @@ export default function MemberPage() {
       })
 
       adjustPage(-1 * checked.length)
-      handleRemoveQueries()
+      removeQueryCaches()
       setShowCheckBox(false)
       setChecked([])
       handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
@@ -367,7 +363,7 @@ export default function MemberPage() {
           setOpen={setAddUserModalOpen}
           handlePageChange={() => {
             adjustPage(1)
-            handleRemoveQueries()
+            removeQueryCaches()
           }}
         />
       )}
@@ -376,10 +372,8 @@ export default function MemberPage() {
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           selectedUserData={selectedUser}
-          reloadData={(offset = 0) => {
-            adjustPage(offset)
-            handleRemoveQueries()
-          }}
+          adjustPage={adjustPage}
+          removeQueryCaches={removeQueryCaches}
         />
       )}
     </>

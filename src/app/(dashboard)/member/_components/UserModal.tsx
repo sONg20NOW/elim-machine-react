@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { createContext, useState } from 'react'
+import { createContext, useCallback, useRef, useState } from 'react'
 
 // MUI Imports
 
@@ -80,12 +80,15 @@ type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
   selectedUserData: MemberDetailResponseDtoType
-  reloadData?: (offset?: number) => void
+  adjustPage?: (offset?: number) => void
+  removeQueryCaches?: () => void
 }
 
 export const MemberIdContext = createContext<number>(0)
 
-const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfoProps) => {
+const UserModal = ({ open, setOpen, selectedUserData, adjustPage, removeQueryCaches }: EditUserInfoProps) => {
+  const changedEvenOnce = useRef(false)
+
   const [tabValue, setTabValue] = useState<tabType>('1')
   const [editData, setEditData] = useState<MemberDetailResponseDtoType>(structuredClone(selectedUserData))
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -133,7 +136,8 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
 
         console.log(`memberId: ${memberId} user is deleted successfully`)
         handleSuccess('해당 직원이 삭제되었습니다.')
-        handleClose(-1)
+        adjustPage && adjustPage(-1)
+        removeQueryCaches && removeQueryCaches()
       } catch (error) {
         handleApiError(error)
       }
@@ -216,6 +220,8 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
         default:
           break
       }
+
+      changedEvenOnce.current = true
     } catch (error: any) {
       handleApiError(error)
     } finally {
@@ -223,23 +229,30 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
     }
   }
 
-  function handleClose(offset?: number) {
-    reloadData && reloadData(offset)
+  // 실제로 창이 닫힐 때 동작하는 함수
+  const onClose = useCallback(() => {
+    if (changedEvenOnce.current) {
+      removeQueryCaches && removeQueryCaches()
+    }
+
     setOpen(false)
-  }
+  }, [setOpen, removeQueryCaches])
+
+  // 창을 닫으려 할 때 동작하는 함수 - 변경사항이 있으면 경고창 출력
+  const handleClose = useCallback(() => {
+    if (existChange) {
+      setOnQuit(() => onClose)
+      setShowAlertModal(true)
+    } else {
+      onClose()
+    }
+  }, [existChange, onClose])
 
   return (
     <MemberIdContext.Provider value={memberId ?? 0}>
       <DefaultModal
         value={tabValue}
-        onClose={() => {
-          if (existChange) {
-            setOnQuit(handleClose)
-            setShowAlertModal(true)
-          } else {
-            handleClose()
-          }
-        }}
+        onClose={handleClose}
         open={open}
         setOpen={setOpen}
         title={selectedUserData?.memberBasicResponseDto?.name || '사용자 정보 수정'}
@@ -303,7 +316,7 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
               취소
             </Button>
           ) : (
-            <Button variant='contained' color='secondary' onClick={() => handleClose()}>
+            <Button variant='contained' color='secondary' onClick={handleClose}>
               닫기
             </Button>
           )
@@ -345,24 +358,24 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
         <TabPanel value='5'>
           <MemberTabContent isEditing={isEditing} tabName='etc' userData={editData} setUserData={setEditData} />
         </TabPanel>
-        {showDeleteModal && (
-          <DeleteModal
-            showDeleteModal={showDeleteModal}
-            setShowDeleteModal={setShowDeleteModal}
-            onDelete={onDeleteUserConfirm}
-          />
-        )}
-        {showAlertModal && (
-          <AlertModal<MemberDetailResponseDtoType>
-            showAlertModal={showAlertModal}
-            setShowAlertModal={setShowAlertModal}
-            setEditData={setEditData}
-            setIsEditing={setIsEditing}
-            originalData={selectedUserData}
-            onQuit={onQuit}
-          />
-        )}
       </DefaultModal>
+      {showDeleteModal && (
+        <DeleteModal
+          showDeleteModal={showDeleteModal}
+          setShowDeleteModal={setShowDeleteModal}
+          onDelete={onDeleteUserConfirm}
+        />
+      )}
+      {showAlertModal && (
+        <AlertModal<MemberDetailResponseDtoType>
+          showAlertModal={showAlertModal}
+          setShowAlertModal={setShowAlertModal}
+          setEditData={setEditData}
+          setIsEditing={setIsEditing}
+          originalData={selectedUserData}
+          onQuit={onQuit}
+        />
+      )}
     </MemberIdContext.Provider>
   )
 }
