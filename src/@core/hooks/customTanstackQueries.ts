@@ -825,20 +825,23 @@ export const useGetMachineProjects = (queryParams: string) => {
 
 // ------------------------- Engineer 관련 -------------------------
 // GET /api/machine-projects/{machineProjectId}/machine-project-engineers
-export const useGetEngineerList = () => {
-  const fetchEngineers: QueryFunction<MachineEngineerOptionResponseDtoType[], string[]> = useCallback(async data => {
-    const response = await auth
-      .get<{
-        data: { engineers: MachineEngineerOptionResponseDtoType[] }
-      }>(`/api/engineers/options`)
-      .then(v => v.data.data.engineers)
+export const useGetEngineersOptions = () => {
+  const fetchEngineersOptions: QueryFunction<MachineEngineerOptionResponseDtoType[], string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: { engineers: MachineEngineerOptionResponseDtoType[] }
+        }>(`/api/engineers/options`)
+        .then(v => v.data.data.engineers)
 
-    const [keyType] = data.queryKey
+      const [keyType] = data.queryKey
 
-    console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`, response)
 
-    return response
-  }, [])
+      return response
+    },
+    []
+  )
 
   return useQuery({
     queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS_OPTIONS,

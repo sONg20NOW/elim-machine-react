@@ -25,7 +25,7 @@ import NoteTabContent from './_components/tabs/NoteTabContent'
 import InspectionListTabContent from './_components/tabs/InspectionListTabContent'
 import type { MachineTabValue } from '@/@core/utils/useMachineTabValueStore'
 import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
-import { useGetEngineerList, useGetMachineProject, useGetScheduleTab } from '@/@core/hooks/customTanstackQueries'
+import { useGetEngineersOptions, useGetMachineProject, useGetScheduleTab } from '@/@core/hooks/customTanstackQueries'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { auth } from '@/lib/auth'
 
@@ -46,7 +46,7 @@ const MachineUpdatePage = () => {
   const { tabValue, setTabValue } = useMachineTabValueStore(state => state)
   const { isEditing } = useMachineIsEditingStore()
 
-  const { data: engineerList } = useGetEngineerList()
+  const { data: engineerList } = useGetEngineersOptions()
   const { data: projectData, refetch: refetchProjectData } = useGetMachineProject(machineProjectId)
   const { data: scheduleData, refetch: refetchScheduleData } = useGetScheduleTab(machineProjectId)
 

@@ -19,7 +19,7 @@ import { gradeOption } from '@/app/_constants/options'
 import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import {
-  useGetEngineerList,
+  useGetEngineersOptions,
   useGetParticipatedEngineerList,
   useGetScheduleTab
 } from '@/@core/hooks/customTanstackQueries'
@@ -33,7 +33,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
   const { isEditing, setIsEditing } = useMachineIsEditingStore()
 
   const { data: scheduleData, refetch: refetchScheduleData } = useGetScheduleTab(machineProjectId)
-  const { data: engineerList } = useGetEngineerList()
+  const { data: engineerList } = useGetEngineersOptions()
   const { refetch: refetchParticipatedEngineers } = useGetParticipatedEngineerList(machineProjectId)
 
   const [editData, setEditData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>(

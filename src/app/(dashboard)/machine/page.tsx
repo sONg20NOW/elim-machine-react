@@ -36,7 +36,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 import { auth } from '@/lib/auth'
 import TableFilterWithSearchParams from '@/@core/components/custom/TableFilterWithSearchParams'
-import { useGetEngineerList, useGetMachineProjects } from '@/@core/hooks/customTanstackQueries'
+import { useGetEngineersOptions, useGetMachineProjects } from '@/@core/hooks/customTanstackQueries'
 
 // datepicker 한글화
 dayjs.locale('ko')
@@ -73,7 +73,7 @@ export default function MachinePage() {
 
   const machineProjects = machineProjectsPage?.content ?? []
 
-  const { data: engineers, isLoading: isLoadingEngineerList, isError: isErrorEngineerList } = useGetEngineerList()
+  const { data: engineers, isLoading: isLoadingEngineerList, isError: isErrorEngineerList } = useGetEngineersOptions()
 
   const loading = isLoading || isLoadingEngineerList
   const error = isError || isErrorEngineerList
