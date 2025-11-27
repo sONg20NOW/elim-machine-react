@@ -32,11 +32,15 @@ import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
 import AddUserModal from './_components/AddUserModall'
 import { useGetMembers, useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
 import TableFilter from '@/@core/components/custom/TableFilter'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
+import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 
 export default function MemberPage() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
+
+  const curUserId = useCurrentUserStore(set => set.currentUser)?.memberId
 
   const isTablet = useContext(isTabletContext)
 
@@ -148,6 +152,12 @@ export default function MemberPage() {
     const obj = { memberId: user.memberId, version: user.version }
     const checked = isChecked(user)
 
+    if (user.memberId === curUserId) {
+      printErrorSnackbar('', '본인은 삭제할 수 없습니다')
+
+      return
+    }
+
     if (!checked) {
       setChecked(prev => prev.concat(obj))
     } else {
@@ -161,7 +171,7 @@ export default function MemberPage() {
         const newPrev = structuredClone(prev)
 
         data.forEach(user => {
-          if (!prev.find(v => v.memberId === user.memberId)) {
+          if (!prev.find(v => v.memberId === user.memberId) && user.memberId !== curUserId) {
             newPrev.push({ memberId: user.memberId, version: user.version })
           }
         })

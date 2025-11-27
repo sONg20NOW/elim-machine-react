@@ -18,6 +18,7 @@ import { IconChevronDown, IconChevronUp, IconExclamationCircleFilled } from '@ta
 
 import type { HeaderType } from '@/@core/types'
 import { isMobileContext, isTabletContext } from './ProtectedPage'
+import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 
 interface BasicTableProps<T> {
   header: HeaderType<T>
@@ -84,6 +85,8 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   const router = useRouter()
 
   const sort = searchParams.get('sort')?.split(',')
+
+  const currentUserId = useCurrentUserStore(set => set.currentUser)?.memberId
 
   const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number; row: T } | null>(null)
 
@@ -255,7 +258,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 )}
                 {showCheckBox && isChecked && (
                   <TableCell size={isMobile ? 'small' : 'medium'} padding='checkbox'>
-                    <Checkbox checked={isChecked(info)} />
+                    <Checkbox disabled={(info as any)?.memberId === currentUserId} checked={isChecked(info)} />
                   </TableCell>
                 )}
                 {!isTablet && (
