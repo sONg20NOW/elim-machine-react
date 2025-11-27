@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 // MUI Imports
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
@@ -17,21 +19,16 @@ import CustomTextField from '@core/components/mui/TextField'
 // Style Imports
 import UserModal from './_components/EngineerDetailModal'
 import AddUserModal from './_components/AddEngineerModal'
-import type {
-  EngineerFilterType,
-  EngineerResponseDtoType,
-  MachineEngineerPageResponseDtoType,
-  successResponseDtoType
-} from '@/@core/types'
-import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
+import type { EngineerFilterType, EngineerResponseDtoType, MachineEngineerPageResponseDtoType } from '@/@core/types'
+import { HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
-import TableFilters from '@/@core/components/custom/TableFilters'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
-import { EngineerInitialFilters } from '@/app/_constants/EngineerSeed'
 import { ENGINEER_FILTER_INFO } from '@/app/_constants/filter/EngineerFilterInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
+import { useGetEngineers } from '@/@core/hooks/customTanstackQueries'
+import TableFilterWithSearchParams from '@/@core/components/custom/TableFilterWithSearchParams'
 
 /**
  * @type T
@@ -41,30 +38,28 @@ import { auth } from '@/lib/auth'
  * @returns
  */
 export default function EngineerPage() {
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+
   // 데이터 리스트
-  const [data, setData] = useState<MachineEngineerPageResponseDtoType[]>([])
+  const { data: engineersPages, refetch, isLoading, isError } = useGetEngineers(searchParams.toString())
+  const data = engineersPages?.content ?? []
 
   // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
 
-  // 에러 발생 시 true
-  const [error, setError] = useState(false)
-
   // 로딩이 끝나고 에러가 없으면 not disabled
-  const disabled = loading || error
+  const disabled = loading || isError || isLoading
 
   // 전체 데이터 개수 => fetching한 데이터에서 추출
-  const [totalCount, setTotalCount] = useState(0)
-
-  // 이름 검색 인풋
-  const [name, setName] = useState('')
-
-  // 현장명 검색 인풋
-  const [projectName, setProjectName] = useState('')
+  const totalCount = engineersPages?.page.totalElements ?? 0
 
   // 페이지네이션 관련
-  const [page, setPage] = useState(0)
-  const [size, setSize] = useState(DEFAULT_PAGESIZE)
+  const page = Number(searchParams.get('page') ?? 0)
+  const size = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)
+  const projectName = searchParams.get('projectName')
+  const name = searchParams.get('name')
 
   // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
@@ -72,69 +67,50 @@ export default function EngineerPage() {
 
   const [selectedUser, setSelectedUser] = useState<EngineerResponseDtoType>()
 
-  // 필터 상태 - 컬럼에 맞게 수정
-  const [filters, setFilters] = useState(EngineerInitialFilters)
-
-  // 정렬 상태
-  const [sorting, setSorting] = useState(createInitialSorting<MachineEngineerPageResponseDtoType>)
-
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<{ engineerId: number; version: number }[]>([])
 
-  // 데이터 페치에 사용되는 쿼리 URL
+  // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
+  const updateParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams)
 
-  // 직원 리스트 호출 API 함수
-  const getFilteredData = useCallback(async () => {
-    setLoading(true)
-    setError(false)
-    const queryParams = new URLSearchParams()
+      updater(params)
+      router.replace(pathname + '?' + params.toString())
+    },
+    [router, pathname, searchParams]
+  )
 
-    try {
-      // 필터링
-      Object.keys(filters).forEach(prop => {
-        const key = prop as keyof typeof filters
+  type paramType = 'page' | 'size' | 'name' | 'projectName'
 
-        filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
+  const setQueryParams = useCallback(
+    (pairs: Partial<Record<paramType, string | number>>) => {
+      if (!pairs) return
+
+      updateParams(params => {
+        Object.entries(pairs).forEach(([key, value]) => {
+          const t_key = key as paramType
+
+          params.set(t_key, value.toString())
+        })
       })
+    },
+    [updateParams]
+  )
 
-      // 정렬
-      sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
+  const resetQueryParams = useCallback(() => {
+    updateParams(params => {
+      params.delete('page')
+      params.delete('name')
+      params.delete('projectName')
+      params.delete('sort')
 
-      // 이름 검색
-      name ? queryParams.set('name', name) : queryParams.delete('name')
+      const filterKeys = Object.keys(ENGINEER_FILTER_INFO)
 
-      // 현장명 검색
-      projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
-
-      // 페이지 설정
-      queryParams.set('page', page.toString())
-      queryParams.set('size', size.toString())
-
-      // axios GET 요청
-      const response = await auth.get<{ data: successResponseDtoType<MachineEngineerPageResponseDtoType[]> }>(
-        `/api/engineers?${queryParams.toString()}`
-      )
-
-      const result = response.data.data
-
-      // 상태 업데이트
-      setData(result.content ?? [])
-      setPage(result.page.number)
-      setSize(result.page.size)
-      setTotalCount(result.page.totalElements)
-    } catch (error: any) {
-      handleApiError(error, '데이터 조회에 실패했습니다.')
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [filters, sorting, page, size, name, projectName])
-
-  // 필터 변경 시 API 호출
-  useEffect(() => {
-    getFilteredData()
-  }, [filters, getFilteredData])
+      filterKeys.forEach(v => params.delete(v))
+    })
+  }, [updateParams])
 
   // 엔지니어 선택 핸들러
   const handleEngineerClick = async (engineerData: MachineEngineerPageResponseDtoType) => {
@@ -194,11 +170,8 @@ export default function EngineerPage() {
         //@ts-ignore
         data: { engineerDeleteRequestDtos: checked }
       })
-      setFilters(EngineerInitialFilters)
-      setName('')
-      setProjectName('')
-      setPage(0)
-      getFilteredData()
+      setQueryParams({ page: 0 })
+      refetch()
       handleSuccess(`선택된 기계설비 기술자 ${checked.length}명이 성공적으로 삭제되었습니다.`)
       setChecked([])
       setShowCheckBox(false)
@@ -215,21 +188,12 @@ export default function EngineerPage() {
         {/* 탭 제목 */}
         <CardHeader title={`기계설비 기술자 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        <TableFilters<EngineerFilterType>
-          filterInfo={ENGINEER_FILTER_INFO}
-          filters={filters}
-          onFiltersChange={setFilters}
-          disabled={disabled}
-          setPage={setPage}
-        />
+        <TableFilterWithSearchParams<EngineerFilterType> filterInfo={ENGINEER_FILTER_INFO} disabled={disabled} />
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<IconReload />}
           onClick={() => {
-            setFilters(EngineerInitialFilters)
-            setPage(0)
-            setName('')
-            setProjectName('')
+            resetQueryParams()
           }}
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
@@ -244,8 +208,7 @@ export default function EngineerPage() {
               select
               value={size.toString()}
               onChange={e => {
-                setSize(Number(e.target.value))
-                setPage(0)
+                setQueryParams({ size: e.target.value, page: 0 })
               }}
               className='gap-[5px]'
               disabled={disabled}
@@ -266,19 +229,21 @@ export default function EngineerPage() {
             </CustomTextField>
             {/* 이름으로 검색 */}
             <SearchBar
+              key={`name_${name}`}
+              defaultValue={name ?? ''}
               placeholder='이름으로 검색'
               setSearchKeyword={name => {
-                setName(name)
-                setPage(0)
+                setQueryParams({ name: name, page: 0 })
               }}
               disabled={disabled}
             />
             {/* 현장명으로 검색 */}
             <SearchBar
+              key={`projectName_${projectName}`}
+              defaultValue={projectName ?? ''}
               placeholder='현장명으로 검색'
               setSearchKeyword={projectName => {
-                setProjectName(projectName)
-                setPage(0)
+                setQueryParams({ projectName: projectName, page: 0 })
               }}
               disabled={disabled}
             />
@@ -330,10 +295,8 @@ export default function EngineerPage() {
             handleRowClick={handleEngineerClick}
             page={page}
             pageSize={size}
-            sorting={sorting}
-            setSorting={setSorting}
-            loading={loading}
-            error={error}
+            loading={isLoading}
+            error={isError}
             showCheckBox={showCheckBox}
             isChecked={isChecked}
             handleCheckItem={handleCheckEngineer}
@@ -348,12 +311,11 @@ export default function EngineerPage() {
           count={totalCount}
           rowsPerPage={size}
           page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
+          onPageChange={(_, newPage) => setQueryParams({ page: newPage })}
           onRowsPerPageChange={event => {
             const newsize = parseInt(event.target.value, 10)
 
-            setSize(newsize)
-            setPage(0)
+            setQueryParams({ size: newsize, page: 0 })
           }}
           disabled={disabled}
           showFirstButton
@@ -373,7 +335,7 @@ export default function EngineerPage() {
 
       {/* 모달들 */}
       {addUserModalOpen && (
-        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} reloadPage={() => getFilteredData()} />
+        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} reloadPage={() => refetch()} />
       )}
       {userDetailModalOpen && selectedUser && (
         <UserModal
@@ -381,7 +343,7 @@ export default function EngineerPage() {
           setOpen={setUserDetailModalOpen}
           data={selectedUser}
           setData={setSelectedUser}
-          reloadData={() => getFilteredData()}
+          reloadData={() => refetch()}
         />
       )}
     </>
