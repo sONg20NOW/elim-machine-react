@@ -80,7 +80,7 @@ type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
   selectedUserData: MemberDetailResponseDtoType
-  reloadData?: () => void
+  reloadData?: (offset?: number) => void
 }
 
 export const MemberIdContext = createContext<number>(0)
@@ -133,7 +133,7 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
 
         console.log(`memberId: ${memberId} user is deleted successfully`)
         handleSuccess('해당 직원이 삭제되었습니다.')
-        setOpen(false)
+        handleClose(-1)
       } catch (error) {
         handleApiError(error)
       }
@@ -145,7 +145,6 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
   const onDeleteUserConfirm = async () => {
     try {
       await handleDeleteUser()
-      reloadData && reloadData()
     } catch (error: any) {
       toast.error(`${error.message}`)
     }
@@ -181,7 +180,6 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           }
 
           setIsEditing(false)
-          reloadData && reloadData()
           break
         case '2':
           const newPrivacy = await mutatePrivacyAsync(editData.memberPrivacyResponseDto)
@@ -190,7 +188,6 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           console.log(`${requestInfo.value} info saved: `, newPrivacy)
           handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
           setIsEditing(false)
-          reloadData && reloadData()
           break
         case '3':
           const newOffice = await mutateOfficeAsync(editData.memberOfficeResponseDto)
@@ -199,7 +196,6 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           console.log(`${requestInfo.value} info saved: `, newOffice)
           handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
           setIsEditing(false)
-          reloadData && reloadData()
           break
         case '4':
           const newCareer = await mutateCareerAsync(editData.memberCareerResponseDto)
@@ -208,7 +204,6 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           console.log(`${requestInfo.value} info saved: `, newCareer)
           handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
           setIsEditing(false)
-          reloadData && reloadData()
           break
         case '5':
           const newEtc = await mutateEtcAsync(editData.memberEtcResponseDto)
@@ -217,7 +212,6 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           console.log(`${requestInfo.value} info saved: `, newEtc)
           handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
           setIsEditing(false)
-          reloadData && reloadData()
           break
         default:
           break
@@ -229,16 +223,21 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
     }
   }
 
+  function handleClose(offset?: number) {
+    reloadData && reloadData(offset)
+    setOpen(false)
+  }
+
   return (
     <MemberIdContext.Provider value={memberId ?? 0}>
       <DefaultModal
         value={tabValue}
         onClose={() => {
           if (existChange) {
-            setOnQuit(() => () => setOpen(false))
+            setOnQuit(handleClose)
             setShowAlertModal(true)
           } else {
-            setOpen(false)
+            handleClose()
           }
         }}
         open={open}
@@ -264,7 +263,16 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
           )
         }
         modifyButton={
-          <>
+          isYours ? (
+            <Button
+              color='warning'
+              onClick={() => {
+                toast.warning('곧 추가될 기능입니다')
+              }}
+            >
+              비밀번호 변경
+            </Button>
+          ) : (
             <Button
               variant='contained'
               color='error'
@@ -275,17 +283,7 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
             >
               삭제
             </Button>
-            {isYours && (
-              <Button
-                color='warning'
-                onClick={() => {
-                  toast.warning('곧 추가될 기능입니다')
-                }}
-              >
-                비밀번호 변경
-              </Button>
-            )}
-          </>
+          )
         }
         secondaryButton={
           isEditing ? (
@@ -305,7 +303,7 @@ const UserModal = ({ open, setOpen, selectedUserData, reloadData }: EditUserInfo
               취소
             </Button>
           ) : (
-            <Button variant='contained' color='secondary' onClick={() => setOpen(false)}>
+            <Button variant='contained' color='secondary' onClick={() => handleClose()}>
               닫기
             </Button>
           )

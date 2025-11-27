@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useContext, useRef } from 'react'
+import { useState, useCallback, useContext } from 'react'
 
 // MUI Imports
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -13,6 +13,8 @@ import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
 import { IconReload } from '@tabler/icons-react'
+
+import { useQueryClient } from '@tanstack/react-query'
 
 import CustomTextField from '@core/components/mui/TextField'
 
@@ -38,7 +40,9 @@ export default function MemberPage() {
 
   const isTablet = useContext(isTabletContext)
 
-  const { data: membersPages, refetch, isLoading, isError } = useGetMembers(searchParams.toString())
+  const queryClient = useQueryClient()
+
+  const { data: membersPages, refetch: refetchPages, isLoading, isError } = useGetMembers(searchParams.toString())
 
   const data = membersPages?.content ?? []
 
@@ -61,24 +65,6 @@ export default function MemberPage() {
   // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<{ memberId: number; version: number }[]>([])
-
-  // 모달 닫힐 때마다 목록 새로 고침
-  const firstRender = useRef(true)
-  const openModal = addUserModalOpen || userDetailModalOpen
-
-  useEffect(() => {
-    if (firstRender.current) {
-      return
-    }
-
-    if (!openModal) {
-      refetch()
-    }
-  }, [openModal, refetch])
-
-  useEffect(() => {
-    firstRender.current = false
-  }, [])
 
   // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
   const updateParams = useCallback(
@@ -120,6 +106,36 @@ export default function MemberPage() {
       filterKeys.forEach(v => params.delete(v))
     })
   }, [updateParams])
+
+  const getLastPageAfter = useCallback(
+    (offset: number) => {
+      return Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
+    },
+    [totalCount, size]
+  )
+
+  const adjustPage = useCallback(
+    (offset = 0) => {
+      const lastPageAfter = getLastPageAfter(offset)
+
+      if (offset > 0 || page > lastPageAfter) {
+        setQueryParams({ page: lastPageAfter })
+      }
+    },
+    [getLastPageAfter, page, setQueryParams]
+  )
+
+  const handleRemoveQueries = useCallback(() => {
+    refetchPages()
+
+    queryClient.removeQueries({
+      predicate(query) {
+        const key = query.queryKey
+
+        return Array.isArray(key) && key[0] === 'GET_MEMBERS' && key[1] !== searchParams.toString() // 스크롤 유지를 위해 현재 data는 refetch, 나머지는 캐시 지우기
+      }
+    })
+  }, [refetchPages, queryClient, searchParams])
 
   // 사용자 선택 핸들러 (디테일 모달)
   const handleUserClick = async (user: MemberPageDtoType) => {
@@ -181,11 +197,11 @@ export default function MemberPage() {
         data: { memberDeleteRequestDtos: checked }
       })
 
-      setQueryParams({ page: 0 })
-      refetch()
-      handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
+      adjustPage(-1 * checked.length)
+      handleRemoveQueries()
       setShowCheckBox(false)
       setChecked([])
+      handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
     } catch (error) {
       handleApiError(error)
     }
@@ -270,7 +286,7 @@ export default function MemberPage() {
               </Button>
             ) : (
               <div className='flex gap-1'>
-                <Button variant='contained' color='error' onClick={() => handleDeleteUsers()}>
+                <Button variant='contained' color='error' onClick={handleDeleteUsers}>
                   {`(${checked.length}) 삭제`}
                 </Button>
                 <Button
@@ -349,7 +365,10 @@ export default function MemberPage() {
         <AddUserModal
           open={addUserModalOpen}
           setOpen={setAddUserModalOpen}
-          handlePageChange={() => setQueryParams({ page: 0 })}
+          handlePageChange={() => {
+            adjustPage(1)
+            handleRemoveQueries()
+          }}
         />
       )}
       {userDetailModalOpen && selectedUser && (
@@ -357,7 +376,10 @@ export default function MemberPage() {
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           selectedUserData={selectedUser}
-          reloadData={() => refetch()}
+          reloadData={(offset = 0) => {
+            adjustPage(offset)
+            handleRemoveQueries()
+          }}
         />
       )}
     </>
