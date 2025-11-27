@@ -46,6 +46,7 @@ import type {
   MemberDetailResponseDtoType,
   MemberEtcDtoType,
   MemberOfficeDtoType,
+  MemberPageDtoType,
   MemberPrivacyDtoType,
   PipeMeasurementResponseDtoType,
   successResponseDtoType,
@@ -859,13 +860,19 @@ export const useGetEngineers = (queryParams: string) => {
   > = useCallback(async data => {
     const [keyType, queryParams] = data.queryKey
 
+    const params = new URLSearchParams(queryParams)
+
+    if (!params.has('size')) {
+      params.set('size', '15')
+    }
+
     const response = await auth
       .get<{
         data: successResponseDtoType<MachineEngineerPageResponseDtoType[]>
-      }>(`/api/engineers?${queryParams}`)
+      }>(`/api/engineers?${params}`)
       .then(v => v.data.data)
 
-    console.log(`!!! queryFn ${keyType} ${queryParams}:`, response)
+    console.log(`!!! queryFn ${keyType} ${params}:`, response)
 
     return response
   }, [])
@@ -905,6 +912,35 @@ export const useGetEngineerByMemberId = (memberId: string) => {
 }
 
 // ------------------------- Member 관련 -------------------------
+// GET /api/members
+export const useGetMembers = (queryParams: string) => {
+  const fetchMembers: QueryFunction<successResponseDtoType<MemberPageDtoType[]>, string[]> = useCallback(async data => {
+    const [keyType, queryParams] = data.queryKey
+
+    const params = new URLSearchParams(queryParams)
+
+    if (!params.has('size')) {
+      params.set('size', '15')
+    }
+
+    const response = await auth
+      .get<{
+        data: successResponseDtoType<MemberPageDtoType[]>
+      }>(`/api/members?${params}`)
+      .then(v => v.data.data)
+
+    console.log(`!!! queryFn ${keyType} ${params}:`, response)
+
+    return response
+  }, [])
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MEMBER.GET_MEMBERS(queryParams),
+    queryFn: fetchMembers,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
 export const useGetSingleMember = (memberId: string) => {
   const fetchMember: QueryFunction<MemberDetailResponseDtoType, string[]> = useCallback(
     async data => {

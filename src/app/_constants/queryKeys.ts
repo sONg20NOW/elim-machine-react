@@ -67,7 +67,8 @@ export const QUERY_KEYS = {
     GET_MACHINE_PROJECTS: (queryParams: string) => ['GET_MACHINE_PROJECTS', queryParams]
   },
   MEMBER: {
-    GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId]
+    GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId],
+    GET_MEMBERS: (queryParams: string) => ['GET_MEMBERS', queryParams]
   },
   MACHINE_PERFORMANCE_REVIEW: {
     GET_RESULT_SUMMARY: (machineProjectId: string) => ['GET_RESULT_SUMMARY', machineProjectId],
