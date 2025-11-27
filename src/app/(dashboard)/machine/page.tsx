@@ -65,13 +65,13 @@ export default function MachinePage() {
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
 
   const {
-    data: machineProjectsPage,
+    data: machineProjectsPages,
     refetch: refetchMachineProjects,
     isLoading,
     isError
   } = useGetMachineProjects(searchParams.toString())
 
-  const machineProjects = machineProjectsPage?.content ?? []
+  const machineProjects = machineProjectsPages?.content ?? []
 
   const { data: engineers, isLoading: isLoadingEngineerList, isError: isErrorEngineerList } = useGetEngineersOptions()
 
@@ -79,7 +79,7 @@ export default function MachinePage() {
   const error = isError || isErrorEngineerList
   const disabled = loading || error
 
-  const totalCount = machineProjectsPage?.page.totalElements ?? 0
+  const totalCount = machineProjectsPages?.page.totalElements ?? 0
 
   const MACHINE_FILTER_INFO_WITH_ENGINEERS = useMemo(
     () => ({
