@@ -80,6 +80,7 @@ export const QUERY_KEYS = {
     GET_AGING: (machineProjectId: string) => ['GET_AGING', machineProjectId]
   },
   LICENSE: {
-    GET_LICENSES_NAMES: ['GET_LICENSES_NAMES']
+    GET_LICENSES_NAMES: ['GET_LICENSES_NAMES'],
+    GET_LICENSES: (queryParams: string) => ['GET_LICENSES', queryParams]
   }
 }

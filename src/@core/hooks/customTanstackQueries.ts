@@ -13,6 +13,7 @@ import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임
 import type {
   EngineerBasicResponseDtoType,
   GasMeasurementResponseDtoType,
+  LicensePageResponseDtoType,
   MachineCategoryResponseDtoType,
   MachineEnergyTypeResponseDtoType,
   MachineEngineerOptionResponseDtoType,
@@ -73,6 +74,31 @@ export const useGetLicenseNames = () => {
       return response
     },
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/licenses
+export const useGetLicenses = (queryParams: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.LICENSE.GET_LICENSES(queryParams),
+    queryFn: async data => {
+      const [keyType, queryParams] = data.queryKey
+      const params = new URLSearchParams(queryParams)
+
+      if (!params.has('size')) {
+        params.set('size', '15')
+      }
+
+      const response = await auth
+        .get<{
+          data: successResponseDtoType<LicensePageResponseDtoType[]>
+        }>(`/api/licenses?${params}`)
+        .then(v => v.data.data)
+
+      console.log(`!!! queryFn ${keyType} in ${params}:`, response)
+
+      return response
+    }
   })
 }
 
