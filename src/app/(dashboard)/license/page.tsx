@@ -53,7 +53,7 @@ export default function Licensepage() {
 
   const [selectedData, setSelectedData] = useState<LicenseResponseDtoType>()
 
-  // 선택 삭제 기능 관련
+  // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<Set<number>>(new Set([]))
 

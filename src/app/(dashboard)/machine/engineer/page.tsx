@@ -67,7 +67,7 @@ export default function EngineerPage() {
 
   const [selectedUser, setSelectedUser] = useState<EngineerResponseDtoType>()
 
-  // 선택 삭제 기능 관련
+  // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<{ engineerId: number; version: number }[]>([])
 
@@ -253,7 +253,7 @@ export default function EngineerPage() {
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
               <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-                선택 삭제
+                선택삭제
               </Button>
             ) : (
               <div className='flex gap-1'>

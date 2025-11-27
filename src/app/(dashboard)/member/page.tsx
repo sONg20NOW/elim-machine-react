@@ -58,7 +58,7 @@ export default function MemberPage() {
 
   const { data: selectedUser } = useGetSingleMember(memberId.toString())
 
-  // 선택 삭제 기능 관련
+  // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<{ memberId: number; version: number }[]>([])
 
@@ -181,8 +181,7 @@ export default function MemberPage() {
         data: { memberDeleteRequestDtos: checked }
       })
 
-      // ! 동작 맞는지 점검
-      resetQueryParams()
+      setQueryParams({ page: 0 })
       refetch()
       handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
       setShowCheckBox(false)
@@ -269,7 +268,7 @@ export default function MemberPage() {
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
               <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-                선택 삭제
+                선택삭제
               </Button>
             ) : (
               <div className='flex gap-1'>
