@@ -3,7 +3,7 @@ import type {
   MachineEngineerPageResponseDtoType,
   SortInfoType,
   MachineProjectPageDtoType,
-  memberPageDtoType,
+  MemberPageDtoType,
   LicensePageResponseDtoType,
   MachineInspectionPageResponseDtoType
 } from '../../../@core/types'
@@ -25,7 +25,7 @@ export const HEADERS = {
     joinDate: { label: '입사일', canSort: true, hideOnTablet: true },
     careerYear: { label: '근속년수', canSort: true, hideOnTablet: true },
     memberStatusDescription: { label: '상태', canSort: false, hideOnTablet: true }
-  } as Record<keyof memberPageDtoType, HeaderInfoType>,
+  } as Record<keyof MemberPageDtoType, HeaderInfoType>,
   machine: {
     projectStatusDescription: { label: '상태', canSort: false },
     region: { label: '지역', canSort: false },

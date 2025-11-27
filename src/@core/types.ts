@@ -81,7 +81,7 @@ export interface MemberCreateRequestDtoType {
 }
 
 // GET api/members (리스트)
-export type memberPageDtoType = {
+export type MemberPageDtoType = {
   memberId: number
   version: number
   roleDescription: string
