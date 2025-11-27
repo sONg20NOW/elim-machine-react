@@ -6,6 +6,8 @@ import Button from '@mui/material/Button'
 
 import { DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
 
+import { toast } from 'react-toastify'
+
 import type { MachineProjectCreateRequestDtoType } from '@/@core/types'
 import { MachineProjectInitialData } from '@/app/_constants/MachineProjectSeed'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
@@ -26,6 +28,12 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
 
   const onSubmitHandler = async () => {
     try {
+      if (newData.machineProjectName === '') {
+        toast.error('현장명은 필수입력입니다.')
+
+        return
+      }
+
       setLoading(true)
       const response = await auth.post<{ data: MachineProjectCreateRequestDtoType }>(`/api/machine-projects`, newData)
 
@@ -79,7 +87,9 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
                     >
                       <span>
                         {MACHINE_CREATE_INFO[key]?.label}
-                        {key === 'companyName' && <sup style={{ fontSize: '16px', color: 'red' }}>*</sup>}
+                        {(key === 'companyName' || key === 'machineProjectName') && (
+                          <sup style={{ fontSize: '16px', color: 'red' }}>*</sup>
+                        )}
                       </span>
                     </TableCell>
                     <TableCell>
