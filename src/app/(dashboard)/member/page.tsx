@@ -382,8 +382,8 @@ export default function MemberPage() {
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           selectedUserData={selectedUser}
-          adjustPage={adjustPage}
-          removeQueryCaches={removeQueryCaches}
+          onDelete={() => adjustPage(-1)}
+          reloadPages={removeQueryCaches}
         />
       )}
     </>

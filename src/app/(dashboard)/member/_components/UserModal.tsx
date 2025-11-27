@@ -80,13 +80,13 @@ type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
   selectedUserData: MemberDetailResponseDtoType
-  adjustPage?: (offset?: number) => void
-  removeQueryCaches?: () => void
+  onDelete?: () => void
+  reloadPages?: () => void
 }
 
 export const MemberIdContext = createContext<number>(0)
 
-const UserModal = ({ open, setOpen, selectedUserData, adjustPage, removeQueryCaches }: EditUserInfoProps) => {
+const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: EditUserInfoProps) => {
   const changedEvenOnce = useRef(false)
 
   const [tabValue, setTabValue] = useState<tabType>('1')
@@ -98,7 +98,7 @@ const UserModal = ({ open, setOpen, selectedUserData, adjustPage, removeQueryCac
 
   const [loading, setLoading] = useState(false)
 
-  const [onQuit, setOnQuit] = useState<() => void>()
+  const onQuit = useRef<() => void>()
 
   // 수정사항 여부
   const existChange = JSON.stringify(editData) !== JSON.stringify(selectedUserData)
@@ -136,7 +136,7 @@ const UserModal = ({ open, setOpen, selectedUserData, adjustPage, removeQueryCac
 
         console.log(`memberId: ${memberId} user is deleted successfully`)
         handleSuccess('해당 직원이 삭제되었습니다.')
-        adjustPage && adjustPage(-1)
+        onDelete && onDelete()
         onClose()
       } catch (error) {
         handleApiError(error)
@@ -232,16 +232,16 @@ const UserModal = ({ open, setOpen, selectedUserData, adjustPage, removeQueryCac
   // 실제로 창이 닫힐 때 동작하는 함수
   const onClose = useCallback(() => {
     if (changedEvenOnce.current) {
-      removeQueryCaches && removeQueryCaches()
+      reloadPages && reloadPages()
     }
 
     setOpen(false)
-  }, [setOpen, removeQueryCaches])
+  }, [setOpen, reloadPages])
 
   // 창을 닫으려 할 때 동작하는 함수 - 변경사항이 있으면 경고창 출력
   const handleClose = useCallback(() => {
     if (existChange) {
-      setOnQuit(() => onClose)
+      onQuit.current = onClose
       setShowAlertModal(true)
     } else {
       onClose()
@@ -306,7 +306,7 @@ const UserModal = ({ open, setOpen, selectedUserData, adjustPage, removeQueryCac
               type='reset'
               onClick={() => {
                 if (existChange) {
-                  setOnQuit(undefined)
+                  onQuit.current = undefined
                   setShowAlertModal(true)
                 } else {
                   setIsEditing(false)
@@ -373,7 +373,7 @@ const UserModal = ({ open, setOpen, selectedUserData, adjustPage, removeQueryCac
           setEditData={setEditData}
           setIsEditing={setIsEditing}
           originalData={selectedUserData}
-          onQuit={onQuit}
+          onQuit={onQuit.current}
         />
       )}
     </MemberIdContext.Provider>
