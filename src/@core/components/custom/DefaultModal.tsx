@@ -16,6 +16,7 @@ import TabContext from '@mui/lab/TabContext'
 import { DialogContent, Divider, IconButton, Typography } from '@mui/material'
 import classNames from 'classnames'
 import type { TransitionProps } from '@mui/material/transitions'
+import { IconX } from '@tabler/icons-react'
 
 type DefaultModalProps = {
   size?: 'xs' | 'sm' | 'md' | 'lg'
@@ -82,7 +83,7 @@ export default function DefaultModal({
           color: theme.palette.grey[500]
         })}
       >
-        <i className='tabler-x' />
+        <IconX />
       </IconButton>
 
       {/* 수정/삭제 버튼 */}
