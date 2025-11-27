@@ -27,8 +27,9 @@ export default function TableFilter<T>({ filterInfo, disabled }: TableFilterProp
   const setSearchParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams)
 
-    params.set('page', '0')
-    params.set(key, value)
+    params.delete('page')
+    if (value !== '') params.set(key, value)
+    else params.delete(key)
 
     router.replace(pathname + '?' + params.toString())
   }
