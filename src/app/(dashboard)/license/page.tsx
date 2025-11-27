@@ -1,19 +1,25 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 // MUI Imports
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
+import { IconReload } from '@tabler/icons-react'
+
+import { Typography } from '@mui/material'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import type { LicensePageResponseDtoType, LicenseResponseDtoType, successResponseDtoType } from '@/@core/types'
-import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
+import type { LicensePageResponseDtoType, LicenseResponseDtoType } from '@/@core/types'
+import { HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
@@ -21,32 +27,25 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AddModal from './_components/AddLicenseModal'
 import DetailModal from './_components/DetailModal'
 import { auth } from '@/lib/auth'
+import { useGetLicenses } from '@/@core/hooks/customTanstackQueries'
 
 export default function Licensepage() {
-  // 데이터 리스트
-  const [data, setData] = useState<LicensePageResponseDtoType[]>([])
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
 
-  // 로딩 시도 중 = true, 로딩 끝 = false
-  const [loading, setLoading] = useState(false)
+  const { data: licensesPages, refetch, isLoading, isError } = useGetLicenses(searchParams.toString())
 
-  // 에러 발생 시 true
-  const [error, setError] = useState(false)
+  const data = licensesPages?.content ?? []
 
-  // 로딩이 끝나고 에러가 없으면 not disabled
-  const disabled = loading || error
+  const disabled = isLoading || isError
 
-  // 전체 데이터 개수 => fetching한 데이터에서 추출
-  const [totalCount, setTotalCount] = useState(0)
+  const totalCount = licensesPages?.page.totalElements ?? 0
 
-  // 업체명 검색 인풋
-  const [companyName, setCompanyName] = useState('')
-
-  // 업체명 검색 인풋
-  const [region, setRegion] = useState('')
-
-  // 페이지네이션 관련
-  const [page, setPage] = useState(0)
-  const [size, setSize] = useState(DEFAULT_PAGESIZE)
+  const page = Number(searchParams.get('page') ?? 0)
+  const size = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)
+  const companyName = searchParams.get('companyName')
+  const region = searchParams.get('region')
 
   // 모달 관련 상태
   const [addModalOpen, setAddModalOpen] = useState(false)
@@ -54,59 +53,46 @@ export default function Licensepage() {
 
   const [selectedData, setSelectedData] = useState<LicenseResponseDtoType>()
 
-  // 정렬 상태
-  const [sorting, setSorting] = useState(createInitialSorting<LicensePageResponseDtoType>)
-
   // 선택 삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<Set<number>>(new Set([]))
 
-  // 데이터 페치에 사용되는 쿼리 URL
+  // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
+  const updateParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams)
 
-  // 라이선스 리스트 호출 API 함수
-  const getFilteredData = useCallback(async () => {
-    setLoading(true)
-    setError(false)
-    const queryParams = new URLSearchParams()
+      updater(params)
+      router.replace(pathname + '?' + params.toString())
+    },
+    [router, pathname, searchParams]
+  )
 
-    try {
-      // 정렬
-      sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
+  type paramType = 'page' | 'size' | 'companyName' | 'region'
 
-      // 업체명 검색
-      companyName ? queryParams.set('companyName', companyName) : queryParams.delete('companyName')
+  const setQueryParams = useCallback(
+    (pairs: Partial<Record<paramType, string | number>>) => {
+      if (!pairs) return
 
-      // 지역 검색
-      region ? queryParams.set('region', region) : queryParams.delete('region')
+      updateParams(params => {
+        Object.entries(pairs).forEach(([key, value]) => {
+          const t_key = key as paramType
 
-      // 페이지 설정
-      queryParams.set('page', page.toString())
-      queryParams.set('size', size.toString())
+          params.set(t_key, value.toString())
+        })
+      })
+    },
+    [updateParams]
+  )
 
-      // axios GET 요청
-      const response = await auth.get<{ data: successResponseDtoType<LicensePageResponseDtoType[]> }>(
-        `/api/licenses?${queryParams.toString()}`
-      )
-
-      const result = response.data.data
-
-      // 상태 업데이트
-      setData(result.content ?? [])
-      setPage(result.page.number)
-      setSize(result.page.size)
-      setTotalCount(result.page.totalElements)
-    } catch (error: any) {
-      handleApiError(error, '데이터 조회에 실패했습니다.')
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [sorting, page, size, companyName, region])
-
-  // 함수 변경 시 API 호출
-  useEffect(() => {
-    getFilteredData()
-  }, [getFilteredData])
+  const resetQueryParams = useCallback(() => {
+    updateParams(params => {
+      params.delete('page')
+      params.delete('companyName')
+      params.delete('region')
+      params.delete('sort')
+    })
+  }, [updateParams])
 
   // 라이선스 선택 핸들러
   const handleLicenseClick = async (licenseData: LicensePageResponseDtoType) => {
@@ -179,10 +165,11 @@ export default function Licensepage() {
         data: { licenseDeleteRequestDtos: list }
       })
 
-      handleSuccess('선택된 라이선스들이 성공적으로 삭제되었습니다.')
-      getFilteredData()
+      setQueryParams({ page: 0 })
+      refetch()
       setChecked(new Set([]))
       setShowCheckBox(false)
+      handleSuccess('선택된 라이선스들이 성공적으로 삭제되었습니다.')
     } catch (error) {
       handleApiError(error)
     }
@@ -190,27 +177,28 @@ export default function Licensepage() {
 
   return (
     <>
-      <Card className='h-full flex flex-col'>
+      <Card className='relative h-full flex flex-col'>
         {/* 탭 제목 */}
-        <CardHeader title={`라이선스관리 (${totalCount})`} className='pbe-4' />
-        {/* <TableFilters<EngineerFilterType>
-          filterInfo={ENGINEER_FILTER_INFO}
-          filters={filters}
-          onFiltersChange={setFilters}
-          disabled={disabled}
-          setPage={setPage}
+        <CardHeader
+          title={
+            <div className='w-full flex justify-between items-center'>
+              <Typography variant='inherit'>{`라이선스관리 (${totalCount})`}</Typography>
+              {/* 필터 초기화 버튼 */}
+              <Button
+                startIcon={<IconReload />}
+                onClick={() => {
+                  resetQueryParams()
+                }}
+                className='max-sm:is-full'
+                disabled={disabled}
+              >
+                필터 초기화
+              </Button>
+            </div>
+          }
+          className='pbe-4'
         />
-        <Button
-          startIcon={<IconReload />}
-          onClick={() => {
-            setCompanyName('')
-            setRegion('')
-          }}
-          className='max-sm:is-full absolute right-8 top-8'
-          disabled={disabled}
-        >
-          필터 초기화
-        </Button>  */}
+
         <div className=' flex justify-between flex-col items-start sm:flex-row sm:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
           <div className='flex gap-2'>
             {/* 페이지당 행수 */}
@@ -219,8 +207,7 @@ export default function Licensepage() {
               select
               value={size.toString()}
               onChange={e => {
-                setSize(Number(e.target.value))
-                setPage(0)
+                setQueryParams({ page: 0, size: e.target.value })
               }}
               className='gap-[5px]'
               disabled={disabled}
@@ -240,29 +227,31 @@ export default function Licensepage() {
               ))}
             </CustomTextField>
             <SearchBar
+              key={`companyName_${companyName}`}
+              defaultValue={companyName ?? ''}
               placeholder='업체명으로 검색'
               setSearchKeyword={companyName => {
-                setCompanyName(companyName)
-                setPage(0)
+                setQueryParams({ page: 0, companyName: companyName })
               }}
               disabled={disabled}
             />
             <SearchBar
+              key={`region${region}`}
+              defaultValue={region ?? ''}
               className='hidden sm:flex'
               placeholder='지역으로 검색'
               setSearchKeyword={region => {
-                setRegion(region)
-                setPage(0)
+                setQueryParams({ page: 0, region: region })
               }}
               disabled={disabled}
             />
           </div>
 
-          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-2 sm:gap-10'>
+          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-2 sm:gap-4'>
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
               <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-                선택 삭제
+                선택삭제
               </Button>
             ) : (
               <div className='flex gap-1'>
@@ -302,10 +291,8 @@ export default function Licensepage() {
             handleRowClick={handleLicenseClick}
             page={page}
             pageSize={size}
-            sorting={sorting}
-            setSorting={setSorting}
-            loading={loading}
-            error={error}
+            loading={isLoading}
+            error={isError}
             showCheckBox={showCheckBox}
             isChecked={isChecked}
             handleCheckItem={handleCheckLicense}
@@ -320,12 +307,11 @@ export default function Licensepage() {
           count={totalCount}
           rowsPerPage={size}
           page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
+          onPageChange={(_, newPage) => setQueryParams({ page: newPage })}
           onRowsPerPageChange={event => {
-            const newsize = parseInt(event.target.value, 10)
+            const newSize = parseInt(event.target.value, 10)
 
-            setSize(newsize)
-            setPage(0)
+            setQueryParams({ page: 0, size: newSize })
           }}
           disabled={disabled}
           showFirstButton
@@ -344,14 +330,14 @@ export default function Licensepage() {
       </Card>
 
       {/* 모달들 */}
-      {addModalOpen && <AddModal open={addModalOpen} setOpen={setAddModalOpen} reloadPage={() => getFilteredData()} />}
+      {addModalOpen && <AddModal open={addModalOpen} setOpen={setAddModalOpen} reloadPage={() => refetch()} />}
       {detailModalOpen && selectedData && (
         <DetailModal
           open={detailModalOpen}
           setOpen={setDetailModalOpen}
           initialData={selectedData}
           setInitialData={setSelectedData}
-          reloadData={() => getFilteredData()}
+          reloadData={() => refetch()}
         />
       )}
     </>
