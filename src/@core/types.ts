@@ -227,6 +227,7 @@ export interface MemberFilterType {
   workForm: string
   gender: string
   foreignYn: string
+  birthMonth: string
 }
 
 // ----------- 기계설비현장 -----------

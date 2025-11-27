@@ -1,6 +1,6 @@
 import { MEMBER_INPUT_INFO } from '../input/MemberInputInfo'
 import type { InputFieldType, MemberFilterType } from '../../../@core/types'
-import { careerYearOption, genderOption } from '@/app/_constants/options'
+import { birthMonthOption, careerYearOption, genderOption } from '@/app/_constants/options'
 
 const { companyName, memberStatus } = MEMBER_INPUT_INFO.basic
 const { officePosition, officeDepartmentName, contractType, laborForm, workForm } = MEMBER_INPUT_INFO.office
@@ -25,5 +25,10 @@ export const MEMBER_FILTER_INFO: Record<keyof MemberFilterType, InputFieldType> 
     label: '근속년수',
     options: careerYearOption
   },
-  memberStatus: memberStatus!
+  memberStatus: memberStatus!,
+  birthMonth: {
+    type: 'multi',
+    label: '생일',
+    options: birthMonthOption
+  }
 }

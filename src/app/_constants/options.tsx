@@ -121,6 +121,11 @@ export const careerYearOption = [
   { value: '10', label: '10년차 이상' }
 ]
 
+export const birthMonthOption = Array.from({ length: 12 }, (_, i) => ({
+  value: `${i + 1}`,
+  label: `${i + 1}월 생일자`
+}))
+
 // machine - project
 export const projectStatusOption = [
   { value: 'CONTRACT_COMPLETED', label: '계약 완료' },
