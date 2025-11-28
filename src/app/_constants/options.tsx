@@ -8,6 +8,11 @@ import type {
   workFormType
 } from '@/@core/types'
 
+export const YNOption = [
+  { value: 'Y', label: '예' },
+  { value: 'N', label: '아니오' }
+]
+
 // member
 // 해당 옵션은 실제로 사용되지 않음. InputBox에서 실제 라이선스 리스트를 가져와서 사용하기 때문.
 export const companyNameOption = []
