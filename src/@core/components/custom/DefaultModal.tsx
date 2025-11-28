@@ -35,13 +35,12 @@ type DefaultModalProps = {
 }
 
 /**
- *
- * @param childeren
- * (optional) TabList, TabPanel
- * @param value
- * (optional) 몇번째 탭인지 알려주는 상태.
- * @returns
- * modal component 리턴.
+ * @param open *
+ * @param setOpen *
+ * @param title *
+ * @param childeren TabList, TabPanel
+ * @param value 몇번째 탭인지 알려주는 상태.
+ * @returns modal component 리턴.
  */
 export default function DefaultModal({
   size = 'md',
@@ -70,7 +69,7 @@ export default function DefaultModal({
       scroll='paper' // ✅ DialogContent 안에서만 스크롤
       closeAfterTransition={false}
       sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
-      TransitionProps={TransitionProps}
+      slotProps={{ transition: TransitionProps }}
     >
       {/* 닫기 버튼 */}
       <IconButton
