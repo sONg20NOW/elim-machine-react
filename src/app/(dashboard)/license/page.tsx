@@ -15,6 +15,8 @@ import { IconReload } from '@tabler/icons-react'
 
 import { Typography } from '@mui/material'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
@@ -34,7 +36,9 @@ export default function Licensepage() {
   const pathname = usePathname()
   const router = useRouter()
 
-  const { data: licensesPages, refetch, isLoading, isError } = useGetLicenses(searchParams.toString())
+  const queryClient = useQueryClient()
+
+  const { data: licensesPages, refetch: refetchPages, isLoading, isError } = useGetLicenses(searchParams.toString())
 
   const data = licensesPages?.content ?? []
 
@@ -150,6 +154,31 @@ export default function Licensepage() {
     return checked.has(license.licenseId)
   }
 
+  // offset만큼 요소수가 변화했을 때 valid한 페이지 param을 책임지는 함수
+  const adjustPage = useCallback(
+    (offset = 0) => {
+      const lastPageAfter = Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
+
+      if (offset > 0 || page > lastPageAfter) {
+        setQueryParams({ page: lastPageAfter })
+      }
+    },
+    [page, setQueryParams, totalCount, size]
+  )
+
+  // tanstack query cache 삭제 및 refetch
+  const removeQueryCaches = useCallback(() => {
+    refetchPages()
+
+    queryClient.removeQueries({
+      predicate(query) {
+        const key = query.queryKey
+
+        return Array.isArray(key) && key[0] === 'GET_LICENSES' && key[1] !== searchParams.toString() // 스크롤 유지를 위해 현재 data는 refetch, 나머지는 캐시 지우기
+      }
+    })
+  }, [refetchPages, queryClient, searchParams])
+
   // 여러 라이선스 한번에 삭제
   async function handleDeleteLicenses() {
     try {
@@ -165,8 +194,8 @@ export default function Licensepage() {
         data: { licenseDeleteRequestDtos: list }
       })
 
-      setQueryParams({ page: 0 })
-      refetch()
+      adjustPage(-1 * list.length)
+      removeQueryCaches()
       setChecked(new Set([]))
       setShowCheckBox(false)
       handleSuccess('선택된 라이선스들이 성공적으로 삭제되었습니다.')
@@ -330,14 +359,25 @@ export default function Licensepage() {
       </Card>
 
       {/* 모달들 */}
-      {addModalOpen && <AddModal open={addModalOpen} setOpen={setAddModalOpen} reloadPage={() => refetch()} />}
+      {addModalOpen && (
+        <AddModal
+          open={addModalOpen}
+          setOpen={setAddModalOpen}
+          reloadPage={() => {
+            adjustPage(1)
+            removeQueryCaches()
+          }}
+        />
+      )}
       {detailModalOpen && selectedData && (
         <DetailModal
           open={detailModalOpen}
           setOpen={setDetailModalOpen}
           initialData={selectedData}
           setInitialData={setSelectedData}
-          reloadData={() => refetch()}
+          reloadData={() => {
+            removeQueryCaches()
+          }}
         />
       )}
     </>
