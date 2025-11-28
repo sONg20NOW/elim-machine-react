@@ -6,6 +6,7 @@ import {
   AppBar,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -25,6 +26,7 @@ import { useGetEnergyTargets, useGetEnergyTypes, useGetEnergyUsages } from '@/@c
 import AddTargetModal from './AddTargetModal'
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { IconX } from '@tabler/icons-react'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -34,6 +36,8 @@ const StyledTab = styled(Tab)(({ theme }) => ({
 const defaultYears = [2023, 2024, 2025]
 const defaultMonths = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] as const
 
+const minHeight = '60dvh'
+
 export default function EnergyReport() {
   const params = useParams()
 
@@ -41,10 +45,13 @@ export default function EnergyReport() {
   const [value, setValue] = useState(0)
   const [years, setYears] = useState<number[]>(defaultYears)
 
-  const { data: energyTypes } = useGetEnergyTypes()
+  const { data: energyTypes, isLoading: isLoadingTypes } = useGetEnergyTypes()
   const currentEnergyType = energyTypes?.find(v => v.machineEnergyTypeId === value)
 
-  const { data: targets } = useGetEnergyTargets(`${params.id}`, `${currentEnergyType?.machineEnergyTypeId}`)
+  const { data: targets, isLoading: isLoadingTargets } = useGetEnergyTargets(
+    `${params.id}`,
+    `${currentEnergyType?.machineEnergyTypeId}`
+  )
 
   const { data: usages, refetch } = useGetEnergyUsages(
     `${params.id}`,
@@ -199,17 +206,22 @@ export default function EnergyReport() {
       >
         에너지 사용량
       </Button>
-      <Dialog maxWidth='xl' fullWidth open={open}>
-        <DialogTitle>
-          <div className='flex justify-between'>
-            <Typography variant='h3'>에너지 사용량</Typography>
-            <IconButton type='button' size='small' onClick={() => setOpen(false)}>
-              <i className='tabler-x' />
-            </IconButton>
-          </div>
-        </DialogTitle>
-        <DialogContent>
-          {currentEnergyType && targets ? (
+      {currentEnergyType && (
+        <Dialog maxWidth='xl' fullWidth open={open}>
+          <DialogTitle>
+            <div className='flex justify-between'>
+              <Typography variant='h3'>에너지 사용량</Typography>
+              <IconButton
+                sx={{ position: 'absolute', right: 5, top: 5 }}
+                type='button'
+                size='small'
+                onClick={() => setOpen(false)}
+              >
+                <IconX />
+              </IconButton>
+            </div>
+          </DialogTitle>
+          <DialogContent>
             <div className={`${styles.container} ${styles.centered} flex flex-col gap-4`}>
               <AppBar position='static' color='warning'>
                 <Tabs
@@ -228,131 +240,129 @@ export default function EnergyReport() {
                 <Typography variant='h4'>{currentEnergyType.name} 사용량</Typography>
                 <AddTargetModal machineEnergyTypeId={currentEnergyType.machineEnergyTypeId} />
               </div>
-              {targets.length > 0 ? (
-                <div className='flex'>
-                  <div className='grid place-items-center'>
-                    <IconButton onClick={movePreviousYear} type='button'>
-                      <i className='tabler-chevron-compact-left' />
-                    </IconButton>
-                  </div>
-                  <table style={{ tableLayout: 'fixed' }}>
-                    {/* year, target 헤더 */}
-                    <thead>
-                      <tr>
-                        <th rowSpan={2} colSpan={1}>
-                          월
-                        </th>
-                        {years.map(year => (
-                          <th colSpan={6} key={year}>
-                            {year}
-                          </th>
-                        ))}
-                      </tr>
-                      {/* target 이름칸 */}
-                      <tr>
-                        {years.map(year =>
-                          targets.map(target => (
-                            <td
-                              className='truncate'
-                              key={`${year} and ${target.machineEnergyTargetId}`}
-                              colSpan={6 / targets.length}
-                            >
-                              {target.name}
-                            </td>
-                          ))
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {/* 사용량 */}
-                      {new Array(12)
-                        .fill(1)
-                        .map((year, idx) => idx + 1)
-                        .map(month => (
-                          <tr key={month}>
-                            <td>{month}</td>
+              <div className={`grid place-items-center min-h-[${minHeight}]`}>
+                {isLoadingTargets || isLoadingTypes ? (
+                  <CircularProgress />
+                ) : (
+                  targets &&
+                  (targets.length > 0 ? (
+                    <div className='flex'>
+                      <div className='grid place-items-center'>
+                        <IconButton onClick={movePreviousYear} type='button'>
+                          <i className='tabler-chevron-compact-left' />
+                        </IconButton>
+                      </div>
+                      <table style={{ tableLayout: 'fixed' }}>
+                        {/* year, target 헤더 */}
+                        <thead>
+                          <tr>
+                            <th rowSpan={2} colSpan={1}>
+                              월
+                            </th>
+                            {years.map(year => (
+                              <th colSpan={6} key={year}>
+                                {year}
+                              </th>
+                            ))}
+                          </tr>
+                          {/* target 이름칸 */}
+                          <tr>
                             {years.map(year =>
                               targets.map(target => (
                                 <td
-                                  key={`${year}-${target.machineEnergyTargetId}-${month}`}
+                                  className='truncate'
+                                  key={`${year} and ${target.machineEnergyTargetId}`}
                                   colSpan={6 / targets.length}
                                 >
-                                  <NumericFormat
-                                    value={usage?.[year]?.[target.machineEnergyTargetId]?.[month] ?? 0}
-                                    thousandSeparator
-                                    customInput={TextField}
-                                    variant='standard'
-                                    onValueChange={v =>
-                                      handleChange(
-                                        year.toString(),
-                                        target.machineEnergyTargetId,
-                                        month.toString(),
-                                        Number(v.value) || 0
-                                      )
-                                    }
-                                    slotProps={{ htmlInput: { sx: { textAlign: 'center' } } }}
-                                  />
+                                  {target.name}
                                 </td>
                               ))
                             )}
                           </tr>
-                        ))}
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td>합계</td>
-                        {years.map(year =>
-                          targets.map(target => (
-                            <td
-                              colSpan={6 / targets.length}
-                              key={`sum-${year}-${target.machineEnergyTargetId}`}
-                              style={{ fontWeight: 'bold' }}
-                            >
-                              {new Intl.NumberFormat().format(totals?.[year]?.[target.machineEnergyTargetId] ?? 0)}
-                            </td>
-                          ))
-                        )}
-                      </tr>
-                    </tfoot>
-                  </table>
-                  <div className='grid place-items-center'>
-                    <IconButton type='button' onClick={moveNextYear}>
-                      <i className='tabler-chevron-compact-right' />
-                    </IconButton>
-                  </div>
-                </div>
-              ) : (
-                <div className='flex flex-col items-center gap-2'>
-                  <Typography color='warning.dark' variant='h5'>
-                    장소가 없습니다
-                  </Typography>
-                  <Typography>장소 관리에서 추가해주세요</Typography>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Box minHeight={'20dvh'} sx={{ display: 'grid', placeItems: 'center' }}>
-              <div className='flex flex-col items-center gap-2'>
-                <Typography color='error.main' variant='h5'>
-                  현재 에너지 타입을 찾을 수 없습니다
-                </Typography>
-                <Typography>관리자에게 문의해주세요</Typography>
+                        </thead>
+                        <tbody>
+                          {/* 사용량 */}
+                          {new Array(12)
+                            .fill(1)
+                            .map((year, idx) => idx + 1)
+                            .map(month => (
+                              <tr key={month}>
+                                <td>{month}</td>
+                                {years.map(year =>
+                                  targets.map(target => (
+                                    <td
+                                      key={`${year}-${target.machineEnergyTargetId}-${month}`}
+                                      colSpan={6 / targets.length}
+                                    >
+                                      <NumericFormat
+                                        value={usage?.[year]?.[target.machineEnergyTargetId]?.[month] ?? 0}
+                                        thousandSeparator
+                                        customInput={TextField}
+                                        variant='standard'
+                                        onValueChange={v =>
+                                          handleChange(
+                                            year.toString(),
+                                            target.machineEnergyTargetId,
+                                            month.toString(),
+                                            Number(v.value) || 0
+                                          )
+                                        }
+                                        slotProps={{ htmlInput: { sx: { textAlign: 'center' } } }}
+                                      />
+                                    </td>
+                                  ))
+                                )}
+                              </tr>
+                            ))}
+                        </tbody>
+                        <tfoot>
+                          <tr>
+                            <td>합계</td>
+                            {years.map(year =>
+                              targets.map(target => (
+                                <td
+                                  colSpan={6 / targets.length}
+                                  key={`sum-${year}-${target.machineEnergyTargetId}`}
+                                  style={{ fontWeight: 'bold' }}
+                                >
+                                  {new Intl.NumberFormat().format(totals?.[year]?.[target.machineEnergyTargetId] ?? 0)}
+                                </td>
+                              ))
+                            )}
+                          </tr>
+                        </tfoot>
+                      </table>
+                      <div className='grid place-items-center'>
+                        <IconButton type='button' onClick={moveNextYear}>
+                          <i className='tabler-chevron-compact-right' />
+                        </IconButton>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className='flex flex-col items-center gap-2'>
+                      <Typography color='warning.dark' variant='h5'>
+                        장소가 없습니다
+                      </Typography>
+                      <Typography>장소 관리에서 추가해주세요</Typography>
+                    </div>
+                  ))
+                )}
               </div>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button color='success' variant='contained' type='button' onClick={handleSave}>
-            저장
-          </Button>
-          {/* <Button color='info' variant='contained' type='button'>
+            </div>
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: 'center' }}>
+            <Button color='success' variant='contained' type='button' onClick={handleSave}>
+              저장
+            </Button>
+            {/* <Button color='info' variant='contained' type='button'>
             보고서 다운로드
           </Button> */}
-          <Button color='secondary' variant='contained' onClick={() => setOpen(false)} type='button'>
-            취소
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Button color='secondary' variant='contained' onClick={() => setOpen(false)} type='button'>
+              취소
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </>
   )
 }

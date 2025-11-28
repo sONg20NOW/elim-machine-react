@@ -25,6 +25,7 @@ import { handleApiError } from '@/utils/errorHandler'
 import InspectionPerformanceModal from './InspectionPerformanceModal'
 import type { MachineReportCategoryReadResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
 import ReloadButton from '../ReloadButton'
+import { IconX } from '@tabler/icons-react'
 
 export default function DownloadReportModal({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const machineProjectId = useParams().id?.toString()
@@ -92,7 +93,7 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
             보고서 다운로드
             {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
             <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
-              <i className='tabler-x' />
+              <IconX />
             </IconButton>
             <div className='flex items-center justify-between'>
               <DialogContentText>
