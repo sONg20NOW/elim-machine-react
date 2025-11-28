@@ -1068,15 +1068,15 @@ export const useMutateSingleMember = <
     onSuccess: data => {
       queryClient.setQueryData(queryKey, (prev: MemberDetailResponseDtoType) => ({
         ...prev,
-        [requestInfo.dtoKey]: data
+        [requestInfo.dtoKey]: { ...prev[requestInfo.dtoKey], ...data }
       }))
       console.log(`member ${memberType} info가 성공적으로 저장되었습니다.`)
     },
 
     onError: error => {
       console.error(error)
-      handleApiError(error)
-    }
+    },
+    throwOnError: true
   })
 }
 
