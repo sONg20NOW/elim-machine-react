@@ -122,6 +122,7 @@ export interface MemberBasicDtoType {
 }
 
 export interface MemberPrivacyDtoType {
+  memberId: number
   version: number
   foreignYn: ynResultType
   juminNum: string
@@ -168,6 +169,7 @@ export type laborFormType = 'RESIDENT' | 'NON_RESIDENT'
 export type workFormType = 'DEEMED' | 'SPECIAL'
 
 export interface MemberOfficeDtoType {
+  memberId: number
   version: number
   staffNum: string
   officeDepartmentId: number
@@ -188,6 +190,7 @@ export interface MemberOfficeDtoType {
 }
 
 export interface MemberCareerDtoType {
+  memberId: number
   grade: gradeType
   version: number
   jobField: string
@@ -197,6 +200,7 @@ export interface MemberCareerDtoType {
   industryOtherMonth: number
 }
 export interface MemberEtcDtoType {
+  memberId: number
   version: number
   youthJobLeap: string
   youthEmploymentIncentive: string
