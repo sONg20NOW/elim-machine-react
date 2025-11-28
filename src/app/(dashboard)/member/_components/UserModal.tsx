@@ -35,6 +35,9 @@ import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
 import BasicTabContent from './tabs/BasicTabContent'
 import PrivacyTabContent from './tabs/PrivacyTabContent'
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
+import TabContext from '@mui/lab/TabContext'
+import { IconX } from '@tabler/icons-react'
 
 export type refType = {
   handleSave: () => void
@@ -144,6 +147,7 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
         console.log(`memberId: ${memberId} user is deleted successfully`)
         handleSuccess('해당 직원이 삭제되었습니다.')
         onDelete && onDelete()
+        changedEvenOnce.current = true
         onClose()
       } catch (error) {
         handleApiError(error)
@@ -272,82 +276,87 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
 
   return (
     <MemberIdContext.Provider value={memberId ?? 0}>
-      <DefaultModal
-        value={tabValue}
-        onClose={handleClose}
-        open={open}
-        setOpen={setOpen}
-        title={selectedUserData?.memberBasicResponseDto?.name || '사용자 정보 수정'}
-        headerDescription={selectedUserData?.memberBasicResponseDto?.companyName || '사용자 정보 수정'}
-        primaryButton={
+      <Dialog onClose={handleClose} open={open} fullWidth maxWidth='md'>
+        <DialogTitle sx={{ position: 'relative' }}>
+          <div className='flex flex-col w-full grid place-items-center'>
+            <Typography variant='h3'>{selectedUserData?.memberBasicResponseDto?.name || '사용자 정보 수정'}</Typography>
+            <Typography variant='subtitle1'>{selectedUserData?.memberBasicResponseDto?.companyName || ''}</Typography>
+          </div>
+          <div className='absolute left-8 top-6'>
+            {isYours ? (
+              <Button
+                color='warning'
+                onClick={() => {
+                  toast.warning('곧 추가될 기능입니다')
+                }}
+              >
+                비밀번호 변경
+              </Button>
+            ) : (
+              <Button
+                variant='contained'
+                color='error'
+                type='reset'
+                onClick={() => {
+                  setShowDeleteModal(true)
+                }}
+              >
+                삭제
+              </Button>
+            )}
+          </div>
+          <IconButton type='button' onClick={handleClose} className='absolute right-4 top-4'>
+            <IconX />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <TabContext value={tabValue}>
+            <div className='h-[60dvh] flex flex-col'>
+              <TabList
+                centered
+                onChange={(event, newValue) => {
+                  setTabValue(newValue)
+                }}
+                aria-label='centered tabs example'
+              >
+                {Object.keys(requestRule).map(item => {
+                  const key = item as keyof typeof requestRule
+
+                  return <Tab key={key} value={key} label={requestRule[key].label} />
+                })}
+              </TabList>
+              <div className='flex-1 overflow-y-auto pt-5'>
+                <TabPanel value='1' keepMounted>
+                  {/* <MemberTabContent isEditing={true} tabName='basic' userData={editData} setUserData={setEditData} /> */}
+                  <BasicTabContent ref={basicTabRef} defaultData={editData.memberBasicResponseDto} />
+                </TabPanel>
+                <TabPanel value='2' keepMounted>
+                  <PrivacyTabContent ref={privacyTabRef} defaultData={editData.memberPrivacyResponseDto} />
+                  {/* <MemberTabContent isEditing={true} tabName='privacy' userData={editData} setUserData={setEditData} /> */}
+                </TabPanel>
+                <TabPanel value='3' keepMounted>
+                  <MemberTabContent isEditing={true} tabName='office' userData={editData} setUserData={setEditData} />
+                </TabPanel>
+                <TabPanel value='4' keepMounted>
+                  <MemberTabContent isEditing={true} tabName='career' userData={editData} setUserData={setEditData} />
+                </TabPanel>
+                <TabPanel value='5' keepMounted>
+                  <MemberTabContent isEditing={true} tabName='etc' userData={editData} setUserData={setEditData} />
+                </TabPanel>
+              </div>
+            </div>
+          </TabContext>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 10 }}>
           <Button variant='contained' onClick={onSubmitHandler} type='submit' color='success' disabled={loading}>
             저장
           </Button>
-        }
-        modifyButton={
-          isYours ? (
-            <Button
-              color='warning'
-              onClick={() => {
-                toast.warning('곧 추가될 기능입니다')
-              }}
-            >
-              비밀번호 변경
-            </Button>
-          ) : (
-            <Button
-              variant='contained'
-              color='error'
-              type='reset'
-              onClick={() => {
-                setShowDeleteModal(true)
-              }}
-            >
-              삭제
-            </Button>
-          )
-        }
-        secondaryButton={
           <Button variant='contained' color='secondary' onClick={handleClose}>
             닫기
           </Button>
-        }
-      >
-        <TabList
-          centered
-          onChange={(event, newValue) => {
-            if (getIsDirty()) {
-              setShowAlertModal(true)
-            } else {
-              setTabValue(newValue)
-            }
-          }}
-          aria-label='centered tabs example'
-        >
-          {Object.keys(requestRule).map(item => {
-            const key = item as keyof typeof requestRule
+        </DialogActions>
+      </Dialog>
 
-            return <Tab key={key} value={key} label={requestRule[key].label} />
-          })}
-        </TabList>
-        <TabPanel value='1' keepMounted>
-          {/* <MemberTabContent isEditing={true} tabName='basic' userData={editData} setUserData={setEditData} /> */}
-          <BasicTabContent ref={basicTabRef} defaultData={editData.memberBasicResponseDto} />
-        </TabPanel>
-        <TabPanel value='2' keepMounted>
-          <PrivacyTabContent ref={privacyTabRef} defaultData={editData.memberPrivacyResponseDto} />
-          {/* <MemberTabContent isEditing={true} tabName='privacy' userData={editData} setUserData={setEditData} /> */}
-        </TabPanel>
-        <TabPanel value='3' keepMounted>
-          <MemberTabContent isEditing={true} tabName='office' userData={editData} setUserData={setEditData} />
-        </TabPanel>
-        <TabPanel value='4' keepMounted>
-          <MemberTabContent isEditing={true} tabName='career' userData={editData} setUserData={setEditData} />
-        </TabPanel>
-        <TabPanel value='5' keepMounted>
-          <MemberTabContent isEditing={true} tabName='etc' userData={editData} setUserData={setEditData} />
-        </TabPanel>
-      </DefaultModal>
       {showDeleteModal && (
         <DeleteModal
           showDeleteModal={showDeleteModal}
