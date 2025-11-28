@@ -14,23 +14,12 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { toast } from 'react-toastify'
 
-import DefaultModal from '@/@core/components/custom/DefaultModal'
-import MemberTabContent from './memberTabContent'
-import type {
-  MemberBasicDtoType,
-  MemberCareerDtoType,
-  MemberEtcDtoType,
-  MemberOfficeDtoType,
-  MemberPrivacyDtoType,
-  MemberDetailResponseDtoType
-} from '@/@core/types'
+import type { MemberDetailResponseDtoType } from '@/@core/types'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
-import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
 import { auth } from '@/lib/auth'
 import type { MemberType } from '@/@core/hooks/customTanstackQueries'
-import { useMutateSingleMember } from '@/@core/hooks/customTanstackQueries'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
 import BasicTabContent from './tabs/BasicTabContent'
@@ -38,6 +27,9 @@ import PrivacyTabContent from './tabs/PrivacyTabContent'
 import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import { IconX } from '@tabler/icons-react'
+import OfficeTabContent from './tabs/OfficeTabContent'
+import CareerTabContent from './tabs/CareerTabContent'
+import EtcTabContent from './tabs/EtcTabContent'
 
 export type refType = {
   handleSave: () => void
@@ -130,10 +122,6 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
   const currentuserId = useCurrentUserStore(set => set.currentUser)?.memberId
   const isYours = selectedUserData.memberBasicResponseDto.memberId === currentuserId
 
-  const { mutateAsync: mutateOfficeAsync } = useMutateSingleMember<MemberOfficeDtoType>(memberId.toString(), 'office')
-  const { mutateAsync: mutateCareerAsync } = useMutateSingleMember<MemberCareerDtoType>(memberId.toString(), 'career')
-  const { mutateAsync: mutateEtcAsync } = useMutateSingleMember<MemberEtcDtoType>(memberId.toString(), 'etc')
-
   const handleDeleteUser = async () => {
     const version = editData.memberBasicResponseDto?.version
 
@@ -192,52 +180,20 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
         savedTabs.push('개인정보')
       }
 
-      switch (tabValue) {
-        // case '1':
-        //   const newBasic = await mutateBasicAsync(editData.memberBasicResponseDto)
-
-        //   setEditData({ ...editData, memberBasicResponseDto: newBasic })
-        //   console.log(`${requestInfo.value} info saved: `, newBasic)
-        //   handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
-
-        //   // 헤더에서 사용하는 정보 업데이트 (현재 로그인 중인 사용자의 정보라면)
-        //   if (currentUser && currentUser.memberId === newBasic.memberId) {
-        //     setCurrentUserName(newBasic.name)
-        //   }
-
-        //   break
-        // case '2':
-        //   const newPrivacy = await mutatePrivacyAsync(editData.memberPrivacyResponseDto)
-
-        //   setEditData({ ...editData, memberPrivacyResponseDto: newPrivacy })
-        //   console.log(`${requestInfo.value} info saved: `, newPrivacy)
-        //   handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
-        //   break
-        case '3':
-          const newOffice = await mutateOfficeAsync(editData.memberOfficeResponseDto)
-
-          setEditData({ ...editData, memberOfficeResponseDto: newOffice })
-          console.log(`${requestInfo.value} info saved: `, newOffice)
-          handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
-          break
-        case '4':
-          const newCareer = await mutateCareerAsync(editData.memberCareerResponseDto)
-
-          setEditData({ ...editData, memberCareerResponseDto: newCareer })
-          console.log(`${requestInfo.value} info saved: `, newCareer)
-          handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
-          break
-        case '5':
-          const newEtc = await mutateEtcAsync(editData.memberEtcResponseDto)
-
-          setEditData({ ...editData, memberEtcResponseDto: newEtc })
-          console.log(`${requestInfo.value} info saved: `, newEtc)
-          handleSuccess(`${requestInfo.label}가 수정되었습니다.`)
-          break
-        default:
-          break
+      if (officeTabRef.current?.dirty) {
+        officeTabRef.current.handleSave()
+        savedTabs.push('재직정보')
       }
 
+      if (careerTabRef.current?.dirty) {
+        careerTabRef.current.handleSave()
+        savedTabs.push('경력정보')
+      }
+
+      if (etcTabRef.current?.dirty) {
+        etcTabRef.current.handleSave()
+        savedTabs.push('기타정보')
+      }
       if (savedTabs.length > 0) {
         handleSuccess(`${savedTabs.join(', ')}가 수정되었습니다`)
 
@@ -276,7 +232,15 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
 
   return (
     <MemberIdContext.Provider value={memberId ?? 0}>
-      <Dialog onClose={handleClose} open={open} fullWidth maxWidth='md'>
+      <Dialog
+        onClose={(event, reason) => {
+          if (reason === 'backdropClick') return
+          handleClose()
+        }}
+        open={open}
+        fullWidth
+        maxWidth='md'
+      >
         <DialogTitle sx={{ position: 'relative' }}>
           <div className='flex flex-col w-full grid place-items-center'>
             <Typography variant='h3'>{selectedUserData?.memberBasicResponseDto?.name || '사용자 정보 수정'}</Typography>
@@ -335,13 +299,16 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
                   {/* <MemberTabContent isEditing={true} tabName='privacy' userData={editData} setUserData={setEditData} /> */}
                 </TabPanel>
                 <TabPanel value='3' keepMounted>
-                  <MemberTabContent isEditing={true} tabName='office' userData={editData} setUserData={setEditData} />
+                  <OfficeTabContent ref={officeTabRef} defaultData={editData.memberOfficeResponseDto} />
+                  {/* <MemberTabContent isEditing={true} tabName='office' userData={editData} setUserData={setEditData} /> */}
                 </TabPanel>
                 <TabPanel value='4' keepMounted>
-                  <MemberTabContent isEditing={true} tabName='career' userData={editData} setUserData={setEditData} />
+                  <CareerTabContent ref={careerTabRef} defaultData={editData.memberCareerResponseDto} />
+                  {/* <MemberTabContent isEditing={true} tabName='career' userData={editData} setUserData={setEditData} /> */}
                 </TabPanel>
                 <TabPanel value='5' keepMounted>
-                  <MemberTabContent isEditing={true} tabName='etc' userData={editData} setUserData={setEditData} />
+                  <EtcTabContent ref={etcTabRef} defaultData={editData.memberEtcResponseDto} />
+                  {/* <MemberTabContent isEditing={true} tabName='etc' userData={editData} setUserData={setEditData} /> */}
                 </TabPanel>
               </div>
             </div>

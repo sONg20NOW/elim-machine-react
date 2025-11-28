@@ -33,8 +33,7 @@ const BasicTabContent = forwardRef<refType, BasicTabContentProps>(({ defaultData
       email: defaultData.email ?? '',
       companyName: defaultData.companyName ?? '',
       memberStatus: defaultData.memberStatus ?? '',
-      note: defaultData.note ?? '',
-      version: defaultData.version
+      note: defaultData.note ?? ''
     }
   })
 
@@ -52,8 +51,7 @@ const BasicTabContent = forwardRef<refType, BasicTabContentProps>(({ defaultData
         email: newBasic.email ?? '',
         companyName: newBasic.companyName ?? '',
         memberStatus: newBasic.memberStatus ?? '',
-        note: newBasic.note ?? '',
-        version: newBasic.version
+        note: newBasic.note ?? ''
       })
 
       // 헤더에서 사용하는 정보 업데이트 (현재 로그인 중인 사용자의 정보라면)

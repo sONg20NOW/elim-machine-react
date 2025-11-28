@@ -9,7 +9,7 @@ interface MultiInputBoxProps<T extends Record<string, any>> {
   form: UseFormReturn<T, any, undefined>
   labelMap: Partial<Record<Path<T>, Partial<{ label: string; options: { label: string; value: string }[] }>>>
   name: Path<T>
-  yn?: boolean
+  disabled?: boolean
 }
 
 /**
@@ -18,29 +18,32 @@ interface MultiInputBoxProps<T extends Record<string, any>> {
  * @param name * form의 name
  * @param form * form
  * @param labelMap * INPUT_INFO
- * @param yn YN 여부
+ * @param diabled 선택 옵션
  */
 export default function MultiInputBox<T extends Record<string, any>>({
   column,
   form,
   labelMap,
   name,
-  yn = false
+  disabled = false
 }: MultiInputBoxProps<T>) {
   const label = labelMap[name]?.label ?? ''
-  const option = yn ? YNOption : labelMap[name]?.options
+  const option = name.includes('Yn') ? YNOption : labelMap[name]?.options
 
   const dirty = (form.formState.dirtyFields as any)[name]
 
   return (
     <Grid2 size={column}>
       <div className='flex flex-col w-full'>
-        <Typography {...(dirty && { color: 'primary.main' })}>{label}</Typography>
+        <Typography {...(dirty && { color: 'primary.main' })} {...(disabled && { color: 'lightgray' })}>
+          {label}
+        </Typography>
         <Controller
           name={name}
           control={form.control}
           render={({ field }) => (
             <TextField
+              disabled={disabled}
               size='small'
               value={field.value}
               onChange={field.onChange}

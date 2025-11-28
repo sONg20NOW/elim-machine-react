@@ -40,9 +40,7 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
       carYn: defaultData.carYn ?? '',
       carNumber: defaultData.carNumber ?? '',
       bankName: defaultData.bankName ?? '',
-      bankNumber: defaultData.bankNumber ?? '',
-
-      version: defaultData.version
+      bankNumber: defaultData.bankNumber ?? ''
     }
   })
 
@@ -73,9 +71,7 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
         carYn: newPrivacy.carYn ?? '',
         carNumber: newPrivacy.carNumber ?? '',
         bankName: newPrivacy.bankName ?? '',
-        bankNumber: newPrivacy.bankNumber ?? '',
-
-        version: newPrivacy.version
+        bankNumber: newPrivacy.bankNumber ?? ''
       })
 
       console.log('privacy 정보 수정 완료')
@@ -94,7 +90,7 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
   return (
     <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
       <Grid2 container spacing={3} columns={2} columnSpacing={5}>
-        <MultiInputBox yn name='foreignYn' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
+        <MultiInputBox name='foreignYn' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
         <TextInputBox name='juminNum' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
         <TextInputBox type='date' name='birthday' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
         <TextInputBox name='phoneNumber' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
@@ -109,7 +105,7 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
         <TextInputBox name='educationLevel' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
         <TextInputBox name='educationMajor' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
 
-        <MultiInputBox yn name='carYn' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
+        <MultiInputBox name='carYn' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
         <TextInputBox
           disabled={watchCarYn !== 'Y'}
           name='carNumber'
