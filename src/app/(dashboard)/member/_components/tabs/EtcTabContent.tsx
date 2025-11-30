@@ -10,7 +10,6 @@ import { useMutateSingleMember } from '@/@core/hooks/customTanstackQueries'
 import { handleApiError } from '@/utils/errorHandler'
 import type { refType } from '../UserModal'
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
 
 interface EtcTabContentProps {
   defaultData: MemberEtcDtoType

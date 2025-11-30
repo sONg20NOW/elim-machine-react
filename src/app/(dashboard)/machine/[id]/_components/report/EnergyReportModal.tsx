@@ -4,7 +4,6 @@ import { useParams } from 'next/navigation'
 
 import {
   AppBar,
-  Box,
   Button,
   CircularProgress,
   Dialog,
@@ -20,13 +19,14 @@ import {
 } from '@mui/material'
 import { NumericFormat } from 'react-number-format'
 
+import { IconX } from '@tabler/icons-react'
+
 import styles from '@/app/_style/Table.module.css'
 
 import { useGetEnergyTargets, useGetEnergyTypes, useGetEnergyUsages } from '@/@core/hooks/customTanstackQueries'
 import AddTargetModal from './AddTargetModal'
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { IconX } from '@tabler/icons-react'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',

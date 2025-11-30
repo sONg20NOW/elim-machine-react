@@ -14,6 +14,12 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { toast } from 'react-toastify'
 
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
+
+import TabContext from '@mui/lab/TabContext'
+
+import { IconX } from '@tabler/icons-react'
+
 import type { MemberDetailResponseDtoType } from '@/@core/types'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
@@ -24,9 +30,7 @@ import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
 import BasicTabContent from './tabs/BasicTabContent'
 import PrivacyTabContent from './tabs/PrivacyTabContent'
-import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
-import TabContext from '@mui/lab/TabContext'
-import { IconX } from '@tabler/icons-react'
+
 import OfficeTabContent from './tabs/OfficeTabContent'
 import CareerTabContent from './tabs/CareerTabContent'
 import EtcTabContent from './tabs/EtcTabContent'
@@ -167,7 +171,6 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
 
     try {
       setLoading(true)
-      const requestInfo = requestRule[tabValue]
       const savedTabs: string[] = []
 
       if (basicTabRef.current?.dirty) {
@@ -194,6 +197,7 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
         etcTabRef.current.handleSave()
         savedTabs.push('기타정보')
       }
+
       if (savedTabs.length > 0) {
         handleSuccess(`${savedTabs.join(', ')}가 수정되었습니다`)
 

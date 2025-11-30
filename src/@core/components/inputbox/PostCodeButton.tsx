@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 
-import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material'
-import { IconMap, IconMapPinFilled, IconSearch, IconX } from '@tabler/icons-react'
+import { Button, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material'
+import { IconMapPinFilled, IconSearch, IconX } from '@tabler/icons-react'
 
 interface PostCodeButtonProps {
   onChange: (value: string) => void

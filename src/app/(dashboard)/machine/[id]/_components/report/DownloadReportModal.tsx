@@ -18,6 +18,8 @@ import {
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 
+import { IconX } from '@tabler/icons-react'
+
 import style from '@/app/_style/Table.module.css'
 import { useGetReportCategories, useGetReportStatuses } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
@@ -25,7 +27,6 @@ import { handleApiError } from '@/utils/errorHandler'
 import InspectionPerformanceModal from './InspectionPerformanceModal'
 import type { MachineReportCategoryReadResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
 import ReloadButton from '../ReloadButton'
-import { IconX } from '@tabler/icons-react'
 
 export default function DownloadReportModal({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const machineProjectId = useParams().id?.toString()
