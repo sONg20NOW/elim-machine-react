@@ -8,13 +8,16 @@ import Button from '@mui/material/Button'
 
 import { DialogContent, Grid2 } from '@mui/material'
 
+import { useForm } from 'react-hook-form'
+
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@/@core/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
-import { MemberInitialData } from '@/app/_constants/MemberSeed'
-import { InputBox } from '@/@core/components/custom/InputBox'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
+import TextInputBox from '@/@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
+import { useGetLicenseNames } from '@/@core/hooks/customTanstackQueries'
 
 type AddUserModalProps = {
   open: boolean
@@ -23,13 +26,25 @@ type AddUserModalProps = {
 }
 
 const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) => {
-  const [userData, setUserData] = useState<MemberCreateRequestDtoType>(MemberInitialData)
   const [loading, setLoading] = useState(false)
 
-  const onSubmitHandler = async () => {
+  const { data: licenses } = useGetLicenseNames()
+  const companyNameOption = licenses?.map(v => ({ label: v.companyName, value: v.companyName }))
+
+  const form = useForm<MemberCreateRequestDtoType>({
+    defaultValues: {
+      companyName: '',
+      name: '',
+      memberStatus: '',
+      email: '',
+      note: ''
+    }
+  })
+
+  const onSubmitHandler = form.handleSubmit(async data => {
     try {
       setLoading(true)
-      const response = await auth.post<{ data: MemberCreateRequestDtoType }>(`/api/members`, userData)
+      const response = await auth.post<{ data: MemberCreateRequestDtoType }>(`/api/members`, data)
 
       console.log('new member added', response.data.data)
       handleSuccess('새 직원이 추가되었습니다.')
@@ -41,7 +56,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
     } finally {
       setLoading(false)
     }
-  }
+  })
 
   return (
     <DefaultModal
@@ -60,26 +75,19 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
       }
     >
       <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-        <Grid2 container spacing={3}>
-          {Object.keys(userData).map(property => {
-            const key = property as keyof typeof userData
-
-            return (
-              <InputBox
-                required={key === 'name' || key === 'email'}
-                key={key}
-                tabInfos={MEMBER_INPUT_INFO.basic}
-                tabFieldKey={key}
-                value={userData[key] ?? ''}
-                onChange={(value: string) => {
-                  setUserData({
-                    ...userData,
-                    [key]: value
-                  })
-                }}
-              />
-            )
-          })}
+        <Grid2 container spacing={3} columns={2}>
+          <TextInputBox form={form} name='name' labelMap={MEMBER_INPUT_INFO.basic} required />
+          <TextInputBox form={form} name='email' labelMap={MEMBER_INPUT_INFO.basic} required />
+          <MultiInputBox
+            form={form}
+            name='companyName'
+            labelMap={{
+              ...MEMBER_INPUT_INFO,
+              companyName: { ...MEMBER_INPUT_INFO.basic.companyName, options: companyNameOption }
+            }}
+          />
+          <MultiInputBox form={form} name='memberStatus' labelMap={MEMBER_INPUT_INFO.basic} />
+          <TextInputBox multiline column={2} form={form} name='note' labelMap={MEMBER_INPUT_INFO.basic} />
         </Grid2>
       </DialogContent>
     </DefaultModal>
