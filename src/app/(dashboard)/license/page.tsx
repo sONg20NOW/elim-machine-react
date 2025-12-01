@@ -378,8 +378,8 @@ export default function Licensepage() {
             }}
           />
         ) : (
-          <Backdrop open={isLoadingLicense}>
-            <CircularProgress />
+          <Backdrop open={isLoadingLicense} sx={theme => ({ zIndex: theme.zIndex.drawer + 1 })}>
+            <CircularProgress size={100} sx={{ color: 'white' }} />
           </Backdrop>
         ))}
     </>
