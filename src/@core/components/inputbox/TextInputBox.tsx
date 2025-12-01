@@ -54,9 +54,10 @@ export default function TextInputBox<T extends Record<string, any>>({
           {...(dirty && { color: 'primary.main' })}
           {...(error && { color: 'error.main' })}
           {...(disabled && { color: 'lightgray' })}
+          sx={{ position: 'relative', width: 'fit-content' }}
         >
           {label}
-          {required && <sup className='text-red-500'>*</sup>}
+          {required && <sup className='absolute right-0 translate-x-full text-red-500'>*</sup>}
         </Typography>
         <TextField
           disabled={disabled}
