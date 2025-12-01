@@ -226,7 +226,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     {
                       <MenuItem
                         onClick={() => handleRowClick(contextMenu.row)}
-                        sx={{ display: 'flex', alignItems: 'center' }}
+                        sx={{ display: 'flex', alignItems: 'center', px: 3 }}
                       >
                         {rightClickMenuHeader && (
                           <div className='flex gap-2'>
