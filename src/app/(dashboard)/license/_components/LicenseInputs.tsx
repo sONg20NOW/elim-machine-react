@@ -22,7 +22,7 @@ export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCre
   //   }
 
   return (
-    <div className='grid gap-8'>
+    <div className='grid gap-5'>
       <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
         <TextInputBox required form={form} name={'companyName'} labelMap={LICENSE_INPUT_INFO} />
         <TextInputBox form={form} name={'companyNameAbbr'} labelMap={LICENSE_INPUT_INFO} />
