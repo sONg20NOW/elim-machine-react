@@ -12,7 +12,7 @@ import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
-import { IconReload } from '@tabler/icons-react'
+import { IconReload, IconTrashFilled } from '@tabler/icons-react'
 
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -207,11 +207,29 @@ export default function MemberPage() {
       removeQueryCaches()
       setShowCheckBox(false)
       setChecked([])
-      handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
+      handleSuccess(`선택된 직원 ${checked.length}명이 삭제되었습니다.`)
     } catch (error) {
       handleApiError(error)
     }
   }
+
+  const handleDeleteUser = useCallback(
+    async (user: MemberPageDtoType) => {
+      try {
+        await auth.delete(`/api/members/${user.memberId}`, {
+          //@ts-ignore
+          data: { memberId: user.memberId, version: user.version }
+        })
+
+        adjustPage(-1)
+        removeQueryCaches()
+        handleSuccess(`선택된 직원이 삭제되었습니다.`)
+      } catch (e) {
+        handleApiError(e)
+      }
+    },
+    [adjustPage, removeQueryCaches]
+  )
 
   return (
     <>
@@ -335,6 +353,10 @@ export default function MemberPage() {
             isChecked={isChecked}
             handleCheckItem={handleCheckUser}
             handleCheckAllItems={handleCheckAllUsers}
+            rightClickMenuHeader={contextMenu => contextMenu.row.name}
+            rightClickMenu={[
+              { icon: <IconTrashFilled color='gray' size={20} />, label: '삭제', handleClick: handleDeleteUser }
+            ]}
           />
         </div>
         {/* 페이지네이션 */}
