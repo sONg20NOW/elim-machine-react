@@ -61,7 +61,7 @@ export default function Licensepage() {
 
   // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
-  const [checked, setChecked] = useState<Set<number>>(new Set([]))
+  const [checked, setChecked] = useState<{ licenseId: number; version: number }[]>([])
 
   // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
   const updateParams = useCallback(
@@ -112,44 +112,26 @@ export default function Licensepage() {
 
   // 설비인력 체크 핸들러 (다중선택)
   const handleCheckLicense = (license: LicensePageResponseDtoType) => {
-    const licenseId = license.licenseId
+    const { licenseId, version } = license
     const checked = isChecked(license)
 
     if (!checked) {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.add(licenseId)
-
-        return newSet
-      })
+      setChecked(prev => prev.concat({ licenseId: licenseId, version: version }))
     } else {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        newSet.delete(licenseId)
-
-        return newSet
-      })
+      setChecked(prev => prev.filter(v => v.licenseId !== licenseId))
     }
   }
 
   const handleCheckAllLicenses = (checked: boolean) => {
     if (checked) {
-      setChecked(prev => {
-        const newSet = new Set(prev)
-
-        data.forEach(license => newSet.add(license.licenseId))
-
-        return newSet
-      })
+      setChecked(data.map(v => ({ licenseId: v.licenseId, version: v.version })))
     } else {
-      setChecked(new Set<number>())
+      setChecked([])
     }
   }
 
   const isChecked = (license: LicensePageResponseDtoType) => {
-    return checked.has(license.licenseId)
+    return checked.some(v => v.licenseId === license.licenseId)
   }
 
   // offset만큼 요소수가 변화했을 때 valid한 페이지 param을 책임지는 함수
@@ -158,10 +140,14 @@ export default function Licensepage() {
       const lastPageAfter = Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
 
       if (offset > 0 || page > lastPageAfter) {
-        setQueryParams({ page: lastPageAfter })
+        lastPageAfter > 0
+          ? setQueryParams({ page: lastPageAfter })
+          : updateParams(params => {
+              params.delete('page')
+            })
       }
     },
-    [page, setQueryParams, totalCount, size]
+    [page, setQueryParams, totalCount, size, updateParams]
   )
 
   // tanstack query cache 삭제 및 refetch
@@ -179,22 +165,17 @@ export default function Licensepage() {
 
   // 여러 라이선스 한번에 삭제
   async function handleDeleteLicenses() {
-    try {
-      const list = Array.from(checked).map(licenseId => {
-        return {
-          licenseId: licenseId,
-          version: data.find(license => license.licenseId === licenseId)!.version
-        }
-      })
+    if (!checked.length) return
 
+    try {
       await auth.delete(`/api/licenses`, {
         //@ts-ignore
-        data: { licenseDeleteRequestDtos: list }
+        data: { licenseDeleteRequestDtos: checked }
       })
 
-      adjustPage(-1 * list.length)
+      adjustPage(-1 * checked.length)
       removeQueryCaches()
-      setChecked(new Set([]))
+      setChecked([])
       setShowCheckBox(false)
       handleSuccess('선택된 라이선스들이 성공적으로 삭제되었습니다.')
     } catch (error) {
@@ -283,7 +264,7 @@ export default function Licensepage() {
             ) : (
               <div className='flex gap-1'>
                 <Button variant='contained' color='error' onClick={() => handleDeleteLicenses()}>
-                  {`(${checked.size}) 삭제`}
+                  {`(${checked.length}) 삭제`}
                 </Button>
                 <Button
                   variant='contained'
