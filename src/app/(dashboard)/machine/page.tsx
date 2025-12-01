@@ -19,7 +19,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import dayjs from 'dayjs'
 
-import { IconCopyPlusFilled, IconPlus, IconReload, IconSquareRoundedMinusFilled } from '@tabler/icons-react'
+import { IconCopyPlusFilled, IconPlus, IconReload, IconTrashFilled } from '@tabler/icons-react'
 
 import { Typography } from '@mui/material'
 
@@ -345,7 +345,7 @@ export default function MachinePage() {
             rightClickMenu={[
               { icon: <IconCopyPlusFilled size={20} color='gray' />, label: '복사', handleClick: handleCopyRow },
               {
-                icon: <IconSquareRoundedMinusFilled size={20} color='gray' />,
+                icon: <IconTrashFilled size={20} color='gray' />,
                 label: '삭제',
                 handleClick: handleDeleteRow
               }
