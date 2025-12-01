@@ -12,6 +12,7 @@ import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
   EngineerBasicResponseDtoType,
+  EngineerResponseDtoType,
   GasMeasurementResponseDtoType,
   LicensePageResponseDtoType,
   LicenseResponseDtoType,
@@ -979,6 +980,50 @@ export const useGetEngineerByMemberId = (memberId: string) => {
     queryFn: fetchEngineer,
     staleTime: 1000 * 60 * 5, // 5분
     enabled: Number(memberId) > 0
+  })
+}
+
+// GET api/engineers/[engineerId]
+export const useGetEngineer = (engineerId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEER(engineerId),
+    queryFn: async data => {
+      const [keyType, engineerId] = data.queryKey
+
+      const response = await auth
+        .get<{ data: EngineerResponseDtoType }>(`/api/engineers/${engineerId}`)
+        .then(v => v.data.data)
+
+      console.log(`!!! queryFn ${keyType}`)
+
+      return response
+    },
+    enabled: Number(engineerId) > 0
+  })
+}
+
+export const useMutateEngineer = (engineerId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.ENGINEER.GET_ENGINEER(engineerId)
+
+  const putLicense = async ({ data }: { data: EngineerResponseDtoType }) => {
+    const response = await auth.put<{ data: EngineerResponseDtoType }>(`/api/engineers/${engineerId}`, data)
+
+    return response.data.data
+  }
+
+  return useMutation<EngineerResponseDtoType, AxiosError, EngineerResponseDtoType>({
+    mutationFn: data => putLicense({ data }),
+
+    onSuccess: data => {
+      queryClient.setQueryData(queryKey, data)
+      console.log('EngineerResponseDtoType가 성공적으로 수정되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    },
+    throwOnError: true
   })
 }
 
