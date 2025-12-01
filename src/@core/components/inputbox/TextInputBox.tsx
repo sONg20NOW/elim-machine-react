@@ -4,35 +4,38 @@ import type { Path, PathValue, UseFormReturn } from 'react-hook-form'
 import PostCodeButton from './PostCodeButton'
 
 interface TextInputBoxProps<T extends Record<string, any>> {
-  column: 1 | 2
   name: Path<T>
   form: UseFormReturn<T, any, undefined>
   labelMap: Partial<Record<Path<T>, { label: string }>>
+  column?: 1 | 2
   multiline?: boolean
   disabled?: boolean
   postcode?: boolean
+  required?: boolean
   type?: 'number' | 'date'
 }
 
 /**
  * useForm을 사용할 때 쓰는 input box (텍스트 입력용)
- * @param column * 1: 반칸, 2: fullWidth
  * @param name * form의 name
  * @param form * form
  * @param labelMap * INPUT_INFO
+ * @param column 1: 반칸, 2: fullWidth (기본값: 1)
  * @param multiline multiline 여부
  * @param disabled disabled 여부
+ * @param required required 여부
  * @param postcode 주소 검색 창 사용 여부
  * @param type number 혹은 date로 타입 지정
  */
 export default function TextInputBox<T extends Record<string, any>>({
-  column,
   name,
   form,
   labelMap,
+  column = 1,
   multiline = false,
   disabled = false,
   postcode = false,
+  required = false,
   type
 }: TextInputBoxProps<T>) {
   const label = labelMap[name]?.label ?? ''
@@ -44,6 +47,7 @@ export default function TextInputBox<T extends Record<string, any>>({
       <div className='flex flex-col w-full'>
         <Typography {...(dirty && { color: 'primary.main' })} {...(disabled && { color: 'lightgray' })}>
           {label}
+          {required && <sup className='text-red-500'>*</sup>}
         </Typography>
         <TextField
           disabled={disabled}

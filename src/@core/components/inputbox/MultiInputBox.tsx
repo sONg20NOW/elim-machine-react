@@ -5,27 +5,27 @@ import { Controller } from 'react-hook-form'
 import { YNOption } from '@/app/_constants/options'
 
 interface MultiInputBoxProps<T extends Record<string, any>> {
-  column: number
   form: UseFormReturn<T, any, undefined>
   labelMap: Partial<Record<Path<T>, Partial<{ label: string; options: { label: string; value: string }[] }>>>
   name: Path<T>
   disabled?: boolean
+  column?: 1 | 2
 }
 
 /**
  * useForm을 사용할 때 쓰는 input box (select용)
- * @param column * 1: 반칸, 2: fullWidth
  * @param name * form의 name
  * @param form * form
  * @param labelMap * INPUT_INFO
+ * @param column 1: 반칸, 2: fullWidth (기본값: 1)
  * @param diabled 선택 옵션
  */
 export default function MultiInputBox<T extends Record<string, any>>({
-  column,
   form,
   labelMap,
   name,
-  disabled = false
+  disabled = false,
+  column = 1
 }: MultiInputBoxProps<T>) {
   const label = labelMap[name]?.label ?? ''
   const option = name.includes('Yn') ? YNOption : labelMap[name]?.options
