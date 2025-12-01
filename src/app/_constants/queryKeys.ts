@@ -81,6 +81,7 @@ export const QUERY_KEYS = {
   },
   LICENSE: {
     GET_LICENSES_NAMES: ['GET_LICENSES_NAMES'],
-    GET_LICENSES: (queryParams: string) => ['GET_LICENSES', queryParams]
+    GET_LICENSES: (queryParams: string) => ['GET_LICENSES', queryParams],
+    GET_LICENSE: (licenseId: string) => ['GET_LICENSE', licenseId]
   }
 }
