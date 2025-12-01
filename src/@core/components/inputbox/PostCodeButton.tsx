@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 
 import { Button, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material'
-import { IconMapPinFilled, IconSearch, IconX } from '@tabler/icons-react'
+import { IconMapPinFilled, IconX } from '@tabler/icons-react'
 
 interface PostCodeButtonProps {
   onChange: (value: string) => void
@@ -18,7 +18,7 @@ export default function PostCodeButton({ onChange }: PostCodeButtonProps) {
   return (
     <>
       <Button size='small' variant='contained' type='button' onClick={() => setOpen(true)}>
-        <IconSearch />
+        검색
       </Button>
       <Dialog
         fullWidth
