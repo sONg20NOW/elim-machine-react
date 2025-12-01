@@ -118,10 +118,10 @@ export default function MemberPage() {
       const lastPageAfter = Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
 
       if (offset > 0 || page > lastPageAfter) {
-        setQueryParams({ page: lastPageAfter })
+        lastPageAfter > 0 ? setQueryParams({ page: lastPageAfter }) : updateParams(params => params.delete('page'))
       }
     },
-    [page, setQueryParams, totalCount, size]
+    [page, setQueryParams, totalCount, size, updateParams]
   )
 
   // tanstack query cache 삭제 및 refetch
