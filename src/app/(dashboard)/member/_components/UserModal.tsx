@@ -34,6 +34,7 @@ import PrivacyTabContent from './tabs/PrivacyTabContent'
 import OfficeTabContent from './tabs/OfficeTabContent'
 import CareerTabContent from './tabs/CareerTabContent'
 import EtcTabContent from './tabs/EtcTabContent'
+import ForgotPasswordPage from '@/app/(login)/login/_components/forgotPasswordModal'
 
 export type refType = {
   handleSave: () => void
@@ -100,6 +101,7 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
   const [openDelete, setOpenDelete] = useState(false)
   const [openAlert, setOpenAlert] = useState(false)
   const [openAlertNoSave, setOpenAlertNoSave] = useState(false)
+  const [openForgetPW, setOpenForgotPW] = useState(false)
 
   const [loading, setLoading] = useState(false)
 
@@ -251,9 +253,10 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
             <div className='flex gap-3'>
               {isYours ? (
                 <Button
+                  variant='contained'
                   color='warning'
                   onClick={() => {
-                    toast.warning('곧 추가될 기능입니다')
+                    setOpenForgotPW(true)
                   }}
                 >
                   비밀번호 변경
@@ -345,6 +348,13 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
           handleConfirm={handleDontSave}
           title={<Typography variant='inherit'>변경사항을 모두 폐기하시겠습니까?</Typography>}
           confirmMessage='폐기'
+        />
+      )}
+      {openForgetPW && (
+        <ForgotPasswordPage
+          open={openForgetPW}
+          setOpen={setOpenForgotPW}
+          userEmail={selectedUserData.memberBasicResponseDto.email}
         />
       )}
     </MemberIdContext.Provider>

@@ -18,10 +18,12 @@ type ResetForm = { email: string; password: string }
 
 export default function ForgotPasswordPage({
   open,
-  setOpen
+  setOpen,
+  userEmail
 }: {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
+  userEmail?: string
 }) {
   const [step, setStep] = useState<'forgot' | 'verify' | 'reset'>('forgot')
   const [email, setEmail] = useState('')
@@ -80,7 +82,7 @@ export default function ForgotPasswordPage({
       open={open}
       setOpen={setOpen}
       title={
-        <Typography variant='h5' sx={{ fontWeight: 600 }}>
+        <Typography variant='inherit' sx={{ fontWeight: 500 }}>
           {{ forgot: '비밀번호 변경', verify: '인증 코드 확인', reset: '새 비밀번호 설정' }[step]}
         </Typography>
       }
@@ -90,6 +92,8 @@ export default function ForgotPasswordPage({
           <form onSubmit={handleSubmit(handleForgot)} className='flex flex-col gap-3 items-start'>
             <div className='flex flex-col gap-1'>
               <TextField
+                size='small'
+                defaultValue={userEmail}
                 type='email'
                 placeholder='이메일'
                 {...register('email', { required: '이메일을 입력하세요' })}
@@ -108,6 +112,7 @@ export default function ForgotPasswordPage({
           <form onSubmit={handleSubmit(handleVerify)} className='flex flex-col gap-3 items-start'>
             <div className='flex flex-col gap-1'>
               <TextField
+                size='small'
                 type='text'
                 placeholder='인증 코드'
                 {...register('code', { required: '코드를 입력하세요' })}
@@ -130,6 +135,7 @@ export default function ForgotPasswordPage({
           <form onSubmit={handleSubmit(handleReset)} className='flex flex-col gap-3 items-start'>
             <div className='flex flex-col gap-1'>
               <TextField
+                size='small'
                 type='password'
                 placeholder='새 비밀번호'
                 {...register('password', { required: '비밀번호를 입력하세요' })}
