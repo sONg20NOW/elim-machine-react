@@ -5,19 +5,19 @@ import { Button, Dialog, DialogActions, DialogTitle, Typography } from '@mui/mat
 import { IconAlertCircleFilled } from '@tabler/icons-react'
 
 interface DeleteModalProps {
-  showDeleteModal: boolean
-  setShowDeleteModal: Dispatch<SetStateAction<boolean>>
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
   onDelete: () => Promise<void>
   title?: string
 }
 
-export default function DeleteModal({ showDeleteModal, setShowDeleteModal, onDelete, title }: DeleteModalProps) {
+export default function DeleteModal({ open, setOpen, onDelete, title }: DeleteModalProps) {
   const [loading, setLoading] = useState(false)
 
-  const handleClose = () => setShowDeleteModal(false)
+  const handleClose = () => setOpen(false)
 
   return (
-    <Dialog open={showDeleteModal} onClose={handleClose} fullWidth maxWidth='xs'>
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth='xs'>
       {/* Title */}
       <DialogTitle sx={{ textAlign: 'center' }}>
         <IconAlertCircleFilled size={40} className='text-red-400 mx-auto' />
