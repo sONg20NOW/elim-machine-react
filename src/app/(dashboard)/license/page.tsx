@@ -329,7 +329,10 @@ export default function Licensepage() {
               {
                 icon: <IconTrashFilled color='gray' size={20} />,
                 label: '삭제',
-                handleClick: row => deleteLicense(row.licenseId, row.version)
+                handleClick: async row => {
+                  await deleteLicense(row.licenseId, row.version)
+                  removeQueryCaches()
+                }
               }
             ]}
           />
