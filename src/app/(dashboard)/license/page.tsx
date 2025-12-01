@@ -11,7 +11,7 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import { IconReload } from '@tabler/icons-react'
+import { IconReload, IconTrashFilled } from '@tabler/icons-react'
 
 import { Backdrop, CircularProgress, Typography } from '@mui/material'
 
@@ -30,6 +30,7 @@ import AddModal from './_components/AddLicenseModal'
 import LicenseModal from './_components/LicenseModal'
 import { auth } from '@/lib/auth'
 import { useGetLicense, useGetLicenses } from '@/@core/hooks/customTanstackQueries'
+import deleteLicense from './_util/deleteLicense'
 
 export default function Licensepage() {
   const searchParams = useSearchParams()
@@ -323,6 +324,14 @@ export default function Licensepage() {
             isChecked={isChecked}
             handleCheckItem={handleCheckLicense}
             handleCheckAllItems={handleCheckAllLicenses}
+            rightClickMenuHeader={contextMenu => contextMenu.row.companyName}
+            rightClickMenu={[
+              {
+                icon: <IconTrashFilled color='gray' size={20} />,
+                label: '삭제',
+                handleClick: row => deleteLicense(row.licenseId, row.version)
+              }
+            ]}
           />
         </div>
 

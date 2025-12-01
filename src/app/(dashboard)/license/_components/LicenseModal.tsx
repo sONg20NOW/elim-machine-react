@@ -15,11 +15,11 @@ import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { LicenseCreateRequestDto, LicenseResponseDtoType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
-import { auth } from '@/lib/auth'
 import LicenseInputs from './LicenseInputs'
 import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
 import { useMutateLicense } from '@/@core/hooks/customTanstackQueries'
 import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
+import deleteLicense from '../_util/deleteLicense'
 
 type LicenseModalProps = {
   open: boolean
@@ -67,21 +67,9 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
   const isDirty = form.formState.isDirty
 
   const handleDeleteLicense = async () => {
-    await deleteLicense()
+    await deleteLicense(licenseId, initialData.version)
     reloadPages && reloadPages()
     setOpen(false)
-  }
-
-  const deleteLicense = async () => {
-    try {
-      await auth.delete(`/api/licenses/${licenseId}`, {
-        data: { licenseId: licenseId, version: initialData.version }
-      } as any)
-
-      handleSuccess('라이선스가 정상적으로 삭제되었습니다.')
-    } catch (error) {
-      handleApiError(error)
-    }
   }
 
   const handleSave = form.handleSubmit(data => {
