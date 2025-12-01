@@ -97,9 +97,9 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
   const changedEvenOnce = useRef(false)
 
   const [tabValue, setTabValue] = useState<tabType>('1')
-  const [editData, setEditData] = useState<MemberDetailResponseDtoType>(structuredClone(selectedUserData))
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showAlertModal, setShowAlertModal] = useState(false)
+  const [openDelete, setOpenDelete] = useState(false)
+  const [openAlert, setOpenAlert] = useState(false)
+  const [openAlertNoSave, setOpenAlertNoSave] = useState(false)
 
   const [loading, setLoading] = useState(false)
 
@@ -119,15 +119,14 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
     )
   }, [])
 
-  const memberId = { ...editData?.memberBasicResponseDto }.memberId
-  const juminNum = { ...editData?.memberPrivacyResponseDto }.juminNum
+  const memberId = { ...selectedUserData?.memberBasicResponseDto }.memberId
 
   // 로그인한 사용자의 userModal인지 파악
   const currentuserId = useCurrentUserStore(set => set.currentUser)?.memberId
   const isYours = selectedUserData.memberBasicResponseDto.memberId === currentuserId
 
   const handleDeleteUser = async () => {
-    const version = editData.memberBasicResponseDto?.version
+    const version = selectedUserData.memberBasicResponseDto?.version
 
     if (version !== undefined && memberId !== undefined) {
       try {
@@ -158,17 +157,6 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
   }
 
   const onSubmitHandler = async () => {
-    // 주민번호에 *이 있으면 빈 값으로 변경
-    if (juminNum && juminNum.includes('*')) {
-      setEditData({
-        ...editData,
-        memberPrivacyResponseDto: {
-          ...editData.memberPrivacyResponseDto,
-          juminNum: ''
-        }
-      })
-    }
-
     try {
       setLoading(true)
       const savedTabs: string[] = []
@@ -222,17 +210,26 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
   // 창을 닫으려 할 때 동작하는 함수 - 변경사항이 있으면 경고창 출력
   const handleClose = useCallback(() => {
     if (getIsDirty()) {
-      setShowAlertModal(true)
+      setOpenAlert(true)
     } else {
       onClose()
     }
   }, [getIsDirty, onClose])
 
-  const handleDontSave = useCallback(() => {
-    setEditData(structuredClone(selectedUserData))
-    setShowAlertModal(false)
+  const handleQuitWithoutSave = useCallback(() => {
+    setOpenAlert(false)
     onClose()
-  }, [onClose, selectedUserData])
+  }, [onClose])
+
+  const handleDontSave = useCallback(() => {
+    for (const i of [basicTabRef, privacyTabRef, officeTabRef, careerTabRef, etcTabRef]) {
+      if (i.current?.dirty) {
+        i.current.handleDontSave()
+      }
+    }
+
+    setOpenAlertNoSave(false)
+  }, [])
 
   return (
     <MemberIdContext.Provider value={memberId ?? 0}>
@@ -251,27 +248,39 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
             <Typography variant='subtitle1'>{selectedUserData?.memberBasicResponseDto?.companyName || ''}</Typography>
           </div>
           <div className='absolute left-8 top-6'>
-            {isYours ? (
+            <div className='flex gap-3'>
+              {isYours ? (
+                <Button
+                  color='warning'
+                  onClick={() => {
+                    toast.warning('곧 추가될 기능입니다')
+                  }}
+                >
+                  비밀번호 변경
+                </Button>
+              ) : (
+                <Button
+                  variant='contained'
+                  color='error'
+                  type='reset'
+                  onClick={() => {
+                    setOpenDelete(true)
+                  }}
+                >
+                  삭제
+                </Button>
+              )}
               <Button
-                color='warning'
-                onClick={() => {
-                  toast.warning('곧 추가될 기능입니다')
-                }}
-              >
-                비밀번호 변경
-              </Button>
-            ) : (
-              <Button
-                variant='contained'
                 color='error'
-                type='reset'
                 onClick={() => {
-                  setShowDeleteModal(true)
+                  const dirty = getIsDirty()
+
+                  if (dirty) setOpenAlertNoSave(true)
                 }}
               >
-                삭제
+                변경사항 폐기
               </Button>
-            )}
+            </div>
           </div>
           <IconButton type='button' onClick={handleClose} className='absolute right-4 top-4'>
             <IconX />
@@ -295,24 +304,19 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
               </TabList>
               <div className='flex-1 overflow-y-auto pt-5'>
                 <TabPanel value='1' keepMounted>
-                  {/* <MemberTabContent isEditing={true} tabName='basic' userData={editData} setUserData={setEditData} /> */}
-                  <BasicTabContent ref={basicTabRef} defaultData={editData.memberBasicResponseDto} />
+                  <BasicTabContent ref={basicTabRef} defaultData={selectedUserData.memberBasicResponseDto} />
                 </TabPanel>
                 <TabPanel value='2' keepMounted>
-                  <PrivacyTabContent ref={privacyTabRef} defaultData={editData.memberPrivacyResponseDto} />
-                  {/* <MemberTabContent isEditing={true} tabName='privacy' userData={editData} setUserData={setEditData} /> */}
+                  <PrivacyTabContent ref={privacyTabRef} defaultData={selectedUserData.memberPrivacyResponseDto} />
                 </TabPanel>
                 <TabPanel value='3' keepMounted>
-                  <OfficeTabContent ref={officeTabRef} defaultData={editData.memberOfficeResponseDto} />
-                  {/* <MemberTabContent isEditing={true} tabName='office' userData={editData} setUserData={setEditData} /> */}
+                  <OfficeTabContent ref={officeTabRef} defaultData={selectedUserData.memberOfficeResponseDto} />
                 </TabPanel>
                 <TabPanel value='4' keepMounted>
-                  <CareerTabContent ref={careerTabRef} defaultData={editData.memberCareerResponseDto} />
-                  {/* <MemberTabContent isEditing={true} tabName='career' userData={editData} setUserData={setEditData} /> */}
+                  <CareerTabContent ref={careerTabRef} defaultData={selectedUserData.memberCareerResponseDto} />
                 </TabPanel>
                 <TabPanel value='5' keepMounted>
-                  <EtcTabContent ref={etcTabRef} defaultData={editData.memberEtcResponseDto} />
-                  {/* <MemberTabContent isEditing={true} tabName='etc' userData={editData} setUserData={setEditData} /> */}
+                  <EtcTabContent ref={etcTabRef} defaultData={selectedUserData.memberEtcResponseDto} />
                 </TabPanel>
               </div>
             </div>
@@ -328,18 +332,19 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
         </DialogActions>
       </Dialog>
 
-      {showDeleteModal && (
-        <DeleteModal
-          showDeleteModal={showDeleteModal}
-          setShowDeleteModal={setShowDeleteModal}
-          onDelete={onDeleteUserConfirm}
-        />
+      {openDelete && (
+        <DeleteModal showDeleteModal={openDelete} setShowDeleteModal={setOpenDelete} onDelete={onDeleteUserConfirm} />
       )}
-      {showAlertModal && (
+      {openAlert && (
+        <ProgressedAlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleQuitWithoutSave} />
+      )}
+      {openAlertNoSave && (
         <ProgressedAlertModal
-          showAlertModal={showAlertModal}
-          setShowAlertModal={setShowAlertModal}
-          handleDontSave={handleDontSave}
+          open={openAlertNoSave}
+          setOpen={setOpenAlertNoSave}
+          handleConfirm={handleDontSave}
+          title={<Typography variant='inherit'>변경사항을 모두 폐기하시겠습니까?</Typography>}
+          confirmMessage='폐기'
         />
       )}
     </MemberIdContext.Provider>
