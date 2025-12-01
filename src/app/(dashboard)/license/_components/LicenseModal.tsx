@@ -164,6 +164,16 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
           <DeleteModal showDeleteModal={openDelete} setShowDeleteModal={setOpenDelete} onDelete={handleDeleteLicense} />
         )}
         {openAlert && <ProgressedAlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={onClose} />}
+        {openAlertNoSave && (
+          <ProgressedAlertModal
+            open={openAlertNoSave}
+            setOpen={setOpenAlertNoSave}
+            handleConfirm={handleDontSave}
+            title={'변경사항을 모두 폐기하시겠습니까?'}
+            subtitle='폐기한 후에는 복구할 수 없습니다'
+            confirmMessage='폐기'
+          />
+        )}
       </div>
     </DefaultModal>
   )

@@ -8,24 +8,30 @@ interface AlertModalProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   handleConfirm: () => void
-  title?: JSX.Element
+  title?: string
+  subtitle?: string
   confirmMessage?: string
 }
 
-export default function ProgressedAlertModal({ open, setOpen, handleConfirm, title, confirmMessage }: AlertModalProps) {
+export default function ProgressedAlertModal({
+  open,
+  setOpen,
+  handleConfirm,
+  title,
+  subtitle,
+  confirmMessage
+}: AlertModalProps) {
   const handleClose = () => setOpen(false)
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth='xs'>
       {/* Icon Title */}
-      <DialogTitle sx={{ textAlign: 'center' }}>
-        <IconAlertCircleFilled size={40} className='text-red-400 mx-auto' />
-        {title ?? (
-          <>
-            <Typography variant='inherit'>지금까지 수정한 내용이 저장되지 않습니다.</Typography>
-            <Typography variant='subtitle1'>그래도 나가시겠습니까?</Typography>
-          </>
-        )}
+      <DialogTitle sx={{ textAlign: 'center', display: 'grid' }}>
+        <IconAlertCircleFilled size={40} className='text-red-400 mx-auto mb-3' />
+
+        <Typography variant='inherit'>{title ?? '지금까지 수정한 내용이 저장되지 않습니다.'}</Typography>
+
+        <Typography variant='subtitle1'>{subtitle ?? '그래도 나가시겠습니까?'}</Typography>
       </DialogTitle>
 
       {/* Buttons */}

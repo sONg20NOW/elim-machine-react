@@ -346,7 +346,7 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
           open={openAlertNoSave}
           setOpen={setOpenAlertNoSave}
           handleConfirm={handleDontSave}
-          title={<Typography variant='inherit'>변경사항을 모두 폐기하시겠습니까?</Typography>}
+          title={'변경사항을 모두 폐기하시겠습니까?'}
           confirmMessage='폐기'
         />
       )}
