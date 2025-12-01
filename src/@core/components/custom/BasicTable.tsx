@@ -54,7 +54,7 @@ interface BasicTableProps<T> {
  * @param showCheckBox 체크박스 prop
  * @param handleCheckItem 체크박스 prop
  * @param handleCheckAllItems 체크박스 prop
- * @param rightClickMenuHeader 우클릭 prop: 우클릭 시 보이는 헤더 문자열
+ * @param rightClickMenuHeader 우클릭 prop: 우클릭 시 보이는 헤더의 문자열을 반환하는 함수
  * @param rightClickMenu 우클릭 prop: 우클릭 시 보이는 메뉴별 아이콘, 이름, 클릭 함수
  * @param onClickPicCount 테이블의 picCount 클릭 동작 함수
  *
