@@ -14,6 +14,7 @@ import type {
   EngineerBasicResponseDtoType,
   GasMeasurementResponseDtoType,
   LicensePageResponseDtoType,
+  LicenseResponseDtoType,
   MachineCategoryResponseDtoType,
   MachineEnergyTypeResponseDtoType,
   MachineEngineerOptionResponseDtoType,
@@ -99,6 +100,50 @@ export const useGetLicenses = (queryParams: string) => {
 
       return response
     }
+  })
+}
+
+// GET api/licenses/[licenseId]
+export const useGetLicense = (licenseId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.LICENSE.GET_LICENSE(licenseId),
+    queryFn: async data => {
+      const [keyType, licenseId] = data.queryKey
+
+      const response = await auth
+        .get<{ data: LicenseResponseDtoType }>(`/api/licenses/${licenseId}`)
+        .then(v => v.data.data)
+
+      console.log(`!!! queryFn ${keyType}`)
+
+      return response
+    },
+    enabled: Number(licenseId) > 0
+  })
+}
+
+export const useMutateLicense = (licenseId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.LICENSE.GET_LICENSE(licenseId)
+
+  const putLicense = async ({ data }: { data: LicenseResponseDtoType }) => {
+    const response = await auth.put<{ data: LicenseResponseDtoType }>(`/api/licenses/${licenseId}`, data)
+
+    return response.data.data
+  }
+
+  return useMutation<LicenseResponseDtoType, AxiosError, LicenseResponseDtoType>({
+    mutationFn: data => putLicense({ data }),
+
+    onSuccess: data => {
+      queryClient.setQueryData(queryKey, data)
+      console.log('LicenseResponseDtoType가 성공적으로 수정되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+    },
+    throwOnError: true
   })
 }
 
