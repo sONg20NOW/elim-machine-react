@@ -36,6 +36,7 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
 
   const [openDelete, setOpenDelete] = useState(false)
   const [openAlert, setOpenAlert] = useState(false)
+  const [openAlertNoSave, setOpenAlertNoSave] = useState(false)
 
   const changedEvenOnce = useRef(false)
 
@@ -103,6 +104,12 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
     }
   })
 
+  const handleDontSave = useCallback(() => {
+    form.reset()
+
+    setOpenAlertNoSave(false)
+  }, [form])
+
   // 실제로 창이 닫힐 때 동작하는 함수
   const onClose = useCallback(() => {
     if (changedEvenOnce.current) {
@@ -140,15 +147,25 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
         </Button>
       }
       modifyButton={
-        <Button
-          sx={{ boxShadow: 'none' }}
-          variant='contained'
-          color='error'
-          type='reset'
-          onClick={() => setOpenDelete(true)}
-        >
-          삭제
-        </Button>
+        <div className='flex gap-3'>
+          <Button
+            sx={{ boxShadow: 'none' }}
+            variant='contained'
+            color='error'
+            type='reset'
+            onClick={() => setOpenDelete(true)}
+          >
+            삭제
+          </Button>
+          <Button
+            color='error'
+            onClick={() => {
+              if (isDirty) setOpenAlertNoSave(true)
+            }}
+          >
+            변경사항 폐기
+          </Button>
+        </div>
       }
     >
       <div className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
