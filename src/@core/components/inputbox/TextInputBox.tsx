@@ -23,7 +23,7 @@ interface TextInputBoxProps<T extends Record<string, any>> {
  * @param multiline multiline 여부
  * @param disabled disabled 여부
  * @param postcode 주소 검색 창 사용 여부
- * @param number
+ * @param type number 혹은 date로 타입 지정
  */
 export default function TextInputBox<T extends Record<string, any>>({
   column,
