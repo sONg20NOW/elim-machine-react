@@ -13,23 +13,23 @@ import MenuItem from '@mui/material/MenuItem'
 
 import { IconReload } from '@tabler/icons-react'
 
-import { Typography } from '@mui/material'
+import { Backdrop, CircularProgress, Typography } from '@mui/material'
 
 import { useQueryClient } from '@tanstack/react-query'
 
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import type { LicensePageResponseDtoType, LicenseResponseDtoType } from '@/@core/types'
+import type { LicensePageResponseDtoType } from '@/@core/types'
 import { HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import AddModal from './_components/AddLicenseModal'
-import DetailModal from './_components/DetailModal'
+import LicenseModal from './_components/LicenseModal'
 import { auth } from '@/lib/auth'
-import { useGetLicenses } from '@/@core/hooks/customTanstackQueries'
+import { useGetLicense, useGetLicenses } from '@/@core/hooks/customTanstackQueries'
 
 export default function Licensepage() {
   const searchParams = useSearchParams()
@@ -52,10 +52,11 @@ export default function Licensepage() {
   const region = searchParams.get('region')
 
   // 모달 관련 상태
-  const [addModalOpen, setAddModalOpen] = useState(false)
-  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [openAdd, setOpenAdd] = useState(false)
+  const [openDetail, setOpenDetail] = useState(false)
 
-  const [selectedData, setSelectedData] = useState<LicenseResponseDtoType>()
+  const [selectedId, setSelectedId] = useState(0)
+  const { data: selectedData, isLoading: isLoadingLicense } = useGetLicense(selectedId.toString())
 
   // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
@@ -101,12 +102,8 @@ export default function Licensepage() {
   // 라이선스 선택 핸들러
   const handleLicenseClick = async (licenseData: LicensePageResponseDtoType) => {
     try {
-      const response = await auth.get<{ data: LicenseResponseDtoType }>(`/api/licenses/${licenseData.licenseId}`)
-
-      const licenseInfo = response.data.data
-
-      setSelectedData(licenseInfo)
-      setDetailModalOpen(true)
+      setSelectedId(licenseData.licenseId)
+      setOpenDetail(true)
     } catch (error) {
       handleApiError(error, '라이선스를 선택하는 데 실패했습니다.')
     }
@@ -304,7 +301,7 @@ export default function Licensepage() {
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
-              onClick={() => setAddModalOpen(!addModalOpen)}
+              onClick={() => setOpenAdd(!openAdd)}
               disabled={disabled}
             >
               추가
@@ -359,27 +356,32 @@ export default function Licensepage() {
       </Card>
 
       {/* 모달들 */}
-      {addModalOpen && (
+      {openAdd && (
         <AddModal
-          open={addModalOpen}
-          setOpen={setAddModalOpen}
+          open={openAdd}
+          setOpen={setOpenAdd}
           reloadPage={() => {
             adjustPage(1)
             removeQueryCaches()
           }}
         />
       )}
-      {detailModalOpen && selectedData && (
-        <DetailModal
-          open={detailModalOpen}
-          setOpen={setDetailModalOpen}
-          initialData={selectedData}
-          setInitialData={setSelectedData}
-          reloadData={() => {
-            removeQueryCaches()
-          }}
-        />
-      )}
+
+      {openDetail &&
+        (!isLoadingLicense ? (
+          <LicenseModal
+            open={openDetail}
+            setOpen={setOpenDetail}
+            initialData={selectedData!}
+            reloadPages={() => {
+              removeQueryCaches()
+            }}
+          />
+        ) : (
+          <Backdrop open={isLoadingLicense}>
+            <CircularProgress />
+          </Backdrop>
+        ))}
     </>
   )
 }

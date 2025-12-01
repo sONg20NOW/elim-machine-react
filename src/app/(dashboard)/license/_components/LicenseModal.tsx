@@ -19,6 +19,7 @@ import { auth } from '@/lib/auth'
 import LicenseInputs from './LicenseInputs'
 import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
 import { useMutateLicense } from '@/@core/hooks/customTanstackQueries'
+import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 
 type LicenseModalProps = {
   open: boolean
@@ -31,7 +32,7 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
   const licenseId = initialData.id
 
   const [loading, setLoading] = useState(false)
-  const { mutateAsync: mutateLicenseAsync } = useMutateLicense(licenseId.toString())
+  const { mutate: mutateLicense } = useMutateLicense(licenseId.toString())
 
   const [openDelete, setOpenDelete] = useState(false)
   const [openAlert, setOpenAlert] = useState(false)
@@ -62,9 +63,6 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
     }
   })
 
-  const watchedCompanyName = form.watch('companyName')
-  const watchedBizno = form.watch('bizno')
-
   const isDirty = form.formState.isDirty
 
   const handleDeleteLicense = async () => {
@@ -85,14 +83,14 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
     }
   }
 
-  const handleSave = form.handleSubmit(async data => {
+  const handleSave = form.handleSubmit(data => {
     if (isDirty) {
       setLoading(true)
 
       try {
-        const newLicense = await mutateLicenseAsync({ ...data, version: initialData.version } as LicenseResponseDtoType)
+        mutateLicense({ ...data, version: initialData.version } as LicenseResponseDtoType)
 
-        form.reset(newLicense)
+        form.reset(data)
         handleSuccess(`라이선스 정보가 수정되었습니다.`)
         changedEvenOnce.current = true
       } catch (error: any) {
@@ -100,6 +98,8 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
       } finally {
         setLoading(false)
       }
+    } else {
+      printWarningSnackbar('변경사항이 없습니다.', 1500)
     }
   })
 
@@ -126,9 +126,9 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
       size='md'
       open={open}
       setOpen={setOpen}
-      title={watchedCompanyName}
+      title={initialData.companyName}
       onClose={handleClose}
-      headerDescription={watchedBizno}
+      headerDescription={initialData.bizno}
       primaryButton={
         <Button variant='contained' onClick={() => handleSave()} type='submit' color='success'>
           저장

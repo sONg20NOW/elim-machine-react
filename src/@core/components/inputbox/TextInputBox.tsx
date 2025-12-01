@@ -1,5 +1,5 @@
 import { Grid2, TextField, Typography } from '@mui/material'
-import type { Path, PathValue, UseFormReturn } from 'react-hook-form'
+import { useFormState, type Path, type PathValue, type RegisterOptions, type UseFormReturn } from 'react-hook-form'
 
 import PostCodeButton from './PostCodeButton'
 
@@ -7,11 +7,12 @@ interface TextInputBoxProps<T extends Record<string, any>> {
   name: Path<T>
   form: UseFormReturn<T, any, undefined>
   labelMap: Partial<Record<Path<T>, { label: string }>>
-  column?: 1 | 2
+  column?: number
   multiline?: boolean
   disabled?: boolean
   postcode?: boolean
   required?: boolean
+  rule?: RegisterOptions<T, Path<T>> | undefined
   type?: 'number' | 'date'
 }
 
@@ -23,8 +24,9 @@ interface TextInputBoxProps<T extends Record<string, any>> {
  * @param column 1: 반칸, 2: fullWidth (기본값: 1)
  * @param multiline multiline 여부
  * @param disabled disabled 여부
- * @param required required 여부
  * @param postcode 주소 검색 창 사용 여부
+ * @param required required 여부
+ * @param rule register 입력값 검증 객체
  * @param type number 혹은 date로 타입 지정
  */
 export default function TextInputBox<T extends Record<string, any>>({
@@ -36,16 +38,23 @@ export default function TextInputBox<T extends Record<string, any>>({
   disabled = false,
   postcode = false,
   required = false,
+  rule,
   type
 }: TextInputBoxProps<T>) {
   const label = labelMap[name]?.label ?? ''
 
   const dirty = (form.formState.dirtyFields as any)[name]
 
+  const error = useFormState({ ...form, name: name }).errors[name]
+
   return (
     <Grid2 size={column}>
-      <div className='flex flex-col w-full'>
-        <Typography {...(dirty && { color: 'primary.main' })} {...(disabled && { color: 'lightgray' })}>
+      <div className='flex flex-col w-full relative'>
+        <Typography
+          {...(dirty && { color: 'primary.main' })}
+          {...(error && { color: 'error.main' })}
+          {...(disabled && { color: 'lightgray' })}
+        >
           {label}
           {required && <sup className='text-red-500'>*</sup>}
         </Typography>
@@ -53,7 +62,7 @@ export default function TextInputBox<T extends Record<string, any>>({
           disabled={disabled}
           {...(type && { type: type })}
           {...(multiline && { multiline: true, minRows: 3 })}
-          {...form.register(name)}
+          {...form.register(name, rule)}
           {...(postcode && {
             slotProps: {
               htmlInput: { name: name },
@@ -68,6 +77,16 @@ export default function TextInputBox<T extends Record<string, any>>({
           })}
           size='small'
         />
+        {error && (
+          <Typography
+            variant='caption'
+            sx={{ position: 'absolute', right: 0, top: 0 }}
+            color='error.main'
+            align='right'
+          >
+            {error.message?.toString()}
+          </Typography>
+        )}
       </div>
     </Grid2>
   )

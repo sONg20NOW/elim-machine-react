@@ -23,7 +23,7 @@ export default function ProgressedAlertModal({ open, setOpen, handleConfirm, tit
         {title ?? (
           <>
             <Typography variant='inherit'>지금까지 수정한 내용이 저장되지 않습니다.</Typography>
-            <Typography variant='inherit'>그래도 나가시겠습니까?</Typography>
+            <Typography variant='subtitle1'>그래도 나가시겠습니까?</Typography>
           </>
         )}
       </DialogTitle>
