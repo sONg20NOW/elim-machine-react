@@ -124,7 +124,7 @@ export const MACHINE_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoTyp
   fieldEndDate: fieldEndDate!,
   note: {
     type: 'long text',
-    label: '비고'
+    label: '특이사항'
   }
 }
 

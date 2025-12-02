@@ -347,10 +347,10 @@ const BasicTabContent = ({}: {}) => {
                       />
                     </td>
                   </tr>
-                  {/* 요청사항 */}
+                  {/* 관리주체 요청사항 */}
                   <tr>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                      요청사항
+                      관리주체 요청사항
                     </th>
                     <td colSpan={3} className='pe-4'>
                       <InputBox
@@ -649,7 +649,7 @@ const BasicTabContent = ({}: {}) => {
                     </tr>
                     <tr style={{ height: '114px' }}>
                       <th rowSpan={1} align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                        요청사항
+                        관리주체 요청사항
                       </th>
                       <td rowSpan={1} colSpan={3} style={{ padding: '10px 12px', minHeight: 200 }}>
                         <p>{editData.requirement ? editData.requirement : '-'}</p>
