@@ -216,6 +216,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
               >
                 {contextMenu && (
                   <Menu
+                    slotProps={{ paper: { sx: { boxShadow: 'var(--mui-customShadows-sm)' } } }}
                     open={contextMenu !== null}
                     onClose={handleClose}
                     anchorReference='anchorPosition'
