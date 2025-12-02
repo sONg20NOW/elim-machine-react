@@ -225,7 +225,10 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   >
                     {
                       <MenuItem
-                        onClick={() => handleRowClick(contextMenu.row)}
+                        onClick={() => {
+                          handleRowClick(contextMenu.row)
+                          handleClose()
+                        }}
                         sx={{ display: 'flex', alignItems: 'center', px: 3 }}
                       >
                         {rightClickMenuHeader && (
