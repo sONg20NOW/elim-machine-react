@@ -419,7 +419,7 @@ const PictureListTabContent = () => {
     const checkAndLoad = () => {
       const container = listContainerRef.current
 
-      if (!container) return
+      if (!container || !container.checkVisibility()) return
 
       if (container.scrollHeight <= container.clientHeight && hasNextRef.current && !loadingInspectionPicsRef.current) {
         getInspectionPics(defaultPageSize)
