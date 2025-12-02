@@ -103,14 +103,14 @@ export default function DefaultModal({
           }
         )}
       >
-        <div>
+        <Typography component={'div'} variant='h3'>
           {title}
-          {headerDescription && (
-            <Typography component='span' className='flex flex-col text-center'>
-              {headerDescription}
-            </Typography>
-          )}
-        </div>
+        </Typography>
+        {headerDescription && (
+          <Typography component='span' variant='inherit' className='flex flex-col text-center'>
+            {headerDescription}
+          </Typography>
+        )}
       </DialogTitle>
 
       {/* ✅ 스크롤 처리되는 본문 */}

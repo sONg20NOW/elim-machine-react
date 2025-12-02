@@ -28,10 +28,12 @@ export default function ProgressedAlertModal({
       {/* Icon Title */}
       <DialogTitle sx={{ textAlign: 'center', display: 'grid' }}>
         <IconAlertCircleFilled size={40} className='text-red-400 mx-auto mb-3' />
-
-        {title ?? '지금까지 수정한 내용이 저장되지 않습니다.'}
-
-        <Typography variant='subtitle1'>{subtitle ?? '그래도 나가시겠습니까?'}</Typography>
+        <Typography component={'div'} variant='inherit'>
+          {title ?? '지금까지 수정한 내용이 저장되지 않습니다.'}
+        </Typography>
+        <Typography component={'div'} variant='subtitle1'>
+          {subtitle ?? '그래도 나가시겠습니까?'}
+        </Typography>
       </DialogTitle>
 
       {/* Buttons */}
