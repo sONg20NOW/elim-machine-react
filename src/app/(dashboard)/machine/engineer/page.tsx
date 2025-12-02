@@ -12,7 +12,7 @@ import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
-import { IconPlus, IconReload } from '@tabler/icons-react'
+import { IconBoltOff, IconPlus, IconReload } from '@tabler/icons-react'
 
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -33,6 +33,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import { useGetEngineer, useGetEngineers } from '@/@core/hooks/customTanstackQueries'
 import TableFilter from '@/@core/components/custom/TableFilter'
+import deleteEngineer from './_util/deleteEngineer'
 
 /**
  * @type T
@@ -320,6 +321,17 @@ export default function EngineerPage() {
             isChecked={isChecked}
             handleCheckItem={handleCheckEngineer}
             handleCheckAllItems={handleCheckAllEngineers}
+            rightClickMenuHeader={contextMenu => contextMenu.row.name}
+            rightClickMenu={[
+              {
+                icon: <IconBoltOff color='gray' size={20} />,
+                label: '설비인력에서 제외',
+                handleClick: async row => {
+                  await deleteEngineer(row.engineerId, row.version)
+                  removeQueryCaches()
+                }
+              }
+            ]}
           />
         </div>
 
