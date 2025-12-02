@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -10,8 +10,6 @@ import { Button, MenuItem, Select, Tab, Typography } from '@mui/material'
 import TabList from '@mui/lab/TabList'
 
 import TabPanel from '@mui/lab/TabPanel'
-
-import { toast } from 'react-toastify'
 
 import type { MachineInspectionDetailResponseDtoType, MachineInspectionSimpleResponseDtoType } from '@/@core/types'
 
@@ -39,8 +37,9 @@ import {
   useMutateWindMeasurementResponseDto
 } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
-import { auth } from '@/lib/auth'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
+import deleteInspection from '../../_util/deleteInspection'
+import { setOffsetContext } from '../tabs/InspectionListTabContent'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -111,6 +110,8 @@ const InspectionDetailModalInner = ({
   inspectionsSimple
 }: InspectionDetailModalInnerProps) => {
   const machineProjectId = useParams().id?.toString() as string
+
+  const setOffset = useContext(setOffsetContext)
 
   const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
 
@@ -222,6 +223,7 @@ const InspectionDetailModalInner = ({
 
         setIsEditing(prev => !prev)
         handleSuccess(`${thisTabInfo.find(tabInfo => tabInfo.value === tabValue)?.label ?? ''}이(가) 수정되었습니다.`)
+        setOffset && setOffset(0)
       } catch (error) {
         handleApiError(error)
       }
@@ -237,24 +239,24 @@ const InspectionDetailModalInner = ({
     mutatePipeMeasurementResponseDto,
     selectedInspection,
     tabValue,
-    thisTabInfo
+    thisTabInfo,
+    setOffset
   ])
 
   const handleDelete = async () => {
-    await auth.delete(`/api/machine-projects/${machineProjectId}/machine-inspections`, {
-      // @ts-ignore
-      data: {
-        machineInspectionDeleteRequestDtos: [
-          {
-            machineInspectionId: selectedInspection.machineInspectionResponseDto.id,
-            version: selectedInspection.machineInspectionResponseDto.version
-          }
-        ]
-      }
-    })
+    const inspectionInfo = selectedInspection.machineInspectionResponseDto
 
-    setOpen(false)
-    toast.info(`${selectedInspection.machineInspectionResponseDto.machineInspectionName}이 삭제되었습니다`)
+    const result = await deleteInspection(
+      Number(machineProjectId),
+      inspectionInfo.id,
+      inspectionInfo.version,
+      inspectionInfo.machineInspectionName
+    )
+
+    if (result) {
+      setOffset && setOffset(1)
+      setOpen(false)
+    }
   }
 
   return (
@@ -286,7 +288,7 @@ const InspectionDetailModalInner = ({
                   <Typography>{v.name}</Typography>
                 </MenuItem>
               ))}
-            </Select>{' '}
+            </Select>
             <Typography variant='inherit'>{'성능점검표'}</Typography>
           </div>
         }
@@ -301,7 +303,7 @@ const InspectionDetailModalInner = ({
                   handleSave()
                 }}
               >
-                {existChange ? '저장' : '변경사항 없음'}
+                저장
               </Button>
             ) : (
               <Button
