@@ -129,7 +129,6 @@ export const MACHINE_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoTyp
 }
 
 // 점검일정/참여기술진 - 참여기술진 수정
-
 export const MACHINE_PROJECT_ENGINEER_INPUT_INFO: machineProjectEngineerInputType = {
   engineerName: { type: 'text', label: '이름' },
   grade: {
