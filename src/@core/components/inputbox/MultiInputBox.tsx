@@ -6,7 +6,7 @@ import { YNOption } from '@/app/_constants/options'
 
 interface MultiInputBoxProps<T extends Record<string, any>> {
   form: UseFormReturn<T, any, undefined>
-  labelMap: Partial<Record<Path<T>, Partial<{ label: string; options: { label: string; value: string }[] }>>>
+  labelMap: Partial<Record<Path<T>, Partial<{ label: string; options: { label: string; value: string | number }[] }>>>
   name: Path<T>
   disabled?: boolean
   column?: number
