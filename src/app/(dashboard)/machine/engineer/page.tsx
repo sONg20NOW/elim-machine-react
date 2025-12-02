@@ -14,12 +14,16 @@ import MenuItem from '@mui/material/MenuItem'
 // Component Imports
 import { IconReload } from '@tabler/icons-react'
 
+import { useQueryClient } from '@tanstack/react-query'
+
+import { Backdrop, CircularProgress } from '@mui/material'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import UserModal from './_components/EngineerDetailModal'
-import AddUserModal from './_components/AddEngineerModal'
-import type { EngineerFilterType, EngineerResponseDtoType, MachineEngineerPageResponseDtoType } from '@/@core/types'
+import EngineerModal from './_components/EngineerModal'
+import AddEngineerModal from './_components/AddEngineerModal'
+import type { EngineerFilterType, MachineEngineerPageResponseDtoType } from '@/@core/types'
 import { HEADERS } from '@/app/_constants/table/TableHeader'
 import BasicTable from '@/@core/components/custom/BasicTable'
 import SearchBar from '@/@core/components/custom/SearchBar'
@@ -27,7 +31,7 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { ENGINEER_FILTER_INFO } from '@/app/_constants/filter/EngineerFilterInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
-import { useGetEngineers } from '@/@core/hooks/customTanstackQueries'
+import { useGetEngineer, useGetEngineers } from '@/@core/hooks/customTanstackQueries'
 import TableFilter from '@/@core/components/custom/TableFilter'
 
 /**
@@ -38,12 +42,14 @@ import TableFilter from '@/@core/components/custom/TableFilter'
  * @returns
  */
 export default function EngineerPage() {
+  const queryClient = useQueryClient()
+
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
 
   // 데이터 리스트
-  const { data: engineersPages, refetch, isLoading, isError } = useGetEngineers(searchParams.toString())
+  const { data: engineersPages, refetch: refetchPages, isLoading, isError } = useGetEngineers(searchParams.toString())
   const data = engineersPages?.content ?? []
 
   // 로딩 시도 중 = true, 로딩 끝 = false
@@ -62,10 +68,11 @@ export default function EngineerPage() {
   const name = searchParams.get('name')
 
   // 모달 관련 상태
-  const [addUserModalOpen, setAddUserModalOpen] = useState(false)
-  const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
+  const [openAdd, setOpenAdd] = useState(false)
+  const [openDetail, setOpenDetail] = useState(false)
 
-  const [selectedUser, setSelectedUser] = useState<EngineerResponseDtoType>()
+  const [selectedId, setSelectedId] = useState(0)
+  const { data: selectedData, isLoading: isLoadingEngineer } = useGetEngineer(selectedId.toString())
 
   // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
@@ -115,12 +122,8 @@ export default function EngineerPage() {
   // 엔지니어 선택 핸들러
   const handleEngineerClick = async (engineerData: MachineEngineerPageResponseDtoType) => {
     try {
-      const response = await auth.get<{ data: EngineerResponseDtoType }>(`/api/engineers/${engineerData.engineerId}`)
-
-      const engineerInfo = response.data.data
-
-      setSelectedUser(engineerInfo)
-      setUserDetailModalOpen(true)
+      setSelectedId(engineerData.engineerId)
+      setOpenDetail(true)
     } catch (error) {
       handleApiError(error, '엔지니어를 선택하는 데 실패했습니다.')
     }
@@ -140,17 +143,7 @@ export default function EngineerPage() {
 
   const handleCheckAllEngineers = (checked: boolean) => {
     if (checked) {
-      setChecked(prev => {
-        const newChecked = structuredClone(prev)
-
-        data.forEach(engineer => {
-          if (!prev.find(v => v.engineerId === engineer.engineerId)) {
-            newChecked.push({ engineerId: engineer.engineerId, version: engineer.version })
-          }
-        })
-
-        return newChecked
-      })
+      setChecked(data.map(v => ({ engineerId: v.engineerId, version: v.version })))
     } else {
       setChecked([])
     }
@@ -159,6 +152,31 @@ export default function EngineerPage() {
   const isChecked = (engineer: MachineEngineerPageResponseDtoType) => {
     return checked.some(v => v.engineerId === engineer.engineerId)
   }
+
+  // offset만큼 요소수가 변화했을 때 valid한 페이지 param을 책임지는 함수
+  const adjustPage = useCallback(
+    (offset = 0) => {
+      const lastPageAfter = Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
+
+      if (offset > 0 || page > lastPageAfter) {
+        lastPageAfter > 0 ? setQueryParams({ page: lastPageAfter }) : updateParams(params => params.delete('page'))
+      }
+    },
+    [page, setQueryParams, totalCount, size, updateParams]
+  )
+
+  // tanstack query cache 삭제 및 refetch
+  const removeQueryCaches = useCallback(() => {
+    refetchPages()
+
+    queryClient.removeQueries({
+      predicate(query) {
+        const key = query.queryKey
+
+        return Array.isArray(key) && key[0] === 'GET_ENGINEERS' && key[1] !== searchParams.toString() // 스크롤 유지를 위해 현재 data는 refetch, 나머지는 캐시 지우기
+      }
+    })
+  }, [refetchPages, queryClient, searchParams])
 
   // 여러 기술자 한번에 삭제
   async function handleDeleteEngineers() {
@@ -170,8 +188,9 @@ export default function EngineerPage() {
         //@ts-ignore
         data: { engineerDeleteRequestDtos: checked }
       })
-      setQueryParams({ page: 0 })
-      refetch()
+
+      adjustPage(-1 * checked.length)
+      removeQueryCaches()
       handleSuccess(`선택된 기계설비 기술자 ${checked.length}명이 성공적으로 삭제되었습니다.`)
       setChecked([])
       setShowCheckBox(false)
@@ -277,7 +296,7 @@ export default function EngineerPage() {
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
-              onClick={() => setAddUserModalOpen(!addUserModalOpen)}
+              onClick={() => setOpenAdd(!openAdd)}
               className='max-sm:is-full'
               disabled={disabled}
             >
@@ -334,18 +353,29 @@ export default function EngineerPage() {
       </Card>
 
       {/* 모달들 */}
-      {addUserModalOpen && (
-        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} reloadPage={() => refetch()} />
-      )}
-      {userDetailModalOpen && selectedUser && (
-        <UserModal
-          open={userDetailModalOpen}
-          setOpen={setUserDetailModalOpen}
-          data={selectedUser}
-          setData={setSelectedUser}
-          reloadData={() => refetch()}
+      {openAdd && (
+        <AddEngineerModal
+          open={openAdd}
+          setOpen={setOpenAdd}
+          reloadPage={() => {
+            adjustPage(1)
+            removeQueryCaches()
+          }}
         />
       )}
+      {openDetail &&
+        (!isLoadingEngineer ? (
+          <EngineerModal
+            open={openDetail}
+            setOpen={setOpenDetail}
+            initialData={selectedData!}
+            reloadPages={() => removeQueryCaches()}
+          />
+        ) : (
+          <Backdrop open={isLoadingEngineer} sx={theme => ({ zIndex: theme.zIndex.drawer + 1 })}>
+            <CircularProgress size={100} sx={{ color: 'white' }} />
+          </Backdrop>
+        ))}
     </>
   )
 }

@@ -1,30 +1,24 @@
 'use client'
 
 // React Imports
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 
 // MUI Imports
 import Button from '@mui/material/Button'
 
-import {
-  Autocomplete,
-  DialogContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  TextField
-} from '@mui/material'
+import { Autocomplete, Grid2, TextField, Typography } from '@mui/material'
+
+import { useForm } from 'react-hook-form'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import { InputBox } from '@/@core/components/custom/InputBox'
-import type { MemberLookupResponseDtoType, MachineEngineerCreateRequestDtoType } from '@/@core/types'
+import type { MachineEngineerCreateRequestDtoType } from '@/@core/types'
 
-import { EngineerInitialData } from '@/app/_constants/EngineerSeed'
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/engineerInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
+import TextInputBox from '@/@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
+import { useGetEngineersOptions, useGetMembersLookup } from '@/@core/hooks/customTanstackQueries'
 
 type AddEngineerModalProps = {
   open: boolean
@@ -33,36 +27,32 @@ type AddEngineerModalProps = {
 }
 
 const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) => {
-  const [userData, setUserData] = useState<MachineEngineerCreateRequestDtoType>(EngineerInitialData)
-  const [memberList, setMemberList] = useState<MemberLookupResponseDtoType[]>([])
+  const { data: memberList } = useGetMembersLookup()
+  const memberOption = memberList?.map(v => ({ value: v.memberId, label: `${v.name} (${v.email})` })) ?? []
+
+  const { data: engineerList } = useGetEngineersOptions()
+
   const [loading, setLoading] = useState(false)
 
-  // 멤버 리스트 가져오기
-  const getMemberList = useCallback(async () => {
-    try {
-      const response = await auth.get<{ data: { memberLookupResponseDtos: MemberLookupResponseDtoType[] } }>(
-        `/api/members/lookup`
-      )
-
-      const result = response.data.data.memberLookupResponseDtos
-
-      setMemberList(result)
-    } catch (error) {
-      handleApiError(error)
+  const form = useForm<MachineEngineerCreateRequestDtoType>({
+    defaultValues: {
+      memberId: 0,
+      grade: '',
+      engineerLicenseNum: '',
+      remark: ''
     }
-  }, [])
-
-  useEffect(() => {
-    getMemberList()
-  }, [getMemberList])
+  })
 
   // 추가 핸들러
-  const onSubmitHandler = async () => {
+  const onSubmitHandler = form.handleSubmit(async data => {
     try {
       setLoading(true)
-      const response = await auth.post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, userData)
 
-      console.log('new member added', response.data.data)
+      const response = await auth
+        .post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, data)
+        .then(v => v.data.data)
+
+      console.log(`new engineer added: ${response.memberId}`)
       handleSuccess('새 설비인력이 추가되었습니다.')
 
       reloadPage()
@@ -72,7 +62,7 @@ const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) 
     } finally {
       setLoading(false)
     }
-  }
+  })
 
   return (
     <DefaultModal
@@ -91,87 +81,34 @@ const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) 
         </Button>
       }
     >
-      <DialogContent className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
-        <TableContainer sx={{ border: 'solid 1px', borderColor: 'lightgray', borderRadius: '8px' }}>
-          <Table size='small'>
-            <TableBody>
-              {Object.keys(userData).map(value => {
-                if (['remark'].includes(value)) return null
-                const key = value as keyof typeof userData
-
-                return (
-                  <TableRow key={key}>
-                    {key === 'memberId' ? (
-                      <>
-                        <TableCell
-                          width={'30%'}
-                          sx={{
-                            borderRight: '1px solid',
-                            borderColor: 'lightgray',
-                            textAlign: 'center',
-                            fontWeight: 'bold',
-                            fontSize: 'medium'
-                          }}
-                        >
-                          <span>
-                            이름<sup style={{ color: 'red' }}>*</sup>
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Autocomplete
-                            onChange={(_, value) =>
-                              setUserData({ ...userData, [key as keyof typeof userData]: value?.value })
-                            }
-                            size='small'
-                            options={memberList.map(member => {
-                              return { label: `${member.name} (${member.email})`, value: member.memberId }
-                            })}
-                            renderInput={params => <TextField {...params} />}
-                          />
-                        </TableCell>
-                      </>
-                    ) : (
-                      <>
-                        <TableCell
-                          width={'30%'}
-                          sx={{
-                            borderRight: '1px solid',
-                            borderColor: 'lightgray',
-                            textAlign: 'center',
-                            fontWeight: 'bold',
-                            fontSize: 'medium'
-                          }}
-                        >
-                          {ENGINEER_INPUT_INFO[key]?.label}
-                        </TableCell>
-                        <TableCell>
-                          <InputBox
-                            tabInfos={ENGINEER_INPUT_INFO}
-                            tabFieldKey={key}
-                            value={userData[key]}
-                            onChange={value => setUserData({ ...userData, [key]: value })}
-                            showLabel={false}
-                          />
-                        </TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <div className='flex flex-col gap-1'>
-          <span className='font-extrabold'>{ENGINEER_INPUT_INFO.remark?.label}</span>
-          <InputBox
-            tabInfos={ENGINEER_INPUT_INFO}
-            tabFieldKey={'remark'}
-            value={userData.remark}
-            onChange={value => setUserData({ ...userData, remark: value })}
-            showLabel={false}
-          />
-        </div>
-      </DialogContent>
+      <div className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
+        <Grid2 container rowSpacing={2} columnSpacing={5} columns={2}>
+          <div className='flex flex-col w-full relative'>
+            <Typography
+              {...(form.formState.dirtyFields.memberId && { color: 'primary.main' })}
+              {...(form.formState.errors.memberId && { color: 'error.main' })}
+              sx={{ position: 'relative', width: 'fit-content' }}
+            >
+              이름
+              <sup className='absolute right-0 translate-x-full text-red-500'>*</sup>
+            </Typography>
+            <Autocomplete
+              fullWidth
+              size='small'
+              options={memberOption}
+              noOptionsText='해당 이름의 직원을 찾을 수 없습니다'
+              getOptionDisabled={option => engineerList?.some(v => v.memberId === option.value) ?? false}
+              onChange={(_, value) => form.setValue('memberId', value?.value ?? 0, { shouldDirty: true })}
+              renderInput={params => <TextField {...params} />}
+            />
+          </div>
+          <MultiInputBox column={2} form={form} name={'grade'} labelMap={ENGINEER_INPUT_INFO} />
+          <TextInputBox column={2} form={form} name={'engineerLicenseNum'} labelMap={ENGINEER_INPUT_INFO} />
+        </Grid2>
+        <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
+          <TextInputBox column={2} multiline form={form} name={'remark'} labelMap={ENGINEER_INPUT_INFO} />
+        </Grid2>
+      </div>
     </DefaultModal>
   )
 }
