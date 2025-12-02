@@ -139,7 +139,7 @@ function InputBoxContent() {
       return (
         <CustomTextField
           required={showLabel && required}
-          slotProps={{ htmlInput: { name: tabFieldKey, min: '2001-01-01', max: '2999-01-01' } }}
+          slotProps={{ htmlInput: { name: tabFieldKey, min: '1800-01-01', max: '2999-01-01' } }}
           type={tabField.type}
           id={tabFieldKey}
           disabled={disabled}
