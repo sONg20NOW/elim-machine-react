@@ -122,7 +122,7 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
       onClose={handleClose}
       headerDescription={initialData.engineerLicenseNum}
       primaryButton={
-        <Button variant='contained' type='submit' disabled={!isDirty || loading} onClick={handleSave}>
+        <Button variant='contained' type='submit' color='success' disabled={!isDirty || loading} onClick={handleSave}>
           저장
         </Button>
       }
@@ -137,6 +137,7 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
             삭제
           </Button>
           <Button
+            disabled={!isDirty}
             color='error'
             onClick={() => {
               if (isDirty) setOpenAlertNoSave(true)

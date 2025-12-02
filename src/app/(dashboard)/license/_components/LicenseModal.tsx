@@ -125,7 +125,13 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
       onClose={handleClose}
       headerDescription={initialData.bizno}
       primaryButton={
-        <Button variant='contained' onClick={() => handleSave()} type='submit' color='success'>
+        <Button
+          variant='contained'
+          onClick={() => handleSave()}
+          type='submit'
+          color='success'
+          disabled={!isDirty || loading}
+        >
           저장
         </Button>
       }
@@ -146,6 +152,7 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
             삭제
           </Button>
           <Button
+            disabled={!isDirty}
             color='error'
             onClick={() => {
               if (isDirty) setOpenAlertNoSave(true)
