@@ -7,7 +7,7 @@ import { createContext, useCallback, useRef, useState } from 'react'
 
 import Button from '@mui/material/Button'
 
-import { CircularProgress, Grid2, Typography } from '@mui/material'
+import { Backdrop, CircularProgress, Grid2, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
@@ -38,7 +38,7 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
   const engineerId = initialData.id
 
   const [loading, setLoading] = useState(false)
-  const { mutate: mutateEngineer } = useMutateEngineer(engineerId.toString())
+  const { mutate: mutateEngineer, isPending } = useMutateEngineer(engineerId.toString())
 
   const [openDelete, setOpenDelete] = useState(false)
   const [openAlert, setOpenAlert] = useState(false)
@@ -185,6 +185,9 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
           confirmMessage='폐기'
         />
       )}
+      <Backdrop sx={theme => ({ zIndex: theme.zIndex.drawer + 1 })} open={isPending}>
+        <CircularProgress sx={{ color: 'white' }} size={50} />
+      </Backdrop>{' '}
     </DefaultModal>
   )
 }
