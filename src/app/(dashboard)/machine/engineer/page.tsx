@@ -12,7 +12,7 @@ import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
-import { IconReload } from '@tabler/icons-react'
+import { IconPlus, IconReload } from '@tabler/icons-react'
 
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -295,7 +295,7 @@ export default function EngineerPage() {
             {/* 유저 추가 버튼 */}
             <Button
               variant='contained'
-              startIcon={<i className='tabler-plus' />}
+              startIcon={<IconPlus />}
               onClick={() => setOpenAdd(!openAdd)}
               className='max-sm:is-full'
               disabled={disabled}
