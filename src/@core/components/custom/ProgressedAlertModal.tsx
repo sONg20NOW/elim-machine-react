@@ -32,7 +32,7 @@ export default function ProgressedAlertModal({
           {title ?? '지금까지 수정한 내용이 저장되지 않습니다.'}
         </Typography>
         <Typography component={'div'} variant='subtitle1'>
-          {subtitle ?? '그래도 나가시겠습니까?'}
+          {subtitle ?? '그래도 계속 진행하시겠습니까?'}
         </Typography>
       </DialogTitle>
 
