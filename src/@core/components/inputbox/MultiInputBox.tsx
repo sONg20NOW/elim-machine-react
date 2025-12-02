@@ -1,6 +1,6 @@
 import { Grid2, MenuItem, TextField, Typography } from '@mui/material'
 import type { Path, UseFormReturn } from 'react-hook-form'
-import { Controller } from 'react-hook-form'
+import { Controller, useFormState } from 'react-hook-form'
 
 import { YNOption } from '@/app/_constants/options'
 
@@ -9,7 +9,8 @@ interface MultiInputBoxProps<T extends Record<string, any>> {
   labelMap: Partial<Record<Path<T>, Partial<{ label: string; options: { label: string; value: string }[] }>>>
   name: Path<T>
   disabled?: boolean
-  column?: 1 | 2
+  column?: number
+  required?: boolean
 }
 
 /**
@@ -17,14 +18,16 @@ interface MultiInputBoxProps<T extends Record<string, any>> {
  * @param name * form의 name
  * @param form * form
  * @param labelMap * INPUT_INFO
- * @param column 1: 반칸, 2: fullWidth (기본값: 1)
  * @param diabled 선택 옵션
+ * @param required 선택 옵션
+ * @param column 1: 반칸, 2: fullWidth (기본값: 1)
  */
 export default function MultiInputBox<T extends Record<string, any>>({
   form,
   labelMap,
   name,
   disabled = false,
+  required = false,
   column = 1
 }: MultiInputBoxProps<T>) {
   const label = labelMap[name]?.label ?? ''
@@ -32,13 +35,22 @@ export default function MultiInputBox<T extends Record<string, any>>({
 
   const dirty = (form.formState.dirtyFields as any)[name]
 
+  const error = useFormState({ ...form, name: name }).errors[name]
+
   return (
     <Grid2 size={column}>
-      <div className='flex flex-col w-full'>
-        <Typography {...(dirty && { color: 'primary.main' })} {...(disabled && { color: 'lightgray' })}>
+      <div className='flex flex-col w-full relative'>
+        <Typography
+          sx={{ position: 'relative', width: 'fit-content' }}
+          {...(dirty && { color: 'primary.main' })}
+          {...(error && { color: 'error.main' })}
+          {...(disabled && { color: 'lightgray' })}
+        >
           {label}
+          {required && <sup className='absolute right-0 translate-x-full text-red-500'>*</sup>}
         </Typography>
         <Controller
+          rules={{ ...(required && { required: { value: required, message: '필수 입력입니다' } }) }}
           name={name}
           control={form.control}
           render={({ field }) => (
@@ -73,6 +85,16 @@ export default function MultiInputBox<T extends Record<string, any>>({
             </TextField>
           )}
         />
+        {error && (
+          <Typography
+            variant='caption'
+            sx={{ position: 'absolute', right: 0, top: 0 }}
+            color='error.main'
+            align='right'
+          >
+            {error.message?.toString()}
+          </Typography>
+        )}
       </div>
     </Grid2>
   )

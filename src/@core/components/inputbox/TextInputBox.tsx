@@ -63,7 +63,7 @@ export default function TextInputBox<T extends Record<string, any>>({
           disabled={disabled}
           {...(type && { type: type })}
           {...(multiline && { multiline: true, minRows: 3 })}
-          {...form.register(name, rule)}
+          {...form.register(name, { ...rule, required: { value: required, message: '필수 입력입니다' } })}
           {...(postcode && {
             slotProps: {
               htmlInput: { name: name },
