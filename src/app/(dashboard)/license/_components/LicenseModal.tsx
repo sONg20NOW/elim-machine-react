@@ -25,10 +25,11 @@ type LicenseModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   initialData: LicenseResponseDtoType
+  adjustPage: (offset: number) => void
   reloadPages: () => void
 }
 
-const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalProps) => {
+const LicenseModal = ({ open, setOpen, initialData, adjustPage, reloadPages }: LicenseModalProps) => {
   const licenseId = initialData.id
 
   const [loading, setLoading] = useState(false)
@@ -68,6 +69,7 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
 
   const handleDeleteLicense = async () => {
     await deleteLicense(licenseId, initialData.version)
+    adjustPage(-1)
     reloadPages()
     setOpen(false)
   }
