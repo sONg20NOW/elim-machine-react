@@ -48,6 +48,7 @@ import type {
   MemberCareerDtoType,
   MemberDetailResponseDtoType,
   MemberEtcDtoType,
+  MemberLookupResponseDtoType,
   MemberOfficeDtoType,
   MemberPageDtoType,
   MemberPrivacyDtoType,
@@ -1052,6 +1053,29 @@ export const useGetMembers = (queryParams: string) => {
 
   return useQuery({
     queryKey: QUERY_KEYS.MEMBER.GET_MEMBERS(queryParams),
+    queryFn: fetchMembers,
+    staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+// GET /api/members/lookup
+export const useGetMembersLookup = () => {
+  const fetchMembers: QueryFunction<MemberLookupResponseDtoType[], string[]> = useCallback(async data => {
+    const [keyType] = data.queryKey
+
+    const response = await auth
+      .get<{
+        data: { memberLookupResponseDtos: MemberLookupResponseDtoType[] }
+      }>(`/api/members/lookup`)
+      .then(v => v.data.data.memberLookupResponseDtos)
+
+    console.log(`!!! queryFn ${keyType}`)
+
+    return response
+  }, [])
+
+  return useQuery({
+    queryKey: QUERY_KEYS.MEMBER.GET_MEMBERS_LOOKUP,
     queryFn: fetchMembers,
     staleTime: 1000 * 60 * 5 // 5분
   })
