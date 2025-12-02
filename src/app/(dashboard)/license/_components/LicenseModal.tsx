@@ -9,7 +9,7 @@ import Button from '@mui/material/Button'
 
 import { useForm } from 'react-hook-form'
 
-import { CircularProgress } from '@mui/material'
+import { Backdrop, CircularProgress } from '@mui/material'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { LicenseCreateRequestDto, LicenseResponseDtoType } from '@/@core/types'
@@ -32,7 +32,7 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
   const licenseId = initialData.id
 
   const [loading, setLoading] = useState(false)
-  const { mutate: mutateLicense } = useMutateLicense(licenseId.toString())
+  const { mutate: mutateLicense, isPending } = useMutateLicense(licenseId.toString())
 
   const [openDelete, setOpenDelete] = useState(false)
   const [openAlert, setOpenAlert] = useState(false)
@@ -68,7 +68,7 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
 
   const handleDeleteLicense = async () => {
     await deleteLicense(licenseId, initialData.version)
-    reloadPages && reloadPages()
+    reloadPages()
     setOpen(false)
   }
 
@@ -101,7 +101,7 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
   // 실제로 창이 닫힐 때 동작하는 함수
   const onClose = useCallback(() => {
     if (changedEvenOnce.current) {
-      reloadPages && reloadPages()
+      reloadPages()
     }
 
     setOpen(false)
@@ -164,22 +164,20 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
         ) : (
           <LicenseInputs form={form} />
         )}
-
-        {openDelete && (
-          <DeleteModal showDeleteModal={openDelete} setShowDeleteModal={setOpenDelete} onDelete={handleDeleteLicense} />
-        )}
-        {openAlert && <ProgressedAlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={onClose} />}
-        {openAlertNoSave && (
-          <ProgressedAlertModal
-            open={openAlertNoSave}
-            setOpen={setOpenAlertNoSave}
-            handleConfirm={handleDontSave}
-            title={'변경사항을 모두 폐기하시겠습니까?'}
-            subtitle='폐기한 후에는 복구할 수 없습니다'
-            confirmMessage='폐기'
-          />
-        )}
       </div>
+      {openDelete && <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={handleDeleteLicense} />}
+      {openAlert && <ProgressedAlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={onClose} />}
+      {openAlertNoSave && (
+        <ProgressedAlertModal
+          open={openAlertNoSave}
+          setOpen={setOpenAlertNoSave}
+          handleConfirm={handleDontSave}
+          title={'변경사항을 모두 폐기하시겠습니까?'}
+          subtitle='폐기한 후에는 복구할 수 없습니다'
+          confirmMessage='폐기'
+        />
+      )}
+      <Backdrop sx={theme => ({ zIndex: theme.zIndex.drawer + 1 })} open={isPending} />
     </DefaultModal>
   )
 }
