@@ -1,26 +1,13 @@
 import { Grid2 } from '@mui/material'
 
-import type { Path, RegisterOptions, UseFormReturn } from 'react-hook-form'
+import type { UseFormReturn } from 'react-hook-form'
 
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'
 import type { LicenseCreateRequestDto } from '@/@core/types'
 import { LICENSE_INPUT_INFO } from '@/app/_constants/input/licenseInputInfo'
+import { emailRule } from '@/app/_constants/input/inputRule'
 
 export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCreateRequestDto, any, undefined> }) {
-  const emailRule: RegisterOptions<LicenseCreateRequestDto, Path<LicenseCreateRequestDto>> = {
-    pattern: {
-      value: /^([a-zA-Z0-9._-]+)@([a-zA-Z0-9._-]+)\.([a-zA-Z]{2,})$/,
-      message: '이메일 형식에 맞춰서 입력하세요'
-    }
-  }
-
-  //   const phoneRule: RegisterOptions<LicenseCreateRequestDto, Path<LicenseCreateRequestDto>> = {
-  //     pattern: {
-  //       value: /^010\-[0-9]{4}\-[0-9]{4}$/,
-  //       message: '010-0000-0000 형식에 맞춰주세요'
-  //     }
-  //   }
-
   return (
     <div className='grid gap-5'>
       <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
