@@ -363,6 +363,7 @@ export interface MachineEngineerOptionListResponseDtoType {
 }
 
 export interface MachineEngineerOptionResponseDtoType {
+  memberId: number
   engineerId: number
   engineerName: string
   gradeDescription: string
