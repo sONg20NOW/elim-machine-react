@@ -75,7 +75,7 @@ const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
       setOpen={setOpen}
       title={'신규 라이선스 추가'}
       primaryButton={
-        <Button variant='contained' onClick={() => onSubmitHandler()} type='submit' disabled={loading}>
+        <Button variant='contained' onClick={onSubmitHandler} type='submit' disabled={loading}>
           추가
         </Button>
       }
