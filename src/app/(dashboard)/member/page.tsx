@@ -16,6 +16,8 @@ import { IconReload, IconTrashFilled } from '@tabler/icons-react'
 
 import { useQueryClient } from '@tanstack/react-query'
 
+import { Typography } from '@mui/material'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
@@ -337,7 +339,9 @@ export default function MemberPage() {
             </Button>
           </div>
         </div>
-
+        <Typography color='warning.main' sx={{ px: 3 }}>
+          ※우클릭으로 삭제할 수 있습니다
+        </Typography>
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<MemberPageDtoType>

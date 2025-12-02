@@ -290,7 +290,9 @@ export default function Licensepage() {
             </Button>
           </div>
         </div>
-
+        <Typography color='warning.main' sx={{ px: 3 }}>
+          ※우클릭으로 삭제할 수 있습니다
+        </Typography>
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<LicensePageResponseDtoType>
@@ -312,6 +314,7 @@ export default function Licensepage() {
                 label: '삭제',
                 handleClick: async row => {
                   await deleteLicense(row.licenseId, row.version)
+                  adjustPage(-1)
                   removeQueryCaches()
                 }
               }

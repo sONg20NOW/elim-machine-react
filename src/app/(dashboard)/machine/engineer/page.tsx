@@ -16,7 +16,7 @@ import { IconBoltOff, IconPlus, IconReload } from '@tabler/icons-react'
 
 import { useQueryClient } from '@tanstack/react-query'
 
-import { Backdrop, CircularProgress } from '@mui/material'
+import { Backdrop, CircularProgress, Typography } from '@mui/material'
 
 import CustomTextField from '@core/components/mui/TextField'
 
@@ -305,7 +305,9 @@ export default function EngineerPage() {
             </Button>
           </div>
         </div>
-
+        <Typography color='warning.main' sx={{ px: 3 }}>
+          ※우클릭으로 설비인력에서 제외할 수 있습니다
+        </Typography>
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<MachineEngineerPageResponseDtoType>
@@ -328,6 +330,7 @@ export default function EngineerPage() {
                 label: '설비인력에서 제외',
                 handleClick: async row => {
                   await deleteEngineer(row.engineerId, row.version)
+                  adjustPage(-1)
                   removeQueryCaches()
                 }
               }
