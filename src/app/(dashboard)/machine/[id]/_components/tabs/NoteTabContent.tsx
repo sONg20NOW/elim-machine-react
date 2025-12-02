@@ -1,144 +1,89 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Button, Typography } from '@mui/material'
+import { Button, Grid2, Typography } from '@mui/material'
 
-import CustomTextField from '@/@core/components/mui/TextField'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import AlertModal from '@/@core/components/custom/AlertModal'
+import { useForm } from 'react-hook-form'
+
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
-import { useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/lib/auth'
+import { useGetMachineProject, useMutateMachineProjectNote } from '@/@core/hooks/customTanstackQueries'
+import TextInputBox from '@/@core/components/inputbox/TextInputBox'
+import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
+
+const MAX_LENGTH = 500
 
 const NoteTabContent = ({}) => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
-  const { data: projectData, refetch: refetchProjectData } = useGetMachineProject(machineProjectId)
+  const { data: projectData } = useGetMachineProject(machineProjectId)
+  const { mutateAsync: mutateNoteAsync, isPending } = useMutateMachineProjectNote(machineProjectId)
 
-  const { isEditing, setIsEditing } = useMachineIsEditingStore()
-  const [note, setNote] = useState(projectData?.note || '')
+  const setIsEditing = useMachineIsEditingStore(set => set.setIsEditing)
 
-  const [showAlertModal, setShowAlertModal] = useState(false)
+  const [openAlert, setOpenAlert] = useState(false)
 
-  const [isSaving, setIsSaving] = useState(false)
-
-  const existChange = note !== projectData?.note
-
-  const maxLength = 500
-
-  // 최대 글자수를 넘기면 입력 불가.
-
-  const handleSave = async () => {
-    if (existChange) {
-      try {
-        setIsSaving(true)
-
-        const updatedData = {
-          version: projectData?.version,
-          note: note
-        }
-
-        const response = await auth.put(`/api/machine-projects/${machineProjectId}/note`, updatedData)
-
-        refetchProjectData()
-        console.log('참고사항 저장 성공:', response.data)
-        handleSuccess('특이사항이 성공적으로 저장되었습니다.')
-        setIsEditing(false)
-      } catch (error) {
-        handleApiError(error)
-      } finally {
-        setIsSaving(false)
-      }
-    } else {
-      setIsEditing(false)
+  const form = useForm<{ note: string }>({
+    defaultValues: {
+      note: projectData?.note ?? ''
     }
+  })
+
+  const isDirty = form.formState.isDirty
+  const watchedNote = form.watch('note')
+
+  useEffect(() => {
+    setIsEditing(isDirty)
+  }, [isDirty, setIsEditing])
+
+  const handleSave = form.handleSubmit(async data => {
+    if (!projectData?.version) {
+      console.log('A타입 에러 발생')
+
+      return
+    }
+
+    if (isDirty) {
+      const newNote = await mutateNoteAsync({ ...data, version: projectData.version })
+
+      form.reset(newNote)
+    }
+  })
+
+  const handleDontSave = () => {
+    form.reset()
+    setOpenAlert(false)
   }
 
   return (
     projectData && (
-      <div className='relative'>
-        {isEditing ? (
-          <CustomTextField
-            inputProps={{ maxLength: maxLength }}
-            fullWidth
-            rows={4}
-            multiline
-            label=''
-            placeholder='참고 사항을 입력해 주세요 (최대 글자수 500)'
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            onFocus={() => setIsEditing(true)}
-          />
-        ) : (
-          <Typography
-            sx={{
-              whiteSpace: 'pre-line',
-              overflowWrap: 'break-word',
-              border: 'solid 1px',
-              borderColor: 'lightgray',
-              borderRadius: 1,
-              px: 3.3,
-              py: 1.8
-            }}
-            minHeight={110}
-          >
-            {note}
-          </Typography>
-        )}
-        <div className='flex gap-2 mt-4'>
-          {isEditing ? (
-            <Button
-              variant='contained'
-              color='success'
-              onClick={() => {
-                handleSave()
-              }}
-              disabled={isSaving}
-            >
+      <div className='grid gap-4'>
+        <Grid2 container columns={1}>
+          <TextInputBox multiline form={form} name='note' labelMap={{ note: { label: '' } }} />
+        </Grid2>
+        <div className='flex justify-between items-start'>
+          <div className='flex gap-2 items-end'>
+            <Button variant='contained' color='success' disabled={!isDirty || isPending} onClick={handleSave}>
               저장
             </Button>
-          ) : (
-            <Button
-              variant='contained'
-              color='primary'
-              onClick={() => {
-                setIsEditing(true)
-              }}
-              disabled={isSaving}
-            >
-              수정
+            <Button color='error' disabled={!isDirty || isPending} onClick={() => setOpenAlert(true)}>
+              변경사항 폐기
             </Button>
-          )}
-          {isEditing && (
-            <Button
-              variant='contained'
-              color='secondary'
-              onClick={() => {
-                if (existChange) {
-                  setShowAlertModal(true)
-                } else {
-                  setIsEditing(false)
-                }
-              }}
-            >
-              취소
-            </Button>
-          )}
+          </div>
+          <Typography>
+            {watchedNote.length} / {MAX_LENGTH}
+          </Typography>
         </div>
-        {showAlertModal && (
-          <AlertModal
-            setIsEditing={setIsEditing}
-            showAlertModal={showAlertModal}
-            setShowAlertModal={setShowAlertModal}
-            setEditData={setNote}
-            originalData={projectData.note ?? ''}
+        {openAlert && (
+          <ProgressedAlertModal
+            open={openAlert}
+            setOpen={setOpenAlert}
+            handleConfirm={handleDontSave}
+            title='특이사항 변경사항이 사라집니다'
+            subtitle='그래도 진행하시겠습니까?'
           />
         )}
-        <Typography sx={{ position: 'absolute', right: 0, bottom: 0 }}>
-          {note.length} / {maxLength}
-        </Typography>
       </div>
     )
   )
