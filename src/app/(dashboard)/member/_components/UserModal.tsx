@@ -35,6 +35,7 @@ import OfficeTabContent from './tabs/OfficeTabContent'
 import CareerTabContent from './tabs/CareerTabContent'
 import EtcTabContent from './tabs/EtcTabContent'
 import ForgotPasswordPage from '@/app/(login)/login/_components/forgotPasswordModal'
+import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 
 export type refType = {
   handleSave: () => void
@@ -192,7 +193,7 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
         handleSuccess(`${savedTabs.join(', ')}가 수정되었습니다`)
 
         changedEvenOnce.current = true
-      }
+      } else printWarningSnackbar('변경사항이 없습니다', 1500)
     } catch (error: any) {
       handleApiError(error)
     } finally {
@@ -279,6 +280,7 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
                   const dirty = getIsDirty()
 
                   if (dirty) setOpenAlertNoSave(true)
+                  else printWarningSnackbar('변경사항이 없습니다', 1500)
                 }}
               >
                 변경사항 폐기
