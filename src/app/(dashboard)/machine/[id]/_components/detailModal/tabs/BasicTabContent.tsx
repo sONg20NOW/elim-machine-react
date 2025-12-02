@@ -223,8 +223,9 @@ export default function BasicTabContent({
           )}
         </div>
         <div className='grid grid-cols-4 gap-2'>
-          {!isEditing
-            ? (editData.engineerIds || []).map((id, idx) => {
+          {!isEditing ? (
+            editData.engineerIds.length > 0 ? (
+              editData.engineerIds.map((id, idx) => {
                 const engineer = participatedEngineerList?.find(value => value.engineerId === id)
 
                 return (
@@ -235,60 +236,65 @@ export default function BasicTabContent({
                   >{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</Card>
                 )
               })
-            : editData.engineerIds
-                .map((id, idx) => {
-                  const engineer = participatedEngineerList?.find(value => value.engineerId === id)
+            ) : (
+              <Typography variant='inherit'>배정된 점검자가 없습니다</Typography>
+            )
+          ) : (
+            editData.engineerIds
+              .map((id, idx) => {
+                const engineer = participatedEngineerList?.find(value => value.engineerId === id)
 
-                  return (
-                    <TextField
-                      key={idx}
-                      sx={{ '& .MuiSelect-select': { px: '16px !important', py: '8px' } }}
-                      fullWidth
-                      size='small'
-                      slotProps={{ ...(isMobile && { select: { IconComponent: () => null } }) }}
-                      value={engineer?.engineerId ?? ''}
-                      select
-                      onChange={e => {
-                        editData.engineerIds.splice(idx, 1, Number(e.target.value))
+                return (
+                  <TextField
+                    key={idx}
+                    sx={{ '& .MuiSelect-select': { px: '16px !important', py: '8px' } }}
+                    fullWidth
+                    size='small'
+                    slotProps={{ ...(isMobile && { select: { IconComponent: () => null } }) }}
+                    value={engineer?.engineerId ?? ''}
+                    select
+                    onChange={e => {
+                      editData.engineerIds.splice(idx, 1, Number(e.target.value))
 
+                      setEditData(prev => ({
+                        ...prev,
+                        engineerIds: prev.engineerIds
+                      }))
+                    }}
+                  >
+                    {participatedEngineerList?.map(engineer => (
+                      <MenuItem
+                        key={engineer.engineerId}
+                        value={engineer.engineerId}
+                        disabled={editData.engineerIds.includes(engineer.engineerId)}
+                      >{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</MenuItem>
+                    ))}
+                    <MenuItem
+                      sx={{ color: 'white', bgcolor: 'error.main', ':hover': { bgcolor: 'error.light' } }}
+                      onClick={() =>
                         setEditData(prev => ({
                           ...prev,
-                          engineerIds: prev.engineerIds
+                          engineerIds: prev.engineerIds.filter((id, index) => idx !== index)
                         }))
-                      }}
+                      }
                     >
-                      {participatedEngineerList?.map(engineer => (
-                        <MenuItem
-                          key={engineer.engineerId}
-                          value={engineer.engineerId}
-                          disabled={editData.engineerIds.includes(engineer.engineerId)}
-                        >{`${engineer?.engineerName} [${engineer?.gradeDescription}]`}</MenuItem>
-                      ))}
-                      <MenuItem
-                        sx={{ color: 'white', bgcolor: 'error.main', ':hover': { bgcolor: 'error.light' } }}
-                        onClick={() =>
-                          setEditData(prev => ({
-                            ...prev,
-                            engineerIds: prev.engineerIds.filter((id, index) => idx !== index)
-                          }))
-                        }
-                      >
-                        삭제
-                      </MenuItem>
-                    </TextField>
-                  )
-                })
-                .concat(
-                  <Card
-                    key={'plus'}
-                    sx={{ bgcolor: 'primary.light', border: 'solid 2px', borderColor: 'primary.main' }}
-                    variant='outlined'
-                    component={Button}
-                    onClick={() => setEditData(prev => ({ ...prev, engineerIds: editData.engineerIds.concat(0) }))}
-                  >
-                    <i className='tabler-plus text-white' />
-                  </Card>
-                )}
+                      삭제
+                    </MenuItem>
+                  </TextField>
+                )
+              })
+              .concat(
+                <Card
+                  key={'plus'}
+                  sx={{ bgcolor: 'primary.light', border: 'solid 2px', borderColor: 'primary.main' }}
+                  variant='outlined'
+                  component={Button}
+                  onClick={() => setEditData(prev => ({ ...prev, engineerIds: editData.engineerIds.concat(0) }))}
+                >
+                  <i className='tabler-plus text-white' />
+                </Card>
+              )
+          )}
         </div>
       </div>
       <table style={{ tableLayout: 'fixed' }}>
