@@ -872,6 +872,42 @@ export const useGetMachineProject = (machineProjectId: string) => {
   })
 }
 
+interface MachineProjectNoteUpdateResponseDto {
+  version: number
+  note: string
+}
+
+export const useMutateMachineProjectNote = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECT(machineProjectId)
+
+  return useMutation<MachineProjectNoteUpdateResponseDto, AxiosError, MachineProjectNoteUpdateResponseDto>({
+    mutationFn: async data => {
+      const response = await auth.put<{ data: MachineProjectNoteUpdateResponseDto }>(
+        `/api/machine-projects/${machineProjectId}/note`,
+        data
+      )
+
+      return response.data.data
+    },
+
+    onSuccess: newNote => {
+      queryClient.setQueryData(queryKey, (prev: MachineProjectResponseDtoType) => ({
+        ...prev,
+        note: newNote.note,
+        version: newNote.version
+      }))
+      console.log('useMutateMachineProjectNote.')
+      toast.info('특이사항이 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
 // GET /api/machine-projects
 export const useGetMachineProjects = (queryParams: string) => {
   return useQuery({
