@@ -369,9 +369,8 @@ export default function Licensepage() {
             open={openDetail}
             setOpen={setOpenDetail}
             initialData={selectedData!}
-            reloadPages={() => {
-              removeQueryCaches()
-            }}
+            adjustPage={adjustPage}
+            reloadPages={removeQueryCaches}
           />
         ) : (
           <Backdrop open={isLoadingLicense} sx={theme => ({ zIndex: theme.zIndex.drawer + 1 })}>
