@@ -335,9 +335,7 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
         </DialogActions>
       </Dialog>
 
-      {openDelete && (
-        <DeleteModal showDeleteModal={openDelete} setShowDeleteModal={setOpenDelete} onDelete={onDeleteUserConfirm} />
-      )}
+      {openDelete && <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={onDeleteUserConfirm} />}
       {openAlert && (
         <ProgressedAlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleQuitWithoutSave} />
       )}

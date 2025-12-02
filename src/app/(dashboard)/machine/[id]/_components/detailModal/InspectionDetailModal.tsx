@@ -418,11 +418,7 @@ const InspectionDetailModalInner = ({
           setIsEditing={setIsEditing}
           originalData={selectedInspection}
         />
-        <DeleteModal
-          showDeleteModal={showDeleteModal}
-          setShowDeleteModal={setShowDeleteModal}
-          onDelete={handleDelete}
-        />
+        <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />
         {/* 갤러리 버튼 클릭 시 동작 */}
         {showPictureListModal && (
           <PictureListModal
