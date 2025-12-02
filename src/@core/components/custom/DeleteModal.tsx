@@ -21,8 +21,12 @@ export default function DeleteModal({ open, setOpen, onDelete, title }: DeleteMo
       {/* Title */}
       <DialogTitle sx={{ textAlign: 'center' }}>
         <IconAlertCircleFilled size={40} className='text-red-400 mx-auto' />
-        <Typography variant='inherit'>{title ?? '정말 삭제하시겠습니까?'}</Typography>
-        <Typography variant='subtitle1'>삭제 후에는 되돌리지 못합니다.</Typography>
+        <Typography component={'div'} variant='inherit'>
+          {title ?? '정말 삭제하시겠습니까?'}
+        </Typography>
+        <Typography component={'div'} variant='subtitle1'>
+          삭제 후에는 되돌리지 못합니다.
+        </Typography>
       </DialogTitle>
 
       {/* Buttons */}
