@@ -23,6 +23,8 @@ import { IconCopyPlusFilled, IconPlus, IconReload, IconTrashFilled } from '@tabl
 
 import { Typography } from '@mui/material'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 import type { MachineFilterType, MachineProjectPageDtoType } from '@/@core/types'
@@ -37,6 +39,7 @@ import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 import { auth } from '@/lib/auth'
 import TableFilter from '@/@core/components/custom/TableFilter'
 import { useGetEngineersOptions, useGetMachineProjects } from '@/@core/hooks/customTanstackQueries'
+import { QUERY_KEYS } from '@/app/_constants/queryKeys'
 
 // datepicker 한글화
 dayjs.locale('ko')
@@ -47,6 +50,8 @@ type periodType = 0 | 1 | 3 | 6
 const periodOptions: periodType[] = [1, 3, 6]
 
 export default function MachinePage() {
+  const queryClient = useQueryClient()
+
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
@@ -66,7 +71,7 @@ export default function MachinePage() {
 
   const {
     data: machineProjectsPages,
-    refetch: refetchMachineProjects,
+    refetch: refetchPages,
     isLoading,
     isError
   } = useGetMachineProjects(searchParams.toString())
@@ -147,6 +152,35 @@ export default function MachinePage() {
     })
   }, [updateParams])
 
+  // offset만큼 요소수가 변화했을 때 valid한 페이지 param을 책임지는 함수
+  const adjustPage = useCallback(
+    (offset = 0) => {
+      const lastPageAfter = Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
+
+      if (offset > 0 || page > lastPageAfter) {
+        lastPageAfter > 0 ? setQueryParams({ page: lastPageAfter }) : updateParams(params => params.delete('page'))
+      }
+    },
+    [page, setQueryParams, totalCount, size, updateParams]
+  )
+
+  // tanstack query cache 삭제 및 refetch
+  const removeQueryCaches = useCallback(() => {
+    refetchPages()
+
+    queryClient.removeQueries({
+      predicate(query) {
+        const key = query.queryKey
+
+        return (
+          Array.isArray(key) &&
+          key[0] === QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECTS(searchParams.toString())[0] &&
+          key[1] !== searchParams.toString()
+        ) // 스크롤 유지를 위해 현재 data는 refetch, 나머지는 캐시 지우기
+      }
+    })
+  }, [refetchPages, queryClient, searchParams])
+
   // 기계설비현장 선택 핸들러
   const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
     if (!machineProject?.machineProjectId) return
@@ -178,7 +212,8 @@ export default function MachinePage() {
   const handleDeleteRow = async (row: MachineProjectPageDtoType) => {
     await auth.delete(`/api/machine-projects/${row.machineProjectId}?version=${row.version}`)
     handleSuccess(`${row.machineProjectName}이(가) 삭제되었습니다`)
-    refetchMachineProjects()
+    adjustPage(-1)
+    removeQueryCaches()
 
     return
   }
@@ -186,7 +221,8 @@ export default function MachinePage() {
   const handleCopyRow = async (row: MachineProjectPageDtoType) => {
     await auth.post(`/api/machine-projects/${row.machineProjectId}`)
     handleSuccess(`${row.machineProjectName}이(가) 복사되었습니다`)
-    refetchMachineProjects()
+    adjustPage(1)
+    removeQueryCaches()
 
     return
   }
@@ -385,7 +421,10 @@ export default function MachinePage() {
         <AddMachineProjectModal
           open={addMachineModalOpen}
           setOpen={setAddMachineModalOpen}
-          reloadPage={() => refetchMachineProjects()}
+          reloadPage={() => {
+            adjustPage(1)
+            removeQueryCaches()
+          }}
         />
       )}
     </LocalizationProvider>
