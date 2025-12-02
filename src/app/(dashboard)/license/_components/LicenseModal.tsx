@@ -177,7 +177,9 @@ const LicenseModal = ({ open, setOpen, initialData, reloadPages }: LicenseModalP
           confirmMessage='폐기'
         />
       )}
-      <Backdrop sx={theme => ({ zIndex: theme.zIndex.drawer + 1 })} open={isPending} />
+      <Backdrop sx={theme => ({ zIndex: theme.zIndex.drawer + 1 })} open={isPending}>
+        <CircularProgress sx={{ color: 'white' }} size={50} />
+      </Backdrop>
     </DefaultModal>
   )
 }
