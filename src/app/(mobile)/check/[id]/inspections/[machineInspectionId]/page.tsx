@@ -263,8 +263,8 @@ export default function CheckInspectionDetailPage() {
         </TabContext>
         <DeleteModal
           title={`해당 설비를\n삭제하시겠습니까?`}
-          showDeleteModal={openAlert}
-          setShowDeleteModal={setOpenAlert}
+          open={openAlert}
+          setOpen={setOpenAlert}
           onDelete={handleDeleteInspection}
         />
       </Box>

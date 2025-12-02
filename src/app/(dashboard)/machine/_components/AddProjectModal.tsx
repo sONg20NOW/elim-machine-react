@@ -4,17 +4,20 @@ import { useState } from 'react'
 
 import Button from '@mui/material/Button'
 
-import { DialogContent, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
+import { DialogContent, Grid2 } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
+import { useForm } from 'react-hook-form'
+
 import type { MachineProjectCreateRequestDtoType } from '@/@core/types'
-import { MachineProjectInitialData } from '@/app/_constants/MachineProjectSeed'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import { InputBox } from '@/@core/components/custom/InputBox'
 import { MACHINE_CREATE_INFO } from '@/app/_constants/input/machineInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
+import TextInputBox from '@/@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
+import { useGetLicenseNames } from '@/@core/hooks/customTanstackQueries'
 
 type AddMachineProjectModalProps = {
   open: boolean
@@ -23,19 +26,33 @@ type AddMachineProjectModalProps = {
 }
 
 export default function AddMachineProjectModal({ open, setOpen, reloadPage }: AddMachineProjectModalProps) {
-  const [newData, setNewData] = useState<MachineProjectCreateRequestDtoType>(MachineProjectInitialData)
   const [loading, setLoading] = useState(false)
 
-  const onSubmitHandler = async () => {
+  const { data: licenseList } = useGetLicenseNames()
+  const companyNameOption = licenseList?.map(v => ({ label: v.companyName, value: v.companyName }))
+
+  const form = useForm<MachineProjectCreateRequestDtoType>({
+    defaultValues: {
+      companyName: '',
+      machineProjectName: '',
+      beginDate: '',
+      endDate: '',
+      fieldBeginDate: '',
+      fieldEndDate: '',
+      note: ''
+    }
+  })
+
+  const onSubmitHandler = form.handleSubmit(async data => {
     try {
-      if (newData.machineProjectName === '') {
+      if (data.machineProjectName === '') {
         toast.error('현장명은 필수입력입니다.')
 
         return
       }
 
       setLoading(true)
-      const response = await auth.post<{ data: MachineProjectCreateRequestDtoType }>(`/api/machine-projects`, newData)
+      const response = await auth.post<{ data: MachineProjectCreateRequestDtoType }>(`/api/machine-projects`, data)
 
       console.log('new machine project added', response.data.data)
       handleSuccess('새 기계설비현장이 추가되었습니다.')
@@ -47,7 +64,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
     } finally {
       setLoading(false)
     }
-  }
+  })
 
   return (
     <DefaultModal
@@ -67,46 +84,28 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
       }
     >
       <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-        <TableContainer sx={{ border: 'solid 1px', borderColor: 'lightgray', borderRadius: '8px' }}>
-          <Table size='small'>
-            <TableBody>
-              {Object.keys(newData).map(value => {
-                const key = value as keyof typeof newData
-
-                return (
-                  <TableRow key={key}>
-                    <TableCell
-                      width={'30%'}
-                      sx={{
-                        borderRight: '1px solid',
-                        borderColor: 'lightgray',
-                        textAlign: 'center',
-                        fontWeight: 'bold',
-                        fontSize: 'medium'
-                      }}
-                    >
-                      <span>
-                        {MACHINE_CREATE_INFO[key]?.label}
-                        {(key === 'companyName' || key === 'machineProjectName') && (
-                          <sup style={{ fontSize: '16px', color: 'red' }}>*</sup>
-                        )}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <InputBox
-                        tabInfos={MACHINE_CREATE_INFO}
-                        tabFieldKey={key}
-                        value={newData[key]}
-                        onChange={value => setNewData({ ...newData, [key]: value })}
-                        showLabel={false}
-                      />
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <div className='grid gap-5'>
+          <Grid2 container rowSpacing={2} columnSpacing={5} columns={2}>
+            <MultiInputBox
+              column={2}
+              required
+              form={form}
+              name='companyName'
+              labelMap={{
+                ...MACHINE_CREATE_INFO,
+                companyName: { ...MACHINE_CREATE_INFO.companyName, options: companyNameOption }
+              }}
+            />
+            <TextInputBox column={2} required form={form} name={'machineProjectName'} labelMap={MACHINE_CREATE_INFO} />{' '}
+            <TextInputBox type='date' form={form} name={'beginDate'} labelMap={MACHINE_CREATE_INFO} />
+            <TextInputBox type='date' form={form} name={'endDate'} labelMap={MACHINE_CREATE_INFO} />
+            <TextInputBox type='date' form={form} name={'fieldBeginDate'} labelMap={MACHINE_CREATE_INFO} />
+            <TextInputBox type='date' form={form} name={'fieldEndDate'} labelMap={MACHINE_CREATE_INFO} />
+          </Grid2>
+          <Grid2 container rowSpacing={1} columnSpacing={5} columns={1}>
+            <TextInputBox multiline form={form} name={'note'} labelMap={MACHINE_CREATE_INFO} />
+          </Grid2>
+        </div>
       </DialogContent>
     </DefaultModal>
   )
