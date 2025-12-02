@@ -29,7 +29,7 @@ export default function ProgressedAlertModal({
       <DialogTitle sx={{ textAlign: 'center', display: 'grid' }}>
         <IconAlertCircleFilled size={40} className='text-red-400 mx-auto mb-3' />
 
-        <Typography variant='inherit'>{title ?? '지금까지 수정한 내용이 저장되지 않습니다.'}</Typography>
+        {title ?? '지금까지 수정한 내용이 저장되지 않습니다.'}
 
         <Typography variant='subtitle1'>{subtitle ?? '그래도 나가시겠습니까?'}</Typography>
       </DialogTitle>
