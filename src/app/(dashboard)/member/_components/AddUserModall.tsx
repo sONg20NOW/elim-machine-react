@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@/@core/types'
-import { MEMBER_INPUT_INFO } from '@/app/_constants/input/MemberInputInfo'
+import { MEMBER_INPUT_INFO } from '@/app/_constants/input/memberInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'

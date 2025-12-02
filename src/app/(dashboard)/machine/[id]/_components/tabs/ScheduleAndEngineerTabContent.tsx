@@ -13,7 +13,7 @@ import { InputBox } from '@/@core/components/custom/InputBox'
 import {
   MACHINE_PROJECT_ENGINEER_INPUT_INFO,
   MACHINE_SCHEDULE_INPUT_INFO
-} from '@/app/_constants/input/MachineInputInfo'
+} from '@/app/_constants/input/machineInputInfo'
 import CustomTextField from '@/@core/components/mui/TextField'
 import { gradeOption } from '@/app/_constants/options'
 import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'

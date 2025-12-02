@@ -4,7 +4,7 @@ import type { Path, RegisterOptions, UseFormReturn } from 'react-hook-form'
 
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'
 import type { LicenseCreateRequestDto } from '@/@core/types'
-import { LICENSE_INPUT_INFO } from '@/app/_constants/input/LicenseInputInfo'
+import { LICENSE_INPUT_INFO } from '@/app/_constants/input/licenseInputInfo'
 
 export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCreateRequestDto, any, undefined> }) {
   const emailRule: RegisterOptions<LicenseCreateRequestDto, Path<LicenseCreateRequestDto>> = {

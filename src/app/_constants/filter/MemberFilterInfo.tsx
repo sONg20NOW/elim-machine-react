@@ -1,4 +1,4 @@
-import { MEMBER_INPUT_INFO } from '../input/MemberInputInfo'
+import { MEMBER_INPUT_INFO } from '../input/memberInputInfo'
 import type { InputFieldType, MemberFilterType } from '../../../@core/types'
 import { birthMonthOption, careerYearOption, genderOption } from '@/app/_constants/options'
 

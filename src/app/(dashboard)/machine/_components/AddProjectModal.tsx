@@ -12,7 +12,7 @@ import type { MachineProjectCreateRequestDtoType } from '@/@core/types'
 import { MachineProjectInitialData } from '@/app/_constants/MachineProjectSeed'
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import { InputBox } from '@/@core/components/custom/InputBox'
-import { MACHINE_CREATE_INFO } from '@/app/_constants/input/MachineInputInfo'
+import { MACHINE_CREATE_INFO } from '@/app/_constants/input/machineInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 

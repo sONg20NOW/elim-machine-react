@@ -22,17 +22,17 @@ import { InputBox } from '@/@core/components/custom/InputBox'
 import type { MemberLookupResponseDtoType, MachineEngineerCreateRequestDtoType } from '@/@core/types'
 
 import { EngineerInitialData } from '@/app/_constants/EngineerSeed'
-import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/EngineerInputInfo'
+import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/engineerInputInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
 
-type AddUserModalProps = {
+type AddEngineerModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   reloadPage: () => void
 }
 
-const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
+const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) => {
   const [userData, setUserData] = useState<MachineEngineerCreateRequestDtoType>(EngineerInitialData)
   const [memberList, setMemberList] = useState<MemberLookupResponseDtoType[]>([])
   const [loading, setLoading] = useState(false)
@@ -176,4 +176,4 @@ const AddUserModal = ({ open, setOpen, reloadPage }: AddUserModalProps) => {
   )
 }
 
-export default AddUserModal
+export default AddEngineerModal

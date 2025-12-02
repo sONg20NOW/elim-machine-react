@@ -6,7 +6,7 @@ import { Button, Checkbox, Typography } from '@mui/material'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/@core/components/custom/InputBox'
-import { MACHINE_INPUT_INFO } from '@/app/_constants/input/MachineInputInfo'
+import { MACHINE_INPUT_INFO } from '@/app/_constants/input/machineInputInfo'
 import type { MachineProjectResponseDtoType } from '@/@core/types'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
@@ -820,13 +820,7 @@ const BasicTabContent = ({}: {}) => {
             setIsEditing={setIsEditing}
           />
         )}
-        {showDeleteModal && (
-          <DeleteModal
-            showDeleteModal={showDeleteModal}
-            setShowDeleteModal={setShowDeleteModal}
-            onDelete={handleDelete}
-          />
-        )}
+        {showDeleteModal && <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />}
         {showDownloadModal && <DownloadReportModal open={showDownloadModal} setOpen={setShowDownloadModal} />}
       </div>
     )
