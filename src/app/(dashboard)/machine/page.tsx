@@ -242,7 +242,7 @@ export default function MachinePage() {
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
         >
-          검색조건 초기화
+          필터 초기화
         </Button>
         <div className='flex justify-between flex-col items-start  md:flex-row md:items-center p-6 border-bs gap-4'>
           <div className='flex gap-8 items-center'>

@@ -236,7 +236,7 @@ const InspectionListTabContent = () => {
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
         >
-          검색조건 초기화
+          필터 초기화
         </Button>
       </div>
       {/* 상단 기능 요소들: 페이지 당 행수, 설비분류 검색, 위치 검색, 선택삭제, 추가 */}
@@ -269,7 +269,7 @@ const InspectionListTabContent = () => {
           </CustomTextField>
           {/* 이름으로 검색 */}
           <SearchBar
-            key={`machineCategoryName_${machineCategoryName}`} // 검색조건 초기화 시 새로 렌더링 되도록 키 지정
+            key={`machineCategoryName_${machineCategoryName}`} // 필터 초기화 시 새로 렌더링 되도록 키 지정
             defaultValue={machineCategoryName ?? ''}
             placeholder='설비분류로 검색'
             setSearchKeyword={machineCateName => {
