@@ -41,6 +41,7 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
 import ReloadButton from '../ReloadButton'
+import { setOffsetContext } from '../tabs/InspectionListTabContent'
 
 const DEFAULT_PAGESIZE = 1000
 
@@ -63,7 +64,7 @@ const InspectionPicListModal = ({
 
   const { data: inspections } = useGetInspectionsSimple(machineProjectId)
 
-  // 반응형을 위한 미디어쿼리
+  const setOffset = useContext(setOffsetContext)
   const isMobile = useContext(isMobileContext)
 
   const [picInspectionId, setPicInspectionId] = useState(
@@ -216,6 +217,7 @@ const InspectionPicListModal = ({
       await refetchPictures()
       toast.success(`${filesToUpload.length}개 사진이 성공적으로 업로드되었습니다.`)
       setFilesToUpload([])
+      setOffset && setOffset(0)
     } else {
       toast.error('사진 업로드에 문제가 발생했습니다.')
     }
