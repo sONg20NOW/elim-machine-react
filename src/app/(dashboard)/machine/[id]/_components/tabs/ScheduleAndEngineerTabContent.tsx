@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -17,7 +17,6 @@ import {
 import CustomTextField from '@/@core/components/mui/TextField'
 import { gradeOption } from '@/app/_constants/options'
 import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'
-import AlertModal from '@/@core/components/custom/AlertModal'
 import {
   useGetEngineersOptions,
   useGetParticipatedEngineerList,
@@ -25,6 +24,7 @@ import {
 } from '@/@core/hooks/customTanstackQueries'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { auth } from '@/lib/auth'
+import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
 
 const ScheduleAndEngineerTabContent = ({}: {}) => {
   const params = useParams()
@@ -83,6 +83,12 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
       }
     })
   }
+
+  const handleDontSave = useCallback(() => {
+    setEditData(scheduleData!)
+    setIsEditing(false)
+    setShowAlertModal(false)
+  }, [setIsEditing, scheduleData])
 
   return (
     <div
@@ -668,13 +674,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
             )}
       </div>
       {showAlertModal && scheduleData && (
-        <AlertModal<MachineProjectScheduleAndEngineerResponseDtoType>
-          showAlertModal={showAlertModal}
-          setShowAlertModal={setShowAlertModal}
-          setEditData={setEditData}
-          setIsEditing={setIsEditing}
-          originalData={scheduleData}
-        />
+        <ProgressedAlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
       )}
     </div>
   )

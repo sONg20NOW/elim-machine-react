@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -8,7 +8,6 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import { MACHINE_INPUT_INFO } from '@/app/_constants/input/machineInputInfo'
 import type { MachineProjectResponseDtoType } from '@/@core/types'
-import AlertModal from '@/@core/components/custom/AlertModal'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import EnergyReport from '../report/EnergyReportModal'
 import DownloadReportModal from '../report/DownloadReportModal'
@@ -17,6 +16,7 @@ import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 import MachinePerformanceReviewModal from '../report/MachinePerformanceReviewModal'
+import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
 
 const BasicTabContent = ({}: {}) => {
   const router = useRouter()
@@ -77,6 +77,12 @@ const BasicTabContent = ({}: {}) => {
       handleApiError(error)
     }
   }
+
+  const handleDontSave = useCallback(() => {
+    setEditData(structuredClone(projectData!))
+    setIsEditing(false)
+    setShowAlertModal(false)
+  }, [projectData, setIsEditing])
 
   if (!editData) {
     return <span>데이터를 찾을 수 없습니다.</span>
@@ -812,13 +818,7 @@ const BasicTabContent = ({}: {}) => {
         </div>
 
         {showAlertModal && (
-          <AlertModal<MachineProjectResponseDtoType>
-            showAlertModal={showAlertModal}
-            setShowAlertModal={setShowAlertModal}
-            setEditData={setEditData}
-            originalData={projectData}
-            setIsEditing={setIsEditing}
-          />
+          <ProgressedAlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
         )}
         {showDeleteModal && <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />}
         {showDownloadModal && <DownloadReportModal open={showDownloadModal} setOpen={setShowDownloadModal} />}

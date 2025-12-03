@@ -19,7 +19,6 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 // style
 import styles from '@/app/_style/Table.module.css'
 import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
-import AlertModal from '@/@core/components/custom/AlertModal'
 import BasicTabContent from './tabs/BasicTabContent'
 import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
@@ -40,6 +39,7 @@ import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdSto
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import deleteInspection from '../../_util/deleteInspection'
 import { setOffsetContext } from '../tabs/InspectionListTabContent'
+import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -259,6 +259,12 @@ const InspectionDetailModalInner = ({
     }
   }
 
+  const handleDontSave = () => {
+    setEditData(structuredClone(selectedInspection))
+    setIsEditing(false)
+    setShowAlertModal(false)
+  }
+
   return (
     selectedInspection && (
       <DefaultModal
@@ -413,13 +419,7 @@ const InspectionDetailModalInner = ({
           )}
         </div>
 
-        <AlertModal<MachineInspectionDetailResponseDtoType>
-          showAlertModal={showAlertModal}
-          setShowAlertModal={setShowAlertModal}
-          setEditData={setEditData}
-          setIsEditing={setIsEditing}
-          originalData={selectedInspection}
-        />
+        <ProgressedAlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
         <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />
         {/* 갤러리 버튼 클릭 시 동작 */}
         {showPictureListModal && (
