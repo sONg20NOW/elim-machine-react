@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -14,7 +14,8 @@ import {
   InputLabel,
   MenuItem,
   TextField,
-  Typography
+  Typography,
+  useMediaQuery
 } from '@mui/material'
 
 import classNames from 'classnames'
@@ -24,6 +25,10 @@ import { toast } from 'react-toastify'
 import { Controller, useForm } from 'react-hook-form'
 
 import ImageZoom from 'react-image-zooom'
+
+import { createPortal } from 'react-dom'
+
+import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled } from '@tabler/icons-react'
 
 import type {
   MachineInspectionDetailResponseDtoType,
@@ -35,6 +40,7 @@ import getS3Key from '@/@core/utils/getS3Key'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { auth } from '@/lib/auth'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 interface InspectionPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
@@ -55,6 +61,8 @@ export default function InspectionPicZoomModal({
   setPictures
 }: InspectionPicZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
+
+  const showMovePicBtns = useMediaQuery('(min-width:1755px)')
 
   const [openAlert, setOpenAlert] = useState(false)
   const proceedingJob = useRef<() => void>()
@@ -89,6 +97,8 @@ export default function InspectionPicZoomModal({
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const isMobile = useContext(isMobileContext)
+
+  const formName = 'inspection-pic-form'
 
   useEffect(() => {
     reset(selectedPic)
@@ -160,29 +170,91 @@ export default function InspectionPicZoomModal({
     setOpen(false)
   }
 
+  const handleDontSave = useCallback(() => {
+    proceedingJob.current && proceedingJob.current()
+    setOpenAlert(false)
+  }, [])
+
   return (
     inspectionList && (
-      <form className='hidden' onSubmit={handleSubmit(handleSave)} id='picture-form'>
-        <Dialog maxWidth='xl' fullWidth open={open} onClose={handleClose}>
-          <style>
-            {`#imageZoom {
+      <form className='hidden' onSubmit={handleSubmit(handleSave)} id={formName}>
+        <style>
+          {`#imageZoom {
               object-fit: contain;
               height: 100%;
             }`}
-          </style>
-          <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
-            <div className='flex justify-between'>
-              <div className='flex gap-4 items-center'>
-                <IconButton
-                  type='button'
-                  sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
-                  size='small'
-                  onClick={handleClose}
-                >
-                  <i className='tabler-x' />
-                </IconButton>
-              </div>
-            </div>
+        </style>
+        {showMovePicBtns &&
+          MovePicture &&
+          open &&
+          createPortal(
+            <>
+              <IconButton
+                sx={theme => ({ zIndex: theme.zIndex.modal + 1 })}
+                className='fixed left-10 top-1/2'
+                onClick={() => {
+                  if (isDirty) {
+                    proceedingJob.current = () => MovePicture('previous')
+                    setOpenAlert(true)
+                  } else {
+                    MovePicture('previous')
+                  }
+                }}
+              >
+                <IconCircleCaretLeftFilled size={50} color='white' />
+              </IconButton>
+              <IconButton
+                sx={theme => ({ zIndex: theme.zIndex.modal + 1 })}
+                className='fixed right-10 top-1/2'
+                onClick={() => {
+                  if (isDirty) {
+                    proceedingJob.current = () => MovePicture('next')
+                    setOpenAlert(true)
+                  } else {
+                    MovePicture('next')
+                  }
+                }}
+              >
+                <IconCircleCaretRightFilled size={50} color='white' />
+              </IconButton>
+            </>,
+            document.body
+          )}
+        <Dialog
+          maxWidth='xl'
+          fullWidth
+          open={open}
+          onClose={(_, reason) => {
+            if (reason === 'backdropClick') return
+            handleClose()
+          }}
+        >
+          <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative', pb: 2 }}>
+            <TextField
+              {...register('originalFileName')}
+              variant='standard'
+              fullWidth
+              label='설비사진명'
+              size='small'
+              sx={{ width: '30%' }}
+              slotProps={{
+                htmlInput: {
+                  sx: {
+                    fontWeight: 700,
+                    fontSize: isMobile ? 20 : 24
+                  }
+                }
+              }}
+              id='new-picture-name-input'
+            />
+            <IconButton
+              type='button'
+              sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
+              size='small'
+              onClick={handleClose}
+            >
+              <i className='tabler-x' />
+            </IconButton>
           </DialogTitle>
           <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '60dvh' }}>
             <div
@@ -190,42 +262,14 @@ export default function InspectionPicZoomModal({
                 'flex-col': isMobile
               })}
             >
-              {MovePicture && (
-                <div
-                  className='grid place-items-center'
-                  onClick={() => {
-                    if (isDirty) {
-                      proceedingJob.current = () => MovePicture('previous')
-                      setOpenAlert(true)
-                    } else {
-                      MovePicture('previous')
-                    }
-                  }}
-                >
-                  <IconButton>
-                    <i className='tabler-chevron-compact-left size-[30px] text-gray-600' />
-                  </IconButton>
-                </div>
-              )}
-
-              <div className='flex-1 flex flex-col gap-2 w-full items-center h-full border-4 p-2 rounded-lg'>
-                <div className='flex justify-between w-full'>
-                  <TextField
-                    {...register('originalFileName')}
-                    variant='standard'
-                    fullWidth
-                    size='small'
-                    sx={{ width: '50%' }}
-                    slotProps={{
-                      htmlInput: {
-                        sx: {
-                          fontWeight: 700,
-                          fontSize: isMobile ? 20 : 24
-                        }
-                      }
-                    }}
-                    id='new-picture-name-input'
-                  />
+              <div className='flex-1 flex flex-col gap-2 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
+                <div className='flex gap-2 self-end'>
+                  <Button sx={{ width: 'fit-content' }} variant='contained' className='bg-blue-500 hover:bg-blue-600'>
+                    다운로드
+                  </Button>
+                  <Button sx={{ width: 'fit-content' }} color='error' variant='contained'>
+                    삭제
+                  </Button>
                   <Button
                     type='button'
                     sx={{
@@ -353,23 +397,6 @@ export default function InspectionPicZoomModal({
                   </Grid2>
                 </Grid2>
               </Box>
-              {MovePicture && (
-                <div
-                  className='grid place-items-center'
-                  onClick={() => {
-                    if (isDirty) {
-                      proceedingJob.current = () => MovePicture('next')
-                      setOpenAlert(true)
-                    } else {
-                      MovePicture('next')
-                    }
-                  }}
-                >
-                  <IconButton>
-                    <i className='tabler-chevron-compact-right size-[30px] text-gray-600' />
-                  </IconButton>
-                </div>
-              )}
             </div>
           </DialogContent>
           <DialogActions>
@@ -381,8 +408,9 @@ export default function InspectionPicZoomModal({
                 sx={{ width: 'fit-content' }}
                 variant='contained'
                 type='submit'
-                form='picture-form'
+                form={formName}
                 disabled={!isDirty || !watchedSubItemId || saving}
+                color='success'
               >
                 저장
               </Button>
@@ -402,32 +430,7 @@ export default function InspectionPicZoomModal({
             }}
           />
         </Dialog>
-        {
-          <Dialog open={openAlert}>
-            <DialogTitle sx={{ position: 'relative' }}>
-              <div className='flex gap-2 text-xl items-center'>
-                <i className='tabler-alert-triangle' />
-                <Typography variant='inherit'>변경사항이 저장되지 않았습니다</Typography>
-              </div>
-            </DialogTitle>
-            <DialogActions>
-              <Button
-                type='button'
-                variant='contained'
-                color='error'
-                onClick={() => {
-                  proceedingJob.current && proceedingJob.current()
-                  setOpenAlert(false)
-                }}
-              >
-                저장하지 않음
-              </Button>
-              <Button type='button' variant='contained' color='secondary' onClick={() => setOpenAlert(false)}>
-                계속 수정
-              </Button>
-            </DialogActions>
-          </Dialog>
-        }
+        <AlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleDontSave} />
       </form>
     )
   )
