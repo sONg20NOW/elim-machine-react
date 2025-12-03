@@ -25,8 +25,11 @@ export default async function getS3Key(
   checklistSubItemId?: number,
   machineProjectPicType?: 'OVERVIEW' | 'ETC' | 'LOCATION_MAP'
 ) {
+  const isInspectionPic = inspectionId && checklistItemId && checklistSubItemId
+  const isProjectPic = machineProjectPicType
+
   // handle inspection image
-  if (inspectionId && checklistItemId && checklistSubItemId) {
+  if (isInspectionPic) {
     try {
       // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
       const presignedResponse = await auth.post<{
@@ -78,9 +81,7 @@ export default async function getS3Key(
     } catch (e) {
       handleApiError(e)
     }
-  }
-
-  if (machineProjectPicType) {
+  } else if (isProjectPic) {
     // handle project image
     try {
       // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
