@@ -257,6 +257,7 @@ const PictureListTabContent = () => {
       // 삭제 예정 리스트 리셋
       setInspectionPicsToDelete([])
       setProjectPicsToDelete([])
+      setShowCheck(false)
       refetchPictures()
     } catch (error) {
       handleApiError(error)
@@ -530,7 +531,7 @@ const PictureListTabContent = () => {
               <Button
                 key={2}
                 color='error'
-                onClick={() => handleDeletePics()}
+                onClick={handleDeletePics}
                 disabled={projectPicsToDelete.length + inspectionPicsToDelete.length === 0}
               >
                 일괄삭제({inspectionPicsToDelete.length + projectPicsToDelete.length})
@@ -564,7 +565,7 @@ const PictureListTabContent = () => {
               {handlefilterProjectPics(projectPics).map(pic => {
                 return (
                   <ProjectPicCard
-                    key={pic.id}
+                    key={`${pic.id}_${pic.version}`}
                     pic={pic}
                     showCheck={showCheck}
                     checked={projectPicsToDelete.find(v => v.id === pic.id) ? true : false}
@@ -600,7 +601,7 @@ const PictureListTabContent = () => {
                     {handlefilterInspectionPics(inspectionsPic).map(pic => {
                       return (
                         <InspectionPicCard
-                          key={pic.machinePicId}
+                          key={`${pic.machinePicId}_${pic.version}`}
                           pic={pic}
                           showCheck={showCheck}
                           checked={inspectionPicsToDelete.find(v => v.machinePicId === pic.machinePicId) ? true : false}
@@ -632,7 +633,6 @@ const PictureListTabContent = () => {
           open={openInspecitonPic}
           setOpen={setOpenInspecitonPic}
           selectedPic={selectedInspectionPic}
-          selectedInspection={selectedInspection}
           setPictures={setInspectionPics}
           MovePicture={MoveInspectionPic}
         />
