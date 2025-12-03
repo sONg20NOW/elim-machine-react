@@ -16,7 +16,7 @@ import type { LicenseCreateRequestDto, LicenseResponseDtoType } from '@/@core/ty
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import LicenseInputs from './LicenseInputs'
-import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 import { useMutateLicense } from '@/@core/hooks/customTanstackQueries'
 import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 import deleteLicense from '../_util/deleteLicense'
@@ -175,9 +175,9 @@ const LicenseModal = ({ open, setOpen, initialData, adjustPage, reloadPages }: L
         )}
       </div>
       {openDelete && <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={handleDeleteLicense} />}
-      {openAlert && <ProgressedAlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={onClose} />}
+      {openAlert && <AlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={onClose} />}
       {openAlertNoSave && (
-        <ProgressedAlertModal
+        <AlertModal
           open={openAlertNoSave}
           setOpen={setOpenAlertNoSave}
           handleConfirm={handleDontSave}

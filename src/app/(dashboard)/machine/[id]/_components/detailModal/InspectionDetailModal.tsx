@@ -39,7 +39,7 @@ import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdSto
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import deleteInspection from '../../_util/deleteInspection'
 import { setOffsetContext } from '../tabs/InspectionListTabContent'
-import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -419,7 +419,7 @@ const InspectionDetailModalInner = ({
           )}
         </div>
 
-        <ProgressedAlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
+        <AlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
         <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />
         {/* 갤러리 버튼 클릭 시 동작 */}
         {showPictureListModal && (

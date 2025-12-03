@@ -13,14 +13,7 @@ interface AlertModalProps {
   confirmMessage?: string
 }
 
-export default function ProgressedAlertModal({
-  open,
-  setOpen,
-  handleConfirm,
-  title,
-  subtitle,
-  confirmMessage
-}: AlertModalProps) {
+export default function AlertModal({ open, setOpen, handleConfirm, title, subtitle, confirmMessage }: AlertModalProps) {
   const handleClose = () => setOpen(false)
 
   return (

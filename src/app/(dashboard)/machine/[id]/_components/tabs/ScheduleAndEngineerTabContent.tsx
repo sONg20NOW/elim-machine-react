@@ -24,7 +24,7 @@ import {
 } from '@/@core/hooks/customTanstackQueries'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { auth } from '@/lib/auth'
-import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 const ScheduleAndEngineerTabContent = ({}: {}) => {
   const params = useParams()
@@ -674,7 +674,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
             )}
       </div>
       {showAlertModal && scheduleData && (
-        <ProgressedAlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
+        <AlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
       )}
     </div>
   )

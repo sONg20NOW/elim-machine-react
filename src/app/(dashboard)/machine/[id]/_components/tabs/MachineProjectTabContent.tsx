@@ -16,7 +16,7 @@ import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 import MachinePerformanceReviewModal from '../report/MachinePerformanceReviewModal'
-import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 const BasicTabContent = ({}: {}) => {
   const router = useRouter()
@@ -818,7 +818,7 @@ const BasicTabContent = ({}: {}) => {
         </div>
 
         {showAlertModal && (
-          <ProgressedAlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
+          <AlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
         )}
         {showDeleteModal && <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />}
         {showDownloadModal && <DownloadReportModal open={showDownloadModal} setOpen={setShowDownloadModal} />}

@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject, useMutateMachineProjectNote } from '@/@core/hooks/customTanstackQueries'
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'
-import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 
 const MAX_LENGTH = 500
 
@@ -76,7 +76,7 @@ const NoteTabContent = ({}) => {
           </Typography>
         </div>
         {openAlert && (
-          <ProgressedAlertModal
+          <AlertModal
             open={openAlert}
             setOpen={setOpenAlert}
             handleConfirm={handleDontSave}

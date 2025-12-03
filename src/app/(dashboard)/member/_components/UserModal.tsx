@@ -27,7 +27,7 @@ import DeleteModal from '@/@core/components/custom/DeleteModal'
 import { auth } from '@/lib/auth'
 import type { MemberType } from '@/@core/hooks/customTanstackQueries'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
-import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 import BasicTabContent from './tabs/BasicTabContent'
 import PrivacyTabContent from './tabs/PrivacyTabContent'
 
@@ -338,11 +338,9 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
       </Dialog>
 
       {openDelete && <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={onDeleteUserConfirm} />}
-      {openAlert && (
-        <ProgressedAlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleQuitWithoutSave} />
-      )}
+      {openAlert && <AlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleQuitWithoutSave} />}
       {openAlertNoSave && (
-        <ProgressedAlertModal
+        <AlertModal
           open={openAlertNoSave}
           setOpen={setOpenAlertNoSave}
           handleConfirm={handleDontSave}

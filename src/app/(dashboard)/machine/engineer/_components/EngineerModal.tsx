@@ -19,7 +19,7 @@ import DeleteModal from '@/@core/components/custom/DeleteModal'
 import { useMutateEngineer } from '@/@core/hooks/customTanstackQueries'
 import deleteEngineer from '../_util/deleteEngineer'
 import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
-import ProgressedAlertModal from '@/@core/components/custom/ProgressedAlertModal'
+import AlertModal from '@/@core/components/custom/AlertModal'
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/engineerInputInfo'
@@ -175,9 +175,9 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
         )}
       </div>
       {openDelete && <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={handleDeleteEngineer} />}
-      {openAlert && <ProgressedAlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={onClose} />}
+      {openAlert && <AlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={onClose} />}
       {openAlertNoSave && (
-        <ProgressedAlertModal
+        <AlertModal
           open={openAlertNoSave}
           setOpen={setOpenAlertNoSave}
           handleConfirm={handleDontSave}
