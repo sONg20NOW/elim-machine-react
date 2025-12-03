@@ -55,7 +55,7 @@ export default function MultiInputBox<T extends Record<string, any>>({
           control={form.control}
           render={({ field }) => (
             <TextField
-              disabled={disabled}
+              disabled={disabled || (option?.length ?? 0) === 0}
               size='small'
               value={field.value}
               onChange={field.onChange}
@@ -77,11 +77,15 @@ export default function MultiInputBox<T extends Record<string, any>>({
                 }
               }}
             >
-              {option?.map(v => (
-                <MenuItem value={v.value} key={v.value}>
-                  {v.label}
-                </MenuItem>
-              ))}
+              {(option?.length ?? 0) === 0 ? (
+                <MenuItem value={100}>사랑해요~</MenuItem> // option의 길이가 0인 경우, <select인데 자식이 없으면 안돼>라는 MUI 에러가 뜨는 것 방지
+              ) : (
+                option?.map(v => (
+                  <MenuItem value={v.value} key={v.value}>
+                    {v.label}
+                  </MenuItem>
+                ))
+              )}
             </TextField>
           )}
         />
