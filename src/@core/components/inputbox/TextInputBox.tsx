@@ -10,6 +10,7 @@ interface TextInputBoxProps<T extends Record<string, any>> {
   column?: number
   multiline?: boolean
   disabled?: boolean
+  placeholder?: string
   postcode?: boolean
   required?: boolean
   rule?: RegisterOptions<T, Path<T>> | undefined
@@ -24,6 +25,7 @@ interface TextInputBoxProps<T extends Record<string, any>> {
  * @param column 1: 반칸, 2: fullWidth (기본값: 1)
  * @param multiline multiline 여부
  * @param disabled disabled 여부
+ * @param placeholder placeholder 문자열
  * @param postcode 주소 검색 창 사용 여부
  * @param required required 여부
  * @param rule register 입력값 검증 객체
@@ -36,6 +38,7 @@ export default function TextInputBox<T extends Record<string, any>>({
   column = 1,
   multiline = false,
   disabled = false,
+  placeholder,
   postcode = false,
   required = false,
   rule,
@@ -61,6 +64,7 @@ export default function TextInputBox<T extends Record<string, any>>({
         </Typography>
         <TextField
           disabled={disabled}
+          placeholder={placeholder}
           {...(type && { type: type })}
           {...(multiline && { multiline: true, minRows: 3 })}
           {...form.register(name, { ...rule, required: { value: required, message: '필수 입력입니다' } })}
