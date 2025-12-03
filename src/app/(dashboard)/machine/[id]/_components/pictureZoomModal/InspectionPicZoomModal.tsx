@@ -1,4 +1,4 @@
-import { useCallback, useContext, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -11,8 +11,6 @@ import {
   DialogTitle,
   Grid2,
   IconButton,
-  InputLabel,
-  MenuItem,
   TextField,
   Typography,
   useMediaQuery
@@ -22,7 +20,7 @@ import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import ImageZoom from 'react-image-zooom'
 
@@ -30,20 +28,19 @@ import { createPortal } from 'react-dom'
 
 import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled } from '@tabler/icons-react'
 
-import type {
-  MachineInspectionDetailResponseDtoType,
-  MachinePicPresignedUrlResponseDtoType,
-  MachinePicUpdateResponseDtoType
-} from '@/@core/types'
+import type { MachinePicPresignedUrlResponseDtoType, MachinePicUpdateResponseDtoType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
-import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
+import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { auth } from '@/lib/auth'
 import AlertModal from '@/@core/components/custom/AlertModal'
+import TextInputBox from '@/@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
 
 interface formType {
   machineInspectionId: number
+  machineChecklistItemId: number
   machineChecklistSubItemId: number
   originalFileName: string
   alternativeSubTitle: string
@@ -56,7 +53,6 @@ interface InspectionPicZoomModalProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   selectedPic: MachinePicPresignedUrlResponseDtoType
-  selectedInspection: MachineInspectionDetailResponseDtoType
   setPictures: Dispatch<SetStateAction<MachinePicPresignedUrlResponseDtoType[]>>
 }
 
@@ -66,7 +62,6 @@ export default function InspectionPicZoomModal({
   open,
   setOpen,
   selectedPic,
-  selectedInspection,
   setPictures
 }: InspectionPicZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
@@ -76,18 +71,10 @@ export default function InspectionPicZoomModal({
   const [openAlert, setOpenAlert] = useState(false)
   const proceedingJob = useRef<() => void>()
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    formState: { isDirty },
-    setValue,
-    getValues,
-    watch
-  } = useForm<formType>({
+  const form = useForm<formType>({
     defaultValues: {
       machineInspectionId: selectedPic.machineInspectionId ?? 0,
+      machineChecklistItemId: selectedPic.machineChecklistItemId ?? 0,
       machineChecklistSubItemId: selectedPic.machineChecklistSubItemId ?? 0,
       originalFileName: selectedPic.originalFileName ?? '',
       alternativeSubTitle: selectedPic.alternativeSubTitle ?? '',
@@ -96,13 +83,28 @@ export default function InspectionPicZoomModal({
     }
   })
 
-  const watchedSubItemId = watch('machineChecklistSubItemId')
-  const watchedAlternativeSubTitle = watch('alternativeSubTitle')
+  const isDirty = form.formState.isDirty
 
-  const [machineChecklistItemId, setMachineChecklistItemId] = useState(selectedPic.machineChecklistItemId)
+  const watchedMachineChecklistItemId = form.watch('machineChecklistItemId')
+  const watchedSubItemId = form.watch('machineChecklistSubItemId')
+  const watchedAlternativeSubTitle = form.watch('alternativeSubTitle')
+  const watchedMachineInspectionId = form.watch('machineInspectionId')
+
+  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, watchedMachineInspectionId.toString())
+
+  const machineChecklistItemIdOption = selectedInspection?.machineChecklistItemsWithPicCountResponseDtos.map(v => ({
+    label: v.machineChecklistItemName,
+    value: v.machineChecklistItemId
+  }))
+
+  const machineChecklistSubItemIdOption = selectedInspection?.machineChecklistItemsWithPicCountResponseDtos
+    .find(v => v.machineChecklistItemId === watchedMachineChecklistItemId)
+    ?.checklistSubItems.map(v => ({
+      label: v.checklistSubItemName,
+      value: v.machineChecklistSubItemId
+    }))
 
   // 사진 정보 수정을 위한 상태관리
-  const [urlInspectionId, setUrlInspectionId] = useState(selectedPic.machineInspectionId)
   const [loading, setLoading] = useState(false)
 
   const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
@@ -113,11 +115,41 @@ export default function InspectionPicZoomModal({
 
   const formName = 'inspection-pic-form'
 
-  // useEffect(() => {
-  //   reset(selectedPic)
-  //   setMachineChecklistItemId(selectedPic.machineChecklistItemId)
-  //   setUrlInspectionId(selectedPic.machineInspectionId)
-  // }, [selectedPic, reset])
+  useEffect(() => {
+    form.reset({
+      machineInspectionId: selectedPic.machineInspectionId ?? 0,
+      machineChecklistItemId: selectedPic.machineChecklistItemId ?? 0,
+      machineChecklistSubItemId: selectedPic.machineChecklistSubItemId ?? 0,
+      originalFileName: selectedPic.originalFileName ?? '',
+      alternativeSubTitle: selectedPic.alternativeSubTitle ?? '',
+      measuredValue: selectedPic.measuredValue ?? '',
+      remark: selectedPic.remark ?? ''
+    })
+  }, [
+    selectedPic.machinePicId,
+    selectedPic.machineInspectionId,
+    selectedPic.machineChecklistItemId,
+    selectedPic.machineChecklistSubItemId,
+    selectedPic.originalFileName,
+    selectedPic.alternativeSubTitle,
+    selectedPic.measuredValue,
+    selectedPic.remark,
+    form
+  ])
+
+  useEffect(() => {
+    if (form.formState.isDirty) {
+      console.log('1')
+      form.setValue('machineChecklistItemId', 0, { shouldDirty: false })
+    }
+  }, [watchedMachineInspectionId, form])
+
+  useEffect(() => {
+    if (form.formState.isDirty) {
+      console.log('2')
+      form.setValue('machineChecklistSubItemId', 0, { shouldDirty: false })
+    }
+  }, [watchedMachineChecklistItemId, form])
 
   const onChangeImage = async (file: File) => {
     try {
@@ -126,9 +158,9 @@ export default function InspectionPicZoomModal({
       const S3KeyResult = await getS3Key(
         machineProjectId,
         [file],
-        getValues().machineInspectionId.toString(),
-        machineChecklistItemId,
-        getValues().machineChecklistSubItemId,
+        selectedPic.machineInspectionId.toString(),
+        selectedPic.machineChecklistItemId,
+        selectedPic.machineChecklistSubItemId,
         undefined
       )
 
@@ -141,7 +173,7 @@ export default function InspectionPicZoomModal({
         .put<{
           data: MachinePicUpdateResponseDtoType
         }>(
-          `/api/machine-projects/${machineProjectId}/machine-inspections/${urlInspectionId}/machine-pics/${selectedPic.machinePicId}`,
+          `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedPic.machineInspectionId}/machine-pics/${selectedPic.machinePicId}`,
           { version: selectedPic.version, s3Key: s3Key }
         )
         .then(v => v.data.data)
@@ -159,7 +191,7 @@ export default function InspectionPicZoomModal({
     }
   }
 
-  const handleSave = handleSubmit(async (data: formType) => {
+  const handleSave = form.handleSubmit(async (data: formType) => {
     if (!watchedSubItemId) {
       toast.error('하위항목을 선택해주세요')
 
@@ -173,23 +205,27 @@ export default function InspectionPicZoomModal({
         .put<{
           data: MachinePicUpdateResponseDtoType
         }>(
-          `/api/machine-projects/${machineProjectId}/machine-inspections/${urlInspectionId}/machine-pics/${selectedPic.machinePicId}`,
+          `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedPic.machineInspectionId}/machine-pics/${selectedPic.machinePicId}`,
           { ...data, version: selectedPic.version }
         )
         .then(v => v.data.data)
 
-      reset({
-        machineInspectionId: response.machineInspectionId ?? 0,
-        machineChecklistSubItemId: response.machineChecklistSubItemId ?? 0,
-        originalFileName: response.originalFileName ?? '',
-        alternativeSubTitle: response.alternativeSubTitle ?? '',
-        measuredValue: response.measuredValue ?? '',
-        remark: response.remark ?? ''
-      })
-      setUrlInspectionId(response.machineInspectionId)
-
       handleSuccess('사진 정보가 변경되었습니다.')
-      setPictures(prev => prev.map(v => (v.machinePicId === selectedPic.machinePicId ? { ...v, ...response } : v)))
+      setPictures(prev =>
+        prev.map(v =>
+          v.machinePicId === selectedPic.machinePicId
+            ? {
+                ...v,
+                ...response,
+                machineChecklistItemId: watchedMachineChecklistItemId,
+                machineChecklistItemName:
+                  machineChecklistItemIdOption?.find(v => v.value === watchedMachineChecklistItemId)?.label ?? '',
+                machineChecklistSubItemName:
+                  machineChecklistSubItemIdOption?.find(v => v.value === watchedSubItemId)?.label ?? ''
+              }
+            : v
+        )
+      )
     } catch (error) {
       handleApiError(error)
     } finally {
@@ -262,7 +298,7 @@ export default function InspectionPicZoomModal({
         >
           <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative', pb: 2 }}>
             <TextField
-              {...register('originalFileName')}
+              {...form.register('originalFileName')}
               variant='standard'
               fullWidth
               label='설비사진명'
@@ -292,7 +328,7 @@ export default function InspectionPicZoomModal({
                 'flex-col': isMobile
               })}
             >
-              <div className='flex-1 flex flex-col gap-2 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
+              <div className='flex-1 flex flex-col gap-6 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
                 <div className='w-full flex justify-between'>
                   <Button color='error' variant='contained'>
                     삭제
@@ -302,122 +338,63 @@ export default function InspectionPicZoomModal({
                       다운로드
                     </Button>
                     <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
-                      사진 변경
+                      사진 교체
                     </Button>
                   </div>
                 </div>
                 <ImageZoom src={selectedPic.presignedUrl} alt={watchedAlternativeSubTitle} />
               </div>
               <Box>
-                <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
-                  <Grid2 size={2}>
-                    <Controller
-                      name='machineInspectionId'
-                      control={control}
-                      render={({ field }) => (
-                        <>
-                          <InputLabel>설비명</InputLabel>
-                          <TextField
-                            select
-                            value={field.value}
-                            onChange={v => {
-                              field.onChange(Number(v.target.value))
-                              setMachineChecklistItemId(0)
-                              setValue('machineChecklistSubItemId', 0, { shouldDirty: true })
-                            }}
-                            hiddenLabel
-                            size='small'
-                            fullWidth
-                          >
-                            {inspectionList?.map(v => (
-                              <MenuItem key={v.id} value={v.id}>
-                                {v.name}
-                              </MenuItem>
-                            ))}
-                          </TextField>
-                        </>
-                      )}
-                    />
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <InputLabel>점검항목</InputLabel>
-
-                    <TextField
-                      select
-                      hiddenLabel
-                      size='small'
-                      fullWidth
-                      value={machineChecklistItemId}
-                      onChange={e => setMachineChecklistItemId(Number(e.target.value))}
-                    >
-                      {selectedInspection.machineChecklistItemsWithPicCountResponseDtos?.map(v => (
-                        <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                          {v.machineChecklistItemName}
-                        </MenuItem>
-                      )) ?? <MenuItem></MenuItem>}
-                    </TextField>
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <Controller
-                      name='machineChecklistSubItemId'
-                      control={control}
-                      render={({ field }) => (
-                        <>
-                          <InputLabel>하위항목</InputLabel>
-                          <TextField
-                            select
-                            value={field.value}
-                            onChange={e => field.onChange(Number(e.target.value))}
-                            hiddenLabel
-                            size='small'
-                            fullWidth
-                          >
-                            {selectedInspection.machineChecklistItemsWithPicCountResponseDtos
-                              .find(v => v.machineChecklistItemId === machineChecklistItemId)
-                              ?.checklistSubItems.map(v => (
-                                <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
-                                  {v.checklistSubItemName}
-                                </MenuItem>
-                              )) ?? <MenuItem></MenuItem>}
-                          </TextField>
-                        </>
-                      )}
-                    />
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <InputLabel>대체타이틀</InputLabel>
-
-                    <TextField
-                      {...register('alternativeSubTitle')}
-                      placeholder='대체타이틀을 입력해주세요'
-                      hiddenLabel
-                      size='small'
-                      fullWidth
-                    />
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <InputLabel>측정값</InputLabel>
-
-                    <TextField
-                      {...register('measuredValue')}
-                      placeholder='측정값을 입력해주세요'
-                      hiddenLabel
-                      size='small'
-                      fullWidth
-                    />
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <InputLabel>비고</InputLabel>
-
-                    <TextField
-                      placeholder='비고는 보고서에 포함되지 않습니다'
-                      {...register('remark')}
-                      minRows={3}
-                      multiline
-                      fullWidth
-                      hiddenLabel
-                    />
-                  </Grid2>
+                <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={1}>
+                  <MultiInputBox
+                    form={form}
+                    name='machineInspectionId'
+                    labelMap={{
+                      machineInspectionId: {
+                        label: '설비명',
+                        options: inspectionList.map(v => ({ label: v.name, value: v.id }))
+                      }
+                    }}
+                  />
+                  <MultiInputBox
+                    form={form}
+                    name='machineChecklistItemId'
+                    labelMap={{
+                      machineChecklistItemId: {
+                        label: '점검항목',
+                        options: machineChecklistItemIdOption
+                      }
+                    }}
+                  />
+                  <MultiInputBox
+                    form={form}
+                    name='machineChecklistSubItemId'
+                    labelMap={{
+                      machineChecklistSubItemId: {
+                        label: '하위항목',
+                        options: machineChecklistSubItemIdOption
+                      }
+                    }}
+                  />
+                  <TextInputBox
+                    form={form}
+                    name='alternativeSubTitle'
+                    labelMap={{ alternativeSubTitle: { label: '대체타이틀' } }}
+                    placeholder='대체타이틀을 입력해주세요'
+                  />
+                  <TextInputBox
+                    form={form}
+                    name='measuredValue'
+                    labelMap={{ measuredValue: { label: '측정값' } }}
+                    placeholder='측정값을 입력해주세요'
+                  />
+                  <TextInputBox
+                    multiline
+                    form={form}
+                    name='remark'
+                    labelMap={{ remark: { label: '비고' } }}
+                    placeholder='비고는 보고서에 포함되지 않습니다'
+                  />
                 </Grid2>
               </Box>
             </div>

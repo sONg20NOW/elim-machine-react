@@ -720,7 +720,6 @@ const InspectionPicListModal = ({
             open={openPicZoom}
             setOpen={setOpenPicZoom}
             selectedPic={selectedPic}
-            selectedInspection={selectedInspection}
             setPictures={setPictures}
           />
         )}
