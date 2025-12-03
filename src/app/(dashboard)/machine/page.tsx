@@ -3,7 +3,7 @@
 // React Imports
 import { useState, useCallback, useMemo } from 'react'
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
@@ -40,6 +40,8 @@ import { auth } from '@/lib/auth'
 import TableFilter from '@/@core/components/custom/TableFilter'
 import { useGetEngineersOptions, useGetMachineProjects } from '@/@core/hooks/customTanstackQueries'
 import { QUERY_KEYS } from '@/app/_constants/queryKeys'
+import useUpdateParams from '@/@core/utils/searchParams/useUpdateParams'
+import useSetQueryParams from '@/@core/utils/searchParams/useSetQueryParams'
 
 // datepicker 한글화
 dayjs.locale('ko')
@@ -53,7 +55,6 @@ export default function MachinePage() {
   const queryClient = useQueryClient()
 
   const searchParams = useSearchParams()
-  const pathname = usePathname()
   const router = useRouter()
 
   const setTabValue = useMachineTabValueStore(state => state.setTabValue)
@@ -100,32 +101,11 @@ export default function MachinePage() {
   )
 
   // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
-  const updateParams = useCallback(
-    (updater: (params: URLSearchParams) => void) => {
-      const params = new URLSearchParams(searchParams)
-
-      updater(params)
-      router.replace(pathname + '?' + params.toString())
-    },
-    [router, pathname, searchParams]
-  )
+  const updateParams = useUpdateParams()
 
   type paramType = 'page' | 'size' | 'projectName' | 'region' | 'fieldBeginDate' | 'fieldEndDate'
 
-  const setQueryParams = useCallback(
-    (pairs: Partial<Record<paramType, string | number>>) => {
-      if (!pairs) return
-
-      updateParams(params => {
-        Object.entries(pairs).forEach(([key, value]) => {
-          const t_key = key as paramType
-
-          params.set(t_key, value.toString())
-        })
-      })
-    },
-    [updateParams]
-  )
+  const setQueryParams = useSetQueryParams<paramType>()
 
   const resetQueryParams = useCallback(() => {
     updateParams(params => {

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef, createContext } from 'react'
 
 // MUI Imports
-import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 
 import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
@@ -35,6 +35,8 @@ import { auth } from '@/lib/auth'
 import TableFilter from '@/@core/components/custom/TableFilter'
 import { QUERY_KEYS } from '@/app/_constants/queryKeys'
 import deleteInspection from '../../_util/deleteInspection'
+import useUpdateParams from '@/@core/utils/searchParams/useUpdateParams'
+import useSetQueryParams from '@/@core/utils/searchParams/useSetQueryParams'
 
 /**
  * offset을 지정하면 모달창이 닫힐 때 페이지 새로고침이 되도록 하는 context
@@ -48,8 +50,6 @@ const InspectionListTabContent = () => {
 
   const machineProjectId = useParams().id?.toString() as string
   const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const router = useRouter()
 
   // 모달 상태
   const [open, setOpen] = useState(false)
@@ -93,33 +93,12 @@ const InspectionListTabContent = () => {
   )
 
   // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
-  const updateParams = useCallback(
-    (updater: (params: URLSearchParams) => void) => {
-      const params = new URLSearchParams(searchParams)
-
-      updater(params)
-      router.replace(pathname + '?' + params.toString())
-    },
-    [router, pathname, searchParams]
-  )
+  const updateParams = useUpdateParams()
 
   type paramType = 'page' | 'size' | 'machineCategoryName' | 'location' | 'engineerName'
 
   // 객체 형식으로 데이터를 전달받으면 그에 따라 searchParams를 설정하고 라우팅하는 함수
-  const setQueryParams = useCallback(
-    (pairs: Partial<Record<paramType, string | number>>) => {
-      if (!pairs) return
-
-      updateParams(params => {
-        Object.entries(pairs).forEach(([key, value]) => {
-          const t_key = key as paramType
-
-          params.set(t_key, value.toString())
-        })
-      })
-    },
-    [updateParams]
-  )
+  const setQueryParams = useSetQueryParams<paramType>()
 
   // 공통 함수 활용
   const resetQueryParams = useCallback(() => {

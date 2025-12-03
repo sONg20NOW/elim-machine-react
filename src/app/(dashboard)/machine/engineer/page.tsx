@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 
 // MUI Imports
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
@@ -34,6 +34,8 @@ import { auth } from '@/lib/auth'
 import { useGetEngineer, useGetEngineers } from '@/@core/hooks/customTanstackQueries'
 import TableFilter from '@/@core/components/custom/TableFilter'
 import deleteEngineer from './_util/deleteEngineer'
+import useUpdateParams from '@/@core/utils/searchParams/useUpdateParams'
+import useSetQueryParams from '@/@core/utils/searchParams/useSetQueryParams'
 
 /**
  * @type T
@@ -46,8 +48,6 @@ export default function EngineerPage() {
   const queryClient = useQueryClient()
 
   const searchParams = useSearchParams()
-  const pathname = usePathname()
-  const router = useRouter()
 
   // 데이터 리스트
   const { data: engineersPages, refetch: refetchPages, isLoading, isError } = useGetEngineers(searchParams.toString())
@@ -80,32 +80,11 @@ export default function EngineerPage() {
   const [checked, setChecked] = useState<{ engineerId: number; version: number }[]>([])
 
   // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
-  const updateParams = useCallback(
-    (updater: (params: URLSearchParams) => void) => {
-      const params = new URLSearchParams(searchParams)
-
-      updater(params)
-      router.replace(pathname + '?' + params.toString())
-    },
-    [router, pathname, searchParams]
-  )
+  const updateParams = useUpdateParams()
 
   type paramType = 'page' | 'size' | 'name' | 'projectName'
 
-  const setQueryParams = useCallback(
-    (pairs: Partial<Record<paramType, string | number>>) => {
-      if (!pairs) return
-
-      updateParams(params => {
-        Object.entries(pairs).forEach(([key, value]) => {
-          const t_key = key as paramType
-
-          params.set(t_key, value.toString())
-        })
-      })
-    },
-    [updateParams]
-  )
+  const setQueryParams = useSetQueryParams<paramType>()
 
   const resetQueryParams = useCallback(() => {
     updateParams(params => {
