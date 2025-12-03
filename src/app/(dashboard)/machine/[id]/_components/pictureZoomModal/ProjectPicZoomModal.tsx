@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useContext, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -28,13 +28,23 @@ import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled } from '@tabler/i
 
 import { createPortal } from 'react-dom'
 
-import type { MachineProjectPicReadResponseDtoType, MachineProjectPicUpdateRequestDtoType } from '@/@core/types'
+import type {
+  MachineProjectPicReadResponseDtoType,
+  MachineProjectPicUpdateRequestDtoType,
+  ProjectPicType
+} from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { auth } from '@/lib/auth'
 import { projectPicOption } from '@/app/_constants/options'
 import AlertModal from '@/@core/components/custom/AlertModal'
+
+interface formType {
+  originalFileName: string
+  machineProjectPicType: ProjectPicType
+  remark: string
+}
 
 interface ProjectPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
@@ -64,20 +74,20 @@ export default function ProjectPicZoomModal({
     handleSubmit,
     control,
     reset,
-    formState: { isDirty, dirtyFields },
-    setValue,
+    formState: { isDirty },
     watch
-  } = useForm<MachineProjectPicUpdateRequestDtoType>({
+  } = useForm<formType>({
     defaultValues: {
-      ...selectedPic
+      originalFileName: selectedPic.originalFileName ?? '',
+      machineProjectPicType: selectedPic.machineProjectPicType ?? '',
+      remark: selectedPic.remark ?? ''
     }
   })
 
   const watchedMachineProjectPicType = watch('machineProjectPicType')
   const watchedOriginalFileName = watch('originalFileName')
 
-  const [presignedUrl, setPresignedUrl] = useState(selectedPic.presignedUrl)
-  const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
@@ -86,51 +96,76 @@ export default function ProjectPicZoomModal({
 
   const formName = 'project-pic-form'
 
-  useEffect(() => {
-    reset(selectedPic)
-    setPresignedUrl(selectedPic.presignedUrl)
-  }, [selectedPic, reset])
+  // useEffect(() => {
+  //   reset(selectedPic)
+  //   setPresignedUrl(selectedPic.presignedUrl)
+  // }, [selectedPic, reset])
 
   const onChangeImage = async (file: File) => {
-    const S3KeyResult = await getS3Key(
-      machineProjectId,
-      [file],
-      undefined,
-      undefined,
-      undefined,
-      watchedMachineProjectPicType
-    )
-
-    if (!S3KeyResult) return
-
-    setPresignedUrl(URL.createObjectURL(file))
-    setValue('s3Key', S3KeyResult[0].s3Key, { shouldDirty: true })
-  }
-
-  const handleSave = async (data: MachineProjectPicUpdateRequestDtoType) => {
-    const updateRequest = dirtyFields.s3Key ? data : { ...data, s3Key: null }
-
     try {
-      setSaving(true)
+      setLoading(true)
+
+      const S3KeyResult = await getS3Key(
+        machineProjectId,
+        [file],
+        undefined,
+        undefined,
+        undefined,
+        watchedMachineProjectPicType
+      )
+
+      if (!S3KeyResult) return
+
+      const presignedUrl = URL.createObjectURL(file)
+      const s3Key = S3KeyResult[0].s3Key
 
       const response = await auth
         .put<{
           data: MachineProjectPicUpdateRequestDtoType
-        }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/${selectedPic.id}`, updateRequest)
+        }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/${selectedPic.id}`, {
+          version: selectedPic.version,
+          s3Key: s3Key
+        })
         .then(v => v.data.data)
 
-      reset(response)
-
-      handleSuccess('사진 정보가 변경되었습니다.')
       setPictures(prev =>
         prev.map(v => (v.id === selectedPic.id ? { ...v, ...response, presignedUrl: presignedUrl } : v))
       )
+      handleSuccess('사진이 교체되었습니다')
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = handleSubmit(async data => {
+    try {
+      setLoading(true)
+
+      const response = await auth
+        .put<{
+          data: MachineProjectPicUpdateRequestDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/${selectedPic.id}`, {
+          ...data,
+          version: selectedPic.version
+        })
+        .then(v => v.data.data)
+
+      reset({
+        originalFileName: response.originalFileName ?? '',
+        machineProjectPicType: response.machineProjectPicType ?? '',
+        remark: response.remark ?? ''
+      })
+
+      handleSuccess('사진 정보가 변경되었습니다.')
+      setPictures(prev => prev.map(v => (v.id === selectedPic.id ? { ...v, ...response } : v)))
     } catch (error) {
       handleApiError(error)
     } finally {
-      setSaving(false)
+      setLoading(false)
     }
-  }
+  })
 
   const handleClose = () => {
     setOpen(false)
@@ -142,7 +177,7 @@ export default function ProjectPicZoomModal({
   }, [])
 
   return (
-    <form className='hidden' onSubmit={handleSubmit(handleSave)} id={formName}>
+    <form className='hidden' onSubmit={handleSave} id={formName}>
       <style>
         {`#imageZoom {
           object-fit: contain;
@@ -211,7 +246,6 @@ export default function ProjectPicZoomModal({
                 }
               }
             }}
-            id='new-picture-name-input'
           />
           <IconButton
             type='button'
@@ -229,27 +263,20 @@ export default function ProjectPicZoomModal({
             })}
           >
             <div className='flex-1 flex flex-col gap-2 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
-              <div className='flex gap-2 self-end'>
-                <Button sx={{ width: 'fit-content' }} variant='contained' className='bg-blue-500 hover:bg-blue-600'>
-                  다운로드
-                </Button>
-                <Button sx={{ width: 'fit-content' }} color='error' variant='contained'>
+              <div className='w-full flex justify-between'>
+                <Button color='error' variant='contained'>
                   삭제
                 </Button>
-                <Button
-                  type='button'
-                  sx={{
-                    color: 'white',
-                    boxShadow: 10,
-                    backgroundColor: 'primary.dark',
-                    zIndex: 5
-                  }}
-                  onClick={() => cameraInputRef.current?.click()}
-                >
-                  사진 변경
-                </Button>
+                <div className='flex gap-2'>
+                  <Button variant='contained' className='bg-blue-500 hover:bg-blue-600'>
+                    다운로드
+                  </Button>
+                  <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
+                    사진 변경
+                  </Button>
+                </div>
               </div>
-              <ImageZoom src={presignedUrl} alt={watchedOriginalFileName} zoom={200} />
+              <ImageZoom src={selectedPic.presignedUrl} alt={watchedOriginalFileName} />
             </div>
             <Box>
               <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
@@ -306,7 +333,7 @@ export default function ProjectPicZoomModal({
               variant='contained'
               type='submit'
               form={formName}
-              disabled={!isDirty || !watchedMachineProjectPicType || saving}
+              disabled={!isDirty || !watchedMachineProjectPicType || loading}
               color='success'
             >
               저장

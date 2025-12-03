@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, useContext } from 'react'
 
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-import { Box, Typography, CircularProgress, ImageList, Button, TextField, MenuItem } from '@mui/material'
+import { Box, Typography, CircularProgress, ImageList, Button, TextField, MenuItem, Divider } from '@mui/material'
 
 // @ts-ignore
 import type { AxiosRequestConfig } from 'axios'
@@ -73,11 +73,14 @@ const PictureListTabContent = () => {
   const listContainerRef = useRef<HTMLDivElement>(null)
 
   // 사진 클릭 기능 구현을 위한 상태
-  const [selectedInspectionPic, setSelectedInspectionPic] = useState<MachinePicPresignedUrlResponseDtoType>()
-  const [showInspecitonPicModal, setShowInspecitonPicModal] = useState(false)
+  const [selectedInspectionPicId, setSelectedInspectionPicId] = useState<number>()
+  const selectedInspectionPic = inspectionPics.find(v => v.machinePicId === selectedInspectionPicId)
 
-  const [selectedProjectPic, setSelectedProjectPic] = useState<MachineProjectPicReadResponseDtoType>()
-  const [showProjectPicModal, setShowProjectPicModal] = useState(false)
+  const [selectedProjectPicId, setSelectedProjectPicId] = useState<number>()
+  const selectedProjectPic = projectPics.find(v => v.id === selectedProjectPicId)
+
+  const [openInspecitonPic, setOpenInspecitonPic] = useState(false)
+  const [openProjectPic, setOpenProjectPic] = useState(false)
 
   const [selectedInspection, setSelectedInspection] = useState<MachineInspectionDetailResponseDtoType>()
 
@@ -261,7 +264,7 @@ const PictureListTabContent = () => {
   }, [machineProjectId, inspectionPicsToDelete, projectPicsToDelete, refetchPictures])
 
   function handleClickInspectionPicCard(pic: MachinePicPresignedUrlResponseDtoType) {
-    // 일괄선택 활성화 시 클릭 동작
+    // 일괄선택 활성화 시 사진카드 클릭 동작
     if (showCheck) {
       if (!inspectionPicsToDelete.find(v => v.machinePicId === pic.machinePicId)) {
         setInspectionPicsToDelete(prev => {
@@ -278,16 +281,16 @@ const PictureListTabContent = () => {
       }
     }
 
-    // 일괄선택 비활성화 시 클릭 동작
+    // 일괄선택 비활성화 시 사진카드 클릭 동작
     else {
       getInspectionByPic(pic)
-      setSelectedInspectionPic(pic)
-      setShowInspecitonPicModal(true)
+      setSelectedInspectionPicId(pic.machinePicId)
+      setOpenInspecitonPic(true)
     }
   }
 
   function handleClickProjectPicCard(pic: MachineProjectPicReadResponseDtoType) {
-    // 일괄선택 활성화 시 클릭 동작
+    // 일괄선택 활성화 시 사진카드 클릭 동작
     if (showCheck) {
       if (!projectPicsToDelete.find(v => v.id === pic.id)) {
         setProjectPicsToDelete(prev => {
@@ -304,15 +307,15 @@ const PictureListTabContent = () => {
       }
     }
 
-    // 일괄선택 비활성화 시 클릭 동작
+    // 일괄선택 비활성화 시 사진카드 클릭 동작
     else {
-      setSelectedProjectPic(pic)
-      setShowProjectPicModal(true)
+      setSelectedProjectPicId(pic.id)
+      setOpenProjectPic(true)
     }
   }
 
   async function MoveInspectionPic(dir: 'next' | 'previous') {
-    const currentPictureIdx = inspectionPics.findIndex(v => v.machinePicId === selectedInspectionPic?.machinePicId)
+    const currentPictureIdx = inspectionPics.findIndex(v => v.machinePicId === selectedInspectionPicId)
 
     if (currentPictureIdx === -1) {
       throw new Error('현재 사진을 찾을 수 없음. 관리자에게 문의하세요.')
@@ -321,7 +324,7 @@ const PictureListTabContent = () => {
     switch (dir) {
       case 'next':
         if (currentPictureIdx + 1 < inspectionPics.length) {
-          setSelectedInspectionPic(inspectionPics[currentPictureIdx + 1])
+          setSelectedInspectionPicId(inspectionPics[currentPictureIdx + 1].machinePicId)
 
           return
         }
@@ -333,22 +336,23 @@ const PictureListTabContent = () => {
           //   throw new Error('hasNext가 true지만 다음 페이지 없음')
           // }
 
-          setSelectedInspectionPic(nextResponse?.content[0])
+          setSelectedInspectionPicId(nextResponse?.content[0].machinePicId)
         } else {
           toast.warning('다음 사진이 없습니다')
         }
 
         break
       case 'previous':
+        // 현장사진 <- 설비사진 으로 넘어가는 경우
         if (currentPictureIdx === 0) {
           if (projectPics.length > 0) {
             setSelectedInspection(undefined)
-            setSelectedInspectionPic(undefined)
-            setSelectedProjectPic(projectPics[projectPics.length - 1])
-            setShowProjectPicModal(true)
+            setSelectedInspectionPicId(undefined)
+            setSelectedProjectPicId(projectPics[projectPics.length - 1].id)
+            setOpenProjectPic(true)
           } else toast.warning('첫번째 사진입니다')
         } else {
-          setSelectedInspectionPic(inspectionPics[currentPictureIdx - 1])
+          setSelectedInspectionPicId(inspectionPics[currentPictureIdx - 1].machinePicId)
         }
 
         break
@@ -359,7 +363,7 @@ const PictureListTabContent = () => {
   }
 
   async function MoveProjectPic(dir: 'next' | 'previous') {
-    const currentPictureIdx = projectPics.findIndex(v => v.id === selectedProjectPic?.id)
+    const currentPictureIdx = projectPics.findIndex(v => v.id === selectedProjectPicId)
 
     if (currentPictureIdx === -1) {
       throw new Error('현재 사진을 찾을 수 없음. 관리자에게 문의하세요.')
@@ -368,13 +372,14 @@ const PictureListTabContent = () => {
     switch (dir) {
       case 'next':
         if (currentPictureIdx + 1 < projectPics.length) {
-          setSelectedProjectPic(projectPics[currentPictureIdx + 1])
+          setSelectedProjectPicId(projectPics[currentPictureIdx + 1].id)
         } else {
+          // 현장사진 -> 설비사진 으로 넘어가는 경우
           if (inspectionPics.length > 0) {
-            setSelectedProjectPic(undefined)
-            setSelectedInspectionPic(inspectionPics[0])
+            setSelectedProjectPicId(undefined)
+            setSelectedInspectionPicId(inspectionPics[0].machinePicId)
             getInspectionByPic(inspectionPics[0])
-            setShowInspecitonPicModal(true)
+            setOpenInspecitonPic(true)
           } else {
             toast.warning('다음 사진이 없습니다')
           }
@@ -383,7 +388,7 @@ const PictureListTabContent = () => {
         break
       case 'previous':
         if (currentPictureIdx !== 0) {
-          setSelectedProjectPic(projectPics[currentPictureIdx - 1])
+          setSelectedProjectPicId(projectPics[currentPictureIdx - 1].id)
         } else {
           toast.warning('첫번째 사진입니다')
         }
@@ -554,7 +559,7 @@ const PictureListTabContent = () => {
         {/* 현장사진 리스트 */}
         {handlefilterProjectPics(projectPics) && handlefilterProjectPics(projectPics).length > 0 && (
           <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant='h3'>현장사진</Typography>
+            <Typography variant='h3'>- 현장사진</Typography>
             <ImageList sx={{ overflow: 'visible' }} cols={isTablet ? 1 : 4} rowHeight={isTablet ? 150 : 250} gap={10}>
               {handlefilterProjectPics(projectPics).map(pic => {
                 return (
@@ -580,8 +585,10 @@ const PictureListTabContent = () => {
             return (
               handlefilterInspectionPics(inspectionsPic)?.length > 0 && (
                 <Box key={insp.id} sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Divider variant='middle' />
+
                   <div className='flex gap-3 items-end'>
-                    <Typography variant='h3'>{insp.name}</Typography>
+                    <Typography variant='h3'>{`-  ${insp.name}`}</Typography>
                     {/* <Typography variant='h6' sx={{ marginBottom: 1 }}>{`[${insp.machineParentCateName}]`}</Typography> */}
                   </div>
                   <ImageList
@@ -622,8 +629,8 @@ const PictureListTabContent = () => {
 
       {selectedInspectionPic && selectedInspection && (
         <InspectionPicZoomModal
-          open={showInspecitonPicModal}
-          setOpen={setShowInspecitonPicModal}
+          open={openInspecitonPic}
+          setOpen={setOpenInspecitonPic}
           selectedPic={selectedInspectionPic}
           selectedInspection={selectedInspection}
           setPictures={setInspectionPics}
@@ -632,8 +639,8 @@ const PictureListTabContent = () => {
       )}
       {selectedProjectPic && (
         <ProjectPicZoomModal
-          open={showProjectPicModal}
-          setOpen={setShowProjectPicModal}
+          open={openProjectPic}
+          setOpen={setOpenProjectPic}
           selectedPic={selectedProjectPic}
           setPictures={setProjectPics}
           MovePicture={MoveProjectPic}

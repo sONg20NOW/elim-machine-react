@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useContext, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -42,6 +42,15 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { auth } from '@/lib/auth'
 import AlertModal from '@/@core/components/custom/AlertModal'
 
+interface formType {
+  machineInspectionId: number
+  machineChecklistSubItemId: number
+  originalFileName: string
+  alternativeSubTitle: string
+  measuredValue: string
+  remark: string
+}
+
 interface InspectionPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
   open: boolean
@@ -72,13 +81,18 @@ export default function InspectionPicZoomModal({
     handleSubmit,
     control,
     reset,
-    formState: { isDirty, dirtyFields },
+    formState: { isDirty },
     setValue,
     getValues,
     watch
-  } = useForm<MachinePicUpdateResponseDtoType & { machineInspectionId: number }>({
+  } = useForm<formType>({
     defaultValues: {
-      ...selectedPic
+      machineInspectionId: selectedPic.machineInspectionId ?? 0,
+      machineChecklistSubItemId: selectedPic.machineChecklistSubItemId ?? 0,
+      originalFileName: selectedPic.originalFileName ?? '',
+      alternativeSubTitle: selectedPic.alternativeSubTitle ?? '',
+      measuredValue: selectedPic.measuredValue ?? '',
+      remark: selectedPic.remark ?? ''
     }
   })
 
@@ -86,11 +100,10 @@ export default function InspectionPicZoomModal({
   const watchedAlternativeSubTitle = watch('alternativeSubTitle')
 
   const [machineChecklistItemId, setMachineChecklistItemId] = useState(selectedPic.machineChecklistItemId)
-  const [presignedUrl, setPresignedUrl] = useState(selectedPic.presignedUrl)
 
   // 사진 정보 수정을 위한 상태관리
   const [urlInspectionId, setUrlInspectionId] = useState(selectedPic.machineInspectionId)
-  const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
 
@@ -100,71 +113,89 @@ export default function InspectionPicZoomModal({
 
   const formName = 'inspection-pic-form'
 
-  useEffect(() => {
-    reset(selectedPic)
-    setPresignedUrl(selectedPic.presignedUrl)
-    setMachineChecklistItemId(selectedPic.machineChecklistItemId)
-    setUrlInspectionId(selectedPic.machineInspectionId)
-  }, [selectedPic, reset])
+  // useEffect(() => {
+  //   reset(selectedPic)
+  //   setMachineChecklistItemId(selectedPic.machineChecklistItemId)
+  //   setUrlInspectionId(selectedPic.machineInspectionId)
+  // }, [selectedPic, reset])
 
   const onChangeImage = async (file: File) => {
-    if (!watchedSubItemId) {
-      toast.error('하위항목을 선택해주세요')
-
-      return
-    }
-
-    const S3KeyResult = await getS3Key(
-      machineProjectId,
-      [file],
-      getValues().machineInspectionId.toString(),
-      machineChecklistItemId,
-      getValues().machineChecklistSubItemId,
-      undefined
-    )
-
-    if (!S3KeyResult) return
-
-    setPresignedUrl(URL.createObjectURL(file))
-    setValue('s3Key', S3KeyResult[0].s3Key, { shouldDirty: true })
-  }
-
-  const handleSave = async (data: MachinePicUpdateResponseDtoType) => {
-    if (!watchedSubItemId) {
-      toast.error('하위항목을 선택해주세요')
-
-      return
-    }
-
-    const updateRequest = dirtyFields.s3Key ? data : { ...data, s3Key: null }
-
     try {
-      setSaving(true)
+      setLoading(true)
+
+      const S3KeyResult = await getS3Key(
+        machineProjectId,
+        [file],
+        getValues().machineInspectionId.toString(),
+        machineChecklistItemId,
+        getValues().machineChecklistSubItemId,
+        undefined
+      )
+
+      if (!S3KeyResult) return
+
+      const presignedUrl = URL.createObjectURL(file)
+      const s3Key = S3KeyResult[0].s3Key
 
       const response = await auth
         .put<{
           data: MachinePicUpdateResponseDtoType
         }>(
           `/api/machine-projects/${machineProjectId}/machine-inspections/${urlInspectionId}/machine-pics/${selectedPic.machinePicId}`,
-          updateRequest
+          { version: selectedPic.version, s3Key: s3Key }
         )
         .then(v => v.data.data)
 
-      reset(response)
-      setUrlInspectionId(response.machineInspectionId)
-
-      handleSuccess('사진 정보가 변경되었습니다.')
       setPictures(prev =>
         prev.map(v =>
           v.machinePicId === selectedPic.machinePicId ? { ...v, ...response, presignedUrl: presignedUrl } : v
         )
       )
+      handleSuccess('사진이 교체되었습니다')
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = handleSubmit(async (data: formType) => {
+    if (!watchedSubItemId) {
+      toast.error('하위항목을 선택해주세요')
+
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const response = await auth
+        .put<{
+          data: MachinePicUpdateResponseDtoType
+        }>(
+          `/api/machine-projects/${machineProjectId}/machine-inspections/${urlInspectionId}/machine-pics/${selectedPic.machinePicId}`,
+          { ...data, version: selectedPic.version }
+        )
+        .then(v => v.data.data)
+
+      reset({
+        machineInspectionId: response.machineInspectionId ?? 0,
+        machineChecklistSubItemId: response.machineChecklistSubItemId ?? 0,
+        originalFileName: response.originalFileName ?? '',
+        alternativeSubTitle: response.alternativeSubTitle ?? '',
+        measuredValue: response.measuredValue ?? '',
+        remark: response.remark ?? ''
+      })
+      setUrlInspectionId(response.machineInspectionId)
+
+      handleSuccess('사진 정보가 변경되었습니다.')
+      setPictures(prev => prev.map(v => (v.machinePicId === selectedPic.machinePicId ? { ...v, ...response } : v)))
     } catch (error) {
       handleApiError(error)
     } finally {
-      setSaving(false)
+      setLoading(false)
     }
-  }
+  })
 
   const handleClose = () => {
     setOpen(false)
@@ -177,7 +208,7 @@ export default function InspectionPicZoomModal({
 
   return (
     inspectionList && (
-      <form className='hidden' onSubmit={handleSubmit(handleSave)} id={formName}>
+      <form className='hidden' onSubmit={handleSave} id={formName}>
         <style>
           {`#imageZoom {
               object-fit: contain;
@@ -245,7 +276,6 @@ export default function InspectionPicZoomModal({
                   }
                 }
               }}
-              id='new-picture-name-input'
             />
             <IconButton
               type='button'
@@ -263,27 +293,20 @@ export default function InspectionPicZoomModal({
               })}
             >
               <div className='flex-1 flex flex-col gap-2 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
-                <div className='flex gap-2 self-end'>
-                  <Button sx={{ width: 'fit-content' }} variant='contained' className='bg-blue-500 hover:bg-blue-600'>
-                    다운로드
-                  </Button>
-                  <Button sx={{ width: 'fit-content' }} color='error' variant='contained'>
+                <div className='w-full flex justify-between'>
+                  <Button color='error' variant='contained'>
                     삭제
                   </Button>
-                  <Button
-                    type='button'
-                    sx={{
-                      color: 'white',
-                      boxShadow: 10,
-                      backgroundColor: 'primary.dark',
-                      zIndex: 5
-                    }}
-                    onClick={() => cameraInputRef.current?.click()}
-                  >
-                    사진 변경
-                  </Button>
+                  <div className='flex gap-2'>
+                    <Button variant='contained' className='bg-blue-500 hover:bg-blue-600'>
+                      다운로드
+                    </Button>
+                    <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
+                      사진 변경
+                    </Button>
+                  </div>
                 </div>
-                <ImageZoom src={presignedUrl} alt={watchedAlternativeSubTitle} />
+                <ImageZoom src={selectedPic.presignedUrl} alt={watchedAlternativeSubTitle} />
               </div>
               <Box>
                 <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
@@ -409,7 +432,7 @@ export default function InspectionPicZoomModal({
                 variant='contained'
                 type='submit'
                 form={formName}
-                disabled={!isDirty || !watchedSubItemId || saving}
+                disabled={!isDirty || !watchedSubItemId || loading}
                 color='success'
               >
                 저장

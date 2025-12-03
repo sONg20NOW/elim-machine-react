@@ -63,8 +63,10 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   const isLoadingRef = useRef(false)
 
   // 사진 클릭 기능 구현을 위한 상태
-  const [selectedPic, setSelectedPic] = useState<MachineProjectPicReadResponseDtoType>()
-  const [showPicZoom, setShowPicZoom] = useState(false)
+  const [selectedPicId, setSelectedPicId] = useState<number>()
+  const selectedPic = pictures.find(v => v.id === selectedPicId)
+
+  const [openPicZoom, setOpenPicZoom] = useState(false)
 
   const filteredPics = pictures.filter(pic =>
     selectedPicType !== '전체' ? selectedPicType === pic.machineProjectPicType : true
@@ -156,7 +158,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   }, [machineProjectId, picturesToDelete, getPictures])
 
   async function MovePicture(dir: 'next' | 'previous') {
-    const currentPictureIdx = pictures.findIndex(v => v.id === selectedPic?.id)
+    const currentPictureIdx = pictures.findIndex(v => v.id === selectedPicId)
 
     if (currentPictureIdx === -1) {
       throw new Error('현재 사진을 찾을 수 없음. 관리자에게 문의하세요.')
@@ -165,7 +167,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     switch (dir) {
       case 'next':
         if (currentPictureIdx + 1 < pictures.length) {
-          setSelectedPic(pictures[currentPictureIdx + 1])
+          setSelectedPicId(pictures[currentPictureIdx + 1].id)
         } else {
           toast.warning('다음 사진이 없습니다')
         }
@@ -173,7 +175,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
         break
       case 'previous':
         if (currentPictureIdx !== 0) {
-          setSelectedPic(pictures[currentPictureIdx - 1])
+          setSelectedPicId(pictures[currentPictureIdx - 1].id)
         } else {
           toast.warning('첫번째 사진입니다')
         }
@@ -194,8 +196,8 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           setPicturesToDelete(prev => prev.filter(v => v.id !== pic.id))
         }
       } else {
-        setSelectedPic(pic)
-        setShowPicZoom(true)
+        setSelectedPicId(pic.id)
+        setOpenPicZoom(true)
       }
     },
     [showCheck, picturesToDelete]
@@ -207,10 +209,10 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   useEffect(() => {
     if (!wasOpened.current) {
       wasOpened.current = true
-    } else if (!showPicZoom) {
+    } else if (!openPicZoom) {
       getPictures()
     }
-  }, [showPicZoom, getPictures])
+  }, [openPicZoom, getPictures])
 
   return (
     <Dialog
@@ -481,8 +483,8 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
       {selectedPic && (
         <ProjectPicZoomModal
           MovePicture={MovePicture}
-          open={showPicZoom}
-          setOpen={setShowPicZoom}
+          open={openPicZoom}
+          setOpen={setOpenPicZoom}
           selectedPic={selectedPic}
           setPictures={setPictures}
         />

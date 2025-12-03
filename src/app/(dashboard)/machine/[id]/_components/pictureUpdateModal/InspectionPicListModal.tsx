@@ -107,7 +107,9 @@ const InspectionPicListModal = ({
   const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
   // 사진 클릭 기능 구현을 위한 상태
-  const [selectedPic, setSelectedPic] = useState<MachinePicPresignedUrlResponseDtoType>()
+  const [selectedPicId, setSelectedPicId] = useState<number>()
+  const selectedPic = pictures.find(v => v.machinePicId === selectedPicId)
+
   const [openPicZoom, setOpenPicZoom] = useState(false)
 
   const [selectAll, setSelectAll] = useState(true)
@@ -238,7 +240,7 @@ const InspectionPicListModal = ({
           setPicturesToDelete(prev => prev.filter(v => v.machinePicId !== pic.machinePicId))
         }
       } else {
-        setSelectedPic(pic)
+        setSelectedPicId(pic.machinePicId)
         setOpenPicZoom(true)
       }
     },
@@ -267,7 +269,7 @@ const InspectionPicListModal = ({
   }, [machineProjectId, picturesToDelete, refetchSelectedInspection])
 
   async function MovePicture(dir: 'next' | 'previous') {
-    const currentPictureIdx = pictures.findIndex(v => v.machinePicId === selectedPic?.machinePicId)
+    const currentPictureIdx = pictures.findIndex(v => v.machinePicId === selectedPicId)
 
     if (currentPictureIdx === -1) {
       throw new Error('현재 사진을 찾을 수 없음. 관리자에게 문의하세요.')
@@ -276,7 +278,7 @@ const InspectionPicListModal = ({
     switch (dir) {
       case 'next':
         if (currentPictureIdx + 1 < pictures.length) {
-          setSelectedPic(pictures[currentPictureIdx + 1])
+          setSelectedPicId(pictures[currentPictureIdx + 1].machinePicId)
 
           return
         }
@@ -288,7 +290,7 @@ const InspectionPicListModal = ({
           //   throw new Error('hasNext가 true지만 다음 페이지 없음')
           // }
 
-          setSelectedPic(nextResponse?.content[0])
+          setSelectedPicId(nextResponse?.content[0].machinePicId)
         } else {
           toast.warning('다음 사진이 없습니다')
         }
@@ -298,7 +300,7 @@ const InspectionPicListModal = ({
         if (currentPictureIdx === 0) {
           toast.warning('첫번째 사진입니다')
         } else {
-          setSelectedPic(pictures[currentPictureIdx - 1])
+          setSelectedPicId(pictures[currentPictureIdx - 1].machinePicId)
         }
 
         break
