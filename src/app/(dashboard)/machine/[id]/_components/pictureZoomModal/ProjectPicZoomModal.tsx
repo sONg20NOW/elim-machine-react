@@ -1,4 +1,4 @@
-import { useCallback, useContext, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -11,8 +11,6 @@ import {
   DialogTitle,
   Grid2,
   IconButton,
-  InputLabel,
-  MenuItem,
   TextField,
   Typography,
   useMediaQuery
@@ -20,7 +18,7 @@ import {
 
 import classNames from 'classnames'
 
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import ImageZoom from 'react-image-zooom'
 
@@ -39,6 +37,8 @@ import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { auth } from '@/lib/auth'
 import { projectPicOption } from '@/app/_constants/options'
 import AlertModal from '@/@core/components/custom/AlertModal'
+import TextInputBox from '@/@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
 
 interface formType {
   originalFileName: string
@@ -69,14 +69,7 @@ export default function ProjectPicZoomModal({
   const [openAlert, setOpenAlert] = useState(false)
   const proceedingJob = useRef<() => void>()
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    formState: { isDirty },
-    watch
-  } = useForm<formType>({
+  const form = useForm<formType>({
     defaultValues: {
       originalFileName: selectedPic.originalFileName ?? '',
       machineProjectPicType: selectedPic.machineProjectPicType ?? '',
@@ -84,8 +77,18 @@ export default function ProjectPicZoomModal({
     }
   })
 
-  const watchedMachineProjectPicType = watch('machineProjectPicType')
-  const watchedOriginalFileName = watch('originalFileName')
+  useEffect(() => {
+    form.reset({
+      originalFileName: selectedPic.originalFileName ?? '',
+      machineProjectPicType: selectedPic.machineProjectPicType ?? '',
+      remark: selectedPic.remark ?? ''
+    })
+  }, [form, selectedPic.id, selectedPic.originalFileName, selectedPic.machineProjectPicType, selectedPic.remark])
+
+  const isDirty = form.formState.isDirty
+
+  const watchedMachineProjectPicType = form.watch('machineProjectPicType')
+  const watchedOriginalFileName = form.watch('originalFileName')
 
   const [loading, setLoading] = useState(false)
 
@@ -95,11 +98,6 @@ export default function ProjectPicZoomModal({
   const isMobile = useContext(isMobileContext)
 
   const formName = 'project-pic-form'
-
-  // useEffect(() => {
-  //   reset(selectedPic)
-  //   setPresignedUrl(selectedPic.presignedUrl)
-  // }, [selectedPic, reset])
 
   const onChangeImage = async (file: File) => {
     try {
@@ -139,7 +137,7 @@ export default function ProjectPicZoomModal({
     }
   }
 
-  const handleSave = handleSubmit(async data => {
+  const handleSave = form.handleSubmit(async data => {
     try {
       setLoading(true)
 
@@ -152,14 +150,14 @@ export default function ProjectPicZoomModal({
         })
         .then(v => v.data.data)
 
-      reset({
+      form.reset({
         originalFileName: response.originalFileName ?? '',
         machineProjectPicType: response.machineProjectPicType ?? '',
         remark: response.remark ?? ''
       })
+      setPictures(prev => prev.map(v => (v.id === selectedPic.id ? { ...v, ...response } : v)))
 
       handleSuccess('사진 정보가 변경되었습니다.')
-      setPictures(prev => prev.map(v => (v.id === selectedPic.id ? { ...v, ...response } : v)))
     } catch (error) {
       handleApiError(error)
     } finally {
@@ -232,12 +230,17 @@ export default function ProjectPicZoomModal({
       >
         <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
           <TextField
-            {...register('originalFileName')}
+            key={selectedPic.id}
+            {...form.register('originalFileName')}
             variant='standard'
             fullWidth
-            label='현장사진명'
+            label={
+              <Typography {...(form.formState.dirtyFields.originalFileName && { color: 'primary.main' })}>
+                현장사진명
+              </Typography>
+            }
             size='small'
-            sx={{ width: '50%' }}
+            sx={{ width: '30%' }}
             slotProps={{
               htmlInput: {
                 sx: {
@@ -262,7 +265,7 @@ export default function ProjectPicZoomModal({
               'flex-col': isMobile
             })}
           >
-            <div className='flex-1 flex flex-col gap-2 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
+            <div className='flex-1 flex flex-col gap-6 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
               <div className='w-full flex justify-between'>
                 <Button color='error' variant='contained'>
                   삭제
@@ -272,53 +275,26 @@ export default function ProjectPicZoomModal({
                     다운로드
                   </Button>
                   <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
-                    사진 변경
+                    사진 교체
                   </Button>
                 </div>
               </div>
               <ImageZoom src={selectedPic.presignedUrl} alt={watchedOriginalFileName} />
             </div>
             <Box>
-              <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={2}>
-                <Grid2 size={2}>
-                  <Controller
-                    name='machineProjectPicType'
-                    control={control}
-                    render={({ field }) => (
-                      <>
-                        <InputLabel>사진 종류</InputLabel>
-                        <TextField
-                          select
-                          value={field.value}
-                          onChange={v => {
-                            field.onChange(v.target.value)
-                          }}
-                          hiddenLabel
-                          size='small'
-                          fullWidth
-                        >
-                          {projectPicOption.map(v => (
-                            <MenuItem key={v.value} value={v.value}>
-                              {v.label}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      </>
-                    )}
-                  />
-                </Grid2>
-                <Grid2 size={2}>
-                  <InputLabel>비고</InputLabel>
-
-                  <TextField
-                    {...register('remark')}
-                    placeholder='비고를 입력해주세요'
-                    minRows={3}
-                    multiline
-                    fullWidth
-                    hiddenLabel
-                  />
-                </Grid2>
+              <Grid2
+                key={selectedPic.id}
+                sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }}
+                container
+                spacing={4}
+                columns={1}
+              >
+                <MultiInputBox
+                  form={form}
+                  name='machineProjectPicType'
+                  labelMap={{ machineProjectPicType: { label: '사진 종류', options: projectPicOption } }}
+                />
+                <TextInputBox multiline form={form} name='remark' labelMap={{ remark: { label: '비고' } }} />
               </Grid2>
             </Box>
           </div>
