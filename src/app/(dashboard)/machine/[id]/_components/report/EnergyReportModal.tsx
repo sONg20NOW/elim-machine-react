@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -19,7 +19,7 @@ import {
 } from '@mui/material'
 import { NumericFormat } from 'react-number-format'
 
-import { IconX } from '@tabler/icons-react'
+import { IconCaretLeft, IconCaretRight, IconX } from '@tabler/icons-react'
 
 import styles from '@/app/_style/Table.module.css'
 
@@ -27,6 +27,7 @@ import { useGetEnergyTargets, useGetEnergyTypes, useGetEnergyUsages } from '@/@c
 import AddTargetModal from './AddTargetModal'
 import { auth } from '@/lib/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -39,6 +40,8 @@ const defaultMonths = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', 
 const minHeight = '60dvh'
 
 export default function EnergyReport() {
+  const machineProjectName = useContext(MacinheProjectNameContext)
+
   const params = useParams()
 
   const [open, setOpen] = useState(false)
@@ -207,10 +210,13 @@ export default function EnergyReport() {
         에너지 사용량
       </Button>
       {currentEnergyType && (
-        <Dialog maxWidth='xl' fullWidth open={open}>
+        <Dialog maxWidth='xl' fullWidth open={open} slotProps={{ paper: { sx: { minHeight: '80dvh' } } }}>
           <DialogTitle>
-            <div className='flex justify-between'>
+            <div className='flex gap-2 items-end'>
               <Typography variant='h3'>에너지 사용량</Typography>
+              <Typography variant='h5' sx={{ color: 'gray' }}>
+                {machineProjectName}
+              </Typography>
               <IconButton
                 sx={{ position: 'absolute', right: 5, top: 5 }}
                 type='button'
@@ -221,24 +227,26 @@ export default function EnergyReport() {
               </IconButton>
             </div>
           </DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ px: 0 }}>
             <div className={`${styles.container} ${styles.centered} flex flex-col gap-4`}>
-              <AppBar position='static' color='warning'>
-                <Tabs
-                  value={value}
-                  onChange={(_, newValue) => setValue(newValue)}
-                  indicatorColor='secondary'
-                  sx={{ color: 'white' }}
-                  textColor='inherit'
-                >
-                  {energyTypes?.map(type => (
-                    <StyledTab key={type.machineEnergyTypeId} label={type.name} value={type.machineEnergyTypeId} />
-                  ))}
-                </Tabs>
-              </AppBar>
-              <div className='flex gap-6 ps-2 items-center'>
-                <Typography variant='h4'>{currentEnergyType.name} 사용량</Typography>
-                <AddTargetModal machineEnergyTypeId={currentEnergyType.machineEnergyTypeId} />
+              <div className='grid gap-4 px-6'>
+                <AppBar position='static' color='warning'>
+                  <Tabs
+                    value={value}
+                    onChange={(_, newValue) => setValue(newValue)}
+                    indicatorColor='secondary'
+                    sx={{ color: 'white' }}
+                    textColor='inherit'
+                  >
+                    {energyTypes?.map(type => (
+                      <StyledTab key={type.machineEnergyTypeId} label={type.name} value={type.machineEnergyTypeId} />
+                    ))}
+                  </Tabs>
+                </AppBar>
+                <div className='flex gap-6 ps-2 items-center'>
+                  <Typography variant='h4'>{currentEnergyType.name} 사용량</Typography>
+                  <AddTargetModal machineEnergyTypeId={currentEnergyType.machineEnergyTypeId} />
+                </div>
               </div>
               <div className={`grid place-items-center min-h-[${minHeight}]`}>
                 {isLoadingTargets || isLoadingTypes ? (
@@ -249,7 +257,7 @@ export default function EnergyReport() {
                     <div className='flex'>
                       <div className='grid place-items-center'>
                         <IconButton onClick={movePreviousYear} type='button'>
-                          <i className='tabler-chevron-compact-left' />
+                          <IconCaretLeft size={40} />
                         </IconButton>
                       </div>
                       <table style={{ tableLayout: 'fixed' }}>
@@ -334,7 +342,7 @@ export default function EnergyReport() {
                       </table>
                       <div className='grid place-items-center'>
                         <IconButton type='button' onClick={moveNextYear}>
-                          <i className='tabler-chevron-compact-right' />
+                          <IconCaretRight size={40} />
                         </IconButton>
                       </div>
                     </div>

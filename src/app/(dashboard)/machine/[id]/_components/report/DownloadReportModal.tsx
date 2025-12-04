@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -27,12 +27,13 @@ import { handleApiError } from '@/utils/errorHandler'
 import InspectionPerformanceModal from './InspectionPerformanceModal'
 import type { MachineReportCategoryReadResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
 import ReloadButton from '../ReloadButton'
+import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
-export default function DownloadReportModal({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
+export default function DownloadReportModal() {
+  const machineProjectName = useContext(MacinheProjectNameContext)
+  const [open, setOpen] = useState(false)
+
   const machineProjectId = useParams().id?.toString()
-
-  // 설비별 성능점검표 모달
-  const [openInspModal, setOpenInspModal] = useState(false)
 
   const [loading, setLoading] = useState(false)
 
@@ -89,9 +90,23 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
   return (
     reportCategories && (
       <>
+        <Button
+          variant='contained'
+          className='bg-blue-500 hover:bg-blue-600 hover:shadow-3'
+          onClick={() => {
+            setOpen(true)
+          }}
+        >
+          보고서 다운로드
+        </Button>
         <Dialog fullWidth maxWidth='md' open={open}>
           <DialogTitle variant='h3' sx={{ position: 'relative' }}>
-            보고서 다운로드
+            <div className='flex gap-2 items-end'>
+              보고서 다운로드
+              <Typography component={'div'} variant='h5' sx={{ color: 'gray' }}>
+                {machineProjectName}
+              </Typography>
+            </div>
             {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
             <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
               <IconX />
@@ -121,7 +136,6 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
                     category={category}
                     idx={idx}
                     statuses={statuses ?? []}
-                    setOpenInspModal={setOpenInspModal}
                     onPresignedLoaded={handleSetPresigned}
 
                     // setStatuses={setStatuses}
@@ -153,7 +167,6 @@ export default function DownloadReportModal({ open, setOpen }: { open: boolean; 
             {/* <SettingButton /> */}
           </DialogActions>
         </Dialog>
-        <InspectionPerformanceModal open={openInspModal} setOpen={setOpenInspModal} />
       </>
     )
   )
@@ -164,13 +177,11 @@ const TableRow = memo(
     category,
     idx,
     statuses,
-    setOpenInspModal,
     onPresignedLoaded
   }: {
     category: MachineReportCategoryReadResponseDtoType
     idx: number
     statuses: MachineReportStatusResponseDtoType[]
-    setOpenInspModal: (open: boolean) => void
     onPresignedLoaded: (categoryId: number, index: number, url: string) => void
   }) => {
     const machineProjectId = useParams().id?.toString()
@@ -269,15 +280,7 @@ const TableRow = memo(
         ) : (
           <td colSpan={1} className='px-1'>
             <div className='grid place-items-cetner'>
-              <Button
-                variant='outlined'
-                type='button'
-                onClick={() => {
-                  setOpenInspModal(true)
-                }}
-              >
-                설비확인
-              </Button>
+              <InspectionPerformanceModal />
             </div>
           </td>
         )}

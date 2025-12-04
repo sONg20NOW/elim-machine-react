@@ -26,13 +26,9 @@ import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import ReloadButton from '../ReloadButton'
 
-export default function InspectionPerformanceModal({
-  open,
-  setOpen
-}: {
-  open: boolean
-  setOpen: (open: boolean) => void
-}) {
+export default function InspectionPerformanceModal() {
+  const [open, setOpen] = useState(false)
+
   const machineProjectId = useParams().id?.toString()
 
   const { data: reportCategories } = useGetReportCategories()
@@ -87,56 +83,67 @@ export default function InspectionPerformanceModal({
 
   return (
     everyCategories && (
-      <Dialog fullWidth maxWidth='sm' open={open}>
-        <DialogTitle variant='h3' sx={{ position: 'relative' }}>
-          설비별 성능점검표
-          {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
-          <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
-            <i className='tabler-x' />
-          </IconButton>
-          <div className='flex items-center justify-between'>
-            <DialogContentText>
-              ※버튼이 비활성화된 경우 개인 PC에서 보고서 생성 후 업로드를 완료해주세요
-            </DialogContentText>
-            <ReloadButton handleClick={refetch} tooltipText='보고서 상태 새로고침' />
-          </div>
-          <Divider />
-        </DialogTitle>
-        <DialogContent className={`${style.container} max-h-[40dvh]`}>
-          <table style={{ tableLayout: 'fixed', width: '100%' }}>
-            <thead>
-              <tr>
-                <th colSpan={1}>번호</th>
-                <th colSpan={4}>내용</th>
-                {/* <th colSpan={1}>생성</th> */}
-                <th colSpan={1}>다운로드</th>
-              </tr>
-            </thead>
-            <tbody>
-              {everyCategories?.map((machineCategory, idx) => (
-                <InspectionTableRow
-                  key={machineCategory.id}
-                  machineCategory={machineCategory}
-                  idx={idx}
-                  statuses={statuses ?? []}
-                  onPresignedLoaded={handleSetPresigned}
-                />
-              ))}
-            </tbody>
-          </table>
-        </DialogContent>
-        <DialogActions className='flex items-center justify-center pt-4' sx={{ boxShadow: 10 }}>
-          <Button
-            variant='contained'
-            className='bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300'
-            type='button'
-            onClick={handleDownloadAll}
-            disabled={loading}
-          >
-            전체 다운로드(ZIP)
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <>
+        <Button
+          variant='outlined'
+          type='button'
+          onClick={() => {
+            setOpen(true)
+          }}
+        >
+          설비확인
+        </Button>
+        <Dialog fullWidth maxWidth='sm' open={open}>
+          <DialogTitle variant='h3' sx={{ position: 'relative' }}>
+            설비별 성능점검표
+            {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
+            <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
+              <i className='tabler-x' />
+            </IconButton>
+            <div className='flex items-center justify-between'>
+              <DialogContentText>
+                ※버튼이 비활성화된 경우 개인 PC에서 보고서 생성 후 업로드를 완료해주세요
+              </DialogContentText>
+              <ReloadButton handleClick={refetch} tooltipText='보고서 상태 새로고침' />
+            </div>
+            <Divider />
+          </DialogTitle>
+          <DialogContent className={`${style.container} max-h-[40dvh]`}>
+            <table style={{ tableLayout: 'fixed', width: '100%' }}>
+              <thead>
+                <tr>
+                  <th colSpan={1}>번호</th>
+                  <th colSpan={4}>내용</th>
+                  {/* <th colSpan={1}>생성</th> */}
+                  <th colSpan={1}>다운로드</th>
+                </tr>
+              </thead>
+              <tbody>
+                {everyCategories?.map((machineCategory, idx) => (
+                  <InspectionTableRow
+                    key={machineCategory.id}
+                    machineCategory={machineCategory}
+                    idx={idx}
+                    statuses={statuses ?? []}
+                    onPresignedLoaded={handleSetPresigned}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </DialogContent>
+          <DialogActions className='flex items-center justify-center pt-4' sx={{ boxShadow: 10 }}>
+            <Button
+              variant='contained'
+              className='bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300'
+              type='button'
+              onClick={handleDownloadAll}
+              disabled={loading}
+            >
+              전체 다운로드(ZIP)
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </>
     )
   )
 }

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -32,6 +32,7 @@ import styles from '@/app/_style/Table.module.css'
 import { auth } from '@/lib/auth'
 import { handleSuccess } from '@/utils/errorHandler'
 import type { MachineInspectionRootCategoryResponseDtoType } from '@/@core/types'
+import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
 // ✅ 각 탭을 dynamic import로 로딩 (Next.js에서만 가능)
 const ResultSummaryTab = dynamic(() => import('./tabs/ResultSummaryTab'))
@@ -83,7 +84,8 @@ export const StyledTextField = styled(TextField)({
   }
 })
 
-export default function MachinePerformanceReviewModal({ machineProjectName }: { machineProjectName: string }) {
+export default function MachinePerformanceReviewModal() {
+  const machineProjectName = useContext(MacinheProjectNameContext)
   const { id } = useParams()
   const machineProjectId = id?.toString()
 
