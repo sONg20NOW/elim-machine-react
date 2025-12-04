@@ -61,7 +61,7 @@ export default function DownloadReportModal() {
     setLoading(true)
     const zip = new JSZip()
 
-    // 병렬 다운로드 (presigned URL -> Blob)
+    // 병렬 다운로드 (presigned URL -> Blob -> zip에 추가)
     const filePromises = presignedMap.current.map(async ({ categoryId, url, index }) => {
       const res = await fetch(url)
 
