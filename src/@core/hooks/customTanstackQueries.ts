@@ -13,6 +13,7 @@ import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임
 import type {
   EngineerBasicResponseDtoType,
   EngineerResponseDtoType,
+  engineerTypeType,
   GasMeasurementResponseDtoType,
   LicensePageResponseDtoType,
   LicenseResponseDtoType,
@@ -935,18 +936,18 @@ export const useGetMachineProjects = (queryParams: string) => {
 
 // ------------------------- Engineer 관련 -------------------------
 // GET /api/machine-projects/{machineProjectId}/machine-project-engineers
-export const useGetEngineersOptions = () => {
+export const useGetEngineersOptions = (engineerType: engineerTypeType = 'MACHINE') => {
   const fetchEngineersOptions: QueryFunction<MachineEngineerOptionResponseDtoType[], string[]> = useCallback(
     async data => {
+      const [keyType, engineerType] = data.queryKey
+
       const response = await auth
         .get<{
           data: { engineers: MachineEngineerOptionResponseDtoType[] }
-        }>(`/api/engineers/options`)
+        }>(`/api/engineers/options?engineerType=${engineerType}`)
         .then(v => v.data.data.engineers)
 
-      const [keyType] = data.queryKey
-
-      console.log(`!!! queryFn ${keyType}:`)
+      console.log(`!!! queryFn ${keyType}_${engineerType}:`)
 
       return response
     },
@@ -954,19 +955,19 @@ export const useGetEngineersOptions = () => {
   )
 
   return useQuery({
-    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS_OPTIONS,
+    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS_OPTIONS(engineerType),
     queryFn: fetchEngineersOptions,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
 
 // GET /api/engineers
-export const useGetEngineers = (queryParams: string) => {
+export const useGetEngineers = (queryParams: string, engineerType: engineerTypeType = 'MACHINE') => {
   const fetchEngineers: QueryFunction<
     successResponseDtoType<MachineEngineerPageResponseDtoType[]>,
     string[]
   > = useCallback(async data => {
-    const [keyType, queryParams] = data.queryKey
+    const [keyType, engineerType, queryParams] = data.queryKey
 
     const params = new URLSearchParams(queryParams)
 
@@ -974,37 +975,39 @@ export const useGetEngineers = (queryParams: string) => {
       params.set('size', '15')
     }
 
+    params.set('engineerType', engineerType)
+
     const response = await auth
       .get<{
         data: successResponseDtoType<MachineEngineerPageResponseDtoType[]>
       }>(`/api/engineers?${params}`)
       .then(v => v.data.data)
 
-    console.log(`!!! queryFn ${keyType} ${params}:`)
+    console.log(`!!! queryFn ${keyType}_${engineerType} ${params}:`)
 
     return response
   }, [])
 
   return useQuery({
-    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS(queryParams),
+    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEERS(engineerType, queryParams),
     queryFn: fetchEngineers,
     staleTime: 1000 * 60 * 5 // 5분
   })
 }
 
 // GET /api/engineers/by-member/{memberId}
-export const useGetEngineerByMemberId = (memberId: string) => {
+export const useGetEngineerByMemberId = (memberId: string, engineerType: engineerTypeType = 'MACHINE') => {
   const fetchEngineer: QueryFunction<EngineerBasicResponseDtoType, string[]> = useCallback(
     async data => {
+      const [keyType, engineerType] = data.queryKey
+
       const response = await auth
         .get<{
           data: EngineerBasicResponseDtoType
-        }>(`/api/engineers/by-member/${memberId}`)
+        }>(`/api/engineers/by-member/${memberId}?engineerType=${engineerType}`)
         .then(v => v.data.data)
 
-      const [keyType] = data.queryKey
-
-      console.log(`!!! queryFn ${keyType}:`)
+      console.log(`!!! queryFn ${keyType}_${engineerType}:`)
 
       return response
     },
@@ -1012,7 +1015,7 @@ export const useGetEngineerByMemberId = (memberId: string) => {
   )
 
   return useQuery({
-    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEER_BY_MEMBERID(memberId),
+    queryKey: QUERY_KEYS.ENGINEER.GET_ENGINEER_BY_MEMBERID(engineerType, memberId),
     queryFn: fetchEngineer,
     staleTime: 1000 * 60 * 5, // 5분
     enabled: Number(memberId) > 0

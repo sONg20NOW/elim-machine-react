@@ -1,3 +1,5 @@
+import type { engineerTypeType } from '@/@core/types'
+
 export const QUERY_KEYS = {
   MACHINE_PROJECT_PIC: {
     GET_OVERVIEW: (machineProjectId: string) => ['GET_OVERVIEW', machineProjectId]
@@ -53,9 +55,17 @@ export const QUERY_KEYS = {
     GET_INSPECTION_OPINION: (machineProjectId: string) => ['GET_INSPECTION_OPINION', machineProjectId]
   },
   ENGINEER: {
-    GET_ENGINEERS_OPTIONS: ['GET_ENGINEERS_OPTIONS'],
-    GET_ENGINEER_BY_MEMBERID: (memberId: string) => ['GET_ENGINEER_BY_MEMBERID', memberId],
-    GET_ENGINEERS: (queryParams: string) => ['GET_ENGINEERS', queryParams],
+    GET_ENGINEERS_OPTIONS: (engineerType: engineerTypeType) => ['GET_ENGINEERS_OPTIONS', engineerType],
+    GET_ENGINEER_BY_MEMBERID: (engineerType: engineerTypeType, memberId: string) => [
+      'GET_ENGINEER_BY_MEMBERID',
+      engineerType,
+      memberId
+    ],
+    GET_ENGINEERS: (engineerType: engineerTypeType, queryParams: string) => [
+      'GET_ENGINEERS',
+      engineerType,
+      queryParams
+    ],
     GET_ENGINEER: (engineerId: string) => ['GET_ENGINEER', engineerId]
   },
   MACHINE_PROJECT: {

@@ -49,7 +49,7 @@ const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) 
       setLoading(true)
 
       const response = await auth
-        .post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, data)
+        .post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, { ...data, engineerType: 'MACHINE' })
         .then(v => v.data.data)
 
       console.log(`new engineer added: ${response.memberId}`)
