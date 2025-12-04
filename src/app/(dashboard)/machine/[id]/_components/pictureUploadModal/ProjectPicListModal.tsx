@@ -31,13 +31,17 @@ import { toast } from 'react-toastify'
 
 import { IconLoader2, IconPhotoOff, IconUpload, IconX } from '@tabler/icons-react'
 
+import JSZip from 'jszip'
+
+import { saveAs } from 'file-saver'
+
 import type { MachineProjectPicReadResponseDtoType, ProjectPicType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { auth } from '@/lib/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
-import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
+import { useGetInspectionsSimple, useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
 import { projectPicOption } from '@/app/_constants/options'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
@@ -52,6 +56,8 @@ type ProjectPicListModalProps = {
 const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicListModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
 
+  const { data: projectData } = useGetMachineProject(machineProjectId)
+
   // 사진 리스트
   const [pictures, setPictures] = useState<MachineProjectPicReadResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
@@ -60,7 +66,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   // 프로젝트 사진 관련
   const [selectedPicType, setSelectedPicType] = useState<ProjectPicType | '전체'>('전체')
 
-  const [picturesToDelete, setPicturesToDelete] = useState<{ id: number; version: number }[]>([])
+  const [checkedPics, setCheckedPics] = useState<MachineProjectPicReadResponseDtoType[]>([])
   const [showCheck, setShowCheck] = useState(false)
 
   // 무한스크롤 관련 Ref들
@@ -143,28 +149,6 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     setFilesToUpload(prev => prev.filter((_, i) => i !== index))
   }
 
-  const handleDeletePics = useCallback(async () => {
-    try {
-      setIsLoading(true)
-
-      await auth.delete(`/api/machine-projects/${machineProjectId}/machine-project-pics`, {
-        data: { machineProjectPicDeleteRequestDtos: picturesToDelete }
-      } as AxiosRequestConfig)
-
-      // 다시 사진 가져오기
-      getPictures()
-
-      // 삭제 예정 리스트 리셋
-      setPicturesToDelete([])
-
-      handleSuccess('선택된 사진들이 일괄삭제되었습니다.')
-    } catch (error) {
-      handleApiError(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [machineProjectId, picturesToDelete, getPictures])
-
   async function MovePicture(dir: 'next' | 'previous') {
     const currentPictureIdx = pictures.findIndex(v => v.id === selectedPicId)
 
@@ -198,18 +182,78 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   const handleClickPicCard = useCallback(
     (pic: MachineProjectPicReadResponseDtoType) => {
       if (showCheck) {
-        if (!picturesToDelete.find(v => v.id === pic.id)) {
-          setPicturesToDelete(prev => [...prev, { id: pic.id, version: pic.version }])
+        if (!checkedPics.find(v => v.id === pic.id)) {
+          setCheckedPics(prev => [...prev, pic])
         } else {
-          setPicturesToDelete(prev => prev.filter(v => v.id !== pic.id))
+          setCheckedPics(prev => prev.filter(v => v.id !== pic.id))
         }
       } else {
         setSelectedPicId(pic.id)
         setOpenPicZoom(true)
       }
     },
-    [showCheck, picturesToDelete]
+    [showCheck, checkedPics]
   )
+
+  const handleDeletePics = useCallback(async () => {
+    try {
+      setIsLoading(true)
+
+      await auth.delete(`/api/machine-projects/${machineProjectId}/machine-project-pics`, {
+        data: { machineProjectPicDeleteRequestDtos: checkedPics }
+      } as AxiosRequestConfig)
+
+      // 다시 사진 가져오기
+      getPictures()
+
+      handleSuccess(`선택된 사진 ${checkedPics.length}장이 일괄삭제되었습니다.`)
+
+      // 삭제 예정 리스트 리셋
+      setCheckedPics([])
+    } catch (error) {
+      handleApiError(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [machineProjectId, checkedPics, getPictures])
+
+  const handleDownloadPics = useCallback(async () => {
+    try {
+      setIsLoading(true)
+
+      const zip = new JSZip()
+
+      const PicPromises = checkedPics.map(async pic => {
+        const res = await fetch(pic.downloadPresignedUrl)
+
+        if (!res) {
+          return
+        }
+
+        const blob = await res.blob()
+
+        const extension = pic.originalFileName.split('.').at(-1)
+
+        const safeName = ['jpg', 'jpeg', 'png'].some(v => v === extension)
+          ? pic.originalFileName
+          : pic.originalFileName.concat('.png')
+
+        zip.file(safeName, blob)
+      })
+
+      await Promise.all(PicPromises)
+
+      const content = await zip.generateAsync({ type: 'blob' })
+
+      const picType = projectPicOption.find(v => v.value === selectedPicType)?.label
+
+      saveAs(content, `${projectData?.machineProjectName}${picType ? '_' + picType : ''}.zip`)
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [checkedPics, selectedPicType, projectData?.machineProjectName])
 
   // 이전에 PicZoom modal이 열린 적 있을 때만 닫혔을 때 사진 새로 가져오기 (showPicZoom의 default값이 false라 최초에 두 번 가져오는 것 방지)
   const wasOpened = useRef(false)
@@ -310,32 +354,33 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           <div className='flex gap-1 top-2 right-1 items-center'>
             {showCheck && [
               <Button
-                key={1}
-                size='small'
+                key={0}
                 color='warning'
                 onClick={async () => {
-                  setPicturesToDelete(filteredPics)
+                  setCheckedPics(filteredPics)
                 }}
               >
                 전체선택
               </Button>,
-              <Button key={2} size='small' color='error' onClick={handleDeletePics}>
-                일괄삭제({picturesToDelete.length})
+              <Button key={1} className='text-blue-500' onClick={handleDownloadPics}>
+                다운로드({checkedPics.length})
+              </Button>,
+              <Button key={2} color='error' onClick={handleDeletePics}>
+                일괄삭제({checkedPics.length})
               </Button>
             ]}
             {filteredPics.length > 0 && (
               <Button
                 color={showCheck ? 'secondary' : 'primary'}
-                size='small'
                 onClick={() => {
                   if (showCheck) {
-                    setPicturesToDelete([])
+                    setCheckedPics([])
                   }
 
                   setShowCheck(prev => !prev)
                 }}
               >
-                {showCheck ? '취소' : '선택삭제'}
+                {showCheck ? '취소' : '선택'}
               </Button>
             )}
           </div>
@@ -350,7 +395,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                       key={pic.id}
                       pic={pic}
                       showCheck={showCheck}
-                      checked={picturesToDelete.some(v => v.id === pic.id)}
+                      checked={checkedPics.some(v => v.id === pic.id)}
                       handleClick={handleClickPicCard}
                     />
                   ))}
@@ -382,7 +427,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                               key={idx}
                               pic={pic}
                               showCheck={showCheck}
-                              checked={picturesToDelete.some(v => v.id === pic.id)}
+                              checked={checkedPics.some(v => v.id === pic.id)}
                               handleClick={handleClickPicCard}
                             />
                           ))}
