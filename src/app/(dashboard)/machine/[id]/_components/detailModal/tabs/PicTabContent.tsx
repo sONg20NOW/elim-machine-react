@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'react-toastify'
 
+import { IconClipboard } from '@tabler/icons-react'
+
 import PictureListModal from '../../pictureUpdateModal/PictureListModal'
 import type {
   MachineInspectionDetailResponseDtoType,
@@ -115,7 +117,7 @@ export default function PicTabContent({
                       {picCateInspectionStatusOption.find(
                         value =>
                           value.value === cate.machineInspectionChecklistItemResultBasicResponseDto?.inspectionResult
-                      )?.label ?? <i className='tabler-backslash text-lg' />}
+                      )?.label ?? picCateInspectionStatusOption.find(v => v.value === 'NONE')?.label}
                     </span>
                   ) : (
                     <TextField
@@ -255,7 +257,7 @@ const DeficiencyModal = ({
             setOpen(true)
           }}
         >
-          <i className='tabler-clipboard' />
+          <IconClipboard />
         </IconButton>
         <DefaultModal
           size='sm'

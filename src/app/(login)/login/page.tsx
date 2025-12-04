@@ -18,6 +18,8 @@ import {
   useTheme
 } from '@mui/material'
 
+import { IconEye, IconEyeOff } from '@tabler/icons-react'
+
 import ForgotPasswordPage from './_components/forgotPasswordModal'
 import { login } from '@/lib/auth'
 
@@ -112,7 +114,7 @@ export default function LoginPage() {
                         onMouseUp={e => e.preventDefault()}
                         sx={{ position: 'absolute', right: 0, top: 0 }}
                       >
-                        <i className={showPW ? 'tabler-eye-off' : 'tabler-eye'} />
+                        {showPW ? <IconEyeOff /> : <IconEye />}
                       </IconButton>
                     </InputAdornment>
                   )

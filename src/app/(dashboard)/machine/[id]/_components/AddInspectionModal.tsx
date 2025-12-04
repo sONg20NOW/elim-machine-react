@@ -12,6 +12,8 @@ import { NumberField } from '@base-ui-components/react/number-field'
 
 import { Controller, useForm } from 'react-hook-form'
 
+import { IconCaretLeftFilled, IconCaretRightFilled } from '@tabler/icons-react'
+
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MachineInspectionCreateRequestDtoType } from '@/@core/types'
 import { handleApiError } from '@/utils/errorHandler'
@@ -87,16 +89,9 @@ const AddInspectionModal = ({ open, setOpen }: AddInspectionModalProps) => {
             render={({ field }) => (
               <div className='flex gap-3'>
                 <NumberField.Root value={field.value} onValueChange={field.onChange} defaultValue={1} min={1} max={100}>
-                  {/* <NumberField.ScrubArea className='cursor-ew-resize'>
-                    <label className='cursor-ew-resize text-sm font-light text-gray-900'>수량</label>
-                    <NumberField.ScrubAreaCursor className='drop-shadow-[0_1px_1px_#0008] filter'>
-                      <i className='tabler-plus' />
-                    </NumberField.ScrubAreaCursor>
-                  </NumberField.ScrubArea> */}
-
                   <NumberField.Group className='flex border rounded-lg'>
                     <NumberField.Decrement className='flex h-10 items-center justify-center rounded-tl-md rounded-bl-md border border-gray-200 bg-gray-50 bg-clip-padding text-gray-900 select-none hover:bg-gray-100 active:bg-gray-100'>
-                      <i className='tabler-chevron-left' />
+                      <IconCaretLeftFilled color='gray' />
                     </NumberField.Decrement>
                     <div className='flex items-center gap-1'>
                       <NumberField.Input className='h-8 w-8 border-gray-200 text-center text-base text-gray-900 tabular-nums focus:z-1 focus:outline focus:outline-2 focus:-outline-offset-1 focus:outline-blue-800' />
@@ -105,7 +100,7 @@ const AddInspectionModal = ({ open, setOpen }: AddInspectionModalProps) => {
                       </Typography>
                     </div>
                     <NumberField.Increment className='flex h-10 items-center justify-center rounded-tr-md rounded-br-md border border-gray-200 bg-gray-50 bg-clip-padding text-gray-900 select-none hover:bg-gray-100 active:bg-gray-100'>
-                      <i className='tabler-chevron-right' />
+                      <IconCaretRightFilled color='gray' />
                     </NumberField.Increment>
                   </NumberField.Group>
                 </NumberField.Root>

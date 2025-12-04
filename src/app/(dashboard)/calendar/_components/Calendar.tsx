@@ -23,6 +23,8 @@ import { Typography } from '@mui/material'
 
 import dayjs from 'dayjs'
 
+import { IconCake, IconSettingsFilled } from '@tabler/icons-react'
+
 import type { CalendarColors, CalendarType } from '@/types/apps/calendarTypes'
 
 // Slice Imports
@@ -152,8 +154,8 @@ const Calendar = (props: CalenderProps) => {
       return (
         <>
           <div className='flex gap-1 items-center'>
-            {eventInfo.event.extendedProps['type'] === '생일' && <i className='tabler-cake' />}
-            {eventInfo.event.extendedProps['type'] === '기계설비' && <i className='tabler-settings-filled' />}
+            {eventInfo.event.extendedProps['type'] === '생일' && <IconCake />}
+            {eventInfo.event.extendedProps['type'] === '기계설비' && <IconSettingsFilled />}
             <Typography
               sx={{ overflowX: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
               color='white'

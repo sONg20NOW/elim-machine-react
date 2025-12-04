@@ -15,6 +15,8 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import classNames from 'classnames'
 
+import { IconChevronRight, IconPencil } from '@tabler/icons-react'
+
 import PictureListTabContent from './_components/tabs/PictureListTabContent'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import CustomTextField from '@/@core/components/mui/TextField'
@@ -114,7 +116,7 @@ const MachineUpdatePage = () => {
                 onClick={() => redirect('/machine')}
               >
                 기계설비현장
-                <i className='tabler-chevron-right' />
+                <IconChevronRight />
               </Typography>
               <div className='flex items-center'>
                 {!isEditingProjectName ? (
@@ -146,7 +148,7 @@ const MachineUpdatePage = () => {
                     setIsEditingProjectName(prev => !prev)
                   }}
                 >
-                  <i className='tabler-pencil' />
+                  <IconPencil />
                 </IconButton>
               </div>
             </div>

@@ -26,7 +26,7 @@ import ImageZoom from 'react-image-zooom'
 
 import { createPortal } from 'react-dom'
 
-import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled } from '@tabler/icons-react'
+import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
 
 import type { MachinePicPresignedUrlResponseDtoType, MachinePicUpdateResponseDtoType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
@@ -317,7 +317,7 @@ export default function InspectionPicZoomModal({
               size='small'
               onClick={handleClose}
             >
-              <i className='tabler-x' />
+              <IconX />
             </IconButton>
           </DialogTitle>
           <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '60dvh' }}>

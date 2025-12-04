@@ -6,6 +6,8 @@ import { useParams } from 'next/navigation'
 
 import { Button, Card, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
 
+import { IconPlus } from '@tabler/icons-react'
+
 import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
 import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
 import { equipmentPhaseOption } from '@/app/_constants/options'
@@ -291,7 +293,7 @@ export default function BasicTabContent({
                   component={Button}
                   onClick={() => setEditData(prev => ({ ...prev, engineerIds: editData.engineerIds.concat(0) }))}
                 >
-                  <i className='tabler-plus text-white' />
+                  <IconPlus color='white' />
                 </Card>
               )
           )}

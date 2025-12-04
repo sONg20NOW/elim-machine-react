@@ -1,3 +1,5 @@
+import { IconBackslash, IconPercentage0, IconX } from '@tabler/icons-react'
+
 import type {
   contractTypeType,
   equipmentPhaseType,
@@ -155,9 +157,9 @@ export const buildingGradeOption = [
 
 // machine - inspection
 export const picCateInspectionStatusOption = [
-  { value: 'NONE', label: <i className='tabler-backslash text-lg' /> },
-  { value: 'PASS', label: <i className='tabler-percentage-0 text-lg' /> },
-  { value: 'FAIL', label: <i className='tabler-x text-lg ' /> }
+  { value: 'NONE', label: <IconBackslash size={20} /> },
+  { value: 'PASS', label: <IconPercentage0 size={20} /> },
+  { value: 'FAIL', label: <IconX size={20} /> }
 ]
 
 // machine-inspection - gas

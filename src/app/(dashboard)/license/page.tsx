@@ -11,7 +11,7 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
-import { IconReload, IconTrashFilled } from '@tabler/icons-react'
+import { IconPlus, IconReload, IconTrashFilled } from '@tabler/icons-react'
 
 import { Backdrop, CircularProgress, Typography } from '@mui/material'
 
@@ -261,7 +261,7 @@ export default function Licensepage() {
             {/* 유저 추가 버튼 */}
             <Button
               variant='contained'
-              startIcon={<i className='tabler-plus' />}
+              startIcon={<IconPlus />}
               onClick={() => setOpenAdd(!openAdd)}
               disabled={disabled}
             >

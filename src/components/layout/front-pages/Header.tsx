@@ -17,6 +17,8 @@ import type { Theme } from '@mui/material/styles'
 import classnames from 'classnames'
 
 // Type Imports
+import { IconMenu2, IconShoppingCart } from '@tabler/icons-react'
+
 import type { Mode } from '@/@core/types'
 
 // Component Imports
@@ -51,7 +53,7 @@ const Header = ({ mode }: { mode: Mode }) => {
           {isBelowLgScreen ? (
             <div className='flex items-center gap-2 sm:gap-4'>
               <IconButton onClick={() => setIsDrawerOpen(true)} className='-mis-2'>
-                <i className='tabler-menu-2 text-textPrimary' />
+                <IconMenu2 className='text-textPrimary' />
               </IconButton>
               <Link href='/front-pages/landing-page'>
                 <Logo />
@@ -76,14 +78,14 @@ const Header = ({ mode }: { mode: Mode }) => {
                 color='primary'
                 target='_blank'
               >
-                <i className='tabler-shopping-cart text-xl' />
+                <IconShoppingCart className='text-xl' />
               </CustomIconButton>
             ) : (
               <Button
                 component={Link}
                 variant='contained'
                 href='https://1.envato.market/vuexy_admin'
-                startIcon={<i className='tabler-shopping-cart text-xl' />}
+                startIcon={<IconShoppingCart className='text-xl' />}
                 className='whitespace-nowrap'
                 target='_blank'
               >

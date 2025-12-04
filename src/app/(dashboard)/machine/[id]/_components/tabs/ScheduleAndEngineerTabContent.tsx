@@ -4,6 +4,8 @@ import { useParams } from 'next/navigation'
 
 import { Box, Button, IconButton, MenuItem, Typography } from '@mui/material'
 
+import { IconPlus, IconX } from '@tabler/icons-react'
+
 import type {
   machineProjectEngineerDetailDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType
@@ -372,7 +374,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                               }))
                             }}
                           >
-                            <i className='tabler-plus' />
+                            <IconPlus />
                             추가
                           </Button>
                         </div>
@@ -514,7 +516,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                               }}
                               type='button'
                             >
-                              <i className='tabler-x' />
+                              <IconX />
                             </IconButton>
                           </div>
                         </td>

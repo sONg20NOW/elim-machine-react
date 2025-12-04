@@ -27,6 +27,8 @@ import TabContext from '@mui/lab/TabContext'
 
 import TabList from '@mui/lab/TabList'
 
+import { IconX } from '@tabler/icons-react'
+
 import styles from '@/app/_style/Table.module.css'
 
 import { auth } from '@/lib/auth'
@@ -280,7 +282,7 @@ export default function MachinePerformanceReviewModal() {
               {machineProjectName}
             </Typography>
             <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={handleClose}>
-              <i className='tabler-x' />
+              <IconX />
             </IconButton>
           </Box>
           <Divider />

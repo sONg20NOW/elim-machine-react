@@ -12,7 +12,7 @@ import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
-import { IconReload, IconTrashFilled } from '@tabler/icons-react'
+import { IconPlus, IconReload, IconTrashFilled } from '@tabler/icons-react'
 
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -310,7 +310,7 @@ export default function MemberPage() {
             {/* 유저 추가 버튼 */}
             <Button
               variant='contained'
-              startIcon={<i className='tabler-plus' />}
+              startIcon={<IconPlus />}
               onClick={() => setAddUserModalOpen(!addUserModalOpen)}
               disabled={disabled}
             >

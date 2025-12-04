@@ -19,6 +19,8 @@ import JSZip from 'jszip'
 
 import { saveAs } from 'file-saver'
 
+import { IconX } from '@tabler/icons-react'
+
 import style from '@/app/_style/Table.module.css'
 import { useGetLeafCategories, useGetReportCategories, useGetReportStatuses } from '@/@core/hooks/customTanstackQueries'
 import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
@@ -98,7 +100,7 @@ export default function InspectionPerformanceModal() {
             설비별 성능점검표
             {/* <Typography>※ 메모리 8GB 이상, 엑셀 2019 이상 버전의 설치가 필요합니다.</Typography> */}
             <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
-              <i className='tabler-x' />
+              <IconX />
             </IconButton>
             <div className='flex items-center justify-between'>
               <DialogContentText>

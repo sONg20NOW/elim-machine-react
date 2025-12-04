@@ -11,7 +11,7 @@ import TablePagination from '@mui/material/TablePagination'
 // Component Imports
 import { MenuItem } from '@mui/material'
 
-import { IconReload, IconTrashFilled } from '@tabler/icons-react'
+import { IconPlus, IconReload, IconTrashFilled } from '@tabler/icons-react'
 
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -321,7 +321,7 @@ const InspectionListTabContent = () => {
             {/* 유저 추가 버튼 */}
             <Button
               variant='contained'
-              startIcon={<i className='tabler-plus' />}
+              startIcon={<IconPlus />}
               onClick={() => setOpenAdd(true)}
               className='max-sm:is-full'
               disabled={disabled}

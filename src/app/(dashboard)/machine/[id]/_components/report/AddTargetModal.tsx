@@ -23,6 +23,8 @@ import { useForm } from 'react-hook-form'
 
 import { motion } from 'motion/react'
 
+import { IconCheck, IconPlus, IconSettingsFilled, IconTrashFilled, IconX } from '@tabler/icons-react'
+
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import { useGetEnergyTargets } from '@/@core/hooks/customTanstackQueries'
@@ -109,11 +111,11 @@ export default function AddTargetModal({ machineEnergyTypeId }: { machineEnergyT
         onClick={() => setOpen(true)}
         variant='contained'
         color='warning'
-        endIcon={<i className='tabler-settings-filled text-xl' />}
+        endIcon={<IconSettingsFilled size={20} />}
       >
         장소 관리
       </Button>
-      <Dialog open={open}>
+      <Dialog open={open} maxWidth='xs' fullWidth>
         <DialogTitle sx={{ position: 'relative' }}>
           <div className='flex justify-between items-center'>
             <Typography variant='h4'>장소 관리</Typography>
@@ -123,7 +125,7 @@ export default function AddTargetModal({ machineEnergyTypeId }: { machineEnergyT
               type='button'
               onClick={() => setOpen(false)}
             >
-              <i className='tabler-x text-error' />
+              <IconX />
             </IconButton>
           </div>
           <Divider />
@@ -135,7 +137,7 @@ export default function AddTargetModal({ machineEnergyTypeId }: { machineEnergyT
               <div className='flex items-center justify-between gap-3'>
                 <TextField inputRef={inputRef} size='small' sx={{ flex: 1 }} />
                 <Fab size='small' type='button' color='secondary' onClick={handleAddTarget}>
-                  <i className='tabler-plus' />
+                  <IconPlus />
                 </Fab>
               </div>
             </div>
@@ -198,6 +200,7 @@ function TargetBox({ target, handleDeleteTarget, handleModifyTargetName }: Targe
   return (
     <form onSubmit={handleSubmit(changeName)}>
       <TextField
+        fullWidth
         variant='standard'
         {...register('name')}
         sx={{ p: 2, border: '1px solid lightgray', borderRadius: 2 }}
@@ -213,13 +216,13 @@ function TargetBox({ target, handleDeleteTarget, handleModifyTargetName }: Targe
                   position='end'
                 >
                   <IconButton disabled={!isDirty} type='submit' size='small'>
-                    <i className='tabler-check w-[25] h-[25] animate-ring' />
+                    <IconCheck size={25} />
                   </IconButton>
                 </MotionInputAdornment>
 
                 <InputAdornment className='text-red-400' position='end'>
                   <IconButton size='small' type='button' onClick={handleDeleteTarget}>
-                    <i className='tabler-trash-filled w-[25] h-[25]' />
+                    <IconTrashFilled size={25} />
                   </IconButton>
                 </InputAdornment>
               </div>

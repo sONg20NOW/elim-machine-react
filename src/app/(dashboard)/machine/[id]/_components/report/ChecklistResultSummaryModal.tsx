@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -27,10 +27,13 @@ import { useForm } from 'react-hook-form'
 
 import { toast } from 'react-toastify'
 
+import { IconX } from '@tabler/icons-react'
+
 import styles from '@/app/_style/Table.module.css'
 import { useGetInspectionOpinions } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 import { handleApiError } from '@/utils/errorHandler'
+import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -42,7 +45,8 @@ interface formType {
   performanceInspectionReportResult: string
 }
 
-export default function ChecklistResultSummaryModal({ machineProjectName }: { machineProjectName: string }) {
+export default function ChecklistResultSummaryModal() {
+  const machineProjectName = useContext(MacinheProjectNameContext)
   const { id } = useParams()
   const machineProjectId = id?.toString()
 
@@ -145,7 +149,7 @@ export default function ChecklistResultSummaryModal({ machineProjectName }: { ma
                 {machineProjectName}
               </Typography>
               <IconButton sx={{ position: 'absolute', top: 5, right: 5 }} onClick={() => setOpen(false)}>
-                <i className='tabler-x' />
+                <IconX />
               </IconButton>
             </Box>
             <Divider />

@@ -18,6 +18,8 @@ import IconButton from '@mui/material/IconButton'
 import classnames from 'classnames'
 
 // Type Imports
+import { IconX } from '@tabler/icons-react'
+
 import type { Mode } from '@/@core/types'
 
 // Hook Imports
@@ -59,7 +61,7 @@ const Wrapper = (props: WrapperProps) => {
       >
         <div className='p-4 flex flex-col gap-x-3'>
           <IconButton onClick={() => setIsDrawerOpen(false)} className='absolute inline-end-4 block-start-2'>
-            <i className='tabler-x' />
+            <IconX />
           </IconButton>
           {children}
         </div>

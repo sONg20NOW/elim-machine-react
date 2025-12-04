@@ -22,7 +22,7 @@ import { useForm } from 'react-hook-form'
 
 import ImageZoom from 'react-image-zooom'
 
-import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled } from '@tabler/icons-react'
+import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
 
 import { createPortal } from 'react-dom'
 
@@ -256,7 +256,7 @@ export default function ProjectPicZoomModal({
             size='small'
             onClick={handleClose}
           >
-            <i className='tabler-x' />
+            <IconX />
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '60dvh' }}>

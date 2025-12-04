@@ -7,6 +7,8 @@ import { useEffect, useRef } from 'react'
 import { styled, useColorScheme, useTheme } from '@mui/material/styles'
 
 // Type Imports
+import { IconChevronsLeft, IconChevronsRight, IconX } from '@tabler/icons-react'
+
 import type { Mode } from '@/@core/types'
 
 // Component Imports
@@ -119,9 +121,9 @@ const Navigation = (props: Props) => {
         {!(isCollapsed && !isHovered) && (
           <NavCollapseIcons
             className='absolute right-4 top-4'
-            lockedIcon={<i className='tabler-chevrons-left text-xl' />}
-            unlockedIcon={<i className='tabler-chevrons-right text-xl' />}
-            closeIcon={<i className='tabler-x text-xl' />}
+            lockedIcon={<IconChevronsLeft />}
+            unlockedIcon={<IconChevronsRight />}
+            closeIcon={<IconX />}
             onClick={() => updateSettings({ layout: !isCollapsed ? 'collapsed' : 'vertical' })}
           />
         )}

@@ -12,6 +12,8 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import classnames from 'classnames'
 
 // Types Imports
+import { IconPlus } from '@tabler/icons-react'
+
 import type { SidebarLeftProps, CalendarFiltersType } from '@/types/apps/calendarTypes'
 import type { ThemeColor } from '@/@core/types'
 
@@ -92,12 +94,7 @@ const SidebarLeft = (props: SidebarLeftProps) => {
         }}
       >
         <div className='is-full p-6'>
-          <Button
-            fullWidth
-            variant='contained'
-            onClick={handleSidebarToggleSidebar}
-            startIcon={<i className='tabler-plus' />}
-          >
+          <Button fullWidth variant='contained' onClick={handleSidebarToggleSidebar} startIcon={<IconPlus />}>
             이벤트 추가하기
           </Button>
         </div>
