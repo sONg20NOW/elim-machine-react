@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 
 import { IconClipboard } from '@tabler/icons-react'
 
-import PictureListModal from '../../pictureUpdateModal/PictureListModal'
+import PictureListModal from '../../pictureUploadModal/PictureListModal'
 import type {
   MachineInspectionDetailResponseDtoType,
   MachineChecklistItemsWithPicCountResponseDtosType,

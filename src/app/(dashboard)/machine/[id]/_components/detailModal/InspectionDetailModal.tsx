@@ -24,7 +24,7 @@ import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
 import PipeTabContent from './tabs/PipeTabContent'
 import PicTabContent from './tabs/PicTabContent'
-import PictureListModal from '../pictureUpdateModal/PictureListModal'
+import PictureListModal from '../pictureUploadModal/PictureListModal'
 import {
   useGetInspectionsSimple,
   useGetSingleInspection,
