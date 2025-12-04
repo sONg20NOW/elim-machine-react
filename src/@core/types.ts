@@ -357,6 +357,8 @@ export interface MachineProjectEngineerUpdateRequestDtoType {
 }
 
 // ----------- Engineer 관련 API -----------
+export type engineerTypeType = 'MACHINE' | 'SAFETY'
+
 // api/engineers/options
 export interface MachineEngineerOptionListResponseDtoType {
   engineers: MachineEngineerOptionResponseDtoType[]
