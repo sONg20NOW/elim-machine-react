@@ -19,13 +19,17 @@ import {
   Divider,
   IconButton,
   ImageList,
-  Paper
+  Paper,
+  Backdrop,
+  CircularProgress
 } from '@mui/material'
 
 // @ts-ignore
 import type { AxiosRequestConfig } from 'axios'
 
 import { toast } from 'react-toastify'
+
+import { IconLoader2, IconPhotoOff, IconUpload, IconX } from '@tabler/icons-react'
 
 import type { MachineProjectPicReadResponseDtoType, ProjectPicType } from '@/@core/types'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
@@ -51,7 +55,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   // 사진 리스트
   const [pictures, setPictures] = useState<MachineProjectPicReadResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
-  const [isUploading, setIsUploading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   // 프로젝트 사진 관련
   const [selectedPicType, setSelectedPicType] = useState<ProjectPicType | '전체'>('전체')
@@ -121,7 +125,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
       return
     }
 
-    setIsUploading(true)
+    setIsLoading(true)
 
     const result = await uploadProjectPictures(machineProjectId, filesToUpload, selectedPicType)
 
@@ -132,7 +136,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
       getPictures()
     }
 
-    setIsUploading(false)
+    setIsLoading(false)
   }
 
   const removePreviewFile = (index: number) => {
@@ -141,6 +145,8 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
 
   const handleDeletePics = useCallback(async () => {
     try {
+      setIsLoading(true)
+
       await auth.delete(`/api/machine-projects/${machineProjectId}/machine-project-pics`, {
         data: { machineProjectPicDeleteRequestDtos: picturesToDelete }
       } as AxiosRequestConfig)
@@ -154,6 +160,8 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
       handleSuccess('선택된 사진들이 일괄삭제되었습니다.')
     } catch (error) {
       handleApiError(error)
+    } finally {
+      setIsLoading(false)
     }
   }, [machineProjectId, picturesToDelete, getPictures])
 
@@ -230,7 +238,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     >
       <div className='flex flex-col gap-5 absolute top-0 right-0 items-end'>
         <IconButton onClick={() => setOpen(false)}>
-          <i className='tabler-x' />
+          <IconX />
         </IconButton>
         <div className='flex flex-col gap-2 pe-7 items-end'>
           <Button
@@ -311,7 +319,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
               >
                 전체선택
               </Button>,
-              <Button key={2} size='small' color='error' onClick={() => handleDeletePics()}>
+              <Button key={2} size='small' color='error' onClick={handleDeletePics}>
                 일괄삭제({picturesToDelete.length})
               </Button>
             ]}
@@ -394,7 +402,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                   color: 'text.secondary'
                 }}
               >
-                <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
+                <IconPhotoOff size={50} />
                 <Typography>등록된 검사 사진이 없습니다.</Typography>
               </Box>
             )}
@@ -418,10 +426,10 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
             {filesToUpload.length > 0 && (
               <>
                 <div className='flex gap-2 items-end pb-2'>
-                  <Typography color='black' variant='subtitle1'>
+                  <Typography color='success.dark' variant='h5'>
                     미리보기
                   </Typography>
-                  <Typography variant='body2' color='text.secondary'>
+                  <Typography variant='body1' color='text.secondary'>
                     {filesToUpload.length}개 파일 선택됨
                   </Typography>
                 </div>
@@ -447,18 +455,19 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 id='photo-upload-input'
               />
               <label htmlFor='photo-upload-input'>
-                <Button variant='outlined' component='span' startIcon={<i className='ri-upload-2-line' />}>
+                <Button variant='outlined' component='span'>
                   파일 선택
                 </Button>
               </label>
 
               <Button
                 variant='contained'
+                color='success'
                 onClick={handleFileUpload}
-                disabled={filesToUpload.length === 0 || isUploading}
-                startIcon={<i className='ri-image-add-line' />}
+                disabled={filesToUpload.length === 0 || isLoading}
+                startIcon={isLoading ? <IconLoader2 className='animate-spin' /> : <IconUpload />}
               >
-                {isUploading ? '업로드 중...' : '사진 업로드'}
+                {isLoading ? '업로드 중...' : '사진 업로드'}
               </Button>
 
               <Button
@@ -489,6 +498,11 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           setPictures={setPictures}
         />
       )}
+      <Backdrop open={isLoading}>
+        <div className='flex flex-col gap-5 items-center'>
+          <CircularProgress size={70} sx={{ color: 'white' }} />
+        </div>
+      </Backdrop>
     </Dialog>
   )
 }
