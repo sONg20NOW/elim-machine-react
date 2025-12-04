@@ -139,14 +139,12 @@ export default function InspectionPicZoomModal({
 
   useEffect(() => {
     if (form.formState.isDirty) {
-      console.log('1')
       form.setValue('machineChecklistItemId', 0, { shouldDirty: false })
     }
   }, [watchedMachineInspectionId, form])
 
   useEffect(() => {
     if (form.formState.isDirty) {
-      console.log('2')
       form.setValue('machineChecklistSubItemId', 0, { shouldDirty: false })
     }
   }, [watchedMachineChecklistItemId, form])

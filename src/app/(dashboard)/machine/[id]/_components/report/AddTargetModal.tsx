@@ -82,7 +82,7 @@ export default function AddTargetModal({ machineEnergyTypeId }: { machineEnergyT
       )
 
       refetch()
-      console.log('target 삭제 완료:', JSON.stringify(target))
+      console.log('target 삭제 완료:', target.machineEnergyTargetId)
       toast.warning(`'장소명: ${target.name}'가 삭제되었습니다`)
     } catch (e) {
       handleApiError(e)

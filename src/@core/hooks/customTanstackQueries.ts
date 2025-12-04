@@ -72,7 +72,7 @@ export const useGetLicenseNames = () => {
         }>(`/api/licenses/names`)
         .then(v => v.data.data.licenseIdAndNameResponseDtos)
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -98,7 +98,7 @@ export const useGetLicenses = (queryParams: string) => {
         }>(`/api/licenses?${params}`)
         .then(v => v.data.data)
 
-      console.log(`!!! queryFn ${keyType} in ${params}:`, response)
+      console.log(`!!! queryFn ${keyType} in ${params}:`)
 
       return response
     }
@@ -165,7 +165,7 @@ export const useGetInspectionsSimple = (machineProjectId: string) => {
         }>(`/api/machine-projects/${machineProjectId}/machine-inspections/simple`)
         .then(v => v.data.data.machineInspections)
 
-      console.log(`!!! queryFn ${keytype}:`, response)
+      console.log(`!!! queryFn ${keytype}:`)
 
       return response
     },
@@ -191,7 +191,7 @@ export const useGetInspections = (machineProjectId: string, queryParams: string)
         }>(`/api/machine-projects/${machineProjectId}/machine-inspections?${params}`)
         .then(v => v.data.data)
 
-      console.log(`!!! queryFn ${keyType} in ${machineProjectId}:`, response)
+      console.log(`!!! queryFn ${keyType} in ${machineProjectId}:`)
 
       return response
     },
@@ -215,7 +215,7 @@ export const useGetEveryInspections = (machineProjectId: string) => {
         }>(`/api/machine-projects/${machineProjectId}/machine-inspections?${queryParams}`)
         .then(v => v.data.data.content)
 
-      console.log(`!!! queryFn ${keytype}:`, response)
+      console.log(`!!! queryFn ${keytype}:`)
 
       return response
     },
@@ -234,7 +234,7 @@ const fetchSingleInspection: QueryFunction<MachineInspectionDetailResponseDtoTyp
     }>(`/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}`)
     .then(v => v.data.data)
 
-  console.log(`!!! queryFn ${keyInfo}:`, response)
+  console.log(`!!! queryFn ${keyInfo}:`)
 
   return response
 }
@@ -454,7 +454,6 @@ export const useMutatePipeMeasurementResponseDto = (machineProjectId: string, ma
     mutationFn: data => putMachineInspectionResponseDto({ data }),
 
     onSuccess: data => {
-      console.log(data)
       queryClient.setQueryData(
         queryKey,
         (prev: MachineInspectionDetailResponseDtoType) =>
@@ -518,7 +517,7 @@ export const useGetRootCategories = (machineProjectId: string) => {
         }>(`/api/machine-projects/${machineProjectId}/machine-inspections/root-categories`)
         .then(v => v.data.data.rootCategories)
 
-      console.log(`!!! queryFn ${keytype}:`, response)
+      console.log(`!!! queryFn ${keytype}:`)
 
       return response
     },
@@ -578,7 +577,7 @@ export const useGetOverviewPics = (machineProjectId: string) => {
         }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/overview?machineProjectPicType=OVERVIEW`)
         .then(v => v.data.data.machineProjectPics)
 
-      console.log(`!!! queryFn ${keytype}:`, response)
+      console.log(`!!! queryFn ${keytype}:`)
 
       return response
     },
@@ -595,7 +594,7 @@ export const useGetCategories = () => {
 
     const [keyType] = data.queryKey
 
-    console.log(`!!! queryFn ${keyType}:`, response)
+    console.log(`!!! queryFn ${keyType}:`)
 
     return response
   }, [])
@@ -616,7 +615,7 @@ export const useGetLeafCategories = () => {
 
     const [keyType] = data.queryKey
 
-    console.log(`!!! queryFn ${keyType}:`, response)
+    console.log(`!!! queryFn ${keyType}:`)
 
     return response
   }, [])
@@ -637,7 +636,7 @@ export const useGetEnergyTypes = () => {
 
     const [keyType] = data.queryKey
 
-    console.log(`!!! queryFn ${keyType}:`, response)
+    console.log(`!!! queryFn ${keyType}:`)
 
     return response
   }, [])
@@ -663,7 +662,7 @@ export const useGetEnergyTargets = (machineProjectId: string, machineEnergyTypeI
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -697,7 +696,7 @@ export const useGetEnergyUsages = (machineProjectId: string, machineEnergyTypeId
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -726,7 +725,7 @@ export const useGetReportCategories = () => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -752,7 +751,7 @@ export const useGetReportStatuses = (machineProjectId: string, machineReportCate
         )
         .then(v => v.data.data.machineReports)
 
-      console.log(`!!! queryFn ${data.queryKey}:`, response)
+      console.log(`!!! queryFn ${data.queryKey}:`)
 
       return response
     },
@@ -779,7 +778,7 @@ export const useGetInspectionOpinions = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -806,7 +805,7 @@ export const useGetParticipatedEngineerList = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -832,7 +831,7 @@ export const useGetScheduleTab = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -858,7 +857,7 @@ export const useGetMachineProject = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -926,7 +925,7 @@ export const useGetMachineProjects = (queryParams: string) => {
         }>(`/api/machine-projects?${params}`)
         .then(v => v.data.data)
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -947,7 +946,7 @@ export const useGetEngineersOptions = () => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -981,7 +980,7 @@ export const useGetEngineers = (queryParams: string) => {
       }>(`/api/engineers?${params}`)
       .then(v => v.data.data)
 
-    console.log(`!!! queryFn ${keyType} ${params}:`, response)
+    console.log(`!!! queryFn ${keyType} ${params}:`)
 
     return response
   }, [])
@@ -1005,7 +1004,7 @@ export const useGetEngineerByMemberId = (memberId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -1082,7 +1081,7 @@ export const useGetMembers = (queryParams: string) => {
       }>(`/api/members?${params}`)
       .then(v => v.data.data)
 
-    console.log(`!!! queryFn ${keyType} ${params}:`, response)
+    console.log(`!!! queryFn ${keyType} ${params}:`)
 
     return response
   }, [])
@@ -1128,7 +1127,7 @@ export const useGetSingleMember = (memberId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -1243,7 +1242,7 @@ export const useGetYearlyPlan = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -1335,7 +1334,7 @@ export const useGetResultSummary = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -1430,7 +1429,7 @@ export const useGetOperationStatus = (machineProjectId: string) => {
 
         const [keyType] = data.queryKey
 
-        console.log(`!!! queryFn ${keyType}:`, response)
+        console.log(`!!! queryFn ${keyType}:`)
 
         return response
       },
@@ -1524,7 +1523,7 @@ export const useGetMeasurement = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -1618,7 +1617,7 @@ export const useGetImprovement = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -1711,7 +1710,7 @@ export const useGetAging = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },
@@ -1811,7 +1810,7 @@ export const useGetGuide = (machineProjectId: string) => {
 
       const [keyType] = data.queryKey
 
-      console.log(`!!! queryFn ${keyType}:`, response)
+      console.log(`!!! queryFn ${keyType}:`)
 
       return response
     },

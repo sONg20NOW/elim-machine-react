@@ -78,7 +78,7 @@ const InspectionForm = memo(
             .then(v => v.data.data)
 
           refetch()
-          console.log('reset inspection form:', response)
+          console.log('reset inspection form:', response.id)
 
           return true
         } catch (e) {

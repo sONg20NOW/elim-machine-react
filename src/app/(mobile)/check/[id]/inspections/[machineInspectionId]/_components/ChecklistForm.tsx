@@ -81,7 +81,7 @@ const ChecklistForm = memo(
             .then(v => v.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
 
           refetch()
-          console.log('reset checklist result form:', response)
+          console.log('reset checklist result form:', response.id)
 
           return true
         } catch (e) {

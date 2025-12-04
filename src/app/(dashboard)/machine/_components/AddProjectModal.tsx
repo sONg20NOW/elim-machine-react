@@ -54,7 +54,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
       setLoading(true)
       const response = await auth.post<{ data: MachineProjectCreateRequestDtoType }>(`/api/machine-projects`, data)
 
-      console.log('new machine project added', response.data.data)
+      console.log('new machine project added', response.data.data.machineProjectName)
       handleSuccess('새 기계설비현장이 추가되었습니다.')
 
       reloadPage()

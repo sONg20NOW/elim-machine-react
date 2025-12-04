@@ -46,7 +46,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
       setLoading(true)
       const response = await auth.post<{ data: MemberCreateRequestDtoType }>(`/api/members`, data)
 
-      console.log('new member added', response.data.data)
+      console.log('new member added', response.data.data.name)
       handleSuccess('새 직원이 추가되었습니다.')
 
       handlePageChange()

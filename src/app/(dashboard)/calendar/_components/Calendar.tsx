@@ -237,9 +237,9 @@ const Calendar = (props: CalenderProps) => {
     direction: theme.direction
   }
 
-  useEffect(() => {
-    console.log(JSON.stringify(calendarOptions.events))
-  }, [calendarOptions.events])
+  // useEffect(() => {
+  //   console.log(JSON.stringify(calendarOptions.events))
+  // }, [calendarOptions.events])
 
   return (
     <>

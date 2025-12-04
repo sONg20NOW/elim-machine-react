@@ -83,7 +83,7 @@ const EmptyPictureTable = memo(
             }
           }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
 
-          console.log('get pictures: ', response.data.data.content)
+          console.log('get pictures: ')
           setPictures(prev => prev.concat(response.data.data.content))
           hasNextRef.current = response.data.data.hasNext
           nextCursorRef.current = response.data.data.nextCursor

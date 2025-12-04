@@ -46,8 +46,6 @@ const AppCalendar = () => {
   useEffect(() => {
     const now = dayjs(Date.now())
 
-    console.log(now.toString())
-
     dispatch(fetchEvents({ year: now.year(), month: now.month() + 1 }))
   }, [dispatch])
 

@@ -162,7 +162,7 @@ const InspectionPicListModal = ({
           }
         }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
 
-        console.log('get pictures: ', response.data.data.content)
+        console.log('get pictures:')
         setPictures(prev => prev.concat(response.data.data.content))
         hasNextRef.current = response.data.data.hasNext
         nextCursorRef.current = response.data.data.nextCursor
@@ -348,7 +348,6 @@ const InspectionPicListModal = ({
             value={picInspectionId}
             onChange={e => {
               setSelectedItemId(0)
-              console.log('☆ Select CHANGE!: ', Number(e.target.value))
               setPicInspectionId(Number(e.target.value))
             }}
             sx={{ width: 'fit-content' }}

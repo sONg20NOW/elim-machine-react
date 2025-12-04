@@ -200,8 +200,6 @@ const InspectionDetailModalInner = ({
               })
               .map(v => v.machineInspectionChecklistItemResultBasicResponseDto)
 
-            console.log('changed:', JSON.stringify(changedBasics))
-
             mutateMachineInspectionChecklistItemResultUpdateRequestDto(changedBasics)
 
             break
