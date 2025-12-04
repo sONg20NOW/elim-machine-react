@@ -172,20 +172,28 @@ const PictureListTabContent = () => {
       }
 
       try {
-        const response = await auth.post<{
-          data: {
-            content: MachinePicPresignedUrlResponseDtoType[]
-            hasNext: boolean
-            nextCursor: MachinePicCursorType | null
-          }
-        }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
+        const response = await auth
+          .post<{
+            data: {
+              content: MachinePicPresignedUrlResponseDtoType[]
+              hasNext: boolean
+              nextCursor: MachinePicCursorType | null
+            }
+          }>(`/api/machine-projects/${machineProjectId}/machine-pics?page=0&size=${pageSize}`, requestBody)
+          .then(v => v.data.data)
 
-        console.log('get inspection pictures: ', response.data.data.content)
-        setInspectionPics(prev => prev.concat(response.data.data.content))
-        hasNextRef.current = response.data.data.hasNext
-        nextCursorRef.current = response.data.data.nextCursor
+        console.log('get inspection pictures: ')
 
-        return response.data.data
+        // 사진 목록을 가져올 때 이미 같은 id가 inspectionPics에 있다면 새로 가져온 데이터로 교체
+        setInspectionPics(prev =>
+          prev
+            .filter(exist => !response.content.some(newPic => newPic.machinePicId === exist.machinePicId))
+            .concat(response.content)
+        )
+        hasNextRef.current = response.hasNext
+        nextCursorRef.current = response.nextCursor
+
+        return response
       } catch (err) {
         handleApiError(err)
       } finally {
