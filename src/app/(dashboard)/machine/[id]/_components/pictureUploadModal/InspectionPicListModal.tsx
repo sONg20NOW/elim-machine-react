@@ -31,6 +31,10 @@ import { toast } from 'react-toastify'
 
 import { IconLoader2, IconPhotoOff, IconUpload, IconX } from '@tabler/icons-react'
 
+import JSZip from 'jszip'
+
+import { saveAs } from 'file-saver'
+
 import type {
   MachineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
@@ -102,7 +106,7 @@ const InspectionPicListModal = ({
     sub => sub.machineChecklistSubItemId === selectedSubItemId
   )
 
-  const [picturesToDelete, setPicturesToDelete] = useState<{ machinePicId: number; version: number }[]>([])
+  const [checkedPics, setCheckedPics] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [showCheck, setShowCheck] = useState(false)
 
   // 무한스크롤 관련 Ref들
@@ -238,17 +242,17 @@ const InspectionPicListModal = ({
   const handleClickInspectionPicCard = useCallback(
     (pic: MachinePicPresignedUrlResponseDtoType) => {
       if (showCheck) {
-        if (!picturesToDelete.find(v => v.machinePicId === pic.machinePicId)) {
-          setPicturesToDelete(prev => [...prev, { machinePicId: pic.machinePicId, version: pic.version }])
+        if (!checkedPics.find(v => v.machinePicId === pic.machinePicId)) {
+          setCheckedPics(prev => [...prev, pic])
         } else {
-          setPicturesToDelete(prev => prev.filter(v => v.machinePicId !== pic.machinePicId))
+          setCheckedPics(prev => prev.filter(v => v.machinePicId !== pic.machinePicId))
         }
       } else {
         setSelectedPicId(pic.machinePicId)
         setOpenPicZoom(true)
       }
     },
-    [showCheck, picturesToDelete]
+    [showCheck, checkedPics]
   )
 
   const handleDeletePics = useCallback(async () => {
@@ -256,25 +260,62 @@ const InspectionPicListModal = ({
       setIsLoading(true)
 
       await auth.delete(`/api/machine-projects/${machineProjectId}/machine-pics`, {
-        data: { machinePicDeleteRequestDtos: picturesToDelete }
+        data: { machinePicDeleteRequestDtos: checkedPics }
       } as AxiosRequestConfig)
 
       // 성공했다면 업로드 때와 마찬가지로 selectedMachine 최신화.
       refetchSelectedInspection()
 
-      setPictures(prev => prev.filter(v => !picturesToDelete.find(k => k.machinePicId === v.machinePicId)))
+      setPictures(prev => prev.filter(v => !checkedPics.find(k => k.machinePicId === v.machinePicId)))
+
+      handleSuccess(`선택된 사진 ${checkedPics.length}장이 일괄삭제되었습니다.`)
 
       // 삭제 예정 리스트 리셋
-      setPicturesToDelete([])
-      setShowCheck(false)
+      setCheckedPics([])
 
-      handleSuccess('선택된 사진들이 일괄삭제되었습니다.')
+      // setShowCheck(false)
     } catch (error) {
       handleApiError(error)
     } finally {
       setIsLoading(false)
     }
-  }, [machineProjectId, picturesToDelete, refetchSelectedInspection])
+  }, [machineProjectId, checkedPics, refetchSelectedInspection])
+
+  const handleDownloadPics = useCallback(async () => {
+    try {
+      setIsLoading(true)
+
+      const zip = new JSZip()
+
+      const PicPromises = checkedPics.map(async pic => {
+        const res = await fetch(pic.downloadPresignedUrl)
+
+        if (!res) {
+          return
+        }
+
+        const blob = await res.blob()
+
+        const extension = pic.originalFileName.split('.').at(-1)
+
+        const safeName = ['jpg', 'jpeg', 'png'].some(v => v === extension)
+          ? pic.originalFileName
+          : pic.originalFileName.concat('.png')
+
+        zip.file(safeName, blob)
+      })
+
+      await Promise.all(PicPromises)
+
+      const content = await zip.generateAsync({ type: 'blob' })
+
+      saveAs(content, `${selectedInspection?.machineInspectionResponseDto.machineInspectionName}.zip`)
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [checkedPics, selectedInspection?.machineInspectionResponseDto.machineInspectionName])
 
   async function MovePicture(dir: 'next' | 'previous') {
     const currentPictureIdx = pictures.findIndex(v => v.machinePicId === selectedPicId)
@@ -452,12 +493,11 @@ const InspectionPicListModal = ({
             <div className='flex gap-1 top-2 right-1 items-center'>
               {showCheck && [
                 <Button
-                  key={1}
-                  size='small'
+                  key={0}
                   color='warning'
                   onClick={async () => {
                     if (selectAll) {
-                      setPicturesToDelete(
+                      setCheckedPics(
                         pictures
                           .concat(await getPictures(1000).then(v => v?.content ?? []))
                           .filter(pic =>
@@ -467,7 +507,7 @@ const InspectionPicListModal = ({
                           )
                       )
                     } else {
-                      setPicturesToDelete([])
+                      setCheckedPics([])
                     }
 
                     setSelectAll(prev => !prev)
@@ -475,23 +515,25 @@ const InspectionPicListModal = ({
                 >
                   {selectAll ? '전체선택' : '전체해제'}
                 </Button>,
-                <Button key={2} size='small' color='error' onClick={() => handleDeletePics()}>
-                  일괄삭제({picturesToDelete.length})
+                <Button key={1} className='text-blue-500' onClick={handleDownloadPics}>
+                  다운로드({checkedPics.length})
+                </Button>,
+                <Button key={2} color='error' onClick={handleDeletePics}>
+                  일괄삭제({checkedPics.length})
                 </Button>
               ]}
               {filteredPics.length > 0 && (
                 <Button
                   color={showCheck ? 'secondary' : 'primary'}
-                  size='small'
                   onClick={() => {
                     if (showCheck) {
-                      setPicturesToDelete([])
+                      setCheckedPics([])
                     }
 
                     setShowCheck(prev => !prev)
                   }}
                 >
-                  {showCheck ? '취소' : '선택삭제'}
+                  {showCheck ? '취소' : '선택'}
                 </Button>
               )}
             </div>
@@ -535,7 +577,7 @@ const InspectionPicListModal = ({
                                 key={idx}
                                 pic={pic}
                                 showCheck={showCheck}
-                                checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
+                                checked={checkedPics.some(v => v.machinePicId === pic.machinePicId)}
                                 handleClick={handleClickInspectionPicCard}
                               />
                             ))}
@@ -590,7 +632,7 @@ const InspectionPicListModal = ({
                                 key={idx}
                                 pic={pic}
                                 showCheck={showCheck}
-                                checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
+                                checked={checkedPics.some(v => v.machinePicId === pic.machinePicId)}
                                 handleClick={handleClickInspectionPicCard}
                               />
                             ))}
@@ -621,7 +663,7 @@ const InspectionPicListModal = ({
                       key={idx}
                       pic={pic}
                       showCheck={showCheck}
-                      checked={picturesToDelete.some(v => v.machinePicId === pic.machinePicId)}
+                      checked={checkedPics.some(v => v.machinePicId === pic.machinePicId)}
                       handleClick={handleClickInspectionPicCard}
                     />
                   ))}
