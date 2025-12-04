@@ -700,6 +700,7 @@ export interface MachinePicPresignedUrlResponseDtoType {
   alternativeSubTitle: string
   s3Key: string
   presignedUrl: string
+  downloadPresignedUrl: string
   remark: string
 }
 
@@ -739,6 +740,7 @@ export interface MachineProjectPicReadResponseDtoType {
   originalFileName: string
   machineProjectPicType: ProjectPicType
   presignedUrl: string
+  downloadPresignedUrl: string
   remark: string
 }
 

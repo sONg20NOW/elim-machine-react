@@ -271,7 +271,13 @@ export default function ProjectPicZoomModal({
                   삭제
                 </Button>
                 <div className='flex gap-2'>
-                  <Button variant='contained' className='bg-blue-500 hover:bg-blue-600'>
+                  <Button
+                    LinkComponent='a'
+                    href={selectedPic.downloadPresignedUrl}
+                    download
+                    variant='contained'
+                    className='bg-blue-500 hover:bg-blue-600'
+                  >
                     다운로드
                   </Button>
                   <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
