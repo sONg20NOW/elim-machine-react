@@ -19,13 +19,17 @@ import {
   Divider,
   IconButton,
   ImageList,
-  Paper
+  Paper,
+  Backdrop,
+  CircularProgress
 } from '@mui/material'
 
 // @ts-ignore
 import type { AxiosRequestConfig } from 'axios'
 
 import { toast } from 'react-toastify'
+
+import { IconLoader2, IconPhotoOff, IconUpload, IconX } from '@tabler/icons-react'
 
 import type {
   MachineChecklistItemsWithPicCountResponseDtosType,
@@ -79,7 +83,7 @@ const InspectionPicListModal = ({
   // 사진 리스트
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
-  const [isUploading, setIsUploading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const [selectedSubItemId, setSelectedSubItemId] = useState<number>(0)
   const [selectedItemId, setSelectedItemId] = useState<number>(clickedPicCate?.machineChecklistItemId ?? 0)
@@ -195,7 +199,7 @@ const InspectionPicListModal = ({
       return
     }
 
-    setIsUploading(true)
+    setIsLoading(true)
 
     if (!selectedItem || !selectedSubItem) {
       toast.error('카테고리를 먼저 설정해주세요.')
@@ -224,7 +228,7 @@ const InspectionPicListModal = ({
       toast.error('사진 업로드에 문제가 발생했습니다.')
     }
 
-    setIsUploading(false)
+    setIsLoading(false)
   }
 
   const removePreviewFile = (index: number) => {
@@ -249,6 +253,8 @@ const InspectionPicListModal = ({
 
   const handleDeletePics = useCallback(async () => {
     try {
+      setIsLoading(true)
+
       await auth.delete(`/api/machine-projects/${machineProjectId}/machine-pics`, {
         data: { machinePicDeleteRequestDtos: picturesToDelete }
       } as AxiosRequestConfig)
@@ -265,6 +271,8 @@ const InspectionPicListModal = ({
       handleSuccess('선택된 사진들이 일괄삭제되었습니다.')
     } catch (error) {
       handleApiError(error)
+    } finally {
+      setIsLoading(false)
     }
   }, [machineProjectId, picturesToDelete, refetchSelectedInspection])
 
@@ -333,7 +341,7 @@ const InspectionPicListModal = ({
       >
         <div className='flex flex-col gap-5 absolute top-0 right-0 items-end'>
           <IconButton onClick={() => setOpen(false)}>
-            <i className='tabler-x' />
+            <IconX />
           </IconButton>
           <div className='grid place-items-center pe-7' onClick={ToggleProjectPic}>
             <Button variant='outlined' color='success'>
@@ -546,8 +554,8 @@ const InspectionPicListModal = ({
                       color: 'text.secondary'
                     }}
                   >
-                    <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
-                    <Typography>등록된 검사 사진이 없습니다.</Typography>
+                    <IconPhotoOff size={50} />
+                    <Typography>등록된 검사 사진이 없습니다</Typography>
                   </Box>
                 )
               ) : selectedSubItemId === 0 ? ( //하위항목: 전체의 경우
@@ -601,8 +609,8 @@ const InspectionPicListModal = ({
                       color: 'text.secondary'
                     }}
                   >
-                    <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
-                    <Typography>등록된 검사 사진이 없습니다.</Typography>
+                    <IconPhotoOff size={50} />
+                    <Typography>등록된 검사 사진이 없습니다</Typography>
                   </Box>
                 )
               ) : filteredPics && filteredPics.length > 0 ? ( //하위항목이 정해진 경우
@@ -628,7 +636,7 @@ const InspectionPicListModal = ({
                     color: 'text.secondary'
                   }}
                 >
-                  <i className='ri-image-line' style={{ fontSize: '48px', marginBottom: '8px' }} />
+                  <IconPhotoOff size={50} />
                   <Typography>등록된 검사 사진이 없습니다.</Typography>
                 </Box>
               )}
@@ -652,10 +660,10 @@ const InspectionPicListModal = ({
               {filesToUpload.length > 0 && (
                 <>
                   <div className='flex gap-2 items-end pb-2'>
-                    <Typography color='black' variant='subtitle1'>
+                    <Typography color='success.dark' variant='h5'>
                       미리보기
                     </Typography>
-                    <Typography variant='body2' color='text.secondary'>
+                    <Typography variant='body1' color='text.secondary'>
                       {filesToUpload.length}개 파일 선택됨
                     </Typography>
                   </div>
@@ -681,18 +689,19 @@ const InspectionPicListModal = ({
                   id='photo-upload-input'
                 />
                 <label htmlFor='photo-upload-input'>
-                  <Button variant='outlined' component='span' startIcon={<i className='ri-upload-2-line' />}>
+                  <Button variant='outlined' component='span'>
                     파일 선택
                   </Button>
                 </label>
 
                 <Button
                   variant='contained'
+                  color='success'
                   onClick={handleFileUpload}
-                  disabled={filesToUpload.length === 0 || isUploading}
-                  startIcon={<i className='ri-image-add-line' />}
+                  disabled={filesToUpload.length === 0 || isLoading}
+                  startIcon={isLoading ? <IconLoader2 className='animate-spin' /> : <IconUpload />}
                 >
-                  {isUploading ? '업로드 중...' : '사진 업로드'}
+                  {isLoading ? '업로드 중...' : '사진 업로드'}
                 </Button>
 
                 <Button
@@ -722,6 +731,11 @@ const InspectionPicListModal = ({
             setPictures={setPictures}
           />
         )}
+        <Backdrop open={isLoading}>
+          <div className='flex flex-col gap-5 items-center'>
+            <CircularProgress size={70} sx={{ color: 'white' }} />
+          </div>
+        </Backdrop>
       </Dialog>
     )
   )
