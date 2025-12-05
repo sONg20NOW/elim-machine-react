@@ -69,6 +69,8 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   const [checkedPics, setCheckedPics] = useState<MachineProjectPicReadResponseDtoType[]>([])
   const [showCheck, setShowCheck] = useState(false)
 
+  const [selectAll, setSelectAll] = useState(true)
+
   // 무한스크롤 관련 Ref들
   const isLoadingRef = useRef(false)
 
@@ -320,6 +322,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
               const value = e.target.value as ProjectPicType | '전체'
 
               setSelectedPicType(value)
+              setSelectAll(true)
             }}
           >
             <MenuItem value={'전체'}>
@@ -357,10 +360,18 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 key={0}
                 color='warning'
                 onClick={async () => {
-                  setCheckedPics(filteredPics)
+                  if (selectAll) {
+                    setCheckedPics(prev =>
+                      prev.filter(v => !filteredPics.some(p => p.id === v.id)).concat(filteredPics)
+                    )
+                  } else {
+                    setCheckedPics(prev => prev.filter(v => !filteredPics.some(p => p.id === v.id)))
+                  }
+
+                  setSelectAll(prev => !prev)
                 }}
               >
-                전체선택
+                {selectAll ? '전체선택' : '전체해제'}
               </Button>,
               <Button key={1} className='text-blue-500' onClick={handleDownloadPics}>
                 다운로드({checkedPics.length})

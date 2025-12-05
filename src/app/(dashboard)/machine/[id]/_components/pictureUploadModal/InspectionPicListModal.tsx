@@ -309,13 +309,24 @@ const InspectionPicListModal = ({
 
       const content = await zip.generateAsync({ type: 'blob' })
 
-      saveAs(content, `${selectedInspection?.machineInspectionResponseDto.machineInspectionName}.zip`)
+      const selectedItemName = selectedItem?.machineChecklistItemName
+      const selectedSubItemName = selectedSubItem?.checklistSubItemName
+
+      saveAs(
+        content,
+        `${selectedInspection?.machineInspectionResponseDto.machineInspectionName}${selectedItemName ? '_' + selectedItemName : ''}${selectedSubItemName ? '_' + selectedSubItemName : ''}.zip`
+      )
     } catch (e) {
       handleApiError(e)
     } finally {
       setIsLoading(false)
     }
-  }, [checkedPics, selectedInspection?.machineInspectionResponseDto.machineInspectionName])
+  }, [
+    checkedPics,
+    selectedInspection?.machineInspectionResponseDto.machineInspectionName,
+    selectedItem?.machineChecklistItemName,
+    selectedSubItem?.checklistSubItemName
+  ])
 
   async function MovePicture(dir: 'next' | 'previous') {
     const currentPictureIdx = pictures.findIndex(v => v.machinePicId === selectedPicId)
@@ -396,6 +407,7 @@ const InspectionPicListModal = ({
             select
             value={picInspectionId}
             onChange={e => {
+              setShowCheck(false)
               setSelectedItemId(0)
               setPicInspectionId(Number(e.target.value))
             }}
@@ -425,6 +437,7 @@ const InspectionPicListModal = ({
               onChange={e => {
                 setSelectedSubItemId(0)
                 setSelectedItemId(Number(e.target.value))
+                setSelectAll(true)
               }}
             >
               <MenuItem value={0}>
@@ -458,7 +471,10 @@ const InspectionPicListModal = ({
               fullWidth
               select
               value={selectedSubItemId ?? 0}
-              onChange={e => setSelectedSubItemId(Number(e.target.value))}
+              onChange={e => {
+                setSelectedSubItemId(Number(e.target.value))
+                setSelectAll(true)
+              }}
             >
               <MenuItem value={0}>
                 <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -497,17 +513,15 @@ const InspectionPicListModal = ({
                   color='warning'
                   onClick={async () => {
                     if (selectAll) {
-                      setCheckedPics(
-                        pictures
-                          .concat(await getPictures(1000).then(v => v?.content ?? []))
-                          .filter(pic =>
-                            selectedSubItem
-                              ? pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId
-                              : true
-                          )
+                      setCheckedPics(prev =>
+                        prev
+                          .filter(v => !filteredPics.some(p => p.machinePicId === v.machinePicId))
+                          .concat(filteredPics)
                       )
                     } else {
-                      setCheckedPics([])
+                      setCheckedPics(prev =>
+                        prev.filter(v => !filteredPics.some(p => p.machinePicId === v.machinePicId))
+                      )
                     }
 
                     setSelectAll(prev => !prev)
