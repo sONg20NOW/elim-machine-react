@@ -15,7 +15,9 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import classNames from 'classnames'
 
-import { IconChevronRight, IconPencil } from '@tabler/icons-react'
+import { IconCheck, IconChevronRight, IconPencil, IconX } from '@tabler/icons-react'
+
+import { useForm } from 'react-hook-form'
 
 import PictureListTabContent from './_components/tabs/PictureListTabContent'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
@@ -54,29 +56,52 @@ const MachineUpdatePage = () => {
 
   const [isEditingProjectName, setIsEditingProjectName] = useState(false)
 
+  const {
+    reset,
+    register,
+    handleSubmit,
+    formState: { isDirty }
+  } = useForm<{ machineProjectName: string }>({
+    defaultValues: {
+      machineProjectName: projectData?.machineProjectName ?? ''
+    }
+  })
+
   const handleChange = (event: SyntheticEvent, newValue: string) => {
     setTabValue(newValue as MachineTabValue)
   }
 
-  const handleChangeProjectName = useCallback(
-    async (projectName: string) => {
-      try {
-        await auth.put<{ data: { projectName: string; version: number } }>(
-          `/api/machine-projects/${machineProjectId}/name`,
-          {
-            version: projectData?.version,
-            name: projectName
-          }
-        )
+  const handleChangeProjectName = handleSubmit(
+    useCallback(
+      async data => {
+        if (isDirty) {
+          try {
+            const response = await auth
+              .put<{ data: { projectName: string; version: number } }>(
+                `/api/machine-projects/${machineProjectId}/name`,
+                {
+                  version: projectData?.version,
+                  name: data.machineProjectName
+                }
+              )
+              .then(v => v.data.data)
 
-        refetchProjectData()
-        handleSuccess('프로젝트 이름이 변경되었습니다.')
-      } catch (error) {
-        handleApiError(error)
-      }
-    },
-    [machineProjectId, projectData?.version, refetchProjectData]
+            reset({ machineProjectName: response.projectName })
+            refetchProjectData()
+            handleSuccess('프로젝트 이름이 변경되었습니다.')
+          } catch (error) {
+            handleApiError(error)
+          }
+        }
+      },
+      [machineProjectId, projectData?.version, isDirty, reset, refetchProjectData]
+    )
   )
+
+  const cancelChangingProjectName = useCallback(() => {
+    reset()
+    setIsEditingProjectName(false)
+  }, [reset, setIsEditingProjectName])
 
   useEffect(() => {
     if (machineProjectId) {
@@ -118,9 +143,9 @@ const MachineUpdatePage = () => {
                 기계설비현장
                 <IconChevronRight />
               </Typography>
-              <div className='flex items-center'>
+              <form className='flex items-center' onSubmit={handleChangeProjectName}>
                 {!isEditingProjectName ? (
-                  <Typography color='black' sx={{ fontSize: 25, fontWeight: 500 }}>
+                  <Typography color='black' sx={{ fontSize: 25, fontWeight: 500, cursor: 'default' }}>
                     {projectData?.machineProjectName ? (
                       projectData?.machineProjectName
                     ) : (
@@ -129,28 +154,31 @@ const MachineUpdatePage = () => {
                   </Typography>
                 ) : (
                   <CustomTextField
+                    {...register('machineProjectName')}
                     slotProps={{
-                      input: { sx: { fontSize: 20 } },
+                      input: { sx: { fontSize: 20, width: 'fit-content' } },
                       htmlInput: { sx: { py: '0 !important' } }
                     }}
-                    id={'projectNameInput'}
-                    defaultValue={projectData?.machineProjectName ?? ''}
                   />
                 )}
                 <IconButton
+                  type='submit'
                   onClick={() => {
-                    if (isEditingProjectName) {
-                      const projectNameInputElement = document.getElementById('projectNameInput') as HTMLInputElement
-
-                      handleChangeProjectName(projectNameInputElement.value)
-                    }
-
                     setIsEditingProjectName(prev => !prev)
                   }}
                 >
-                  <IconPencil />
+                  {!isEditingProjectName ? (
+                    <IconPencil />
+                  ) : (
+                    <IconCheck className='text-green-400 hover:text-green-500' />
+                  )}
                 </IconButton>
-              </div>
+                {isEditingProjectName && (
+                  <IconButton type='button' onClick={cancelChangingProjectName}>
+                    <IconX className='text-red-400 hover:text-red-500' />
+                  </IconButton>
+                )}
+              </form>
             </div>
           }
           sx={{ cursor: 'pointer', padding: 0 }}
