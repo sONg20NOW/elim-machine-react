@@ -124,7 +124,7 @@ const InspectionListTabContent = () => {
 
   // tanstack query cache 삭제 및 refetch
   const removeQueryCaches = useCallback(() => {
-    refetchPages()
+    if (offset.current !== 1) refetchPages()
 
     queryClient.removeQueries({
       predicate(query) {
@@ -205,11 +205,12 @@ const InspectionListTabContent = () => {
 
   useEffect(() => {
     if (!openModal && offset.current !== null) {
-      adjustPage(offset.current)
+      if (offset.current === 1) setQueryParams({ page: 0 })
+      else adjustPage(offset.current)
       removeQueryCaches()
       setOffset(null)
     }
-  }, [openModal, adjustPage, removeQueryCaches])
+  }, [openModal, adjustPage, removeQueryCaches, setQueryParams])
 
   return (
     <setOffsetContext.Provider value={setOffset}>
