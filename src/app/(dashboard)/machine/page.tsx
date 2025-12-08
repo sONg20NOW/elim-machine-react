@@ -162,6 +162,14 @@ export default function MachinePage() {
     })
   }, [refetchPages, queryClient, searchParams])
 
+  /**
+   * 요소를 하나 추가했을 때 첫번째 페이지로 설정하고 새로고침하는 함수
+   */
+  const handlePageWhenPlusOne = useCallback(() => {
+    setQueryParams({ page: 0 })
+    removeQueryCaches()
+  }, [setQueryParams, removeQueryCaches])
+
   // 기계설비현장 선택 핸들러
   const handleMachineProjectClick = async (machineProject: MachineProjectPageDtoType) => {
     if (!machineProject?.machineProjectId) return
@@ -206,9 +214,9 @@ export default function MachinePage() {
 
   const handleCopyRow = async (row: MachineProjectPageDtoType) => {
     try {
+      setLoading(true)
       await auth.post(`/api/machine-projects/${row.machineProjectId}`)
-      adjustPage(1)
-      removeQueryCaches()
+      handlePageWhenPlusOne()
       handleSuccess(`${row.machineProjectName}이(가) 복사되었습니다`)
     } catch (e) {
       handleApiError(e)
@@ -245,9 +253,7 @@ export default function MachinePage() {
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<IconReload />}
-          onClick={() => {
-            resetQueryParams()
-          }}
+          onClick={resetQueryParams}
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
         >
@@ -429,10 +435,7 @@ export default function MachinePage() {
         <AddMachineProjectModal
           open={addMachineModalOpen}
           setOpen={setAddMachineModalOpen}
-          reloadPage={() => {
-            adjustPage(1)
-            removeQueryCaches()
-          }}
+          reloadPage={handlePageWhenPlusOne}
         />
       )}
     </LocalizationProvider>
