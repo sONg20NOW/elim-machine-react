@@ -23,7 +23,8 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
-import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
+
+// import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
 import ClientProviders from '@/components/ClientProviders'
 
 const BROWER_TAB_TITLE = 'ELIM'
@@ -57,11 +58,11 @@ const RootLayout = (props: ChildrenType) => {
       <Script src='//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'></Script>
       <body className='flex is-full min-bs-full flex-auto flex-col'>
         {/* 클라이언트 전용 SW 등록 컴포넌트 */}
-        <ServiceWorkerRegister />
+        {/* <ServiceWorkerRegister /> */}
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
         <ClientProviders>{children}</ClientProviders>
         <SpeedInsights />
-        <ToastContainer autoClose={3000} position='bottom-right' />
+        <ToastContainer autoClose={3000} position='bottom-left' />
       </body>
     </html>
   )
