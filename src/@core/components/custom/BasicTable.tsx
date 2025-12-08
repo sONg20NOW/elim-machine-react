@@ -22,7 +22,7 @@ import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 
 interface BasicTableProps<T> {
   header: HeaderType<T>
-  data: T[]
+  data?: T[]
   handleRowClick: (row: T) => Promise<void>
   page: number
   pageSize: number
@@ -135,14 +135,18 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   )
 
   return (
-    <TableContainer sx={{ px: 2, overflowY: 'auto', maxHeight: '100%' }}>
-      <Table
-        stickyHeader
-        aria-label='simple table'
-        sx={{ border: '1px solid lightgray', position: 'relative', height: '100%' }}
-      >
+    <TableContainer
+      sx={{
+        mx: 2,
+        width: theme => `calc(100% - ${theme.spacing(4)})`,
+        border: '1px solid lightgray',
+        overflowY: 'auto',
+        maxHeight: '100%'
+      }}
+    >
+      <Table stickyHeader aria-label='simple table' sx={{ position: 'relative', height: '100%' }}>
         <TableHead className='select-none'>
-          <TableRow>
+          <TableRow sx={{ zIndex: '2' }}>
             {showCheckBox && handleCheckAllItems && (
               <TableCell padding='checkbox'>
                 <Checkbox
@@ -168,7 +172,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   key={key}
                   align='center'
                   className={classNames(
-                    'text-base z-0',
+                    'text-base',
                     {
                       'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
                       'font-bold select-none': header[k].canSort,
@@ -194,163 +198,184 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((info, index) => {
-            return (
-              <TableRow
-                hover={true}
-                key={index}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                className='cursor-pointer'
-                onClick={() => {
-                  if (contextMenu) return
+          {loading ? (
+            new Array(3)
+              .fill(0)
+              .map((_, idx) => idx)
+              .map(v => (
+                <TableRow sx={{ zIndex: 0 }} key={v} className='animate-pulse'>
+                  {['번호'].concat(Object.keys(header)).map(header => (
+                    <TableCell key={header}>
+                      <div className='h-[22px] w-full grid place-items-center'>
+                        <div className='h-2 w-full rounded bg-gray-300'></div>
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+          ) : data && data.length > 0 ? (
+            data.map((info, index) => {
+              return (
+                <TableRow
+                  hover={true}
+                  key={index}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  className='cursor-pointer'
+                  onClick={() => {
+                    if (contextMenu) return
 
-                  if (!showCheckBox) {
-                    handleRowClick(info)
-                  } else if (handleCheckItem) {
-                    handleCheckItem(info)
-                  }
-                }}
-                onContextMenu={e => {
-                  rightClickMenu && handleContextMenu(e, info)
-                }}
-              >
-                {contextMenu && (
-                  <Menu
-                    slotProps={{ paper: { sx: { boxShadow: 'var(--mui-customShadows-sm)' } } }}
-                    open={contextMenu !== null}
-                    onClose={handleClose}
-                    anchorReference='anchorPosition'
-                    anchorPosition={
-                      contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
+                    if (!showCheckBox) {
+                      handleRowClick(info)
+                    } else if (handleCheckItem) {
+                      handleCheckItem(info)
                     }
-                  >
-                    {
-                      <MenuItem
-                        onClick={() => {
-                          handleRowClick(contextMenu.row)
-                          handleClose()
-                        }}
-                        sx={{ display: 'flex', alignItems: 'center', px: 3 }}
-                      >
-                        {rightClickMenuHeader && (
-                          <div className='flex gap-2'>
-                            <ListItemIcon className='grid place-items-center'>
-                              <IconExclamationCircleFilled size={26} className='text-blue-500' />
-                            </ListItemIcon>
-                            <Typography variant='h5'>{rightClickMenuHeader(contextMenu)}</Typography>
-                          </div>
-                        )}
-                      </MenuItem>
-                    }
-                    <Divider />
-                    {rightClickMenu?.map(v => (
-                      <MenuItem
-                        sx={{ display: 'flex', alignItems: 'center' }}
-                        key={v.label}
-                        onClick={() => {
-                          v.handleClick(contextMenu.row)
-                          setContextMenu(null)
-                        }}
-                      >
-                        <ListItemIcon className='grid place-items-center'>{v.icon}</ListItemIcon>
-                        <Typography variant='h6' className='text-gray-500'>
-                          {v.label}
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Menu>
-                )}
-                {showCheckBox && isChecked && (
-                  <TableCell size={isMobile ? 'small' : 'medium'} padding='checkbox'>
-                    <Checkbox disabled={(info as any)?.memberId === currentUserId} checked={isChecked(info)} />
-                  </TableCell>
-                )}
-                {!isTablet && (
-                  <TableCell size={isMobile ? 'small' : 'medium'} align='center' key={'order'}>
-                    <Typography>{page * pageSize + index + 1}</Typography>
-                  </TableCell>
-                )}
-
-                {Object.keys(header).map(property => {
-                  const key = property as keyof T
-
-                  let content: string | undefined = ''
-
-                  if (!Object.keys(header).includes(property)) {
-                    // header 속성에 포함되지 않다면 출력 x & 예외 출력
-                    return null
-                  } else if (multiException && Object.keys(multiException).includes(property)) {
-                    // MultiException 예외 처리
-                    const key = property as keyof typeof multiException
-
-                    const pieces = multiException[key]?.map(value =>
-                      value === 'latestProjectEndDate' ? info[value]?.toString().slice(5) : info[value]
-                    )
-
-                    content = pieces?.join(key === 'age' ? '  ' : ' ~ ')
-                  } else if (listException && listException.includes(key)) {
-                    // ListException 처리
-                    const list = info[key] as string[]
-
-                    // 세 개 이상일 경우 외 (length - 2) 로 처리
-                    content =
-                      list.length < 3
-                        ? list.join(', ')
-                        : list
-                            .slice(0, 2)
-                            .join(', ')
-                            .concat(` 외 ${list.length - 2}`)
-                  } else {
-                    if (key === 'remark') {
-                      content = info[key]
-                        ?.toString()
-                        .slice(0, 3)
-                        .concat(info[key]?.toString().length > 3 ? '..' : '')
-                    } else {
-                      content = info[key] as string
-                    }
-                  }
-
-                  return (
-                    !(isTablet && header[key].hideOnTablet) && (
-                      <TableCell
-                        size={isMobile ? 'small' : 'medium'}
-                        key={key?.toString()}
-                        align='center'
-                        sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
-                      >
-                        {/* 사진의 경우 클릭 가능하도록 */}
-                        <Typography
-                          onClick={e => {
-                            if (key === 'machinePicCount' && onClickPicCount) {
-                              e.stopPropagation()
-                              onClickPicCount(info)
-                            }
+                  }}
+                  onContextMenu={e => {
+                    rightClickMenu && handleContextMenu(e, info)
+                  }}
+                >
+                  {contextMenu && (
+                    <Menu
+                      slotProps={{ paper: { sx: { boxShadow: 'var(--mui-customShadows-sm)' } } }}
+                      open={contextMenu !== null}
+                      onClose={handleClose}
+                      anchorReference='anchorPosition'
+                      anchorPosition={
+                        contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
+                      }
+                    >
+                      {
+                        <MenuItem
+                          onClick={() => {
+                            handleRowClick(contextMenu.row)
+                            handleClose()
                           }}
-                          sx={{
-                            ...(key === 'machinePicCount' && {
-                              color: 'primary.main',
-                              ':hover': { textDecoration: 'underline' }
-                            })
+                          sx={{ display: 'flex', alignItems: 'center', px: 3 }}
+                        >
+                          {rightClickMenuHeader && (
+                            <div className='flex gap-2'>
+                              <ListItemIcon className='grid place-items-center'>
+                                <IconExclamationCircleFilled size={26} className='text-blue-500' />
+                              </ListItemIcon>
+                              <Typography variant='h5'>{rightClickMenuHeader(contextMenu)}</Typography>
+                            </div>
+                          )}
+                        </MenuItem>
+                      }
+                      <Divider />
+                      {rightClickMenu?.map(v => (
+                        <MenuItem
+                          sx={{ display: 'flex', alignItems: 'center' }}
+                          key={v.label}
+                          onClick={() => {
+                            v.handleClick(contextMenu.row)
+                            setContextMenu(null)
                           }}
                         >
-                          {content}
-                        </Typography>
-                      </TableCell>
-                    )
-                  )
-                })}
-              </TableRow>
-            )
-          })}
-        </TableBody>
+                          <ListItemIcon className='grid place-items-center'>{v.icon}</ListItemIcon>
+                          <Typography variant='h6' className='text-gray-500'>
+                            {v.label}
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                    </Menu>
+                  )}
+                  {showCheckBox && isChecked && (
+                    <TableCell size={isMobile ? 'small' : 'medium'} padding='checkbox'>
+                      <Checkbox disabled={(info as any)?.memberId === currentUserId} checked={isChecked(info)} />
+                    </TableCell>
+                  )}
+                  {!isTablet && (
+                    <TableCell size={isMobile ? 'small' : 'medium'} align='center' key={'order'}>
+                      <Typography>{page * pageSize + index + 1}</Typography>
+                    </TableCell>
+                  )}
 
-        {/* 전달된 데이터가 없을 때 */}
-        {data.length === 0 && (
-          <caption className='text-center py-5'>
-            {loading ? 'Loading...' : error ? '데이터를 불러오는 데 실패했습니다.' : '데이터가 없습니다.'}
-          </caption>
-        )}
+                  {Object.keys(header).map(property => {
+                    const key = property as keyof T
+
+                    let content: string | undefined = ''
+
+                    if (!Object.keys(header).includes(property)) {
+                      // header 속성에 포함되지 않다면 출력 x & 예외 출력
+                      return null
+                    } else if (multiException && Object.keys(multiException).includes(property)) {
+                      // MultiException 예외 처리
+                      const key = property as keyof typeof multiException
+
+                      const pieces = multiException[key]?.map(value =>
+                        value === 'latestProjectEndDate' ? info[value]?.toString().slice(5) : info[value]
+                      )
+
+                      content = pieces?.join(key === 'age' ? '  ' : ' ~ ')
+                    } else if (listException && listException.includes(key)) {
+                      // ListException 처리
+                      const list = info[key] as string[]
+
+                      // 세 개 이상일 경우 외 (length - 2) 로 처리
+                      content =
+                        list.length < 3
+                          ? list.join(', ')
+                          : list
+                              .slice(0, 2)
+                              .join(', ')
+                              .concat(` 외 ${list.length - 2}`)
+                    } else {
+                      if (key === 'remark') {
+                        content = info[key]
+                          ?.toString()
+                          .slice(0, 3)
+                          .concat(info[key]?.toString().length > 3 ? '..' : '')
+                      } else {
+                        content = info[key] as string
+                      }
+                    }
+
+                    return (
+                      !(isTablet && header[key].hideOnTablet) && (
+                        <TableCell
+                          size={isMobile ? 'small' : 'medium'}
+                          key={key?.toString()}
+                          align='center'
+                          sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
+                        >
+                          {/* 사진의 경우 클릭 가능하도록 */}
+                          <Typography
+                            onClick={e => {
+                              if (key === 'machinePicCount' && onClickPicCount) {
+                                e.stopPropagation()
+                                onClickPicCount(info)
+                              }
+                            }}
+                            sx={{
+                              ...(key === 'machinePicCount' && {
+                                color: 'primary.main',
+                                ':hover': { textDecoration: 'underline' }
+                              })
+                            }}
+                          >
+                            {content}
+                          </Typography>
+                        </TableCell>
+                      )
+                    )
+                  })}
+                </TableRow>
+              )
+            })
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={Object.keys(header).length + 1}
+                className='text-center'
+                variant='body'
+                sx={{ ...(error && { color: 'error.main' }) }}
+              >
+                {error ? '데이터를 불러오는 데 실패했습니다.' : '데이터가 없습니다.'}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
       </Table>
     </TableContainer>
   )
