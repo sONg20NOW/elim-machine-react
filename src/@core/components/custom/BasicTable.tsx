@@ -14,7 +14,7 @@ import classNames from 'classnames'
 import type { TableCellProps } from '@mui/material'
 import { Checkbox, Divider, ListItemIcon, Menu, MenuItem, styled, TableCell, Typography } from '@mui/material'
 
-import { IconChevronDown, IconChevronUp, IconExclamationCircleFilled } from '@tabler/icons-react'
+import { IconCaretDownFilled, IconCaretUpFilled, IconExclamationCircleFilled } from '@tabler/icons-react'
 
 import type { HeaderType } from '@/@core/types'
 import { isMobileContext, isTabletContext } from './ProtectedPage'
@@ -190,9 +190,9 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     sort &&
                     sort[0] === k &&
                     (sort[1] === 'desc' ? (
-                      <IconChevronDown className='absolute text-xl  top-[50%] -translate-y-1/2 text-color-primary-dark' />
+                      <IconCaretDownFilled color='gray' className='absolute text-xl top-[50%] -translate-y-1/2' />
                     ) : (
-                      <IconChevronUp className='absolute text-xl  top-[50%] -translate-y-1/2 text-color-primary-dark' />
+                      <IconCaretUpFilled color='gray' className='absolute text-xl top-[50%] -translate-y-1/2' />
                     ))}
                 </StyledTableCell>
               )
