@@ -35,6 +35,7 @@ export default function SearchBar({
         placeholder={placeholder}
         disabled={disabled}
         sx={{
+          minWidth: '113px',
           border: '1px solid var(--mui-palette-customColors-inputBorder)',
           borderRadius: 6,
           background: 'white',
