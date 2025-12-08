@@ -66,7 +66,7 @@ export default function MachinePage() {
   const fieldBeginDate = searchParams.get('fieldBeginDate')
   const fieldEndDate = searchParams.get('fieldEndDate')
 
-  const [curMonth, setCurMonth] = useState<0 | 1 | 3 | 6 | null>(null)
+  const [curMonth, setCurMonth] = useState<0 | 1 | 3 | 6 | null>(0)
 
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
 
