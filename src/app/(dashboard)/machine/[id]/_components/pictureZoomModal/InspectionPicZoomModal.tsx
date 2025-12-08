@@ -37,6 +37,7 @@ import { auth } from '@/lib/auth'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
+import DeleteModal from '@/@core/components/custom/DeleteModal'
 
 interface formType {
   machineInspectionId: number
@@ -69,6 +70,7 @@ export default function InspectionPicZoomModal({
   const showMovePicBtns = useMediaQuery('(min-width:1755px)')
 
   const [openAlert, setOpenAlert] = useState(false)
+  const [openDelete, setOpenDelete] = useState(false)
   const proceedingJob = useRef<() => void>()
 
   const form = useForm<formType>({
@@ -189,7 +191,7 @@ export default function InspectionPicZoomModal({
     }
   }
 
-  const handleSave = form.handleSubmit(async (data: formType) => {
+  const handleSave = form.handleSubmit(async data => {
     if (!watchedSubItemId) {
       toast.error('하위항목을 선택해주세요')
 
@@ -208,7 +210,6 @@ export default function InspectionPicZoomModal({
         )
         .then(v => v.data.data)
 
-      handleSuccess('사진 정보가 변경되었습니다.')
       setPictures(prev =>
         prev.map(v =>
           v.machinePicId === selectedPic.machinePicId
@@ -224,6 +225,7 @@ export default function InspectionPicZoomModal({
             : v
         )
       )
+      handleSuccess('사진 정보가 변경되었습니다.')
     } catch (error) {
       handleApiError(error)
     } finally {
@@ -237,8 +239,29 @@ export default function InspectionPicZoomModal({
 
   const handleDontSave = useCallback(() => {
     proceedingJob.current && proceedingJob.current()
+    form.reset()
     setOpenAlert(false)
-  }, [])
+  }, [form])
+
+  const handleDelete = useCallback(async () => {
+    try {
+      setLoading(true)
+      await auth.delete(`/api/machine-projects/${machineProjectId}/machine-pics`, {
+        data: {
+          machinePicDeleteRequestDtos: [{ machinePicId: selectedPic.machinePicId, version: selectedPic.version }]
+        }
+      } as any)
+
+      setOpen(false)
+      setPictures(prev => prev.filter(v => v.machinePicId !== selectedPic.machinePicId))
+      handleSuccess('사진이 정상적으로 삭제되었습니다')
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setOpenDelete(false)
+      setLoading(false)
+    }
+  }, [machineProjectId, selectedPic.machinePicId, selectedPic.version, setOpen, setPictures])
 
   return (
     inspectionList && (
@@ -328,9 +351,21 @@ export default function InspectionPicZoomModal({
             >
               <div className='flex-1 flex flex-col gap-6 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
                 <div className='w-full flex justify-between'>
-                  <Button color='error' variant='contained'>
-                    삭제
-                  </Button>
+                  <div className='flex gap-2'>
+                    <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
+                      삭제
+                    </Button>
+                    <Button
+                      color='error'
+                      disabled={!isDirty}
+                      onClick={() => {
+                        proceedingJob.current = undefined
+                        setOpenAlert(true)
+                      }}
+                    >
+                      변경사항 폐기
+                    </Button>
+                  </div>
                   <div className='flex gap-2'>
                     <Button
                       LinkComponent={'a'}
@@ -435,6 +470,7 @@ export default function InspectionPicZoomModal({
           />
         </Dialog>
         <AlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleDontSave} />
+        <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={handleDelete} />
       </form>
     )
   )

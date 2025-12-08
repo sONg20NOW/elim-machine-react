@@ -39,6 +39,7 @@ import { projectPicOption } from '@/app/_constants/options'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
+import DeleteModal from '@/@core/components/custom/DeleteModal'
 
 interface formType {
   originalFileName: string
@@ -67,6 +68,7 @@ export default function ProjectPicZoomModal({
   const showMovePicBtns = useMediaQuery('(min-width:1755px)')
 
   const [openAlert, setOpenAlert] = useState(false)
+  const [openDelete, setOpenDelete] = useState(false)
   const proceedingJob = useRef<() => void>()
 
   const form = useForm<formType>({
@@ -171,8 +173,29 @@ export default function ProjectPicZoomModal({
 
   const handleDontSave = useCallback(() => {
     proceedingJob.current && proceedingJob.current()
+    form.reset()
     setOpenAlert(false)
-  }, [])
+  }, [form])
+
+  const handleDelete = useCallback(async () => {
+    try {
+      setLoading(true)
+      await auth.delete(`/api/machine-projects/${machineProjectId}/machine-project-pics`, {
+        data: {
+          machineProjectPicDeleteRequestDtos: [{ id: selectedPic.id, version: selectedPic.version }]
+        }
+      } as any)
+
+      setOpen(false)
+      setPictures(prev => prev.filter(v => v.id !== selectedPic.id))
+      handleSuccess('사진이 정상적으로 삭제되었습니다')
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setOpenDelete(false)
+      setLoading(false)
+    }
+  }, [machineProjectId, selectedPic.id, selectedPic.version, setOpen, setPictures])
 
   return (
     <form className='hidden' onSubmit={handleSave} id={formName}>
@@ -267,9 +290,21 @@ export default function ProjectPicZoomModal({
           >
             <div className='flex-1 flex flex-col gap-6 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
               <div className='w-full flex justify-between'>
-                <Button color='error' variant='contained'>
-                  삭제
-                </Button>
+                <div className='flex gap-2'>
+                  <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
+                    삭제
+                  </Button>
+                  <Button
+                    color='error'
+                    disabled={!isDirty}
+                    onClick={() => {
+                      proceedingJob.current = undefined
+                      setOpenAlert(true)
+                    }}
+                  >
+                    변경사항 폐기
+                  </Button>
+                </div>
                 <div className='flex gap-2'>
                   <Button
                     LinkComponent='a'
@@ -338,6 +373,7 @@ export default function ProjectPicZoomModal({
       </Dialog>
 
       <AlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleDontSave} />
+      <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={handleDelete} />
     </form>
   )
 }
