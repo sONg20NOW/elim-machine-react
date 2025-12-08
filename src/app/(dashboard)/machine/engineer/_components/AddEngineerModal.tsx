@@ -52,11 +52,11 @@ const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) 
         .post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, { ...data, engineerType: 'MACHINE' })
         .then(v => v.data.data)
 
-      console.log(`new engineer added: ${response.memberId}`)
-      handleSuccess('새 설비인력이 추가되었습니다.')
-
       reloadPage()
       setOpen(false)
+
+      console.log(`new engineer added: ${response.memberId}`)
+      handleSuccess('새 설비인력이 추가되었습니다.')
     } catch (error: any) {
       handleApiError(error)
     } finally {

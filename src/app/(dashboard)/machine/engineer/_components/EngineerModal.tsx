@@ -80,8 +80,8 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
       mutateEngineer({ ...data, version: initialData.version })
 
       form.reset(data)
-      handleSuccess(`설비인력 정보가 수정되었습니다.`)
       changedEvenOnce.current = true
+      handleSuccess(`설비인력 정보가 수정되었습니다.`)
     } catch (error: any) {
       handleApiError(error)
     } finally {

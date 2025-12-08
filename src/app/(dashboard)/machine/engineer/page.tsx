@@ -31,7 +31,7 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 import { ENGINEER_FILTER_INFO } from '@/app/_constants/filter/EngineerFilterInfo'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { auth } from '@/lib/auth'
-import { useGetEngineer, useGetEngineers } from '@/@core/hooks/customTanstackQueries'
+import { useGetEngineer, useGetEngineers, useGetEngineersOptions } from '@/@core/hooks/customTanstackQueries'
 import TableFilter from '@/@core/components/custom/TableFilter'
 import deleteEngineer from './_util/deleteEngineer'
 import useUpdateParams from '@/@core/utils/searchParams/useUpdateParams'
@@ -51,7 +51,7 @@ export default function EngineerPage() {
 
   // 데이터 리스트
   const { data: engineersPages, refetch: refetchPages, isLoading, isError } = useGetEngineers(searchParams.toString())
-  const data = engineersPages?.content ?? []
+  const data = engineersPages?.content
 
   // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
@@ -74,6 +74,7 @@ export default function EngineerPage() {
 
   const [selectedId, setSelectedId] = useState(0)
   const { data: selectedData, isLoading: isLoadingEngineer } = useGetEngineer(selectedId.toString())
+  const { refetch: refetchEngineerOptions } = useGetEngineersOptions()
 
   // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
@@ -123,7 +124,7 @@ export default function EngineerPage() {
 
   const handleCheckAllEngineers = (checked: boolean) => {
     if (checked) {
-      setChecked(data.map(v => ({ engineerId: v.engineerId, version: v.version })))
+      setChecked(data?.map(v => ({ engineerId: v.engineerId, version: v.version })) ?? [])
     } else {
       setChecked([])
     }
@@ -147,16 +148,23 @@ export default function EngineerPage() {
 
   // tanstack query cache 삭제 및 refetch
   const removeQueryCaches = useCallback(() => {
+    refetchEngineerOptions()
     refetchPages()
 
     queryClient.removeQueries({
       predicate(query) {
         const key = query.queryKey
 
-        return Array.isArray(key) && key[0] === 'GET_ENGINEERS' && key[1] !== searchParams.toString() // 스크롤 유지를 위해 현재 data는 refetch, 나머지는 캐시 지우기
+        return (
+          Array.isArray(key) &&
+          key.length >= 3 &&
+          key[0] === 'GET_ENGINEERS' &&
+          key[1] === 'MACHINE' &&
+          key[2] !== searchParams.toString()
+        ) // 스크롤 유지를 위해 현재 data는 refetch, 나머지는 캐시 지우기
       }
     })
-  }, [refetchPages, queryClient, searchParams])
+  }, [refetchEngineerOptions, refetchPages, queryClient, searchParams])
 
   // 여러 기술자 한번에 삭제
   async function handleDeleteEngineers() {
