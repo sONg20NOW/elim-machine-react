@@ -21,7 +21,7 @@ import dayjs from 'dayjs'
 
 import { IconCopyPlusFilled, IconPlus, IconReload, IconTrashFilled } from '@tabler/icons-react'
 
-import { Typography } from '@mui/material'
+import { Backdrop, CircularProgress, Typography } from '@mui/material'
 
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -73,7 +73,7 @@ export default function MachinePage() {
   const {
     data: machineProjectsPages,
     refetch: refetchPages,
-    isLoading,
+    isLoading: isLoadingPages,
     isError
   } = useGetMachineProjects(searchParams.toString())
 
@@ -81,9 +81,10 @@ export default function MachinePage() {
 
   const { data: engineers, isLoading: isLoadingEngineerList, isError: isErrorEngineerList } = useGetEngineersOptions()
 
-  const loading = isLoading || isLoadingEngineerList
-  const error = isError || isErrorEngineerList
-  const disabled = loading || error
+  const [loading, setLoading] = useState(false)
+
+  const total_loading = loading || isLoadingPages || isLoadingEngineerList
+  const disabled = total_loading || isError || isErrorEngineerList
 
   const totalCount = machineProjectsPages?.page.totalElements ?? 0
 
@@ -190,25 +191,49 @@ export default function MachinePage() {
   }
 
   const handleDeleteRow = async (row: MachineProjectPageDtoType) => {
-    await auth.delete(`/api/machine-projects/${row.machineProjectId}?version=${row.version}`)
-    handleSuccess(`${row.machineProjectName}이(가) 삭제되었습니다`)
-    adjustPage(-1)
-    removeQueryCaches()
-
-    return
+    try {
+      setLoading(true)
+      await auth.delete(`/api/machine-projects/${row.machineProjectId}?version=${row.version}`)
+      adjustPage(-1)
+      removeQueryCaches()
+      handleSuccess(`${row.machineProjectName}이(가) 삭제되었습니다`)
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleCopyRow = async (row: MachineProjectPageDtoType) => {
-    await auth.post(`/api/machine-projects/${row.machineProjectId}`)
-    handleSuccess(`${row.machineProjectName}이(가) 복사되었습니다`)
-    adjustPage(1)
-    removeQueryCaches()
+    try {
+      await auth.post(`/api/machine-projects/${row.machineProjectId}`)
+      adjustPage(1)
+      removeQueryCaches()
+      handleSuccess(`${row.machineProjectName}이(가) 복사되었습니다`)
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setLoading(false)
+    }
 
     return
   }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ko'>
+      <Backdrop
+        open={total_loading}
+        sx={theme => ({
+          zIndex: theme.zIndex.modal + 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          color: 'white'
+        })}
+      >
+        <CircularProgress size={60} color='inherit' />
+        <Typography variant='inherit'>요청을 처리하는 중</Typography>
+      </Backdrop>
       <Card className='relative h-full flex flex-col'>
         <CardHeader title={`기계설비현장 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
@@ -352,8 +377,8 @@ export default function MachinePage() {
             handleRowClick={handleMachineProjectClick}
             page={page}
             pageSize={size}
-            loading={loading}
-            error={error}
+            loading={isLoadingPages}
+            error={isError}
             listException={['engineerNames']}
             rightClickMenuHeader={contextMenu => {
               return contextMenu.row['machineProjectName']
