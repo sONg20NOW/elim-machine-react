@@ -396,7 +396,7 @@ export default function MachinePage() {
 
         <TablePagination
           rowsPerPageOptions={PageSizeOptions} // 1 추가 (테스트용)
-          component='div'
+          component={Card}
           count={totalCount}
           rowsPerPage={size}
           page={page}
