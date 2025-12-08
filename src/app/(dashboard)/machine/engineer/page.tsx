@@ -320,7 +320,7 @@ export default function EngineerPage() {
         {/* 페이지네이션 */}
         <TablePagination
           rowsPerPageOptions={PageSizeOptions}
-          component='div'
+          component={Card}
           count={totalCount}
           rowsPerPage={size}
           page={page}

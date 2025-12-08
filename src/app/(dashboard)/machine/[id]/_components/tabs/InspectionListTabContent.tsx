@@ -9,7 +9,7 @@ import Button from '@mui/material/Button'
 import TablePagination from '@mui/material/TablePagination'
 
 // Component Imports
-import { MenuItem } from '@mui/material'
+import { Card, MenuItem } from '@mui/material'
 
 import { IconPlus, IconReload, IconTrashFilled } from '@tabler/icons-react'
 
@@ -374,7 +374,7 @@ const InspectionListTabContent = () => {
         {/* 페이지네이션 */}
         <TablePagination
           rowsPerPageOptions={PageSizeOptions}
-          component='div'
+          component={Card}
           count={totalCount}
           rowsPerPage={size}
           page={page}
