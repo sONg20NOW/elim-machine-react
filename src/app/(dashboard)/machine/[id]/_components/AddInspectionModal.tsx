@@ -16,7 +16,7 @@ import { IconCaretLeftFilled, IconCaretRightFilled } from '@tabler/icons-react'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MachineInspectionCreateRequestDtoType } from '@/@core/types'
-import { handleApiError } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { useGetCategories } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/lib/auth'
 import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
@@ -65,11 +65,18 @@ const AddInspectionModal = ({ open, setOpen }: AddInspectionModalProps) => {
     }
 
     try {
-      await auth.post(`/api/machine-projects/${machineProjectId}/machine-inspections`, {
-        inspections: [{ ...data, machineCategoryId: finalCategoryId }]
-      })
+      const response = await auth
+        .post<{ data: { machineInspectionIds: number[] } }>(
+          `/api/machine-projects/${machineProjectId}/machine-inspections`,
+          {
+            inspections: [{ ...data, machineCategoryId: finalCategoryId }]
+          }
+        )
+        .then(v => v.data.data.machineInspectionIds)
+
       setOffset && setOffset(1)
       setOpen(false)
+      handleSuccess(`${response.length}개 설비가 추가되었습니다`)
     } catch (error) {
       handleApiError(error)
     }
