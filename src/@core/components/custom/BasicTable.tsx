@@ -5,20 +5,22 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 
 import classNames from 'classnames'
 
-import { Checkbox, Divider, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material'
+import type { TableCellProps } from '@mui/material'
+import { Checkbox, Divider, ListItemIcon, Menu, MenuItem, styled, TableCell, Typography } from '@mui/material'
 
 import { IconChevronDown, IconChevronUp, IconExclamationCircleFilled } from '@tabler/icons-react'
 
 import type { HeaderType } from '@/@core/types'
 import { isMobileContext, isTabletContext } from './ProtectedPage'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
+
+const StyledTableCell = styled(TableCell)<TableCellProps>({ padding: 14 })
 
 interface BasicTableProps<T> {
   header: HeaderType<T>
@@ -148,7 +150,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
         <TableHead className='select-none'>
           <TableRow sx={{ zIndex: '2' }}>
             {showCheckBox && handleCheckAllItems && (
-              <TableCell padding='checkbox'>
+              <StyledTableCell padding='checkbox'>
                 <Checkbox
                   onChange={e => {
                     const checked = e.target.checked
@@ -156,18 +158,18 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     handleCheckAllItems(checked)
                   }}
                 />
-              </TableCell>
+              </StyledTableCell>
             )}
             {!isTablet && (
-              <TableCell align='center' key='order' className='font-medium text-base'>
+              <StyledTableCell align='center' key='order' className='font-medium text-base'>
                 번호
-              </TableCell>
+              </StyledTableCell>
             )}
             {Object.keys(header).map(key => {
               const k = key as keyof T
 
               return (
-                <TableCell
+                <StyledTableCell
                   size={isMobile ? 'small' : 'medium'}
                   key={key}
                   align='center'
@@ -192,7 +194,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     ) : (
                       <IconChevronUp className='absolute text-xl  top-[50%] -translate-y-1/2 text-color-primary-dark' />
                     ))}
-                </TableCell>
+                </StyledTableCell>
               )
             })}
           </TableRow>
@@ -205,11 +207,11 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
               .map(v => (
                 <TableRow sx={{ zIndex: 0 }} key={v} className='animate-pulse'>
                   {['번호'].concat(Object.keys(header)).map(header => (
-                    <TableCell key={header}>
+                    <StyledTableCell key={header}>
                       <div className='h-[22px] w-full grid place-items-center'>
                         <div className='h-2 w-full rounded bg-gray-300'></div>
                       </div>
-                    </TableCell>
+                    </StyledTableCell>
                   ))}
                 </TableRow>
               ))
@@ -281,14 +283,14 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     </Menu>
                   )}
                   {showCheckBox && isChecked && (
-                    <TableCell size={isMobile ? 'small' : 'medium'} padding='checkbox'>
+                    <StyledTableCell size={isMobile ? 'small' : 'medium'} padding='checkbox'>
                       <Checkbox disabled={(info as any)?.memberId === currentUserId} checked={isChecked(info)} />
-                    </TableCell>
+                    </StyledTableCell>
                   )}
                   {!isTablet && (
-                    <TableCell size={isMobile ? 'small' : 'medium'} align='center' key={'order'}>
+                    <StyledTableCell size={isMobile ? 'small' : 'medium'} align='center' key={'order'}>
                       <Typography>{page * pageSize + index + 1}</Typography>
-                    </TableCell>
+                    </StyledTableCell>
                   )}
 
                   {Object.keys(header).map(property => {
@@ -333,7 +335,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
 
                     return (
                       !(isTablet && header[key].hideOnTablet) && (
-                        <TableCell
+                        <StyledTableCell
                           size={isMobile ? 'small' : 'medium'}
                           key={key?.toString()}
                           align='center'
@@ -356,7 +358,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                           >
                             {content}
                           </Typography>
-                        </TableCell>
+                        </StyledTableCell>
                       )
                     )
                   })}
@@ -365,14 +367,14 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
             })
           ) : (
             <TableRow>
-              <TableCell
+              <StyledTableCell
                 colSpan={Object.keys(header).length + 1}
                 className='text-center'
                 variant='body'
                 sx={{ ...(error && { color: 'error.main' }) }}
               >
                 {error ? '데이터를 불러오는 데 실패했습니다.' : '데이터가 없습니다.'}
-              </TableCell>
+              </StyledTableCell>
             </TableRow>
           )}
         </TableBody>
