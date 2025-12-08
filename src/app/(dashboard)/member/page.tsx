@@ -216,7 +216,7 @@ export default function MemberPage() {
     <>
       <Card className='relative h-full flex flex-col'>
         {/* 탭 제목 */}
-        <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
+        <CardHeader slotProps={{ title: { typography: 'h4' } }} title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
         {!isTablet && <TableFilter<MemberFilterType> filterInfo={MEMBER_FILTER_INFO} disabled={disabled} />}
         {/* 필터 초기화 버튼 */}

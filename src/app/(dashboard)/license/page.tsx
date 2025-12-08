@@ -167,6 +167,7 @@ export default function Licensepage() {
       <Card className='relative h-full flex flex-col'>
         {/* 탭 제목 */}
         <CardHeader
+          slotProps={{ title: { typography: 'h4' } }}
           title={
             <div className='w-full flex justify-between items-center'>
               <Typography variant='inherit'>{`라이선스관리 (${totalCount})`}</Typography>

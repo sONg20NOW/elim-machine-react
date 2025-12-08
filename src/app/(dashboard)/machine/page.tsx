@@ -235,7 +235,11 @@ export default function MachinePage() {
         <Typography variant='inherit'>요청을 처리하는 중</Typography>
       </Backdrop>
       <Card className='relative h-full flex flex-col'>
-        <CardHeader title={`기계설비현장 (${totalCount})`} className='pbe-4' />
+        <CardHeader
+          slotProps={{ title: { typography: 'h4' } }}
+          title={`기계설비현장 (${totalCount})`}
+          className='pbe-4'
+        />
         {/* 필터바 */}
         <TableFilter<MachineFilterType> filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS} disabled={disabled} />
         {/* 필터 초기화 버튼 */}
