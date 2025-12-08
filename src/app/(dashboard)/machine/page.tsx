@@ -77,7 +77,7 @@ export default function MachinePage() {
     isError
   } = useGetMachineProjects(searchParams.toString())
 
-  const machineProjects = machineProjectsPages?.content ?? []
+  const machineProjects = machineProjectsPages?.content
 
   const { data: engineers, isLoading: isLoadingEngineerList, isError: isErrorEngineerList } = useGetEngineersOptions()
 
@@ -222,7 +222,7 @@ export default function MachinePage() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ko'>
       <Backdrop
-        open={total_loading}
+        open={loading}
         sx={theme => ({
           zIndex: theme.zIndex.modal + 1,
           display: 'flex',
@@ -249,7 +249,7 @@ export default function MachinePage() {
         >
           필터 초기화
         </Button>
-        <div className='flex justify-between flex-col items-start  md:flex-row md:items-center p-6 border-bs gap-4'>
+        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <div className='flex gap-8 items-center'>
             <div className='flex gap-2 flex-wrap'>
               {/* 페이지당 행수 */}
@@ -393,7 +393,6 @@ export default function MachinePage() {
             ]}
           />
         </div>
-
         <TablePagination
           rowsPerPageOptions={PageSizeOptions} // 1 추가 (테스트용)
           component={Card}
