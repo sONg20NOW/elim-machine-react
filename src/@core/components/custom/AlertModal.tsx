@@ -20,7 +20,7 @@ export default function AlertModal({ open, setOpen, handleConfirm, title, subtit
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth='xs'>
       {/* Icon Title */}
       <DialogTitle sx={{ textAlign: 'center', display: 'grid' }}>
-        <IconAlertCircleFilled size={40} className='text-red-400 mx-auto mb-3' />
+        <IconAlertCircleFilled size={30} className='text-red-400 mx-auto mb-3' />
         <Typography component={'div'} variant='inherit'>
           {title ?? '지금까지 수정한 내용이 저장되지 않습니다.'}
         </Typography>

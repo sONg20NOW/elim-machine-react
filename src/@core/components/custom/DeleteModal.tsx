@@ -20,7 +20,7 @@ export default function DeleteModal({ open, setOpen, onDelete, title }: DeleteMo
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth='xs'>
       {/* Title */}
       <DialogTitle sx={{ textAlign: 'center' }}>
-        <IconAlertCircleFilled size={40} className='text-red-400 mx-auto' />
+        <IconAlertCircleFilled size={30} className='text-red-400 mx-auto' />
         <Typography component={'div'} variant='inherit'>
           {title ?? '정말 삭제하시겠습니까?'}
         </Typography>
