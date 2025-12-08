@@ -34,7 +34,7 @@ export async function login(email: string, password: string) {
       throw new Error()
     }
   } catch (error) {
-    return 400
+    return error
   }
 }
 

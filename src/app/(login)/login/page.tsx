@@ -68,9 +68,9 @@ export default function LoginPage() {
       }
     } else {
       if (isTablet) {
-        printErrorSnackbar('로그인 오류')
+        printErrorSnackbar(response, '로그인 오류 발생')
       } else {
-        handleApiError('로그인 오류')
+        handleApiError(response, '로그인 오류 발생')
       }
     }
   }
