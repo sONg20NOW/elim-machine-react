@@ -192,7 +192,7 @@ export const useGetInspections = (machineProjectId: string, queryParams: string)
         }>(`/api/machine-projects/${machineProjectId}/machine-inspections?${params}`)
         .then(v => v.data.data)
 
-      console.log(`!!! queryFn ${keyType} in ${machineProjectId}:`)
+      console.log(`!!! queryFn ${keyType} in ${machineProjectId} for ${params}:`)
 
       return response
     },
