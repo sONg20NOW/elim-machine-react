@@ -354,47 +354,53 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
             </Typography>
             <ReloadButton handleClick={getPictures} tooltipText='현장사진 새로고침' />
           </div>
-          <div className='flex gap-1 top-2 right-1 items-center'>
-            {showCheck && [
-              <Button
-                key={0}
-                color='warning'
-                onClick={async () => {
-                  if (selectAll) {
-                    setCheckedPics(prev =>
-                      prev.filter(v => !filteredPics.some(p => p.id === v.id)).concat(filteredPics)
-                    )
-                  } else {
-                    setCheckedPics(prev => prev.filter(v => !filteredPics.some(p => p.id === v.id)))
-                  }
 
-                  setSelectAll(prev => !prev)
-                }}
-              >
-                {selectAll ? '전체선택' : '전체해제'}
-              </Button>,
-              <Button key={1} className='text-blue-500' onClick={handleDownloadPics}>
-                다운로드({checkedPics.length})
-              </Button>,
-              <Button key={2} color='error' onClick={handleDeletePics}>
-                일괄삭제({checkedPics.length})
-              </Button>
-            ]}
-            {filteredPics.length > 0 && (
-              <Button
-                color={showCheck ? 'secondary' : 'primary'}
-                onClick={() => {
-                  if (showCheck) {
-                    setCheckedPics([])
-                  }
+          {filteredPics.length > 0 && (
+            <div className='flex flex-col items-end'>
+              <Typography variant='subtitle1'>
+                ※선택 버튼을 통해 선택 삭제 혹은 선택 다운로드 할 수 있습니다.
+              </Typography>
+              <div className='flex gap-1 top-2 right-1 items-center'>
+                {showCheck && [
+                  <Button
+                    key={0}
+                    color='warning'
+                    onClick={async () => {
+                      if (selectAll) {
+                        setCheckedPics(prev =>
+                          prev.filter(v => !filteredPics.some(p => p.id === v.id)).concat(filteredPics)
+                        )
+                      } else {
+                        setCheckedPics(prev => prev.filter(v => !filteredPics.some(p => p.id === v.id)))
+                      }
 
-                  setShowCheck(prev => !prev)
-                }}
-              >
-                {showCheck ? '취소' : '선택'}
-              </Button>
-            )}
-          </div>
+                      setSelectAll(prev => !prev)
+                    }}
+                  >
+                    {selectAll ? '전체선택' : '전체해제'}
+                  </Button>,
+                  <Button key={1} className='text-blue-500' onClick={handleDownloadPics}>
+                    다운로드({checkedPics.length})
+                  </Button>,
+                  <Button key={2} color='error' onClick={handleDeletePics}>
+                    일괄삭제({checkedPics.length})
+                  </Button>
+                ]}
+                <Button
+                  color={showCheck ? 'secondary' : 'primary'}
+                  onClick={() => {
+                    if (showCheck) {
+                      setCheckedPics([])
+                    }
+
+                    setShowCheck(prev => !prev)
+                  }}
+                >
+                  {showCheck ? '취소' : '선택'}
+                </Button>
+              </div>
+            </div>
+          )}
         </Box>
         <Grid item xs={12} sx={{ flex: 1, overflowY: 'auto', paddingTop: 2 }}>
           <div className='flex-1 h-full overflowX-visible overflowY-auto'>
