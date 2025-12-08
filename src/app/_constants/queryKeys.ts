@@ -1,5 +1,20 @@
 import type { engineerTypeType } from '@/@core/types'
 
+/**
+ * page가 0일 때와 page queryParam이 없는 경우 중복 호출 방지를 위한 함수
+ * @param queryParams queryParams 문자열
+ * @returns page가 0인 경우 page param을 제외한 params를 반환
+ */
+function refineParams(queryParams: string) {
+  const params = new URLSearchParams(queryParams)
+
+  if (params.get('page') === '0') {
+    params.delete('page')
+  }
+
+  return params.toString()
+}
+
 export const QUERY_KEYS = {
   MACHINE_PROJECT_PIC: {
     GET_OVERVIEW: (machineProjectId: string) => ['GET_OVERVIEW', machineProjectId]
@@ -19,7 +34,7 @@ export const QUERY_KEYS = {
     GET_INSPECTIONS: (machineProjectId: string, queryParams: string) => [
       'GET_INSPECTIONS',
       machineProjectId,
-      queryParams
+      refineParams(queryParams)
     ],
     GET_ROOT_CATEGORIES: (machineProjectId: string) => ['GET_ROOT_CATEGORIES', machineProjectId]
   },
@@ -64,7 +79,7 @@ export const QUERY_KEYS = {
     GET_ENGINEERS: (engineerType: engineerTypeType, queryParams: string) => [
       'GET_ENGINEERS',
       engineerType,
-      queryParams
+      refineParams(queryParams)
     ],
     GET_ENGINEER: (engineerId: string) => ['GET_ENGINEER', engineerId]
   },
@@ -75,11 +90,11 @@ export const QUERY_KEYS = {
       machineProjectId
     ],
     GET_MACHINE_PROJECT: (machineProjectId: string) => ['GET_MACHINE_PROJECT', machineProjectId],
-    GET_MACHINE_PROJECTS: (queryParams: string) => ['GET_MACHINE_PROJECTS', queryParams]
+    GET_MACHINE_PROJECTS: (queryParams: string) => ['GET_MACHINE_PROJECTS', refineParams(queryParams)]
   },
   MEMBER: {
     GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId],
-    GET_MEMBERS: (queryParams: string) => ['GET_MEMBERS', queryParams],
+    GET_MEMBERS: (queryParams: string) => ['GET_MEMBERS', refineParams(queryParams)],
     GET_MEMBERS_LOOKUP: ['GET_MEMBERS_LOOKUP']
   },
   MACHINE_PERFORMANCE_REVIEW: {
@@ -93,7 +108,7 @@ export const QUERY_KEYS = {
   },
   LICENSE: {
     GET_LICENSES_NAMES: ['GET_LICENSES_NAMES'],
-    GET_LICENSES: (queryParams: string) => ['GET_LICENSES', queryParams],
+    GET_LICENSES: (queryParams: string) => ['GET_LICENSES', refineParams(queryParams)],
     GET_LICENSE: (licenseId: string) => ['GET_LICENSE', licenseId]
   }
 }
