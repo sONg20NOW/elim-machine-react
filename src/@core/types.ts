@@ -724,6 +724,7 @@ export interface MachinePicUpdateResponseDtoType {
   machineChecklistSubItemId: number
   originalFileName: string
   s3Key: string
+  downloadPresignedUrl: string
   cdnPath: string
   alternativeSubTitle: string
   measuredValue: string
@@ -750,7 +751,7 @@ export interface MachineProjectPicReadResponseDtoType {
 export interface MachineProjectPicUpdateRequestDtoType {
   version: number
   originalFileName: string
-  s3Key: string
+  downloadPresignedUrl: string
   machineProjectPicType: ProjectPicType
   remark: string
 }
