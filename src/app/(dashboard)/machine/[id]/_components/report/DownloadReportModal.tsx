@@ -88,17 +88,17 @@ export default function DownloadReportModal() {
   }
 
   return (
-    reportCategories && (
-      <>
-        <Button
-          variant='contained'
-          className='bg-blue-500 hover:bg-blue-600 hover:shadow-3'
-          onClick={() => {
-            setOpen(true)
-          }}
-        >
-          보고서 다운로드
-        </Button>
+    <>
+      <Button
+        variant='contained'
+        className='bg-blue-500 hover:bg-blue-600 hover:shadow-3'
+        onClick={() => {
+          setOpen(true)
+        }}
+      >
+        보고서 다운로드
+      </Button>
+      {reportCategories && (
         <Dialog fullWidth maxWidth='md' open={open}>
           <DialogTitle variant='h3' sx={{ position: 'relative' }}>
             <div className='flex gap-2 items-end'>
@@ -167,8 +167,8 @@ export default function DownloadReportModal() {
             {/* <SettingButton /> */}
           </DialogActions>
         </Dialog>
-      </>
-    )
+      )}
+    </>
   )
 }
 
