@@ -150,8 +150,9 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
         <TableHead className='select-none'>
           <TableRow sx={{ zIndex: '2' }}>
             {showCheckBox && handleCheckAllItems && (
-              <StyledTableCell padding='checkbox'>
+              <StyledTableCell>
                 <Checkbox
+                  sx={{ padding: 0 }}
                   onChange={e => {
                     const checked = e.target.checked
 
@@ -283,8 +284,12 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     </Menu>
                   )}
                   {showCheckBox && isChecked && (
-                    <StyledTableCell size={isMobile ? 'small' : 'medium'} padding='checkbox'>
-                      <Checkbox disabled={(info as any)?.memberId === currentUserId} checked={isChecked(info)} />
+                    <StyledTableCell size={isMobile ? 'small' : 'medium'}>
+                      <Checkbox
+                        sx={{ padding: 0 }}
+                        disabled={(info as any)?.memberId === currentUserId}
+                        checked={isChecked(info)}
+                      />
                     </StyledTableCell>
                   )}
                   {!isTablet && (
