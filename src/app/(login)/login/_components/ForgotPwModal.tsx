@@ -16,7 +16,7 @@ type ForgotForm = { email: string }
 type VerifyForm = { email: string; code: string }
 type ResetForm = { email: string; password: string }
 
-export default function ForgotPasswordPage({
+export default function ForgotPwModal({
   open,
   setOpen,
   userEmail
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage({
       open={open}
       setOpen={setOpen}
       title={
-        <Typography variant='inherit' sx={{ fontWeight: 500 }}>
+        <Typography variant='h4'>
           {{ forgot: '비밀번호 변경', verify: '인증 코드 확인', reset: '새 비밀번호 설정' }[step]}
         </Typography>
       }
@@ -97,9 +97,11 @@ export default function ForgotPasswordPage({
                 type='email'
                 placeholder='이메일'
                 {...register('email', { required: '이메일을 입력하세요' })}
-                slotProps={{ root: { sx: { minWidth: '300px' } }, htmlInput: { sx: { py: 1.5 } } }}
+                slotProps={{ root: { sx: { minWidth: '300px' } } }}
               />
-              {errors.email && <Typography className='text-red-500'>{errors.email.message?.toString()}</Typography>}
+              {errors.email && (
+                <Typography className='text-red-500 text-end'>{errors.email.message?.toString()}</Typography>
+              )}
             </div>
 
             <Button type='submit' disabled={isSubmitting} variant='contained' sx={{ width: 'fit-content' }}>
