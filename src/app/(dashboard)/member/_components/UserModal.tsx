@@ -34,7 +34,7 @@ import PrivacyTabContent from './tabs/PrivacyTabContent'
 import OfficeTabContent from './tabs/OfficeTabContent'
 import CareerTabContent from './tabs/CareerTabContent'
 import EtcTabContent from './tabs/EtcTabContent'
-import ForgotPasswordPage from '@/app/(login)/login/_components/forgotPasswordModal'
+import ForgotPwModal from '@/app/(login)/login/_components/ForgotPwModal'
 import { printWarningSnackbar } from '@core/utils/snackbarHandler'
 
 export type refType = {
@@ -349,7 +349,7 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
         />
       )}
       {openForgetPW && (
-        <ForgotPasswordPage
+        <ForgotPwModal
           open={openForgetPW}
           setOpen={setOpenForgotPW}
           userEmail={selectedUserData.memberBasicResponseDto.email}
