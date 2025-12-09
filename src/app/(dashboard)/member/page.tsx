@@ -8,7 +8,6 @@ import { useSearchParams } from 'next/navigation'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
-import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
@@ -38,6 +37,7 @@ import useCurrentUserStore from '@core/utils/useCurrentUserStore'
 import { printErrorSnackbar } from '@core/utils/snackbarHandler'
 import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
 import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
+import BasicTablePagination from '@/@core/components/elim-table/BasicTablePagination'
 
 export default function MemberPage() {
   const searchParams = useSearchParams()
@@ -343,32 +343,7 @@ export default function MemberPage() {
           />
         </div>
         {/* 페이지네이션 */}
-        <TablePagination
-          rowsPerPageOptions={PageSizeOptions}
-          component={Card}
-          count={totalCount}
-          rowsPerPage={size}
-          page={page}
-          onPageChange={(_, newPage) => setQueryParams({ page: newPage })}
-          onRowsPerPageChange={event => {
-            const newSize = parseInt(event.target.value, 10)
-
-            setQueryParams({ size: newSize, page: 0 })
-          }}
-          disabled={disabled}
-          showFirstButton
-          showLastButton
-          labelRowsPerPage='페이지당 행 수:'
-          labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
-          sx={{
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            '.MuiTablePagination-toolbar': {
-              paddingLeft: 2,
-              paddingRight: 2
-            }
-          }}
-        />
+        <BasicTablePagination totalCount={totalCount} disabled={disabled} />
       </Card>
 
       {/* 모달들 */}

@@ -6,10 +6,9 @@ import { useState, useCallback, useEffect, useRef, createContext } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 
 import Button from '@mui/material/Button'
-import TablePagination from '@mui/material/TablePagination'
 
 // Component Imports
-import { Card, MenuItem } from '@mui/material'
+import { MenuItem } from '@mui/material'
 
 import { IconPlus, IconReload, IconTrashFilled } from '@tabler/icons-react'
 
@@ -37,6 +36,7 @@ import { QUERY_KEYS } from '@/@core/data/queryKeys'
 import deleteInspection from '../../_utils/deleteInspection'
 import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
 import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
+import BasicTablePagination from '@/@core/components/elim-table/BasicTablePagination'
 
 /**
  * offset을 지정하면 모달창이 닫힐 때 페이지 새로고침이 되도록 하는 context
@@ -374,32 +374,7 @@ const InspectionListTabContent = () => {
         </div>
 
         {/* 페이지네이션 */}
-        <TablePagination
-          rowsPerPageOptions={PageSizeOptions}
-          component={Card}
-          count={totalCount}
-          rowsPerPage={size}
-          page={page}
-          onPageChange={(_, newPage) => setQueryParams({ page: newPage })}
-          onRowsPerPageChange={event => {
-            const newsize = parseInt(event.target.value, 10)
-
-            setQueryParams({ size: newsize, page: 0 })
-          }}
-          disabled={disabled}
-          showFirstButton
-          showLastButton
-          labelRowsPerPage='페이지당 행 수:'
-          labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
-          sx={{
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            '.MuiTablePagination-toolbar': {
-              paddingLeft: 2,
-              paddingRight: 2
-            }
-          }}
-        />
+        <BasicTablePagination totalCount={totalCount} disabled={disabled} />
 
         {/* 모달 */}
         {open && currentInspectionId && <InspectionDetailModal open={open} setOpen={setOpen} />}
