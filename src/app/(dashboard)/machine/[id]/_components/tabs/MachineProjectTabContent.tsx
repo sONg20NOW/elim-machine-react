@@ -181,7 +181,7 @@ const BasicTabContent = () => {
                       <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                         기관명
                       </td>
-                      <td className='pe-4'>
+                      <td colSpan={3} className='pe-4'>
                         <InputBox
                           showLabel={false}
                           tabFieldKey='institutionName'
@@ -197,7 +197,7 @@ const BasicTabContent = () => {
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                         주소
                       </th>
-                      <td colSpan={2} className='pe-4'>
+                      <td colSpan={3} className='pe-4'>
                         <InputBox
                           showLabel={false}
                           tabFieldKey='roadAddress'

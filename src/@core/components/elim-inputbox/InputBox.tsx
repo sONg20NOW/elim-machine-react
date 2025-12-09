@@ -2,25 +2,25 @@ import { createContext, useContext, useState } from 'react'
 
 import Grid from '@mui/material/Grid2'
 
-import { Box, Button, InputAdornment, MenuItem, Typography } from '@mui/material'
+import { Box, Button, InputAdornment, MenuItem } from '@mui/material'
 
 import CustomTextField from '@core/components/mui/TextField'
 import type { BoxSizeType, InputFieldType, ynResultType } from '@core/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
-import PostCodeDialog from '@/@core/components/elim-modal/PostCodeDialog'
 import { handleApiError } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
 import { useGetLicenseNames } from '@core/hooks/customTanstackQueries'
 import YNSelectBox from './YNSelectBox'
+import PostCodeButton from './PostCodeButton'
 
 interface InputBoxProps {
-  isEditing?: boolean
   tabFieldKey: string
   value: string
-  size?: BoxSizeType
-  disabled?: boolean
   onChange: (value: string) => void
   tabInfos: Record<string, InputFieldType>
+  isEditing?: boolean
+  size?: BoxSizeType
+  disabled?: boolean
   showLabel?: boolean
   required?: boolean
   placeholder?: string
@@ -29,18 +29,15 @@ interface InputBoxProps {
 const InputBoxContext = createContext<InputBoxProps | null>(null)
 
 /**
- * @param size
- * (optional) box의 size, tabField에 정의되어 있는 사이즈보다 우선시됨.
- * @param tabInfos
- * id와 그에 따른 박스 구성에 필요한 정보들 (ex. {name: {size: 'md', type: 'text', label: '이름'}, ...})
- * @param tabFieldKey
- * box 구성 정보를 알아내는 데 필요한 id (ex. companyName, ...)
- * @param value
- * value
- * @param onChange
- * (value: string) => void
- * @see
- * src\app\_schema\MemberTabInfo.tsx 참고
+ * @param tabInfos * id와 그에 따른 박스 구성에 필요한 정보들 (ex. {name: {size: 'md', type: 'text', label: '이름'}, ...})
+ * @param tabFieldKey * box 구성 정보를 알아내는 데 필요한 id (ex. companyName, ...)
+ * @param value * value
+ * @param onChange * (value: string) => void
+ * @param size box의 size, tabField에 정의되어 있는 사이즈보다 우선시됨.
+ * @param disabled
+ * @param showLabel
+ * @param required
+ * @param placeholder
  */
 export function InputBox(props: InputBoxProps) {
   const { size, tabFieldKey, tabInfos } = props
@@ -70,9 +67,6 @@ function InputBoxContent() {
   // 회사명 옵션
   const { data: licenseNames } = useGetLicenseNames()
   const companyNameOption = licenseNames?.map(v => ({ value: v.companyName, label: v.companyName }))
-
-  // 주소 모달 상태
-  const [showMapModal, setShowMapModal] = useState(false)
 
   // 주민번호 핸들링
   const [juminNum, setJuminNum] = useState(value)
@@ -239,29 +233,25 @@ function InputBoxContent() {
       )
     case 'map':
       return (
-        <div className='relative'>
-          <CustomTextField
-            required={showLabel && required}
-            slotProps={{
-              htmlInput: { name: tabFieldKey },
-              input: {
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <Button onClick={() => setShowMapModal(true)} variant='contained' size='small'>
-                      <Typography sx={{ color: 'white !important' }}>검색</Typography>
-                    </Button>
-                  </InputAdornment>
-                )
-              }
-            }}
-            id={tabFieldKey}
-            disabled={disabled}
-            label={label}
-            value={value ?? ''}
-            onChange={e => onChange(e.target.value)}
-          />
-          {<PostCodeDialog open={showMapModal} setOpen={setShowMapModal} ElementId={tabFieldKey} onChange={onChange} />}
-        </div>
+        <CustomTextField
+          required={showLabel && required}
+          fullWidth
+          slotProps={{
+            htmlInput: { name: tabFieldKey },
+            input: {
+              endAdornment: (
+                <InputAdornment sx={{ color: 'white' }} position='end'>
+                  <PostCodeButton onChange={onChange} />
+                </InputAdornment>
+              )
+            }
+          }}
+          id={tabFieldKey}
+          disabled={disabled}
+          label={label}
+          value={value ?? ''}
+          onChange={e => onChange(e.target.value)}
+        />
       )
     default:
       return null
