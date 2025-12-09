@@ -5,8 +5,6 @@ import {
   memberStatusOption,
   officeDepartmentNameOption,
   officePositionOption,
-
-  // roleOption,
   workFormOption
 } from '@/@core/data/options'
 import type { memberInputType } from '../../types'
@@ -30,13 +28,6 @@ export const MEMBER_INPUT_INFO: memberInputType = {
       label: '소속',
       options: companyNameOption
     },
-
-    // role: {
-    //   size: 'md',
-    //   type: 'multi',
-    //   label: '권한',
-    //   options: roleOption
-    // },
     memberStatus: {
       size: 'md',
       type: 'multi',
