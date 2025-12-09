@@ -58,9 +58,9 @@ const NoteTabContent = ({}) => {
 
   return (
     projectData && (
-      <div className='grid gap-4'>
+      <div className='grid gap-4 max-w-[890px]'>
         <Grid2 container columns={1}>
-          <TextInputBox multiline form={form} name='note' labelMap={{ note: { label: '' } }} />
+          <TextInputBox multiline={10} form={form} name='note' labelMap={{ note: { label: '' } }} />
         </Grid2>
         <div className='flex justify-between items-start'>
           <div className='flex gap-2 items-end'>
