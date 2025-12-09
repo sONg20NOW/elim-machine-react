@@ -108,7 +108,8 @@ const ScheduleAndEngineerTabContent = () => {
         overflow: 'hidden',
         background: '#fafbfc',
         fontSize: 15,
-        marginBottom: 16
+        marginBottom: 16,
+        maxWidth: '50dvw'
       }}
     >
       <div>
