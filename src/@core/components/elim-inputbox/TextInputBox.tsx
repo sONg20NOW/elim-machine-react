@@ -8,7 +8,7 @@ interface TextInputBoxProps<T extends Record<string, any>> {
   form: UseFormReturn<T, any, undefined>
   labelMap: Partial<Record<Path<T>, { label: string }>>
   column?: number
-  multiline?: boolean
+  multiline?: boolean | number
   disabled?: boolean
   placeholder?: string
   postcode?: boolean
@@ -66,7 +66,7 @@ export default function TextInputBox<T extends Record<string, any>>({
           disabled={disabled}
           placeholder={placeholder}
           {...(type && { type: type })}
-          {...(multiline && { multiline: true, minRows: 3 })}
+          {...(multiline && { multiline: true, minRows: typeof multiline !== 'number' ? 3 : multiline })}
           {...form.register(name, { ...rule, required: { value: required, message: '필수 입력입니다' } })}
           {...(postcode && {
             slotProps: {
