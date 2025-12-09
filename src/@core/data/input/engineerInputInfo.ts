@@ -1,4 +1,4 @@
-import { gradeOption } from '@/app/_constants/options'
+import { gradeOption } from '@/@core/data/options'
 import type { engineerInputType } from '@core/types'
 
 export const ENGINEER_INPUT_INFO: engineerInputType = {

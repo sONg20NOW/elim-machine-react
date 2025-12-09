@@ -1,7 +1,7 @@
 import { Checkbox, ImageListItem, ImageListItemBar, Paper, Typography } from '@mui/material'
 
 import type { MachineProjectPicReadResponseDtoType } from '@core/types'
-import { projectPicOption } from '@/app/_constants/options'
+import { projectPicOption } from '@/@core/data/options'
 
 // 현장사진 카드 컴포넌트
 export default function ProjectPicCard({

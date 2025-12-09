@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import type { MachineInspectionDetailResponseDtoType } from '@core/types'
-import { fuelTypeOption } from '@/app/_constants/options'
+import { fuelTypeOption } from '@/@core/data/options'
 
 interface GasTabContentProps<T> {
   editData: T

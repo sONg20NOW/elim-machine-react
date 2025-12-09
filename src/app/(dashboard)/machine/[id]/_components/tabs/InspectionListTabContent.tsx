@@ -18,12 +18,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import InspectionDetailModal from '../detailModal/InspectionDetailModal'
 
 // Constants
-import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
+import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/@core/data/options'
 
 // Utils
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import type { MachineInspectionFilterType, MachineInspectionPageResponseDtoType } from '@core/types'
-import { HEADERS } from '@/app/_constants/table/TableHeader'
+import { HEADERS } from '@/@core/data/table/TableHeader'
 import SearchBar from '@/@core/components/elim-inputbox/SearchBar'
 import CustomTextField from '@core/components/mui/TextField'
 import BasicTable from '@/@core/components/elim-table/BasicTable'
@@ -33,7 +33,7 @@ import { useGetInspections, useGetParticipatedEngineerList } from '@core/hooks/c
 import useCurrentInspectionIdStore from '@core/utils/useCurrentInspectionIdStore'
 import { auth } from '@core/utils/auth'
 import TableFilter from '@/@core/components/elim-table/TableFilter'
-import { QUERY_KEYS } from '@/app/_constants/queryKeys'
+import { QUERY_KEYS } from '@/@core/data/queryKeys'
 import deleteInspection from '../../_utils/deleteInspection'
 import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
 import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'

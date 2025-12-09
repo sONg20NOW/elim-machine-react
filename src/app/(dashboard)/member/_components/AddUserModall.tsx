@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form'
 
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@core/types'
-import { MEMBER_INPUT_INFO } from '@/app/_constants/input/memberInputInfo'
+import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'

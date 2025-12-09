@@ -4,14 +4,14 @@ import {
   companyNameOption,
   gradeOption,
   projectStatusOption
-} from '@/app/_constants/options'
+} from '@/@core/data/options'
 import type {
   InputFieldType,
   machineInputType,
   MachineProjectCreateRequestDtoType,
   machineProjectEngineerInputType,
   machineScheduleInputType
-} from '../../../@core/types'
+} from '../../types'
 
 // 기계설비현장 상세페이지
 export const MACHINE_INPUT_INFO: machineInputType = {

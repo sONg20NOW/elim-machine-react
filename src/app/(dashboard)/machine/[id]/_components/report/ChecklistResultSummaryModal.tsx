@@ -29,7 +29,7 @@ import { toast } from 'react-toastify'
 
 import { IconX } from '@tabler/icons-react'
 
-import styles from '@/app/_style/Table.module.css'
+import styles from '@core/styles/customTable.module.css'
 import { useGetInspectionOpinions } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'

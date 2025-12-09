@@ -29,7 +29,7 @@ import TabList from '@mui/lab/TabList'
 
 import { IconX } from '@tabler/icons-react'
 
-import styles from '@/app/_style/Table.module.css'
+import styles from '@core/styles/customTable.module.css'
 
 import { auth } from '@core/utils/auth'
 import { handleSuccess } from '@core/utils/errorHandler'

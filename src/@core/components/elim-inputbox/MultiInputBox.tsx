@@ -2,7 +2,7 @@ import { Grid2, MenuItem, TextField, Typography } from '@mui/material'
 import type { Path, UseFormReturn } from 'react-hook-form'
 import { Controller, useFormState } from 'react-hook-form'
 
-import { YNOption } from '@/app/_constants/options'
+import { YNOption } from '@/@core/data/options'
 
 interface MultiInputBoxProps<T extends Record<string, any>> {
   form: UseFormReturn<T, any, undefined>

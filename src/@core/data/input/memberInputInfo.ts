@@ -8,8 +8,8 @@ import {
 
   // roleOption,
   workFormOption
-} from '@/app/_constants/options'
-import type { memberInputType } from '../../../@core/types'
+} from '@/@core/data/options'
+import type { memberInputType } from '../../types'
 
 // 직원 상세 페이지
 export const MEMBER_INPUT_INFO: memberInputType = {

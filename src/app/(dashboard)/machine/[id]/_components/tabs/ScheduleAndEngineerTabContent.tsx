@@ -9,12 +9,9 @@ import { IconPlus, IconX } from '@tabler/icons-react'
 import type { machineProjectEngineerDetailDtoType, MachineProjectScheduleAndEngineerResponseDtoType } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { InputBox } from '@/@core/components/elim-inputbox/InputBox'
-import {
-  MACHINE_PROJECT_ENGINEER_INPUT_INFO,
-  MACHINE_SCHEDULE_INPUT_INFO
-} from '@/app/_constants/input/machineInputInfo'
+import { MACHINE_PROJECT_ENGINEER_INPUT_INFO, MACHINE_SCHEDULE_INPUT_INFO } from '@/@core/data/input/machineInputInfo'
 import CustomTextField from '@core/components/mui/TextField'
-import { gradeOption } from '@/app/_constants/options'
+import { gradeOption } from '@/@core/data/options'
 import {
   useGetEngineersOptions,
   useGetParticipatedEngineerList,

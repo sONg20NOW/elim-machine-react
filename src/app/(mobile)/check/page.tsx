@@ -32,7 +32,7 @@ import { auth, logout } from '@core/utils/auth'
 import { isMobileContext } from '@/components/ProtectedPage'
 import useCurrentUserStore from '@core/utils/useCurrentUserStore'
 import { useGetEngineerByMemberId } from '@core/hooks/customTanstackQueries'
-import { gradeOption } from '@/app/_constants/options'
+import { gradeOption } from '@/@core/data/options'
 import { printErrorSnackbar, printInfoSnackbar } from '@core/utils/snackbarHandler'
 
 export default function MachinePage() {

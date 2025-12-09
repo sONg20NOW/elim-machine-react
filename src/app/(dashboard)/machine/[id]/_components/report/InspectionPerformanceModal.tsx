@@ -21,7 +21,7 @@ import { saveAs } from 'file-saver'
 
 import { IconX } from '@tabler/icons-react'
 
-import style from '@/app/_style/Table.module.css'
+import styles from '@core/styles/customTable.module.css'
 import { useGetLeafCategories, useGetReportCategories, useGetReportStatuses } from '@core/hooks/customTanstackQueries'
 import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@core/types'
 import { auth } from '@core/utils/auth'
@@ -110,7 +110,7 @@ export default function InspectionPerformanceModal() {
             </div>
             <Divider />
           </DialogTitle>
-          <DialogContent className={`${style.container} max-h-[40dvh]`}>
+          <DialogContent className={`${styles.container} max-h-[40dvh]`}>
             <table style={{ tableLayout: 'fixed', width: '100%' }}>
               <thead>
                 <tr>

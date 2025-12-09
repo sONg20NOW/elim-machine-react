@@ -22,8 +22,8 @@ import { printWarningSnackbar } from '@core/utils/snackbarHandler'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
-import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/engineerInputInfo'
-import { emailRule, phoneRule } from '@/app/_constants/input/inputRule'
+import { ENGINEER_INPUT_INFO } from '@/@core/data/input/engineerInputInfo'
+import { emailRule, phoneRule } from '@/@core/data/input/inputRule'
 
 type EngineerModalProps = {
   open: boolean

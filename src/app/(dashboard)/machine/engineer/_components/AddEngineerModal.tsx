@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form'
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import type { MachineEngineerCreateRequestDtoType } from '@core/types'
 
-import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/engineerInputInfo'
+import { ENGINEER_INPUT_INFO } from '@/@core/data/input/engineerInputInfo'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'

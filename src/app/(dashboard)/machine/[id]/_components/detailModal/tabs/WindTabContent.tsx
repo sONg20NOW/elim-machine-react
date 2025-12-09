@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { Divider, MenuItem, TextField } from '@mui/material'
 
 import type { MachineInspectionDetailResponseDtoType } from '@core/types'
-import { fanTypeOption } from '@/app/_constants/options'
+import { fanTypeOption } from '@/@core/data/options'
 
 interface WindTabContentProps<T> {
   editData: T

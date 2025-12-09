@@ -20,7 +20,7 @@ import { saveAs } from 'file-saver'
 
 import { IconX } from '@tabler/icons-react'
 
-import style from '@/app/_style/Table.module.css'
+import styles from '@core/styles/customTable.module.css'
 import { useGetReportCategories, useGetReportStatuses } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'
@@ -119,7 +119,7 @@ export default function DownloadReportModal() {
             </div>
             <Divider />
           </DialogTitle>
-          <DialogContent className={`${style.container} max-h-[50dvh]`}>
+          <DialogContent className={`${styles.container} max-h-[50dvh]`}>
             <table style={{ tableLayout: 'fixed', width: '100%' }}>
               <thead>
                 <tr>

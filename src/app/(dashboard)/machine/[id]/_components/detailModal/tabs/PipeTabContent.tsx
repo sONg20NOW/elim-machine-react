@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { Divider, MenuItem, TextField } from '@mui/material'
 
 import type { MachineInspectionDetailResponseDtoType } from '@core/types'
-import { pipeTypeOption } from '@/app/_constants/options'
+import { pipeTypeOption } from '@/@core/data/options'
 
 interface WindTabContentProps<T> {
   editData: T

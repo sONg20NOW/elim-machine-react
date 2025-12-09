@@ -21,7 +21,7 @@ import { NumericFormat } from 'react-number-format'
 
 import { IconCaretLeft, IconCaretRight, IconX } from '@tabler/icons-react'
 
-import styles from '@/app/_style/Table.module.css'
+import styles from '@core/styles/customTable.module.css'
 
 import { useGetEnergyTargets, useGetEnergyTypes, useGetEnergyUsages } from '@core/hooks/customTanstackQueries'
 import AddTargetModal from './AddTargetModal'

@@ -17,7 +17,7 @@ import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 
 // style
-import styles from '@/app/_style/Table.module.css'
+import styles from '@core/styles/customTable.module.css'
 import DisabledTabWithTooltip from '@/app/(dashboard)/machine/[id]/_components/DisabledTabWithTooltip'
 import BasicTabContent from './tabs/BasicTabContent'
 import { GasTabContent } from './tabs/GasTabContent'

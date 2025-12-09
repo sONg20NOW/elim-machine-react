@@ -6,7 +6,7 @@ import { MenuItem, Select, Typography, useTheme } from '@mui/material'
 
 import { Controller, useForm, useFormState } from 'react-hook-form'
 
-import styles from '@/app/_style/Table.module.css'
+import styles from '@core/styles/customTable.module.css'
 import { centerStyle, StyledTextField, type refType } from '../MachinePerformanceReviewModal'
 import {
   useGetMeasurement,

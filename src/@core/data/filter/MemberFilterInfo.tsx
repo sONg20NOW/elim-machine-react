@@ -1,6 +1,6 @@
 import { MEMBER_INPUT_INFO } from '../input/memberInputInfo'
-import type { InputFieldType, MemberFilterType } from '../../../@core/types'
-import { birthMonthOption, careerYearOption, genderOption } from '@/app/_constants/options'
+import type { InputFieldType, MemberFilterType } from '../../types'
+import { birthMonthOption, careerYearOption, genderOption } from '@/@core/data/options'
 
 const { companyName, memberStatus } = MEMBER_INPUT_INFO.basic
 const { officePosition, officeDepartmentName, contractType, laborForm, workForm } = MEMBER_INPUT_INFO.office

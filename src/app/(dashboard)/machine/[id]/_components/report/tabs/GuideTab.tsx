@@ -7,7 +7,7 @@ import { Radio, Typography, useTheme } from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
 
 import { centerStyle, type refType } from '../MachinePerformanceReviewModal'
-import styles from '@/app/_style/Table.module.css'
+import styles from '@core/styles/customTable.module.css'
 import type { MachinePerformanceReviewGuideResponseDtoType } from '@core/types'
 import { useGetGuide, useMutateGuide } from '@core/hooks/customTanstackQueries'
 import { makeGuideSeed } from '../../../_utils/makeSeed'

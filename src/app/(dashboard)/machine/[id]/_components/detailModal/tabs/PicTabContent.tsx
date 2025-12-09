@@ -16,7 +16,7 @@ import type {
   MachineInspectionChecklistItemResultBasicResponseDtoType
 } from '@core/types'
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
-import { picCateInspectionStatusOption } from '@/app/_constants/options'
+import { picCateInspectionStatusOption } from '@/@core/data/options'
 
 interface PicTabContentProps<T> {
   editData: T

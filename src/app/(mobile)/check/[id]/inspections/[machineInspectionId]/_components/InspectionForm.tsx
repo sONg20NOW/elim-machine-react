@@ -17,7 +17,7 @@ import type { FormComponentHandle } from '../page'
 // import EngineerCard from '../_components/EngineerCard'
 import { auth } from '@core/utils/auth'
 import { useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
-import { equipmentPhaseOption } from '@/app/_constants/options'
+import { equipmentPhaseOption } from '@/@core/data/options'
 import { printErrorSnackbar } from '@core/utils/snackbarHandler'
 
 export interface formType {

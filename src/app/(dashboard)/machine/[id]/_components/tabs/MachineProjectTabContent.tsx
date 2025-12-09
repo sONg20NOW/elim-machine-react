@@ -6,7 +6,7 @@ import { Button, Checkbox, Typography } from '@mui/material'
 
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { InputBox } from '@/@core/components/elim-inputbox/InputBox'
-import { MACHINE_INPUT_INFO } from '@/app/_constants/input/machineInputInfo'
+import { MACHINE_INPUT_INFO } from '@/@core/data/input/machineInputInfo'
 import type { MachineProjectResponseDtoType } from '@core/types'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import EnergyReport from '../report/EnergyReportModal'

@@ -5,7 +5,7 @@ import { DialogContent, Grid2 } from '@mui/material'
 import { useForm } from 'react-hook-form'
 
 import type { MemberPrivacyDtoType } from '@core/types'
-import { MEMBER_INPUT_INFO } from '@/app/_constants/input/memberInputInfo'
+import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { useMutateSingleMember } from '@core/hooks/customTanstackQueries'
 import { handleApiError } from '@core/utils/errorHandler'
 import type { refType } from '../UserModal'
