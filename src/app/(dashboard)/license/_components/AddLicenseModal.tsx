@@ -10,7 +10,7 @@ import { DialogContent } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import DefaultModal from '@core/components/custom/DefaultModal'
+import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import type { LicenseCreateRequestDto } from '@core/types'

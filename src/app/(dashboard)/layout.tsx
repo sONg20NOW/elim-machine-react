@@ -12,9 +12,9 @@ import VerticalFooter from '@components/layout/vertical/Footer'
 // Util Imports
 import { getMode } from '@core/utils/serverHelpers'
 
-import ScrollToTopButton from '@core/components/custom/ScrollToTopButton'
+import ScrollToTopButton from '@/@core/components/elim-button/ScrollToTopButton'
 import Header from '@/components/layout/vertical/Header'
-import ProtectedPage from '../../@core/components/custom/ProtectedPage'
+import ProtectedPage from '../../components/ProtectedPage'
 
 const Layout = async (props: ChildrenType) => {
   // const params = await props.params

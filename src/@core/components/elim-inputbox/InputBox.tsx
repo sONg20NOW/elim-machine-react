@@ -5,13 +5,13 @@ import Grid from '@mui/material/Grid2'
 import { Box, Button, InputAdornment, MenuItem, Typography } from '@mui/material'
 
 import CustomTextField from '@core/components/mui/TextField'
-import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType, ynResultType } from '@core/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
-import PostCodeDialog from '@core/components/custom/daumMapPostcode'
+import PostCodeDialog from '@/@core/components/elim-modal/PostCodeDialog'
 import { handleApiError } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
 import { useGetLicenseNames } from '@core/hooks/customTanstackQueries'
+import YNSelectBox from './YNSelectBox'
 
 interface InputBoxProps {
   isEditing?: boolean

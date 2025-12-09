@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, type ReactNode } from 'react'
 
 import { Box, Typography } from '@mui/material'
 
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 
 interface MobileHeaderProps {
   left?: ReactNode

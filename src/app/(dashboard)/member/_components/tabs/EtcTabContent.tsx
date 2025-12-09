@@ -9,7 +9,7 @@ import { MEMBER_INPUT_INFO } from '@/app/_constants/input/memberInputInfo'
 import { useMutateSingleMember } from '@core/hooks/customTanstackQueries'
 import { handleApiError } from '@core/utils/errorHandler'
 import type { refType } from '../UserModal'
-import TextInputBox from '@core/components/inputbox/TextInputBox'
+import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 
 interface EtcTabContentProps {
   defaultData: MemberEtcDtoType

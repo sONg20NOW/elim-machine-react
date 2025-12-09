@@ -20,7 +20,7 @@ import {
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 import { uploadInspectionPictures } from '@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@core/hooks/customTanstackQueries'
 import { printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'

@@ -11,17 +11,17 @@ import { Backdrop, CircularProgress, Grid2, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import DefaultModal from '@core/components/custom/DefaultModal'
+import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import type { EngineerResponseDtoType } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import DeleteModal from '@core/components/custom/DeleteModal'
+import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 
 import { useMutateEngineer } from '@core/hooks/customTanstackQueries'
 import deleteEngineer from '../_util/deleteEngineer'
 import { printWarningSnackbar } from '@core/utils/snackbarHandler'
-import AlertModal from '@core/components/custom/AlertModal'
-import TextInputBox from '@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@core/components/inputbox/MultiInputBox'
+import AlertModal from '@/@core/components/elim-modal/AlertModal'
+import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/engineerInputInfo'
 import { emailRule, phoneRule } from '@/app/_constants/input/inputRule'
 

@@ -19,7 +19,7 @@ import {
 
 import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@core/types'
 
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 import { uploadSingleInspectionPic } from '@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'

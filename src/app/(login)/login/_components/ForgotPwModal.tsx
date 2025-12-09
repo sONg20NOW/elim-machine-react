@@ -9,7 +9,7 @@ import { Button, TextField, Typography } from '@mui/material'
 
 import axios from 'axios'
 
-import DefaultModal from '@core/components/custom/DefaultModal'
+import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 
 type ForgotForm = { email: string }

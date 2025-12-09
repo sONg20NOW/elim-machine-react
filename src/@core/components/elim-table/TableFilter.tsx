@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
 
-import { InputBox } from '@core/components/custom/InputBox'
+import { InputBox } from '@/@core/components/elim-inputbox/InputBox'
 import type { InputFieldType } from '@core/types'
 
 interface TableFilterProps<T> {

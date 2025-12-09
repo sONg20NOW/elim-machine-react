@@ -8,8 +8,8 @@ import { useForm } from 'react-hook-form'
 
 import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject, useMutateMachineProjectNote } from '@core/hooks/customTanstackQueries'
-import TextInputBox from '@core/components/inputbox/TextInputBox'
-import AlertModal from '@core/components/custom/AlertModal'
+import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
+import AlertModal from '@/@core/components/elim-modal/AlertModal'
 
 const MAX_LENGTH = 500
 

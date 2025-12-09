@@ -11,12 +11,12 @@ import { toast } from 'react-toastify'
 import { useForm } from 'react-hook-form'
 
 import type { MachineProjectCreateRequestDtoType } from '@core/types'
-import DefaultModal from '@core/components/custom/DefaultModal'
+import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import { MACHINE_CREATE_INFO } from '@/app/_constants/input/machineInputInfo'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
-import TextInputBox from '@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@core/components/inputbox/MultiInputBox'
+import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import { useGetLicenseNames } from '@core/hooks/customTanstackQueries'
 
 type AddMachineProjectModalProps = {

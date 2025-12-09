@@ -37,7 +37,7 @@ import { saveAs } from 'file-saver'
 
 import type { MachineProjectPicReadResponseDtoType, ProjectPicType } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 import { uploadProjectPictures } from '@core/utils/uploadProjectPictures'
 import { auth } from '@core/utils/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'

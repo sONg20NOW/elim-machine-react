@@ -33,13 +33,13 @@ import type {
 } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import getS3Key from '@core/utils/getS3Key'
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 import { auth } from '@core/utils/auth'
 import { projectPicOption } from '@/app/_constants/options'
-import AlertModal from '@core/components/custom/AlertModal'
-import TextInputBox from '@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@core/components/inputbox/MultiInputBox'
-import DeleteModal from '@core/components/custom/DeleteModal'
+import AlertModal from '@/@core/components/elim-modal/AlertModal'
+import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
+import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 
 interface formType {
   originalFileName: string

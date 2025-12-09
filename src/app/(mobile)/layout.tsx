@@ -7,8 +7,8 @@ import type { ChildrenType } from '@core/types'
 
 // Util Imports
 
-import ScrollToTopButton from '@core/components/custom/ScrollToTopButton'
-import ProtectedPage from '../../@core/components/custom/ProtectedPage'
+import ScrollToTopButton from '@/@core/components/elim-button/ScrollToTopButton'
+import ProtectedPage from '../../components/ProtectedPage'
 
 const Layout = async (props: ChildrenType) => {
   // const params = await props.params

@@ -19,14 +19,14 @@ import type {
   MachineProjectPicReadResponseDtoType
 } from '@core/types'
 
-import SearchBar from '@core/components/custom/SearchBar'
+import SearchBar from '@/@core/components/elim-inputbox/SearchBar'
 import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { useGetInspectionsSimple } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import PictureListModal from '../pictureUploadModal/PictureListModal'
 import { projectPicOption } from '@/app/_constants/options'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
-import { isTabletContext } from '@core/components/custom/ProtectedPage'
+import { isTabletContext } from '@/components/ProtectedPage'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
 import ReloadButton from '../ReloadButton'

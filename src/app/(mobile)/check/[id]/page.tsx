@@ -16,7 +16,7 @@ import type {
 } from '@core/types'
 import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@core/utils/auth'
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 import ProjectInfoCard from './_components/ProjectInfoCard'
 import type { projectSummaryType } from '@core/utils/useProjectSummaryStore'
 import useProjectSummaryStore from '@core/utils/useProjectSummaryStore'

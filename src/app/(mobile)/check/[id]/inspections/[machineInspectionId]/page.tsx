@@ -16,11 +16,11 @@ import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 
 import { auth } from '@core/utils/auth'
 
-import DeleteModal from '@core/components/custom/DeleteModal'
+import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import ChecklistForm from './_components/ChecklistForm'
 import InspectionForm from './_components/InspectionForm'
 
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 
 import PictureTable from './_components/PictureTable'
 import ImageUploadPage from './_components/ImageUploadPage'

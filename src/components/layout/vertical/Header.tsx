@@ -28,7 +28,7 @@ import {
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
 import { logout } from '@core/utils/auth'
-import { isMobileContext, isTabletContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext, isTabletContext } from '@/components/ProtectedPage'
 import UserModal from '@/app/(dashboard)/member/_components/UserModal'
 import { useGetSingleMember } from '@core/hooks/customTanstackQueries'
 import useCurrentUserStore from '@core/utils/useCurrentUserStore'

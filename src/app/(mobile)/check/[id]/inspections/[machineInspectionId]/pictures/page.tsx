@@ -26,7 +26,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { IconCamera, IconChevronLeft } from '@tabler/icons-react'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 import { auth } from '@core/utils/auth'
 import type {
   MachinePicCursorType,

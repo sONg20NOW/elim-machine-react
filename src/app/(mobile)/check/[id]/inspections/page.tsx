@@ -14,7 +14,7 @@ import type {
 } from '@core/types'
 import { auth } from '@core/utils/auth'
 import AddInspectionModal from '../_components/AddInspectionModal'
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
 import useProjectSummaryStore from '@core/utils/useProjectSummaryStore'
 import { printErrorSnackbar } from '@core/utils/snackbarHandler'

@@ -10,8 +10,8 @@ import { useGetLicenseNames, useMutateSingleMember } from '@core/hooks/customTan
 import { handleApiError } from '@core/utils/errorHandler'
 import type { refType } from '../UserModal'
 import useCurrentUserStore from '@core/utils/useCurrentUserStore'
-import TextInputBox from '@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@core/components/inputbox/MultiInputBox'
+import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 
 interface BasicTabContentProps {
   defaultData: MemberBasicDtoType

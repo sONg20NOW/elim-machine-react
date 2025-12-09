@@ -9,7 +9,7 @@ import { InputLabel, MenuItem, Select, TextField, Typography } from '@mui/materi
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@/components/ProtectedPage'
 import type { MachineInspectionResponseDtoType } from '@core/types'
 import type { FormComponentHandle } from '../page'
 
