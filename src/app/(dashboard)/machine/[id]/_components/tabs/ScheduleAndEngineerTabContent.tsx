@@ -109,7 +109,7 @@ const ScheduleAndEngineerTabContent = () => {
         background: '#fafbfc',
         fontSize: 15,
         marginBottom: 16,
-        maxWidth: '50dvw'
+        maxWidth: '890px'
       }}
     >
       <div>

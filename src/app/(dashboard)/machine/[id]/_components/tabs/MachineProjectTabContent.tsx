@@ -92,7 +92,7 @@ const BasicTabContent = () => {
   return (
     projectData && (
       <MacinheProjectNameContext.Provider value={projectData.machineProjectName}>
-        <div className='h-full flex flex-col max-w-[50dvw]'>
+        <div className='h-full flex flex-col max-w-[890px]'>
           {/* 상단 버튼들 : 점검의견서, 성능점검시 검토사항 ... */}
           <div className='flex mb-4 justify-between'>
             <div className='flex gap-[4px]'>
