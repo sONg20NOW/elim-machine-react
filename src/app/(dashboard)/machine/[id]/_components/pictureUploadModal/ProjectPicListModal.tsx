@@ -36,7 +36,7 @@ import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 
 import type { MachineProjectPicReadResponseDtoType, ProjectPicType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
 import { auth } from '@/@core/utils/auth'

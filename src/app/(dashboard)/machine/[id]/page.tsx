@@ -20,7 +20,7 @@ import { IconCheck, IconChevronRight, IconPencil, IconX } from '@tabler/icons-re
 import { useForm } from 'react-hook-form'
 
 import PictureListTabContent from './_components/tabs/PictureListTabContent'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import CustomTextField from '@/@core/components/mui/TextField'
 import DisabledTabWithTooltip from '@/app/(dashboard)/machine/[id]/_components/DisabledTabWithTooltip'
 import BasicTabContent from './_components/tabs/MachineProjectTabContent'

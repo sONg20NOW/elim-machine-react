@@ -14,6 +14,8 @@ import 'react-toastify/ReactToastify.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
 // Type Imports
+import { SnackbarProvider } from 'notistack'
+
 import type { ChildrenType } from '@/@core/types'
 
 // Component Imports
@@ -25,7 +27,6 @@ import '@/app/globals.css'
 import '@assets/iconify-icons/generated-icons.css'
 
 // import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
-import ClientProviders from '@/components/ClientProviders'
 
 const BROWER_TAB_TITLE = 'ELIM'
 const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
@@ -60,7 +61,9 @@ const RootLayout = (props: ChildrenType) => {
         {/* 클라이언트 전용 SW 등록 컴포넌트 */}
         {/* <ServiceWorkerRegister /> */}
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
-        <ClientProviders>{children}</ClientProviders>
+        <SnackbarProvider maxSnack={3} autoHideDuration={1000}>
+          {children}
+        </SnackbarProvider>
         <SpeedInsights />
         <ToastContainer autoClose={3000} position='bottom-left' />
       </body>

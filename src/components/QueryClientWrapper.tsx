@@ -1,6 +1,4 @@
-// src/components/QueryClientWrapper.tsx 또는 ClientProviders.tsx
-
-'use client' // 👈 이 파일은 클라이언트 컴포넌트로 지정
+'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 

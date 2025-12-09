@@ -22,7 +22,7 @@ import { IconX } from '@tabler/icons-react'
 
 import type { MemberDetailResponseDtoType } from '@/@core/types'
 
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import { auth } from '@/@core/utils/auth'
 import type { MemberType } from '@/@core/hooks/customTanstackQueries'

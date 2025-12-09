@@ -1,6 +1,6 @@
 import { enqueueSnackbar } from 'notistack'
 
-import { getErrorMessage } from '@/utils/errorHandler'
+import { getErrorMessage } from '@/@core/utils/errorHandler'
 
 export function printSuccessSnackbar(message: string, autoHideDuration = 1000) {
   enqueueSnackbar(message, { variant: 'success', autoHideDuration: autoHideDuration })

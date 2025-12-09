@@ -25,7 +25,7 @@ import style from '@/app/_style/Table.module.css'
 import { useGetLeafCategories, useGetReportCategories, useGetReportStatuses } from '@/@core/hooks/customTanstackQueries'
 import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
 import { auth } from '@/@core/utils/auth'
-import { handleApiError } from '@/utils/errorHandler'
+import { handleApiError } from '@/@core/utils/errorHandler'
 import ReloadButton from '../ReloadButton'
 
 export default function InspectionPerformanceModal() {

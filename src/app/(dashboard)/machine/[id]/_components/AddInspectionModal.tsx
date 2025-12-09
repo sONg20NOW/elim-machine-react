@@ -16,7 +16,7 @@ import { IconCaretLeftFilled, IconCaretRightFilled } from '@tabler/icons-react'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { MachineInspectionCreateRequestDtoType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import { useGetCategories } from '@/@core/hooks/customTanstackQueries'
 import { auth } from '@/@core/utils/auth'
 import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'

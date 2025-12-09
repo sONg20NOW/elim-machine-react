@@ -14,7 +14,7 @@ import TabPanel from '@mui/lab/TabPanel'
 import type { MachineInspectionDetailResponseDtoType, MachineInspectionSimpleResponseDtoType } from '@/@core/types'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 
 // style
 import styles from '@/app/_style/Table.module.css'

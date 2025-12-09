@@ -26,7 +26,7 @@ import styles from '@/app/_style/Table.module.css'
 import { useGetEnergyTargets, useGetEnergyTypes, useGetEnergyUsages } from '@/@core/hooks/customTanstackQueries'
 import AddTargetModal from './AddTargetModal'
 import { auth } from '@/@core/utils/auth'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
 const StyledTab = styled(Tab)(({ theme }) => ({

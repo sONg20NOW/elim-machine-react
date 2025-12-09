@@ -31,7 +31,7 @@ import type {
   MachineProjectPicUpdateRequestDtoType,
   ProjectPicType
 } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { auth } from '@/@core/utils/auth'

@@ -11,7 +11,7 @@ import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
 
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import type {
   MachineInspectionDetailResponseDtoType,
   MachinePicCursorType,

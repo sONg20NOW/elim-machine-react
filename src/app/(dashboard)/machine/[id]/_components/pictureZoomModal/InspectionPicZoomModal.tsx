@@ -29,7 +29,7 @@ import { createPortal } from 'react-dom'
 import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
 
 import type { MachinePicPresignedUrlResponseDtoType, MachinePicUpdateResponseDtoType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'

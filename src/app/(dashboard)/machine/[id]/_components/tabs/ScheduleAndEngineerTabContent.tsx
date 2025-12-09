@@ -10,7 +10,7 @@ import type {
   machineProjectEngineerDetailDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType
 } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import { InputBox } from '@/@core/components/custom/InputBox'
 import {
   MACHINE_PROJECT_ENGINEER_INPUT_INFO,

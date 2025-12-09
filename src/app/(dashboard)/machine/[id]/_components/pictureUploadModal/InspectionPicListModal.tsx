@@ -40,7 +40,7 @@ import type {
   MachinePicPresignedUrlResponseDtoType,
   MachinePicCursorType
 } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'

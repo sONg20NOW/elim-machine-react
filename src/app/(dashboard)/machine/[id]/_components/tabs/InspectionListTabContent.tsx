@@ -21,7 +21,7 @@ import InspectionDetailModal from '../detailModal/InspectionDetailModal'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
 
 // Utils
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import type { MachineInspectionFilterType, MachineInspectionPageResponseDtoType } from '@/@core/types'
 import { HEADERS } from '@/app/_constants/table/TableHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'

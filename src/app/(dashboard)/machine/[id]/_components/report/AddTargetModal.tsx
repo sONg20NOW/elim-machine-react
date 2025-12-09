@@ -26,7 +26,7 @@ import { motion } from 'motion/react'
 import { IconCheck, IconPlus, IconSettingsFilled, IconTrashFilled, IconX } from '@tabler/icons-react'
 
 import { auth } from '@/@core/utils/auth'
-import { handleApiError } from '@/utils/errorHandler'
+import { handleApiError } from '@/@core/utils/errorHandler'
 import { useGetEnergyTargets } from '@/@core/hooks/customTanstackQueries'
 import type { targetType } from '@/@core/types'
 

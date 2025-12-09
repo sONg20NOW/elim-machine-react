@@ -1,5 +1,5 @@
 import { auth } from '@/@core/utils/auth'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 
 /**
  * 설비를 삭제하는 함수

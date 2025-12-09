@@ -32,7 +32,7 @@ import { IconX } from '@tabler/icons-react'
 import styles from '@/app/_style/Table.module.css'
 
 import { auth } from '@/@core/utils/auth'
-import { handleSuccess } from '@/utils/errorHandler'
+import { handleSuccess } from '@/@core/utils/errorHandler'
 import type { MachineInspectionRootCategoryResponseDtoType } from '@/@core/types'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 

@@ -25,7 +25,7 @@ import { login } from '@core/utils/auth'
 
 import 'react-toastify/ReactToastify.css'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import { printErrorSnackbar, printSuccessSnackbar } from '@/@core/utils/snackbarHandler'
 
 type LoginFormInputs = {

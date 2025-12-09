@@ -58,7 +58,7 @@ import type {
   targetType,
   WindMeasurementResponseDtoType
 } from '@/@core/types' // 타입 임포트
-import { handleApiError } from '@/utils/errorHandler'
+import { handleApiError } from '@/@core/utils/errorHandler'
 
 // ------------------------- License 관련 -------------------------
 export const useGetLicenseNames = () => {

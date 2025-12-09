@@ -10,7 +10,7 @@ import { Button, TextField, Typography } from '@mui/material'
 import axios from 'axios'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 
 type ForgotForm = { email: string }
 type VerifyForm = { email: string; code: string }

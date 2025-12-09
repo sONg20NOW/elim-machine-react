@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form'
 
 import DefaultModal from '@/@core/components/custom/DefaultModal'
 import type { EngineerResponseDtoType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 
 import { useMutateEngineer } from '@/@core/hooks/customTanstackQueries'
