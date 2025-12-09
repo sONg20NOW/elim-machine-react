@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -6,10 +6,10 @@ import { Button, Grid2, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject, useMutateMachineProjectNote } from '@core/hooks/customTanstackQueries'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
+import { isEditingStateContext } from '../../page'
 
 const MAX_LENGTH = 500
 
@@ -20,7 +20,7 @@ const NoteTabContent = ({}) => {
   const { data: projectData } = useGetMachineProject(machineProjectId)
   const { mutateAsync: mutateNoteAsync, isPending } = useMutateMachineProjectNote(machineProjectId)
 
-  const setIsEditing = useMachineIsEditingStore(set => set.setIsEditing)
+  const { setIsEditing } = useContext(isEditingStateContext)!
 
   const [openAlert, setOpenAlert] = useState(false)
 

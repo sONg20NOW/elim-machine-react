@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -20,9 +20,9 @@ import {
   useGetParticipatedEngineerList,
   useGetScheduleTab
 } from '@core/hooks/customTanstackQueries'
-import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
 import { auth } from '@core/utils/auth'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
+import { isEditingStateContext } from '../../page'
 
 // 참여기술진 추가 시 사용되는 더미 데이터
 const MachineProjectEngineerInitialData: machineProjectEngineerDetailDtoType = {
@@ -40,7 +40,7 @@ const ScheduleAndEngineerTabContent = () => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
-  const { isEditing, setIsEditing } = useMachineIsEditingStore()
+  const { isEditing, setIsEditing } = useContext(isEditingStateContext)!
 
   const { data: scheduleData, refetch: refetchScheduleData } = useGetScheduleTab(machineProjectId)
   const { data: engineerList } = useGetEngineersOptions()

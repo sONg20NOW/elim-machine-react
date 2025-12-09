@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -12,18 +12,18 @@ import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import EnergyReport from '../report/EnergyReportModal'
 import DownloadReportModal from '../report/DownloadReportModal'
 import ChecklistResultSummaryModal from '../report/ChecklistResultSummaryModal'
-import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import MachinePerformanceReviewModal from '../report/MachinePerformanceReviewModal'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
+import { isEditingStateContext } from '../../page'
 
 export const MacinheProjectNameContext = createContext<string>('')
 
 const BasicTabContent = () => {
   const router = useRouter()
 
-  const { isEditing, setIsEditing } = useMachineIsEditingStore()
+  const { isEditing, setIsEditing } = useContext(isEditingStateContext)!
   const [loading, setLoading] = useState(false)
 
   const params = useParams()

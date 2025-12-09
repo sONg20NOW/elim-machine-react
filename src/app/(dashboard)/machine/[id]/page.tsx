@@ -1,7 +1,7 @@
 'use client'
 
 import type { SyntheticEvent } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useEffect, useState } from 'react'
 
 import { redirect, useParams } from 'next/navigation'
 
@@ -30,7 +30,6 @@ import InspectionListTabContent from './_components/tabs/InspectionListTabConten
 import type { MachineTabValue } from '@core/utils/useMachineTabValueStore'
 import useMachineTabValueStore from '@core/utils/useMachineTabValueStore'
 import { useGetEngineersOptions, useGetMachineProject, useGetScheduleTab } from '@core/hooks/customTanstackQueries'
-import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
 import { auth } from '@core/utils/auth'
 
 const Tabs = [
@@ -41,6 +40,11 @@ const Tabs = [
   { value: '특이사항', label: '특이사항' }
 ]
 
+export const isEditingStateContext = createContext<{
+  isEditing: boolean
+  setIsEditing: (value: boolean) => void
+} | null>(null)
+
 const MachineUpdatePage = () => {
   const isMobile = useMediaQuery('(max-width:600px)')
 
@@ -48,7 +52,7 @@ const MachineUpdatePage = () => {
   const machineProjectId = params?.id as string
 
   const { tabValue, setTabValue } = useMachineTabValueStore(state => state)
-  const { isEditing } = useMachineIsEditingStore()
+  const [isEditing, setIsEditing] = useState(false)
 
   const { data: engineerList } = useGetEngineersOptions()
   const { data: projectData, refetch: refetchProjectData } = useGetMachineProject(machineProjectId)
@@ -119,108 +123,110 @@ const MachineUpdatePage = () => {
   }, [machineProjectId, tabValue, refetchProjectData, refetchScheduleData, engineerList, projectData, scheduleData])
 
   return (
-    <Card className='h-full flex flex-col'>
-      <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-5': !isMobile })}>
-        <CardHeader
-          title={
-            <div
-              className={classNames('flex gap-0  mt-1', {
-                'flex-col text-left items-start': isMobile,
-                'items-center': !isMobile
-              })}
-            >
-              <Typography
-                color='black'
-                sx={{
-                  fontSize: 25,
-                  fontWeight: 500,
-                  ':hover': { color: 'primary.main' },
-                  alignItems: 'center',
-                  display: 'flex'
-                }}
-                onClick={() => redirect('/machine')}
+    <isEditingStateContext.Provider value={{ isEditing, setIsEditing }}>
+      <Card className='h-full flex flex-col'>
+        <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-5': !isMobile })}>
+          <CardHeader
+            title={
+              <div
+                className={classNames('flex gap-0  mt-1', {
+                  'flex-col text-left items-start': isMobile,
+                  'items-center': !isMobile
+                })}
               >
-                기계설비현장
-                <IconChevronRight />
-              </Typography>
-              <form className='flex items-center' onSubmit={handleChangeProjectName}>
-                {!isEditingProjectName ? (
-                  <Typography color='black' sx={{ fontSize: 25, fontWeight: 500, cursor: 'default' }}>
-                    {projectData?.machineProjectName ? (
-                      projectData?.machineProjectName
-                    ) : (
-                      <span className='font-normal text-slate-400'>이름 없음</span>
-                    )}
-                  </Typography>
-                ) : (
-                  <CustomTextField
-                    {...register('machineProjectName')}
-                    slotProps={{
-                      input: { sx: { fontSize: 20, width: 'fit-content' } },
-                      htmlInput: { sx: { py: '0 !important' } }
-                    }}
-                  />
-                )}
-                <IconButton
-                  type='submit'
-                  onClick={() => {
-                    setIsEditingProjectName(prev => !prev)
+                <Typography
+                  color='black'
+                  sx={{
+                    fontSize: 25,
+                    fontWeight: 500,
+                    ':hover': { color: 'primary.main' },
+                    alignItems: 'center',
+                    display: 'flex'
                   }}
+                  onClick={() => redirect('/machine')}
                 >
+                  기계설비현장
+                  <IconChevronRight />
+                </Typography>
+                <form className='flex items-center' onSubmit={handleChangeProjectName}>
                   {!isEditingProjectName ? (
-                    <IconPencil />
+                    <Typography color='black' sx={{ fontSize: 25, fontWeight: 500, cursor: 'default' }}>
+                      {projectData?.machineProjectName ? (
+                        projectData?.machineProjectName
+                      ) : (
+                        <span className='font-normal text-slate-400'>이름 없음</span>
+                      )}
+                    </Typography>
                   ) : (
-                    <IconCheck className='text-green-400 hover:text-green-500' />
+                    <CustomTextField
+                      {...register('machineProjectName')}
+                      slotProps={{
+                        input: { sx: { fontSize: 20, width: 'fit-content' } },
+                        htmlInput: { sx: { py: '0 !important' } }
+                      }}
+                    />
                   )}
-                </IconButton>
-                {isEditingProjectName && (
-                  <IconButton type='button' onClick={cancelChangingProjectName}>
-                    <IconX className='text-red-400 hover:text-red-500' />
+                  <IconButton
+                    type='submit'
+                    onClick={() => {
+                      setIsEditingProjectName(prev => !prev)
+                    }}
+                  >
+                    {!isEditingProjectName ? (
+                      <IconPencil />
+                    ) : (
+                      <IconCheck className='text-green-400 hover:text-green-500' />
+                    )}
                   </IconButton>
-                )}
-              </form>
-            </div>
-          }
-          sx={{ cursor: 'pointer', padding: 0 }}
-        />
-      </div>
+                  {isEditingProjectName && (
+                    <IconButton type='button' onClick={cancelChangingProjectName}>
+                      <IconX className='text-red-400 hover:text-red-500' />
+                    </IconButton>
+                  )}
+                </form>
+              </div>
+            }
+            sx={{ cursor: 'pointer', padding: 0 }}
+          />
+        </div>
 
-      <CardContent className='flex-1 flex flex-col overflow-y-hidden p-0"'>
-        <TabContext value={tabValue}>
-          {/* 탭 목록 */}
-          <TabList onChange={handleChange} aria-label='nav tabs example'>
-            {Tabs.map(tab => {
-              return isEditing && tabValue !== tab.value ? (
-                <DisabledTabWithTooltip value={tab.value} label={tab.label} />
-              ) : (
-                <Tab key={tab.value} value={tab.value} label={tab.label} />
-              )
-            })}
-          </TabList>
-          <div className='flex-1 overflow-y-hidden pt-4'>
-            <TabPanel value='현장정보' className='h-full'>
-              {projectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
-            </TabPanel>
-            <TabPanel value='점검일정/참여기술진'>
-              {scheduleData ? (
-                <ScheduleAndEngineerTabContent />
-              ) : (
-                <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
-              )}
-            </TabPanel>
-            <TabPanel value='설비목록' className='h-full' keepMounted>
-              <InspectionListTabContent />
-            </TabPanel>
-            <TabPanel value='전체사진' className='h-full' keepMounted>
-              <PictureListTabContent />
-            </TabPanel>
-            <TabPanel value='특이사항'>
-              {projectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
-            </TabPanel>
-          </div>
-        </TabContext>
-      </CardContent>
-    </Card>
+        <CardContent className='flex-1 flex flex-col overflow-y-hidden p-0"'>
+          <TabContext value={tabValue}>
+            {/* 탭 목록 */}
+            <TabList onChange={handleChange} aria-label='nav tabs example'>
+              {Tabs.map(tab => {
+                return isEditing && tabValue !== tab.value ? (
+                  <DisabledTabWithTooltip value={tab.value} label={tab.label} />
+                ) : (
+                  <Tab key={tab.value} value={tab.value} label={tab.label} />
+                )
+              })}
+            </TabList>
+            <div className='flex-1 overflow-y-hidden pt-4'>
+              <TabPanel value='현장정보' className='h-full'>
+                {projectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
+              </TabPanel>
+              <TabPanel value='점검일정/참여기술진'>
+                {scheduleData ? (
+                  <ScheduleAndEngineerTabContent />
+                ) : (
+                  <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
+                )}
+              </TabPanel>
+              <TabPanel value='설비목록' className='h-full' keepMounted>
+                <InspectionListTabContent />
+              </TabPanel>
+              <TabPanel value='전체사진' className='h-full' keepMounted>
+                <PictureListTabContent />
+              </TabPanel>
+              <TabPanel value='특이사항'>
+                {projectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
+              </TabPanel>
+            </div>
+          </TabContext>
+        </CardContent>
+      </Card>
+    </isEditingStateContext.Provider>
   )
 }
 
