@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 import { useGetMachineProject, useMutateMachineProjectNote } from '@core/hooks/customTanstackQueries'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
-import { isEditingStateContext } from '../../page'
+import isEditingContext from '../../isEditingContext'
 
 const MAX_LENGTH = 500
 
@@ -20,7 +20,7 @@ const NoteTabContent = ({}) => {
   const { data: projectData } = useGetMachineProject(machineProjectId)
   const { mutateAsync: mutateNoteAsync, isPending } = useMutateMachineProjectNote(machineProjectId)
 
-  const { setIsEditing } = useContext(isEditingStateContext)!
+  const { setIsEditing } = useContext(isEditingContext)!
 
   const [openAlert, setOpenAlert] = useState(false)
 

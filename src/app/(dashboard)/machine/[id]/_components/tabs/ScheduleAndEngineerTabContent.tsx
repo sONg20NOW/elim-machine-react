@@ -22,7 +22,7 @@ import {
 } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
-import { isEditingStateContext } from '../../page'
+import isEditingContext from '../../isEditingContext'
 
 // 참여기술진 추가 시 사용되는 더미 데이터
 const MachineProjectEngineerInitialData: machineProjectEngineerDetailDtoType = {
@@ -40,7 +40,7 @@ const ScheduleAndEngineerTabContent = () => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
-  const { isEditing, setIsEditing } = useContext(isEditingStateContext)!
+  const { isEditing, setIsEditing } = useContext(isEditingContext)!
 
   const { data: scheduleData, refetch: refetchScheduleData } = useGetScheduleTab(machineProjectId)
   const { data: engineerList } = useGetEngineersOptions()

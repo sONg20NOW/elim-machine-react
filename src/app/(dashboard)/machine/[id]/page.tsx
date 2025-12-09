@@ -1,7 +1,7 @@
 'use client'
 
 import type { SyntheticEvent } from 'react'
-import { createContext, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { redirect, useParams } from 'next/navigation'
 
@@ -31,6 +31,7 @@ import type { MachineTabValue } from '@core/utils/useMachineTabValueStore'
 import useMachineTabValueStore from '@core/utils/useMachineTabValueStore'
 import { useGetEngineersOptions, useGetMachineProject, useGetScheduleTab } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
+import isEditingContext from './isEditingContext'
 
 const Tabs = [
   { value: '현장정보', label: '현장정보' },
@@ -39,11 +40,6 @@ const Tabs = [
   { value: '전체사진', label: '전체사진' },
   { value: '특이사항', label: '특이사항' }
 ]
-
-export const isEditingStateContext = createContext<{
-  isEditing: boolean
-  setIsEditing: (value: boolean) => void
-} | null>(null)
 
 const MachineUpdatePage = () => {
   const isMobile = useMediaQuery('(max-width:600px)')
@@ -123,7 +119,7 @@ const MachineUpdatePage = () => {
   }, [machineProjectId, tabValue, refetchProjectData, refetchScheduleData, engineerList, projectData, scheduleData])
 
   return (
-    <isEditingStateContext.Provider value={{ isEditing, setIsEditing }}>
+    <isEditingContext.Provider value={{ isEditing, setIsEditing }}>
       <Card className='h-full flex flex-col'>
         <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-5': !isMobile })}>
           <CardHeader
@@ -226,7 +222,7 @@ const MachineUpdatePage = () => {
           </TabContext>
         </CardContent>
       </Card>
-    </isEditingStateContext.Provider>
+    </isEditingContext.Provider>
   )
 }
 

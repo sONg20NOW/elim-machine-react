@@ -16,14 +16,14 @@ import { useGetMachineProject } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import MachinePerformanceReviewModal from '../report/MachinePerformanceReviewModal'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
-import { isEditingStateContext } from '../../page'
+import isEditingContext from '../../isEditingContext'
 
 export const MacinheProjectNameContext = createContext<string>('')
 
 const BasicTabContent = () => {
   const router = useRouter()
 
-  const { isEditing, setIsEditing } = useContext(isEditingStateContext)!
+  const { isEditing, setIsEditing } = useContext(isEditingContext)!
   const [loading, setLoading] = useState(false)
 
   const params = useParams()
