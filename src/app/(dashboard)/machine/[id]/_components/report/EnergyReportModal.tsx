@@ -19,7 +19,7 @@ import {
 } from '@mui/material'
 import { NumericFormat } from 'react-number-format'
 
-import { IconCaretLeft, IconCaretRight, IconX } from '@tabler/icons-react'
+import { IconCaretLeftFilled, IconCaretRightFilled, IconX } from '@tabler/icons-react'
 
 import styles from '@core/styles/customTable.module.css'
 
@@ -28,6 +28,7 @@ import AddTargetModal from './AddTargetModal'
 import { auth } from '@core/utils/auth'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
+import { cn } from '@/lib/utils'
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -257,7 +258,7 @@ export default function EnergyReport() {
                     <div className='flex'>
                       <div className='grid place-items-center'>
                         <IconButton onClick={movePreviousYear} type='button'>
-                          <IconCaretLeft size={40} />
+                          <IconCaretLeftFilled size={40} color='dimgray' />
                         </IconButton>
                       </div>
                       <table style={{ tableLayout: 'fixed' }}>
@@ -268,7 +269,7 @@ export default function EnergyReport() {
                               월
                             </th>
                             {years.map(year => (
-                              <th colSpan={6} key={year}>
+                              <th className={cn({ 'bg-orange-100': year % 2 === 1 })} colSpan={6} key={year}>
                                 {year}
                               </th>
                             ))}
@@ -278,7 +279,7 @@ export default function EnergyReport() {
                             {years.map(year =>
                               targets.map(target => (
                                 <td
-                                  className='truncate'
+                                  className={cn('truncate', { 'bg-orange-100': year % 2 === 1 })}
                                   key={`${year} and ${target.machineEnergyTargetId}`}
                                   colSpan={6 / targets.length}
                                 >
@@ -292,13 +293,14 @@ export default function EnergyReport() {
                           {/* 사용량 */}
                           {new Array(12)
                             .fill(1)
-                            .map((year, idx) => idx + 1)
+                            .map((_, idx) => idx + 1)
                             .map(month => (
                               <tr key={month}>
                                 <td>{month}</td>
                                 {years.map(year =>
                                   targets.map(target => (
                                     <td
+                                      className={cn({ 'bg-orange-50': year % 2 === 1 })}
                                       key={`${year}-${target.machineEnergyTargetId}-${month}`}
                                       colSpan={6 / targets.length}
                                     >
@@ -329,6 +331,7 @@ export default function EnergyReport() {
                             {years.map(year =>
                               targets.map(target => (
                                 <td
+                                  className={cn('truncate', { 'bg-orange-100': year % 2 === 1 })}
                                   colSpan={6 / targets.length}
                                   key={`sum-${year}-${target.machineEnergyTargetId}`}
                                   style={{ fontWeight: 'bold' }}
@@ -342,7 +345,7 @@ export default function EnergyReport() {
                       </table>
                       <div className='grid place-items-center'>
                         <IconButton type='button' onClick={moveNextYear}>
-                          <IconCaretRight size={40} />
+                          <IconCaretRightFilled size={40} color='dimgray' />
                         </IconButton>
                       </div>
                     </div>
