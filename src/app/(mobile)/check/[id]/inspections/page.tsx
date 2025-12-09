@@ -12,7 +12,7 @@ import type {
   machineProjectEngineerDetailDtoType,
   successResponseDtoType
 } from '@/@core/types'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import AddInspectionModal from '../_components/AddInspectionModal'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'

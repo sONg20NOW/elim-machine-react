@@ -34,7 +34,7 @@ import type {
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from '@/@core/utils/getS3Key'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { projectPicOption } from '@/app/_constants/options'
 import AlertModal from '@/@core/components/custom/AlertModal'
 import TextInputBox from '@/@core/components/inputbox/TextInputBox'

@@ -14,7 +14,7 @@ import DefaultModal from '@/@core/components/custom/DefaultModal'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import type { LicenseCreateRequestDto } from '@/@core/types'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import LicenseInputs from './LicenseInputs'
 
 type AddModalProps = {

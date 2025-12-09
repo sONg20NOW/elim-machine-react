@@ -39,7 +39,7 @@ import type { MachineProjectPicReadResponseDtoType, ProjectPicType } from '@/@co
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import { useGetInspectionsSimple, useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
 import { projectPicOption } from '@/app/_constants/options'

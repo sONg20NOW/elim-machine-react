@@ -28,7 +28,7 @@ import {
 import type { MachineProjectPageDtoType, successResponseDtoType } from '@/@core/types'
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/custom/SearchBar'
-import { auth, logout } from '@/lib/auth'
+import { auth, logout } from '@/@core/utils/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 import { useGetEngineerByMemberId } from '@/@core/hooks/customTanstackQueries'

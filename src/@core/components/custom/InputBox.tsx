@@ -8,9 +8,9 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import YNSelectBox from './YNSelectBox'
 import type { BoxSizeType, InputFieldType, ynResultType } from '@/@core/types'
 import { MemberIdContext } from '@/app/(dashboard)/member/_components/UserModal'
-import PostCodeDialog from '@/@core/utils/daumMapPostcode'
+import PostCodeDialog from '@/@core/components/custom/daumMapPostcode'
 import { handleApiError } from '@/utils/errorHandler'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { useGetLicenseNames } from '@/@core/hooks/customTanstackQueries'
 
 interface InputBoxProps {

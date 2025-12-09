@@ -24,7 +24,7 @@ import { IconX } from '@tabler/icons-react'
 import style from '@/app/_style/Table.module.css'
 import { useGetLeafCategories, useGetReportCategories, useGetReportStatuses } from '@/@core/hooks/customTanstackQueries'
 import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import ReloadButton from '../ReloadButton'
 

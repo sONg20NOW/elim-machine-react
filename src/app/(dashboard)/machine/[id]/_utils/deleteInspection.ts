@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 /**

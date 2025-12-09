@@ -10,7 +10,7 @@ import { centerStyle, type refType } from '../MachinePerformanceReviewModal'
 import styles from '@/app/_style/Table.module.css'
 import type { MachinePerformanceReviewGuideResponseDtoType } from '@/@core/types'
 import { useGetGuide, useMutateGuide } from '@/@core/hooks/customTanstackQueries'
-import { makeGuideSeed } from './utils/makeSeed'
+import { makeGuideSeed } from '../../../_utils/makeSeed'
 
 const GuideTabInner = forwardRef<refType, {}>(({}, ref) => {
   const machineProjectId = useParams().id?.toString()

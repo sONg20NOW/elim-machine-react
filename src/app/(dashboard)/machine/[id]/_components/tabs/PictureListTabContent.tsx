@@ -22,7 +22,7 @@ import type {
 import SearchBar from '@/@core/components/custom/SearchBar'
 import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import PictureListModal from '../pictureUploadModal/PictureListModal'
 import { projectPicOption } from '@/app/_constants/options'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'

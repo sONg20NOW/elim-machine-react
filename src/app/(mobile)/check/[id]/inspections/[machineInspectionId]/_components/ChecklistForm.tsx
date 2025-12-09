@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/@core/types'
 import type { FormComponentHandle } from '../page'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { useGetChecklistInfo, useGetChecklistResult } from '@/@core/hooks/customTanstackQueries'
 import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
 

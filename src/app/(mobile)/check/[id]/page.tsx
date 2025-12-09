@@ -15,7 +15,7 @@ import type {
   successResponseDtoType
 } from '@/@core/types'
 import MobileHeader from '../../_components/MobileHeader'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import ProjectInfoCard from './_components/ProjectInfoCard'
 import type { projectSummaryType } from '@/@core/utils/useProjectSummaryStore'

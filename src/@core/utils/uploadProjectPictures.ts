@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import getS3Key from './getS3Key'
 import type { ProjectPicType } from '../types'

@@ -18,17 +18,28 @@ import {
 } from '@/app/_constants/input/machineInputInfo'
 import CustomTextField from '@/@core/components/mui/TextField'
 import { gradeOption } from '@/app/_constants/options'
-import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'
 import {
   useGetEngineersOptions,
   useGetParticipatedEngineerList,
   useGetScheduleTab
 } from '@/@core/hooks/customTanstackQueries'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import AlertModal from '@/@core/components/custom/AlertModal'
 
-const ScheduleAndEngineerTabContent = ({}: {}) => {
+// 참여기술진 추가 시 사용되는 더미 데이터
+const MachineProjectEngineerInitialData: machineProjectEngineerDetailDtoType = {
+  engineerId: 0,
+  engineerName: '',
+  grade: '',
+  gradeDescription: '',
+  engineerLicenseNum: '',
+  beginDate: '',
+  endDate: '',
+  note: ''
+}
+
+const ScheduleAndEngineerTabContent = () => {
   const params = useParams()
   const machineProjectId = params?.id as string
 

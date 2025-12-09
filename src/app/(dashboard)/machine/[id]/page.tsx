@@ -22,7 +22,7 @@ import { useForm } from 'react-hook-form'
 import PictureListTabContent from './_components/tabs/PictureListTabContent'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import CustomTextField from '@/@core/components/mui/TextField'
-import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
+import DisabledTabWithTooltip from '@/app/(dashboard)/machine/[id]/_components/DisabledTabWithTooltip'
 import BasicTabContent from './_components/tabs/MachineProjectTabContent'
 import ScheduleAndEngineerTabContent from './_components/tabs/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/tabs/NoteTabContent'
@@ -31,7 +31,7 @@ import type { MachineTabValue } from '@/@core/utils/useMachineTabValueStore'
 import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
 import { useGetEngineersOptions, useGetMachineProject, useGetScheduleTab } from '@/@core/hooks/customTanstackQueries'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 
 const Tabs = [
   { value: '현장정보', label: '현장정보' },

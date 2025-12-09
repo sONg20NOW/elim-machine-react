@@ -8,7 +8,7 @@ import type { AxiosError } from 'axios'
 
 import { toast } from 'react-toastify'
 
-import { auth } from '@/lib/auth' // 실제 auth 임포트 경로 사용
+import { auth } from '@/@core/utils/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
   EngineerBasicResponseDtoType,

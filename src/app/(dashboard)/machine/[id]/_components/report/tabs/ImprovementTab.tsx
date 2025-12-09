@@ -18,7 +18,7 @@ import {
   useMutateImprovement,
   useMutateImprovementAutoFill
 } from '@/@core/hooks/customTanstackQueries'
-import { makeImprovementSeed } from './utils/makeSeed'
+import { makeImprovementSeed } from '../../../_utils/makeSeed'
 
 const ImprovementTab = memo(
   forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(

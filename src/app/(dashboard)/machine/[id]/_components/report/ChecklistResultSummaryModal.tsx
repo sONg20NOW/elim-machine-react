@@ -31,7 +31,7 @@ import { IconX } from '@tabler/icons-react'
 
 import styles from '@/app/_style/Table.module.css'
 import { useGetInspectionOpinions } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 

@@ -21,7 +21,7 @@ import {
 import { IconEye, IconEyeOff } from '@tabler/icons-react'
 
 import ForgotPasswordPage from './_components/forgotPasswordModal'
-import { login } from '@/lib/auth'
+import { login } from '@core/utils/auth'
 
 import 'react-toastify/ReactToastify.css'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'

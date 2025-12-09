@@ -22,7 +22,7 @@ import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
 import { uploadSingleInspectionPic } from '@/@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { printErrorSnackbar, printSuccessSnackbar } from '@/@core/utils/snackbarHandler'
 
 const PictureTable = memo(

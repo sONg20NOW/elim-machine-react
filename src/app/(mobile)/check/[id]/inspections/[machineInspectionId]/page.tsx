@@ -14,7 +14,7 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 
 import DeleteModal from '@/@core/components/custom/DeleteModal'
 import ChecklistForm from './_components/ChecklistForm'

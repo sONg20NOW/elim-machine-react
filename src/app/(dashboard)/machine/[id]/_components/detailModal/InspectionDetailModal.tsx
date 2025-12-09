@@ -18,7 +18,7 @@ import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 
 // style
 import styles from '@/app/_style/Table.module.css'
-import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
+import DisabledTabWithTooltip from '@/app/(dashboard)/machine/[id]/_components/DisabledTabWithTooltip'
 import BasicTabContent from './tabs/BasicTabContent'
 import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
@@ -37,7 +37,7 @@ import {
 } from '@/@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
-import deleteInspection from '../../_util/deleteInspection'
+import deleteInspection from '../../_utils/deleteInspection'
 import { setOffsetContext } from '../tabs/InspectionListTabContent'
 import AlertModal from '@/@core/components/custom/AlertModal'
 

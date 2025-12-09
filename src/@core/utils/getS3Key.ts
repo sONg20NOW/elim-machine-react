@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { handleApiError } from '@/utils/errorHandler'
 
 /**

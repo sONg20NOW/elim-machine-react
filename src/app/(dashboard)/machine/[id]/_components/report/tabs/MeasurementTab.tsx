@@ -17,7 +17,7 @@ import type {
   MachineInspectionRootCategoryResponseDtoType,
   MachinePerformanceReviewMeasurementResponseDtoType
 } from '@/@core/types'
-import { makeMeasurementSeed } from './utils/makeSeed'
+import { makeMeasurementSeed } from '../../../_utils/makeSeed'
 
 const MeasurementTab = memo(
   forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(

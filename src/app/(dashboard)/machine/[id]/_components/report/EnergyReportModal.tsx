@@ -25,7 +25,7 @@ import styles from '@/app/_style/Table.module.css'
 
 import { useGetEnergyTargets, useGetEnergyTypes, useGetEnergyUsages } from '@/@core/hooks/customTanstackQueries'
 import AddTargetModal from './AddTargetModal'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 

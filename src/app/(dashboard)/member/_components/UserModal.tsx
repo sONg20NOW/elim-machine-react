@@ -24,7 +24,7 @@ import type { MemberDetailResponseDtoType } from '@/@core/types'
 
 import { handleApiError, handleSuccess } from '@/utils/errorHandler'
 import DeleteModal from '@/@core/components/custom/DeleteModal'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import type { MemberType } from '@/@core/hooks/customTanstackQueries'
 import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
 import AlertModal from '@/@core/components/custom/AlertModal'

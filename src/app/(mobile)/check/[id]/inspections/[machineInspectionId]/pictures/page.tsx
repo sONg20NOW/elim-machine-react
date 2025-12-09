@@ -27,7 +27,7 @@ import { IconCamera, IconChevronLeft } from '@tabler/icons-react'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import type {
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType,

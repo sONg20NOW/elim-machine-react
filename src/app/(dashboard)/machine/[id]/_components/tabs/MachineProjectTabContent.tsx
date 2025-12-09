@@ -14,7 +14,7 @@ import DownloadReportModal from '../report/DownloadReportModal'
 import ChecklistResultSummaryModal from '../report/ChecklistResultSummaryModal'
 import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
 import { useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import MachinePerformanceReviewModal from '../report/MachinePerformanceReviewModal'
 import AlertModal from '@/@core/components/custom/AlertModal'
 

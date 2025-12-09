@@ -17,7 +17,7 @@ import type {
   MachineInspectionRootCategoryResponseDtoType,
   MachinePerformanceReviewOperationStatusResponseDtoType
 } from '@/@core/types'
-import { makeOperationStatusSeed } from './utils/makeSeed'
+import { makeOperationStatusSeed } from '../../../_utils/makeSeed'
 
 const OperationStatusTab = memo(
   forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(

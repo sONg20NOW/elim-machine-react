@@ -14,7 +14,7 @@ import type {
   MachinePerformanceReviewYearlyPlanResponseDtoType
 } from '@/@core/types'
 import { useGetYearlyPlan, useMutateYearlyPlan, useMutateYearlyPlanAutoFill } from '@/@core/hooks/customTanstackQueries'
-import { makeYearlyPlanSeed } from './utils/makeSeed'
+import { makeYearlyPlanSeed } from '../../../_utils/makeSeed'
 
 const defaultYears = [1, 2, 3, 4, 5]
 

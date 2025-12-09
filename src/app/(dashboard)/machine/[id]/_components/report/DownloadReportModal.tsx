@@ -22,7 +22,7 @@ import { IconX } from '@tabler/icons-react'
 
 import style from '@/app/_style/Table.module.css'
 import { useGetReportCategories, useGetReportStatuses } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/lib/auth'
+import { auth } from '@/@core/utils/auth'
 import { handleApiError } from '@/utils/errorHandler'
 import InspectionPerformanceModal from './InspectionPerformanceModal'
 import type { MachineReportCategoryReadResponseDtoType, MachineReportStatusResponseDtoType } from '@/@core/types'
