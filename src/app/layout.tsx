@@ -16,7 +16,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 // Type Imports
 import { SnackbarProvider } from 'notistack'
 
-import type { ChildrenType } from '@/@core/types'
+import type { ChildrenType } from '@core/types'
 
 // Component Imports
 

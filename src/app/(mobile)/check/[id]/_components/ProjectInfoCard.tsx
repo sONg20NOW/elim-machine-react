@@ -2,10 +2,10 @@ import { useRef } from 'react'
 
 import { Box, IconButton, Typography } from '@mui/material'
 
-import { uploadProjectPictures } from '@/@core/utils/uploadProjectPictures'
-import { useGetOverviewPics } from '@/@core/hooks/customTanstackQueries'
-import type { projectSummaryType } from '@/@core/utils/useProjectSummaryStore'
-import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
+import { uploadProjectPictures } from '@core/utils/uploadProjectPictures'
+import { useGetOverviewPics } from '@core/hooks/customTanstackQueries'
+import type { projectSummaryType } from '@core/utils/useProjectSummaryStore'
+import { printErrorSnackbar } from '@core/utils/snackbarHandler'
 
 export default function ProjectInfoCard({
   projectSummaryData,

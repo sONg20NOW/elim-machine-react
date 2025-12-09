@@ -12,7 +12,7 @@ import { styled } from '@mui/material/styles'
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
-import type { ChildrenType } from '@/@core/types'
+import type { ChildrenType } from '@core/types'
 import type { Locale } from '@configs/i18n'
 
 // Component Imports

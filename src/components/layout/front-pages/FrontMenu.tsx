@@ -20,7 +20,7 @@ import classnames from 'classnames'
 // Type Imports
 import { IconX } from '@tabler/icons-react'
 
-import type { Mode } from '@/@core/types'
+import type { Mode } from '@core/types'
 
 // Hook Imports
 import { useIntersection } from '@/hooks/useIntersection'

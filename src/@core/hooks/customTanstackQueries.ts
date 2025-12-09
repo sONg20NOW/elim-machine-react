@@ -8,7 +8,7 @@ import type { AxiosError } from 'axios'
 
 import { toast } from 'react-toastify'
 
-import { auth } from '@/@core/utils/auth' // 실제 auth 임포트 경로 사용
+import { auth } from '@core/utils/auth' // 실제 auth 임포트 경로 사용
 import { QUERY_KEYS } from '@/app/_constants/queryKeys' // 실제 쿼리 키 임포트 경로 사용
 import type {
   EngineerBasicResponseDtoType,
@@ -57,8 +57,8 @@ import type {
   successResponseDtoType,
   targetType,
   WindMeasurementResponseDtoType
-} from '@/@core/types' // 타입 임포트
-import { handleApiError } from '@/@core/utils/errorHandler'
+} from '@core/types' // 타입 임포트
+import { handleApiError } from '@core/utils/errorHandler'
 
 // ------------------------- License 관련 -------------------------
 export const useGetLicenseNames = () => {

@@ -8,7 +8,7 @@ import type {
   officePositionType,
   ProjectPicType,
   workFormType
-} from '@/@core/types'
+} from '@core/types'
 
 export const YNOption = [
   { value: 'Y', label: '예' },

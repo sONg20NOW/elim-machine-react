@@ -9,7 +9,7 @@ import { styled, useColorScheme, useTheme } from '@mui/material/styles'
 // Type Imports
 import { IconChevronsLeft, IconChevronsRight, IconX } from '@tabler/icons-react'
 
-import type { Mode } from '@/@core/types'
+import type { Mode } from '@core/types'
 
 // Component Imports
 import VerticalNav, { NavHeader, NavCollapseIcons } from '@menu/vertical-menu'

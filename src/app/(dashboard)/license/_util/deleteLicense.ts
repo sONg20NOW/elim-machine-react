@@ -1,5 +1,5 @@
-import { auth } from '@/@core/utils/auth'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
+import { auth } from '@core/utils/auth'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 
 export default async function deleteLicense(licenseId: number, version: number) {
   try {

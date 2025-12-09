@@ -11,14 +11,14 @@ import { useForm } from 'react-hook-form'
 
 import { Backdrop, CircularProgress } from '@mui/material'
 
-import DefaultModal from '@/@core/components/custom/DefaultModal'
-import type { LicenseCreateRequestDto, LicenseResponseDtoType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import DeleteModal from '@/@core/components/custom/DeleteModal'
+import DefaultModal from '@core/components/custom/DefaultModal'
+import type { LicenseCreateRequestDto, LicenseResponseDtoType } from '@core/types'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import DeleteModal from '@core/components/custom/DeleteModal'
 import LicenseInputs from './LicenseInputs'
-import AlertModal from '@/@core/components/custom/AlertModal'
-import { useMutateLicense } from '@/@core/hooks/customTanstackQueries'
-import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
+import AlertModal from '@core/components/custom/AlertModal'
+import { useMutateLicense } from '@core/hooks/customTanstackQueries'
+import { printWarningSnackbar } from '@core/utils/snackbarHandler'
 import deleteLicense from '../_util/deleteLicense'
 
 type LicenseModalProps = {

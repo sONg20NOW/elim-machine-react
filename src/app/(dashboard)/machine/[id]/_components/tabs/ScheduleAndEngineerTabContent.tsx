@@ -6,26 +6,23 @@ import { Box, Button, IconButton, MenuItem, Typography } from '@mui/material'
 
 import { IconPlus, IconX } from '@tabler/icons-react'
 
-import type {
-  machineProjectEngineerDetailDtoType,
-  MachineProjectScheduleAndEngineerResponseDtoType
-} from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import { InputBox } from '@/@core/components/custom/InputBox'
+import type { machineProjectEngineerDetailDtoType, MachineProjectScheduleAndEngineerResponseDtoType } from '@core/types'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import { InputBox } from '@core/components/custom/InputBox'
 import {
   MACHINE_PROJECT_ENGINEER_INPUT_INFO,
   MACHINE_SCHEDULE_INPUT_INFO
 } from '@/app/_constants/input/machineInputInfo'
-import CustomTextField from '@/@core/components/mui/TextField'
+import CustomTextField from '@core/components/mui/TextField'
 import { gradeOption } from '@/app/_constants/options'
 import {
   useGetEngineersOptions,
   useGetParticipatedEngineerList,
   useGetScheduleTab
-} from '@/@core/hooks/customTanstackQueries'
-import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
-import { auth } from '@/@core/utils/auth'
-import AlertModal from '@/@core/components/custom/AlertModal'
+} from '@core/hooks/customTanstackQueries'
+import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
+import { auth } from '@core/utils/auth'
+import AlertModal from '@core/components/custom/AlertModal'
 
 // 참여기술진 추가 시 사용되는 더미 데이터
 const MachineProjectEngineerInitialData: machineProjectEngineerDetailDtoType = {

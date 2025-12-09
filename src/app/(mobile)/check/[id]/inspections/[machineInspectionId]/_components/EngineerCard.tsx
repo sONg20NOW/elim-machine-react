@@ -1,6 +1,6 @@
 import { IconButton, Paper, Typography } from '@mui/material'
 
-import type { machineProjectEngineerDetailDtoType } from '@/@core/types'
+import type { machineProjectEngineerDetailDtoType } from '@core/types'
 
 export default function EngineerCard({
   engineer,

@@ -12,8 +12,8 @@ import {
   useGetResultSummary,
   useMutateResultSummary,
   useMutateResultSummaryAutoFill
-} from '@/@core/hooks/customTanstackQueries'
-import type { MachinePerformanceReviewSummaryResponseDtoType } from '@/@core/types'
+} from '@core/hooks/customTanstackQueries'
+import type { MachinePerformanceReviewSummaryResponseDtoType } from '@core/types'
 import { makeResultSummarySeed } from '../../../_utils/makeSeed'
 
 const ResultSummaryTab = memo(

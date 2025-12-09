@@ -5,7 +5,7 @@ import type {
   MachinePerformanceReviewOperationStatusResponseDtoType,
   MachinePerformanceReviewSummaryResponseDtoType,
   MachinePerformanceReviewYearlyPlanResponseDtoType
-} from '@/@core/types'
+} from '@core/types'
 
 export function makeResultSummarySeed(resultSummary?: MachinePerformanceReviewSummaryResponseDtoType) {
   return {

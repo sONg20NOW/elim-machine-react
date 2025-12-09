@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { createContext, useMemo, useState } from 'react'
 
 // Type Imports
-import type { Mode, Skin, Layout, LayoutComponentWidth } from '@/@core/types'
+import type { Mode, Skin, Layout, LayoutComponentWidth } from '@core/types'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'

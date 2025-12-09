@@ -19,7 +19,7 @@ import classnames from 'classnames'
 // Type Imports
 import { IconMenu2, IconShoppingCart } from '@tabler/icons-react'
 
-import type { Mode } from '@/@core/types'
+import type { Mode } from '@core/types'
 
 // Component Imports
 import Logo from '@components/layout/shared/Logo'

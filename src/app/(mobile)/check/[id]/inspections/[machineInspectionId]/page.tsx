@@ -14,22 +14,22 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
 
-import { auth } from '@/@core/utils/auth'
+import { auth } from '@core/utils/auth'
 
-import DeleteModal from '@/@core/components/custom/DeleteModal'
+import DeleteModal from '@core/components/custom/DeleteModal'
 import ChecklistForm from './_components/ChecklistForm'
 import InspectionForm from './_components/InspectionForm'
 
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@core/components/custom/ProtectedPage'
 
 import PictureTable from './_components/PictureTable'
 import ImageUploadPage from './_components/ImageUploadPage'
-import { useGetChecklistInfo, useGetEveryInspections } from '@/@core/hooks/customTanstackQueries'
+import { useGetChecklistInfo, useGetEveryInspections } from '@core/hooks/customTanstackQueries'
 import EmptyPictureTable from './_components/EmptyPictureTable'
 import EmptyCategorySelector from './_components/EmptyCategorySelector'
-import type { CheckTabValueType } from '@/@core/utils/useCheckTabValueStore'
-import useCheckTabValueStore from '@/@core/utils/useCheckTabValueStore'
-import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@/@core/utils/snackbarHandler'
+import type { CheckTabValueType } from '@core/utils/useCheckTabValueStore'
+import useCheckTabValueStore from '@core/utils/useCheckTabValueStore'
+import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
 
 export interface FormComponentHandle {
   submit: () => Promise<boolean>

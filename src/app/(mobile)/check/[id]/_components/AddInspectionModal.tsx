@@ -6,12 +6,12 @@ import { Grid, MenuItem, Button, Typography, IconButton } from '@mui/material'
 
 import { NumberField } from '@base-ui-components/react/number-field'
 
-import CustomTextField from '@/@core/components/mui/TextField'
-import DefaultModal from '@/@core/components/custom/DefaultModal'
-import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@/@core/types'
-import { auth } from '@/@core/utils/auth'
-import { useGetCategories } from '@/@core/hooks/customTanstackQueries'
-import { printErrorSnackbar, printSuccessSnackbar } from '@/@core/utils/snackbarHandler'
+import CustomTextField from '@core/components/mui/TextField'
+import DefaultModal from '@core/components/custom/DefaultModal'
+import type { MachineCategoryResponseDtoType, MachineInspectionCreateRequestDtoType } from '@core/types'
+import { auth } from '@core/utils/auth'
+import { useGetCategories } from '@core/hooks/customTanstackQueries'
+import { printErrorSnackbar, printSuccessSnackbar } from '@core/utils/snackbarHandler'
 
 type AddInspectionModalProps = {
   disabled: boolean

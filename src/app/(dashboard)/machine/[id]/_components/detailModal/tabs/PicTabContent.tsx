@@ -14,8 +14,8 @@ import type {
   MachineInspectionDetailResponseDtoType,
   MachineChecklistItemsWithPicCountResponseDtosType,
   MachineInspectionChecklistItemResultBasicResponseDtoType
-} from '@/@core/types'
-import DefaultModal from '@/@core/components/custom/DefaultModal'
+} from '@core/types'
+import DefaultModal from '@core/components/custom/DefaultModal'
 import { picCateInspectionStatusOption } from '@/app/_constants/options'
 
 interface PicTabContentProps<T> {

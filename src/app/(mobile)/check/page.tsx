@@ -25,15 +25,15 @@ import {
   useTheme
 } from '@mui/material'
 
-import type { MachineProjectPageDtoType, successResponseDtoType } from '@/@core/types'
+import type { MachineProjectPageDtoType, successResponseDtoType } from '@core/types'
 import MobileHeader from '../_components/MobileHeader'
-import SearchBar from '@/@core/components/custom/SearchBar'
-import { auth, logout } from '@/@core/utils/auth'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
-import { useGetEngineerByMemberId } from '@/@core/hooks/customTanstackQueries'
+import SearchBar from '@core/components/custom/SearchBar'
+import { auth, logout } from '@core/utils/auth'
+import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import { useGetEngineerByMemberId } from '@core/hooks/customTanstackQueries'
 import { gradeOption } from '@/app/_constants/options'
-import { printErrorSnackbar, printInfoSnackbar } from '@/@core/utils/snackbarHandler'
+import { printErrorSnackbar, printInfoSnackbar } from '@core/utils/snackbarHandler'
 
 export default function MachinePage() {
   const router = useRouter()

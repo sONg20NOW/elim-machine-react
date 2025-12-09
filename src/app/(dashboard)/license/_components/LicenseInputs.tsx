@@ -2,8 +2,8 @@ import { Divider, Grid2 } from '@mui/material'
 
 import type { UseFormReturn } from 'react-hook-form'
 
-import TextInputBox from '@/@core/components/inputbox/TextInputBox'
-import type { LicenseCreateRequestDto } from '@/@core/types'
+import TextInputBox from '@core/components/inputbox/TextInputBox'
+import type { LicenseCreateRequestDto } from '@core/types'
 import { LICENSE_INPUT_INFO } from '@/app/_constants/input/licenseInputInfo'
 import { emailRule } from '@/app/_constants/input/inputRule'
 

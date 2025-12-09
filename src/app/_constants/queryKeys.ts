@@ -1,4 +1,4 @@
-import type { engineerTypeType } from '@/@core/types'
+import type { engineerTypeType } from '@core/types'
 
 /**
  * page가 0일 때와 page queryParam이 없는 경우 중복 호출 방지를 위한 함수

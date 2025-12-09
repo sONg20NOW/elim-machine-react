@@ -12,8 +12,8 @@ import { centerStyle, StyledTextField } from '../MachinePerformanceReviewModal'
 import type {
   MachineInspectionRootCategoryResponseDtoType,
   MachinePerformanceReviewAgingUpdateResponseDtoType
-} from '@/@core/types'
-import { useGetAging, useMutateAging, useMutateAgingAutoFill } from '@/@core/hooks/customTanstackQueries'
+} from '@core/types'
+import { useGetAging, useMutateAging, useMutateAgingAutoFill } from '@core/hooks/customTanstackQueries'
 
 const AgingTab = memo(
   forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(

@@ -10,11 +10,11 @@ import { DialogContent } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import DefaultModal from '@/@core/components/custom/DefaultModal'
+import DefaultModal from '@core/components/custom/DefaultModal'
 
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import type { LicenseCreateRequestDto } from '@/@core/types'
-import { auth } from '@/@core/utils/auth'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import type { LicenseCreateRequestDto } from '@core/types'
+import { auth } from '@core/utils/auth'
 import LicenseInputs from './LicenseInputs'
 
 type AddModalProps = {

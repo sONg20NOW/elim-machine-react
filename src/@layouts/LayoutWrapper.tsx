@@ -4,7 +4,7 @@
 import type { ReactElement } from 'react'
 
 // Type Imports
-import type { SystemMode } from '@/@core/types'
+import type { SystemMode } from '@core/types'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'

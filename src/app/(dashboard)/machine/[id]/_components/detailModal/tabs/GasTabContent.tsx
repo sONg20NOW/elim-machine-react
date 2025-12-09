@@ -5,7 +5,7 @@ import { LocalizationProvider, TimeField } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
-import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
+import type { MachineInspectionDetailResponseDtoType } from '@core/types'
 import { fuelTypeOption } from '@/app/_constants/options'
 
 interface GasTabContentProps<T> {

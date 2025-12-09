@@ -30,8 +30,8 @@ import type { CalendarColors, CalendarType } from '@/types/apps/calendarTypes'
 // Slice Imports
 import { fetchEvents, filterEvents, updateEvent } from '@/redux-store/slices/calendar'
 import UserModal from '../../member/_components/UserModal'
-import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
-import { useGetSingleMember } from '@/@core/hooks/customTanstackQueries'
+import useMachineTabValueStore from '@core/utils/useMachineTabValueStore'
+import { useGetSingleMember } from '@core/hooks/customTanstackQueries'
 
 type CalenderProps = {
   calendarStore: CalendarType

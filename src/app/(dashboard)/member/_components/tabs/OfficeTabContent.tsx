@@ -4,13 +4,13 @@ import { DialogContent, Grid2 } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import type { MemberOfficeDtoType } from '@/@core/types'
+import type { MemberOfficeDtoType } from '@core/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/memberInputInfo'
-import { useMutateSingleMember } from '@/@core/hooks/customTanstackQueries'
-import { handleApiError } from '@/@core/utils/errorHandler'
+import { useMutateSingleMember } from '@core/hooks/customTanstackQueries'
+import { handleApiError } from '@core/utils/errorHandler'
 import type { refType } from '../UserModal'
-import TextInputBox from '@/@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
+import TextInputBox from '@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@core/components/inputbox/MultiInputBox'
 
 interface OfficeTabContentProps {
   defaultData: MemberOfficeDtoType

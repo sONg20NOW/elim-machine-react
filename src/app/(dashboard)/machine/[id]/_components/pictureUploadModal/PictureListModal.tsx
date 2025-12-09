@@ -3,7 +3,7 @@
 // React Imports
 import { useState } from 'react'
 
-import type { MachineChecklistItemsWithPicCountResponseDtosType } from '@/@core/types'
+import type { MachineChecklistItemsWithPicCountResponseDtosType } from '@core/types'
 
 import InspectionPicListModal from './InspectionPicListModal'
 import ProjectPicListModal from './ProjectPicListModal'

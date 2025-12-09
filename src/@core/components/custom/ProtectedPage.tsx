@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { Backdrop, Button, CircularProgress, Typography, useMediaQuery, useTheme } from '@mui/material'
 
-import useAccessTokenStore from '@/@core/utils/useAuthStore'
+import useAccessTokenStore from '@core/utils/useAuthStore'
 
 export const isTabletContext = createContext<boolean | null>(null)
 export const isMobileContext = createContext<boolean | null>(null)

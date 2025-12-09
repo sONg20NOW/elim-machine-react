@@ -1,6 +1,6 @@
 // Type Imports
 
-import type { ChildrenType } from '@/@core/types'
+import type { ChildrenType } from '@core/types'
 
 // Component Imports
 import Providers from '@components/Providers'
@@ -10,7 +10,7 @@ import Providers from '@components/Providers'
 
 // Util Imports
 
-import ScrollToTopButton from '@/@core/components/custom/ScrollToTopButton'
+import ScrollToTopButton from '@core/components/custom/ScrollToTopButton'
 import ProtectedPage from '../../@core/components/custom/ProtectedPage'
 
 const Layout = async (props: ChildrenType) => {

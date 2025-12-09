@@ -27,7 +27,7 @@ import {
 } from '@floating-ui/react'
 
 // Type Imports
-import type { Mode } from '@/@core/types'
+import type { Mode } from '@core/types'
 
 // Component Imports
 import Link from '@components/Link'

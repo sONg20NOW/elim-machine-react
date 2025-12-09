@@ -20,18 +20,18 @@ import { IconCheck, IconChevronRight, IconPencil, IconX } from '@tabler/icons-re
 import { useForm } from 'react-hook-form'
 
 import PictureListTabContent from './_components/tabs/PictureListTabContent'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import CustomTextField from '@/@core/components/mui/TextField'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import CustomTextField from '@core/components/mui/TextField'
 import DisabledTabWithTooltip from '@/app/(dashboard)/machine/[id]/_components/DisabledTabWithTooltip'
 import BasicTabContent from './_components/tabs/MachineProjectTabContent'
 import ScheduleAndEngineerTabContent from './_components/tabs/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/tabs/NoteTabContent'
 import InspectionListTabContent from './_components/tabs/InspectionListTabContent'
-import type { MachineTabValue } from '@/@core/utils/useMachineTabValueStore'
-import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
-import { useGetEngineersOptions, useGetMachineProject, useGetScheduleTab } from '@/@core/hooks/customTanstackQueries'
-import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
-import { auth } from '@/@core/utils/auth'
+import type { MachineTabValue } from '@core/utils/useMachineTabValueStore'
+import useMachineTabValueStore from '@core/utils/useMachineTabValueStore'
+import { useGetEngineersOptions, useGetMachineProject, useGetScheduleTab } from '@core/hooks/customTanstackQueries'
+import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
+import { auth } from '@core/utils/auth'
 
 const Tabs = [
   { value: '현장정보', label: '현장정보' },

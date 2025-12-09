@@ -14,13 +14,13 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { IconCaretLeftFilled, IconCaretRightFilled } from '@tabler/icons-react'
 
-import DefaultModal from '@/@core/components/custom/DefaultModal'
-import type { MachineInspectionCreateRequestDtoType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import { useGetCategories } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/@core/utils/auth'
-import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
-import TextInputBox from '@/@core/components/inputbox/TextInputBox'
+import DefaultModal from '@core/components/custom/DefaultModal'
+import type { MachineInspectionCreateRequestDtoType } from '@core/types'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import { useGetCategories } from '@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
+import MultiInputBox from '@core/components/inputbox/MultiInputBox'
+import TextInputBox from '@core/components/inputbox/TextInputBox'
 import { setOffsetContext } from './tabs/InspectionListTabContent'
 
 type AddInspectionModalProps = {

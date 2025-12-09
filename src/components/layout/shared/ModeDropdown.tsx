@@ -14,7 +14,7 @@ import MenuList from '@mui/material/MenuList'
 import MenuItem from '@mui/material/MenuItem'
 
 // Type Imports
-import type { Mode } from '@/@core/types'
+import type { Mode } from '@core/types'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'

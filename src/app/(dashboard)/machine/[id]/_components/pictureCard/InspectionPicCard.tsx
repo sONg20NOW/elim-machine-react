@@ -1,6 +1,6 @@
 import { Checkbox, ImageListItem, ImageListItemBar, Paper, Typography } from '@mui/material'
 
-import type { MachinePicPresignedUrlResponseDtoType } from '@/@core/types'
+import type { MachinePicPresignedUrlResponseDtoType } from '@core/types'
 
 // 설비사진 카드 컴포넌트
 export default function InspectionPicCard({

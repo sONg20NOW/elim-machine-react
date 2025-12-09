@@ -16,9 +16,9 @@ import { Checkbox, Divider, ListItemIcon, Menu, MenuItem, styled, TableCell, Typ
 
 import { IconCaretDownFilled, IconCaretUpFilled, IconExclamationCircleFilled } from '@tabler/icons-react'
 
-import type { HeaderType } from '@/@core/types'
+import type { HeaderType } from '@core/types'
 import { isMobileContext, isTabletContext } from './ProtectedPage'
-import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
+import useCurrentUserStore from '@core/utils/useCurrentUserStore'
 
 const StyledTableCell = styled(TableCell)<TableCellProps>({ padding: 14 })
 

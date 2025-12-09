@@ -9,16 +9,16 @@ import { InputLabel, MenuItem, Select, TextField, Typography } from '@mui/materi
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import type { MachineInspectionResponseDtoType } from '@/@core/types'
+import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import type { MachineInspectionResponseDtoType } from '@core/types'
 import type { FormComponentHandle } from '../page'
 
 // import { engineerListContext } from '../page'
 // import EngineerCard from '../_components/EngineerCard'
-import { auth } from '@/@core/utils/auth'
-import { useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
+import { useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
 import { equipmentPhaseOption } from '@/app/_constants/options'
-import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
+import { printErrorSnackbar } from '@core/utils/snackbarHandler'
 
 export interface formType {
   machineInspectionName: string

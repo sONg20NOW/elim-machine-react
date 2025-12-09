@@ -12,11 +12,11 @@ import {
   useGetMeasurement,
   useMutateMeasurement,
   useMutateMeasurementAutoFill
-} from '@/@core/hooks/customTanstackQueries'
+} from '@core/hooks/customTanstackQueries'
 import type {
   MachineInspectionRootCategoryResponseDtoType,
   MachinePerformanceReviewMeasurementResponseDtoType
-} from '@/@core/types'
+} from '@core/types'
 import { makeMeasurementSeed } from '../../../_utils/makeSeed'
 
 const MeasurementTab = memo(

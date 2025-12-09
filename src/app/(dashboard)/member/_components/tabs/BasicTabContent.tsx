@@ -4,14 +4,14 @@ import { DialogContent, Grid2 } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import type { MemberBasicDtoType } from '@/@core/types'
+import type { MemberBasicDtoType } from '@core/types'
 import { MEMBER_INPUT_INFO } from '@/app/_constants/input/memberInputInfo'
-import { useGetLicenseNames, useMutateSingleMember } from '@/@core/hooks/customTanstackQueries'
-import { handleApiError } from '@/@core/utils/errorHandler'
+import { useGetLicenseNames, useMutateSingleMember } from '@core/hooks/customTanstackQueries'
+import { handleApiError } from '@core/utils/errorHandler'
 import type { refType } from '../UserModal'
-import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
-import TextInputBox from '@/@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
+import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import TextInputBox from '@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@core/components/inputbox/MultiInputBox'
 
 interface BasicTabContentProps {
   defaultData: MemberBasicDtoType

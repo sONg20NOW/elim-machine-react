@@ -25,7 +25,7 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import type { Settings } from '@core/contexts/settingsContext'
-import type { Direction } from '@/@core/types'
+import type { Direction } from '@core/types'
 import type { PrimaryColorConfig } from '@configs/primaryColorConfig'
 
 // Icon Imports

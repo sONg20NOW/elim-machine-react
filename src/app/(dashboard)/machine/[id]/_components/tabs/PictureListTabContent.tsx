@@ -11,22 +11,22 @@ import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
 
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import type {
   MachineInspectionDetailResponseDtoType,
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType,
   MachineProjectPicReadResponseDtoType
-} from '@/@core/types'
+} from '@core/types'
 
-import SearchBar from '@/@core/components/custom/SearchBar'
+import SearchBar from '@core/components/custom/SearchBar'
 import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
-import { useGetInspectionsSimple } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/@core/utils/auth'
+import { useGetInspectionsSimple } from '@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
 import PictureListModal from '../pictureUploadModal/PictureListModal'
 import { projectPicOption } from '@/app/_constants/options'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
-import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
+import { isTabletContext } from '@core/components/custom/ProtectedPage'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
 import ReloadButton from '../ReloadButton'

@@ -8,10 +8,10 @@ import { Button, Card, MenuItem, Select, TextField, Tooltip, Typography } from '
 
 import { IconPlus } from '@tabler/icons-react'
 
-import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
-import { useGetParticipatedEngineerList } from '@/@core/hooks/customTanstackQueries'
+import type { MachineInspectionDetailResponseDtoType } from '@core/types'
+import { useGetParticipatedEngineerList } from '@core/hooks/customTanstackQueries'
 import { equipmentPhaseOption } from '@/app/_constants/options'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@core/components/custom/ProtectedPage'
 
 interface basicTabContentProps<T> {
   editData: T

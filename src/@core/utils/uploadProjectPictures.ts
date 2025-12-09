@@ -1,5 +1,5 @@
-import { auth } from '@/@core/utils/auth'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
+import { auth } from '@core/utils/auth'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import getS3Key from './getS3Key'
 import type { ProjectPicType } from '../types'
 

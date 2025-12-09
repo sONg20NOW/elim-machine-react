@@ -11,10 +11,10 @@ import TabList from '@mui/lab/TabList'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import type { MachineInspectionDetailResponseDtoType, MachineInspectionSimpleResponseDtoType } from '@/@core/types'
+import type { MachineInspectionDetailResponseDtoType, MachineInspectionSimpleResponseDtoType } from '@core/types'
 
-import DefaultModal from '@/@core/components/custom/DefaultModal'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
+import DefaultModal from '@core/components/custom/DefaultModal'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 
 // style
 import styles from '@/app/_style/Table.module.css'
@@ -34,12 +34,12 @@ import {
   useMutateMachineInspectionResponseDto,
   useMutatePipeMeasurementResponseDto,
   useMutateWindMeasurementResponseDto
-} from '@/@core/hooks/customTanstackQueries'
-import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
-import DeleteModal from '@/@core/components/custom/DeleteModal'
+} from '@core/hooks/customTanstackQueries'
+import useCurrentInspectionIdStore from '@core/utils/useCurrentInspectionIdStore'
+import DeleteModal from '@core/components/custom/DeleteModal'
 import deleteInspection from '../../_utils/deleteInspection'
 import { setOffsetContext } from '../tabs/InspectionListTabContent'
-import AlertModal from '@/@core/components/custom/AlertModal'
+import AlertModal from '@core/components/custom/AlertModal'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],

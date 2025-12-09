@@ -1,5 +1,5 @@
 import { gradeOption } from '@/app/_constants/options'
-import type { engineerInputType } from '@/@core/types'
+import type { engineerInputType } from '@core/types'
 
 export const ENGINEER_INPUT_INFO: engineerInputType = {
   name: { type: 'text', label: '이름' },

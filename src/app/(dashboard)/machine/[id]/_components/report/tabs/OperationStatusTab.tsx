@@ -12,11 +12,11 @@ import {
   useGetOperationStatus,
   useMutateOperationStatus,
   useMutateOperationStatusAutoFill
-} from '@/@core/hooks/customTanstackQueries'
+} from '@core/hooks/customTanstackQueries'
 import type {
   MachineInspectionRootCategoryResponseDtoType,
   MachinePerformanceReviewOperationStatusResponseDtoType
-} from '@/@core/types'
+} from '@core/types'
 import { makeOperationStatusSeed } from '../../../_utils/makeSeed'
 
 const OperationStatusTab = memo(

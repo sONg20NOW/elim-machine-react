@@ -31,9 +31,9 @@ import { IconX } from '@tabler/icons-react'
 
 import styles from '@/app/_style/Table.module.css'
 
-import { auth } from '@/@core/utils/auth'
-import { handleSuccess } from '@/@core/utils/errorHandler'
-import type { MachineInspectionRootCategoryResponseDtoType } from '@/@core/types'
+import { auth } from '@core/utils/auth'
+import { handleSuccess } from '@core/utils/errorHandler'
+import type { MachineInspectionRootCategoryResponseDtoType } from '@core/types'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
 // ✅ 각 탭을 dynamic import로 로딩 (Next.js에서만 가능)

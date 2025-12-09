@@ -6,10 +6,10 @@ import { Button, Grid2, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
-import { useGetMachineProject, useMutateMachineProjectNote } from '@/@core/hooks/customTanstackQueries'
-import TextInputBox from '@/@core/components/inputbox/TextInputBox'
-import AlertModal from '@/@core/components/custom/AlertModal'
+import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
+import { useGetMachineProject, useMutateMachineProjectNote } from '@core/hooks/customTanstackQueries'
+import TextInputBox from '@core/components/inputbox/TextInputBox'
+import AlertModal from '@core/components/custom/AlertModal'
 
 const MAX_LENGTH = 500
 

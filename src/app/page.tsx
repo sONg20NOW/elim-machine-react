@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { Backdrop, CircularProgress, Typography } from '@mui/material'
 
-import useIsTablet from '@/@core/utils/useIsTablet'
+import useIsTablet from '@core/utils/useIsTablet'
 
 export default function HomeRedirectPage() {
   const router = useRouter()

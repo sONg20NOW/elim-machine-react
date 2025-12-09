@@ -11,13 +11,13 @@ import type {
   MachineInspectionPageResponseDtoType,
   machineProjectEngineerDetailDtoType,
   successResponseDtoType
-} from '@/@core/types'
-import { auth } from '@/@core/utils/auth'
+} from '@core/types'
+import { auth } from '@core/utils/auth'
 import AddInspectionModal from '../_components/AddInspectionModal'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { isMobileContext } from '@core/components/custom/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
-import useProjectSummaryStore from '@/@core/utils/useProjectSummaryStore'
-import { printErrorSnackbar } from '@/@core/utils/snackbarHandler'
+import useProjectSummaryStore from '@core/utils/useProjectSummaryStore'
+import { printErrorSnackbar } from '@core/utils/snackbarHandler'
 
 export interface inspectionSummaryType {
   machineProjectName: string

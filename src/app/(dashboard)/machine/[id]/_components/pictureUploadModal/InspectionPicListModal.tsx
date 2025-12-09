@@ -39,13 +39,13 @@ import type {
   MachineChecklistItemsWithPicCountResponseDtosType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicCursorType
-} from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
+} from '@core/types'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
-import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
-import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/@core/utils/auth'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { uploadInspectionPictures } from '@core/utils/uploadInspectionPictures'
+import { useGetInspectionsSimple, useGetSingleInspection } from '@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
+import { isMobileContext } from '@core/components/custom/ProtectedPage'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
 import ReloadButton from '../ReloadButton'

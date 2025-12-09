@@ -4,19 +4,19 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { Button, Checkbox, Typography } from '@mui/material'
 
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import { InputBox } from '@/@core/components/custom/InputBox'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import { InputBox } from '@core/components/custom/InputBox'
 import { MACHINE_INPUT_INFO } from '@/app/_constants/input/machineInputInfo'
-import type { MachineProjectResponseDtoType } from '@/@core/types'
-import DeleteModal from '@/@core/components/custom/DeleteModal'
+import type { MachineProjectResponseDtoType } from '@core/types'
+import DeleteModal from '@core/components/custom/DeleteModal'
 import EnergyReport from '../report/EnergyReportModal'
 import DownloadReportModal from '../report/DownloadReportModal'
 import ChecklistResultSummaryModal from '../report/ChecklistResultSummaryModal'
-import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
-import { useGetMachineProject } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/@core/utils/auth'
+import useMachineIsEditingStore from '@core/utils/useMachineIsEditingStore'
+import { useGetMachineProject } from '@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
 import MachinePerformanceReviewModal from '../report/MachinePerformanceReviewModal'
-import AlertModal from '@/@core/components/custom/AlertModal'
+import AlertModal from '@core/components/custom/AlertModal'
 
 export const MacinheProjectNameContext = createContext<string>('')
 

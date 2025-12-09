@@ -20,14 +20,14 @@ import TabContext from '@mui/lab/TabContext'
 
 import { IconX } from '@tabler/icons-react'
 
-import type { MemberDetailResponseDtoType } from '@/@core/types'
+import type { MemberDetailResponseDtoType } from '@core/types'
 
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import DeleteModal from '@/@core/components/custom/DeleteModal'
-import { auth } from '@/@core/utils/auth'
-import type { MemberType } from '@/@core/hooks/customTanstackQueries'
-import useCurrentUserStore from '@/@core/utils/useCurrentUserStore'
-import AlertModal from '@/@core/components/custom/AlertModal'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import DeleteModal from '@core/components/custom/DeleteModal'
+import { auth } from '@core/utils/auth'
+import type { MemberType } from '@core/hooks/customTanstackQueries'
+import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import AlertModal from '@core/components/custom/AlertModal'
 import BasicTabContent from './tabs/BasicTabContent'
 import PrivacyTabContent from './tabs/PrivacyTabContent'
 
@@ -35,7 +35,7 @@ import OfficeTabContent from './tabs/OfficeTabContent'
 import CareerTabContent from './tabs/CareerTabContent'
 import EtcTabContent from './tabs/EtcTabContent'
 import ForgotPasswordPage from '@/app/(login)/login/_components/forgotPasswordModal'
-import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
+import { printWarningSnackbar } from '@core/utils/snackbarHandler'
 
 export type refType = {
   handleSave: () => void

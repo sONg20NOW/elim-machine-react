@@ -2,8 +2,8 @@ import type { ChangeEventHandler } from 'react'
 
 import { MenuItem, Typography } from '@mui/material'
 
-import CustomTextField from '@/@core/components/mui/TextField'
-import type { ynResultType } from '@/@core/types'
+import CustomTextField from '@core/components/mui/TextField'
+import type { ynResultType } from '@core/types'
 
 interface YNSelectBoxProps {
   name?: string

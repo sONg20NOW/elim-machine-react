@@ -26,16 +26,16 @@ import { Controller, useForm } from 'react-hook-form'
 import { IconCamera, IconChevronLeft } from '@tabler/icons-react'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { auth } from '@/@core/utils/auth'
+import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { auth } from '@core/utils/auth'
 import type {
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicUpdateResponseDtoType
-} from '@/@core/types'
-import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
-import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@/@core/utils/snackbarHandler'
-import getS3Key from '@/@core/utils/getS3Key'
+} from '@core/types'
+import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
+import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
+import getS3Key from '@core/utils/getS3Key'
 
 const max_pic = 100
 

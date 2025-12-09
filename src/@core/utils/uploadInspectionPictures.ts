@@ -1,4 +1,4 @@
-import { auth } from '@/@core/utils/auth'
+import { auth } from '@core/utils/auth'
 import getS3Key from './getS3Key'
 
 export const uploadInspectionPictures = async (

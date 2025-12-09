@@ -20,19 +20,19 @@ import { useQueryClient } from '@tanstack/react-query'
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import type { LicensePageResponseDtoType } from '@/@core/types'
+import type { LicensePageResponseDtoType } from '@core/types'
 import { HEADERS } from '@/app/_constants/table/TableHeader'
-import BasicTable from '@/@core/components/custom/BasicTable'
-import SearchBar from '@/@core/components/custom/SearchBar'
+import BasicTable from '@core/components/custom/BasicTable'
+import SearchBar from '@core/components/custom/SearchBar'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import AddModal from './_components/AddLicenseModal'
 import LicenseModal from './_components/LicenseModal'
-import { auth } from '@/@core/utils/auth'
-import { useGetLicense, useGetLicenses } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
+import { useGetLicense, useGetLicenses } from '@core/hooks/customTanstackQueries'
 import deleteLicense from './_util/deleteLicense'
-import useUpdateParams from '@/@core/utils/searchParams/useUpdateParams'
-import useSetQueryParams from '@/@core/utils/searchParams/useSetQueryParams'
+import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
+import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
 
 export default function Licensepage() {
   const searchParams = useSearchParams()

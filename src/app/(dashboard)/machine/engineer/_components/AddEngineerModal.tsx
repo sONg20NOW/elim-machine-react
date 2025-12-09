@@ -10,15 +10,15 @@ import { Autocomplete, Grid2, TextField, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
-import DefaultModal from '@/@core/components/custom/DefaultModal'
-import type { MachineEngineerCreateRequestDtoType } from '@/@core/types'
+import DefaultModal from '@core/components/custom/DefaultModal'
+import type { MachineEngineerCreateRequestDtoType } from '@core/types'
 
 import { ENGINEER_INPUT_INFO } from '@/app/_constants/input/engineerInputInfo'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import { auth } from '@/@core/utils/auth'
-import TextInputBox from '@/@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
-import { useGetEngineersOptions, useGetMembersLookup } from '@/@core/hooks/customTanstackQueries'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import { auth } from '@core/utils/auth'
+import TextInputBox from '@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@core/components/inputbox/MultiInputBox'
+import { useGetEngineersOptions, useGetMembersLookup } from '@core/hooks/customTanstackQueries'
 
 type AddEngineerModalProps = {
   open: boolean

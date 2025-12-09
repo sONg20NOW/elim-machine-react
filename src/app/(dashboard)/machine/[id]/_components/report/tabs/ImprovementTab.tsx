@@ -12,12 +12,12 @@ import { centerStyle, StyledTextField } from '../MachinePerformanceReviewModal'
 import type {
   MachineInspectionRootCategoryResponseDtoType,
   MachinePerformanceReviewImprovementResponseDtoType
-} from '@/@core/types'
+} from '@core/types'
 import {
   useGetImprovement,
   useMutateImprovement,
   useMutateImprovementAutoFill
-} from '@/@core/hooks/customTanstackQueries'
+} from '@core/hooks/customTanstackQueries'
 import { makeImprovementSeed } from '../../../_utils/makeSeed'
 
 const ImprovementTab = memo(

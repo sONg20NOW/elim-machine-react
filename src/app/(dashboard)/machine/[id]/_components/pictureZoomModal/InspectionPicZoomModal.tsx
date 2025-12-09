@@ -28,16 +28,16 @@ import { createPortal } from 'react-dom'
 
 import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
 
-import type { MachinePicPresignedUrlResponseDtoType, MachinePicUpdateResponseDtoType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/@core/utils/errorHandler'
-import getS3Key from '@/@core/utils/getS3Key'
-import { useGetInspectionsSimple, useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { auth } from '@/@core/utils/auth'
-import AlertModal from '@/@core/components/custom/AlertModal'
-import TextInputBox from '@/@core/components/inputbox/TextInputBox'
-import MultiInputBox from '@/@core/components/inputbox/MultiInputBox'
-import DeleteModal from '@/@core/components/custom/DeleteModal'
+import type { MachinePicPresignedUrlResponseDtoType, MachinePicUpdateResponseDtoType } from '@core/types'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import getS3Key from '@core/utils/getS3Key'
+import { useGetInspectionsSimple, useGetSingleInspection } from '@core/hooks/customTanstackQueries'
+import { isMobileContext } from '@core/components/custom/ProtectedPage'
+import { auth } from '@core/utils/auth'
+import AlertModal from '@core/components/custom/AlertModal'
+import TextInputBox from '@core/components/inputbox/TextInputBox'
+import MultiInputBox from '@core/components/inputbox/MultiInputBox'
+import DeleteModal from '@core/components/custom/DeleteModal'
 
 interface formType {
   machineInspectionId: number

@@ -1,6 +1,6 @@
 // Type Imports
 
-import type { ChildrenType } from '@/@core/types'
+import type { ChildrenType } from '@core/types'
 
 // Component Imports
 import Providers from '@components/Providers'
@@ -13,7 +13,7 @@ import VerticalFooter from '@components/layout/vertical/Footer'
 // Util Imports
 import { getMode } from '@core/utils/serverHelpers'
 
-import ScrollToTopButton from '@/@core/components/custom/ScrollToTopButton'
+import ScrollToTopButton from '@core/components/custom/ScrollToTopButton'
 import Header from '@/components/layout/vertical/Header'
 import ProtectedPage from '../../@core/components/custom/ProtectedPage'
 

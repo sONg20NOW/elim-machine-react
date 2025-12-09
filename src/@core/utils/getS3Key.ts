@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-import { auth } from '@/@core/utils/auth'
-import { handleApiError } from '@/@core/utils/errorHandler'
+import { auth } from '@core/utils/auth'
+import { handleApiError } from '@core/utils/errorHandler'
 
 /**
  * S3 Bucket에 사진들을 등록하고 s3Key 정보를 받는 함수
