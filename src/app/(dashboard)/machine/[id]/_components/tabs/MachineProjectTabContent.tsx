@@ -20,7 +20,7 @@ import AlertModal from '@/@core/components/elim-modal/AlertModal'
 
 export const MacinheProjectNameContext = createContext<string>('')
 
-const BasicTabContent = ({}: {}) => {
+const BasicTabContent = () => {
   const router = useRouter()
 
   const { isEditing, setIsEditing } = useMachineIsEditingStore()
