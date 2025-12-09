@@ -13,9 +13,6 @@ import 'react-toastify/ReactToastify.css'
 
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
-// Type Imports
-import { SnackbarProvider } from 'notistack'
-
 import type { ChildrenType } from '@core/types'
 
 // Component Imports
@@ -25,6 +22,7 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
+import Providers from '@/components/Providers'
 
 // import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
 
@@ -61,9 +59,7 @@ const RootLayout = (props: ChildrenType) => {
         {/* 클라이언트 전용 SW 등록 컴포넌트 */}
         {/* <ServiceWorkerRegister /> */}
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
-        <SnackbarProvider maxSnack={3} autoHideDuration={1000}>
-          {children}
-        </SnackbarProvider>
+        <Providers>{children}</Providers>
         <SpeedInsights />
         <ToastContainer autoClose={3000} position='bottom-left' />
       </body>

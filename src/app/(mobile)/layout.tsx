@@ -2,9 +2,6 @@
 
 import type { ChildrenType } from '@core/types'
 
-// Component Imports
-import Providers from '@components/Providers'
-
 // Config Imports
 // import { i18n } from '@configs/i18n'
 
@@ -21,12 +18,10 @@ const Layout = async (props: ChildrenType) => {
   // Vars
   // const direction = i18n.langDirection[params.lang]
   return (
-    <Providers>
-      <ProtectedPage>
-        {children}
-        <ScrollToTopButton />
-      </ProtectedPage>
-    </Providers>
+    <ProtectedPage>
+      {children}
+      <ScrollToTopButton />
+    </ProtectedPage>
   )
 }
 

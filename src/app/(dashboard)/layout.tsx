@@ -3,7 +3,6 @@
 import type { ChildrenType } from '@core/types'
 
 // Component Imports
-import Providers from '@components/Providers'
 import Navigation from '@components/layout/vertical/Navigation'
 import VerticalFooter from '@components/layout/vertical/Footer'
 
@@ -27,22 +26,20 @@ const Layout = async (props: ChildrenType) => {
   const mode = await getMode()
 
   return (
-    <Providers>
-      <ProtectedPage>
-        <div className='h-[100dvh] flex flex-col'>
-          <Header />
-          {/* 내비게이션 바 + 메인 영역 */}
-          <div className='flex-1 flex overflow-y-hidden'>
-            <Navigation mode={mode} />
-            <div className='flex-1 p-3 h-full flex flex-col gap-4 bg-indigo-100/50'>
-              <div className='w-full flex-1 overflow-y-hidden'>{children}</div>
-              <VerticalFooter />
-            </div>
+    <ProtectedPage>
+      <div className='h-[100dvh] flex flex-col'>
+        <Header />
+        {/* 내비게이션 바 + 메인 영역 */}
+        <div className='flex-1 flex overflow-y-hidden'>
+          <Navigation mode={mode} />
+          <div className='flex-1 p-3 h-full flex flex-col gap-4 bg-indigo-100/50'>
+            <div className='w-full flex-1 overflow-y-hidden'>{children}</div>
+            <VerticalFooter />
           </div>
-          <ScrollToTopButton />
         </div>
-      </ProtectedPage>
-    </Providers>
+        <ScrollToTopButton />
+      </div>
+    </ProtectedPage>
   )
 }
 

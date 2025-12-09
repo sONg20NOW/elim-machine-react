@@ -1,5 +1,5 @@
 // Type Imports
-import type { ChildrenType } from '@core/types'
+import type { ChildrenType } from '@/@core/types'
 
 // Context Imports
 import { VerticalNavProvider } from '@menu/contexts/verticalNavContext'
@@ -9,6 +9,7 @@ import ThemeProvider from '@components/theme'
 // Util Imports
 import { getSettingsFromCookie } from '@core/utils/serverHelpers'
 import QueryClientWrapper from './QueryClientWrapper'
+import ClientSnackbarProvider from './ClientSnackbarProvider'
 
 type Props = ChildrenType
 
@@ -25,7 +26,9 @@ const Providers = async (props: Props) => {
     <VerticalNavProvider>
       <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
         <ThemeProvider direction={'ltr'} systemMode={systemMode}>
-          <QueryClientWrapper>{children}</QueryClientWrapper>
+          <QueryClientWrapper>
+            <ClientSnackbarProvider>{children}</ClientSnackbarProvider>
+          </QueryClientWrapper>
           {/* <AppReactToastify hideProgressBar /> */}
         </ThemeProvider>
       </SettingsProvider>
