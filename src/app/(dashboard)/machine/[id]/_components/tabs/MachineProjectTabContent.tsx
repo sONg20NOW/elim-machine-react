@@ -154,8 +154,13 @@ const BasicTabContent = () => {
                         관리주체 현황
                       </th>
                       <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
-                        <div className='justify-end flex gap-2'>
-                          <Button color='success' variant='contained' type='submit' disabled={loading}>
+                        <div className='flex items-end justify-end gap-2'>
+                          {!existChange && isEditing && (
+                            <Typography variant='caption' color='warning.main'>
+                              변경사항이 없습니다
+                            </Typography>
+                          )}
+                          <Button color='success' variant='contained' type='submit' disabled={loading || !existChange}>
                             저장
                           </Button>
                           <Button
