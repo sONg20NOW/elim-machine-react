@@ -40,22 +40,21 @@ const BasicTabContent = () => {
 
   // 프로젝트 이름 변경 시 버전 충돌 방지
   useEffect(() => {
-    if (!projectData) return
-    setEditData(prev => ({ ...prev, version: projectData.version }))
-  }, [projectData])
+    if (!projectData?.machineProjectName) return
+    setEditData(prev => ({ ...prev, machineProjectName: projectData.machineProjectName, version: projectData.version }))
+  }, [projectData?.version, projectData?.machineProjectName])
 
   const handleSave = async () => {
     try {
       setLoading(true)
 
-      const result = await auth.put<{ data: MachineProjectResponseDtoType }>(
-        `/api/machine-projects/${machineProjectId}`,
-        editData
-      )
+      const result = await auth.put<
+        Exclude<{ data: MachineProjectResponseDtoType } & { machineProjectId: number }, { note: string | null }>
+      >(`/api/machine-projects/${machineProjectId}`, editData)
 
       setIsEditing(false)
 
-      setEditData(result.data.data)
+      setEditData(prev => ({ ...prev, ...result.data.data }))
       refetchProjectData()
       console.log('result:', result.data.data)
       handleSuccess('수정되었습니다.')
