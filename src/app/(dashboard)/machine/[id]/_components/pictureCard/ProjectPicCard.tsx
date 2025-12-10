@@ -1,20 +1,32 @@
-import { Checkbox, ImageListItem, ImageListItemBar, Paper, Typography } from '@mui/material'
+import { Button, Checkbox, ImageListItem, ImageListItemBar, Paper, Typography } from '@mui/material'
 
 import type { MachineProjectPicReadResponseDtoType } from '@core/types'
 import { projectPicOption } from '@/@core/data/options'
 
-// 현장사진 카드 컴포넌트
-export default function ProjectPicCard({
-  pic,
-  showCheck,
-  checked,
-  handleClick
-}: {
+interface ProjectPicCardProps {
   pic: MachineProjectPicReadResponseDtoType
   showCheck: boolean
   checked: boolean
   handleClick: (pic: MachineProjectPicReadResponseDtoType) => void
-}) {
+  handleClickLabel?: () => void
+}
+
+/**
+ * 현장사진 컴포넌트
+ * @param pic * 사진 정보
+ * @param showCheck * 선택삭제 토글 여부 state
+ * @param checked * 체크 여부
+ * @param handleClick * 사진 카드 클릭 시 동작 함수
+ * @param handleClickLabel 사진 종류 텍스트 클릭 시 동작 함수
+ * @returns
+ */
+export default function ProjectPicCard({
+  pic,
+  showCheck,
+  checked,
+  handleClick,
+  handleClickLabel
+}: ProjectPicCardProps) {
   return (
     <div className='flex flex-col items-center'>
       <Paper
@@ -63,7 +75,10 @@ export default function ProjectPicCard({
         )}
       </Paper>
       <div className='flex flex-col items-center py-1'>
-        <Typography className='text-green-600'>{`${projectPicOption.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
+        <Typography
+          {...(handleClickLabel && { component: Button, sx: { p: 0 }, onClick: handleClickLabel })}
+          className='text-green-600'
+        >{`${projectPicOption.find(v => v.value === pic.machineProjectPicType)?.label}`}</Typography>
       </div>
     </div>
   )
