@@ -20,7 +20,7 @@ const EmptyCategorySelector = memo(({ category, setCategory }: EmptyCategorySele
 
   const isMobile = useContext(isMobileContext)
 
-  const checklistItem = checklistList?.find(v => v.machineChecklistItemId === Number(category))
+  const checklistItem = checklistList?.find(v => v.machineProjectChecklistItemId === Number(category))
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
@@ -49,20 +49,20 @@ const EmptyCategorySelector = memo(({ category, setCategory }: EmptyCategorySele
         >
           <MenuItem value='전체'>전체</MenuItem>
           {checklistList?.map(v =>
-            v.machineChecklistItemName !== '기타' ? (
+            v.machineProjectChecklistItemName !== '기타' ? (
               <MenuItem
-                key={v.machineChecklistItemId}
-                value={v.machineChecklistItemId}
+                key={v.machineProjectChecklistItemId}
+                value={v.machineProjectChecklistItemId}
                 sx={{
                   color: v.totalMachinePicCount === 0 ? 'red' : ''
                 }}
               >
-                {v.machineChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}/
+                {v.machineProjectChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}/
                 {v.checklistSubItems.length}]
               </MenuItem>
             ) : (
-              <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                {v.machineChecklistItemName}
+              <MenuItem key={v.machineProjectChecklistItemId} value={v.machineProjectChecklistItemId}>
+                {v.machineProjectChecklistItemName}
               </MenuItem>
             )
           )}

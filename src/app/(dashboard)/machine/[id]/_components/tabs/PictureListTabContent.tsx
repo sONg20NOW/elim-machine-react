@@ -57,10 +57,6 @@ const PictureListTabContent = () => {
   // inspection으로 필터링하기 위한 옵션
   const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
 
-  // ! 추후 세부 필터링 추가
-  // const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
-  // const [machineChecklistSubItemId, setMachineChecklistSubItemId] = useState(0)
-
   // 무한스크롤 관련 Ref들
   const loadingInspectionPicsRef = useRef(false)
   const loadingProjectPicsRef = useRef(false)
@@ -210,8 +206,8 @@ const PictureListTabContent = () => {
           keyword
             ? pic.machineCategoryName.includes(keyword) ||
               pic.originalFileName.includes(keyword) ||
-              pic.machineChecklistItemName.includes(keyword) ||
-              pic.machineChecklistSubItemName.includes(keyword)
+              pic.machineProjectChecklistItemName.includes(keyword) ||
+              pic.machineProjectChecklistSubItemName.includes(keyword)
             : true
         )
         .filter(v => (!inspectionId ? true : v.machineInspectionId === inspectionId))
@@ -484,30 +480,6 @@ const PictureListTabContent = () => {
             </TextField>
           )}
           <ReloadButton handleClick={refetchPictures} tooltipText='사진 새로고침' />
-          {/* ! 추후구현
-           {
-            inspectionId !== 0 && filterPics(pictures).length !== 0
-            && (
-              <TextField
-                label='점검항목으로 검색'
-                sx={{ width: { sx: 'full', sm: 250 } }}
-                select
-                size='small'
-                value={machineChecklistItemId}
-                onChange={e => setMachineChecklistItemId(Number(e.target.value))}
-                fullWidth
-              >
-                <MenuItem key={0} value={0}>
-                  전체
-                </MenuItem>
-                {[].map(v => (
-                  <MenuItem key={v.mach} value={v.machineInspectionId}>
-                    {v.machineInspectionName}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )
-          } */}
         </div>
         <div className='flex gap-2 items-start'>
           <Button variant='outlined' type='button' color='success' onClick={() => setOpen(true)}>

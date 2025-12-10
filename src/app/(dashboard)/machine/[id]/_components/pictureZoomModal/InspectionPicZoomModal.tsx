@@ -28,7 +28,11 @@ import { createPortal } from 'react-dom'
 
 import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
 
-import type { MachinePicPresignedUrlResponseDtoType, MachinePicUpdateResponseDtoType } from '@core/types'
+import type {
+  MachinePicPresignedUrlResponseDtoType,
+  MachinePicUpdateRequestDtoType,
+  MachinePicUpdateResponseDtoType
+} from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import getS3Key from '@core/utils/getS3Key'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@core/hooks/customTanstackQueries'
@@ -39,15 +43,7 @@ import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 
-interface formType {
-  machineInspectionId: number
-  machineChecklistItemId: number
-  machineChecklistSubItemId: number
-  originalFileName: string
-  alternativeSubTitle: string
-  measuredValue: string
-  remark: string
-}
+type formType = Omit<MachinePicUpdateRequestDtoType, 'version' | 's3Key'> & { machineProjectChecklistItemId: number }
 
 interface InspectionPicZoomModalProps {
   MovePicture?: (dir: 'next' | 'previous') => void
@@ -76,8 +72,8 @@ export default function InspectionPicZoomModal({
   const form = useForm<formType>({
     defaultValues: {
       machineInspectionId: selectedPic.machineInspectionId ?? 0,
-      machineChecklistItemId: selectedPic.machineChecklistItemId ?? 0,
-      machineChecklistSubItemId: selectedPic.machineChecklistSubItemId ?? 0,
+      machineProjectChecklistItemId: selectedPic.machineProjectChecklistItemId ?? 0,
+      machineProjectChecklistSubItemId: selectedPic.machineProjectChecklistSubItemId ?? 0,
       originalFileName: selectedPic.originalFileName ?? '',
       alternativeSubTitle: selectedPic.alternativeSubTitle ?? '',
       measuredValue: selectedPic.measuredValue ?? '',
@@ -87,23 +83,23 @@ export default function InspectionPicZoomModal({
 
   const isDirty = form.formState.isDirty
 
-  const watchedMachineChecklistItemId = form.watch('machineChecklistItemId')
-  const watchedSubItemId = form.watch('machineChecklistSubItemId')
+  const watchedChecklistItemId = form.watch('machineProjectChecklistItemId')
+  const watchedChecklistSubItemId = form.watch('machineProjectChecklistSubItemId')
   const watchedAlternativeSubTitle = form.watch('alternativeSubTitle')
   const watchedMachineInspectionId = form.watch('machineInspectionId')
 
   const { data: selectedInspection } = useGetSingleInspection(machineProjectId, watchedMachineInspectionId.toString())
 
   const machineChecklistItemIdOption = selectedInspection?.machineChecklistItemsWithPicCountResponseDtos.map(v => ({
-    label: v.machineChecklistItemName,
-    value: v.machineChecklistItemId
+    label: v.machineProjectChecklistItemName,
+    value: v.machineProjectChecklistItemId
   }))
 
   const machineChecklistSubItemIdOption = selectedInspection?.machineChecklistItemsWithPicCountResponseDtos
-    .find(v => v.machineChecklistItemId === watchedMachineChecklistItemId)
+    .find(v => v.machineProjectChecklistItemId === watchedChecklistItemId)
     ?.checklistSubItems.map(v => ({
-      label: v.checklistSubItemName,
-      value: v.machineChecklistSubItemId
+      label: v.machineProjectChecklistSubItemName,
+      value: v.machineProjectChecklistSubItemId
     }))
 
   // 사진 정보 수정을 위한 상태관리
@@ -120,8 +116,8 @@ export default function InspectionPicZoomModal({
   useEffect(() => {
     form.reset({
       machineInspectionId: selectedPic.machineInspectionId ?? 0,
-      machineChecklistItemId: selectedPic.machineChecklistItemId ?? 0,
-      machineChecklistSubItemId: selectedPic.machineChecklistSubItemId ?? 0,
+      machineProjectChecklistItemId: selectedPic.machineProjectChecklistItemId ?? 0,
+      machineProjectChecklistSubItemId: selectedPic.machineProjectChecklistSubItemId ?? 0,
       originalFileName: selectedPic.originalFileName ?? '',
       alternativeSubTitle: selectedPic.alternativeSubTitle ?? '',
       measuredValue: selectedPic.measuredValue ?? '',
@@ -130,8 +126,8 @@ export default function InspectionPicZoomModal({
   }, [
     selectedPic.machinePicId,
     selectedPic.machineInspectionId,
-    selectedPic.machineChecklistItemId,
-    selectedPic.machineChecklistSubItemId,
+    selectedPic.machineProjectChecklistItemId,
+    selectedPic.machineProjectChecklistSubItemId,
     selectedPic.originalFileName,
     selectedPic.alternativeSubTitle,
     selectedPic.measuredValue,
@@ -141,15 +137,15 @@ export default function InspectionPicZoomModal({
 
   useEffect(() => {
     if (form.formState.isDirty) {
-      form.setValue('machineChecklistItemId', 0, { shouldDirty: false })
+      form.setValue('machineProjectChecklistItemId', 0, { shouldDirty: false })
     }
   }, [watchedMachineInspectionId, form])
 
   useEffect(() => {
     if (form.formState.isDirty) {
-      form.setValue('machineChecklistSubItemId', 0, { shouldDirty: false })
+      form.setValue('machineProjectChecklistSubItemId', 0, { shouldDirty: false })
     }
-  }, [watchedMachineChecklistItemId, form])
+  }, [watchedChecklistItemId, form])
 
   const onChangeImage = async (file: File) => {
     try {
@@ -159,8 +155,8 @@ export default function InspectionPicZoomModal({
         machineProjectId,
         [file],
         selectedPic.machineInspectionId.toString(),
-        selectedPic.machineChecklistItemId,
-        selectedPic.machineChecklistSubItemId,
+        selectedPic.machineProjectChecklistItemId,
+        selectedPic.machineProjectChecklistSubItemId,
         undefined
       )
 
@@ -174,7 +170,7 @@ export default function InspectionPicZoomModal({
           data: MachinePicUpdateResponseDtoType
         }>(
           `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedPic.machineInspectionId}/machine-pics/${selectedPic.machinePicId}`,
-          { version: selectedPic.version, s3Key: s3Key }
+          { version: selectedPic.version, s3Key: s3Key } as MachinePicUpdateRequestDtoType
         )
         .then(v => v.data.data)
 
@@ -192,7 +188,7 @@ export default function InspectionPicZoomModal({
   }
 
   const handleSave = form.handleSubmit(async data => {
-    if (!watchedSubItemId) {
+    if (!watchedChecklistSubItemId) {
       toast.error('하위항목을 선택해주세요')
 
       return
@@ -206,7 +202,7 @@ export default function InspectionPicZoomModal({
           data: MachinePicUpdateResponseDtoType
         }>(
           `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedPic.machineInspectionId}/machine-pics/${selectedPic.machinePicId}`,
-          { ...data, version: selectedPic.version }
+          { ...data, version: selectedPic.version } as Omit<MachinePicUpdateRequestDtoType, 's3Key'>
         )
         .then(v => v.data.data)
 
@@ -216,11 +212,11 @@ export default function InspectionPicZoomModal({
             ? {
                 ...v,
                 ...response,
-                machineChecklistItemId: watchedMachineChecklistItemId,
-                machineChecklistItemName:
-                  machineChecklistItemIdOption?.find(v => v.value === watchedMachineChecklistItemId)?.label ?? '',
-                machineChecklistSubItemName:
-                  machineChecklistSubItemIdOption?.find(v => v.value === watchedSubItemId)?.label ?? ''
+                machineProjectChecklistItemId: watchedChecklistItemId,
+                machineProjectChecklistItemName:
+                  machineChecklistItemIdOption?.find(v => v.value === watchedChecklistItemId)?.label ?? '',
+                machineProjectChecklistSubItemName:
+                  machineChecklistSubItemIdOption?.find(v => v.value === watchedChecklistSubItemId)?.label ?? ''
               }
             : v
         )
@@ -397,9 +393,9 @@ export default function InspectionPicZoomModal({
                   />
                   <MultiInputBox
                     form={form}
-                    name='machineChecklistItemId'
+                    name='machineProjectChecklistItemId'
                     labelMap={{
-                      machineChecklistItemId: {
+                      machineProjectChecklistItemId: {
                         label: '점검항목',
                         options: machineChecklistItemIdOption
                       }
@@ -407,9 +403,9 @@ export default function InspectionPicZoomModal({
                   />
                   <MultiInputBox
                     form={form}
-                    name='machineChecklistSubItemId'
+                    name='machineProjectChecklistSubItemId'
                     labelMap={{
-                      machineChecklistSubItemId: {
+                      machineProjectChecklistSubItemId: {
                         label: '하위항목',
                         options: machineChecklistSubItemIdOption
                       }
@@ -441,14 +437,14 @@ export default function InspectionPicZoomModal({
           <DialogActions>
             <div className='flex items-end gap-4'>
               <Typography color={isDirty ? 'error.main' : 'warning.main'}>
-                {!isDirty ? '변경사항이 없습니다' : !watchedSubItemId && '※하위항목을 지정해주세요'}
+                {!isDirty ? '변경사항이 없습니다' : !watchedChecklistSubItemId && '※하위항목을 지정해주세요'}
               </Typography>
               <Button
                 sx={{ width: 'fit-content' }}
                 variant='contained'
                 type='submit'
                 form={formName}
-                disabled={!isDirty || !watchedSubItemId || loading}
+                disabled={!isDirty || !watchedChecklistSubItemId || loading}
                 color='success'
               >
                 저장
