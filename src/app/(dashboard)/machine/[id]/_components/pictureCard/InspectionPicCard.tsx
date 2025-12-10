@@ -61,12 +61,12 @@ export default function InspectionPicCard({
         )}
       </Paper>
       <div className='flex flex-col items-center py-1'>
-        <Typography className='text-green-600'>{pic.machineChecklistItemName}</Typography>
+        <Typography className='text-green-600'>{pic.machineProjectChecklistItemName}</Typography>
         <Typography
           className='text-gray-700'
           style={pic.alternativeSubTitle ? { textDecoration: 'line-through', opacity: '60%' } : {}}
         >
-          {pic.machineChecklistSubItemName}
+          {pic.machineProjectChecklistSubItemName}
         </Typography>
         <Typography className='text-blue-500'>{pic.alternativeSubTitle}</Typography>
         <Typography className='text-red-500'>{pic.measuredValue}</Typography>

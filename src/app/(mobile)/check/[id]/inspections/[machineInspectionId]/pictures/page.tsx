@@ -39,16 +39,7 @@ import getS3Key from '@core/utils/getS3Key'
 
 const max_pic = 100
 
-interface formType {
-  version: number
-  machinePicId: number
-  machineInspectionId: number
-  machineChecklistSubItemId: number
-  originalFileName: string
-  alternativeSubTitle: string
-  measuredValue: string
-  remark: string
-}
+type formType = Omit<MachinePicUpdateResponseDtoType, 's3Key' | 'downloadPresignedUrl'>
 
 export default function PicturePage() {
   const { id: machineProjectId, machineInspectionId } = useParams()
@@ -69,7 +60,7 @@ export default function PicturePage() {
 
   const [openAlert, setOpenAlert] = useState(false)
 
-  const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
+  const [machineProjectChecklistItemId, setMachineProjectChecklistItemId] = useState(0)
   const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
   const { data: currentInspectioin } = useGetSingleInspectionSumamry(`${machineProjectId}`, `${machineInspectionId}`)
@@ -88,7 +79,7 @@ export default function PicturePage() {
       machinePicId: 0,
       version: 0,
       machineInspectionId: 0,
-      machineChecklistSubItemId: 0,
+      machineProjectChecklistSubItemId: 0,
       originalFileName: '',
       alternativeSubTitle: '',
       measuredValue: '',
@@ -96,15 +87,18 @@ export default function PicturePage() {
     }
   })
 
-  const watchedSubItemId = watch('machineChecklistSubItemId')
+  const watchedSubItemId = watch('machineProjectChecklistSubItemId')
 
   const subItems = useMemo(() => {
-    return checklistList?.find(v => v.machineChecklistItemId === machineChecklistItemId)?.checklistSubItems ?? []
-  }, [checklistList, machineChecklistItemId])
+    return (
+      checklistList?.find(v => v.machineProjectChecklistItemId === machineProjectChecklistItemId)?.checklistSubItems ??
+      []
+    )
+  }, [checklistList, machineProjectChecklistItemId])
 
   useEffect(() => {
-    if (!subItems.find(v => v.machineChecklistSubItemId === watchedSubItemId)) {
-      setValue('machineChecklistSubItemId', 0)
+    if (!subItems.find(v => v.machineProjectChecklistSubItemId === watchedSubItemId)) {
+      setValue('machineProjectChecklistSubItemId', 0)
     }
   }, [subItems, watchedSubItemId, setValue])
 
@@ -116,13 +110,13 @@ export default function PicturePage() {
         version: selectedPic.version,
         machinePicId: selectedPic.machinePicId,
         machineInspectionId: selectedPic.machineInspectionId,
-        machineChecklistSubItemId: selectedPic.machineChecklistSubItemId ?? 0,
+        machineProjectChecklistSubItemId: selectedPic.machineProjectChecklistSubItemId ?? 0,
         originalFileName: selectedPic.originalFileName ?? '',
         alternativeSubTitle: selectedPic.alternativeSubTitle ?? '',
         measuredValue: selectedPic.measuredValue ?? '',
         remark: selectedPic.remark
       })
-      setMachineChecklistItemId(selectedPic.machineChecklistItemId ?? 0)
+      setMachineProjectChecklistItemId(selectedPic.machineProjectChecklistItemId ?? 0)
       setTimeout(() => {
         scrollableAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
       }, 100)
@@ -161,8 +155,8 @@ export default function PicturePage() {
       `${machineProjectId}`,
       [file],
       `${machineInspectionId}`,
-      selectedPic?.machineChecklistItemId,
-      selectedPic?.machineChecklistSubItemId
+      selectedPic?.machineProjectChecklistItemId,
+      selectedPic?.machineProjectChecklistSubItemId
     ).then(v => v && v[0])
 
     if (!s3Key?.uploadSuccess) {
@@ -185,7 +179,7 @@ export default function PicturePage() {
             ? {
                 ...v,
                 ...response,
-                machineChecklistItemId: machineChecklistItemId,
+                machineProjectChecklistItemId: machineProjectChecklistItemId,
                 presignedUrl: URL.createObjectURL(file)
               }
             : v
@@ -245,7 +239,9 @@ export default function PicturePage() {
 
         setPictures(prev =>
           prev.map(v =>
-            v.machinePicId === selectedPicId ? { ...v, ...response, machineChecklistItemId: machineChecklistItemId } : v
+            v.machinePicId === selectedPicId
+              ? { ...v, ...response, machineProjectChecklistItemId: machineProjectChecklistItemId }
+              : v
           )
         )
         reset({ ...response })
@@ -255,7 +251,7 @@ export default function PicturePage() {
         printErrorSnackbar(e)
       }
     },
-    [machineProjectId, selectedPicId, machineInspectionId, reset, watchedSubItemId, machineChecklistItemId]
+    [machineProjectId, selectedPicId, machineInspectionId, reset, watchedSubItemId, machineProjectChecklistItemId]
   )
 
   function TinyImgCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
@@ -386,8 +382,8 @@ export default function PicturePage() {
               </InputLabel>
               <TextField
                 slotProps={{ input: { sx: { fontSize: 18 } } }}
-                value={machineChecklistItemId}
-                onChange={e => setMachineChecklistItemId(Number(e.target.value))}
+                value={machineProjectChecklistItemId}
+                onChange={e => setMachineProjectChecklistItemId(Number(e.target.value))}
                 fullWidth
                 size={isMobile ? 'small' : 'medium'}
                 select
@@ -395,20 +391,20 @@ export default function PicturePage() {
                 {checklistList
                   .filter(p => p.checklistSubItems.length !== 0)
                   .map(v => (
-                    <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                      {v.machineChecklistItemName}
+                    <MenuItem key={v.machineProjectChecklistItemId} value={v.machineProjectChecklistItemId}>
+                      {v.machineProjectChecklistItemName}
                     </MenuItem>
                   ))}
               </TextField>
             </div>
-            {machineChecklistItemId && !!subItems.length && (
+            {machineProjectChecklistItemId && !!subItems.length && (
               <div className='flex flex-col gap-1'>
                 <InputLabel required sx={{ px: 2 }}>
                   하위항목
                 </InputLabel>
                 <Controller
                   control={control}
-                  name={'machineChecklistSubItemId'}
+                  name={'machineProjectChecklistSubItemId'}
                   render={({ field: { ref, onChange, value } }) => (
                     <TextField
                       ref={ref}
@@ -432,7 +428,10 @@ export default function PicturePage() {
 
                             return (
                               <Typography variant='inherit'>
-                                {subItems.find(v => v.machineChecklistSubItemId === value)?.checklistSubItemName}
+                                {
+                                  subItems.find(v => v.machineProjectChecklistSubItemId === value)
+                                    ?.machineProjectChecklistSubItemName
+                                }
                               </Typography>
                             )
                           }
@@ -440,8 +439,8 @@ export default function PicturePage() {
                       }}
                     >
                       {subItems.map(v => (
-                        <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
-                          {v.checklistSubItemName}
+                        <MenuItem key={v.machineProjectChecklistSubItemId} value={v.machineProjectChecklistSubItemId}>
+                          {v.machineProjectChecklistSubItemName}
                         </MenuItem>
                       ))}
                     </TextField>

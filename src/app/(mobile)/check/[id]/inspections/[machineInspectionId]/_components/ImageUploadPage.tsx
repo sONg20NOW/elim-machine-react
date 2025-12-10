@@ -175,8 +175,8 @@ export default function ImageUploadPage() {
                 <Typography sx={{ fontSize: 18, opacity: '50%' }}>--- 점검항목을 선택하세요 ---</Typography>
               </MenuItem>
               {checklistList?.map(v => (
-                <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                  {v.machineChecklistItemName}
+                <MenuItem key={v.machineProjectChecklistItemId} value={v.machineProjectChecklistItemId}>
+                  {v.machineProjectChecklistItemName}
                 </MenuItem>
               ))}
             </TextField>
@@ -202,10 +202,10 @@ export default function ImageUploadPage() {
                   </MenuItem>
                   {checklistList &&
                     checklistList
-                      .find(v => v.machineChecklistItemId === checklistItemId)
+                      .find(v => v.machineProjectChecklistItemId === checklistItemId)
                       ?.checklistSubItems.map(p => (
-                        <MenuItem key={p.machineChecklistSubItemId} value={p.machineChecklistSubItemId}>
-                          {p.checklistSubItemName}
+                        <MenuItem key={p.machineProjectChecklistSubItemId} value={p.machineProjectChecklistSubItemId}>
+                          {p.machineProjectChecklistSubItemName}
                         </MenuItem>
                       ))}
                 </TextField>

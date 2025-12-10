@@ -2,6 +2,7 @@ import axios from 'axios'
 
 import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'
+import type { MachineInspectionPicUploadPresignedUrlBatchRequestDtoType } from '../types'
 
 /**
  * S3 Bucket에 사진들을 등록하고 s3Key 정보를 받는 함수
@@ -37,12 +38,12 @@ export default async function getS3Key(
       }>(`/api/presigned-urls/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/upload`, {
         uploadType: 'INSPECTION_IMAGE',
         originalFileNames: files.map(file => file.name),
-        checklistItemId: checklistItemId,
-        checklistSubItemId: checklistSubItemId
+        machineProjectChecklistItemId: checklistItemId,
+        machineProjectChecklistSubItemId: checklistSubItemId
 
         // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
         // memberId: 1
-      })
+      } as MachineInspectionPicUploadPresignedUrlBatchRequestDtoType)
 
       const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
 
