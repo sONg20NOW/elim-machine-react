@@ -376,6 +376,18 @@ const InspectionPicListModal = ({
     refetchPictures()
   }, [refetchPictures])
 
+  // Zoom modal 닫힐 때마다 inspection 정보 다시 가져오기 => 점검항목/하위항목 사진 개수 반영을 위해
+  const openedOnce = useRef(false)
+
+  useEffect(() => {
+    if (!openPicZoom) {
+      if (!openedOnce.current) openedOnce.current = true
+      else {
+        refetchSelectedInspection()
+      }
+    }
+  }, [openPicZoom, refetchSelectedInspection])
+
   return (
     selectedInspection &&
     inspections && (
