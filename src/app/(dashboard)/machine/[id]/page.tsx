@@ -121,20 +121,18 @@ const MachineUpdatePage = () => {
   return (
     <isEditingContext.Provider value={{ isEditing, setIsEditing }}>
       <Card className='h-full flex flex-col'>
-        <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-5': !isMobile })}>
+        <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-6': !isMobile })}>
           <CardHeader
             title={
               <div
-                className={classNames('flex gap-0  mt-1', {
+                className={classNames('flex gap-0', {
                   'flex-col text-left items-start': isMobile,
                   'items-center': !isMobile
                 })}
               >
                 <Typography
-                  color='black'
+                  variant='h4'
                   sx={{
-                    fontSize: 25,
-                    fontWeight: 500,
                     ':hover': { color: 'primary.main' },
                     alignItems: 'center',
                     display: 'flex'
@@ -146,12 +144,8 @@ const MachineUpdatePage = () => {
                 </Typography>
                 <form className='flex items-center' onSubmit={handleChangeProjectName}>
                   {!isEditingProjectName ? (
-                    <Typography color='black' sx={{ fontSize: 25, fontWeight: 500, cursor: 'default' }}>
-                      {projectData?.machineProjectName ? (
-                        projectData?.machineProjectName
-                      ) : (
-                        <span className='font-normal text-slate-400'>이름 없음</span>
-                      )}
+                    <Typography color='black' variant='h4' sx={{ cursor: 'default' }}>
+                      {projectData?.machineProjectName ?? ''}
                     </Typography>
                   ) : (
                     <CustomTextField
