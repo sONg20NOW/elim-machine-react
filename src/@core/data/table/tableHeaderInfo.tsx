@@ -10,7 +10,7 @@ import type {
 
 // TODO: 추후 input info와 연동..? field들에 대해서 번역한 단어를 저장해두는 것도 좋을 듯..
 // table 생성 중 헤더 생성에 필요.
-export const HEADERS = {
+export const TABLE_HEADER_INFO = {
   // 직원관리 탭 테이블
   member: {
     // roleDescription: { label: '권한', canSort: true },

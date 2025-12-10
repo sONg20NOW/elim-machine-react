@@ -22,7 +22,7 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/@core/data/options'
 // Utils
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import type { MachineInspectionFilterType, MachineInspectionPageResponseDtoType } from '@core/types'
-import { HEADERS } from '@/@core/data/table/TableHeader'
+import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
 import SearchBar from '@/@core/components/elim-inputbox/SearchBar'
 import CustomTextField from '@core/components/mui/TextField'
 import BasicTable from '@/@core/components/elim-table/BasicTable'
@@ -337,7 +337,7 @@ const InspectionListTabContent = () => {
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<MachineInspectionPageResponseDtoType>
             listException={['engineerNames']}
-            header={HEADERS.machineInspection}
+            header={TABLE_HEADER_INFO.machineInspection}
             data={filteredInspectionList ?? []}
             handleRowClick={handleSelectInspection}
             loading={isLoading}

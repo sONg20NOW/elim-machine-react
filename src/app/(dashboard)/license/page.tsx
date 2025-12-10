@@ -20,7 +20,7 @@ import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import type { LicensePageResponseDtoType } from '@core/types'
-import { HEADERS } from '@/@core/data/table/TableHeader'
+import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
 import BasicTable from '@/@core/components/elim-table/BasicTable'
 import SearchBar from '@/@core/components/elim-inputbox/SearchBar'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/@core/data/options'
@@ -276,7 +276,7 @@ export default function Licensepage() {
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<LicensePageResponseDtoType>
-            header={HEADERS.licenses}
+            header={TABLE_HEADER_INFO.licenses}
             data={data}
             handleRowClick={handleLicenseClick}
             loading={isLoading}

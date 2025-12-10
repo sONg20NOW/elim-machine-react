@@ -23,7 +23,7 @@ import CustomTextField from '@core/components/mui/TextField'
 import EngineerModal from './_components/EngineerModal'
 import AddEngineerModal from './_components/AddEngineerModal'
 import type { EngineerFilterType, MachineEngineerPageResponseDtoType } from '@core/types'
-import { HEADERS } from '@core/data/table/TableHeader'
+import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
 import BasicTable from '@core/components/elim-table/BasicTable'
 import SearchBar from '@core/components/elim-inputbox/SearchBar'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@core/data/options'
@@ -303,7 +303,7 @@ export default function EngineerPage() {
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<MachineEngineerPageResponseDtoType>
             multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
-            header={HEADERS.engineers}
+            header={TABLE_HEADER_INFO.engineers}
             data={data}
             handleRowClick={handleEngineerClick}
             loading={isLoading}

@@ -28,7 +28,7 @@ import { MEMBER_FILTER_INFO } from '@core/data/filter/memberFilterInfo'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/@core/data/options'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
-import { HEADERS } from '@/@core/data/table/TableHeader'
+import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
 import { isTabletContext } from '@/components/ProtectedPage'
 import AddUserModal from './_components/AddUserModall'
 import { useGetMembers, useGetSingleMember } from '@core/hooks/customTanstackQueries'
@@ -324,7 +324,7 @@ export default function MemberPage() {
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<MemberPageDtoType>
-            header={HEADERS.member}
+            header={TABLE_HEADER_INFO.member}
             data={data}
             handleRowClick={handleUserClick}
             multiException={{ age: ['age', 'genderDescription'] }}

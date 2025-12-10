@@ -27,7 +27,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import CustomTextField from '@core/components/mui/TextField'
 
 import type { MachineFilterType, MachineProjectPageDtoType } from '@core/types'
-import { HEADERS } from '@core/data/table/TableHeader'
+import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
 import { MACHINE_FILTER_INFO } from '@core/data/filter/machineFilterInfo'
 import SearchBar from '@core/components/elim-inputbox/SearchBar'
 import BasicTable from '@core/components/elim-table/BasicTable'
@@ -382,7 +382,7 @@ export default function MachinePage() {
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<MachineProjectPageDtoType>
-            header={HEADERS.machine}
+            header={TABLE_HEADER_INFO.machine}
             data={machineProjects}
             handleRowClick={handleMachineProjectClick}
             loading={isLoadingPages}
