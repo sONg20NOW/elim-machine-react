@@ -279,8 +279,6 @@ export default function Licensepage() {
             header={HEADERS.licenses}
             data={data}
             handleRowClick={handleLicenseClick}
-            page={page}
-            pageSize={size}
             loading={isLoading}
             error={isError}
             showCheckBox={showCheckBox}

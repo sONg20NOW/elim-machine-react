@@ -19,6 +19,7 @@ import { IconCaretDownFilled, IconCaretUpFilled, IconExclamationCircleFilled } f
 import type { HeaderType } from '@core/types'
 import { isMobileContext, isTabletContext } from '../../../components/ProtectedPage'
 import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import { DEFAULT_PAGESIZE } from '@/@core/data/options'
 
 const StyledTableCell = styled(TableCell)<TableCellProps>({ padding: 14 })
 
@@ -26,8 +27,6 @@ interface BasicTableProps<T> {
   header: HeaderType<T>
   data?: T[]
   handleRowClick: (row: T) => Promise<void>
-  page: number
-  pageSize: number
   loading: boolean
   error: boolean
   multiException?: Partial<Record<keyof T, Array<keyof T>>>
@@ -42,14 +41,13 @@ interface BasicTableProps<T> {
 }
 
 /**
- * @type 데이터 배열 요소의 타입
+ * queryParams 기반으로 동작하는 테이블.
+ * @type T 데이터 배열 요소의 타입
  * @param header* 테이블 헤더 정보 (ex. {name: {label: '이름', canSort: true}, ...})
- * @param data*
- * @param handleRowClick*
- * @param page*
- * @param pageSize*
- * @param loading*
- * @param error*
+ * @param data* 테이블을 구성할 배열 데이터
+ * @param handleRowClick* 행 클릭 시 동작 함수 (row: T) => void
+ * @param loading* 데이터 로딩 여부
+ * @param error* 데이터 에러 여부
  * @param multiException 하나의 column에 여러 데이터 표시 예외처리
  * @param listException 리스트 타입의 데이터 예외처리
  * @param isChecked 체크박스 prop
@@ -68,8 +66,6 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
   rightClickMenuHeader,
   rightClickMenu,
   handleRowClick,
-  page,
-  pageSize,
   multiException,
   listException,
   loading,
@@ -82,11 +78,14 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
 }: BasicTableProps<T>) {
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
+
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
 
   const sort = searchParams.get('sort')?.split(',')
+  const page = Number(searchParams.get('page') ?? 0)
+  const size = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)
 
   const currentUserId = useCurrentUserStore(set => set.currentUser)?.memberId
 
@@ -294,7 +293,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   )}
                   {!isTablet && (
                     <StyledTableCell size={isMobile ? 'small' : 'medium'} align='center' key={'order'}>
-                      <Typography>{page * pageSize + index + 1}</Typography>
+                      <Typography>{page * size + index + 1}</Typography>
                     </StyledTableCell>
                   )}
 

@@ -306,8 +306,6 @@ export default function EngineerPage() {
             header={HEADERS.engineers}
             data={data}
             handleRowClick={handleEngineerClick}
-            page={page}
-            pageSize={size}
             loading={isLoading}
             error={isError}
             showCheckBox={showCheckBox}

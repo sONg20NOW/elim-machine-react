@@ -327,8 +327,6 @@ export default function MemberPage() {
             header={HEADERS.member}
             data={data}
             handleRowClick={handleUserClick}
-            page={page}
-            pageSize={size}
             multiException={{ age: ['age', 'genderDescription'] }}
             loading={isLoading}
             error={isError}

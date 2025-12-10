@@ -385,8 +385,6 @@ export default function MachinePage() {
             header={HEADERS.machine}
             data={machineProjects}
             handleRowClick={handleMachineProjectClick}
-            page={page}
-            pageSize={size}
             loading={isLoadingPages}
             error={isError}
             listException={['engineerNames']}

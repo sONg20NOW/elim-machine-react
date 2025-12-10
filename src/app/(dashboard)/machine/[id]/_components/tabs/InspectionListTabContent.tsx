@@ -340,8 +340,6 @@ const InspectionListTabContent = () => {
             header={HEADERS.machineInspection}
             data={filteredInspectionList ?? []}
             handleRowClick={handleSelectInspection}
-            page={page}
-            pageSize={size}
             loading={isLoading}
             error={isError}
             showCheckBox={showCheckBox}
