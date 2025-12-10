@@ -436,7 +436,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                             width: 'fit-content'
                           }}
                         >
-                          # {label}
+                          {'[ ' + label + ' ]'}
                         </Typography>
                         <ImageList cols={isMobile ? 1 : 4} gap={10} rowHeight={isMobile ? 150 : 250}>
                           {picsByItem.map((pic, idx) => (

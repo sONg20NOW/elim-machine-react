@@ -574,7 +574,7 @@ const InspectionPicListModal = ({
                       picsByItem.length > 0 && (
                         <Box
                           key={item.machineProjectChecklistItemId}
-                          sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 0 }}
+                          sx={{ mb: 6, display: 'flex', flexDirection: 'column' }}
                         >
                           <Typography
                             variant='h5'
@@ -586,7 +586,7 @@ const InspectionPicListModal = ({
                               width: 'fit-content'
                             }}
                           >
-                            # {item.machineProjectChecklistItemName}
+                            {'[ ' + item.machineProjectChecklistItemName + ' ]'}
                           </Typography>
                           <ImageList
                             sx={{ overflow: 'visible' }}
@@ -634,7 +634,7 @@ const InspectionPicListModal = ({
                       picBySubItems.length > 0 && (
                         <Box
                           key={sub.machineProjectChecklistSubItemId}
-                          sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
+                          sx={{ mb: 6, display: 'flex', flexDirection: 'column' }}
                         >
                           <Typography
                             variant='h5'
@@ -646,7 +646,7 @@ const InspectionPicListModal = ({
                               width: 'fit-content'
                             }}
                           >
-                            # {sub.machineProjectChecklistSubItemName}
+                            {'[ ' + sub.machineProjectChecklistSubItemName + ' ]'}
                           </Typography>
                           <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
                             {picBySubItems.map((pic, idx) => (
@@ -706,7 +706,6 @@ const InspectionPicListModal = ({
               )}
             </div>
           </Grid>
-          <Divider />
           {/* 사진 업로드 영역 */}
           <Grid item xs={12} sx={{ maxHeight: '60%' }}>
             <Paper
