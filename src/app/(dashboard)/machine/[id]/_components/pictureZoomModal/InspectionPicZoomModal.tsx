@@ -3,8 +3,10 @@ import { useCallback, useContext, useEffect, useRef, useState, type Dispatch, ty
 import { useParams } from 'next/navigation'
 
 import {
+  Backdrop,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -274,6 +276,7 @@ export default function InspectionPicZoomModal({
           createPortal(
             <>
               <IconButton
+                disabled={loading}
                 sx={theme => ({ zIndex: theme.zIndex.modal + 1 })}
                 className='fixed left-10 top-1/2'
                 onClick={() => {
@@ -288,6 +291,7 @@ export default function InspectionPicZoomModal({
                 <IconCircleCaretLeftFilled size={50} color='white' />
               </IconButton>
               <IconButton
+                disabled={loading}
                 sx={theme => ({ zIndex: theme.zIndex.modal + 1 })}
                 className='fixed right-10 top-1/2'
                 onClick={() => {
@@ -313,6 +317,9 @@ export default function InspectionPicZoomModal({
             handleClose()
           }}
         >
+          <Backdrop sx={theme => ({ zIndex: theme.zIndex.modal + 4 })} open={loading}>
+            <CircularProgress size={60} sx={{ color: 'white' }} />
+          </Backdrop>
           <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative', pb: 2 }}>
             <TextField
               {...form.register('originalFileName')}
