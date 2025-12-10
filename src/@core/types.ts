@@ -711,6 +711,15 @@ export interface machinePicCreateRequestDtoType {
   s3Key: string
 }
 
+type uploadTypeType = 'INSPECTION_IMAGE' | 'PROJECT_IMAGE'
+
+export interface MachineInspectionPicUploadPresignedUrlBatchRequestDtoType {
+  uploadType: uploadTypeType
+  originalFileNames: string[]
+  machineProjectChecklistItemId: number
+  machineProjectChecklistSubItemId: number
+}
+
 // ----------- 무한스크롤 사진 관련 -----------
 // 무한스크롤 커서 정보 (사진 조회용)
 export interface MachinePicCursorType {
