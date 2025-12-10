@@ -18,7 +18,7 @@ export default function PostCodeButton({ onChange }: PostCodeButtonProps) {
   return (
     <>
       <Button size='small' variant='contained' type='button' color='primary' onClick={() => setOpen(true)}>
-        <Typography>검색</Typography>
+        <Typography sx={{ color: 'white' }}>검색</Typography>
       </Button>
       <Dialog
         fullWidth

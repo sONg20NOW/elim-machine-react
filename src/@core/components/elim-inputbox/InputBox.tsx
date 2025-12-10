@@ -11,7 +11,7 @@ import { handleApiError } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
 import { useGetLicenseNames } from '@core/hooks/customTanstackQueries'
 import YNSelectBox from './YNSelectBox'
-import PostCodeButton from './PostCodeButton'
+import PostCodeButton from '../elim-button/PostCodeButton'
 
 interface InputBoxProps {
   tabFieldKey: string

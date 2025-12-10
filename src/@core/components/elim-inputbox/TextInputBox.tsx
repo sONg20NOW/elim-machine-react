@@ -1,7 +1,7 @@
 import { Grid2, TextField, Typography } from '@mui/material'
 import { useFormState, type Path, type PathValue, type RegisterOptions, type UseFormReturn } from 'react-hook-form'
 
-import PostCodeButton from './PostCodeButton'
+import PostCodeButton from '../elim-button/PostCodeButton'
 
 interface TextInputBoxProps<T extends Record<string, any>> {
   name: Path<T>
