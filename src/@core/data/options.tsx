@@ -152,7 +152,8 @@ export const checkTypeOption = [
 export const buildingGradeOption = [
   { value: 'BASIC', label: '초급' },
   { value: 'INTERMEDIATE', label: '중급' },
-  { value: 'ADVANCED', label: '고급' }
+  { value: 'ADVANCED', label: '고급' },
+  { value: 'SUPREME', label: '특급' }
 ]
 
 // machine - inspection
