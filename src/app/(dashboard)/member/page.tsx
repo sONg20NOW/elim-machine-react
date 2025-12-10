@@ -32,7 +32,7 @@ import { HEADERS } from '@/@core/data/table/TableHeader'
 import { isTabletContext } from '@/components/ProtectedPage'
 import AddUserModal from './_components/AddUserModall'
 import { useGetMembers, useGetSingleMember } from '@core/hooks/customTanstackQueries'
-import TableFilter from '@/@core/components/elim-table/TableFilter'
+import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
 import useCurrentUserStore from '@core/utils/useCurrentUserStore'
 import { printErrorSnackbar } from '@core/utils/snackbarHandler'
 import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
@@ -218,7 +218,7 @@ export default function MemberPage() {
         {/* 탭 제목 */}
         <CardHeader slotProps={{ title: { typography: 'h4' } }} title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        {!isTablet && <TableFilter<MemberFilterType> filterInfo={MEMBER_FILTER_INFO} disabled={disabled} />}
+        {!isTablet && <BasicTableFilter<MemberFilterType> filterInfo={MEMBER_FILTER_INFO} disabled={disabled} />}
         {/* 필터 초기화 버튼 */}
         {!isTablet && (
           <Button

@@ -36,7 +36,7 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@core/data/options'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import useMachineTabValueStore from '@core/utils/useMachineTabValueStore'
 import { auth } from '@core/utils/auth'
-import TableFilter from '@core/components/elim-table/TableFilter'
+import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
 import { useGetEngineersOptions, useGetMachineProjects } from '@core/hooks/customTanstackQueries'
 import { QUERY_KEYS } from '@core/data/queryKeys'
 import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
@@ -249,7 +249,7 @@ export default function MachinePage() {
           className='pbe-4'
         />
         {/* 필터바 */}
-        <TableFilter<MachineFilterType> filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS} disabled={disabled} />
+        <BasicTableFilter<MachineFilterType> filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS} disabled={disabled} />
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<IconReload />}

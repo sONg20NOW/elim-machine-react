@@ -7,7 +7,7 @@ import Grid from '@mui/material/Grid2'
 import { InputBox } from '@/@core/components/elim-inputbox/InputBox'
 import type { InputFieldType } from '@core/types'
 
-interface TableFilterProps<T> {
+interface BasicTableFilterProps<T> {
   filterInfo: Record<keyof T, InputFieldType>
   disabled: boolean
 }
@@ -19,7 +19,7 @@ interface TableFilterProps<T> {
  * @type 필터 타입 (ex. MemberFilterType, ...)
  * @returns
  */
-export default function TableFilter<T>({ filterInfo, disabled }: TableFilterProps<T>) {
+export default function BasicTableFilter<T>({ filterInfo, disabled }: BasicTableFilterProps<T>) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()

@@ -31,7 +31,7 @@ import PictureListModal from '../pictureUploadModal/PictureListModal'
 import { useGetInspections, useGetParticipatedEngineerList } from '@core/hooks/customTanstackQueries'
 import useCurrentInspectionIdStore from '@core/utils/useCurrentInspectionIdStore'
 import { auth } from '@core/utils/auth'
-import TableFilter from '@/@core/components/elim-table/TableFilter'
+import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
 import { QUERY_KEYS } from '@/@core/data/queryKeys'
 import deleteInspection from '../../_utils/deleteInspection'
 import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
@@ -218,7 +218,7 @@ const InspectionListTabContent = () => {
       <div className='relative h-full flex flex-col'>
         {/* 필터바 */}
         <div>
-          <TableFilter<MachineInspectionFilterType>
+          <BasicTableFilter<MachineInspectionFilterType>
             filterInfo={{
               engineerName: {
                 label: '점검자',

@@ -31,7 +31,7 @@ import { ENGINEER_FILTER_INFO } from '@core/data/filter/engineerFilterInfo'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
 import { useGetEngineer, useGetEngineers, useGetEngineersOptions } from '@core/hooks/customTanstackQueries'
-import TableFilter from '@core/components/elim-table/TableFilter'
+import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
 import deleteEngineer from './_util/deleteEngineer'
 import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
 import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
@@ -199,7 +199,7 @@ export default function EngineerPage() {
           className='pbe-4'
         />
         {/* 필터바 */}
-        <TableFilter<EngineerFilterType> filterInfo={ENGINEER_FILTER_INFO} disabled={disabled} />
+        <BasicTableFilter<EngineerFilterType> filterInfo={ENGINEER_FILTER_INFO} disabled={disabled} />
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<IconReload />}
