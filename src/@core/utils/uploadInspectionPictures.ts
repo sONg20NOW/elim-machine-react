@@ -1,5 +1,6 @@
 import { auth } from '@core/utils/auth'
 import getS3Key from './getS3Key'
+import type { machinePicCreateRequestDtoType } from '../types'
 
 export const uploadInspectionPictures = async (
   machineProjectId: string,
@@ -23,13 +24,16 @@ export const uploadInspectionPictures = async (
     }
 
     // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
-    const machinePicCreateRequestDtos = S3uploadResults.map(result => ({
-      machineChecklistSubItemId: checklistSubItemId, // 기본값 또는 selectedMachine에서 가져오기
-      originalFileName: result.fileName,
-      s3Key: result.s3Key
+    const machinePicCreateRequestDtos = S3uploadResults.map(
+      result =>
+        ({
+          machineProjectChecklistSubItemId: checklistSubItemId, // 기본값 또는 selectedMachine에서 가져오기
+          originalFileName: result.fileName,
+          s3Key: result.s3Key
 
-      // cdnPath는 추후 확장사항
-    }))
+          // cdnPath는 추후 확장사항
+        }) as machinePicCreateRequestDtoType
+    )
 
     const dbResponse = await auth.post<{ data: { machinePicIds: number[] } }>(
       `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/machine-pics`,
@@ -81,13 +85,16 @@ export const uploadSingleInspectionPic = async (
     }
 
     // 3. DB에 사진 정보 기록 (백엔드 서버로 POST)
-    const machinePicCreateRequestDtos = S3uploadResults.map(result => ({
-      machineChecklistSubItemId: checklistSubItemId, // 기본값 또는 selectedMachine에서 가져오기
-      originalFileName: result.fileName,
-      s3Key: result.s3Key
+    const machinePicCreateRequestDtos = S3uploadResults.map(
+      result =>
+        ({
+          machineProjectChecklistSubItemId: checklistSubItemId, // 기본값 또는 selectedMachine에서 가져오기
+          originalFileName: result.fileName,
+          s3Key: result.s3Key
 
-      // cdnPath는 추후 확장사항
-    }))
+          // cdnPath는 추후 확장사항
+        }) as machinePicCreateRequestDtoType
+    )
 
     const dbResponse = await auth.post<{ data: { machinePicIds: number[] } }>(
       `/api/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/machine-pics`,

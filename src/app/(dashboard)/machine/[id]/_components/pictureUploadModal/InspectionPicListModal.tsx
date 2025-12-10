@@ -90,7 +90,7 @@ const InspectionPicListModal = ({
   const [isLoading, setIsLoading] = useState(false)
 
   const [selectedSubItemId, setSelectedSubItemId] = useState<number>(0)
-  const [selectedItemId, setSelectedItemId] = useState<number>(clickedPicCate?.machineChecklistItemId ?? 0)
+  const [selectedItemId, setSelectedItemId] = useState<number>(clickedPicCate?.machineProjectChecklistItemId ?? 0)
 
   const checklistItems = selectedInspection?.machineChecklistItemsWithPicCountResponseDtos ?? []
 
@@ -100,10 +100,10 @@ const InspectionPicListModal = ({
       0
     ) ?? 0
 
-  const selectedItem = checklistItems.find(v => v.machineChecklistItemId === selectedItemId)
+  const selectedItem = checklistItems.find(v => v.machineProjectChecklistItemId === selectedItemId)
 
   const selectedSubItem = selectedItem?.checklistSubItems.find(
-    sub => sub.machineChecklistSubItemId === selectedSubItemId
+    sub => sub.machineProjectChecklistSubItemId === selectedSubItemId
   )
 
   const [checkedPics, setCheckedPics] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
@@ -124,8 +124,9 @@ const InspectionPicListModal = ({
 
   const filteredPics = pictures.filter(
     pic =>
-      (selectedItemId === 0 || pic.machineChecklistItemId === selectedItemId) &&
-      (selectedSubItemId === 0 || pic.machineChecklistSubItemId === selectedSubItem?.machineChecklistSubItemId)
+      (selectedItemId === 0 || pic.machineProjectChecklistItemId === selectedItemId) &&
+      (selectedSubItemId === 0 ||
+        pic.machineProjectChecklistSubItemId === selectedSubItem?.machineProjectChecklistSubItemId)
   )
 
   const handleClose = () => {
@@ -215,8 +216,8 @@ const InspectionPicListModal = ({
       machineProjectId,
       selectedInspection.machineInspectionResponseDto.id.toString(),
       filesToUpload,
-      selectedItem.machineChecklistItemId,
-      selectedSubItem.machineChecklistSubItemId
+      selectedItem.machineProjectChecklistItemId,
+      selectedSubItem.machineProjectChecklistSubItemId
     )
 
     if (result) {
@@ -309,8 +310,8 @@ const InspectionPicListModal = ({
 
       const content = await zip.generateAsync({ type: 'blob' })
 
-      const selectedItemName = selectedItem?.machineChecklistItemName
-      const selectedSubItemName = selectedSubItem?.checklistSubItemName
+      const selectedItemName = selectedItem?.machineProjectChecklistItemName
+      const selectedSubItemName = selectedSubItem?.machineProjectChecklistSubItemName
 
       saveAs(
         content,
@@ -324,8 +325,8 @@ const InspectionPicListModal = ({
   }, [
     checkedPics,
     selectedInspection?.machineInspectionResponseDto.machineInspectionName,
-    selectedItem?.machineChecklistItemName,
-    selectedSubItem?.checklistSubItemName
+    selectedItem?.machineProjectChecklistItemName,
+    selectedSubItem?.machineProjectChecklistSubItemName
   ])
 
   async function MovePicture(dir: 'next' | 'previous') {
@@ -433,7 +434,7 @@ const InspectionPicListModal = ({
               size='small'
               fullWidth
               select
-              value={selectedItem?.machineChecklistItemId ?? 0}
+              value={selectedItem?.machineProjectChecklistItemId ?? 0}
               onChange={e => {
                 setSelectedSubItemId(0)
                 setSelectedItemId(Number(e.target.value))
@@ -449,9 +450,9 @@ const InspectionPicListModal = ({
                 </Typography>
               </MenuItem>
               {checklistItems.map(item => (
-                <MenuItem key={item.machineChecklistItemId} value={item.machineChecklistItemId}>
+                <MenuItem key={item.machineProjectChecklistItemId} value={item.machineProjectChecklistItemId}>
                   <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {item.machineChecklistItemName}
+                    {item.machineProjectChecklistItemName}
                   </Typography>
                   <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
                     {item.totalMachinePicCount ? `(${item.totalMachinePicCount})` : ''}
@@ -485,9 +486,9 @@ const InspectionPicListModal = ({
                 </Typography>
               </MenuItem>
               {selectedItem?.checklistSubItems?.map(sub => (
-                <MenuItem key={sub.machineChecklistSubItemId} value={sub.machineChecklistSubItemId}>
+                <MenuItem key={sub.machineProjectChecklistSubItemId} value={sub.machineProjectChecklistSubItemId}>
                   <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {sub.checklistSubItemName}
+                    {sub.machineProjectChecklistSubItemName}
                   </Typography>
                   <Typography color='primary.main' sx={{ overflowWrap: 'break-word' }}>
                     {sub.machinePicCount ? `(${sub.machinePicCount})` : ''}
@@ -566,26 +567,26 @@ const InspectionPicListModal = ({
                 pictures.length > 0 ? (
                   checklistItems.map(item => {
                     const picsByItem = pictures.filter(
-                      pic => pic.machineChecklistItemId === item.machineChecklistItemId
+                      pic => pic.machineProjectChecklistItemId === item.machineProjectChecklistItemId
                     )
 
                     return (
                       picsByItem.length > 0 && (
                         <Box
-                          key={item.machineChecklistItemId}
+                          key={item.machineProjectChecklistItemId}
                           sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 0 }}
                         >
                           <Typography
                             variant='h5'
                             paddingInlineStart={2}
-                            onClick={() => setSelectedItemId(item.machineChecklistItemId)}
+                            onClick={() => setSelectedItemId(item.machineProjectChecklistItemId)}
                             sx={{
                               cursor: 'pointer',
                               ':hover': { textDecoration: 'underline', textUnderlineOffset: '3px' },
                               width: 'fit-content'
                             }}
                           >
-                            # {item.machineChecklistItemName}
+                            # {item.machineProjectChecklistItemName}
                           </Typography>
                           <ImageList
                             sx={{ overflow: 'visible' }}
@@ -625,27 +626,27 @@ const InspectionPicListModal = ({
                 selectedItem?.totalMachinePicCount !== 0 ? (
                   selectedItem?.checklistSubItems.map(sub => {
                     const picBySubItems = filteredPics.filter(
-                      pic => pic.machineChecklistSubItemId === sub.machineChecklistSubItemId
+                      pic => pic.machineProjectChecklistSubItemId === sub.machineProjectChecklistSubItemId
                     )
 
                     return (
                       picBySubItems &&
                       picBySubItems.length > 0 && (
                         <Box
-                          key={sub.machineChecklistSubItemId}
+                          key={sub.machineProjectChecklistSubItemId}
                           sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
                         >
                           <Typography
                             variant='h5'
                             paddingInlineStart={2}
-                            onClick={() => setSelectedSubItemId(sub.machineChecklistSubItemId)}
+                            onClick={() => setSelectedSubItemId(sub.machineProjectChecklistSubItemId)}
                             sx={{
                               cursor: 'pointer',
                               ':hover': { textDecoration: 'underline', textUnderlineOffset: '3px' },
                               width: 'fit-content'
                             }}
                           >
-                            # {sub.checklistSubItemName}
+                            # {sub.machineProjectChecklistSubItemName}
                           </Typography>
                           <ImageList cols={isMobile ? 1 : 4} gap={0} rowHeight={isMobile ? 150 : 250}>
                             {picBySubItems.map((pic, idx) => (

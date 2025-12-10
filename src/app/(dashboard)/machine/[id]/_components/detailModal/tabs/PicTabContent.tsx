@@ -48,7 +48,7 @@ export default function PicTabContent({
         <tbody>
           {editData.machineChecklistItemsWithPicCountResponseDtos.map((cate, idx) => {
             return (
-              <tr key={cate.machineChecklistItemId}>
+              <tr key={cate.machineProjectChecklistItemId}>
                 {idx === 0 && (
                   <th
                     rowSpan={editData.machineChecklistItemsWithPicCountResponseDtos.length}
@@ -71,7 +71,7 @@ export default function PicTabContent({
                     placement='right'
                     title={cate.checklistSubItems?.map((subCate, index) => (
                       <Typography sx={{ bgcolor: 'white' }} key={index}>
-                        {index + 1}. {subCate.checklistSubItemName}
+                        {index + 1}. {subCate.machineProjectChecklistSubItemName}
                         <Typography component={'span'} color='primary.main'>
                           {subCate.machinePicCount ? ` (${subCate.machinePicCount})` : ''}
                         </Typography>
@@ -92,7 +92,7 @@ export default function PicTabContent({
                         cursor: 'pointer'
                       }}
                     >
-                      {idx + 1}. {cate.machineChecklistItemName}
+                      {idx + 1}. {cate.machineProjectChecklistItemName}
                       <Typography component={'span'} color='primary.main'>
                         {cate.totalMachinePicCount ? ` (${cate.totalMachinePicCount})` : ''}
                       </Typography>
@@ -100,7 +100,7 @@ export default function PicTabContent({
                   </Tooltip>
                   {cate.machineInspectionChecklistItemResultBasicResponseDto?.inspectionResult === 'FAIL' && (
                     <DeficiencyModal
-                      checklistItemId={cate.machineChecklistItemId}
+                      checklistItemId={cate.machineProjectChecklistItemId}
                       editData={editData}
                       handleChangeChecklistItemResult={handleChangeChecklistItemResult}
                     />
@@ -123,7 +123,7 @@ export default function PicTabContent({
                     <TextField
                       value={
                         editData.machineChecklistItemsWithPicCountResponseDtos.find(
-                          v => cate.machineChecklistItemId === v.machineChecklistItemId
+                          v => cate.machineProjectChecklistItemId === v.machineProjectChecklistItemId
                         )?.machineInspectionChecklistItemResultBasicResponseDto.inspectionResult ?? 'NONE'
                       }
                       size='small'
@@ -200,7 +200,7 @@ const DeficiencyModal = ({
   const [open, setOpen] = useState(false)
 
   const currentChecklist = editData.machineChecklistItemsWithPicCountResponseDtos.find(
-    v => v.machineChecklistItemId === checklistItemId
+    v => v.machineProjectChecklistItemId === checklistItemId
   )
 
   const currentChecklistResult = currentChecklist?.machineInspectionChecklistItemResultBasicResponseDto
@@ -263,7 +263,7 @@ const DeficiencyModal = ({
           size='sm'
           title={
             <Typography variant='h3' fontWeight={600}>
-              {currentChecklist?.machineChecklistItemName ?? '미흡사항'}
+              {currentChecklist?.machineProjectChecklistItemName ?? '미흡사항'}
             </Typography>
           }
           open={open}

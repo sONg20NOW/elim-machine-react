@@ -66,7 +66,7 @@ export default function CheckInspectionDetailPage() {
   // 현재 선택된 inspection 데이터 가져오기
   const { data: checklist } = useGetChecklistInfo(`${machineProjectId}`, `${machineInspectionId}`)
 
-  const checklistItem = checklist?.find(v => v.machineChecklistItemId === Number(category))
+  const checklistItem = checklist?.find(v => v.machineProjectChecklistItemId === Number(category))
 
   const handleDeleteInspection = useCallback(async () => {
     try {
@@ -211,7 +211,7 @@ export default function CheckInspectionDetailPage() {
                 setCategory={setCategory}
               />
               <PictureTable
-                machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
+                machineProjectChecklistItemId={checklistItem?.machineProjectChecklistItemId ?? null}
                 scrollableAreaRef={scrollableAreaRef}
                 tabHeight={TabListRef.current?.clientHeight ?? 0}
               />
@@ -227,7 +227,7 @@ export default function CheckInspectionDetailPage() {
             >
               <EmptyCategorySelector category={category} setCategory={setCategory} />
               <EmptyPictureTable
-                machineChecklistItemId={checklistItem?.machineChecklistItemId ?? null}
+                machineProjectChecklistItemId={checklistItem?.machineProjectChecklistItemId ?? null}
                 scrollableAreaRef={scrollableAreaRef}
                 tabHeight={TabListRef.current?.clientHeight ?? 0}
               />

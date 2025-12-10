@@ -486,8 +486,8 @@ export interface MachineInspectionResponseDtoType {
 
 // 점검 항목 + 사진 개수 등의 정보 목록
 export interface MachineChecklistItemsWithPicCountResponseDtosType {
-  machineChecklistItemId: number
-  machineChecklistItemName: string
+  machineProjectChecklistItemId: number
+  machineProjectChecklistItemName: string
   checklistSubItems: MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType[]
   totalMachinePicCount: number
   machineInspectionChecklistItemResultBasicResponseDto: MachineInspectionChecklistItemResultBasicResponseDtoType
@@ -507,8 +507,8 @@ export interface MachineInspectionChecklistItemResultBasicResponseDtoType {
 
 // 점검 항목의 하위 항목 및 사진 개수 응답 DTO
 export interface MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType {
-  machineChecklistSubItemId: number
-  checklistSubItemName: string
+  machineProjectChecklistSubItemId: number
+  machineProjectChecklistSubItemName: string
   machinePicCount: number
 }
 
@@ -684,7 +684,6 @@ export interface machineInspectionSummaryResponseDtoType {
 }
 
 // ----------- presignedURL 관련 -----------
-
 // POST /api/machine-projects/{machineProjectId}/machine-pics 프로젝트 내 전체 사진 조회 (Presigned URL 포함)
 export interface MachinePicPresignedUrlResponseDtoType {
   machineInspectionId: number
@@ -692,11 +691,11 @@ export interface MachinePicPresignedUrlResponseDtoType {
   machinePicId: number
   version: number
   machineCategoryId: number
-  machineChecklistItemId: number
-  machineChecklistSubItemId: number
+  machineProjectChecklistItemId: number
+  machineProjectChecklistSubItemId: number
   machineCategoryName: string
-  machineChecklistItemName: string
-  machineChecklistSubItemName: string
+  machineProjectChecklistItemName: string
+  machineProjectChecklistSubItemName: string
   originalFileName: string
   measuredValue: string
   alternativeSubTitle: string
@@ -706,12 +705,18 @@ export interface MachinePicPresignedUrlResponseDtoType {
   remark: string
 }
 
+export interface machinePicCreateRequestDtoType {
+  machineProjectChecklistSubItemId: number
+  originalFileName: string
+  s3Key: string
+}
+
 // ----------- 무한스크롤 사진 관련 -----------
 // 무한스크롤 커서 정보 (사진 조회용)
 export interface MachinePicCursorType {
   lastMachineCateSortOrder: number
   lastMachinePicCateSortOrder: number
-  lastMachineChecklistSubItemSortOrder: number
+  lastMachineProjectChecklistSubItemSortOrder: number
   lastMachineInspectionId: number
   lastMachinePicId: number
 }
@@ -721,7 +726,7 @@ export interface MachinePicUpdateResponseDtoType {
   machineInspectionId: number
   machinePicId: number
   version: number
-  machineChecklistSubItemId: number
+  machineProjectChecklistSubItemId: number
   originalFileName: string
   s3Key: string
   downloadPresignedUrl: string
@@ -730,6 +735,11 @@ export interface MachinePicUpdateResponseDtoType {
   measuredValue: string
   remark: string
 }
+
+export type MachinePicUpdateRequestDtoType = Omit<
+  MachinePicUpdateResponseDtoType,
+  'machinePicId' | 'downloadPresignedUrl' | 'cdnPath'
+>
 
 // ----------- machineProject Pic 관련 -------------
 export type ProjectPicType = 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
