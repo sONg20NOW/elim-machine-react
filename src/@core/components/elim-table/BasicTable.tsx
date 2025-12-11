@@ -176,17 +176,17 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                   className={classNames(
                     'text-base',
                     {
-                      'cursor-pointer hover:underline': !(loading || error) && header[k].canSort,
-                      'font-bold select-none': header[k].canSort,
-                      'font-medium': !header[k].canSort
+                      'cursor-pointer hover:underline': !(loading || error) && header[k]?.canSort,
+                      'font-bold select-none': header[k]?.canSort,
+                      'font-medium': !header[k]?.canSort
                     },
-                    { hidden: isTablet && header[k].hideOnTablet }
+                    { hidden: isTablet && header[k]?.hideOnTablet }
                   )}
                   sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
-                  onClick={!(loading || error) && header[k].canSort ? () => handleSorting(key) : undefined}
+                  onClick={!(loading || error) && header[k]?.canSort ? () => handleSorting(key) : undefined}
                 >
-                  {header[k].label}
-                  {header[k].canSort &&
+                  {header[k]?.label}
+                  {header[k]?.canSort &&
                     sort &&
                     sort[0] === k &&
                     (sort[1] === 'desc' ? (
@@ -236,6 +236,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                     rightClickMenu && handleContextMenu(e, info)
                   }}
                 >
+                  {/* 우클릭 메뉴 */}
                   {contextMenu && (
                     <Menu
                       slotProps={{ paper: { sx: { boxShadow: 'var(--mui-customShadows-sm)' } } }}
@@ -282,6 +283,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                       ))}
                     </Menu>
                   )}
+                  {/* 체크박스 */}
                   {showCheckBox && isChecked && (
                     <StyledTableCell size={isMobile ? 'small' : 'medium'}>
                       <Checkbox
@@ -291,79 +293,82 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                       />
                     </StyledTableCell>
                   )}
+                  {/* 번호 */}
                   {!isTablet && (
                     <StyledTableCell size={isMobile ? 'small' : 'medium'} align='center' key={'order'}>
                       <Typography>{page * size + index + 1}</Typography>
                     </StyledTableCell>
                   )}
+                  {/* 데이터 출력 */}
+                  {Object.keys(header).map(key => {
+                    const k = key as keyof T
 
-                  {Object.keys(header).map(property => {
-                    const key = property as keyof T
+                    let cell: string | undefined = ''
 
-                    let content: string | undefined = ''
+                    // 1. MultiException 예외 처리
+                    if (multiException && Object.keys(multiException).includes(key)) {
+                      const t_key = key as keyof typeof multiException
 
-                    if (!Object.keys(header).includes(property)) {
-                      // header 속성에 포함되지 않다면 출력 x & 예외 출력
-                      return null
-                    } else if (multiException && Object.keys(multiException).includes(property)) {
-                      // MultiException 예외 처리
-                      const key = property as keyof typeof multiException
-
-                      const pieces = multiException[key]?.map(value =>
+                      const pieces = multiException[t_key]?.map(value =>
                         value === 'latestProjectEndDate' ? info[value]?.toString().slice(5) : info[value]
                       )
 
-                      content = pieces?.join(key === 'age' ? '  ' : ' ~ ')
-                    } else if (listException && listException.includes(key)) {
-                      // ListException 처리
-                      const list = info[key] as string[]
+                      cell = pieces?.join(t_key === 'age' ? '  ' : ' ~ ')
+                    }
+
+                    // 2. ListException 처리
+                    else if (listException && listException.includes(k)) {
+                      const list = info[k] as string[]
 
                       // 세 개 이상일 경우 외 (length - 2) 로 처리
-                      content =
+                      cell =
                         list.length < 3
                           ? list.join(', ')
                           : list
                               .slice(0, 2)
                               .join(', ')
                               .concat(` 외 ${list.length - 2}`)
-                    } else {
-                      if (key === 'remark') {
-                        content = info[key]
+                    }
+
+                    // 3. Exception이 아닌 경우
+                    else {
+                      // remark의 경우 최대 3자까지만 출력
+                      if (k === 'remark') {
+                        cell = info[k]
                           ?.toString()
                           .slice(0, 3)
-                          .concat(info[key]?.toString().length > 3 ? '..' : '')
+                          .concat(info[k]?.toString().length > 3 ? '..' : '')
                       } else {
-                        content = info[key] as string
+                        cell = info[k] as string
                       }
                     }
 
                     return (
-                      !(isTablet && header[key].hideOnTablet) && (
-                        <StyledTableCell
-                          size={isMobile ? 'small' : 'medium'}
-                          key={key?.toString()}
-                          align='center'
-                          sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
+                      <StyledTableCell
+                        size={isMobile ? 'small' : 'medium'}
+                        key={k?.toString()}
+                        align='center'
+                        sx={isTablet ? { p: 0, py: 2, px: 1 } : {}}
+                        className={classNames({ hidden: isTablet && header[k]?.hideOnTablet })}
+                      >
+                        {/* 사진의 경우 클릭 가능하도록 */}
+                        <Typography
+                          onClick={e => {
+                            if (k === 'machinePicCount' && onClickPicCount) {
+                              e.stopPropagation()
+                              onClickPicCount(info)
+                            }
+                          }}
+                          sx={{
+                            ...(k === 'machinePicCount' && {
+                              color: 'primary.main',
+                              ':hover': { textDecoration: 'underline' }
+                            })
+                          }}
                         >
-                          {/* 사진의 경우 클릭 가능하도록 */}
-                          <Typography
-                            onClick={e => {
-                              if (key === 'machinePicCount' && onClickPicCount) {
-                                e.stopPropagation()
-                                onClickPicCount(info)
-                              }
-                            }}
-                            sx={{
-                              ...(key === 'machinePicCount' && {
-                                color: 'primary.main',
-                                ':hover': { textDecoration: 'underline' }
-                              })
-                            }}
-                          >
-                            {content}
-                          </Typography>
-                        </StyledTableCell>
-                      )
+                          {cell}
+                        </Typography>
+                      </StyledTableCell>
                     )
                   })}
                 </TableRow>
