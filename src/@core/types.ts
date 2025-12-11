@@ -1331,11 +1331,6 @@ export interface HeaderInfoType {
 
 export type HeaderType<T> = Record<keyof T, HeaderInfoType>
 
-// 테이블 정렬
-export type SortType = '' | 'asc' | 'desc'
-
-export type SortInfoType<T> = Record<'target', keyof T | ''> & Record<'sort', SortType>
-
 // 모달 Box 사이징, 입력 타입
 export type BoxSizeType = 'sm' | 'md' | 'lg'
 export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text' | 'juminNum' | 'map'

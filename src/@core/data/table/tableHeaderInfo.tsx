@@ -1,7 +1,6 @@
 import type {
   HeaderInfoType,
   MachineEngineerPageResponseDtoType,
-  SortInfoType,
   MachineProjectPageDtoType,
   MemberPageDtoType,
   LicensePageResponseDtoType,
@@ -80,12 +79,4 @@ export const TABLE_HEADER_INFO = {
     contractDate: { label: '계약일', canSort: false, hideOnTablet: true },
     expireDate: { label: '만료일', canSort: false, hideOnTablet: true }
   } as Record<keyof LicensePageResponseDtoType, HeaderInfoType>
-}
-
-// 초기 정렬 생성
-export function createInitialSorting<T>(): SortInfoType<T> {
-  return {
-    target: '',
-    sort: ''
-  }
 }
