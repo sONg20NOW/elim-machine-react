@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // MUI Imports
 import { useRouter } from 'next/navigation'
@@ -21,15 +21,17 @@ import type { CalendarOptions } from '@fullcalendar/core'
 // Type Imports
 import { Typography } from '@mui/material'
 
+import dayjs from 'dayjs'
+
+import { IconCake, IconSettingsFilled } from '@tabler/icons-react'
+
 import type { CalendarColors, CalendarType } from '@/types/apps/calendarTypes'
 
 // Slice Imports
 import { fetchEvents, filterEvents, updateEvent } from '@/redux-store/slices/calendar'
-import type { MemberDetailResponseDtoType } from '@/@core/types'
-import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
 import UserModal from '../../member/_components/UserModal'
-import useMachineTabValueStore from '@/@core/utils/useMachineTabValueStore'
+import useMachineTabValueStore from '@core/utils/useMachineTabValueStore'
+import { useGetSingleMember } from '@core/hooks/customTanstackQueries'
 
 type CalenderProps = {
   calendarStore: CalendarType
@@ -65,21 +67,10 @@ const Calendar = (props: CalenderProps) => {
   const router = useRouter()
 
   const [open, setOpen] = useState(false)
-  const [selectedUserData, setSelectedUserData] = useState<MemberDetailResponseDtoType>()
+  const [memberId, setMemberId] = useState('0')
+  const { data: selectedUserData } = useGetSingleMember(memberId.toString())
 
   const setTabValue = useMachineTabValueStore(set => set.setTabValue)
-
-  const getSingleMember = useCallback(async (memberId: number) => {
-    try {
-      const response = await auth
-        .get<{ data: MemberDetailResponseDtoType }>(`/api/members/${memberId}`)
-        .then(v => v.data.data)
-
-      setSelectedUserData(response)
-    } catch (e) {
-      handleApiError(e)
-    }
-  }, [])
 
   // Hooks
   const theme = useTheme()
@@ -94,7 +85,10 @@ const Calendar = (props: CalenderProps) => {
 
   // calendarOptions(Props)
   const calendarOptions: CalendarOptions = {
-    events: calendarStore.events,
+    events: calendarStore.events.map(event => ({
+      ...event,
+      end: dayjs(event.end?.toString()).add(1, 'day').format('YYYY-MM-DD')
+    })),
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     initialView: 'dayGridMonth',
     headerToolbar: {
@@ -160,8 +154,8 @@ const Calendar = (props: CalenderProps) => {
       return (
         <>
           <div className='flex gap-1 items-center'>
-            {eventInfo.event.extendedProps['type'] === '생일' && <i className='tabler-cake' />}
-            {eventInfo.event.extendedProps['type'] === '기계설비' && <i className='tabler-settings-filled' />}
+            {eventInfo.event.extendedProps['type'] === '생일' && <IconCake />}
+            {eventInfo.event.extendedProps['type'] === '기계설비' && <IconSettingsFilled />}
             <Typography
               sx={{ overflowX: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
               color='white'
@@ -183,7 +177,7 @@ const Calendar = (props: CalenderProps) => {
       } else if (event.extendedProps['type'] === '생일') {
         const memberId = event.id
 
-        await getSingleMember(Number(memberId))
+        setMemberId(memberId)
         setOpen(true)
       }
 
@@ -245,17 +239,14 @@ const Calendar = (props: CalenderProps) => {
     direction: theme.direction
   }
 
+  // useEffect(() => {
+  //   console.log(JSON.stringify(calendarOptions.events))
+  // }, [calendarOptions.events])
+
   return (
     <>
       <FullCalendar height='100%' ref={calendarRef} {...calendarOptions} />
-      {open && selectedUserData && (
-        <UserModal
-          selectedUserData={selectedUserData}
-          setSelectedUserData={setSelectedUserData}
-          open={open}
-          setOpen={setOpen}
-        />
-      )}
+      {open && selectedUserData && <UserModal open={open} setOpen={setOpen} selectedUserData={selectedUserData} />}
     </>
   )
 }

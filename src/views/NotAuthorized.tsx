@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography'
 import classnames from 'classnames'
 
 // Type Imports
-import type { SystemMode } from '@/@core/types'
+import type { SystemMode } from '@core/types'
 import type { Locale } from '@/configs/i18n'
 
 // Hook Imports

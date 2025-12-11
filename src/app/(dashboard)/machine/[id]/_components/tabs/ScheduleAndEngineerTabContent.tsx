@@ -1,39 +1,46 @@
-import { useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Box, Button, IconButton, MenuItem } from '@mui/material'
+import { Box, Button, IconButton, MenuItem, Typography } from '@mui/material'
 
-import type {
-  machineProjectEngineerDetailDtoType,
-  MachineProjectScheduleAndEngineerResponseDtoType
-} from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { InputBox } from '@/@core/components/custom/InputBox'
+import { IconPlus, IconX } from '@tabler/icons-react'
+
+import type { machineProjectEngineerDetailDtoType, MachineProjectScheduleAndEngineerResponseDtoType } from '@core/types'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import { InputBox } from '@/@core/components/elim-inputbox/InputBox'
+import { MACHINE_PROJECT_ENGINEER_INPUT_INFO, MACHINE_SCHEDULE_INPUT_INFO } from '@/@core/data/input/machineInputInfo'
+import CustomTextField from '@core/components/mui/TextField'
+import { gradeOption } from '@/@core/data/options'
 import {
-  MACHINE_PROJECT_ENGINEER_INPUT_INFO,
-  MACHINE_SCHEDULE_INPUT_INFO
-} from '@/app/_constants/input/MachineInputInfo'
-import CustomTextField from '@/@core/components/mui/TextField'
-import { gradeOption } from '@/app/_constants/options'
-import { MachineProjectEngineerInitialData } from '@/app/_constants/MachineProjectSeed'
-import AlertModal from '@/@core/components/custom/AlertModal'
-import {
-  useGetEngineerList,
+  useGetEngineersOptions,
   useGetParticipatedEngineerList,
   useGetScheduleTab
-} from '@/@core/hooks/customTanstackQueries'
-import useMachineIsEditingStore from '@/@core/utils/useMachineIsEditingStore'
-import { auth } from '@/lib/auth'
+} from '@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
+import AlertModal from '@/@core/components/elim-modal/AlertModal'
+import isEditingContext from '../../isEditingContext'
 
-const ScheduleAndEngineerTabContent = ({}: {}) => {
+// 참여기술진 추가 시 사용되는 더미 데이터
+const MachineProjectEngineerInitialData: machineProjectEngineerDetailDtoType = {
+  engineerId: 0,
+  engineerName: '',
+  grade: '',
+  gradeDescription: '',
+  engineerLicenseNum: '',
+  beginDate: '',
+  endDate: '',
+  note: ''
+}
+
+const ScheduleAndEngineerTabContent = () => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
-  const { isEditing, setIsEditing } = useMachineIsEditingStore()
+  const { isEditing, setIsEditing } = useContext(isEditingContext)!
 
   const { data: scheduleData, refetch: refetchScheduleData } = useGetScheduleTab(machineProjectId)
-  const { data: engineerList } = useGetEngineerList()
+  const { data: engineerList } = useGetEngineersOptions()
   const { refetch: refetchParticipatedEngineers } = useGetParticipatedEngineerList(machineProjectId)
 
   const [editData, setEditData] = useState<MachineProjectScheduleAndEngineerResponseDtoType>(
@@ -45,12 +52,15 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
   const existChange = JSON.stringify(editData) !== JSON.stringify(scheduleData)
 
   const engineerMenuOption = engineerList?.map(engineer => {
-    return { value: engineer.engineerId, label: `${engineer.engineerName}` }
+    return { value: engineer.engineerId, label: `${engineer.engineerName} [${engineer.gradeDescription}]` }
   })
+
+  const [loading, setLoading] = useState(false)
 
   // 실제 API 호출 부분 (PUT/PATCH 등)
   const handleSave = async () => {
     try {
+      setLoading(true)
       await auth.put(`/api/machine-projects/${machineProjectId}/schedule`, editData)
 
       await auth.put(`/api/machine-projects/${machineProjectId}/machine-project-engineers`, {
@@ -64,6 +74,8 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
       handleSuccess('저장되었습니다.')
     } catch (error) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -79,6 +91,12 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
     })
   }
 
+  const handleDontSave = useCallback(() => {
+    setEditData(scheduleData!)
+    setIsEditing(false)
+    setShowAlertModal(false)
+  }, [setIsEditing, scheduleData])
+
   return (
     <div
       style={{
@@ -87,7 +105,8 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
         overflow: 'hidden',
         background: '#fafbfc',
         fontSize: 15,
-        marginBottom: 16
+        marginBottom: 16,
+        maxWidth: '890px'
       }}
     >
       <div>
@@ -107,7 +126,12 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                         점검일정
                       </th>
                       <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px', gap: '2px' }}>
-                        <div className='justify-end flex gap-2'>
+                        <div className='justify-end flex gap-2 items-end'>
+                          {!existChange && (
+                            <Typography variant='caption' color='warning.main'>
+                              변경사항이 없습니다
+                            </Typography>
+                          )}
                           <Button
                             variant='contained'
                             color='success'
@@ -116,6 +140,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                               handleSave()
                               setIsEditing(false)
                             }}
+                            disabled={loading || !existChange}
                           >
                             저장
                           </Button>
@@ -337,7 +362,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                             size='small'
                             variant='contained'
                             type='button'
-                            color='primary'
+                            color='info'
                             onClick={() => {
                               setEditData(prev => ({
                                 ...prev,
@@ -345,14 +370,17 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                                   ...prev.engineers,
                                   {
                                     ...MachineProjectEngineerInitialData,
-                                    beginDate: editData.beginDate,
-                                    endDate: editData.endDate
+                                    beginDate:
+                                      editData.engineers?.[editData.engineers.length - 1]?.beginDate ??
+                                      editData.beginDate,
+                                    endDate:
+                                      editData.engineers?.[editData.engineers.length - 1]?.endDate ?? editData.endDate
                                   }
                                 ]
                               }))
                             }}
                           >
-                            <i className='tabler-plus' />
+                            <IconPlus />
                             추가
                           </Button>
                         </div>
@@ -405,7 +433,14 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                               }
                             }}
                             slotProps={{
-                              select: { displayEmpty: true },
+                              select: {
+                                displayEmpty: true,
+                                renderValue: value => (
+                                  <Typography variant='inherit'>
+                                    {engineerList?.find(v => v.engineerId === value)?.engineerName ?? '-'}
+                                  </Typography>
+                                )
+                              },
                               htmlInput: { name: name }
                             }}
                           >
@@ -487,7 +522,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                               }}
                               type='button'
                             >
-                              <i className='tabler-x' />
+                              <IconX />
                             </IconButton>
                           </div>
                         </td>
@@ -515,7 +550,7 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                         <Button
                           type='button'
                           variant='contained'
-                          color='success'
+                          color='primary'
                           onClick={() => {
                             setIsEditing(true)
                           }}
@@ -591,52 +626,63 @@ const ScheduleAndEngineerTabContent = ({}: {}) => {
                         참여기술진
                       </th>
                     </tr>
-                    <tr className='py-1'>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>성명</th>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>등급</th>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                        수첩발급번호
-                      </th>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }} colSpan={2}>
-                        참여기간
-                      </th>
-                      <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>비고</th>
-                    </tr>
-                    {(scheduleData.engineers || []).map((eng, idx) => (
-                      <tr key={eng.engineerId || idx}>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.engineerName}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.gradeDescription}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.engineerLicenseNum}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.beginDate}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.endDate}</p>
-                        </td>
-                        <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
-                          <p>{eng.note}</p>
+                    {(scheduleData?.engineers.length ?? 0 > 0) ? (
+                      <>
+                        <tr className='py-1'>
+                          <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>성명</th>
+                          <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>등급</th>
+                          <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                            수첩발급번호
+                          </th>
+                          <th
+                            style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}
+                            colSpan={2}
+                          >
+                            참여기간
+                          </th>
+                          <th style={{ padding: '6px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>비고</th>
+                        </tr>
+                        {(scheduleData.engineers || []).map((eng, idx) => (
+                          <tr key={eng.engineerId || idx}>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.engineerName}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.gradeDescription}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.engineerLicenseNum}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.beginDate}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.endDate}</p>
+                            </td>
+                            <td style={{ padding: '13px', border: '1px solid #d1d5db', wordBreak: 'break-all' }}>
+                              <p>{eng.note}</p>
+                            </td>
+                          </tr>
+                        ))}
+                      </>
+                    ) : (
+                      <tr>
+                        <td colSpan={6}>
+                          <div className='grid place-items-center p-4'>
+                            <Typography color='warning.main'>
+                              해당 기계설비현장에 참여 중인 기술진이 없습니다
+                            </Typography>
+                          </div>
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
             )}
       </div>
       {showAlertModal && scheduleData && (
-        <AlertModal<MachineProjectScheduleAndEngineerResponseDtoType>
-          showAlertModal={showAlertModal}
-          setShowAlertModal={setShowAlertModal}
-          setEditData={setEditData}
-          setIsEditing={setIsEditing}
-          originalData={scheduleData}
-        />
+        <AlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
       )}
     </div>
   )

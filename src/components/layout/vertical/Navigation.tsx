@@ -7,7 +7,9 @@ import { useEffect, useRef } from 'react'
 import { styled, useColorScheme, useTheme } from '@mui/material/styles'
 
 // Type Imports
-import type { Mode } from '@/@core/types'
+import { IconChevronsLeft, IconChevronsRight, IconX } from '@tabler/icons-react'
+
+import type { Mode } from '@core/types'
 
 // Component Imports
 import VerticalNav, { NavHeader, NavCollapseIcons } from '@menu/vertical-menu'
@@ -97,7 +99,12 @@ const Navigation = (props: Props) => {
     // eslint-disable-next-line lines-around-comment
     // Sidebar Vertical Menu
     <VerticalNav
-      customStyles={navigationCustomStyles(verticalNavOptions, theme)}
+      customStyles={{
+        ...navigationCustomStyles(verticalNavOptions, theme),
+        height: '100%', // ✅ 핵심
+        position: 'sticky', // optional (원하면 fixed → sticky로 변경)
+        top: 0
+      }}
       collapsedWidth={71}
       backgroundColor='var(--mui-palette-background-paper)'
       // eslint-disable-next-line lines-around-comment
@@ -114,9 +121,9 @@ const Navigation = (props: Props) => {
         {!(isCollapsed && !isHovered) && (
           <NavCollapseIcons
             className='absolute right-4 top-4'
-            lockedIcon={<i className='tabler-chevrons-left text-xl' />}
-            unlockedIcon={<i className='tabler-chevrons-right text-xl' />}
-            closeIcon={<i className='tabler-x text-xl' />}
+            lockedIcon={<IconChevronsLeft />}
+            unlockedIcon={<IconChevronsRight />}
+            closeIcon={<IconX />}
             onClick={() => updateSettings({ layout: !isCollapsed ? 'collapsed' : 'vertical' })}
           />
         )}

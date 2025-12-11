@@ -1,35 +1,41 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 // MUI Imports
+import { useSearchParams } from 'next/navigation'
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
-import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
+import { IconBoltOff, IconPlus, IconReload } from '@tabler/icons-react'
+
+import { useQueryClient } from '@tanstack/react-query'
+
+import { Backdrop, CircularProgress, Typography } from '@mui/material'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
-import UserModal from './_components/UserModal'
-import AddUserModal from './_components/addUserModal'
-import type {
-  EngineerFilterType,
-  EngineerResponseDtoType,
-  MachineEngineerPageResponseDtoType,
-  successResponseDtoType
-} from '@/@core/types'
-import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
-import BasicTable from '@/@core/components/custom/BasicTable'
-import SearchBar from '@/@core/components/custom/SearchBar'
-import TableFilters from '@/@core/components/custom/TableFilters'
-import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
-import { EngineerInitialFilters } from '@/app/_constants/EngineerSeed'
-import { ENGINEER_FILTER_INFO } from '@/app/_constants/filter/EngineerFilterInfo'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { auth } from '@/lib/auth'
+import EngineerModal from './_components/EngineerModal'
+import AddEngineerModal from './_components/AddEngineerModal'
+import type { EngineerFilterType, MachineEngineerPageResponseDtoType } from '@core/types'
+import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
+import BasicTable from '@core/components/elim-table/BasicTable'
+import SearchBar from '@core/components/elim-inputbox/SearchBar'
+import { DEFAULT_PAGESIZE, PageSizeOptions } from '@core/data/options'
+import { ENGINEER_FILTER_INFO } from '@core/data/filter/engineerFilterInfo'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import { auth } from '@core/utils/auth'
+import { useGetEngineer, useGetEngineers, useGetEngineersOptions } from '@core/hooks/customTanstackQueries'
+import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
+import deleteEngineer from './_util/deleteEngineer'
+import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
+import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
+import BasicTablePagination from '@core/components/elim-table/BasicTablePagination'
 
 /**
  * @type T
@@ -39,110 +45,66 @@ import { auth } from '@/lib/auth'
  * @returns
  */
 export default function EngineerPage() {
+  const queryClient = useQueryClient()
+
+  const searchParams = useSearchParams()
+
   // 데이터 리스트
-  const [data, setData] = useState<MachineEngineerPageResponseDtoType[]>([])
+  const { data: engineersPages, refetch: refetchPages, isLoading, isError } = useGetEngineers(searchParams.toString())
+  const data = engineersPages?.content
 
   // 로딩 시도 중 = true, 로딩 끝 = false
   const [loading, setLoading] = useState(false)
 
-  // 에러 발생 시 true
-  const [error, setError] = useState(false)
-
   // 로딩이 끝나고 에러가 없으면 not disabled
-  const disabled = loading || error
+  const disabled = loading || isError || isLoading
 
   // 전체 데이터 개수 => fetching한 데이터에서 추출
-  const [totalCount, setTotalCount] = useState(0)
-
-  // 이름 검색 인풋
-  const [name, setName] = useState('')
-
-  // 현장명 검색 인풋
-  const [projectName, setProjectName] = useState('')
+  const totalCount = engineersPages?.page.totalElements ?? 0
 
   // 페이지네이션 관련
-  const [page, setPage] = useState(0)
-  const [size, setSize] = useState(DEFAULT_PAGESIZE)
+  const page = Number(searchParams.get('page') ?? 0)
+  const size = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)
+  const projectName = searchParams.get('projectName')
+  const name = searchParams.get('name')
 
   // 모달 관련 상태
-  const [addUserModalOpen, setAddUserModalOpen] = useState(false)
-  const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
+  const [openAdd, setOpenAdd] = useState(false)
+  const [openDetail, setOpenDetail] = useState(false)
 
-  const [selectedUser, setSelectedUser] = useState<EngineerResponseDtoType>()
+  const [selectedId, setSelectedId] = useState(0)
+  const { data: selectedData, isLoading: isLoadingEngineer } = useGetEngineer(selectedId.toString())
+  const { refetch: refetchEngineerOptions } = useGetEngineersOptions()
 
-  // 필터 상태 - 컬럼에 맞게 수정
-  const [filters, setFilters] = useState(EngineerInitialFilters)
-
-  // 정렬 상태
-  const [sorting, setSorting] = useState(createInitialSorting<MachineEngineerPageResponseDtoType>)
-
-  // 선택 삭제 기능 관련
+  // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<{ engineerId: number; version: number }[]>([])
 
-  // 데이터 페치에 사용되는 쿼리 URL
+  // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
+  const updateParams = useUpdateParams()
 
-  // 직원 리스트 호출 API 함수
-  const getFilteredData = useCallback(async () => {
-    setLoading(true)
-    setError(false)
-    const queryParams = new URLSearchParams()
+  type paramType = 'page' | 'size' | 'name' | 'projectName'
 
-    try {
-      // 필터링
-      Object.keys(filters).forEach(prop => {
-        const key = prop as keyof typeof filters
+  const setQueryParams = useSetQueryParams<paramType>()
 
-        filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
-      })
+  const resetQueryParams = useCallback(() => {
+    updateParams(params => {
+      params.delete('page')
+      params.delete('name')
+      params.delete('projectName')
+      params.delete('sort')
 
-      // 정렬
-      sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
+      const filterKeys = Object.keys(ENGINEER_FILTER_INFO)
 
-      // 이름 검색
-      name ? queryParams.set('name', name) : queryParams.delete('name')
-
-      // 현장명 검색
-      projectName ? queryParams.set('projectName', projectName) : queryParams.delete('projectName')
-
-      // 페이지 설정
-      queryParams.set('page', page.toString())
-      queryParams.set('size', size.toString())
-
-      // axios GET 요청
-      const response = await auth.get<{ data: successResponseDtoType<MachineEngineerPageResponseDtoType[]> }>(
-        `/api/engineers?${queryParams.toString()}`
-      )
-
-      const result = response.data.data
-
-      // 상태 업데이트
-      setData(result.content ?? [])
-      setPage(result.page.number)
-      setSize(result.page.size)
-      setTotalCount(result.page.totalElements)
-    } catch (error: any) {
-      handleApiError(error, '데이터 조회에 실패했습니다.')
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [filters, sorting, page, size, name, projectName])
-
-  // 필터 변경 시 API 호출
-  useEffect(() => {
-    getFilteredData()
-  }, [filters, getFilteredData])
+      filterKeys.forEach(v => params.delete(v))
+    })
+  }, [updateParams])
 
   // 엔지니어 선택 핸들러
   const handleEngineerClick = async (engineerData: MachineEngineerPageResponseDtoType) => {
     try {
-      const response = await auth.get<{ data: EngineerResponseDtoType }>(`/api/engineers/${engineerData.engineerId}`)
-
-      const engineerInfo = response.data.data
-
-      setSelectedUser(engineerInfo)
-      setUserDetailModalOpen(true)
+      setSelectedId(engineerData.engineerId)
+      setOpenDetail(true)
     } catch (error) {
       handleApiError(error, '엔지니어를 선택하는 데 실패했습니다.')
     }
@@ -162,76 +124,87 @@ export default function EngineerPage() {
 
   const handleCheckAllEngineers = (checked: boolean) => {
     if (checked) {
-      setChecked(prev => {
-        const newChecked = structuredClone(prev)
-
-        data.forEach(engineer => {
-          if (!prev.find(v => v.engineerId === engineer.engineerId)) {
-            newChecked.push({ engineerId: engineer.engineerId, version: engineer.version })
-          }
-        })
-
-        return newChecked
-      })
+      setChecked(data?.map(v => ({ engineerId: v.engineerId, version: v.version })) ?? [])
     } else {
       setChecked([])
     }
   }
 
   const isChecked = (engineer: MachineEngineerPageResponseDtoType) => {
-    let exist = false
-
-    checked.forEach(v => {
-      if (JSON.stringify(v) === JSON.stringify({ engineerId: engineer.engineerId, version: engineer.version }))
-        exist = true
-    })
-
-    return exist
+    return checked.some(v => v.engineerId === engineer.engineerId)
   }
+
+  // offset만큼 요소수가 변화했을 때 valid한 페이지 param을 책임지는 함수
+  const adjustPage = useCallback(
+    (offset = 0) => {
+      const lastPageAfter = Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
+
+      if (offset > 0 || page > lastPageAfter) {
+        lastPageAfter > 0 ? setQueryParams({ page: lastPageAfter }) : updateParams(params => params.delete('page'))
+      }
+    },
+    [page, setQueryParams, totalCount, size, updateParams]
+  )
+
+  // tanstack query cache 삭제 및 refetch
+  const removeQueryCaches = useCallback(() => {
+    refetchEngineerOptions()
+    refetchPages()
+
+    queryClient.removeQueries({
+      predicate(query) {
+        const key = query.queryKey
+
+        return (
+          Array.isArray(key) &&
+          key.length >= 3 &&
+          key[0] === 'GET_ENGINEERS' &&
+          key[1] === 'MACHINE' &&
+          key[2] !== searchParams.toString()
+        ) // 스크롤 유지를 위해 현재 data는 refetch, 나머지는 캐시 지우기
+      }
+    })
+  }, [refetchEngineerOptions, refetchPages, queryClient, searchParams])
 
   // 여러 기술자 한번에 삭제
   async function handleDeleteEngineers() {
     if (!checked.length) return
 
     try {
+      setLoading(true)
       await auth.delete(`/api/engineers`, {
         //@ts-ignore
         data: { engineerDeleteRequestDtos: checked }
       })
-      setFilters(EngineerInitialFilters)
-      setName('')
-      setProjectName('')
-      setPage(0)
-      getFilteredData()
+
+      adjustPage(-1 * checked.length)
+      removeQueryCaches()
       handleSuccess(`선택된 기계설비 기술자 ${checked.length}명이 성공적으로 삭제되었습니다.`)
       setChecked([])
       setShowCheckBox(false)
     } catch (error) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <>
-      <Card className='relative'>
+      <Card className='relative h-full flex flex-col'>
         {/* 탭 제목 */}
-        <CardHeader title={`기계설비 기술자 (${totalCount})`} className='pbe-4' />
-        {/* 필터바 */}
-        <TableFilters<EngineerFilterType>
-          filterInfo={ENGINEER_FILTER_INFO}
-          filters={filters}
-          onFiltersChange={setFilters}
-          disabled={disabled}
-          setPage={setPage}
+        <CardHeader
+          slotProps={{ title: { typography: 'h4' } }}
+          title={`기계설비 기술자 (${totalCount})`}
+          className='pbe-4'
         />
+        {/* 필터바 */}
+        <BasicTableFilter<EngineerFilterType> filterInfo={ENGINEER_FILTER_INFO} disabled={disabled} />
         {/* 필터 초기화 버튼 */}
         <Button
-          startIcon={<i className='tabler-reload' />}
+          startIcon={<IconReload />}
           onClick={() => {
-            setFilters(EngineerInitialFilters)
-            setPage(0)
-            setName('')
-            setProjectName('')
+            resetQueryParams()
           }}
           className='max-sm:is-full absolute right-8 top-8'
           disabled={disabled}
@@ -246,8 +219,7 @@ export default function EngineerPage() {
               select
               value={size.toString()}
               onChange={e => {
-                setSize(Number(e.target.value))
-                setPage(0)
+                setQueryParams({ size: e.target.value, page: 0 })
               }}
               className='gap-[5px]'
               disabled={disabled}
@@ -268,19 +240,21 @@ export default function EngineerPage() {
             </CustomTextField>
             {/* 이름으로 검색 */}
             <SearchBar
+              key={`name_${name}`}
+              defaultValue={name ?? ''}
               placeholder='이름으로 검색'
               setSearchKeyword={name => {
-                setName(name)
-                setPage(0)
+                setQueryParams({ name: name, page: 0 })
               }}
               disabled={disabled}
             />
             {/* 현장명으로 검색 */}
             <SearchBar
+              key={`projectName_${projectName}`}
+              defaultValue={projectName ?? ''}
               placeholder='현장명으로 검색'
               setSearchKeyword={projectName => {
-                setProjectName(projectName)
-                setPage(0)
+                setQueryParams({ projectName: projectName, page: 0 })
               }}
               disabled={disabled}
             />
@@ -290,7 +264,7 @@ export default function EngineerPage() {
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
               <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-                선택 삭제
+                선택삭제
               </Button>
             ) : (
               <div className='flex gap-1'>
@@ -313,8 +287,8 @@ export default function EngineerPage() {
             {/* 유저 추가 버튼 */}
             <Button
               variant='contained'
-              startIcon={<i className='tabler-plus' />}
-              onClick={() => setAddUserModalOpen(!addUserModalOpen)}
+              startIcon={<IconPlus />}
+              onClick={() => setOpenAdd(!openAdd)}
               className='max-sm:is-full'
               disabled={disabled}
             >
@@ -322,68 +296,65 @@ export default function EngineerPage() {
             </Button>
           </div>
         </div>
-
+        <Typography color='warning.main' sx={{ px: 3 }}>
+          ※우클릭으로 설비인력에서 제외할 수 있습니다
+        </Typography>
         {/* 테이블 */}
-        <BasicTable<MachineEngineerPageResponseDtoType>
-          multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
-          header={HEADERS.engineers}
-          data={data}
-          handleRowClick={handleEngineerClick}
-          page={page}
-          pageSize={size}
-          sorting={sorting}
-          setSorting={setSorting}
-          loading={loading}
-          error={error}
-          showCheckBox={showCheckBox}
-          isChecked={isChecked}
-          handleCheckItem={handleCheckEngineer}
-          handleCheckAllItems={handleCheckAllEngineers}
-        />
+        <div className='flex-1 overflow-y-hidden'>
+          <BasicTable<MachineEngineerPageResponseDtoType>
+            multiException={{ latestProjectBeginDate: ['latestProjectBeginDate', 'latestProjectEndDate'] }}
+            header={TABLE_HEADER_INFO.engineers}
+            data={data}
+            handleRowClick={handleEngineerClick}
+            loading={isLoading}
+            error={isError}
+            showCheckBox={showCheckBox}
+            isChecked={isChecked}
+            handleCheckItem={handleCheckEngineer}
+            handleCheckAllItems={handleCheckAllEngineers}
+            rightClickMenuHeader={contextMenu => contextMenu.row.name}
+            rightClickMenu={[
+              {
+                icon: <IconBoltOff color='gray' size={20} />,
+                label: '설비인력에서 제외',
+                handleClick: async row => {
+                  await deleteEngineer(row.engineerId, row.version)
+                  adjustPage(-1)
+                  removeQueryCaches()
+                }
+              }
+            ]}
+          />
+        </div>
 
         {/* 페이지네이션 */}
-        <TablePagination
-          rowsPerPageOptions={PageSizeOptions}
-          component='div'
-          count={totalCount}
-          rowsPerPage={size}
-          page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={event => {
-            const newsize = parseInt(event.target.value, 10)
-
-            setSize(newsize)
-            setPage(0)
-          }}
-          disabled={disabled}
-          showFirstButton
-          showLastButton
-          labelRowsPerPage='페이지당 행 수:'
-          labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
-          sx={{
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            '.MuiTablePagination-toolbar': {
-              paddingLeft: 2,
-              paddingRight: 2
-            }
-          }}
-        />
+        <BasicTablePagination totalCount={totalCount} disabled={disabled} />
       </Card>
 
       {/* 모달들 */}
-      {addUserModalOpen && (
-        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} reloadPage={() => getFilteredData()} />
-      )}
-      {userDetailModalOpen && selectedUser && (
-        <UserModal
-          open={userDetailModalOpen}
-          setOpen={setUserDetailModalOpen}
-          data={selectedUser}
-          setData={setSelectedUser}
-          reloadData={() => getFilteredData()}
+      {openAdd && (
+        <AddEngineerModal
+          open={openAdd}
+          setOpen={setOpenAdd}
+          reloadPage={() => {
+            adjustPage(1)
+            removeQueryCaches()
+          }}
         />
       )}
+      {openDetail &&
+        (!isLoadingEngineer ? (
+          <EngineerModal
+            open={openDetail}
+            setOpen={setOpenDetail}
+            initialData={selectedData!}
+            reloadPages={() => removeQueryCaches()}
+          />
+        ) : (
+          <Backdrop open={isLoadingEngineer} sx={theme => ({ zIndex: theme.zIndex.drawer + 1 })}>
+            <CircularProgress size={100} sx={{ color: 'white' }} />
+          </Backdrop>
+        ))}
     </>
   )
 }

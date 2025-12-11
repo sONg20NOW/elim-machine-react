@@ -1,153 +1,127 @@
 'use client'
 
-import { useEffect, useState, useCallback, useContext } from 'react'
+import { useState, useCallback, useContext } from 'react'
 
 // MUI Imports
+import { useSearchParams } from 'next/navigation'
+
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
-import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
-import TableFilters from '../../../@core/components/custom/TableFilters'
+import { IconPlus, IconReload, IconTrashFilled } from '@tabler/icons-react'
+
+import { useQueryClient } from '@tanstack/react-query'
+
+import { Typography } from '@mui/material'
+
 import CustomTextField from '@core/components/mui/TextField'
 
 // Style Imports
 import UserModal from './_components/UserModal'
-import AddUserModal from './_components/addUserModal'
-import type {
-  MemberDetailResponseDtoType,
-  MemberFilterType,
-  memberPageDtoType,
-  successResponseDtoType
-} from '@/@core/types'
-import BasicTable from '@/@core/components/custom/BasicTable'
-import SearchBar from '@/@core/components/custom/SearchBar'
-import { MEMBER_FILTER_INFO } from '@/app/_constants/filter/MemberFilterInfo'
-import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/app/_constants/options'
-import { MemeberInitialFilters } from '@/app/_constants/MemberSeed'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { auth } from '@/lib/auth'
-import { createInitialSorting, HEADERS } from '@/app/_constants/table/TableHeader'
-import { isTabletContext } from '@/@core/components/custom/ProtectedPage'
+import type { MemberFilterType, MemberPageDtoType } from '@core/types'
+import BasicTable from '@/@core/components/elim-table/BasicTable'
+import SearchBar from '@/@core/components/elim-inputbox/SearchBar'
+import { MEMBER_FILTER_INFO } from '@core/data/filter/memberFilterInfo'
+import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/@core/data/options'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import { auth } from '@core/utils/auth'
+import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
+import AddUserModal from './_components/AddUserModall'
+import { useGetMembers, useGetSingleMember } from '@core/hooks/customTanstackQueries'
+import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
+import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import { printErrorSnackbar } from '@core/utils/snackbarHandler'
+import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
+import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
+import BasicTablePagination from '@/@core/components/elim-table/BasicTablePagination'
+import { isTabletContext } from '@/@core/contexts/mediaQueryContext'
 
 export default function MemberPage() {
+  const searchParams = useSearchParams()
+
+  const curUserId = useCurrentUserStore(set => set.currentUser)?.memberId
+
   const isTablet = useContext(isTabletContext)
 
-  // 데이터 리스트
-  const [data, setData] = useState<memberPageDtoType[]>([])
+  const queryClient = useQueryClient()
 
-  // 로딩 시도 중 = true, 로딩 끝 = false
-  const [loading, setLoading] = useState(false)
+  const { data: membersPages, refetch: refetchPages, isLoading, isError } = useGetMembers(searchParams.toString())
 
-  // 에러 발생 시 true
-  const [error, setError] = useState(false)
+  const data = membersPages?.content ?? []
 
-  // 로딩이 끝나고 에러가 없으면 not disabled
-  const disabled = loading || error
+  const page = Number(searchParams.get('page') ?? 0)
+  const size = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)
+  const name = searchParams.get('name')
+  const region = searchParams.get('region')
 
-  // 전체 데이터 개수 => fetching한 데이터에서 추출
-  const [totalCount, setTotalCount] = useState(0)
+  const disabled = isLoading || isError
 
-  // 이름 검색 인풋
-  const [name, setName] = useState('')
-
-  // 지역 검색 인풋
-  const [region, setRegion] = useState('')
-
-  // 페이지네이션 관련
-  const [page, setPage] = useState(0)
-  const [size, setSize] = useState(DEFAULT_PAGESIZE)
+  const totalCount = membersPages?.page.totalElements ?? 0
 
   // 모달 관련 상태
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
   const [userDetailModalOpen, setUserDetailModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<MemberDetailResponseDtoType>()
+  const [memberId, setMemberId] = useState(0)
 
-  // 필터 상태 - 컬럼에 맞게 수정
-  const [filters, setFilters] = useState(MemeberInitialFilters)
+  const { data: selectedUser } = useGetSingleMember(memberId.toString())
 
-  // 정렬 상태
-  const [sorting, setSorting] = useState(createInitialSorting<memberPageDtoType>)
-
-  // 선택 삭제 기능 관련
+  // 선택삭제 기능 관련
   const [showCheckBox, setShowCheckBox] = useState(false)
   const [checked, setChecked] = useState<{ memberId: number; version: number }[]>([])
 
-  // 직원 리스트 호출 API 함수
-  const getFilteredData = useCallback(async () => {
-    setLoading(true)
-    setError(false)
+  // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅해주는 함수
+  const updateParams = useUpdateParams()
 
-    // 데이터 페치에 사용되는 쿼리 URL
-    const queryParams = new URLSearchParams()
+  type paramType = 'page' | 'size' | 'name' | 'region'
 
-    try {
-      // 필터링
-      Object.keys(filters).forEach(prop => {
-        const key = prop as keyof MemberFilterType
+  // 객체 형식으로 데이터를 전달받으면 그에 따라 searchParams를 설정하고 라우팅하는 함수
+  const setQueryParams = useSetQueryParams<paramType>()
 
-        filters[key] ? queryParams.set(prop, filters[key] as string) : queryParams.delete(prop)
-      })
+  const resetQueryParams = useCallback(() => {
+    updateParams(params => {
+      params.delete('page')
+      params.delete('name')
+      params.delete('region')
+      params.delete('sort')
 
-      // 정렬
-      sorting.sort ? queryParams.set('sort', `${sorting.target},${sorting.sort}`) : queryParams.delete('sort')
+      const filterKeys = Object.keys(MEMBER_FILTER_INFO)
 
-      // 이름 검색
-      name ? queryParams.set('name', name) : queryParams.delete('name')
+      filterKeys.forEach(v => params.delete(v))
+    })
+  }, [updateParams])
 
-      // 지역 검색
-      region ? queryParams.set('region', region) : queryParams.delete('region')
+  // offset만큼 요소수가 변화했을 때 valid한 페이지 param을 책임지는 함수
+  const adjustPage = useCallback(
+    (offset = 0) => {
+      const lastPageAfter = Math.max(Math.ceil((totalCount + offset) / size) - 1, 0)
 
-      // 페이지 설정
-      queryParams.set('page', page.toString())
-      queryParams.set('size', size.toString())
+      if (offset > 0 || page > lastPageAfter) {
+        lastPageAfter > 0 ? setQueryParams({ page: lastPageAfter }) : updateParams(params => params.delete('page'))
+      }
+    },
+    [page, setQueryParams, totalCount, size, updateParams]
+  )
 
-      // axios GET 요청
-      // const response = await auth.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
-      //   `/api/members?${queryParams.toString()}`
-      // )
-      const response = await auth.get<{ data: successResponseDtoType<memberPageDtoType[]> }>(
-        `/api/members?${queryParams.toString()}`
-      )
+  // tanstack query cache 삭제 및 refetch
+  const removeQueryCaches = useCallback(() => {
+    refetchPages()
 
-      const result = response.data.data
+    queryClient.removeQueries({
+      predicate(query) {
+        const key = query.queryKey
 
-      // 상태 업데이트
-      setData(result.content ?? [])
-      setPage(result.page.number)
-      setSize(result.page.size)
-      setTotalCount(result.page.totalElements)
-    } catch (error: any) {
-      handleApiError(error, '데이터 조회에 실패했습니다.')
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [filters, sorting, page, size, name, region])
-
-  // 필터 변경 시 API 호출
-  useEffect(() => {
-    getFilteredData()
-  }, [filters, getFilteredData])
+        return Array.isArray(key) && key[0] === 'GET_MEMBERS' && key[1] !== searchParams.toString() // 스크롤 유지를 위해 현재 data는 refetch, 나머지는 캐시 지우기
+      }
+    })
+  }, [refetchPages, queryClient, searchParams])
 
   // 사용자 선택 핸들러 (디테일 모달)
-  const handleUserClick = async (user: memberPageDtoType) => {
-    // const response = await auth.get(`/api/members/${user?.memberId}`)
-
-    // const data = await response.json()
-
-    // if (response.ok) {
-    //   setSelectedUser(data.data)
-    //   setUserDetailModalOpen(true)
-    // } else {
-    //   toast.error(data.message)
-    // }
+  const handleUserClick = async (user: MemberPageDtoType) => {
     try {
-      const response = await auth.get<{ data: MemberDetailResponseDtoType }>(`/api/members/${user?.memberId}`)
-
-      setSelectedUser(response.data.data)
+      setMemberId(user.memberId)
       setUserDetailModalOpen(true)
     } catch (error) {
       handleApiError(error)
@@ -155,9 +129,15 @@ export default function MemberPage() {
   }
 
   // 사용자 체크 핸들러 (다중선택)
-  const handleCheckUser = (user: memberPageDtoType) => {
+  const handleCheckUser = (user: MemberPageDtoType) => {
     const obj = { memberId: user.memberId, version: user.version }
     const checked = isChecked(user)
+
+    if (user.memberId === curUserId) {
+      printErrorSnackbar('', '본인은 삭제할 수 없습니다')
+
+      return
+    }
 
     if (!checked) {
       setChecked(prev => prev.concat(obj))
@@ -172,7 +152,7 @@ export default function MemberPage() {
         const newPrev = structuredClone(prev)
 
         data.forEach(user => {
-          if (!prev.find(v => v.memberId === user.memberId)) {
+          if (!prev.find(v => v.memberId === user.memberId) && user.memberId !== curUserId) {
             newPrev.push({ memberId: user.memberId, version: user.version })
           }
         })
@@ -184,7 +164,7 @@ export default function MemberPage() {
     }
   }
 
-  const isChecked = (user: memberPageDtoType) => {
+  const isChecked = (user: MemberPageDtoType) => {
     let exist = false
 
     checked.forEach(v => {
@@ -203,44 +183,48 @@ export default function MemberPage() {
         //@ts-ignore
         data: { memberDeleteRequestDtos: checked }
       })
-      setFilters(MemeberInitialFilters)
-      setName('')
-      setRegion('')
-      setPage(0)
 
-      getFilteredData()
-      handleSuccess(`선택된 직원 ${checked.length}명이 성공적으로 삭제되었습니다.`)
+      adjustPage(-1 * checked.length)
+      removeQueryCaches()
       setShowCheckBox(false)
       setChecked([])
+      handleSuccess(`선택된 직원 ${checked.length}명이 삭제되었습니다.`)
     } catch (error) {
       handleApiError(error)
     }
   }
 
+  const handleDeleteUser = useCallback(
+    async (user: MemberPageDtoType) => {
+      try {
+        await auth.delete(`/api/members/${user.memberId}`, {
+          //@ts-ignore
+          data: { memberId: user.memberId, version: user.version }
+        })
+
+        adjustPage(-1)
+        removeQueryCaches()
+        handleSuccess(`선택된 직원이 삭제되었습니다.`)
+      } catch (e) {
+        handleApiError(e)
+      }
+    },
+    [adjustPage, removeQueryCaches]
+  )
+
   return (
     <>
-      <Card className='relative'>
+      <Card className='relative h-full flex flex-col'>
         {/* 탭 제목 */}
-        <CardHeader title={`직원관리 (${totalCount})`} className='pbe-4' />
+        <CardHeader slotProps={{ title: { typography: 'h4' } }} title={`직원관리 (${totalCount})`} className='pbe-4' />
         {/* 필터바 */}
-        {!isTablet && (
-          <TableFilters<MemberFilterType>
-            filterInfo={MEMBER_FILTER_INFO}
-            filters={filters}
-            onFiltersChange={setFilters}
-            disabled={disabled}
-            setPage={setPage}
-          />
-        )}
+        {!isTablet && <BasicTableFilter<MemberFilterType> filterInfo={MEMBER_FILTER_INFO} disabled={disabled} />}
         {/* 필터 초기화 버튼 */}
         {!isTablet && (
           <Button
-            startIcon={<i className='tabler-reload' />}
+            startIcon={<IconReload />}
             onClick={() => {
-              setFilters(MemeberInitialFilters)
-              setName('')
-              setPage(0)
-              setRegion('')
+              resetQueryParams()
             }}
             className='max-sm:is-full absolute right-8 top-8'
             disabled={disabled}
@@ -248,7 +232,7 @@ export default function MemberPage() {
             필터 초기화
           </Button>
         )}
-        <div className=' flex justify-between flex-col items-start md:flex-row md:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
+        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-3 sm:p-6 border-bs gap-2 sm:gap-4'>
           <div className='flex gap-2'>
             {/* 페이지당 행수 */}
             <CustomTextField
@@ -256,8 +240,7 @@ export default function MemberPage() {
               select
               value={size.toString()}
               onChange={e => {
-                setSize(Number(e.target.value))
-                setPage(0)
+                setQueryParams({ size: e.target.value, page: 0 })
               }}
               className='gap-[5px]'
               disabled={disabled}
@@ -278,20 +261,22 @@ export default function MemberPage() {
             </CustomTextField>
             {/* 이름으로 검색 */}
             <SearchBar
+              key={`name_${name}`}
+              defaultValue={name ?? ''}
               placeholder='이름으로 검색'
               setSearchKeyword={name => {
-                setName(name)
-                setPage(0)
+                setQueryParams({ name: name, page: 0 })
               }}
               disabled={disabled}
             />
             {/* 지역으로 검색 */}
             {!isTablet && (
               <SearchBar
+                key={`region${region}`}
+                defaultValue={region ?? ''}
                 placeholder='지역으로 검색'
                 setSearchKeyword={region => {
-                  setRegion(region)
-                  setPage(0)
+                  setQueryParams({ region: region, page: 0 })
                 }}
                 disabled={disabled}
               />
@@ -302,11 +287,11 @@ export default function MemberPage() {
             {/* 한번에 삭제 */}
             {!showCheckBox ? (
               <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-                선택 삭제
+                선택삭제
               </Button>
             ) : (
               <div className='flex gap-1'>
-                <Button variant='contained' color='error' onClick={() => handleDeleteUsers()}>
+                <Button variant='contained' color='error' onClick={handleDeleteUsers}>
                   {`(${checked.length}) 삭제`}
                 </Button>
                 <Button
@@ -325,7 +310,7 @@ export default function MemberPage() {
             {/* 유저 추가 버튼 */}
             <Button
               variant='contained'
-              startIcon={<i className='tabler-plus' />}
+              startIcon={<IconPlus />}
               onClick={() => setAddUserModalOpen(!addUserModalOpen)}
               disabled={disabled}
             >
@@ -333,66 +318,50 @@ export default function MemberPage() {
             </Button>
           </div>
         </div>
-
+        <Typography color='warning.main' sx={{ px: 3 }}>
+          ※우클릭으로 삭제할 수 있습니다
+        </Typography>
         {/* 테이블 */}
-        <BasicTable<memberPageDtoType>
-          header={HEADERS.member}
-          data={data}
-          handleRowClick={handleUserClick}
-          page={page}
-          pageSize={size}
-          multiException={{ age: ['age', 'genderDescription'] }}
-          sorting={sorting}
-          setSorting={setSorting}
-          loading={loading}
-          error={error}
-          showCheckBox={showCheckBox}
-          isChecked={isChecked}
-          handleCheckItem={handleCheckUser}
-          handleCheckAllItems={handleCheckAllUsers}
-        />
-
+        <div className='flex-1 overflow-y-hidden'>
+          <BasicTable<MemberPageDtoType>
+            header={TABLE_HEADER_INFO.member}
+            data={data}
+            handleRowClick={handleUserClick}
+            multiException={{ age: ['age', 'genderDescription'] }}
+            loading={isLoading}
+            error={isError}
+            showCheckBox={showCheckBox}
+            isChecked={isChecked}
+            handleCheckItem={handleCheckUser}
+            handleCheckAllItems={handleCheckAllUsers}
+            rightClickMenuHeader={contextMenu => contextMenu.row.name}
+            rightClickMenu={[
+              { icon: <IconTrashFilled color='gray' size={20} />, label: '삭제', handleClick: handleDeleteUser }
+            ]}
+          />
+        </div>
         {/* 페이지네이션 */}
-        <TablePagination
-          rowsPerPageOptions={PageSizeOptions}
-          component='div'
-          count={totalCount}
-          rowsPerPage={size}
-          page={page}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={event => {
-            const newsize = parseInt(event.target.value, 10)
-
-            setSize(newsize)
-            setPage(0)
-          }}
-          disabled={disabled}
-          showFirstButton
-          showLastButton
-          labelRowsPerPage='페이지당 행 수:'
-          labelDisplayedRows={({ from, to, count }) => `${count !== -1 ? count : `${to} 이상`}개 중 ${from}-${to}개`}
-          sx={{
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            '.MuiTablePagination-toolbar': {
-              paddingLeft: 2,
-              paddingRight: 2
-            }
-          }}
-        />
+        <BasicTablePagination totalCount={totalCount} disabled={disabled} />
       </Card>
 
       {/* 모달들 */}
       {addUserModalOpen && (
-        <AddUserModal open={addUserModalOpen} setOpen={setAddUserModalOpen} handlePageChange={() => setPage(0)} />
+        <AddUserModal
+          open={addUserModalOpen}
+          setOpen={setAddUserModalOpen}
+          handlePageChange={() => {
+            adjustPage(1)
+            removeQueryCaches()
+          }}
+        />
       )}
       {userDetailModalOpen && selectedUser && (
         <UserModal
           open={userDetailModalOpen}
           setOpen={setUserDetailModalOpen}
           selectedUserData={selectedUser}
-          setSelectedUserData={setSelectedUser}
-          reloadData={() => getFilteredData()}
+          onDelete={() => adjustPage(-1)}
+          reloadPages={removeQueryCaches}
         />
       )}
     </>

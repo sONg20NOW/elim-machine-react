@@ -8,10 +8,12 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContentText,
   DialogTitle,
+  Fab,
   IconButton,
   InputLabel,
   MenuItem,
@@ -21,34 +23,23 @@ import {
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { toast } from 'react-toastify'
+import { IconCamera, IconChevronLeft } from '@tabler/icons-react'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { auth } from '@/lib/auth'
+import { auth } from '@core/utils/auth'
 import type {
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType,
   MachinePicUpdateResponseDtoType
-} from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
-import getS3Key from '@/@core/utils/getS3Key'
+} from '@core/types'
+import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
+import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
+import getS3Key from '@core/utils/getS3Key'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const max_pic = 100
 
-interface formType {
-  s3Key: string
-  presignedUrl: string
-  version: number
-  machinePicId: number
-  machineInspectionId: number
-  machineChecklistSubItemId: number
-  originalFileName: string
-  alternativeSubTitle: string
-  measuredValue: string
-  remark: string
-}
+type formType = Omit<MachinePicUpdateResponseDtoType, 's3Key' | 'downloadPresignedUrl' | 'presignedUrl'>
 
 export default function PicturePage() {
   const { id: machineProjectId, machineInspectionId } = useParams()
@@ -69,7 +60,7 @@ export default function PicturePage() {
 
   const [openAlert, setOpenAlert] = useState(false)
 
-  const [machineChecklistItemId, setMachineChecklistItemId] = useState(0)
+  const [machineProjectChecklistItemId, setMachineProjectChecklistItemId] = useState(0)
   const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
   const { data: currentInspectioin } = useGetSingleInspectionSumamry(`${machineProjectId}`, `${machineInspectionId}`)
@@ -85,11 +76,10 @@ export default function PicturePage() {
     formState: { isDirty }
   } = useForm<formType>({
     defaultValues: {
-      presignedUrl: '',
       machinePicId: 0,
       version: 0,
       machineInspectionId: 0,
-      machineChecklistSubItemId: 0,
+      machineProjectChecklistSubItemId: 0,
       originalFileName: '',
       alternativeSubTitle: '',
       measuredValue: '',
@@ -97,16 +87,18 @@ export default function PicturePage() {
     }
   })
 
-  const watchedPresignedUrl = watch('presignedUrl')
-  const watchedSubItemId = watch('machineChecklistSubItemId')
+  const watchedSubItemId = watch('machineProjectChecklistSubItemId')
 
   const subItems = useMemo(() => {
-    return checklistList?.find(v => v.machineChecklistItemId === machineChecklistItemId)?.checklistSubItems ?? []
-  }, [checklistList, machineChecklistItemId])
+    return (
+      checklistList?.find(v => v.machineProjectChecklistItemId === machineProjectChecklistItemId)?.checklistSubItems ??
+      []
+    )
+  }, [checklistList, machineProjectChecklistItemId])
 
   useEffect(() => {
-    if (!subItems.find(v => v.machineChecklistSubItemId === watchedSubItemId)) {
-      setValue('machineChecklistSubItemId', 0)
+    if (!subItems.find(v => v.machineProjectChecklistSubItemId === watchedSubItemId)) {
+      setValue('machineProjectChecklistSubItemId', 0)
     }
   }, [subItems, watchedSubItemId, setValue])
 
@@ -115,17 +107,16 @@ export default function PicturePage() {
 
     if (selectedPic) {
       reset({
-        presignedUrl: selectedPic.presignedUrl,
         version: selectedPic.version,
         machinePicId: selectedPic.machinePicId,
         machineInspectionId: selectedPic.machineInspectionId,
-        machineChecklistSubItemId: selectedPic.machineChecklistSubItemId ?? 0,
+        machineProjectChecklistSubItemId: selectedPic.machineProjectChecklistSubItemId ?? 0,
         originalFileName: selectedPic.originalFileName ?? '',
         alternativeSubTitle: selectedPic.alternativeSubTitle ?? '',
         measuredValue: selectedPic.measuredValue ?? '',
         remark: selectedPic.remark
       })
-      setMachineChecklistItemId(selectedPic.machineChecklistItemId ?? 0)
+      setMachineProjectChecklistItemId(selectedPic.machineProjectChecklistItemId ?? 0)
       setTimeout(() => {
         scrollableAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
       }, 100)
@@ -158,25 +149,48 @@ export default function PicturePage() {
     const files = e.target.files
 
     if (!files) return
-    const file = files[0]
+    const file: File = files[0]
 
-    setValue('presignedUrl', URL.createObjectURL(file), {
-      shouldDirty: true,
-      shouldValidate: true
-    })
-
-    const S3KeyResult = await getS3Key(
+    const s3Key = await getS3Key(
       `${machineProjectId}`,
       [file],
       `${machineInspectionId}`,
-      machineChecklistItemId,
-      watchedSubItemId,
-      undefined
-    )
+      selectedPic?.machineProjectChecklistItemId,
+      selectedPic?.machineProjectChecklistSubItemId
+    ).then(v => v && v[0])
 
-    if (!S3KeyResult) return
-    setValue('s3Key', S3KeyResult[0].s3Key)
-    setValue('originalFileName', S3KeyResult[0].fileName)
+    if (!s3Key?.uploadSuccess) {
+      return
+    }
+
+    try {
+      const response = await auth
+        .put<{
+          data: MachinePicUpdateResponseDtoType
+        }>(
+          `/api/machine-projects/${machineProjectId}/machine-inspections/${machineInspectionId}/machine-pics/${selectedPicId}`,
+          { version: getValues().version, s3Key: s3Key.s3Key }
+        )
+        .then(v => v.data.data)
+
+      setPictures(prev =>
+        prev.map(v =>
+          v.machinePicId === selectedPicId
+            ? {
+                ...v,
+                ...response,
+                machineProjectChecklistItemId: machineProjectChecklistItemId,
+                presignedUrl: URL.createObjectURL(file)
+              }
+            : v
+        )
+      )
+      reset({ ...response })
+      console.log('updated picture:', response)
+      printSuccessSnackbar(`사진이 변경되었습니다`)
+    } catch (e) {
+      printErrorSnackbar(e, '사진 변경에 실패했습니다')
+    }
   }
 
   const handleDeletePicture = useCallback(async () => {
@@ -199,7 +213,7 @@ export default function PicturePage() {
 
       setOpenAlert(false)
     } catch (e) {
-      handleApiError(e)
+      printErrorSnackbar(e)
     }
 
     return
@@ -208,7 +222,7 @@ export default function PicturePage() {
   const handleSave = useCallback(
     async (data: formType) => {
       if (!watchedSubItemId) {
-        toast.warning('수정을 위해서는 하위항목을 지정해주세요.')
+        printWarningSnackbar('수정을 위해서는 하위항목을 지정해주세요.')
 
         return
       }
@@ -226,26 +240,18 @@ export default function PicturePage() {
         setPictures(prev =>
           prev.map(v =>
             v.machinePicId === selectedPicId
-              ? { ...v, ...response, machineChecklistItemId: machineChecklistItemId, presignedUrl: watchedPresignedUrl }
+              ? { ...v, ...response, machineProjectChecklistItemId: machineProjectChecklistItemId }
               : v
           )
         )
         reset({ ...response })
         console.log('updated picture:', response)
-        handleSuccess(`사진정보가 수정되었습니다.`)
+        printSuccessSnackbar(`사진정보가 수정되었습니다.`)
       } catch (e) {
-        handleApiError(e)
+        printErrorSnackbar(e)
       }
     },
-    [
-      machineProjectId,
-      selectedPicId,
-      machineInspectionId,
-      reset,
-      watchedSubItemId,
-      watchedPresignedUrl,
-      machineChecklistItemId
-    ]
+    [machineProjectId, selectedPicId, machineInspectionId, reset, watchedSubItemId, machineProjectChecklistItemId]
   )
 
   function TinyImgCard({ pic }: { pic: MachinePicPresignedUrlResponseDtoType }) {
@@ -288,14 +294,14 @@ export default function PicturePage() {
         {/* 헤더 */}
         <MobileHeader
           left={
-            <Button type='button' sx={{ p: 0, display: 'flex', gap: 2 }} onClick={() => router.back()}>
-              <i className='tabler-chevron-left text-white text-3xl' />
+            <Button type='button' sx={{ p: 0, display: 'flex', gap: 2, minWidth: 0 }} onClick={() => router.back()}>
+              <IconChevronLeft color='white' size={30} />
               {!isMobile && <Typography color='white'>{currentInspectioin?.machineInspectionName}</Typography>}
             </Button>
           }
           right={
             <Box sx={{ display: 'flex', gap: isMobile ? 2 : 4 }}>
-              <IconButton type='submit' sx={{ p: 0 }} disabled={!isDirty}>
+              <IconButton type='submit' sx={{ p: 0 }} disabled={!isDirty || !watchedSubItemId}>
                 <i
                   ref={saveButtonRef}
                   className={`tabler-device-floppy text-white text-3xl ${isDirty ? 'animate-ring' : ''}`}
@@ -309,140 +315,180 @@ export default function PicturePage() {
           title={`사진(${pictures.length})`}
         />
         {/* 본 컨텐츠 (스크롤 가능 영역)*/}
-        <Box
-          ref={scrollableAreaRef}
-          sx={{
-            flex: 1,
-            overflowY: 'auto',
-            py: !isMobile ? 10 : 4,
-            px: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 5
-          }}
-        >
+        {checklistList ? (
           <Box
+            ref={scrollableAreaRef}
             sx={{
-              height: isMobile ? '35dvh' : '48dvh',
-              border: '1px solid lightgray',
-              borderRadius: 2,
-              p: 2,
-              position: 'relative'
+              flex: 1,
+              overflowY: 'auto',
+              py: !isMobile ? 10 : 4,
+              px: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 5
             }}
           >
-            <IconButton type='button' sx={{ position: 'absolute', right: 8, top: 8, color: 'primary.main' }}>
-              <i className='tabler-camera text-4xl' onClick={() => imageInputRef.current?.click()} />
-            </IconButton>
-            <input
-              type='file'
-              hidden
-              ref={imageInputRef}
-              accept='image/*' // 이미지 파일만 허용
-              capture='environment'
-              onChange={handleImageChange}
-            />
-
-            {watchedPresignedUrl ? (
-              <img
-                src={watchedPresignedUrl}
-                alt={getValues().alternativeSubTitle}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
-            ) : (
-              <Typography>이미지 오류!</Typography>
-            )}
-          </Box>
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>파일 이름</InputLabel>
-            <TextField
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('originalFileName')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
-          </div>
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
-            <TextField
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-              value={machineChecklistItemId}
-              onChange={e => setMachineChecklistItemId(Number(e.target.value))}
-              fullWidth
-              select
-            >
-              {checklistList &&
-                checklistList
-                  .filter(p => p.checklistSubItems.length !== 0)
-                  .map(v => (
-                    <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                      {v.machineChecklistItemName}
-                    </MenuItem>
-                  ))}
-            </TextField>
-          </div>
-          {machineChecklistItemId && !!subItems.length && (
+            <div className='flex flex-col'>
+              <Typography variant='h5' sx={{ paddingInlineStart: 2 }}>
+                # {currentInspectioin?.machineInspectionName}
+              </Typography>
+              <Box
+                sx={{
+                  minHeight: isMobile ? '35dvh' : '48dvh',
+                  height: isMobile ? '35dvh' : '48dvh',
+                  border: '1px solid lightgray',
+                  borderRadius: 2,
+                  p: 2,
+                  position: 'relative',
+                  background: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3))'
+                }}
+              >
+                <Fab
+                  size='small'
+                  type='button'
+                  sx={{ position: 'absolute', right: 14, top: 14, backgroundColor: '#ffffff9f' }}
+                >
+                  <IconCamera color='white' size={30} onClick={() => imageInputRef.current?.click()} />
+                </Fab>
+                <input
+                  type='file'
+                  hidden
+                  ref={imageInputRef}
+                  accept='image/*' // 이미지 파일만 허용
+                  capture='environment'
+                  onChange={handleImageChange}
+                />
+                <img
+                  src={selectedPic?.presignedUrl}
+                  alt={getValues().alternativeSubTitle}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              </Box>
+            </div>
             <div className='flex flex-col gap-1'>
-              <InputLabel sx={{ px: 2 }}>하위항목</InputLabel>
-              <Controller
-                control={control}
-                name={'machineChecklistSubItemId'}
-                render={({ field: { ref, onChange, value } }) => (
-                  <TextField
-                    ref={ref}
-                    onChange={e => onChange(Number(e.target.value))}
-                    value={value}
-                    fullWidth
-                    select
-                    slotProps={{ input: { sx: { fontSize: 18 } } }}
-                  >
-                    {subItems.map(v => (
-                      <MenuItem key={v.machineChecklistSubItemId} value={v.machineChecklistSubItemId}>
-                        {v.checklistSubItemName}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
+              <InputLabel sx={{ px: 2 }}>파일 이름</InputLabel>
+              <TextField
+                size={isMobile ? 'small' : 'medium'}
+                fullWidth
+                {...register('originalFileName')}
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
               />
             </div>
-          )}
+            <div className='flex flex-col gap-1'>
+              <InputLabel required sx={{ px: 2 }}>
+                점검항목
+              </InputLabel>
+              <TextField
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+                value={machineProjectChecklistItemId}
+                onChange={e => setMachineProjectChecklistItemId(Number(e.target.value))}
+                fullWidth
+                size={isMobile ? 'small' : 'medium'}
+                select
+              >
+                {checklistList
+                  .filter(p => p.checklistSubItems.length !== 0)
+                  .map(v => (
+                    <MenuItem key={v.machineProjectChecklistItemId} value={v.machineProjectChecklistItemId}>
+                      {v.machineProjectChecklistItemName}
+                    </MenuItem>
+                  ))}
+              </TextField>
+            </div>
+            {machineProjectChecklistItemId && !!subItems.length && (
+              <div className='flex flex-col gap-1'>
+                <InputLabel required sx={{ px: 2 }}>
+                  하위항목
+                </InputLabel>
+                <Controller
+                  control={control}
+                  name={'machineProjectChecklistSubItemId'}
+                  render={({ field: { ref, onChange, value } }) => (
+                    <TextField
+                      ref={ref}
+                      onChange={e => onChange(Number(e.target.value))}
+                      value={value}
+                      fullWidth
+                      select
+                      size={isMobile ? 'small' : 'medium'}
+                      slotProps={{
+                        input: { sx: { fontSize: 18 } },
+                        select: {
+                          displayEmpty: true,
+                          renderValue: value => {
+                            if (!value || value === '') {
+                              return (
+                                <Typography variant='inherit' color='error'>
+                                  하위 항목은 필수 입력입니다
+                                </Typography>
+                              )
+                            }
 
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>대체타이틀</InputLabel>
-            <TextField
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('alternativeSubTitle')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
+                            return (
+                              <Typography variant='inherit'>
+                                {
+                                  subItems.find(v => v.machineProjectChecklistSubItemId === value)
+                                    ?.machineProjectChecklistSubItemName
+                                }
+                              </Typography>
+                            )
+                          }
+                        }
+                      }}
+                    >
+                      {subItems.map(v => (
+                        <MenuItem key={v.machineProjectChecklistSubItemId} value={v.machineProjectChecklistSubItemId}>
+                          {v.machineProjectChecklistSubItemName}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </div>
+            )}
+
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>대체타이틀</InputLabel>
+              <TextField
+                size={isMobile ? 'small' : 'medium'}
+                fullWidth
+                {...register('alternativeSubTitle')}
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>측정값</InputLabel>
+              <TextField
+                size={isMobile ? 'small' : 'medium'}
+                fullWidth
+                {...register('measuredValue')}
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+            <div className='flex flex-col gap-1'>
+              <InputLabel sx={{ px: 2 }}>비고</InputLabel>
+              <TextField
+                minRows={3}
+                size={isMobile ? 'small' : 'medium'}
+                fullWidth
+                {...register('remark')}
+                hiddenLabel
+                multiline
+                slotProps={{ input: { sx: { fontSize: 18 } } }}
+              />
+            </div>
+          </Box>
+        ) : (
+          <div className='w-full h-full grid place-items-center'>
+            <CircularProgress />
           </div>
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>측정값</InputLabel>
-            <TextField
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('measuredValue')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
-          </div>
-          <div className='flex flex-col gap-1'>
-            <InputLabel sx={{ px: 2 }}>비고</InputLabel>
-            <TextField
-              minRows={3}
-              size={isMobile ? 'small' : 'medium'}
-              fullWidth
-              {...register('remark')}
-              hiddenLabel
-              multiline
-              slotProps={{ input: { sx: { fontSize: 18 } } }}
-            />
-          </div>
-        </Box>
+        )}
         {/* 탭 리스트 */}
         <Box
           sx={{

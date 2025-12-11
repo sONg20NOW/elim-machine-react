@@ -20,11 +20,10 @@ import {
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { toast } from 'react-toastify'
-
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
-import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
+import { uploadInspectionPictures } from '@core/utils/uploadInspectionPictures'
+import { useGetChecklistInfo } from '@core/hooks/customTanstackQueries'
+import { printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface checklistFormType {
   checklistSubItemId: number
@@ -43,6 +42,16 @@ export default function ImageUploadPage() {
 
   const [checklistItemId, setChecklistItemId] = useState(0)
   const [uploading, setUploading] = useState(false)
+
+  const emptyCameraRef = useRef<HTMLInputElement>(null)
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || !machineProjectId || !machineInspectionId) return
+
+    const file = event.target.files[0]
+
+    setFilesToUpload(prev => [...prev, file])
+  }
 
   const checklistForm = useForm<checklistFormType>({
     defaultValues: {
@@ -64,13 +73,13 @@ export default function ImageUploadPage() {
 
   const handleUploadPictures = (data: checklistFormType) => {
     if (!(machineProjectId && machineInspectionId)) {
-      toast.warning('기계정보와 설비정보가 없습니다.')
+      printWarningSnackbar('기계정보와 설비정보가 없습니다.')
 
       return
     }
 
     if (!checklistForm.getValues().checklistSubItemId) {
-      toast.warning('하위항목을 먼저 지정해주세요')
+      printWarningSnackbar('하위항목을 먼저 지정해주세요')
 
       return
     }
@@ -89,6 +98,7 @@ export default function ImageUploadPage() {
       )
 
       if (result) {
+        printSuccessSnackbar(`${result}개 사진 업로드가 완료되었습니다`, 1200)
         setFilesToUpload([])
         refetch()
       }
@@ -142,6 +152,14 @@ export default function ImageUploadPage() {
           }}
           className='hidden'
         />
+        <input
+          type='file'
+          capture='environment'
+          className='hidden'
+          accept='image/*'
+          ref={emptyCameraRef}
+          onChange={handleImageUpload}
+        />
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: !isMobile ? 2 : 1 }}>
           <div className='flex flex-col gap-1'>
             <InputLabel sx={{ px: 2 }}>점검항목</InputLabel>
@@ -157,8 +175,8 @@ export default function ImageUploadPage() {
                 <Typography sx={{ fontSize: 18, opacity: '50%' }}>--- 점검항목을 선택하세요 ---</Typography>
               </MenuItem>
               {checklistList?.map(v => (
-                <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                  {v.machineChecklistItemName}
+                <MenuItem key={v.machineProjectChecklistItemId} value={v.machineProjectChecklistItemId}>
+                  {v.machineProjectChecklistItemName}
                 </MenuItem>
               ))}
             </TextField>
@@ -184,10 +202,10 @@ export default function ImageUploadPage() {
                   </MenuItem>
                   {checklistList &&
                     checklistList
-                      .find(v => v.machineChecklistItemId === checklistItemId)
+                      .find(v => v.machineProjectChecklistItemId === checklistItemId)
                       ?.checklistSubItems.map(p => (
-                        <MenuItem key={p.machineChecklistSubItemId} value={p.machineChecklistSubItemId}>
-                          {p.checklistSubItemName}
+                        <MenuItem key={p.machineProjectChecklistSubItemId} value={p.machineProjectChecklistSubItemId}>
+                          {p.machineProjectChecklistSubItemName}
                         </MenuItem>
                       ))}
                 </TextField>
@@ -211,19 +229,34 @@ export default function ImageUploadPage() {
               <Typography>업로드할 파일이 없습니다.</Typography>
             </Box>
           )}
-          <Box sx={{ display: 'flex', justifyContent: 'end', gap: 2 }}>
-            <Typography alignContent={'end'}>{filesToUpload.length}개 선택됨</Typography>
-            <Button type='button' variant='contained' onClick={() => inputRef.current?.click()}>
-              파일 선택
-            </Button>
-            <Button
-              type='submit'
-              variant='contained'
-              color='secondary'
-              disabled={filesToUpload.length === 0 || watchedChecklistSubItemId === 0}
-            >
-              사진 업로드
-            </Button>
+          <Box
+            sx={{
+              display: 'flex',
+              ...(isMobile && { flexDirection: 'column' }),
+              justifyContent: 'end',
+              gap: 2,
+              alignItems: 'end'
+            }}
+          >
+            <Typography>{filesToUpload.length}개 선택됨</Typography>
+            <div className='flex gap-2'>
+              <Button color='success' variant='contained' type='button' onClick={() => emptyCameraRef.current?.click()}>
+                카메라
+              </Button>
+
+              <Button type='button' variant='contained' onClick={() => inputRef.current?.click()}>
+                갤러리
+              </Button>
+              <Button
+                type='submit'
+                variant='contained'
+                color='secondary'
+                disabled={filesToUpload.length === 0 || watchedChecklistSubItemId === 0}
+              >
+                사진 업로드
+              </Button>
+            </div>
+            {watchedChecklistSubItemId === 0 && <Typography color='warning.main'>하위항목을 지정해주세요</Typography>}
           </Box>
         </Box>
       </Box>

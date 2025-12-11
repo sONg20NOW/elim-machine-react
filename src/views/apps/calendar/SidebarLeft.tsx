@@ -11,7 +11,7 @@ import classnames from 'classnames'
 
 // Types Imports
 import type { SidebarLeftProps, CalendarFiltersType } from '@/types/apps/calendarTypes'
-import type { ThemeColor } from '@/@core/types'
+import type { ThemeColor } from '@core/types'
 
 // Styled Component Imports
 import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'

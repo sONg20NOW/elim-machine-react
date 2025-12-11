@@ -13,19 +13,14 @@ import type {
   MachineProjectResponseDtoType,
   MachineProjectScheduleAndEngineerResponseDtoType,
   successResponseDtoType
-} from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+} from '@core/types'
 import MobileHeader from '../../_components/MobileHeader'
-import { auth } from '@/lib/auth'
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
+import { auth } from '@core/utils/auth'
 import ProjectInfoCard from './_components/ProjectInfoCard'
-
-export interface projectSummaryType {
-  machineProjectName: string | null
-  beginDate: string | null
-  endDate: string | null
-  engineerNames: string[] | null
-}
+import type { projectSummaryType } from '@core/utils/useProjectSummaryStore'
+import useProjectSummaryStore from '@core/utils/useProjectSummaryStore'
+import { printErrorSnackbar, printSuccessSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface ProjectFormType {
   machineProjectName: string | null
@@ -41,10 +36,10 @@ const CheckDetailPage = () => {
 
   const isMobile = useContext(isMobileContext)
 
+  const { projectSummary, setProjectSummary, removeProjectSummary } = useProjectSummaryStore()
+
   // ! 대표 이미지, 마지막 업로드 추가
-  const [projectSummaryData, setProjectSummaryData] = useState<projectSummaryType | undefined>(
-    localStorage.getItem('projectSummary') !== null ? JSON.parse(localStorage.getItem('projectSummary')!) : undefined
-  )
+  const [projectSummaryData, setProjectSummaryData] = useState<projectSummaryType>(projectSummary)
 
   const versionRef = useRef(0)
 
@@ -56,7 +51,13 @@ const CheckDetailPage = () => {
     formState: { isSubmitting, isDirty },
     handleSubmit,
     reset
-  } = useForm<ProjectFormType>()
+  } = useForm<ProjectFormType>({
+    defaultValues: {
+      machineProjectName: '',
+      requirement: '',
+      note: ''
+    }
+  })
 
   useEffect(() => {
     if (projectSummaryData) return
@@ -79,7 +80,7 @@ const CheckDetailPage = () => {
 
       return response.data.data
     } catch (error) {
-      handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
+      printErrorSnackbar(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
     }
   }, [machineProjectId])
 
@@ -92,7 +93,7 @@ const CheckDetailPage = () => {
 
       return response.data.data.page.totalElements
     } catch (error) {
-      handleApiError(error, '설비개수를 불러오는 데 실패했습니다.')
+      printErrorSnackbar(error, '설비개수를 불러오는 데 실패했습니다.')
 
       return 0
     }
@@ -107,7 +108,7 @@ const CheckDetailPage = () => {
 
       return response.data.data
     } catch (error) {
-      handleApiError(error, '점검일정/참여기술진 정보를 불러오는 데 실패했습니다.')
+      printErrorSnackbar(error, '점검일정/참여기술진 정보를 불러오는 데 실패했습니다.')
     }
   }, [machineProjectId])
 
@@ -131,7 +132,11 @@ const CheckDetailPage = () => {
 
     setInspectionCnt(await getInspectionCnt())
 
-    reset(projectData)
+    reset({
+      machineProjectName: projectData.machineProjectName ?? '',
+      requirement: projectData.requirement ?? '',
+      note: projectData.note ?? ''
+    })
   }, [getProjectData, getScheduleData, getInspectionCnt, reset])
 
   // projectData와 scheduleData 중 썸네일에 필요한 정보를 projectSummaryData에 저장.
@@ -142,9 +147,9 @@ const CheckDetailPage = () => {
   // projectSummaryData가 바뀔 때마다 localStorage에 저장.
   useEffect(() => {
     if (projectSummaryData) {
-      localStorage.setItem('projectSummary', JSON.stringify(projectSummaryData))
+      setProjectSummary(projectSummaryData)
     }
-  }, [projectSummaryData])
+  }, [projectSummaryData, setProjectSummary])
 
   // ! api 하나로 통일
   const handleSave = useCallback(
@@ -186,9 +191,9 @@ const CheckDetailPage = () => {
               note: data.note
             }
         )
-        handleSuccess('변경사항이 저장되었습니다.')
+        printSuccessSnackbar('변경사항이 저장되었습니다.')
       } catch (err) {
-        handleApiError(err)
+        printErrorSnackbar(err)
       }
     },
     [machineProjectId, reset]
@@ -204,7 +209,7 @@ const CheckDetailPage = () => {
               sx={{ p: 0 }}
               onClick={() => {
                 router.back()
-                localStorage.removeItem('projectSummary')
+                removeProjectSummary()
               }}
             >
               <i className='tabler-chevron-left text-white text-3xl' />
@@ -214,7 +219,7 @@ const CheckDetailPage = () => {
           right={
             <IconButton sx={{ p: 0 }} type='submit' disabled={isSubmitting || !isDirty}>
               {isDirty ? (
-                <i className=' tabler-device-floppy text-white text-3xl animate-ring ' />
+                <i className='tabler-device-floppy text-white text-3xl animate-ring' />
               ) : (
                 <i className='tabler-device-floppy text-white text-3xl' />
               )}

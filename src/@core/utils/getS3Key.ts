@@ -1,8 +1,23 @@
 import axios from 'axios'
 
-import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
+import { auth } from '@core/utils/auth'
+import { handleApiError } from '@core/utils/errorHandler'
+import type { MachineInspectionPicUploadPresignedUrlBatchRequestDtoType } from '../types'
 
+/**
+ * S3 Bucket에 사진들을 등록하고 s3Key 정보를 받는 함수
+ * @param machineProjectId 필수
+ * @param files 필수
+ * @param inspectionId (설비사진 필수)
+ * @param checklistItemId (설비사진 필수)
+ * @param checklistSubItemId (설비사진 필수)
+ * @param machineProjectPicType (현장사진 필수)
+ * @returns s3Key 정보를 담은 객체 배열 {
+    fileName: string;
+    s3Key: string;
+    uploadSuccess: boolean;
+}[]
+ */
 export default async function getS3Key(
   machineProjectId: string,
   files: File[],
@@ -11,8 +26,11 @@ export default async function getS3Key(
   checklistSubItemId?: number,
   machineProjectPicType?: 'OVERVIEW' | 'ETC' | 'LOCATION_MAP'
 ) {
+  const isInspectionPic = inspectionId && checklistItemId && checklistSubItemId
+  const isProjectPic = machineProjectPicType
+
   // handle inspection image
-  if (inspectionId && checklistItemId && checklistSubItemId) {
+  if (isInspectionPic) {
     try {
       // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)
       const presignedResponse = await auth.post<{
@@ -20,12 +38,12 @@ export default async function getS3Key(
       }>(`/api/presigned-urls/machine-projects/${machineProjectId}/machine-inspections/${inspectionId}/upload`, {
         uploadType: 'INSPECTION_IMAGE',
         originalFileNames: files.map(file => file.name),
-        checklistItemId: checklistItemId,
-        checklistSubItemId: checklistSubItemId
+        machineProjectChecklistItemId: checklistItemId,
+        machineProjectChecklistSubItemId: checklistSubItemId
 
         // ! 현재 유저의 ID => 로그인 기능 구현 후 추가
         // memberId: 1
-      })
+      } as MachineInspectionPicUploadPresignedUrlBatchRequestDtoType)
 
       const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
 
@@ -64,9 +82,7 @@ export default async function getS3Key(
     } catch (e) {
       handleApiError(e)
     }
-  }
-
-  if (machineProjectPicType) {
+  } else if (isProjectPic) {
     // handle project image
     try {
       // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴.)

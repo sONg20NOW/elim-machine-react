@@ -5,25 +5,26 @@ import { useParams } from 'next/navigation'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import { InputLabel, MenuItem, TextField } from '@mui/material'
+import { InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import type { MachineInspectionResponseDtoType } from '@/@core/types'
+import type { MachineInspectionResponseDtoType } from '@core/types'
 import type { FormComponentHandle } from '../page'
 
 // import { engineerListContext } from '../page'
 // import EngineerCard from '../_components/EngineerCard'
-import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
-import { useGetSingleInspectionSumamry } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
+import { useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
+import { equipmentPhaseOption } from '@/@core/data/options'
+import { printErrorSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 export interface formType {
   machineInspectionName: string
   location: string
   purpose: string
-  equipmentPhase: 'INSTALL' | 'MANUFACTURE' | 'USE'
+  equipmentPhase: 'INSTALL' | 'MANUFACTURE' | 'USE' | null
   equipmentPhaseDate: string
   checkDate: string
   remark: string
@@ -77,11 +78,11 @@ const InspectionForm = memo(
             .then(v => v.data.data)
 
           refetch()
-          console.log('reset inspection form:', response)
+          console.log('reset inspection form:', response.id)
 
           return true
         } catch (e) {
-          handleApiError(e)
+          printErrorSnackbar(e)
 
           return false
         }
@@ -154,25 +155,32 @@ const InspectionForm = memo(
                 control={control}
                 name='equipmentPhase'
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    slotProps={{
-                      select: { sx: { width: 'fit-content', paddingRight: 2, fontSize: 18 } }
+                  <Select
+                    value={field.value ?? ''}
+                    onChange={e => field.onChange(e.target.value === '' ? null : e.target.value)}
+                    sx={{
+                      flex: 1
                     }}
-                    select
-                    sx={{ flex: 1 }}
                     size={isMobile ? 'small' : 'medium'}
+                    displayEmpty
+                    renderValue={value => {
+                      const found = equipmentPhaseOption.find(opt => opt.value === value)?.label
+
+                      return found ? (
+                        <Typography sx={{ fontSize: 18 }}>{found}</Typography>
+                      ) : (
+                        <Typography sx={{ fontSize: 18, opacity: '60%', fontStyle: 'italic' }} variant='inherit'>
+                          미정
+                        </Typography>
+                      )
+                    }}
                   >
-                    {[
-                      { label: '설치일', value: 'INSTALL' },
-                      { label: '제조일', value: 'MANUFACTURE' },
-                      { label: '사용일', value: 'USE' }
-                    ].map(v => (
+                    {equipmentPhaseOption.map(v => (
                       <MenuItem value={v.value} key={v.value}>
                         {v.label}
                       </MenuItem>
                     ))}
-                  </TextField>
+                  </Select>
                 )}
               />
             }

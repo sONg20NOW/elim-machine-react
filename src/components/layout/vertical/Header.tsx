@@ -1,52 +1,60 @@
 'use client'
 
-import { useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography, Link } from '@mui/material'
+import { Drawer, IconButton, AppBar, Button, Toolbar, Box, Typography } from '@mui/material'
+
+import { toast } from 'react-toastify'
+
+import {
+  IconCalendar,
+  IconCircle,
+  IconClipboard,
+  IconClipboardCheck,
+  IconHeartHandshake,
+  IconHistory,
+  IconMenu2,
+  IconPaperclip,
+  IconSettings,
+  IconShield,
+  IconSpeakerphone,
+  IconUsers,
+  IconUsersPlus,
+  IconZoomQuestion
+} from '@tabler/icons-react'
 
 import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 
-import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
-import { isMobileContext, isTabletContext } from '@/@core/components/custom/ProtectedPage'
+import { logout } from '@core/utils/auth'
+import UserModal from '@/app/(dashboard)/member/_components/UserModal'
+import { useGetSingleMember } from '@core/hooks/customTanstackQueries'
+import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import { isMobileContext, isTabletContext } from '@/@core/contexts/mediaQueryContext'
 
 // import Logo from '@components/layout/shared/Logo'
 
 export default function Header() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [keyword, setKeyword] = useState<string>()
+  const [openUser, setOpenUser] = useState(false)
 
   const isTablet = useContext(isTabletContext)
   const isMobile = useContext(isMobileContext)
 
-  const username = '송강규'
+  const currentUser = useCurrentUserStore(set => set.currentUser)
 
-  const handleLogout = async () => {
-    try {
-      // ! CSRF token 같이 넣어서 POST
-      await auth.post(`/api/authentication/web/logout`)
-    } catch (e) {
-      handleApiError(e)
-    } finally {
-      localStorage.removeItem('accessToken')
-      router.push('/login')
-    }
+  function UserModalContainer() {
+    const { data: userData } = useGetSingleMember((currentUser?.memberId ?? 0).toString())
+
+    return userData && <UserModal open={openUser} setOpen={setOpenUser} selectedUserData={userData} />
   }
 
-  useEffect(() => {
-    if (keyword) {
-      localStorage.setItem('headerKeyword', keyword)
-      const searchBar = document.getElementById('검색어를 입력하세요') as HTMLInputElement
-
-      searchBar.value = ''
-      setKeyword(undefined)
-
-      router.push('/machine')
-    }
-  }, [keyword, router])
+  const handleLogout = useCallback(() => {
+    toast.info('로그아웃되었습니다.')
+    logout()
+  }, [])
 
   return (
     <AppBar
@@ -56,30 +64,39 @@ export default function Header() {
       position='static'
     >
       <Toolbar className='flex justify-between'>
-        <div className='flex gap-4'>
+        <div className='flex gap-2'>
+          {isTablet && (
+            <IconButton edge='end' onClick={() => setOpen(true)}>
+              <IconMenu2 color='white' />
+            </IconButton>
+          )}
           <div onClick={() => router.push('/machine')} className='cursor-pointer'>
             {/* <Logo /> */}
             <Typography color='white' variant='h4' sx={{ paddingInlineStart: 4 }}>
               엘림 주식회사
             </Typography>
           </div>
-          {isTablet && (
-            <IconButton edge='end' onClick={() => setOpen(true)}>
-              <i className='tabler-menu-2 text-white' />
-            </IconButton>
-          )}
-          {/* <SearchBar placeholder='검색어를 입력하세요' setSearchKeyword={name => setKeyword(name)} /> */}
         </div>
         {!isTablet && (
           <div className='flex gap-5 items-center overflow-visible'>
-            <Typography color='white' onClick={() => console.log(document.cookie.split(';'))}>
-              반갑습니다, {username}님
-            </Typography>
+            {currentUser && (
+              <Typography
+                color='white'
+                onClick={() => console.log(document.cookie.split(';'))}
+                sx={{ alignItems: 'center', display: 'flex' }}
+              >
+                반갑습니다,{' '}
+                <Button color='inherit' type='button' onClick={() => setOpenUser(true)}>
+                  {currentUser.name}
+                </Button>
+                님
+              </Typography>
+            )}
             <Button
               size='small'
               sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
               variant='contained'
-              onClick={() => handleLogout()}
+              onClick={handleLogout}
             >
               <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
             </Button>
@@ -99,41 +116,49 @@ export default function Header() {
             {isTablet && (
               <Box
                 sx={{ backgroundColor: 'primary.dark' }}
-                className='flex justify-between items-center overflow-visible p-3'
+                className='flex flex-col justify-between items-start overflow-visible p-3'
               >
-                <div className='flex flex-col gap-1'>
+                <div className='flex justify-between w-full'>
                   <Typography color='white' onClick={() => console.log(document.cookie.split(';'))}>
                     반갑습니다,
                   </Typography>
-                  <Typography
-                    maxWidth={3}
+                  <Button
+                    size='small'
                     sx={{
-                      overflow: 'hidden', // width 넘으면 숨김
-                      textOverflow: 'ellipsis', // 넘는 텍스트는 ... 처리
-                      whiteSpace: 'nowrap', // 줄바꿈 방지
-                      maxWidth: 120
+                      backgroundColor: 'white',
+                      verticalAlign: 'start',
+                      ':hover': { boxShadow: 5, backgroundColor: 'lightgray' }
                     }}
-                    color='white'
-                    onClick={() => console.log(document.cookie.split(';'))}
+                    variant='contained'
+                    onClick={handleLogout}
                   >
-                    {username}
-                  </Typography>
+                    <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
+                  </Button>
                 </div>
-
-                <Button
-                  size='small'
-                  sx={{ backgroundColor: 'white', ':hover': { boxShadow: 5, backgroundColor: 'lightgray' } }}
-                  variant='contained'
-                  onClick={() => handleLogout()}
+                <Typography
+                  maxWidth={3}
+                  sx={{
+                    overflow: 'hidden', // width 넘으면 숨김
+                    textOverflow: 'ellipsis', // 넘는 텍스트는 ... 처리
+                    whiteSpace: 'nowrap', // 줄바꿈 방지
+                    maxWidth: 220,
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  color='white'
+                  onClick={() => console.log(document.cookie.split(';'))}
                 >
-                  <Typography sx={{ fontWeight: 600 }}>로그아웃</Typography>
-                </Button>
+                  <Button color='inherit' type='button' onClick={() => setOpenUser(true)} sx={{ p: 0 }}>
+                    {currentUser?.name ?? ''}
+                  </Button>
+                  님
+                </Typography>
               </Box>
             )}
-            <Menu renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}>
+            <Menu renderExpandedMenuItemIcon={{ icon: <IconCircle className='text-xs' /> }}>
               <MenuItem
                 href={`/calendar`}
-                icon={<i className='tabler-calendar' />}
+                icon={<IconCalendar />}
                 className='ps-2 pe-3 bg-white '
                 style={{
                   borderRadius: 5
@@ -145,7 +170,7 @@ export default function Header() {
               <MenuSection label='기계설비점검'>
                 <MenuItem
                   href={`/machine`}
-                  icon={<i className='tabler-settings' />}
+                  icon={<IconSettings />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -156,7 +181,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/machine/engineer`}
-                  icon={<i className='tabler-users' />}
+                  icon={<IconUsers />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -167,7 +192,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/machine/template`}
-                  icon={<i className='tabler-clipboard' />}
+                  icon={<IconClipboard />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -180,7 +205,7 @@ export default function Header() {
               <MenuSection label='안전진단전검'>
                 <MenuItem
                   href={`/safety`}
-                  icon={<i className='tabler-shield' />}
+                  icon={<IconShield />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -193,7 +218,7 @@ export default function Header() {
               <MenuSection label='문의'>
                 <MenuItem
                   href={`/board/notice`}
-                  icon={<i className='tabler-speakerphone' />}
+                  icon={<IconSpeakerphone />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -204,7 +229,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/board/files`}
-                  icon={<i className='tabler-paperclip' />}
+                  icon={<IconPaperclip />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -215,7 +240,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/board/faq`}
-                  icon={<i className='tabler-clipboard-check' />}
+                  icon={<IconClipboardCheck />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -226,7 +251,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/board/qna`}
-                  icon={<i className='tabler-zoom-question' />}
+                  icon={<IconZoomQuestion />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -239,7 +264,7 @@ export default function Header() {
               <MenuSection label='관리'>
                 <MenuItem
                   href={`/member`}
-                  icon={<i className='tabler-users-plus' />}
+                  icon={<IconUsersPlus />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -250,7 +275,7 @@ export default function Header() {
                 </MenuItem>
                 <MenuItem
                   href={`/loginlog`}
-                  icon={<i className='tabler-history' />}
+                  icon={<IconHistory />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -263,7 +288,7 @@ export default function Header() {
               <MenuSection label='라이선스'>
                 <MenuItem
                   href={`/license`}
-                  icon={<i className='tabler-heart-handshake' />}
+                  icon={<IconHeartHandshake />}
                   className='ps-2 pe-3 bg-white '
                   style={{
                     borderRadius: 5
@@ -275,13 +300,14 @@ export default function Header() {
               </MenuSection>
             </Menu>
           </Box>
-          <Box sx={{ width: 'full', textAlign: 'right' }}>
+          {/* <Box sx={{ width: 'full', textAlign: 'right' }}>
             <Link href='/check' className={`text-color-primary`} width={'fit-content'} sx={{ py: 1, px: 3 }}>
               성능점검 앱
             </Link>
-          </Box>
+          </Box> */}
         </Drawer>
       )}
+      {openUser && currentUser && <UserModalContainer />}
     </AppBar>
   )
 }

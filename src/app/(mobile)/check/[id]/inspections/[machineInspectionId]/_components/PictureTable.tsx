@@ -1,4 +1,4 @@
-import type { RefObject } from 'react'
+import type { ChangeEventHandler, RefObject } from 'react'
 import { useEffect, useState, useCallback, useRef, useContext, memo } from 'react'
 
 import { useParams, usePathname, useRouter } from 'next/navigation'
@@ -17,21 +17,26 @@ import {
   Checkbox
 } from '@mui/material'
 
-import { handleApiError } from '@/utils/errorHandler'
-import type { MachinePicCursorType, MachinePicPresignedUrlResponseDtoType } from '@/@core/types'
+import type {
+  MachineChecklistItemsWithPicCountResponseDtosType,
+  MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType,
+  MachinePicCursorType,
+  MachinePicPresignedUrlResponseDtoType
+} from '@core/types'
 
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import { uploadInspectionPictures } from '@/@core/utils/uploadInspectionPictures'
-import { useGetChecklistInfo } from '@/@core/hooks/customTanstackQueries'
-import { auth } from '@/lib/auth'
+import { uploadSingleInspectionPic } from '@core/utils/uploadInspectionPictures'
+import { useGetChecklistInfo } from '@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
+import { printErrorSnackbar, printSuccessSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const PictureTable = memo(
   ({
-    machineChecklistItemId,
+    machineProjectChecklistItemId,
     scrollableAreaRef,
     tabHeight
   }: {
-    machineChecklistItemId: number | null
+    machineProjectChecklistItemId: number | null
     scrollableAreaRef: RefObject<HTMLElement>
     tabHeight: number
   }) => {
@@ -44,7 +49,7 @@ const PictureTable = memo(
 
     const { refetch } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
 
-    const machineChecklistItemIdRef = useRef(machineChecklistItemId)
+    const machineChecklistItemIdRef = useRef(machineProjectChecklistItemId)
     const isLoadingRef = useRef(false)
 
     // 무한스크롤 관련 Ref들
@@ -52,8 +57,8 @@ const PictureTable = memo(
     const nextCursorRef = useRef<MachinePicCursorType | null>(undefined)
 
     useEffect(() => {
-      machineChecklistItemIdRef.current = machineChecklistItemId
-    }, [machineChecklistItemId])
+      machineChecklistItemIdRef.current = machineProjectChecklistItemId
+    }, [machineProjectChecklistItemId])
 
     const defaultPageSize = 4
     const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
@@ -65,6 +70,39 @@ const PictureTable = memo(
     const trigger = useScrollTrigger({ target: scrollableAreaRef.current })
 
     const { data: checklistList } = useGetChecklistInfo(machineProjectId!.toString(), machineInspectionId!.toString())
+
+    const handlePicClick = (pic: MachinePicPresignedUrlResponseDtoType) => () => {
+      const searchParams = new URLSearchParams()
+
+      searchParams.set('picId', pic.machinePicId.toString())
+      router.push(pathname.split('?')[0] + '/pictures' + '?' + searchParams.toString())
+    }
+
+    const handleImageUpload =
+      (
+        itemData: MachineChecklistItemsWithPicCountResponseDtosType,
+        subItemData: MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType
+      ) =>
+      async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!event.target.files || !machineProjectId || !machineInspectionId) return
+
+        const file = event.target.files[0]
+
+        if (
+          await uploadSingleInspectionPic(
+            machineProjectId.toString(),
+            machineInspectionId.toString(),
+            file,
+            itemData.machineProjectChecklistItemId,
+            subItemData.machineProjectChecklistSubItemId
+          )
+        ) {
+          refetch()
+          printSuccessSnackbar('사진 업로드가 완료되었습니다')
+        } else {
+          printErrorSnackbar('', '사진 업로드에 실패했습니다')
+        }
+      }
 
     // 현재 커서 정보에 기반해서 사진을 가져오는 함수.
     const getPictures = useCallback(
@@ -78,7 +116,9 @@ const PictureTable = memo(
           const requestBody = {
             ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {}),
             machineInspectionId: Number(machineInspectionId),
-            ...(machineChecklistItemIdRef.current ? { machineChecklistItemId: machineChecklistItemIdRef.current } : {})
+            ...(machineChecklistItemIdRef.current
+              ? { machineProjectChecklistItemId: machineChecklistItemIdRef.current }
+              : {})
           }
 
           const response = await auth.post<{
@@ -99,7 +139,7 @@ const PictureTable = memo(
 
           return response.data.data
         } catch (err) {
-          handleApiError(err)
+          printErrorSnackbar(err)
 
           isLoadingRef.current = false
           setIsLoading(false)
@@ -116,7 +156,7 @@ const PictureTable = memo(
 
     useEffect(() => {
       resetCursor()
-    }, [machineChecklistItemId, emptyMode])
+    }, [machineProjectChecklistItemId, emptyMode])
 
     // 스크롤 이벤트 핸들러
     const handleScroll = useCallback(() => {
@@ -157,141 +197,6 @@ const PictureTable = memo(
       return () => window.removeEventListener('scroll', handleScroll)
     }, [handleScroll, getPictures, pictures, scrollableAreaRef])
 
-    const ImageCard = ({ pic, index }: { pic: MachinePicPresignedUrlResponseDtoType; index: number }) => {
-      return (
-        <Paper
-          sx={{
-            position: 'relative',
-            cursor: 'pointer',
-            borderColor: 'lightgray',
-            borderWidth: '1px',
-            ':hover': { boxShadow: 10 }
-          }}
-          variant='outlined'
-          key={`${pic.machinePicId}-${index}`}
-          onClick={() => {
-            const searchParams = new URLSearchParams()
-
-            searchParams.set('picId', pic.machinePicId.toString())
-            router.push(pathname.split('?')[0] + '/pictures' + '?' + searchParams.toString())
-          }}
-        >
-          <ImageListItem>
-            <img
-              src={pic.presignedUrl}
-              alt={pic.originalFileName}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                borderTopLeftRadius: 5,
-                borderTopRightRadius: 5
-              }}
-            />
-            <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
-          </ImageListItem>
-
-          <div className='p-1'>
-            <Typography
-              fontSize={'medium'}
-              fontWeight={600}
-              color='primary.dark'
-              textAlign={'center'}
-            >{`${pic.machineChecklistItemName}`}</Typography>
-            <Typography
-              fontSize={'medium'}
-              color='black'
-              textAlign={'center'}
-            >{`${pic.machineChecklistSubItemName}`}</Typography>
-          </div>
-        </Paper>
-      )
-    }
-
-    const EmptyImageCard = ({
-      machineChecklistItemName,
-      machineChecklistSubItemName,
-      machineChecklistItemId,
-      machineChecklistSubItemId
-    }: {
-      machineChecklistItemName: string
-      machineChecklistSubItemName: string
-      machineChecklistItemId: number
-      machineChecklistSubItemId: number
-    }) => {
-      const emptyCameraRef = useRef<HTMLInputElement>(null)
-
-      const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!event.target.files || !machineProjectId || !machineInspectionId) return
-
-        const file = event.target.files[0]
-
-        if (
-          await uploadInspectionPictures(
-            machineProjectId.toString(),
-            machineInspectionId.toString(),
-            [file],
-            machineChecklistItemId,
-            machineChecklistSubItemId
-          )
-        )
-          refetch()
-      }
-
-      return (
-        <Paper
-          sx={{
-            position: 'relative',
-            cursor: 'pointer',
-            borderColor: 'lightgray',
-            borderWidth: '1px',
-            ':active': { boxShadow: '0px 0px 21px 5px #282828' }
-          }}
-          variant='outlined'
-          key={machineChecklistItemName}
-          onClick={() => {
-            emptyCameraRef.current?.click()
-          }}
-        >
-          <input
-            type='file'
-            capture='environment'
-            className='hidden absolute right-0 top-1/2 -translate-y-1/2'
-            accept='image/*'
-            ref={emptyCameraRef}
-            onChange={e => {
-              handleImageUpload(e)
-            }}
-          />
-          <ImageListItem
-            sx={{
-              background: '#373737ff',
-              borderTopLeftRadius: 6,
-              borderTopRightRadius: 6,
-              placeItems: 'center',
-              display: 'grid'
-            }}
-          >
-            <i className='tabler-camera text-[70px] text-white' />
-          </ImageListItem>
-
-          <div className='p-1'>
-            <Typography
-              fontSize={'medium'}
-              fontWeight={600}
-              color='primary.dark'
-              textAlign={'center'}
-            >{`${machineChecklistItemName}`}</Typography>
-            <Typography
-              fontSize={'medium'}
-              color='black'
-              textAlign={'center'}
-            >{`${machineChecklistSubItemName}`}</Typography>
-          </div>
-        </Paper>
-      )
-    }
-
     return (
       <div className='flex flex-col gap-8'>
         <Checkbox
@@ -319,7 +224,7 @@ const PictureTable = memo(
               {checklistList
                 .filter(v =>
                   machineChecklistItemIdRef.current
-                    ? v.machineChecklistItemId === machineChecklistItemIdRef.current
+                    ? v.machineProjectChecklistItemId === machineChecklistItemIdRef.current
                     : true
                 )
                 .map(v =>
@@ -327,11 +232,10 @@ const PictureTable = memo(
                     .filter(p => p.machinePicCount === 0)
                     .map(p => (
                       <EmptyImageCard
-                        key={p.machineChecklistSubItemId}
-                        machineChecklistItemId={v.machineChecklistItemId}
-                        machineChecklistSubItemId={p.machineChecklistSubItemId}
-                        machineChecklistItemName={v.machineChecklistItemName}
-                        machineChecklistSubItemName={p.checklistSubItemName}
+                        key={p.machineProjectChecklistSubItemId}
+                        itemData={v}
+                        subItemData={p}
+                        onImageUpload={handleImageUpload(v, p)}
                       />
                     ))
                 )}
@@ -341,7 +245,7 @@ const PictureTable = memo(
           <>
             <ImageList sx={{ overflow: 'visible' }} cols={isMobile ? 1 : 2} rowHeight={isMobile ? 180 : 240} gap={15}>
               {pictures.map((pic, index) => (
-                <ImageCard key={index} pic={pic} index={index} />
+                <ImageCard key={index} pic={pic} index={index} handlePicClick={handlePicClick(pic)} />
               ))}
             </ImageList>
             {!nextCursorRef.current && (
@@ -366,5 +270,126 @@ const PictureTable = memo(
     )
   }
 )
+
+const ImageCard = ({
+  pic,
+  index,
+  handlePicClick
+}: {
+  pic: MachinePicPresignedUrlResponseDtoType
+  index: number
+  handlePicClick: () => void
+}) => {
+  return (
+    <Paper
+      sx={{
+        position: 'relative',
+        cursor: 'pointer',
+        borderColor: 'lightgray',
+        borderWidth: '1px',
+        ':hover': { boxShadow: 10 }
+      }}
+      variant='outlined'
+      key={`${pic.machinePicId}-${index}`}
+      onClick={handlePicClick}
+    >
+      <ImageListItem>
+        <img
+          src={pic.presignedUrl}
+          alt={pic.originalFileName}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            background: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.1))',
+            borderTopLeftRadius: 5,
+            borderTopRightRadius: 5
+          }}
+        />
+        <ImageListItemBar sx={{ textAlign: 'center' }} title={pic.originalFileName} />
+      </ImageListItem>
+
+      <div className='p-1'>
+        <Typography
+          fontSize={'medium'}
+          fontWeight={600}
+          color='primary.dark'
+          textAlign={'center'}
+        >{`${pic.machineProjectChecklistItemName}`}</Typography>
+        <Typography
+          fontSize={'medium'}
+          color='black'
+          textAlign={'center'}
+        >{`${pic.machineProjectChecklistSubItemName}`}</Typography>
+      </div>
+    </Paper>
+  )
+}
+
+const EmptyImageCard = ({
+  itemData,
+  subItemData,
+  onImageUpload
+}: {
+  itemData: MachineChecklistItemsWithPicCountResponseDtosType
+  subItemData: MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType
+  onImageUpload: ChangeEventHandler<HTMLInputElement>
+}) => {
+  const emptyCameraRef = useRef<HTMLInputElement>(null)
+
+  const machineProjectChecklistItemName = itemData.machineProjectChecklistItemName
+  const machineProjectChecklistSubItemName = subItemData.machineProjectChecklistSubItemName
+
+  return (
+    <Paper
+      sx={{
+        position: 'relative',
+        cursor: 'pointer',
+        borderColor: 'lightgray',
+        borderWidth: '1px',
+        ':active': { boxShadow: '0px 0px 21px 5px #282828' }
+      }}
+      variant='outlined'
+      key={machineProjectChecklistItemName}
+      onClick={() => {
+        emptyCameraRef.current?.click()
+      }}
+    >
+      <input
+        type='file'
+        capture='environment'
+        className='hidden absolute right-0 top-1/2 -translate-y-1/2'
+        accept='image/*'
+        ref={emptyCameraRef}
+        onChange={onImageUpload}
+      />
+      <ImageListItem
+        sx={{
+          background: '#373737ff',
+          borderTopLeftRadius: 6,
+          borderTopRightRadius: 6,
+          placeItems: 'center',
+          display: 'grid'
+        }}
+      >
+        <i className='tabler-camera text-[70px] text-white' />
+      </ImageListItem>
+
+      <div className='p-1'>
+        <Typography
+          fontSize={'medium'}
+          fontWeight={600}
+          color='primary.dark'
+          textAlign={'center'}
+        >{`${machineProjectChecklistItemName}`}</Typography>
+        <Typography
+          fontSize={'medium'}
+          color='black'
+          textAlign={'center'}
+        >{`${machineProjectChecklistSubItemName}`}</Typography>
+      </div>
+    </Paper>
+  )
+}
 
 export default PictureTable

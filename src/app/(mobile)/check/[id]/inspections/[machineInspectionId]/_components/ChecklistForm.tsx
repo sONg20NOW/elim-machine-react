@@ -7,12 +7,12 @@ import { Box, Checkbox, InputLabel, MenuItem, TextField, Typography } from '@mui
 
 import { useForm } from 'react-hook-form'
 
-import { isMobileContext } from '@/@core/components/custom/ProtectedPage'
-import type { MachineInspectionChecklistItemResultResponseDtoType } from '@/@core/types'
+import type { MachineInspectionChecklistItemResultResponseDtoType } from '@core/types'
 import type { FormComponentHandle } from '../page'
-import { auth } from '@/lib/auth'
-import { handleApiError } from '@/utils/errorHandler'
-import { useGetChecklistInfo, useGetChecklistResult } from '@/@core/hooks/customTanstackQueries'
+import { auth } from '@core/utils/auth'
+import { useGetChecklistInfo, useGetChecklistResult } from '@core/hooks/customTanstackQueries'
+import { printErrorSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface formType {
   deficiencies: string
@@ -43,7 +43,7 @@ const ChecklistForm = memo(
 
     const checklistMeta = useRef({ id: 0, version: 0 })
 
-    const checklistItem = checklistList?.find(v => v.machineChecklistItemId === Number(category))
+    const checklistItem = checklistList?.find(v => v.machineProjectChecklistItemId === Number(category))
 
     const { data: checklistResult, refetch } = useGetChecklistResult(
       `${machineProjectId}`,
@@ -81,11 +81,11 @@ const ChecklistForm = memo(
             .then(v => v.data.data.machineInspectionChecklistItemResultUpdateResponseDtos[0])
 
           refetch()
-          console.log('reset checklist result form:', response)
+          console.log('reset checklist result form:', response.id)
 
           return true
         } catch (e) {
-          handleApiError(e)
+          printErrorSnackbar(e)
 
           return false
         }
@@ -138,20 +138,20 @@ const ChecklistForm = memo(
           >
             <MenuItem value='전체'>전체</MenuItem>
             {checklistList?.map(v =>
-              v.machineChecklistItemName !== '기타' ? (
+              v.machineProjectChecklistItemName !== '기타' ? (
                 <MenuItem
-                  key={v.machineChecklistItemId}
-                  value={v.machineChecklistItemId}
+                  key={v.machineProjectChecklistItemId}
+                  value={v.machineProjectChecklistItemId}
                   sx={{
                     color: v.totalMachinePicCount === 0 ? 'red' : ''
                   }}
                 >
-                  {v.machineChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}/
-                  {v.checklistSubItems.length}]
+                  {v.machineProjectChecklistItemName} [{v.checklistSubItems.filter(p => p.machinePicCount !== 0).length}
+                  /{v.checklistSubItems.length}]
                 </MenuItem>
               ) : (
-                <MenuItem key={v.machineChecklistItemId} value={v.machineChecklistItemId}>
-                  {v.machineChecklistItemName}
+                <MenuItem key={v.machineProjectChecklistItemId} value={v.machineProjectChecklistItemId}>
+                  {v.machineProjectChecklistItemName}
                 </MenuItem>
               )
             )}

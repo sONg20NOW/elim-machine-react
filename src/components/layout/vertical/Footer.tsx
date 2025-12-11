@@ -1,8 +1,6 @@
 'use client'
 
 // Component Imports
-import Link from 'next/link'
-
 import classnames from 'classnames'
 
 // Next Imports
@@ -19,16 +17,18 @@ const Footer = () => {
     <div
       className={classnames(
         verticalLayoutClasses.footerContent,
-        'pl-[10px] flex items-center justify-between flex-wrap  hidden md:flex'
+        'px-[10px] flex items-center justify-between flex-wrap  hidden md:flex'
       )}
     >
-      <p>
-        <span className='text-textSecondary'>{`© ${new Date().getFullYear()}, Made `}</span>
-        <span className='text-textSecondary'>{` by Elim`}</span>
-      </p>
-      <Link href='/check' className={`text-color-primary`}>
+      <div className='flex items-center gap-6'>
+        <p>
+          <span className='text-textSecondary'>{`© ${new Date().getFullYear()}, Made `}</span>
+          <span className='text-textSecondary'>{` by Elim`}</span>
+        </p>
+      </div>
+      {/* <Link href='/check' className={`text-color-primary`}>
         성능점검 앱
-      </Link>
+      </Link> */}
     </div>
   )
 }

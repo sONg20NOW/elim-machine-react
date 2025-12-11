@@ -2,18 +2,16 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { Divider, MenuItem, TextField } from '@mui/material'
 
-import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
-import { fanTypeOption } from '@/app/_constants/options'
+import type { MachineInspectionDetailResponseDtoType } from '@core/types'
+import { fanTypeOption } from '@/@core/data/options'
 
 interface WindTabContentProps<T> {
-  selectedMachineData: T
   editData: T
   setEditData: Dispatch<SetStateAction<T>>
   isEditing: boolean
 }
 
 export function WindTabContent({
-  selectedMachineData,
   editData,
   setEditData,
   isEditing
@@ -21,7 +19,7 @@ export function WindTabContent({
   return (
     <div className='flex flex-col gap-8'>
       {!isEditing
-        ? selectedMachineData.windMeasurementResponseDtos.map((info, idx) => (
+        ? editData.windMeasurementResponseDtos.map((info, idx) => (
             <div key={info.windMeasurementId} className='flex-col flex gap-4'>
               {idx !== 0 && <Divider />}
               <div className='flex flex-col gap-1' key={info.windMeasurementId * 2}>
@@ -90,7 +88,7 @@ export function WindTabContent({
             </div>
           ))
         : editData.windMeasurementResponseDtos.map((info, idx) => (
-            <div key={info.windMeasurementId} className='flex-col flex gap-4'>
+            <div key={info.windMeasurementId} className='flex-col flex gap-4 [&>div>table>tbody>tr>td]:py-0'>
               {idx !== 0 && <Divider />}
               {/* 설계값 */}
               <div className='flex flex-col gap-1' key={info.windMeasurementId * 2}>

@@ -1,5 +1,7 @@
 import Script from 'next/script'
 
+import type { Metadata } from 'next'
+
 // MUI Imports
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
 
@@ -9,8 +11,9 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/ReactToastify.css'
 
-// Type Imports
-import type { ChildrenType } from '@/@core/types'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+
+import type { ChildrenType } from '@core/types'
 
 // Component Imports
 
@@ -19,14 +22,19 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
-import { BROWER_TAB_DESCRIPTION, BROWER_TAB_TITLE } from './_constants/table/TableHeader'
+import Providers from '@/components/Providers'
 
-export const metadata = {
+// import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
+
+const BROWER_TAB_TITLE = 'ELIM'
+const BROWER_TAB_DESCRIPTION = 'Elim-safety 114'
+
+export const metadata: Metadata = {
   title: BROWER_TAB_TITLE,
   description: BROWER_TAB_DESCRIPTION
 }
 
-const RootLayout = async (props: ChildrenType) => {
+const RootLayout = (props: ChildrenType) => {
   // const params = await props.params
 
   const { children } = props
@@ -36,6 +44,9 @@ const RootLayout = async (props: ChildrenType) => {
   const systemMode = 'light'
 
   // const direction = i18n.langDirection[params.lang]
+  // if ('serviceWorker' in navigator) {
+  //   navigator.serviceWorker.register('/sw.js')
+  // }
 
   return (
     <html id='__next' suppressHydrationWarning>
@@ -45,9 +56,12 @@ const RootLayout = async (props: ChildrenType) => {
       </head>
       <Script src='//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'></Script>
       <body className='flex is-full min-bs-full flex-auto flex-col'>
+        {/* 클라이언트 전용 SW 등록 컴포넌트 */}
+        {/* <ServiceWorkerRegister /> */}
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
-        {children}
-        <ToastContainer autoClose={3000} />
+        <Providers>{children}</Providers>
+        <SpeedInsights />
+        <ToastContainer autoClose={3000} position='bottom-left' />
       </body>
     </html>
   )

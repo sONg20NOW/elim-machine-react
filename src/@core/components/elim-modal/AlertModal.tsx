@@ -1,0 +1,54 @@
+import { useState, type Dispatch, type SetStateAction } from 'react'
+
+import { Button, Dialog, DialogActions, DialogTitle, Typography } from '@mui/material'
+
+import { IconAlertCircleFilled } from '@tabler/icons-react'
+
+interface AlertModalProps {
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+  handleConfirm: () => void
+  title?: string
+  subtitle?: string
+  confirmMessage?: string
+}
+
+export default function AlertModal({ open, setOpen, handleConfirm, title, subtitle, confirmMessage }: AlertModalProps) {
+  const [clicked, setClicked] = useState(false)
+
+  const handleClose = () => setOpen(false)
+
+  return (
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth='xs'>
+      {/* Icon Title */}
+      <DialogTitle sx={{ textAlign: 'center', display: 'grid' }}>
+        <IconAlertCircleFilled size={30} className='text-red-400 mx-auto mb-3' />
+        <Typography component={'div'} variant='h5'>
+          {title ?? '지금까지 수정한 내용이 저장되지 않습니다.'}
+        </Typography>
+        <Typography component={'div'} variant='subtitle1'>
+          {subtitle ?? '그래도 계속 진행하시겠습니까?'}
+        </Typography>
+      </DialogTitle>
+
+      {/* Buttons */}
+      <DialogActions>
+        <Button
+          variant='contained'
+          className='bg-color-warning hover:bg-color-warning-light'
+          onClick={() => {
+            setClicked(true)
+            handleConfirm()
+          }}
+          disabled={clicked}
+        >
+          {confirmMessage ?? '저장하지 않음'}
+        </Button>
+
+        <Button variant='contained' color='secondary' onClick={handleClose}>
+          취소
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}

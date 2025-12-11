@@ -1,6 +1,8 @@
 'use client'
 
 // Hook Imports
+import { IconMenu2 } from '@tabler/icons-react'
+
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 
 const NavToggle = () => {
@@ -15,7 +17,7 @@ const NavToggle = () => {
     <>
       {/* <i className='tabler-menu-2 cursor-pointer' onClick={handleClick} /> */}
       {/* Comment following code and uncomment above code in order to toggle menu on desktop screens as well */}
-      {isBreakpointReached && <i className='tabler-menu-2 cursor-pointer' onClick={handleClick} />}
+      {isBreakpointReached && <IconMenu2 className='cursor-pointer' onClick={handleClick} />}
     </>
   )
 }

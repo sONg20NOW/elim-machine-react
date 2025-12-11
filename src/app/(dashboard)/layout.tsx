@@ -1,9 +1,8 @@
 // Type Imports
 
-import type { ChildrenType } from '@/@core/types'
+import type { ChildrenType } from '@core/types'
 
 // Component Imports
-import Providers from '@components/Providers'
 import Navigation from '@components/layout/vertical/Navigation'
 import VerticalFooter from '@components/layout/vertical/Footer'
 
@@ -13,9 +12,9 @@ import VerticalFooter from '@components/layout/vertical/Footer'
 // Util Imports
 import { getMode } from '@core/utils/serverHelpers'
 
-import ScrollToTopButton from '@/@core/components/custom/ScrollToTopButton'
+import ScrollToTopButton from '@/@core/components/elim-button/ScrollToTopButton'
 import Header from '@/components/layout/vertical/Header'
-import ProtectedPage from '../../@core/components/custom/ProtectedPage'
+import ProtectedPage from '../../components/ProtectedPage'
 
 const Layout = async (props: ChildrenType) => {
   // const params = await props.params
@@ -27,21 +26,20 @@ const Layout = async (props: ChildrenType) => {
   const mode = await getMode()
 
   return (
-    <Providers>
-      <ProtectedPage>
+    <ProtectedPage>
+      <div className='h-[100dvh] flex flex-col'>
         <Header />
-        <div className='flex flex-auto relative h-full'>
+        {/* 내비게이션 바 + 메인 영역 */}
+        <div className='flex-1 flex overflow-y-hidden'>
           <Navigation mode={mode} />
-          <div className='flex flex-col w-full pb-[10px] gap-[5px] h-full'>
-            <div className='px-[10px] flex flex-col w-full justify-between h-full'>
-              <div className='flex-auto w-full pt-[10px] pb-[10px]'>{children}</div>
-              <VerticalFooter />
-            </div>
+          <div className='flex-1 p-3 h-full flex flex-col gap-4 bg-indigo-100/50'>
+            <div className='w-full flex-1 overflow-y-hidden'>{children}</div>
+            <VerticalFooter />
           </div>
         </div>
         <ScrollToTopButton />
-      </ProtectedPage>
-    </Providers>
+      </div>
+    </ProtectedPage>
   )
 }
 

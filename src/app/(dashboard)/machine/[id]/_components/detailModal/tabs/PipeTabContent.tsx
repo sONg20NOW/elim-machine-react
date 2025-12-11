@@ -2,18 +2,16 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { Divider, MenuItem, TextField } from '@mui/material'
 
-import type { MachineInspectionDetailResponseDtoType } from '@/@core/types'
-import { pipeTypeOption } from '@/app/_constants/options'
+import type { MachineInspectionDetailResponseDtoType } from '@core/types'
+import { pipeTypeOption } from '@/@core/data/options'
 
 interface WindTabContentProps<T> {
-  selectedMachineData: T
   editData: T
   setEditData: Dispatch<SetStateAction<T>>
   isEditing: boolean
 }
 
 export default function PipeTabContent({
-  selectedMachineData,
   editData,
   setEditData,
   isEditing
@@ -21,7 +19,7 @@ export default function PipeTabContent({
   return (
     <div className='flex-col flex gap-5'>
       {!isEditing
-        ? selectedMachineData.pipeMeasurementResponseDtos.map((info, idx) => (
+        ? editData.pipeMeasurementResponseDtos.map((info, idx) => (
             <div key={idx} className='flex-col flex gap-4'>
               {idx !== 0 && <Divider />}
               <div className='flex flex-col gap-1'>
@@ -56,7 +54,11 @@ export default function PipeTabContent({
               {idx !== 0 && <Divider />}
               <div className='flex flex-col gap-1'>
                 <span className='ps-1 font-bold'>배관 두께 측정 {idx + 1}</span>
-                <table aria-label={`배관 두께 측정 ${idx + 1}`} style={{ tableLayout: 'fixed' }}>
+                <table
+                  aria-label={`배관 두께 측정 ${idx + 1}`}
+                  className='[&>tbody>tr>td]:py-0'
+                  style={{ tableLayout: 'fixed' }}
+                >
                   <tbody>
                     <tr>
                       <th>배관종류</th>

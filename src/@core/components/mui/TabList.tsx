@@ -4,7 +4,7 @@ import { styled } from '@mui/material/styles'
 import type { TabListProps } from '@mui/lab/TabList'
 
 // Type Imports
-import type { ThemeColor } from '@/@core/types'
+import type { ThemeColor } from '@core/types'
 
 export type CustomTabListProps = TabListProps & {
   color?: ThemeColor

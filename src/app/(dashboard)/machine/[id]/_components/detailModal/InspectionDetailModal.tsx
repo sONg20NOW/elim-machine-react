@@ -1,40 +1,45 @@
 'use client'
 
 // React Imports
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Button, Tab } from '@mui/material'
+import { Button, MenuItem, Select, Tab, Typography } from '@mui/material'
 
 import TabList from '@mui/lab/TabList'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import type {
-  GasMeasurementResponseDtoType,
-  machineInspectionChecklistItemResultBasicResponseDtoType,
-  MachineInspectionDetailResponseDtoType,
-  MachineInspectionResponseDtoType,
-  PipeMeasurementResponseDtoType,
-  WindMeasurementResponseDtoType
-} from '@/@core/types'
-import DefaultModal from '@/@core/components/custom/DefaultModal'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
+import type { MachineInspectionDetailResponseDtoType, MachineInspectionSimpleResponseDtoType } from '@core/types'
+
+import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 
 // style
-import styles from '@/app/_style/Table.module.css'
-import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
-import AlertModal from '@/@core/components/custom/AlertModal'
+import styles from '@core/styles/customTable.module.css'
+import DisabledTabWithTooltip from '@/app/(dashboard)/machine/[id]/_components/DisabledTabWithTooltip'
 import BasicTabContent from './tabs/BasicTabContent'
 import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
 import PipeTabContent from './tabs/PipeTabContent'
 import PicTabContent from './tabs/PicTabContent'
-import PictureListModal from '../pictureUpdateModal/PictureListModal'
-import { useGetSingleInspection } from '@/@core/hooks/customTanstackQueries'
-import useCurrentInspectionIdStore from '@/@core/utils/useCurrentInspectionIdStore'
-import { auth } from '@/lib/auth'
+import PictureListModal from '../pictureUploadModal/PictureListModal'
+import {
+  useGetInspectionsSimple,
+  useGetSingleInspection,
+  useMutateEngineerIds,
+  useMutateGasMeasurementResponseDto,
+  useMutateMachineInspectionChecklistItemResultUpdateRequestDto,
+  useMutateMachineInspectionResponseDto,
+  useMutatePipeMeasurementResponseDto,
+  useMutateWindMeasurementResponseDto
+} from '@core/hooks/customTanstackQueries'
+import useCurrentInspectionIdStore from '@core/utils/useCurrentInspectionIdStore'
+import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
+import deleteInspection from '../../_utils/deleteInspection'
+import { setOffsetContext } from '../tabs/InspectionListTabContent'
+import AlertModal from '@/@core/components/elim-modal/AlertModal'
 
 const TabInfo: Record<
   MachineInspectionDetailResponseDtoType['checklistExtensionType'],
@@ -73,9 +78,64 @@ type InspectionDetailModalProps = {
 
 const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
-  const currentInspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
+  const inspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
 
-  const { data: selectedInspection, refetch: refetchSelectedInspection } = useGetSingleInspection(
+  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, inspectionId.toString())
+  const { data: inspectionsSimple } = useGetInspectionsSimple(machineProjectId)
+
+  return (
+    selectedInspection &&
+    inspectionsSimple && (
+      <InspectionDetailModalInner
+        open={open}
+        setOpen={setOpen}
+        selectedInspection={selectedInspection}
+        inspectionsSimple={inspectionsSimple}
+      />
+    )
+  )
+}
+
+type InspectionDetailModalInnerProps = {
+  open: boolean
+  setOpen: (open: boolean) => void
+  selectedInspection: MachineInspectionDetailResponseDtoType
+  inspectionsSimple: MachineInspectionSimpleResponseDtoType[]
+}
+
+const InspectionDetailModalInner = ({
+  open,
+  setOpen,
+  selectedInspection,
+  inspectionsSimple
+}: InspectionDetailModalInnerProps) => {
+  const machineProjectId = useParams().id?.toString() as string
+
+  const setOffset = useContext(setOffsetContext)
+
+  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
+
+  const { mutate: mutateMachineInspectionResponseDto } = useMutateMachineInspectionResponseDto(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const { mutate: mutateEngineerIds } = useMutateEngineerIds(machineProjectId, currentInspectionId.toString())
+
+  const { mutate: mutateMachineInspectionChecklistItemResultUpdateRequestDto } =
+    useMutateMachineInspectionChecklistItemResultUpdateRequestDto(machineProjectId, currentInspectionId.toString())
+
+  const { mutate: mutateGasMeasurementResponseDto } = useMutateGasMeasurementResponseDto(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const { mutate: mutateWindMeasurementResponseDto } = useMutateWindMeasurementResponseDto(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const { mutate: mutatePipeMeasurementResponseDto } = useMutatePipeMeasurementResponseDto(
     machineProjectId,
     currentInspectionId.toString()
   )
@@ -85,11 +145,10 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
   }
 
   // 수정 시 변경되는 데이터 (저장되기 전) - 깊은 복사
-  const [editData, setEditData] = useState<MachineInspectionDetailResponseDtoType>(
-    JSON.parse(JSON.stringify(selectedInspection))
-  )
+  const [editData, setEditData] = useState<MachineInspectionDetailResponseDtoType>(structuredClone(selectedInspection))
 
   const [showAlertModal, setShowAlertModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showPictureListModal, setShowPictureListModal] = useState(false)
 
   // 탭
@@ -99,12 +158,12 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
   const [isEditing, setIsEditing] = useState(false)
 
   // 저장되었을 경우(selectedMachineData가 바뀐 경우) 최신화
-  useEffect(() => setEditData(JSON.parse(JSON.stringify(selectedInspection))), [selectedInspection])
+  useEffect(() => setEditData(structuredClone(selectedInspection)), [selectedInspection])
 
   // ? 미흡사항이 변경되었을 때도 version이 달라서 차이가 발생하므로 version 제외하고 비교.
   const existChange =
-    JSON.stringify(stripVersion(selectedInspection)) !==
-    JSON.stringify(stripVersion({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) }))
+    JSON.stringify(selectedInspection) !==
+    JSON.stringify({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) })
 
   // 저장 시 각 탭에 따라 다르게 동작 (! 기본 정보 수정 시 )
   // 1. PUT 보내고 -> 2. selectedMachine, editData 최신화
@@ -113,81 +172,48 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
       try {
         switch (tabValue) {
           case 'BASIC':
-            await auth.put<{ data: MachineInspectionResponseDtoType }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}`,
-              editData.machineInspectionResponseDto
-            )
+            mutateMachineInspectionResponseDto(editData.machineInspectionResponseDto)
 
             // 참여기술진 변경사항이 있다면 POST.
             if (
               JSON.stringify(editData.engineerIds.filter(id => id > 0)) !==
               JSON.stringify(selectedInspection.engineerIds)
             ) {
-              await auth.put<{ data: { engineerIds: number[] } }>(
-                `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-engineers`,
-                { engineerIds: editData.engineerIds.filter(id => id > 0) }
-              )
+              mutateEngineerIds(editData.engineerIds.filter(id => id > 0))
             }
-
-            refetchSelectedInspection()
 
             break
 
           case 'PIC':
-            // 점검결과(machineChecklistItemInspectionResult)에 변경이 감지되었을 때만 requestBody에 포함시키기.
-            const changedCates: { id: number; version: number; inspectionResult: string }[] = []
+            const changedBasics = editData.machineChecklistItemsWithPicCountResponseDtos
+              .filter(v => {
+                const originalBasic = selectedInspection.machineChecklistItemsWithPicCountResponseDtos.find(
+                  p =>
+                    p.machineInspectionChecklistItemResultBasicResponseDto.id ===
+                    v.machineInspectionChecklistItemResultBasicResponseDto.id
+                )?.machineInspectionChecklistItemResultBasicResponseDto
 
-            editData.machineChecklistItemsWithPicCountResponseDtos?.map((cate, idx) => {
-              const originalCate = selectedInspection.machineChecklistItemsWithPicCountResponseDtos[idx]
+                return (
+                  JSON.stringify(originalBasic) !==
+                  JSON.stringify(v.machineInspectionChecklistItemResultBasicResponseDto)
+                )
+              })
+              .map(v => v.machineInspectionChecklistItemResultBasicResponseDto)
 
-              if (
-                cate.machineInspectionChecklistItemResultBasicResponseDto !==
-                originalCate.machineInspectionChecklistItemResultBasicResponseDto
-              ) {
-                changedCates.push(cate.machineInspectionChecklistItemResultBasicResponseDto)
-              }
-            })
-
-            if (changedCates) {
-              await auth.put<{
-                data: {
-                  machineInspectionChecklistItemResultUpdateResponseDtos: machineInspectionChecklistItemResultBasicResponseDtoType[]
-                }
-              }>(
-                `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/machine-inspection-checklist-item-results`,
-                { machineInspectionChecklistItemResultUpdateRequestDtos: changedCates }
-              )
-              refetchSelectedInspection()
-            }
+            mutateMachineInspectionChecklistItemResultUpdateRequestDto(changedBasics)
 
             break
           case 'GAS':
-            await auth.put<{
-              data: GasMeasurementResponseDtoType
-            }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/gasMeasurement`,
-              editData.gasMeasurementResponseDto
-            )
+            mutateGasMeasurementResponseDto(editData.gasMeasurementResponseDto)
 
-            refetchSelectedInspection()
             break
           case 'WIND':
-            await auth.put<{
-              data: { windMeasurementUpdateResponseDtos: WindMeasurementResponseDtoType[] }
-            }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/windMeasurements`,
-              { windMeasurementUpdateRequestDtos: editData.windMeasurementResponseDtos }
-            )
-            refetchSelectedInspection()
+            mutateWindMeasurementResponseDto(editData.windMeasurementResponseDtos)
+
             break
           case 'PIPE':
-            await auth.put<{
-              data: { pipeMeasurementUpdateResponseDtos: PipeMeasurementResponseDtoType[] }
-            }>(
-              `/api/machine-projects/${machineProjectId}/machine-inspections/${selectedInspection.machineInspectionResponseDto.id}/pipeMeasurements`,
-              { pipeMeasurementUpdateRequestDtos: editData.pipeMeasurementResponseDtos }
-            )
-            refetchSelectedInspection()
+            mutatePipeMeasurementResponseDto(editData.pipeMeasurementResponseDtos)
+
             break
           default:
             break
@@ -195,39 +221,105 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
 
         setIsEditing(prev => !prev)
         handleSuccess(`${thisTabInfo.find(tabInfo => tabInfo.value === tabValue)?.label ?? ''}이(가) 수정되었습니다.`)
+        setOffset && setOffset(0)
       } catch (error) {
         handleApiError(error)
       }
     }
-  }, [editData, existChange, machineProjectId, selectedInspection, refetchSelectedInspection, tabValue, thisTabInfo])
+  }, [
+    editData,
+    existChange,
+    mutateMachineInspectionResponseDto,
+    mutateEngineerIds,
+    mutateMachineInspectionChecklistItemResultUpdateRequestDto,
+    mutateGasMeasurementResponseDto,
+    mutateWindMeasurementResponseDto,
+    mutatePipeMeasurementResponseDto,
+    selectedInspection,
+    tabValue,
+    thisTabInfo,
+    setOffset
+  ])
+
+  const handleDelete = async () => {
+    const inspectionInfo = selectedInspection.machineInspectionResponseDto
+
+    const result = await deleteInspection(
+      Number(machineProjectId),
+      inspectionInfo.id,
+      inspectionInfo.version,
+      inspectionInfo.machineInspectionName
+    )
+
+    if (result) {
+      setOffset && setOffset(1)
+      setOpen(false)
+    }
+  }
+
+  const handleDontSave = () => {
+    setEditData(structuredClone(selectedInspection))
+    setIsEditing(false)
+    setShowAlertModal(false)
+  }
 
   return (
     selectedInspection && (
       <DefaultModal
         modifyButton={
-          <Button variant='contained' color='error'>
+          <Button variant='contained' color='error' onClick={() => setShowDeleteModal(true)}>
             삭제
           </Button>
         }
         value={tabValue}
         open={open}
         setOpen={setOpen}
-        title={`${selectedInspection.machineInspectionResponseDto.machineInspectionName || ''}   성능점검표`}
+        title={
+          <div className='flex items-center'>
+            <Select
+              IconComponent={() => null}
+              variant='standard'
+              value={currentInspectionId}
+              onChange={e => {
+                setCurrentInspectionId(Number(e.target.value))
+              }}
+              renderValue={value => (
+                <Typography variant='h3'>{inspectionsSimple.find(v => v.id === value)!.name}</Typography>
+              )}
+            >
+              {inspectionsSimple.map(v => (
+                <MenuItem key={v.id} value={v.id}>
+                  <Typography>{v.name}</Typography>
+                </MenuItem>
+              ))}
+            </Select>
+            <Typography variant='inherit'>{'성능점검표'}</Typography>
+          </div>
+        }
         primaryButton={
           <div style={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant='contained'
-              color='primary'
-              onClick={() => {
-                if (!isEditing || !existChange) {
-                  setIsEditing(prev => !prev)
-                } else {
+            {isEditing ? (
+              <Button
+                variant='contained'
+                color='success'
+                disabled={!existChange}
+                onClick={() => {
                   handleSave()
-                }
-              }}
-            >
-              {!isEditing ? '수정' : '저장'}
-            </Button>
+                }}
+              >
+                저장
+              </Button>
+            ) : (
+              <Button
+                variant='contained'
+                color='primary'
+                onClick={() => {
+                  setIsEditing(prev => !prev)
+                }}
+              >
+                수정
+              </Button>
+            )}
 
             {isEditing ? (
               <Button
@@ -298,78 +390,46 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
             </Button> */}
           </div>
           <TabPanel value={'BASIC'}>
-            <BasicTabContent
-              selectedMachineData={selectedInspection}
+            <BasicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+          </TabPanel>
+          <TabPanel value={'PIC'}>
+            <PicTabContent
               editData={editData}
               setEditData={setEditData}
               isEditing={isEditing}
+              handleChangeChecklistItemResult={mutateMachineInspectionChecklistItemResultUpdateRequestDto}
             />
-          </TabPanel>
-          <TabPanel value={'PIC'}>
-            <PicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
           </TabPanel>
           {editData.gasMeasurementResponseDto && (
             <TabPanel value={'GAS'}>
-              <GasTabContent
-                selectedMachineData={selectedInspection}
-                editData={editData}
-                setEditData={setEditData}
-                isEditing={isEditing}
-              />
+              <GasTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
             </TabPanel>
           )}
           {editData.windMeasurementResponseDtos && (
             <TabPanel value={'WIND'}>
-              <WindTabContent
-                selectedMachineData={selectedInspection}
-                editData={editData}
-                setEditData={setEditData}
-                isEditing={isEditing}
-              />
+              <WindTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
             </TabPanel>
           )}
           {editData.pipeMeasurementResponseDtos && (
             <TabPanel value={'PIPE'}>
-              <PipeTabContent
-                selectedMachineData={selectedInspection}
-                editData={editData}
-                setEditData={setEditData}
-                isEditing={isEditing}
-              />
+              <PipeTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
             </TabPanel>
           )}
         </div>
 
-        {showAlertModal && (
-          <AlertModal<MachineInspectionDetailResponseDtoType>
-            showAlertModal={showAlertModal}
-            setShowAlertModal={setShowAlertModal}
-            setEditData={setEditData}
-            setIsEditing={setIsEditing}
-            originalData={selectedInspection}
+        <AlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
+        <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />
+        {/* 갤러리 버튼 클릭 시 동작 */}
+        {showPictureListModal && (
+          <PictureListModal
+            open={showPictureListModal}
+            setOpen={setShowPictureListModal}
+            defaultPicInspectionId={currentInspectionId}
           />
         )}
-        {/* 갤러리 버튼 클릭 시 동작 */}
-        {showPictureListModal && <PictureListModal open={showPictureListModal} setOpen={setShowPictureListModal} />}
       </DefaultModal>
     )
   )
 }
 
 export default InspectionDetailModal
-
-// util 함수: 배열 안 객체에서 version 제거
-const stripVersion = (data: MachineInspectionDetailResponseDtoType) => {
-  return {
-    ...data,
-    machineChecklistItemsWithPicCountDtos: data.machineChecklistItemsWithPicCountResponseDtos?.map(
-      v => ({
-        ...v,
-        machineInspectionChecklistItemResultBasicResponseDto: {
-          id: v.machineInspectionChecklistItemResultBasicResponseDto.id,
-          inspectionResult: v.machineInspectionChecklistItemResultBasicResponseDto.inspectionResult
-        }
-      }) // version 제거
-    )
-  }
-}

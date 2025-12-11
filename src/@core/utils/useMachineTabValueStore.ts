@@ -16,7 +16,7 @@ const machineTabValueCreator: StateCreator<TabValueState> = set => ({
   // ⭐ 액션 (Action)
   setTabValue: (value: MachineTabValue) => {
     set({ tabValue: value }) // set 함수를 통해 상태 업데이트
-    console.log('zustand call!')
+    console.log(`zustand call! (tabvalue: ${value})`)
   }
 })
 

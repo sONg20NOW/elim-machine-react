@@ -1,17 +1,14 @@
 // Type Imports
 
-import type { ChildrenType } from '@/@core/types'
-
-// Component Imports
-import Providers from '@components/Providers'
+import type { ChildrenType } from '@core/types'
 
 // Config Imports
 // import { i18n } from '@configs/i18n'
 
 // Util Imports
 
-import ScrollToTopButton from '@/@core/components/custom/ScrollToTopButton'
-import ProtectedPage from '../../@core/components/custom/ProtectedPage'
+import ScrollToTopButton from '@/@core/components/elim-button/ScrollToTopButton'
+import ProtectedPage from '../../components/ProtectedPage'
 
 const Layout = async (props: ChildrenType) => {
   // const params = await props.params
@@ -21,12 +18,10 @@ const Layout = async (props: ChildrenType) => {
   // Vars
   // const direction = i18n.langDirection[params.lang]
   return (
-    <Providers>
-      <ProtectedPage>
-        {children}
-        <ScrollToTopButton />
-      </ProtectedPage>
-    </Providers>
+    <ProtectedPage>
+      {children}
+      <ScrollToTopButton />
+    </ProtectedPage>
   )
 }
 

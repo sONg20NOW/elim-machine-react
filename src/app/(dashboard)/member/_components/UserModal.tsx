@@ -1,8 +1,7 @@
 'use client'
 
 // React Imports
-import type { Dispatch, SetStateAction } from 'react'
-import { createContext, useState } from 'react'
+import { createContext, useCallback, useRef, useState } from 'react'
 
 // MUI Imports
 
@@ -15,18 +14,38 @@ import TabPanel from '@mui/lab/TabPanel'
 
 import { toast } from 'react-toastify'
 
-import DefaultModal from '@/@core/components/custom/DefaultModal'
-import MemberTabContent from './memberTabContent'
-import type { MemberDetailResponseDtoType } from '@/@core/types'
-import { handleApiError, handleSuccess } from '@/utils/errorHandler'
-import AlertModal from '@/@core/components/custom/AlertModal'
-import DeleteModal from '@/@core/components/custom/DeleteModal'
-import DisabledTabWithTooltip from '@/@core/components/custom/DisabledTabWithTooltip'
-import { auth } from '@/lib/auth'
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
+
+import TabContext from '@mui/lab/TabContext'
+
+import { IconX } from '@tabler/icons-react'
+
+import type { MemberDetailResponseDtoType } from '@core/types'
+
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
+import { auth } from '@core/utils/auth'
+import type { MemberType } from '@core/hooks/customTanstackQueries'
+import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import AlertModal from '@/@core/components/elim-modal/AlertModal'
+import BasicTabContent from './tabs/BasicTabContent'
+import PrivacyTabContent from './tabs/PrivacyTabContent'
+
+import OfficeTabContent from './tabs/OfficeTabContent'
+import CareerTabContent from './tabs/CareerTabContent'
+import EtcTabContent from './tabs/EtcTabContent'
+import ForgotPwModal from '@/app/(login)/login/_components/ForgotPwModal'
+import { printWarningSnackbar } from '@core/utils/snackbarHandler'
+
+export type refType = {
+  handleSave: () => void
+  handleDontSave: () => void
+  dirty: boolean
+}
 
 type requestRuleBodyType = {
   url: string
-  value: string
+  value: MemberType
   label: string
   dtoKey: keyof MemberDetailResponseDtoType
 }
@@ -70,30 +89,47 @@ type EditUserInfoProps = {
   open: boolean
   setOpen: (open: boolean) => void
   selectedUserData: MemberDetailResponseDtoType
-  setSelectedUserData: Dispatch<SetStateAction<MemberDetailResponseDtoType | undefined>>
-  reloadData?: () => void
+  onDelete?: () => void
+  reloadPages?: () => void
 }
 
 export const MemberIdContext = createContext<number>(0)
 
-const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloadData }: EditUserInfoProps) => {
-  const [value, setValue] = useState<tabType>('1')
-  const [editData, setEditData] = useState<MemberDetailResponseDtoType>(JSON.parse(JSON.stringify(selectedUserData)))
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showAlertModal, setShowAlertModal] = useState(false)
+const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: EditUserInfoProps) => {
+  const changedEvenOnce = useRef(false)
 
-  const [isEditing, setIsEditing] = useState(false)
+  const [tabValue, setTabValue] = useState<tabType>('1')
+  const [openDelete, setOpenDelete] = useState(false)
+  const [openAlert, setOpenAlert] = useState(false)
+  const [openAlertNoSave, setOpenAlertNoSave] = useState(false)
+  const [openForgetPW, setOpenForgotPW] = useState(false)
 
-  const [onQuit, setOnQuit] = useState<() => void>()
+  const [loading, setLoading] = useState(false)
 
-  // 수정사항 여부
-  const existChange = JSON.stringify(editData) !== JSON.stringify(selectedUserData)
+  const basicTabRef = useRef<refType>(null)
+  const privacyTabRef = useRef<refType>(null)
+  const officeTabRef = useRef<refType>(null)
+  const careerTabRef = useRef<refType>(null)
+  const etcTabRef = useRef<refType>(null)
 
-  const memberId = { ...editData?.memberBasicResponseDto }.memberId
-  const juminNum = { ...editData?.memberPrivacyResponseDto }.juminNum
+  const getIsDirty = useCallback(() => {
+    return (
+      basicTabRef.current?.dirty ||
+      privacyTabRef.current?.dirty ||
+      officeTabRef.current?.dirty ||
+      careerTabRef.current?.dirty ||
+      etcTabRef.current?.dirty
+    )
+  }, [])
+
+  const memberId = { ...selectedUserData?.memberBasicResponseDto }.memberId
+
+  // 로그인한 사용자의 userModal인지 파악
+  const currentuserId = useCurrentUserStore(set => set.currentUser)?.memberId
+  const isYours = selectedUserData.memberBasicResponseDto.memberId === currentuserId
 
   const handleDeleteUser = async () => {
-    const version = editData.memberBasicResponseDto?.version
+    const version = selectedUserData.memberBasicResponseDto?.version
 
     if (version !== undefined && memberId !== undefined) {
       try {
@@ -104,7 +140,9 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
 
         console.log(`memberId: ${memberId} user is deleted successfully`)
         handleSuccess('해당 직원이 삭제되었습니다.')
-        setOpen(false)
+        onDelete && onDelete()
+        changedEvenOnce.current = true
+        onClose()
       } catch (error) {
         handleApiError(error)
       }
@@ -116,173 +154,207 @@ const UserModal = ({ open, setOpen, selectedUserData, setSelectedUserData, reloa
   const onDeleteUserConfirm = async () => {
     try {
       await handleDeleteUser()
-      reloadData && reloadData()
     } catch (error: any) {
       toast.error(`${error.message}`)
     }
   }
 
   const onSubmitHandler = async () => {
-    // 주민번호에 *이 있으면 빈 값으로 변경
-    if (juminNum && juminNum.includes('*')) {
-      setEditData({
-        ...editData,
-        memberPrivacyResponseDto: {
-          ...editData.memberPrivacyResponseDto,
-          juminNum: ''
-        }
-      })
-    }
-
     try {
-      const response = await auth.put<{ data: MemberDetailResponseDtoType }>(
-        `/api/members/${memberId}${requestRule[value].url}`,
-        { ...editData[requestRule[value].dtoKey] }
-      )
+      setLoading(true)
+      const savedTabs: string[] = []
 
-      const returnData = response.data.data
+      if (basicTabRef.current?.dirty) {
+        basicTabRef.current?.handleSave()
+        savedTabs.push('기본정보')
+      }
 
-      setEditData({
-        ...editData,
-        [requestRule[value].dtoKey]: returnData
-      })
-      setSelectedUserData({
-        ...selectedUserData,
-        [requestRule[value].dtoKey]: returnData
-      })
-      console.log(`${requestRule[value].value} info saved: `, returnData)
-      handleSuccess(`${requestRule[value].label}가 수정되었습니다.`)
-      setIsEditing(false)
-      reloadData && reloadData()
+      if (privacyTabRef.current?.dirty) {
+        privacyTabRef.current.handleSave()
+        savedTabs.push('개인정보')
+      }
+
+      if (officeTabRef.current?.dirty) {
+        officeTabRef.current.handleSave()
+        savedTabs.push('재직정보')
+      }
+
+      if (careerTabRef.current?.dirty) {
+        careerTabRef.current.handleSave()
+        savedTabs.push('경력정보')
+      }
+
+      if (etcTabRef.current?.dirty) {
+        etcTabRef.current.handleSave()
+        savedTabs.push('기타정보')
+      }
+
+      if (savedTabs.length > 0) {
+        handleSuccess(`${savedTabs.join(', ')}가 수정되었습니다`)
+
+        changedEvenOnce.current = true
+      } else printWarningSnackbar('변경사항이 없습니다', 1500)
     } catch (error: any) {
       handleApiError(error)
+    } finally {
+      setLoading(false)
     }
   }
 
+  // 실제로 창이 닫힐 때 동작하는 함수
+  const onClose = useCallback(() => {
+    if (changedEvenOnce.current) {
+      reloadPages && reloadPages()
+    }
+
+    setOpen(false)
+  }, [setOpen, reloadPages])
+
+  // 창을 닫으려 할 때 동작하는 함수 - 변경사항이 있으면 경고창 출력
+  const handleClose = useCallback(() => {
+    if (getIsDirty()) {
+      setOpenAlert(true)
+    } else {
+      onClose()
+    }
+  }, [getIsDirty, onClose])
+
+  const handleQuitWithoutSave = useCallback(() => {
+    setOpenAlert(false)
+    onClose()
+  }, [onClose])
+
+  const handleDontSave = useCallback(() => {
+    for (const i of [basicTabRef, privacyTabRef, officeTabRef, careerTabRef, etcTabRef]) {
+      if (i.current?.dirty) {
+        i.current.handleDontSave()
+      }
+    }
+
+    setOpenAlertNoSave(false)
+  }, [])
+
   return (
     <MemberIdContext.Provider value={memberId ?? 0}>
-      <DefaultModal
-        value={value}
-        onClose={() => {
-          if (existChange) {
-            setOnQuit(() => () => setOpen(false))
-            setShowAlertModal(true)
-          } else {
-            setOpen(false)
-          }
+      <Dialog
+        onClose={(event, reason) => {
+          if (reason === 'backdropClick') return
+          handleClose()
         }}
         open={open}
-        setOpen={setOpen}
-        title={selectedUserData?.memberBasicResponseDto?.name || '사용자 정보 수정'}
-        headerDescription={selectedUserData?.memberBasicResponseDto?.companyName || '사용자 정보 수정'}
-        primaryButton={
-          isEditing ? (
-            <Button variant='contained' onClick={onSubmitHandler} type='submit'>
-              저장
-            </Button>
-          ) : (
-            <Button
-              variant='contained'
-              color='primary'
-              type='reset'
-              onClick={() => {
-                setIsEditing(true)
-              }}
-            >
-              수정
-            </Button>
-          )
-        }
-        modifyButton={
-          <Button
-            variant='contained'
-            color='error'
-            type='reset'
-            onClick={() => {
-              setShowDeleteModal(true)
-            }}
-          >
-            삭제
-          </Button>
-        }
-        secondaryButton={
-          isEditing ? (
-            <Button
-              variant='contained'
-              color='secondary'
-              type='reset'
-              onClick={() => {
-                if (existChange) {
-                  setOnQuit(undefined)
-                  setShowAlertModal(true)
-                } else {
-                  setIsEditing(false)
-                }
-              }}
-            >
-              취소
-            </Button>
-          ) : (
-            <Button variant='contained' color='secondary' onClick={() => setOpen(false)}>
-              닫기
-            </Button>
-          )
-        }
+        fullWidth
+        maxWidth='md'
       >
-        <TabList
-          centered
-          onChange={(event, newValue) => {
-            if (existChange) {
-              setShowAlertModal(true)
-            } else {
-              setValue(newValue)
-            }
-          }}
-          aria-label='centered tabs example'
-        >
-          {Object.keys(requestRule).map(item => {
-            const key = item as keyof typeof requestRule
+        <DialogTitle sx={{ position: 'relative' }}>
+          <div className='flex flex-col w-full grid place-items-center'>
+            <Typography variant='h3'>{selectedUserData?.memberBasicResponseDto?.name || '사용자 정보 수정'}</Typography>
+            <Typography variant='subtitle1'>{selectedUserData?.memberBasicResponseDto?.companyName || ''}</Typography>
+          </div>
+          <div className='absolute left-8 top-6'>
+            <div className='flex gap-3'>
+              {isYours ? (
+                <Button
+                  variant='contained'
+                  color='warning'
+                  onClick={() => {
+                    setOpenForgotPW(true)
+                  }}
+                >
+                  비밀번호 변경
+                </Button>
+              ) : (
+                <Button
+                  variant='contained'
+                  color='error'
+                  type='reset'
+                  onClick={() => {
+                    setOpenDelete(true)
+                  }}
+                >
+                  삭제
+                </Button>
+              )}
+              <Button
+                color='error'
+                onClick={() => {
+                  const dirty = getIsDirty()
 
-            return existChange && value !== key ? (
-              <DisabledTabWithTooltip key={key} value={key} label={requestRule[key].label} />
-            ) : (
-              <Tab key={key} value={key} label={requestRule[key].label} />
-            )
-          })}
-        </TabList>
-        <TabPanel value='1'>
-          <MemberTabContent isEditing={isEditing} tabName='basic' userData={editData} setUserData={setEditData} />
-        </TabPanel>
-        <TabPanel value='2'>
-          <MemberTabContent isEditing={isEditing} tabName='privacy' userData={editData} setUserData={setEditData} />
-        </TabPanel>
-        <TabPanel value='3'>
-          <MemberTabContent isEditing={isEditing} tabName='office' userData={editData} setUserData={setEditData} />
-        </TabPanel>
-        <TabPanel value='4'>
-          <MemberTabContent isEditing={isEditing} tabName='career' userData={editData} setUserData={setEditData} />
-        </TabPanel>
-        <TabPanel value='5'>
-          <MemberTabContent isEditing={isEditing} tabName='etc' userData={editData} setUserData={setEditData} />
-        </TabPanel>
-        {showDeleteModal && (
-          <DeleteModal
-            showDeleteModal={showDeleteModal}
-            setShowDeleteModal={setShowDeleteModal}
-            onDelete={onDeleteUserConfirm}
-          />
-        )}
-        {showAlertModal && (
-          <AlertModal<MemberDetailResponseDtoType>
-            showAlertModal={showAlertModal}
-            setShowAlertModal={setShowAlertModal}
-            setEditData={setEditData}
-            setIsEditing={setIsEditing}
-            originalData={selectedUserData}
-            onQuit={onQuit}
-          />
-        )}
-      </DefaultModal>
+                  if (dirty) setOpenAlertNoSave(true)
+                  else printWarningSnackbar('변경사항이 없습니다', 1500)
+                }}
+              >
+                변경사항 폐기
+              </Button>
+            </div>
+          </div>
+          <IconButton type='button' onClick={handleClose} className='absolute right-4 top-4'>
+            <IconX />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <TabContext value={tabValue}>
+            <div className='h-[60dvh] flex flex-col'>
+              <TabList
+                centered
+                onChange={(event, newValue) => {
+                  setTabValue(newValue)
+                }}
+                aria-label='centered tabs example'
+              >
+                {Object.keys(requestRule).map(item => {
+                  const key = item as keyof typeof requestRule
+
+                  return <Tab key={key} value={key} label={requestRule[key].label} />
+                })}
+              </TabList>
+              <div className='flex-1 overflow-y-auto pt-5'>
+                <TabPanel value='1' keepMounted>
+                  <BasicTabContent ref={basicTabRef} defaultData={selectedUserData.memberBasicResponseDto} />
+                </TabPanel>
+                <TabPanel value='2' keepMounted>
+                  <PrivacyTabContent ref={privacyTabRef} defaultData={selectedUserData.memberPrivacyResponseDto} />
+                </TabPanel>
+                <TabPanel value='3' keepMounted>
+                  <OfficeTabContent ref={officeTabRef} defaultData={selectedUserData.memberOfficeResponseDto} />
+                </TabPanel>
+                <TabPanel value='4' keepMounted>
+                  <CareerTabContent ref={careerTabRef} defaultData={selectedUserData.memberCareerResponseDto} />
+                </TabPanel>
+                <TabPanel value='5' keepMounted>
+                  <EtcTabContent ref={etcTabRef} defaultData={selectedUserData.memberEtcResponseDto} />
+                </TabPanel>
+              </div>
+            </div>
+          </TabContext>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 10 }}>
+          <Button variant='contained' onClick={onSubmitHandler} type='submit' color='success' disabled={loading}>
+            저장
+          </Button>
+          <Button variant='contained' color='secondary' onClick={handleClose}>
+            닫기
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {openDelete && <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={onDeleteUserConfirm} />}
+      {openAlert && <AlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleQuitWithoutSave} />}
+      {openAlertNoSave && (
+        <AlertModal
+          open={openAlertNoSave}
+          setOpen={setOpenAlertNoSave}
+          handleConfirm={handleDontSave}
+          title={'변경사항을 모두 폐기하시겠습니까?'}
+          confirmMessage='폐기'
+        />
+      )}
+      {openForgetPW && (
+        <ForgotPwModal
+          open={openForgetPW}
+          setOpen={setOpenForgotPW}
+          userEmail={selectedUserData.memberBasicResponseDto.email}
+        />
+      )}
     </MemberIdContext.Provider>
   )
 }

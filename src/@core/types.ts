@@ -23,43 +23,64 @@ export type ChildrenType = {
 
 export type ThemeColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'
 
-/**
- * @type T
- * 탭 카테고리 타입 (ex. 'basic' | 'privacy' | ...)
- * @type K
- * 상세 정보 타입 (ex. {memberBasicResponseDto: ...})
- */
-export type InputInfoType<T extends string, K> = Record<T, Partial<Record<AllSubKeys<K>, InputFieldType>>>
-
-type AllSubKeys<T> = {
-  [K in keyof T]: keyof T[K]
-}[keyof T]
-
-export type TabType = {
-  member: 'basic' | 'privacy' | 'office' | 'career' | 'etc'
-  machine: 'project' | 'schedule'
+/* -------------------------- BasicTableHeader Type -------------------------- */
+// tabler header column별 정보
+export interface HeaderInfoType {
+  label: string
+  canSort: boolean
+  hideOnTablet?: boolean
 }
 
+// table header 정보
+export type HeaderType<T> = Partial<Record<keyof T, HeaderInfoType>>
+
+export interface tableHeaderInfoType {
+  member: HeaderType<MemberPageDtoType>
+  machine: HeaderType<MachineProjectPageDtoType>
+  machineInspection: HeaderType<MachineInspectionPageResponseDtoType>
+  engineers: HeaderType<MachineEngineerPageResponseDtoType>
+  licenses: HeaderType<LicensePageResponseDtoType>
+}
+
+/* -------------------------- InputInfo Type -------------------------- */
+export type InputFieldType = {
+  size?: BoxSizeType
+  type: InputType
+  label: string
+  options?: Array<{ value: string; label: string }>
+  disabled?: boolean
+}
+
+export type BoxSizeType = 'sm' | 'md' | 'lg'
+export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text' | 'juminNum' | 'map'
+
+type InputInfoType<T> = Partial<Record<keyof T, InputFieldType>>
+
 // member 인풋 정보 형식
-export type memberInputType = InputInfoType<TabType['member'], MemberDetailResponseDtoType>
+export type memberInputInfoType = {
+  basic: InputInfoType<MemberBasicDtoType>
+  privacy: InputInfoType<MemberPrivacyDtoType>
+  office: InputInfoType<MemberOfficeDtoType>
+  career: InputInfoType<MemberCareerDtoType>
+  etc: InputInfoType<MemberEtcDtoType>
+}
 
 // machine-projects/[id] 인풋 정보 형식
-export type machineInputType = Partial<Record<keyof MachineProjectResponseDtoType, InputFieldType>>
+export type machineInputInfoType = InputInfoType<MachineProjectResponseDtoType>
 
 // machine-projects/[id]/schedule_tab 인풋 정보 형식
-export type machineScheduleInputType = Partial<
-  Record<keyof MachineProjectScheduleAndEngineerResponseDtoType, InputFieldType>
->
+export type machineScheduleInputInfoType = InputInfoType<MachineProjectScheduleAndEngineerResponseDtoType>
 
 // machine-projects/[id]/machine-project-engineers 인풋 정보 형식
-export type machineProjectEngineerInputType = Partial<Record<keyof machineProjectEngineerDetailDtoType, InputFieldType>>
+export type machineProjectEngineerInputInfoType = InputInfoType<machineProjectEngineerDetailDtoType>
 
 // engineers/[id] 인풋 정보 형식
-export type engineerInputType = Partial<Record<keyof EngineerResponseDtoType, InputFieldType>>
+export type engineerInputInfoType = InputInfoType<EngineerResponseDtoType>
 
 // licenses/[id] 인풋 정보 형식
-export type licenseInputType = Partial<Record<keyof LicenseResponseDtoType, InputFieldType>>
+export type licenseInputInfoType = InputInfoType<LicenseResponseDtoType>
 
+/* -------------------------- Dto Type -------------------------- */
 // -------- 캘린더 ----------
 export interface CalendarEventResponseDtoType {
   id: number
@@ -81,7 +102,7 @@ export interface MemberCreateRequestDtoType {
 }
 
 // GET api/members (리스트)
-export type memberPageDtoType = {
+export type MemberPageDtoType = {
   memberId: number
   version: number
   roleDescription: string
@@ -101,91 +122,92 @@ export type memberPageDtoType = {
 
 // GET api/members/[memberId]
 export type MemberDetailResponseDtoType = {
-  memberBasicResponseDto: memberBasicDtoType
-  memberCareerResponseDto: memberCareerDtoType
-  memberEtcResponseDto: memberEtcDtoType
-  memberOfficeResponseDto: memberOfficeDtoType
-  memberPrivacyResponseDto: memberPrivacyDtoType
+  memberBasicResponseDto: MemberBasicDtoType
+  memberCareerResponseDto: MemberCareerDtoType
+  memberEtcResponseDto: MemberEtcDtoType
+  memberOfficeResponseDto: MemberOfficeDtoType
+  memberPrivacyResponseDto: MemberPrivacyDtoType
 }
-interface memberBasicDtoType {
-  companyName: string
-  email: string
+
+export interface MemberBasicDtoType {
   memberId: number
-  memberStatus: string
-  memberStatusDescription: string
-  name: string
-  note: string
-  role: string
-  roleDescription: string
-  storedFileName: string | null
   version: number
+  companyName: string
+  name: string
+  memberStatus: memberStatusType
+  email: string
+  s3Key: string
+  note: string
 }
-interface memberCareerDtoType {
-  grade: string
-  gradeDescription: string
-  industryOtherMonth: number
-  industrySameMonth: number
+
+export interface MemberPrivacyDtoType {
+  memberId: number
+  version: number
+  foreignYn: ynResultType
+  juminNum: string
+  birthday: string
+  phoneNumber: string
+  emerNum1: string
+  emerNum2: string
+  roadAddress: string | null
+  jibunAddress: string | null
+  detailAddress: string | null
+  educationLevel: string
+  educationMajor: string
+  familyCnt: number
+  carYn: ynResultType
+  carNumber: string
+  religion: string
+  bankName: string
+  bankNumber: string
+}
+
+export interface MemberOfficeDtoType {
+  memberId: number
+  version: number
+  staffNum: string
+  officeDepartmentId: number
+  officeDepartmentName: string
+  officePosition: officePositionType
+  contractType: contractTypeType
+  apprentice: string
+  workForm: workFormType
+  laborForm: laborFormType
+  contractYn: ynResultType
+  staffCardYn: ynResultType
+  fieldworkYn: ynResultType
+  joinDate: string
+  resignDate: string | null
+  insuranceAcquisitionDate: string
+  insuranceLostDate: string | null
+  groupInsuranceYn: ynResultType
+}
+
+export interface MemberCareerDtoType {
+  memberId: number
+  grade: gradeType
+  version: number
   jobField: string
   licenseName1: string
   licenseName2: string
-  version: number
+  industrySameMonth: number
+  industryOtherMonth: number
 }
-interface memberEtcDtoType {
-  employedType: string
+export interface MemberEtcDtoType {
+  memberId: number
+  version: number
+  youthJobLeap: string
+  youthEmploymentIncentive: string
+  youthDigital: string
+  seniorInternship: string
+  newMiddleAgedJobs: string
   incomeTaxReducedBeginDate: string
   incomeTaxReducedEndDate: string
+  employedType: string
   militaryPeriod: string
-  newMiddleAgedJobs: string
-  seniorInternship: string
-  youthDigital: string
-  youthEmploymentIncentive: string
-  youthJobLeap: string
-  version: number
-}
-interface memberOfficeDtoType {
-  apprentice: string
-  contractType: string
-  contractTypeDescription: string
-  contractYn: string
-  fieldworkYn: string
-  groupInsuranceYn: string
-  insuranceAcquisitionDate: string
-  insuranceLostDate: string | null
-  joinDate: string
-  laborForm: string
-  laborFormDescription: string
-  officeDepartmentId: number
-  officeDepartmentName: string
-  officePosition: string
-  officePositionDescription: string
-  resignDate: string | null
-  staffCardYn: string
-  staffNum: string
-  version: number
-  workForm: string
-  workFormDescription: string
-}
-export interface memberPrivacyDtoType {
-  roadAddress: string | null
-  detailAddress: string | null
-  bankName: string
-  bankNumber: string
-  birthday: string
-  carNumber: string
-  carYn: string
-  educationLevel: string
-  educationMajor: string
-  emerNum1: string
-  emerNum2: string
-  familyCnt: number
-  foreignYn: string
-  juminNum: string
-  phoneNumber: string
-  religion: string
-  version: number
 }
 
-export type memberLookupResponseDtoType = {
+export type MemberLookupResponseDtoType = {
   memberId: number
   email: string
   name: string
@@ -203,6 +225,7 @@ export interface MemberFilterType {
   workForm: string
   gender: string
   foreignYn: string
+  birthMonth: string
 }
 
 // ----------- 기계설비현장 -----------
@@ -302,7 +325,7 @@ export type MachineProjectScheduleAndEngineerResponseDtoType = {
 export interface machineProjectEngineerDetailDtoType {
   engineerId: number
   engineerName: string
-  grade: string
+  grade: gradeType | ''
   gradeDescription: string
   engineerLicenseNum: string
   beginDate: string
@@ -332,6 +355,7 @@ export interface MachineEngineerOptionListResponseDtoType {
 }
 
 export interface MachineEngineerOptionResponseDtoType {
+  memberId: number
   engineerId: number
   engineerName: string
   gradeDescription: string
@@ -397,6 +421,12 @@ export interface EngineerFilterType {
 }
 
 // ----------- 설비목록 -----------
+// GET inspections simple
+export interface MachineInspectionSimpleResponseDtoType {
+  id: number
+  name: string
+}
+
 // GET api/machine-projects/{machineProjectId}/machine-inspections: 점검 설비 리스트 조회 (설비 목록 조회)
 export interface MachineInspectionPageResponseDtoType {
   machineInspectionId: number
@@ -413,21 +443,14 @@ export interface MachineInspectionPageResponseDtoType {
 
 // GET api/machine-projects/{machineProjectId}/machine-inspections/{machineInspectionId}: 점검 설비 상세 응답 DTO
 export interface MachineInspectionDetailResponseDtoType {
-  checklistExtensionType:
-    | 'NONE'
-    | 'GAS_MEASUREMENT'
-    | 'WIND_MEASUREMENT'
-    | 'WIND_MEASUREMENT_SA_RA'
-    | 'PIPE_MEASUREMENT'
+  checklistExtensionType: checklistExtensionTypeType
   machineInspectionResponseDto: MachineInspectionResponseDtoType
   engineerIds: number[]
-  machineChecklistItemsWithPicCountResponseDtos: machineChecklistItemsWithPicCountResponseDtosType[]
+  machineChecklistItemsWithPicCountResponseDtos: MachineChecklistItemsWithPicCountResponseDtosType[]
   gasMeasurementResponseDto: GasMeasurementResponseDtoType
   pipeMeasurementResponseDtos: PipeMeasurementResponseDtoType[]
   windMeasurementResponseDtos: WindMeasurementResponseDtoType[]
 }
-
-type equipmentPhaseType = 'INSTALL' | 'MANUFACTURE' | 'USE'
 
 // 점검 설비 기본 정보 응답 DTO
 export interface MachineInspectionResponseDtoType {
@@ -438,33 +461,37 @@ export interface MachineInspectionResponseDtoType {
   machineCategoryName: string
   purpose: string
   location: string
-  equipmentPhase: equipmentPhaseType
+  equipmentPhase: equipmentPhaseType | null
   equipmentPhaseDate: string
   checkDate: string
   remark: string
 }
 
 // 점검 항목 + 사진 개수 등의 정보 목록
-export interface machineChecklistItemsWithPicCountResponseDtosType {
-  machineChecklistItemId: number
-  machineChecklistItemName: string
+export interface MachineChecklistItemsWithPicCountResponseDtosType {
+  machineProjectChecklistItemId: number
+  machineProjectChecklistItemName: string
   checklistSubItems: MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType[]
   totalMachinePicCount: number
-  machineInspectionChecklistItemResultBasicResponseDto: machineInspectionChecklistItemResultBasicResponseDtoType
+  machineInspectionChecklistItemResultBasicResponseDto: MachineInspectionChecklistItemResultBasicResponseDtoType
 }
 
-export interface machineInspectionChecklistItemResultBasicResponseDtoType {
+// 점검 결과 수정 요청 DTO
+export type MachineInspectionChecklistItemResultUpdateRequestDtoType =
+  MachineInspectionChecklistItemResultBasicResponseDtoType
+
+export interface MachineInspectionChecklistItemResultBasicResponseDtoType {
   id: number
   version: number
   inspectionResult: string
-  deficiencies: string
-  actionRequired: string
+  deficiencies: string | null
+  actionRequired: string | null
 }
 
 // 점검 항목의 하위 항목 및 사진 개수 응답 DTO
 export interface MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistSubItemWithPicCountResponseDtoType {
-  machineChecklistSubItemId: number
-  checklistSubItemName: string
+  machineProjectChecklistSubItemId: number
+  machineProjectChecklistSubItemName: string
   machinePicCount: number
 }
 
@@ -568,6 +595,11 @@ export interface MachineLeafCategoryResponseDtoType {
   name: string
 }
 
+export interface MachineInspectionRootCategoryResponseDtoType {
+  machineCategoryId: number
+  machineCategoryName: string
+}
+
 // ----------- 보고서 관련 -----------
 export interface MachineEnergyTypeResponseDtoType {
   machineEnergyTypeId: number
@@ -584,8 +616,6 @@ export interface MachineEnergyUsageReadResponseDtoType {
   year: number
   monthlyValues: string
 }
-
-type reportStatusType = 'PENDING' | 'COMPLETED' | 'FAILED'
 
 // GET /api/machine-projects/{machineProjectId}/machine-reports/status 보고서 상태 다건 조회
 export interface MachineReportStatusResponseDtoType {
@@ -621,12 +651,11 @@ export interface MachineReportCategoryReadResponseDtoType {
 }
 
 // 점검의견서 조회 응답 DTO
-
 export interface machineInspectionSummaryResponseDtoType {
   machineInspectionSummaryResponseDto: {
     summaryElements: {
       machineTopCategoryName: string
-      inspectionResult: 'PASS' | 'FAIL' | 'NONE'
+      inspectionResult: inspectionResultType
       actionRequired: Record<string, string>
     }[]
   }
@@ -635,7 +664,6 @@ export interface machineInspectionSummaryResponseDtoType {
 }
 
 // ----------- presignedURL 관련 -----------
-
 // POST /api/machine-projects/{machineProjectId}/machine-pics 프로젝트 내 전체 사진 조회 (Presigned URL 포함)
 export interface MachinePicPresignedUrlResponseDtoType {
   machineInspectionId: number
@@ -643,17 +671,31 @@ export interface MachinePicPresignedUrlResponseDtoType {
   machinePicId: number
   version: number
   machineCategoryId: number
-  machineChecklistItemId: number
-  machineChecklistSubItemId: number
+  machineProjectChecklistItemId: number
+  machineProjectChecklistSubItemId: number
   machineCategoryName: string
-  machineChecklistItemName: string
-  machineChecklistSubItemName: string
+  machineProjectChecklistItemName: string
+  machineProjectChecklistSubItemName: string
   originalFileName: string
   measuredValue: string
   alternativeSubTitle: string
   s3Key: string
   presignedUrl: string
+  downloadPresignedUrl: string
   remark: string
+}
+
+export interface machinePicCreateRequestDtoType {
+  machineProjectChecklistSubItemId: number
+  originalFileName: string
+  s3Key: string
+}
+
+export interface MachineInspectionPicUploadPresignedUrlBatchRequestDtoType {
+  uploadType: uploadTypeType
+  originalFileNames: string[]
+  machineProjectChecklistItemId: number
+  machineProjectChecklistSubItemId: number
 }
 
 // ----------- 무한스크롤 사진 관련 -----------
@@ -661,7 +703,7 @@ export interface MachinePicPresignedUrlResponseDtoType {
 export interface MachinePicCursorType {
   lastMachineCateSortOrder: number
   lastMachinePicCateSortOrder: number
-  lastMachineChecklistSubItemSortOrder: number
+  lastMachineProjectChecklistSubItemSortOrder: number
   lastMachineInspectionId: number
   lastMachinePicId: number
 }
@@ -671,27 +713,31 @@ export interface MachinePicUpdateResponseDtoType {
   machineInspectionId: number
   machinePicId: number
   version: number
-  machineChecklistSubItemId: number
+  machineProjectChecklistSubItemId: number
   originalFileName: string
   s3Key: string
+  presignedUrl: string
+  downloadPresignedUrl: string
   cdnPath: string
   alternativeSubTitle: string
   measuredValue: string
   remark: string
 }
 
+export type MachinePicUpdateRequestDtoType = Omit<
+  MachinePicUpdateResponseDtoType,
+  'machinePicId' | 'downloadPresignedUrl' | 'cdnPath'
+>
+
 // ----------- machineProject Pic 관련 -------------
-export type ProjectPicType = 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
-
-// GET /api/machine-projects/{machineProjectId}/machine-project-pics/overview
 // GET /api/machine-projects/{machineProjectId}/machine-project-pics
-
 export interface MachineProjectPicReadResponseDtoType {
   id: number
   version: number
   originalFileName: string
-  machineProjectPicType: ProjectPicType
+  machineProjectPicType: machineProjectPicTypeType
   presignedUrl: string
+  downloadPresignedUrl: string
   remark: string
 }
 
@@ -699,8 +745,8 @@ export interface MachineProjectPicReadResponseDtoType {
 export interface MachineProjectPicUpdateRequestDtoType {
   version: number
   originalFileName: string
-  s3Key: string
-  machineProjectPicType: ProjectPicType
+  downloadPresignedUrl: string
+  machineProjectPicType: machineProjectPicTypeType
   remark: string
 }
 
@@ -772,10 +818,440 @@ export interface LicenseCreateRequestDto {
   remark: string
 }
 
+// ----------- 성능점검시 검토사항 -----------
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/result-summary 결과요약
+export interface MachinePerformanceReviewSummaryResponseDtoType {
+  maintenanceGuidelineAdequacy: string
+  systemOperationalStatus: string
+  designAndMeasuredValueConsistency: string
+  equipmentAgingDegree: string
+  inspectionDeficiencies: string
+  improvementNeedsAndPlan: string
+  energyUsageByType: string
+  energyEfficiencyOperationMethod: string
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/yearly-plan 연도별 계획
+export interface MachinePerformanceReviewYearlyPlanResponseDtoType {
+  refrigeratorResult: resultType
+  refrigeratorDeficiency: string
+  refrigeratorPlanYear1: planYearType
+  refrigeratorPlanYear2: planYearType
+  refrigeratorPlanYear3: planYearType
+  refrigeratorPlanYear4: planYearType
+  refrigeratorPlanYear5: planYearType
+  coolingTowerResult: resultType
+  coolingTowerDeficiency: string
+  coolingTowerPlanYear1: planYearType
+  coolingTowerPlanYear2: planYearType
+  coolingTowerPlanYear3: planYearType
+  coolingTowerPlanYear4: planYearType
+  coolingTowerPlanYear5: planYearType
+  thermalStorageResult: resultType
+  thermalStorageDeficiency: string
+  thermalStoragePlanYear1: planYearType
+  thermalStoragePlanYear2: planYearType
+  thermalStoragePlanYear3: planYearType
+  thermalStoragePlanYear4: planYearType
+  thermalStoragePlanYear5: planYearType
+  boilerResult: resultType
+  boilerDeficiency: string
+  boilerPlanYear1: planYearType
+  boilerPlanYear2: planYearType
+  boilerPlanYear3: planYearType
+  boilerPlanYear4: planYearType
+  boilerPlanYear5: planYearType
+  heatExchangerResult: resultType
+  heatExchangerDeficiency: string
+  heatExchangerPlanYear1: planYearType
+  heatExchangerPlanYear2: planYearType
+  heatExchangerPlanYear3: planYearType
+  heatExchangerPlanYear4: planYearType
+  heatExchangerPlanYear5: planYearType
+  expansionTankResult: resultType
+  expansionTankDeficiency: string
+  expansionTankPlanYear1: planYearType
+  expansionTankPlanYear2: planYearType
+  expansionTankPlanYear3: planYearType
+  expansionTankPlanYear4: planYearType
+  expansionTankPlanYear5: planYearType
+  pumpResult: resultType
+  pumpDeficiency: string
+  pumpPlanYear1: planYearType
+  pumpPlanYear2: planYearType
+  pumpPlanYear3: planYearType
+  pumpPlanYear4: planYearType
+  pumpPlanYear5: planYearType
+  renewableEnergySystemResult: resultType
+  renewableEnergySystemDeficiency: string
+  renewableEnergySystemPlanYear1: planYearType
+  renewableEnergySystemPlanYear2: planYearType
+  renewableEnergySystemPlanYear3: planYearType
+  renewableEnergySystemPlanYear4: planYearType
+  renewableEnergySystemPlanYear5: planYearType
+  packageAirConditionerResult: resultType
+  packageAirConditionerDeficiency: string
+  packageAirConditionerPlanYear1: planYearType
+  packageAirConditionerPlanYear2: planYearType
+  packageAirConditionerPlanYear3: planYearType
+  packageAirConditionerPlanYear4: planYearType
+  packageAirConditionerPlanYear5: planYearType
+  precisionAirConditionerResult: resultType
+  precisionAirConditionerDeficiency: string
+  precisionAirConditionerPlanYear1: planYearType
+  precisionAirConditionerPlanYear2: planYearType
+  precisionAirConditionerPlanYear3: planYearType
+  precisionAirConditionerPlanYear4: planYearType
+  precisionAirConditionerPlanYear5: planYearType
+  airHandlingUnitResult: resultType
+  airHandlingUnitDeficiency: string
+  airHandlingUnitPlanYear1: planYearType
+  airHandlingUnitPlanYear2: planYearType
+  airHandlingUnitPlanYear3: planYearType
+  airHandlingUnitPlanYear4: planYearType
+  airHandlingUnitPlanYear5: planYearType
+  fanCoilUnitResult: resultType
+  fanCoilUnitDeficiency: string
+  fanCoilUnitPlanYear1: planYearType
+  fanCoilUnitPlanYear2: planYearType
+  fanCoilUnitPlanYear3: planYearType
+  fanCoilUnitPlanYear4: planYearType
+  fanCoilUnitPlanYear5: planYearType
+  ventilationSystemResult: resultType
+  ventilationSystemDeficiency: string
+  ventilationSystemPlanYear1: planYearType
+  ventilationSystemPlanYear2: planYearType
+  ventilationSystemPlanYear3: planYearType
+  ventilationSystemPlanYear4: planYearType
+  ventilationSystemPlanYear5: planYearType
+  filterResult: resultType
+  filterDeficiency: string
+  filterPlanYear1: planYearType
+  filterPlanYear2: planYearType
+  filterPlanYear3: planYearType
+  filterPlanYear4: planYearType
+  filterPlanYear5: planYearType
+  sanitaryFacilityResult: resultType
+  sanitaryFacilityDeficiency: string
+  sanitaryFacilityPlanYear1: planYearType
+  sanitaryFacilityPlanYear2: planYearType
+  sanitaryFacilityPlanYear3: planYearType
+  sanitaryFacilityPlanYear4: planYearType
+  sanitaryFacilityPlanYear5: planYearType
+  hotWaterSupplyResult: resultType
+  hotWaterSupplyDeficiency: string
+  hotWaterSupplyPlanYear1: planYearType
+  hotWaterSupplyPlanYear2: planYearType
+  hotWaterSupplyPlanYear3: planYearType
+  hotWaterSupplyPlanYear4: planYearType
+  hotWaterSupplyPlanYear5: planYearType
+  waterTankResult: resultType
+  waterTankDeficiency: string
+  waterTankPlanYear1: planYearType
+  waterTankPlanYear2: planYearType
+  waterTankPlanYear3: planYearType
+  waterTankPlanYear4: planYearType
+  waterTankPlanYear5: planYearType
+  drainageResult: resultType
+  drainageDeficiency: string
+  drainagePlanYear1: planYearType
+  drainagePlanYear2: planYearType
+  drainagePlanYear3: planYearType
+  drainagePlanYear4: planYearType
+  drainagePlanYear5: planYearType
+  sewageTreatmentResult: resultType
+  sewageTreatmentDeficiency: string
+  sewageTreatmentPlanYear1: planYearType
+  sewageTreatmentPlanYear2: planYearType
+  sewageTreatmentPlanYear3: planYearType
+  sewageTreatmentPlanYear4: planYearType
+  sewageTreatmentPlanYear5: planYearType
+  waterReuseResult: resultType
+  waterReuseDeficiency: string
+  waterReusePlanYear1: planYearType
+  waterReusePlanYear2: planYearType
+  waterReusePlanYear3: planYearType
+  waterReusePlanYear4: planYearType
+  waterReusePlanYear5: planYearType
+  pipeLineResult: resultType
+  pipeLineDeficiency: string
+  pipeLinePlanYear1: planYearType
+  pipeLinePlanYear2: planYearType
+  pipeLinePlanYear3: planYearType
+  pipeLinePlanYear4: planYearType
+  pipeLinePlanYear5: planYearType
+  ductResult: resultType
+  ductDeficiency: string
+  ductPlanYear1: planYearType
+  ductPlanYear2: planYearType
+  ductPlanYear3: planYearType
+  ductPlanYear4: planYearType
+  ductPlanYear5: planYearType
+  insulationResult: resultType
+  insulationDeficiency: string
+  insulationPlanYear1: planYearType
+  insulationPlanYear2: planYearType
+  insulationPlanYear3: planYearType
+  insulationPlanYear4: planYearType
+  insulationPlanYear5: planYearType
+  automaticControlResult: resultType
+  automaticControlDeficiency: string
+  automaticControlPlanYear1: planYearType
+  automaticControlPlanYear2: planYearType
+  automaticControlPlanYear3: planYearType
+  automaticControlPlanYear4: planYearType
+  automaticControlPlanYear5: planYearType
+  noiseVibrationSeismicResult: resultType
+  noiseVibrationSeismicDeficiency: string
+  noiseVibrationSeismicPlanYear1: planYearType
+  noiseVibrationSeismicPlanYear2: planYearType
+  noiseVibrationSeismicPlanYear3: planYearType
+  noiseVibrationSeismicPlanYear4: planYearType
+  noiseVibrationSeismicPlanYear5: planYearType
+  note: string
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/operation-status 작동상태
+export interface MachinePerformanceReviewOperationStatusResponseDtoType {
+  refrigeratorResult: resultType
+  refrigeratorRemark: string
+  coolingTowerResult: resultType
+  coolingTowerRemark: string
+  thermalStorageResult: resultType
+  thermalStorageRemark: string
+  boilerResult: resultType
+  boilerRemark: string
+  heatExchangerResult: resultType
+  heatExchangerRemark: string
+  expansionTankResult: resultType
+  expansionTankRemark: string
+  pumpResult: resultType
+  pumpRemark: string
+  renewableEnergySystemResult: resultType
+  renewableEnergySystemRemark: string
+  packageAirConditionerResult: resultType
+  packageAirConditionerRemark: string
+  precisionAirConditionerResult: resultType
+  precisionAirConditionerRemark: string
+  airHandlingUnitResult: resultType
+  airHandlingUnitRemark: string
+  fanCoilUnitResult: resultType
+  fanCoilUnitRemark: string
+  ventilationSystemResult: resultType
+  ventilationSystemRemark: string
+  filterResult: resultType
+  filterRemark: string
+  sanitaryFacilityResult: resultType
+  sanitaryFacilityRemark: string
+  hotWaterSupplyResult: resultType
+  hotWaterSupplyRemark: string
+  waterTankResult: resultType
+  waterTankRemark: string
+  drainageResult: resultType
+  drainageRemark: string
+  sewageTreatmentResult: resultType
+  sewageTreatmentRemark: string
+  waterReuseResult: resultType
+  waterReuseRemark: string
+  pipeLineResult: resultType
+  pipeLineRemark: string
+  ductResult: resultType
+  ductRemark: string
+  insulationResult: resultType
+  insulationRemark: string
+  automaticControlResult: resultType
+  automaticControlRemark: string
+  noiseVibrationSeismicResult: resultType
+  noiseVibrationSeismicRemark: string
+  opinion: string
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/measurement 측정값 일치
+export interface MachinePerformanceReviewMeasurementResponseDtoType {
+  refrigeratorResult: matchResultType
+  refrigeratorRemark: string
+  coolingTowerResult: matchResultType
+  coolingTowerRemark: string
+  thermalStorageResult: matchResultType
+  thermalStorageRemark: string
+  boilerResult: matchResultType
+  boilerRemark: string
+  heatExchangerResult: matchResultType
+  heatExchangerRemark: string
+  expansionTankResult: matchResultType
+  expansionTankRemark: string
+  pumpResult: matchResultType
+  pumpRemark: string
+  renewableEnergySystemResult: matchResultType
+  renewableEnergySystemRemark: string
+  packageAirConditionerResult: matchResultType
+  packageAirConditionerRemark: string
+  precisionAirConditionerResult: matchResultType
+  precisionAirConditionerRemark: string
+  airHandlingUnitResult: matchResultType
+  airHandlingUnitRemark: string
+  fanCoilUnitResult: matchResultType
+  fanCoilUnitRemark: string
+  ventilationSystemResult: matchResultType
+  ventilationSystemRemark: string
+  filterResult: matchResultType
+  filterRemark: string
+  sanitaryFacilityResult: matchResultType
+  sanitaryFacilityRemark: string
+  hotWaterSupplyResult: matchResultType
+  hotWaterSupplyRemark: string
+  waterTankResult: matchResultType
+  waterTankRemark: string
+  drainageResult: matchResultType
+  drainageRemark: string
+  sewageTreatmentResult: matchResultType
+  sewageTreatmentRemark: string
+  waterReuseResult: matchResultType
+  waterReuseRemark: string
+  pipeLineResult: matchResultType
+  pipeLineRemark: string
+  ductResult: matchResultType
+  ductRemark: string
+  insulationResult: matchResultType
+  insulationRemark: string
+  automaticControlResult: matchResultType
+  automaticControlRemark: string
+  noiseVibrationSeismicResult: matchResultType
+  noiseVibrationSeismicRemark: string
+  opinion: string
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/improvement 개선사항
+export interface MachinePerformanceReviewImprovementResponseDtoType {
+  refrigeratorResult: resultType
+  refrigeratorDeficiency: string
+  refrigeratorImprovement: string
+  coolingTowerResult: resultType
+  coolingTowerDeficiency: string
+  coolingTowerImprovement: string
+  thermalStorageResult: resultType
+  thermalStorageDeficiency: string
+  thermalStorageImprovement: string
+  boilerResult: resultType
+  boilerDeficiency: string
+  boilerImprovement: string
+  heatExchangerResult: resultType
+  heatExchangerDeficiency: string
+  heatExchangerImprovement: string
+  expansionTankResult: resultType
+  expansionTankDeficiency: string
+  expansionTankImprovement: string
+  pumpResult: resultType
+  pumpDeficiency: string
+  pumpImprovement: string
+  renewableEnergySystemResult: resultType
+  renewableEnergySystemDeficiency: string
+  renewableEnergySystemImprovement: string
+  packageAirConditionerResult: resultType
+  packageAirConditionerDeficiency: string
+  packageAirConditionerImprovement: string
+  precisionAirConditionerResult: resultType
+  precisionAirConditionerDeficiency: string
+  precisionAirConditionerImprovement: string
+  airHandlingUnitResult: resultType
+  airHandlingUnitDeficiency: string
+  airHandlingUnitImprovement: string
+  fanCoilUnitResult: resultType
+  fanCoilUnitDeficiency: string
+  fanCoilUnitImprovement: string
+  ventilationSystemResult: resultType
+  ventilationSystemDeficiency: string
+  ventilationSystemImprovement: string
+  filterResult: resultType
+  filterDeficiency: string
+  filterImprovement: string
+  sanitaryFacilityResult: resultType
+  sanitaryFacilityDeficiency: string
+  sanitaryFacilityImprovement: string
+  hotWaterSupplyResult: resultType
+  hotWaterSupplyDeficiency: string
+  hotWaterSupplyImprovement: string
+  waterTankResult: resultType
+  waterTankDeficiency: string
+  waterTankImprovement: string
+  drainageResult: resultType
+  drainageDeficiency: string
+  drainageImprovement: string
+  sewageTreatmentResult: resultType
+  sewageTreatmentDeficiency: string
+  sewageTreatmentImprovement: string
+  waterReuseResult: resultType
+  waterReuseDeficiency: string
+  waterReuseImprovement: string
+  pipeLineResult: resultType
+  pipeLineDeficiency: string
+  pipeLineImprovement: string
+  ductResult: resultType
+  ductDeficiency: string
+  ductImprovement: string
+  insulationResult: resultType
+  insulationDeficiency: string
+  insulationImprovement: string
+  automaticControlResult: resultType
+  automaticControlDeficiency: string
+  automaticControlImprovement: string
+  noiseVibrationSeismicResult: resultType
+  noiseVibrationSeismicDeficiency: string
+  noiseVibrationSeismicImprovement: string
+  note: string
+}
+
+// GET /api/machine-projects/{machineProjectId}/machine-performance-review/guide 검토가이드
+export interface MachinePerformanceReviewGuideResponseDtoType {
+  builtDrawingYn: ynResultType
+  specificationYn: ynResultType
+  loadCalculationYn: ynResultType
+  operationManual: ynResultType
+  manufacturerCertificateYn: ynResultType
+  techStandardForm3Yn: ynResultType
+  techStandardForm4Yn: ynResultType
+  techStandardForm5Yn: ynResultType
+  techStandardForm6Yn: ynResultType
+}
+
+export interface MachinePerformanceReviewAgingItemResponseDtoType {
+  machineRootCategoryName: string
+  systemName: string
+  durableYearProcurement: number
+  durableYearRealEstate: number
+  usedYear: number
+  remark: string
+}
+
+export interface MachinePerformanceReviewAgingReadResponseDtoType {
+  agingEquipments: MachinePerformanceReviewAgingItemResponseDtoType[]
+  agingStandard: agingStandardType
+  agingInspectionResult: string
+}
+
+export interface MachinePerformanceReviewAgingUpdateResponseDtoType {
+  agingStandard: agingStandardType
+  agingInspectionResult: string
+}
+
+// ----------- 모바일 -----------
+// GET /api/engineers/by-member/{memberId}
+export interface EngineerBasicResponseDtoType {
+  engineerId: number
+  companyName: string
+  memberName: string
+  grade: gradeType
+  engineerLicenseNum: string
+}
+
 // ----------- 로그인 -----------
 // POST /api/auth/web/login
 export interface LoginResponseDtoType {
   tokenResponseDto: TokenResponseDto
+  loginMemberResponseDto: {
+    memberId: number
+    name: string
+  }
 }
 
 // JWT 토큰 발급 DTO
@@ -802,29 +1278,60 @@ export interface PageInfoDtoType {
   totalPages: number
 }
 
-// 인풋 형식
-export type InputFieldType = {
-  size?: BoxSizeType
-  type: InputType
-  label: string
-  options?: Array<{ value: string; label: string }>
-  disabled?: boolean
-}
+/* -------------------------- ENUM Type -------------------------- */
+export type agingStandardType = 'KOREA_REAL_ESTATE_BOARD' | 'PUBLIC_PROCUREMENT_SERVICE'
 
-// 테이블 헤더
-export interface HeaderInfoType {
-  label: string
-  canSort: boolean
-  hideOnTablet: boolean
-}
+export type ynResultType = 'Y' | 'N'
 
-export type HeaderType<T> = Record<keyof T, HeaderInfoType>
+export type matchResultType = 'MATCH' | 'MISMATCH' | 'NONE'
 
-// 테이블 정렬
-export type SortType = '' | 'asc' | 'desc'
+export type inspectionResultType = 'PASS' | 'FAIL' | 'NONE'
 
-export type SortInfoType<T> = Record<'target', keyof T | ''> & Record<'sort', SortType>
+export type planYearType = 'INSPECTION' | 'REPLACEMENT' | 'REPAIR' | 'INSTALLATION' | 'NONE'
+export type resultType = 'PASS' | 'FAIL' | 'NONE'
 
-// 모달 Box 사이징, 입력 타입
-export type BoxSizeType = 'sm' | 'md' | 'lg'
-export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text' | 'juminNum' | 'map'
+export type machineProjectPicTypeType = 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
+
+export type uploadTypeType = 'INSPECTION_IMAGE' | 'PROJECT_IMAGE'
+
+export type equipmentPhaseType = 'INSTALL' | 'MANUFACTURE' | 'USE'
+
+export type officePositionType =
+  | 'TEMPORARY'
+  | 'INTERN'
+  | 'STAFF'
+  | 'JUNIOR_STAFF'
+  | 'ASSISTANT_MANAGER'
+  | 'SENIOR_ASSISTANT_MANAGER'
+  | 'RESPONSIBLE'
+  | 'TEAM_LEADER'
+  | 'SECTION_CHIEF'
+  | 'DEPUTY_GENERAL_MANAGER'
+  | 'MANAGER'
+  | 'SENIOR_MANAGER'
+  | 'DEPUTY_MANAGER'
+  | 'DIRECTOR'
+  | 'EXECUTIVE_DIRECTOR'
+  | 'SENIOR_EXECUTIVE_DIRECTOR'
+  | 'ADVISOR'
+  | 'VICE_PRESIDENT'
+  | 'PRESIDENT'
+
+export type contractTypeType = 'REGULAR' | 'CONTRACT_1Y' | 'CONTRACT_2Y' | 'NON_REGULAR' | 'DAILY' | 'TEMPORARY'
+export type laborFormType = 'RESIDENT' | 'NON_RESIDENT'
+export type workFormType = 'DEEMED' | 'SPECIAL'
+
+export type checklistExtensionTypeType =
+  | 'NONE'
+  | 'GAS_MEASUREMENT'
+  | 'WIND_MEASUREMENT'
+  | 'WIND_MEASUREMENT_SA_RA'
+  | 'PIPE_MEASUREMENT'
+
+export type engineerTypeType = 'MACHINE' | 'SAFETY'
+
+export type gradeType = 'ASSIST' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
+
+export type memberStatusType = 'NORMAL' | 'QUIT' | 'PENDING' | 'LEAVE'
+
+export type reportStatusType = 'PENDING' | 'COMPLETED' | 'FAILED'

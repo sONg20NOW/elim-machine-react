@@ -6,7 +6,7 @@ import 'server-only'
 
 // Type Imports
 import type { Settings } from '@core/contexts/settingsContext'
-import type { SystemMode } from '@/@core/types'
+import type { SystemMode } from '@core/types'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'

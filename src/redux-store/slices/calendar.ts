@@ -5,8 +5,8 @@ import type { EventInput } from '@fullcalendar/core'
 
 // Type Imports
 import type { CalendarFiltersType, CalendarType } from '@/types/apps/calendarTypes'
-import type { CalendarEventResponseDtoType } from '@/@core/types'
-import { auth } from '@/lib/auth'
+import type { CalendarEventResponseDtoType } from '@core/types'
+import { auth } from '@core/utils/auth'
 
 function mergeEventsByName(eventsObj: Record<string, any[]>): any[] {
   const merged: Record<string, { name: string; start: string; end: string; [key: string]: any }> = {}
