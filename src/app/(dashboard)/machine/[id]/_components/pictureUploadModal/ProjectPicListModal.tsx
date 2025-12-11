@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -107,9 +107,8 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
         }>(`/api/machine-projects/${machineProjectId}/machine-project-pics`)
         .then(v => v.data.data.machineProjectPics)
 
+      console.log('get project pictures!')
       setPictures(response)
-
-      return response
     } catch (err) {
       handleApiError(err)
     } finally {
@@ -259,14 +258,16 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   }, [checkedPics, selectedPicType, projectData?.machineProjectName])
 
   // 이전에 PicZoom modal이 열린 적 있을 때만 닫혔을 때 사진 새로 가져오기 (showPicZoom의 default값이 false라 최초에 두 번 가져오는 것 방지)
-  const wasOpened = useRef(false)
-
   useEffect(() => {
-    if (!wasOpened.current) {
-      wasOpened.current = true
-    } else if (!openPicZoom) {
-      getPictures()
+    async function getPicturesWhenClosed() {
+      console.log('wasOpened ')
+
+      if (!openPicZoom) {
+        getPictures()
+      }
     }
+
+    getPicturesWhenClosed()
   }, [openPicZoom, getPictures])
 
   return (
