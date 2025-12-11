@@ -738,6 +738,7 @@ export interface MachinePicUpdateResponseDtoType {
   machineProjectChecklistSubItemId: number
   originalFileName: string
   s3Key: string
+  presignedUrl: string
   downloadPresignedUrl: string
   cdnPath: string
   alternativeSubTitle: string
