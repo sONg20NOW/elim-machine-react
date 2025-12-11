@@ -164,7 +164,6 @@ export default function InspectionPicZoomModal({
 
       if (!S3KeyResult) return
 
-      const presignedUrl = URL.createObjectURL(file)
       const s3Key = S3KeyResult[0].s3Key
 
       const response = await auth
@@ -176,11 +175,7 @@ export default function InspectionPicZoomModal({
         )
         .then(v => v.data.data)
 
-      setPictures(prev =>
-        prev.map(v =>
-          v.machinePicId === selectedPic.machinePicId ? { ...v, ...response, presignedUrl: presignedUrl } : v
-        )
-      )
+      setPictures(prev => prev.map(v => (v.machinePicId === selectedPic.machinePicId ? { ...v, ...response } : v)))
       handleSuccess('사진이 교체되었습니다')
     } catch (e) {
       handleApiError(e)

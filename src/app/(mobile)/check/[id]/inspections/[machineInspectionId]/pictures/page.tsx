@@ -39,7 +39,7 @@ import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const max_pic = 100
 
-type formType = Omit<MachinePicUpdateResponseDtoType, 's3Key' | 'downloadPresignedUrl'>
+type formType = Omit<MachinePicUpdateResponseDtoType, 's3Key' | 'downloadPresignedUrl' | 'presignedUrl'>
 
 export default function PicturePage() {
   const { id: machineProjectId, machineInspectionId } = useParams()
