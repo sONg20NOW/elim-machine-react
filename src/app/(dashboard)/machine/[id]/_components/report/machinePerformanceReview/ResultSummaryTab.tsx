@@ -14,7 +14,7 @@ import {
   useMutateResultSummaryAutoFill
 } from '@core/hooks/customTanstackQueries'
 import type { MachinePerformanceReviewSummaryResponseDtoType } from '@core/types'
-import { makeResultSummarySeed } from '../../../_utils/makeSeed'
+import { makeResultSummarySeed } from './makeSeed'
 
 const ResultSummaryTab = memo(
   forwardRef<refType, {}>(({}, ref) => {

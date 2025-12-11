@@ -11,14 +11,16 @@ import type { refType } from '../MachinePerformanceReviewModal'
 import { centerStyle, StyledTextField } from '../MachinePerformanceReviewModal'
 import type {
   MachineInspectionRootCategoryResponseDtoType,
-  MachinePerformanceReviewYearlyPlanResponseDtoType
+  MachinePerformanceReviewImprovementResponseDtoType
 } from '@core/types'
-import { useGetYearlyPlan, useMutateYearlyPlan, useMutateYearlyPlanAutoFill } from '@core/hooks/customTanstackQueries'
-import { makeYearlyPlanSeed } from '../../../_utils/makeSeed'
+import {
+  useGetImprovement,
+  useMutateImprovement,
+  useMutateImprovementAutoFill
+} from '@core/hooks/customTanstackQueries'
+import { makeImprovementSeed } from './makeSeed'
 
-const defaultYears = [1, 2, 3, 4, 5]
-
-const YearlyPlanTab = memo(
+const ImprovementTab = memo(
   forwardRef<refType, { rootCategories?: MachineInspectionRootCategoryResponseDtoType[] }>(
     ({ rootCategories }, ref) => {
       const machineProjectId = useParams().id?.toString()
@@ -26,29 +28,29 @@ const YearlyPlanTab = memo(
       const theme = useTheme()
       const [autoFillTrigger, setAutoFillTrigger] = useState(true)
 
-      const { data: yearlyPlan } = useGetYearlyPlan(machineProjectId!)
-      const { mutate } = useMutateYearlyPlan(machineProjectId!)
-      const { mutate: mutateAutoFill } = useMutateYearlyPlanAutoFill(machineProjectId!)
+      const { data: improvement } = useGetImprovement(machineProjectId!)
+      const { mutate } = useMutateImprovement(machineProjectId!)
+      const { mutate: mutateAutoFill } = useMutateImprovementAutoFill(machineProjectId!)
 
-      const { register, control, reset, getValues } = useForm<MachinePerformanceReviewYearlyPlanResponseDtoType>({
-        defaultValues: makeYearlyPlanSeed(yearlyPlan)
+      const { register, control, reset, getValues } = useForm<MachinePerformanceReviewImprovementResponseDtoType>({
+        defaultValues: makeImprovementSeed(improvement)
       })
 
       useEffect(() => {
-        reset(makeYearlyPlanSeed(yearlyPlan))
-      }, [yearlyPlan, reset, autoFillTrigger])
+        reset(makeImprovementSeed(improvement))
+      }, [improvement, reset, autoFillTrigger])
 
       const OperationRow = ({
         categoryName,
         resultFieldName,
         deficiencyFieldName,
-        planYearFieldName,
+        improvementFieldName,
         colSpan = 3
       }: {
         categoryName: string
-        resultFieldName: keyof MachinePerformanceReviewYearlyPlanResponseDtoType
-        deficiencyFieldName: keyof MachinePerformanceReviewYearlyPlanResponseDtoType
-        planYearFieldName: string
+        resultFieldName: keyof MachinePerformanceReviewImprovementResponseDtoType
+        deficiencyFieldName: keyof MachinePerformanceReviewImprovementResponseDtoType
+        improvementFieldName: keyof MachinePerformanceReviewImprovementResponseDtoType
         colSpan?: number
       }) => {
         const exists = rootCategories?.some(v => v.machineCategoryName === categoryName)
@@ -76,55 +78,19 @@ const YearlyPlanTab = memo(
                 )}
               />
             </td>
-            <td colSpan={6} style={{ padding: 0 }}>
-              <StyledTextField multiline maxRows={3} {...register(deficiencyFieldName)} />
+            <td colSpan={7} style={{ padding: 0 }}>
+              <StyledTextField multiline rows={1} {...register(deficiencyFieldName)} />
             </td>
-            {defaultYears.map(year => (
-              <td key={year} colSpan={2} style={{ padding: 0 }}>
-                <Controller
-                  control={control}
-                  name={`${planYearFieldName}${year}` as keyof MachinePerformanceReviewYearlyPlanResponseDtoType}
-                  render={({ field }) => (
-                    <Select
-                      sx={{
-                        px: 4,
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        '&:before, &:after': { display: 'none' }, // 밑줄 제거
-                        '& .MuiFilledInput-root': {
-                          backgroundColor: 'transparent'
-                        },
-                        '& .MuiSelect-filled': { py: 0 },
-                        '& .MuiSelect-select': {
-                          display: 'flex',
-                          alignItems: 'center',
-                          height: '100%', // 높이 최대
-                          py: 0
-                        }
-                      }}
-                      fullWidth
-                      variant='filled'
-                      size='small'
-                      value={field.value}
-                      onChange={field.onChange}
-                    >
-                      <MenuItem value='INSPECTION'>점검</MenuItem>
-                      <MenuItem value='REPLACEMENT'>교체</MenuItem>
-                      <MenuItem value='REPAIR'>보수</MenuItem>
-                      <MenuItem value='INSTALLATION'>설치</MenuItem>
-                      <MenuItem value='NONE'></MenuItem>
-                    </Select>
-                  )}
-                />
-              </td>
-            ))}
+            <td colSpan={7} style={{ padding: 0 }}>
+              <StyledTextField multiline rows={1} {...register(improvementFieldName)} />
+            </td>
           </>
         ) : (
           <>
             <td colSpan={colSpan} style={{ color: 'lightgray' }}>
               {categoryName}
             </td>
-            <td colSpan={18} style={{ color: 'lightgray' }}></td>
+            <td colSpan={16} style={{ color: 'lightgray' }}></td>
           </>
         )
       }
@@ -145,7 +111,7 @@ const YearlyPlanTab = memo(
 
         return !isDirty ? (
           <Typography color='warning.main' sx={{ pb: 4 }}>
-            ※연도별 계획의 변경사항이 없습니다※
+            ※개선사항의 변경사항이 없습니다※
           </Typography>
         ) : null
       }
@@ -154,7 +120,7 @@ const YearlyPlanTab = memo(
         <div className={`${styles.container} flex flex-col gap-4 items-center h-full justify-between `}>
           <div className='flex flex-col gap-4'>
             <div className='flex flex-col gap-1 w-full'>
-              <Typography variant='h5'>성능개선 필요성 및 연도별 세부개선계획</Typography>
+              <Typography variant='h5'>성능점검표에 따른 조치사항 및 개선사항</Typography>
               <table
                 style={{
                   tableLayout: 'fixed',
@@ -165,21 +131,10 @@ const YearlyPlanTab = memo(
               >
                 <thead>
                   <tr>
-                    <th rowSpan={2} colSpan={6}>
-                      점검대상 기계설비
-                    </th>
-                    <th rowSpan={2} colSpan={2}>
-                      점검결과
-                    </th>
-                    <th rowSpan={2} colSpan={6}>
-                      성능개선 필요성
-                    </th>
-                    <th colSpan={10}>성능개선 계획(성능점검일 기준)</th>
-                  </tr>
-                  <tr>
-                    {defaultYears.map(year => (
-                      <th key={year} colSpan={2}>{`${year}년차`}</th>
-                    ))}
+                    <th colSpan={6}>점검대상 기계설비</th>
+                    <th colSpan={2}>결과</th>
+                    <th colSpan={7}>미흡사항</th>
+                    <th colSpan={7}>개선사항</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -192,7 +147,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'refrigeratorResult'}
                       deficiencyFieldName={'refrigeratorDeficiency'}
-                      planYearFieldName={'refrigeratorPlanYear'}
+                      improvementFieldName={'refrigeratorImprovement'}
                       categoryName='냉동기'
                     />
                   </tr>
@@ -200,7 +155,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'coolingTowerResult'}
                       deficiencyFieldName={'coolingTowerDeficiency'}
-                      planYearFieldName={'coolingTowerPlanYear'}
+                      improvementFieldName={'coolingTowerImprovement'}
                       categoryName='냉각탑'
                     />
                   </tr>
@@ -208,7 +163,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'thermalStorageResult'}
                       deficiencyFieldName={'thermalStorageDeficiency'}
-                      planYearFieldName={'thermalStoragePlanYear'}
+                      improvementFieldName={'thermalStorageImprovement'}
                       categoryName='축열조'
                     />
                   </tr>
@@ -216,7 +171,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'boilerResult'}
                       deficiencyFieldName={'boilerDeficiency'}
-                      planYearFieldName={'boilerPlanYear'}
+                      improvementFieldName={'boilerImprovement'}
                       categoryName='보일러'
                     />
                   </tr>
@@ -224,7 +179,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'heatExchangerResult'}
                       deficiencyFieldName={'heatExchangerDeficiency'}
-                      planYearFieldName={'heatExchangerPlanYear'}
+                      improvementFieldName={'heatExchangerImprovement'}
                       categoryName='열교환기'
                     />
                   </tr>
@@ -232,7 +187,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'expansionTankResult'}
                       deficiencyFieldName={'expansionTankDeficiency'}
-                      planYearFieldName={'expansionTankPlanYear'}
+                      improvementFieldName={'expansionTankImprovement'}
                       categoryName='팽창탱크'
                     />
                   </tr>
@@ -240,7 +195,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'pumpResult'}
                       deficiencyFieldName={'pumpDeficiency'}
-                      planYearFieldName={'pumpPlanYear'}
+                      improvementFieldName={'pumpImprovement'}
                       categoryName='펌프(냉·난방)'
                     />
                   </tr>
@@ -248,7 +203,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'renewableEnergySystemResult'}
                       deficiencyFieldName={'renewableEnergySystemDeficiency'}
-                      planYearFieldName={'renewableEnergySystemPlanYear'}
+                      improvementFieldName={'renewableEnergySystemImprovement'}
                       categoryName='신재생'
                     />
                   </tr>
@@ -256,7 +211,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'packageAirConditionerResult'}
                       deficiencyFieldName={'packageAirConditionerDeficiency'}
-                      planYearFieldName={'packageAirConditionerPlanYear'}
+                      improvementFieldName={'packageAirConditionerImprovement'}
                       categoryName='패키지 에어컨'
                     />
                   </tr>
@@ -264,7 +219,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'precisionAirConditionerResult'}
                       deficiencyFieldName={'precisionAirConditionerDeficiency'}
-                      planYearFieldName={'precisionAirConditionerPlanYear'}
+                      improvementFieldName={'precisionAirConditionerImprovement'}
                       categoryName='항온 항습기'
                     />
                   </tr>
@@ -277,7 +232,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'airHandlingUnitResult'}
                       deficiencyFieldName={'airHandlingUnitDeficiency'}
-                      planYearFieldName={'airHandlingUnitPlanYear'}
+                      improvementFieldName={'airHandlingUnitImprovement'}
                       categoryName='공기 조화기'
                     />
                   </tr>
@@ -285,7 +240,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'fanCoilUnitResult'}
                       deficiencyFieldName={'fanCoilUnitDeficiency'}
-                      planYearFieldName={'fanCoilUnitPlanYear'}
+                      improvementFieldName={'fanCoilUnitImprovement'}
                       categoryName='팬코일 유닛'
                     />
                   </tr>
@@ -298,7 +253,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'ventilationSystemResult'}
                       deficiencyFieldName={'ventilationSystemDeficiency'}
-                      planYearFieldName={'ventilationSystemPlanYear'}
+                      improvementFieldName={'ventilationSystemImprovement'}
                       categoryName='환기설비'
                     />
                   </tr>
@@ -306,7 +261,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'filterResult'}
                       deficiencyFieldName={'filterDeficiency'}
-                      planYearFieldName={'filterPlanYear'}
+                      improvementFieldName={'filterImprovement'}
                       categoryName='필터'
                     />
                   </tr>
@@ -317,7 +272,7 @@ const YearlyPlanTab = memo(
                       colSpan={6}
                       resultFieldName={'sanitaryFacilityResult'}
                       deficiencyFieldName={'sanitaryFacilityDeficiency'}
-                      planYearFieldName={'sanitaryFacilityPlanYear'}
+                      improvementFieldName={'sanitaryFacilityImprovement'}
                       categoryName='위생 기구 설비'
                     />
                   </tr>
@@ -330,7 +285,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'hotWaterSupplyResult'}
                       deficiencyFieldName={'hotWaterSupplyDeficiency'}
-                      planYearFieldName={'hotWaterSupplyPlanYear'}
+                      improvementFieldName={'hotWaterSupplyImprovement'}
                       categoryName='급수·급탕설비'
                     />
                   </tr>
@@ -338,7 +293,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'waterTankResult'}
                       deficiencyFieldName={'waterTankDeficiency'}
-                      planYearFieldName={'waterTankPlanYear'}
+                      improvementFieldName={'waterTankImprovement'}
                       categoryName='고·저수조'
                     />
                   </tr>
@@ -349,7 +304,7 @@ const YearlyPlanTab = memo(
                       colSpan={6}
                       resultFieldName={'drainageResult'}
                       deficiencyFieldName={'drainageDeficiency'}
-                      planYearFieldName={'drainagePlanYear'}
+                      improvementFieldName={'drainageImprovement'}
                       categoryName='오·배수 통기 및 우수배수설비'
                     />
                   </tr>
@@ -362,7 +317,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'sewageTreatmentResult'}
                       deficiencyFieldName={'sewageTreatmentDeficiency'}
-                      planYearFieldName={'sewageTreatmentPlanYear'}
+                      improvementFieldName={'sewageTreatmentImprovement'}
                       categoryName='오수 정화 설비'
                     />
                   </tr>
@@ -370,7 +325,7 @@ const YearlyPlanTab = memo(
                     <OperationRow
                       resultFieldName={'waterReuseResult'}
                       deficiencyFieldName={'waterReuseDeficiency'}
-                      planYearFieldName={'waterReusePlanYear'}
+                      improvementFieldName={'waterReuseImprovement'}
                       categoryName='물 재이용 설비'
                     />
                   </tr>
@@ -381,7 +336,7 @@ const YearlyPlanTab = memo(
                       colSpan={6}
                       resultFieldName={'pipeLineResult'}
                       deficiencyFieldName={'pipeLineDeficiency'}
-                      planYearFieldName={'pipeLinePlanYear'}
+                      improvementFieldName={'pipeLineImprovement'}
                       categoryName='배관설비'
                     />
                   </tr>
@@ -390,7 +345,7 @@ const YearlyPlanTab = memo(
                       colSpan={6}
                       resultFieldName={'ductResult'}
                       deficiencyFieldName={'ductDeficiency'}
-                      planYearFieldName={'ductPlanYear'}
+                      improvementFieldName={'ductImprovement'}
                       categoryName='덕트설비'
                     />
                   </tr>
@@ -399,7 +354,7 @@ const YearlyPlanTab = memo(
                       colSpan={6}
                       resultFieldName={'insulationResult'}
                       deficiencyFieldName={'insulationDeficiency'}
-                      planYearFieldName={'insulationPlanYear'}
+                      improvementFieldName={'insulationImprovement'}
                       categoryName='보온설비'
                     />
                   </tr>
@@ -408,7 +363,7 @@ const YearlyPlanTab = memo(
                       colSpan={6}
                       resultFieldName={'automaticControlResult'}
                       deficiencyFieldName={'automaticControlDeficiency'}
-                      planYearFieldName={'automaticControlPlanYear'}
+                      improvementFieldName={'automaticControlImprovement'}
                       categoryName='자동제어설비'
                     />
                   </tr>
@@ -419,7 +374,7 @@ const YearlyPlanTab = memo(
                       colSpan={6}
                       resultFieldName={'automaticControlResult'}
                       deficiencyFieldName={'automaticControlDeficiency'}
-                      planYearFieldName={'soundProofPlanYear'}
+                      improvementFieldName={'automaticControlImprovement'}
                       categoryName='방음·방진·내진설비'
                     />
                   </tr>
@@ -445,4 +400,4 @@ const YearlyPlanTab = memo(
   )
 )
 
-export default YearlyPlanTab
+export default ImprovementTab

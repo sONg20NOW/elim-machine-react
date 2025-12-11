@@ -7,6 +7,8 @@ import type {
   MachinePerformanceReviewYearlyPlanResponseDtoType
 } from '@core/types'
 
+// 성능점검시 검토사항 시드 생성 함수들
+
 export function makeResultSummarySeed(resultSummary?: MachinePerformanceReviewSummaryResponseDtoType) {
   return {
     maintenanceGuidelineAdequacy: resultSummary?.maintenanceGuidelineAdequacy || '',
