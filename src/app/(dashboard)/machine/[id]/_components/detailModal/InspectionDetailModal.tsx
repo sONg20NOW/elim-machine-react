@@ -35,10 +35,9 @@ import {
   useMutatePipeMeasurementResponseDto,
   useMutateWindMeasurementResponseDto
 } from '@core/hooks/customTanstackQueries'
-import useCurrentInspectionIdStore from '@/@core/hooks/zustand/useCurrentInspectionIdStore'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import deleteInspection from '../../_utils/deleteInspection'
-import { setOffsetContext } from '../tabs/InspectionListTabContent'
+import { setOffsetContext, useSetInspectionIdContext } from '../tabs/InspectionListTabContent'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 
 const TabInfo: Record<
@@ -74,13 +73,13 @@ const TabInfo: Record<
 type InspectionDetailModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
+  selectedInspectionId: number
 }
 
-const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) => {
+const InspectionDetailModal = ({ open, setOpen, selectedInspectionId }: InspectionDetailModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
-  const inspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
 
-  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, inspectionId.toString())
+  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, selectedInspectionId.toString())
   const { data: inspectionsSimple } = useGetInspectionsSimple(machineProjectId)
 
   return (
@@ -112,8 +111,9 @@ const InspectionDetailModalInner = ({
   const machineProjectId = useParams().id?.toString() as string
 
   const setOffset = useContext(setOffsetContext)
+  const setInspectionId = useSetInspectionIdContext()
 
-  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
+  const currentInspectionId = selectedInspection.machineInspectionResponseDto.id
 
   const { mutate: mutateMachineInspectionResponseDto } = useMutateMachineInspectionResponseDto(
     machineProjectId,
@@ -281,7 +281,7 @@ const InspectionDetailModalInner = ({
               variant='standard'
               value={currentInspectionId}
               onChange={e => {
-                setCurrentInspectionId(Number(e.target.value))
+                setInspectionId(Number(e.target.value))
               }}
               renderValue={value => (
                 <Typography variant='h3'>{inspectionsSimple.find(v => v.id === value)!.name}</Typography>

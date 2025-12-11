@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef, createContext } from 'react'
+import { useState, useCallback, useEffect, useRef, createContext, useContext } from 'react'
 
 // MUI Imports
 import { useParams, useSearchParams } from 'next/navigation'
@@ -29,7 +29,6 @@ import BasicTable from '@/@core/components/elim-table/BasicTable'
 import AddInspectionModal from '../AddInspectionModal'
 import PictureListModal from '../pictureUploadModal/PictureListModal'
 import { useGetInspections, useGetParticipatedEngineerList } from '@core/hooks/customTanstackQueries'
-import useCurrentInspectionIdStore from '@/@core/hooks/zustand/useCurrentInspectionIdStore'
 import { auth } from '@core/utils/auth'
 import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
 import { QUERY_KEYS } from '@/@core/data/queryKeys'
@@ -45,6 +44,16 @@ import BasicTablePagination from '@/@core/components/elim-table/BasicTablePagina
  */
 export const setOffsetContext = createContext<((offset: number | null) => void) | null>(null)
 
+const setInspectionIdContext = createContext<((id: number) => void) | null>(null)
+
+export const useSetInspectionIdContext = () => {
+  const setInspectionId = useContext(setInspectionIdContext)
+
+  if (!setInspectionId) throw new Error('useSetInspectionIdContext is wrong!')
+
+  return setInspectionId
+}
+
 const InspectionListTabContent = () => {
   const queryClient = useQueryClient()
 
@@ -56,7 +65,7 @@ const InspectionListTabContent = () => {
   const [openAdd, setOpenAdd] = useState(false)
   const [openPicList, setOpenPicList] = useState(false)
 
-  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
+  const [inspectionId, setInspectionId] = useState<number>()
 
   // 검색 조건
   const page = Number(searchParams.get('page') ?? 0)
@@ -85,11 +94,11 @@ const InspectionListTabContent = () => {
   // 테이블 행 클릭 시 초기 동작하는 함수
   const handleSelectInspection = useCallback(
     async (machine: MachineInspectionPageResponseDtoType, pictureClick?: boolean) => {
-      setCurrentInspectionId(machine.machineInspectionId)
+      setInspectionId(machine.machineInspectionId)
       if (pictureClick) return
       setOpen(true)
     },
-    [setCurrentInspectionId]
+    []
   )
 
   // params를 변경하는 함수를 입력하면 해당 페이지로 라우팅까지 해주는 함수
@@ -215,172 +224,176 @@ const InspectionListTabContent = () => {
 
   return (
     <setOffsetContext.Provider value={setOffset}>
-      <div className='relative h-full flex flex-col'>
-        {/* 필터바 */}
-        <div>
-          <BasicTableFilter<MachineInspectionFilterType>
-            filterInfo={{
-              engineerName: {
-                label: '점검자',
-                type: 'multi',
-                options: participatedEngineerList?.map(engineer => ({
-                  value: engineer.engineerName,
-                  label: `${engineer.engineerName} (${engineer.gradeDescription})`
-                }))
-              }
-            }}
-            disabled={disabled}
-          />
-          {/* 필터 초기화 버튼 */}
-          <Button
-            startIcon={<IconReload />}
-            onClick={() => {
-              resetQueryParams()
-            }}
-            className='max-sm:is-full absolute right-8 top-8'
-            disabled={disabled}
-          >
-            필터 초기화
-          </Button>
-        </div>
-        {/* 상단 기능 요소들: 페이지 당 행수, 설비분류 검색, 위치 검색, 선택삭제, 추가 */}
-        <div className='flex flex-col justify-between items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <div className='flex gap-2'>
-            {/* 페이지당 행수 */}
-            <CustomTextField
-              size='small'
-              select
-              value={size.toString()}
-              onChange={e => {
-                setQueryParams({ size: Number(e.target.value), page: 0 })
+      <setInspectionIdContext.Provider value={setInspectionId}>
+        <div className='relative h-full flex flex-col'>
+          {/* 필터바 */}
+          <div>
+            <BasicTableFilter<MachineInspectionFilterType>
+              filterInfo={{
+                engineerName: {
+                  label: '점검자',
+                  type: 'multi',
+                  options: participatedEngineerList?.map(engineer => ({
+                    value: engineer.engineerName,
+                    label: `${engineer.engineerName} (${engineer.gradeDescription})`
+                  }))
+                }
               }}
-              className='gap-[5px]'
               disabled={disabled}
-              slotProps={{
-                select: {
-                  renderValue: selectedValue => {
-                    return selectedValue + ' 개씩'
+            />
+            {/* 필터 초기화 버튼 */}
+            <Button
+              startIcon={<IconReload />}
+              onClick={() => {
+                resetQueryParams()
+              }}
+              className='max-sm:is-full absolute right-8 top-8'
+              disabled={disabled}
+            >
+              필터 초기화
+            </Button>
+          </div>
+          {/* 상단 기능 요소들: 페이지 당 행수, 설비분류 검색, 위치 검색, 선택삭제, 추가 */}
+          <div className='flex flex-col justify-between items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+            <div className='flex gap-2'>
+              {/* 페이지당 행수 */}
+              <CustomTextField
+                size='small'
+                select
+                value={size.toString()}
+                onChange={e => {
+                  setQueryParams({ size: Number(e.target.value), page: 0 })
+                }}
+                className='gap-[5px]'
+                disabled={disabled}
+                slotProps={{
+                  select: {
+                    renderValue: selectedValue => {
+                      return selectedValue + ' 개씩'
+                    }
+                  }
+                }}
+              >
+                {PageSizeOptions.map(pageSize => (
+                  <MenuItem key={pageSize} value={pageSize}>
+                    {pageSize}
+                    {`\u00a0\u00a0`}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+              {/* 이름으로 검색 */}
+              <SearchBar
+                key={`machineCategoryName_${machineCategoryName}`} // 필터 초기화 시 새로 렌더링 되도록 키 지정
+                defaultValue={machineCategoryName ?? ''}
+                placeholder='설비분류로 검색'
+                setSearchKeyword={machineCateName => {
+                  setQueryParams({ machineCategoryName: machineCateName, page: 0 })
+                }}
+                disabled={disabled}
+              />
+              {/* 현장명으로 검색 */}
+              <SearchBar
+                key={`location_${location}`}
+                defaultValue={location ?? ''}
+                placeholder='위치로 검색'
+                setSearchKeyword={location => {
+                  setQueryParams({ location: location, page: 0 })
+                }}
+                disabled={disabled}
+              />
+              <Button variant='contained' color='info' disabled={true || isLoading || isError}>
+                점검대상 및 수량
+              </Button>
+            </div>
+
+            <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+              {/* 한번에 삭제 */}
+              {!showCheckBox ? (
+                <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+                  선택삭제
+                </Button>
+              ) : (
+                <div className='flex gap-1'>
+                  <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
+                    {`(${checked.length}) 삭제`}
+                  </Button>
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    onClick={() => {
+                      setShowCheckBox(prev => !prev)
+                      handleCheckAll(false)
+                    }}
+                  >
+                    취소
+                  </Button>
+                </div>
+              )}
+
+              {/* 유저 추가 버튼 */}
+              <Button
+                variant='contained'
+                startIcon={<IconPlus />}
+                onClick={() => setOpenAdd(true)}
+                className='max-sm:is-full'
+                disabled={disabled}
+              >
+                추가
+              </Button>
+            </div>
+          </div>
+
+          {/* 테이블 */}
+          <div className='flex-1 overflow-y-hidden'>
+            <BasicTable<MachineInspectionPageResponseDtoType>
+              listException={['engineerNames']}
+              header={TABLE_HEADER_INFO.machineInspection}
+              data={filteredInspectionList ?? []}
+              handleRowClick={handleSelectInspection}
+              loading={isLoading}
+              error={isError}
+              showCheckBox={showCheckBox}
+              isChecked={isChecked}
+              handleCheckItem={handleCheck}
+              handleCheckAllItems={handleCheckAll}
+              onClickPicCount={async (machine: MachineInspectionPageResponseDtoType) => {
+                await handleSelectInspection(machine, true)
+                setOpenPicList(true)
+              }}
+              rightClickMenuHeader={contextMenu => contextMenu.row.machineInspectionName}
+              rightClickMenu={[
+                {
+                  icon: <IconTrashFilled color='gray' size={20} />,
+                  label: '삭제',
+                  handleClick: async row => {
+                    await deleteInspection(
+                      Number(machineProjectId),
+                      row.machineInspectionId,
+                      row.version,
+                      row.machineInspectionName
+                    )
+                    queryClient.removeQueries({ queryKey: ['GET_INSPECTIONS_SIMPLE', machineProjectId], exact: true })
+                    adjustPage(-1)
+                    removeQueryCaches()
                   }
                 }
-              }}
-            >
-              {PageSizeOptions.map(pageSize => (
-                <MenuItem key={pageSize} value={pageSize}>
-                  {pageSize}
-                  {`\u00a0\u00a0`}
-                </MenuItem>
-              ))}
-            </CustomTextField>
-            {/* 이름으로 검색 */}
-            <SearchBar
-              key={`machineCategoryName_${machineCategoryName}`} // 필터 초기화 시 새로 렌더링 되도록 키 지정
-              defaultValue={machineCategoryName ?? ''}
-              placeholder='설비분류로 검색'
-              setSearchKeyword={machineCateName => {
-                setQueryParams({ machineCategoryName: machineCateName, page: 0 })
-              }}
-              disabled={disabled}
+              ]}
             />
-            {/* 현장명으로 검색 */}
-            <SearchBar
-              key={`location_${location}`}
-              defaultValue={location ?? ''}
-              placeholder='위치로 검색'
-              setSearchKeyword={location => {
-                setQueryParams({ location: location, page: 0 })
-              }}
-              disabled={disabled}
-            />
-            <Button variant='contained' color='info' disabled={true || isLoading || isError}>
-              점검대상 및 수량
-            </Button>
           </div>
 
-          <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
-            {/* 한번에 삭제 */}
-            {!showCheckBox ? (
-              <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-                선택삭제
-              </Button>
-            ) : (
-              <div className='flex gap-1'>
-                <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
-                  {`(${checked.length}) 삭제`}
-                </Button>
-                <Button
-                  variant='contained'
-                  color='secondary'
-                  onClick={() => {
-                    setShowCheckBox(prev => !prev)
-                    handleCheckAll(false)
-                  }}
-                >
-                  취소
-                </Button>
-              </div>
-            )}
+          {/* 페이지네이션 */}
+          <BasicTablePagination totalCount={totalCount} disabled={disabled} />
 
-            {/* 유저 추가 버튼 */}
-            <Button
-              variant='contained'
-              startIcon={<IconPlus />}
-              onClick={() => setOpenAdd(true)}
-              className='max-sm:is-full'
-              disabled={disabled}
-            >
-              추가
-            </Button>
-          </div>
+          {/* 모달 */}
+          {open && inspectionId && (
+            <InspectionDetailModal open={open} setOpen={setOpen} selectedInspectionId={inspectionId} />
+          )}
+          {openAdd && <AddInspectionModal open={openAdd} setOpen={setOpenAdd} />}
+          {openPicList && (
+            <PictureListModal open={openPicList} setOpen={setOpenPicList} defaultPicInspectionId={inspectionId} />
+          )}
         </div>
-
-        {/* 테이블 */}
-        <div className='flex-1 overflow-y-hidden'>
-          <BasicTable<MachineInspectionPageResponseDtoType>
-            listException={['engineerNames']}
-            header={TABLE_HEADER_INFO.machineInspection}
-            data={filteredInspectionList ?? []}
-            handleRowClick={handleSelectInspection}
-            loading={isLoading}
-            error={isError}
-            showCheckBox={showCheckBox}
-            isChecked={isChecked}
-            handleCheckItem={handleCheck}
-            handleCheckAllItems={handleCheckAll}
-            onClickPicCount={async (machine: MachineInspectionPageResponseDtoType) => {
-              await handleSelectInspection(machine, true)
-              setOpenPicList(true)
-            }}
-            rightClickMenuHeader={contextMenu => contextMenu.row.machineInspectionName}
-            rightClickMenu={[
-              {
-                icon: <IconTrashFilled color='gray' size={20} />,
-                label: '삭제',
-                handleClick: async row => {
-                  await deleteInspection(
-                    Number(machineProjectId),
-                    row.machineInspectionId,
-                    row.version,
-                    row.machineInspectionName
-                  )
-                  queryClient.removeQueries({ queryKey: ['GET_INSPECTIONS_SIMPLE', machineProjectId], exact: true })
-                  adjustPage(-1)
-                  removeQueryCaches()
-                }
-              }
-            ]}
-          />
-        </div>
-
-        {/* 페이지네이션 */}
-        <BasicTablePagination totalCount={totalCount} disabled={disabled} />
-
-        {/* 모달 */}
-        {open && currentInspectionId && <InspectionDetailModal open={open} setOpen={setOpen} />}
-        {openAdd && <AddInspectionModal open={openAdd} setOpen={setOpenAdd} />}
-        {openPicList && (
-          <PictureListModal open={openPicList} setOpen={setOpenPicList} defaultPicInspectionId={currentInspectionId} />
-        )}
-      </div>
+      </setInspectionIdContext.Provider>
     </setOffsetContext.Provider>
   )
 }
