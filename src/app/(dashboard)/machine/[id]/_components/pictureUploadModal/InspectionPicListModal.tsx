@@ -45,11 +45,11 @@ import InspectionPicZoomModal from '../pictureZoomModal/InspectionPicZoomModal'
 import { uploadInspectionPictures } from '@core/utils/uploadInspectionPictures'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
-import { isMobileContext } from '@/components/ProtectedPage'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
 import ReloadButton from '../ReloadButton'
 import { setOffsetContext } from '../tabs/InspectionListTabContent'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const DEFAULT_PAGESIZE = 1000
 

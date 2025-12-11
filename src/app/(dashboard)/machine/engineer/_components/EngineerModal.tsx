@@ -23,7 +23,7 @@ import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import { ENGINEER_INPUT_INFO } from '@/@core/data/input/engineerInputInfo'
-import { emailRule, phoneRule } from '@/@core/data/input/inputRule'
+import { emailRule, phoneRule } from '@/@core/data/inputRule'
 
 type EngineerModalProps = {
   open: boolean

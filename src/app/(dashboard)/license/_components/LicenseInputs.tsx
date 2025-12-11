@@ -5,7 +5,7 @@ import type { UseFormReturn } from 'react-hook-form'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import type { LicenseCreateRequestDto } from '@core/types'
 import { LICENSE_INPUT_INFO } from '@/@core/data/input/licenseInputInfo'
-import { emailRule } from '@/@core/data/input/inputRule'
+import { emailRule } from '@/@core/data/inputRule'
 
 export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCreateRequestDto, any, undefined> }) {
   return (

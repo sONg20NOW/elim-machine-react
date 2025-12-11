@@ -35,13 +35,13 @@ import type {
 } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import getS3Key from '@core/utils/getS3Key'
-import { isMobileContext } from '@/components/ProtectedPage'
 import { auth } from '@core/utils/auth'
 import { projectPicOption } from '@/@core/data/options'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface formType {
   originalFileName: string

@@ -9,7 +9,6 @@ import { InputLabel, MenuItem, Select, TextField, Typography } from '@mui/materi
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { isMobileContext } from '@/components/ProtectedPage'
 import type { MachineInspectionResponseDtoType } from '@core/types'
 import type { FormComponentHandle } from '../page'
 
@@ -19,6 +18,7 @@ import { auth } from '@core/utils/auth'
 import { useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
 import { equipmentPhaseOption } from '@/@core/data/options'
 import { printErrorSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 export interface formType {
   machineInspectionName: string

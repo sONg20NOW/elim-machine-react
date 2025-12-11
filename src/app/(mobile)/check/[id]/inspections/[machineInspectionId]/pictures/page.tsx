@@ -26,7 +26,6 @@ import { Controller, useForm } from 'react-hook-form'
 import { IconCamera, IconChevronLeft } from '@tabler/icons-react'
 
 import MobileHeader from '@/app/(mobile)/_components/MobileHeader'
-import { isMobileContext } from '@/components/ProtectedPage'
 import { auth } from '@core/utils/auth'
 import type {
   MachinePicCursorType,
@@ -36,6 +35,7 @@ import type {
 import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
 import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
 import getS3Key from '@core/utils/getS3Key'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const max_pic = 100
 

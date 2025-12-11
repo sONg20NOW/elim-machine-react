@@ -20,8 +20,6 @@ import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import ChecklistForm from './_components/ChecklistForm'
 import InspectionForm from './_components/InspectionForm'
 
-import { isMobileContext } from '@/components/ProtectedPage'
-
 import PictureTable from './_components/PictureTable'
 import ImageUploadPage from './_components/ImageUploadPage'
 import { useGetChecklistInfo, useGetEveryInspections } from '@core/hooks/customTanstackQueries'
@@ -30,6 +28,7 @@ import EmptyCategorySelector from './_components/EmptyCategorySelector'
 import type { CheckTabValueType } from '@core/utils/useCheckTabValueStore'
 import useCheckTabValueStore from '@core/utils/useCheckTabValueStore'
 import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 export interface FormComponentHandle {
   submit: () => Promise<boolean>

@@ -16,11 +16,11 @@ import type {
 } from '@core/types'
 import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@core/utils/auth'
-import { isMobileContext } from '@/components/ProtectedPage'
 import ProjectInfoCard from './_components/ProjectInfoCard'
 import type { projectSummaryType } from '@core/utils/useProjectSummaryStore'
 import useProjectSummaryStore from '@core/utils/useProjectSummaryStore'
 import { printErrorSnackbar, printSuccessSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface ProjectFormType {
   machineProjectName: string | null

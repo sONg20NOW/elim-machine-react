@@ -14,10 +14,10 @@ import type {
 } from '@core/types'
 import { auth } from '@core/utils/auth'
 import AddInspectionModal from '../_components/AddInspectionModal'
-import { isMobileContext } from '@/components/ProtectedPage'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
 import useProjectSummaryStore from '@core/utils/useProjectSummaryStore'
 import { printErrorSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 export interface inspectionSummaryType {
   machineProjectName: string

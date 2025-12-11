@@ -10,6 +10,7 @@ import ThemeProvider from '@components/theme'
 import { getSettingsFromCookie } from '@core/utils/serverHelpers'
 import QueryClientWrapper from './QueryClientWrapper'
 import ClientSnackbarProvider from './ClientSnackbarProvider'
+import { MediaQueriesProvider } from '@/@core/contexts/mediaQueryContext'
 
 type Props = ChildrenType
 
@@ -26,9 +27,11 @@ const Providers = async (props: Props) => {
     <VerticalNavProvider>
       <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
         <ThemeProvider direction={'ltr'} systemMode={systemMode}>
-          <QueryClientWrapper>
-            <ClientSnackbarProvider>{children}</ClientSnackbarProvider>
-          </QueryClientWrapper>
+          <MediaQueriesProvider>
+            <QueryClientWrapper>
+              <ClientSnackbarProvider>{children}</ClientSnackbarProvider>
+            </QueryClientWrapper>
+          </MediaQueriesProvider>
           {/* <AppReactToastify hideProgressBar /> */}
         </ThemeProvider>
       </SettingsProvider>

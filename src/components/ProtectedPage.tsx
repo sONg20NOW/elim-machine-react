@@ -1,20 +1,14 @@
 'use client'
 
-import { createContext, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
-import { Backdrop, Button, CircularProgress, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Backdrop, Button, CircularProgress, Typography } from '@mui/material'
 
 import useAccessTokenStore from '@core/utils/useAuthStore'
 
-export const isTabletContext = createContext<boolean | null>(null)
-export const isMobileContext = createContext<boolean | null>(null)
-
 export default function ProtectedPage({ children }: { children: React.ReactNode }) {
-  const theme = useTheme()
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const router = useRouter()
 
   const [dotCnt, setDotCnt] = useState<0 | 1 | 2 | 3>(0)
@@ -53,9 +47,7 @@ export default function ProtectedPage({ children }: { children: React.ReactNode 
         </div>
       </Backdrop>
 
-      <isTabletContext.Provider value={isTablet}>
-        <isMobileContext.Provider value={isMobile}>{children}</isMobileContext.Provider>
-      </isTabletContext.Provider>
+      {children}
     </>
   )
 }

@@ -29,7 +29,6 @@ import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/@core/data/options'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
 import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
-import { isTabletContext } from '@/components/ProtectedPage'
 import AddUserModal from './_components/AddUserModall'
 import { useGetMembers, useGetSingleMember } from '@core/hooks/customTanstackQueries'
 import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
@@ -38,6 +37,7 @@ import { printErrorSnackbar } from '@core/utils/snackbarHandler'
 import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
 import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
 import BasicTablePagination from '@/@core/components/elim-table/BasicTablePagination'
+import { isTabletContext } from '@/@core/contexts/mediaQueryContext'
 
 export default function MemberPage() {
   const searchParams = useSearchParams()

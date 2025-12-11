@@ -26,10 +26,10 @@ import { auth } from '@core/utils/auth'
 import PictureListModal from '../pictureUploadModal/PictureListModal'
 import { projectPicOption } from '@/@core/data/options'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
-import { isTabletContext } from '@/components/ProtectedPage'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
 import ReloadButton from '../ReloadButton'
+import { isTabletContext } from '@/@core/contexts/mediaQueryContext'
 
 const PictureListTabContent = () => {
   const router = useRouter()

@@ -11,7 +11,7 @@ import { IconPlus } from '@tabler/icons-react'
 import type { MachineInspectionDetailResponseDtoType } from '@core/types'
 import { useGetParticipatedEngineerList } from '@core/hooks/customTanstackQueries'
 import { equipmentPhaseOption } from '@/@core/data/options'
-import { isMobileContext } from '@/components/ProtectedPage'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface basicTabContentProps<T> {
   editData: T

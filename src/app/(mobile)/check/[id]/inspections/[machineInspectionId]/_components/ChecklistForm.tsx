@@ -7,12 +7,12 @@ import { Box, Checkbox, InputLabel, MenuItem, TextField, Typography } from '@mui
 
 import { useForm } from 'react-hook-form'
 
-import { isMobileContext } from '@/components/ProtectedPage'
 import type { MachineInspectionChecklistItemResultResponseDtoType } from '@core/types'
 import type { FormComponentHandle } from '../page'
 import { auth } from '@core/utils/auth'
 import { useGetChecklistInfo, useGetChecklistResult } from '@core/hooks/customTanstackQueries'
 import { printErrorSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface formType {
   deficiencies: string

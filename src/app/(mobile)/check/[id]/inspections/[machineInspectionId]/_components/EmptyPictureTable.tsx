@@ -22,11 +22,11 @@ import type {
   MachinePicPresignedUrlResponseDtoType
 } from '@core/types'
 
-import { isMobileContext } from '@/components/ProtectedPage'
 import { uploadSingleInspectionPic } from '@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import { printErrorSnackbar, printSuccessSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const EmptyPictureTable = memo(
   ({

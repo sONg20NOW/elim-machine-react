@@ -38,12 +38,12 @@ import type {
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import getS3Key from '@core/utils/getS3Key'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@core/hooks/customTanstackQueries'
-import { isMobileContext } from '@/components/ProtectedPage'
 import { auth } from '@core/utils/auth'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 type formType = Omit<MachinePicUpdateRequestDtoType, 'version' | 's3Key'> & { machineProjectChecklistItemId: number }
 

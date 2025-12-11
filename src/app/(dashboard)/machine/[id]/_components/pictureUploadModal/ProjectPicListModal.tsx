@@ -37,7 +37,6 @@ import { saveAs } from 'file-saver'
 
 import type { MachineProjectPicReadResponseDtoType, ProjectPicType } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import { isMobileContext } from '@/components/ProtectedPage'
 import { uploadProjectPictures } from '@core/utils/uploadProjectPictures'
 import { auth } from '@core/utils/auth'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
@@ -46,6 +45,7 @@ import { projectPicOption } from '@/@core/data/options'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
 import ReloadButton from '../ReloadButton'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 type ProjectPicListModalProps = {
   open: boolean

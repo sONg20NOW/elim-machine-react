@@ -29,11 +29,11 @@ import type { MachineProjectPageDtoType, successResponseDtoType } from '@core/ty
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/elim-inputbox/SearchBar'
 import { auth, logout } from '@core/utils/auth'
-import { isMobileContext } from '@/components/ProtectedPage'
 import useCurrentUserStore from '@core/utils/useCurrentUserStore'
 import { useGetEngineerByMemberId } from '@core/hooks/customTanstackQueries'
 import { gradeOption } from '@/@core/data/options'
 import { printErrorSnackbar, printInfoSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 export default function MachinePage() {
   const router = useRouter()

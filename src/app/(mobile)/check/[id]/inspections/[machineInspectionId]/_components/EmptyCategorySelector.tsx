@@ -5,8 +5,8 @@ import { useParams } from 'next/navigation'
 
 import { Box, InputLabel, MenuItem, TextField } from '@mui/material'
 
-import { isMobileContext } from '@/components/ProtectedPage'
 import { useGetChecklistInfo } from '@core/hooks/customTanstackQueries'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface EmptyCategorySelectorProps {
   category: string

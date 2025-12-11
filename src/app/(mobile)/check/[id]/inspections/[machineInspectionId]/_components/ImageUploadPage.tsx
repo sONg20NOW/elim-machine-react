@@ -20,10 +20,10 @@ import {
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { isMobileContext } from '@/components/ProtectedPage'
 import { uploadInspectionPictures } from '@core/utils/uploadInspectionPictures'
 import { useGetChecklistInfo } from '@core/hooks/customTanstackQueries'
 import { printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface checklistFormType {
   checklistSubItemId: number
