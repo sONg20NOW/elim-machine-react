@@ -29,7 +29,7 @@ import type { AxiosRequestConfig } from 'axios'
 
 import { toast } from 'react-toastify'
 
-import { IconLoader2, IconPhotoOff, IconUpload, IconX } from '@tabler/icons-react'
+import { IconLoader2, IconUpload, IconX } from '@tabler/icons-react'
 
 import JSZip from 'jszip'
 
@@ -50,6 +50,7 @@ import PicPreviewCard from '../pictureCard/PicPreviewCard'
 import ReloadButton from '../../../../../../@core/components/elim-button/ReloadButton'
 import { setOffsetContext } from '../tabs/InspectionListTabContent'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
+import NoPhotoBox from './NoPhotoBox'
 
 const DEFAULT_PAGESIZE = 1000
 
@@ -87,7 +88,8 @@ const InspectionPicListModal = ({
   // 사진 리스트
   const [pictures, setPictures] = useState<MachinePicPresignedUrlResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+
+  const [isUploading, setIsUploading] = useState(false)
 
   const [selectedSubItemId, setSelectedSubItemId] = useState<number>(0)
   const [selectedItemId, setSelectedItemId] = useState<number>(clickedPicCate?.machineProjectChecklistItemId ?? 0)
@@ -204,7 +206,7 @@ const InspectionPicListModal = ({
       return
     }
 
-    setIsLoading(true)
+    setIsUploading(true)
 
     if (!selectedItem || !selectedSubItem) {
       toast.error('카테고리를 먼저 설정해주세요.')
@@ -233,7 +235,7 @@ const InspectionPicListModal = ({
       toast.error('사진 업로드에 문제가 발생했습니다.')
     }
 
-    setIsLoading(false)
+    setIsUploading(false)
   }
 
   const removePreviewFile = (index: number) => {
@@ -258,7 +260,7 @@ const InspectionPicListModal = ({
 
   const handleDeletePics = useCallback(async () => {
     try {
-      setIsLoading(true)
+      setIsUploading(true)
 
       await auth.delete(`/api/machine-projects/${machineProjectId}/machine-pics`, {
         data: { machinePicDeleteRequestDtos: checkedPics }
@@ -278,13 +280,13 @@ const InspectionPicListModal = ({
     } catch (error) {
       handleApiError(error)
     } finally {
-      setIsLoading(false)
+      setIsUploading(false)
     }
   }, [machineProjectId, checkedPics, refetchSelectedInspection])
 
   const handleDownloadPics = useCallback(async () => {
     try {
-      setIsLoading(true)
+      setIsUploading(true)
 
       const zip = new JSZip()
 
@@ -320,7 +322,7 @@ const InspectionPicListModal = ({
     } catch (e) {
       handleApiError(e)
     } finally {
-      setIsLoading(false)
+      setIsUploading(false)
     }
   }, [
     checkedPics,
@@ -621,18 +623,7 @@ const InspectionPicListModal = ({
                     )
                   })
                 ) : (
-                  <Box
-                    sx={{
-                      textAlign: 'center',
-                      py: 4,
-                      border: '2px dashed #e0e0e0',
-                      borderRadius: 1,
-                      color: 'text.secondary'
-                    }}
-                  >
-                    <IconPhotoOff size={50} />
-                    <Typography>등록된 검사 사진이 없습니다</Typography>
-                  </Box>
+                  <NoPhotoBox isLoading={isLoadingRef.current} />
                 )
               ) : selectedSubItemId === 0 ? ( //하위항목: 전체의 경우
                 selectedItem?.totalMachinePicCount !== 0 ? (
@@ -676,18 +667,7 @@ const InspectionPicListModal = ({
                     )
                   })
                 ) : (
-                  <Box
-                    sx={{
-                      textAlign: 'center',
-                      py: 4,
-                      border: '2px dashed #e0e0e0',
-                      borderRadius: 1,
-                      color: 'text.secondary'
-                    }}
-                  >
-                    <IconPhotoOff size={50} />
-                    <Typography>등록된 검사 사진이 없습니다</Typography>
-                  </Box>
+                  <NoPhotoBox isLoading={isLoadingRef.current} />
                 )
               ) : filteredPics && filteredPics.length > 0 ? ( //하위항목이 정해진 경우
                 //해당 하위항목의 사진이 존재하는 경우
@@ -703,18 +683,7 @@ const InspectionPicListModal = ({
                   ))}
                 </ImageList>
               ) : (
-                <Box //해당 하위 항목의 사진 개수가 0인 경우
-                  sx={{
-                    textAlign: 'center',
-                    py: 4,
-                    border: '2px dashed #e0e0e0',
-                    borderRadius: 1,
-                    color: 'text.secondary'
-                  }}
-                >
-                  <IconPhotoOff size={50} />
-                  <Typography>등록된 검사 사진이 없습니다.</Typography>
-                </Box>
+                <NoPhotoBox isLoading={isLoadingRef.current} />
               )}
             </div>
           </Grid>
@@ -773,10 +742,10 @@ const InspectionPicListModal = ({
                   variant='contained'
                   color='success'
                   onClick={handleFileUpload}
-                  disabled={filesToUpload.length === 0 || isLoading}
-                  startIcon={isLoading ? <IconLoader2 className='animate-spin' /> : <IconUpload />}
+                  disabled={filesToUpload.length === 0 || isUploading}
+                  startIcon={isUploading ? <IconLoader2 className='animate-spin' /> : <IconUpload />}
                 >
-                  {isLoading ? '업로드 중...' : '사진 업로드'}
+                  {isUploading ? '업로드 중...' : '사진 업로드'}
                 </Button>
 
                 <Button
@@ -806,7 +775,7 @@ const InspectionPicListModal = ({
             setPictures={setPictures}
           />
         )}
-        <Backdrop open={isLoading}>
+        <Backdrop open={isUploading || isLoadingRef.current}>
           <div className='flex flex-col gap-5 items-center'>
             <CircularProgress size={70} sx={{ color: 'white' }} />
           </div>

@@ -29,7 +29,7 @@ import type { AxiosRequestConfig } from 'axios'
 
 import { toast } from 'react-toastify'
 
-import { IconLoader2, IconPhotoOff, IconUpload, IconX } from '@tabler/icons-react'
+import { IconLoader2, IconUpload, IconX } from '@tabler/icons-react'
 
 import JSZip from 'jszip'
 
@@ -46,6 +46,7 @@ import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
 import ReloadButton from '../../../../../../@core/components/elim-button/ReloadButton'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
+import NoPhotoBox from './NoPhotoBox'
 
 type ProjectPicListModalProps = {
   open: boolean
@@ -54,14 +55,15 @@ type ProjectPicListModalProps = {
 }
 
 const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicListModalProps) => {
-  const machineProjectId = useParams().id?.toString() as string
+  const machineProjectId = useParams().id?.toString() ?? ''
 
   const { data: projectData } = useGetMachineProject(machineProjectId)
+  const { data: inspections } = useGetInspectionsSimple(machineProjectId)
 
   // 사진 리스트
   const [pictures, setPictures] = useState<MachineProjectPicReadResponseDtoType[]>([])
   const [filesToUpload, setFilesToUpload] = useState<File[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   // 프로젝트 사진 관련
   const [selectedPicType, setSelectedPicType] = useState<machineProjectPicTypeType | '전체'>('전체')
@@ -71,8 +73,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
 
   const [selectAll, setSelectAll] = useState(true)
 
-  // 무한스크롤 관련 Ref들
-  const isLoadingRef = useRef(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   // 사진 클릭 기능 구현을 위한 상태
   const [selectedPicId, setSelectedPicId] = useState<number>()
@@ -84,8 +85,6 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     selectedPicType !== '전체' ? selectedPicType === pic.machineProjectPicType : true
   )
 
-  const { data: inspections } = useGetInspectionsSimple(machineProjectId)
-
   // 반응형을 위한 미디어쿼리
   const isMobile = useContext(isMobileContext)
 
@@ -95,9 +94,11 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
 
   // 사진을 가져오는 함수. (무한 스크롤 X)
   const getPictures = useCallback(async () => {
-    isLoadingRef.current = true
+    if (machineProjectId === '') return
 
     try {
+      setIsLoading(true)
+
       const response = await auth
         .get<{
           data: {
@@ -112,7 +113,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     } catch (err) {
       handleApiError(err)
     } finally {
-      isLoadingRef.current = false
+      setIsLoading(false)
     }
   }, [machineProjectId])
 
@@ -133,7 +134,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
       return
     }
 
-    setIsLoading(true)
+    setIsUploading(true)
 
     const result = await uploadProjectPictures(machineProjectId, filesToUpload, selectedPicType)
 
@@ -144,7 +145,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
       getPictures()
     }
 
-    setIsLoading(false)
+    setIsUploading(false)
   }
 
   const removePreviewFile = (index: number) => {
@@ -199,7 +200,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
 
   const handleDeletePics = useCallback(async () => {
     try {
-      setIsLoading(true)
+      setIsUploading(true)
 
       await auth.delete(`/api/machine-projects/${machineProjectId}/machine-project-pics`, {
         data: { machineProjectPicDeleteRequestDtos: checkedPics }
@@ -215,13 +216,13 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     } catch (error) {
       handleApiError(error)
     } finally {
-      setIsLoading(false)
+      setIsUploading(false)
     }
   }, [machineProjectId, checkedPics, getPictures])
 
   const handleDownloadPics = useCallback(async () => {
     try {
-      setIsLoading(true)
+      setIsUploading(true)
 
       const zip = new JSZip()
 
@@ -253,7 +254,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
     } catch (e) {
       handleApiError(e)
     } finally {
-      setIsLoading(false)
+      setIsUploading(false)
     }
   }, [checkedPics, selectedPicType, projectData?.machineProjectName])
 
@@ -455,18 +456,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 })
               )
             ) : (
-              <Box
-                sx={{
-                  textAlign: 'center',
-                  py: 4,
-                  border: '2px dashed #e0e0e0',
-                  borderRadius: 1,
-                  color: 'text.secondary'
-                }}
-              >
-                <IconPhotoOff size={50} />
-                <Typography>등록된 검사 사진이 없습니다.</Typography>
-              </Box>
+              <NoPhotoBox isLoading={isLoading} />
             )}
           </div>
         </Grid>
@@ -526,10 +516,10 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
                 variant='contained'
                 color='success'
                 onClick={handleFileUpload}
-                disabled={filesToUpload.length === 0 || isLoading}
-                startIcon={isLoading ? <IconLoader2 className='animate-spin' /> : <IconUpload />}
+                disabled={filesToUpload.length === 0 || isUploading}
+                startIcon={isUploading ? <IconLoader2 className='animate-spin' /> : <IconUpload />}
               >
-                {isLoading ? '업로드 중...' : '사진 업로드'}
+                {isUploading ? '업로드 중...' : '사진 업로드'}
               </Button>
 
               <Button
@@ -560,7 +550,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
           setPictures={setPictures}
         />
       )}
-      <Backdrop open={isLoading}>
+      <Backdrop open={isUploading || isLoading}>
         <div className='flex flex-col gap-5 items-center'>
           <CircularProgress size={70} sx={{ color: 'white' }} />
         </div>

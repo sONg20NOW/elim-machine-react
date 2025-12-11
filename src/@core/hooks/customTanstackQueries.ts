@@ -156,6 +156,7 @@ export const useMutateLicense = (licenseId: string) => {
 // GET /api/machine-projects/${machineProjectId}/machine-inspections/simple : 설비 목록 조회 (SIMPLE)
 export const useGetInspectionsSimple = (machineProjectId: string) => {
   return useQuery({
+    enabled: machineProjectId !== '',
     queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS_SIMPLE(machineProjectId),
     queryFn: async data => {
       const [keytype, machineProjectId] = data.queryKey
@@ -866,6 +867,7 @@ export const useGetMachineProject = (machineProjectId: string) => {
   )
 
   return useQuery({
+    enabled: machineProjectId !== '',
     queryKey: QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECT(machineProjectId),
     queryFn: fetchMachineProjectData,
     staleTime: 1000 * 60 * 5 // 5분
