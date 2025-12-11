@@ -7,14 +7,14 @@ import {
 } from '@/@core/data/options'
 import type {
   InputFieldType,
-  machineInputType,
+  machineInputInfoType,
   MachineProjectCreateRequestDtoType,
-  machineProjectEngineerInputType,
-  machineScheduleInputType
+  machineProjectEngineerInputInfoType,
+  machineScheduleInputInfoType
 } from '../../types'
 
 // 기계설비현장 상세페이지
-export const MACHINE_INPUT_INFO: machineInputType = {
+export const MACHINE_INPUT_INFO: machineInputInfoType = {
   institutionName: { type: 'text', label: '기관명' },
   machineProjectName: { type: 'text', label: '현장명' },
   roadAddress: { type: 'map', label: '주소' },
@@ -59,7 +59,7 @@ export const MACHINE_INPUT_INFO: machineInputType = {
 }
 
 // 점검일정 / 참여기술진 탭 테이블 수정에 사용.
-export const MACHINE_SCHEDULE_INPUT_INFO: machineScheduleInputType = {
+export const MACHINE_SCHEDULE_INPUT_INFO: machineScheduleInputInfoType = {
   fieldBeginDate: {
     type: 'date',
     label: '현장점검시작'
@@ -129,7 +129,7 @@ export const MACHINE_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoTyp
 }
 
 // 점검일정/참여기술진 - 참여기술진 수정
-export const MACHINE_PROJECT_ENGINEER_INPUT_INFO: machineProjectEngineerInputType = {
+export const MACHINE_PROJECT_ENGINEER_INPUT_INFO: machineProjectEngineerInputInfoType = {
   engineerName: { type: 'text', label: '이름' },
   grade: {
     type: 'multi',

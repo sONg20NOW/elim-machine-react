@@ -1,7 +1,7 @@
 import { gradeOption } from '@/@core/data/options'
-import type { engineerInputType } from '@core/types'
+import type { engineerInputInfoType } from '@core/types'
 
-export const ENGINEER_INPUT_INFO: engineerInputType = {
+export const ENGINEER_INPUT_INFO: engineerInputInfoType = {
   name: { type: 'text', label: '이름' },
   email: { type: 'text', label: '이메일' },
   phoneNumber: { type: 'text', label: '번호' },

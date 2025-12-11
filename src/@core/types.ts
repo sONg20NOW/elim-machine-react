@@ -23,43 +23,56 @@ export type ChildrenType = {
 
 export type ThemeColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'
 
-/**
- * @type T
- * 탭 카테고리 타입 (ex. 'basic' | 'privacy' | ...)
- * @type K
- * 상세 정보 타입 (ex. {memberBasicResponseDto: ...})
- */
-export type InputInfoType<T extends string, K> = Record<T, Partial<Record<AllSubKeys<K>, InputFieldType>>>
-
-type AllSubKeys<T> = {
-  [K in keyof T]: keyof T[K]
-}[keyof T]
-
-export type TabType = {
-  member: 'basic' | 'privacy' | 'office' | 'career' | 'etc'
-  machine: 'project' | 'schedule'
+/* -------------------------- BasicTableHeader Type -------------------------- */
+// tabler header column별 정보
+export interface HeaderInfoType {
+  label: string
+  canSort: boolean
+  hideOnTablet: boolean
 }
 
+// table header 정보
+export type HeaderType<T> = Record<keyof T, HeaderInfoType>
+
+/* -------------------------- InputInfo Type -------------------------- */
+export type InputFieldType = {
+  size?: BoxSizeType
+  type: InputType
+  label: string
+  options?: Array<{ value: string; label: string }>
+  disabled?: boolean
+}
+
+export type BoxSizeType = 'sm' | 'md' | 'lg'
+export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text' | 'juminNum' | 'map'
+
+type InputInfoType<T> = Partial<Record<keyof T, InputFieldType>>
+
 // member 인풋 정보 형식
-export type memberInputType = InputInfoType<TabType['member'], MemberDetailResponseDtoType>
+export type memberInputType = {
+  basic: InputInfoType<MemberBasicDtoType>
+  privacy: InputInfoType<MemberPrivacyDtoType>
+  office: InputInfoType<MemberOfficeDtoType>
+  career: InputInfoType<MemberCareerDtoType>
+  etc: InputInfoType<MemberEtcDtoType>
+}
 
 // machine-projects/[id] 인풋 정보 형식
-export type machineInputType = Partial<Record<keyof MachineProjectResponseDtoType, InputFieldType>>
+export type machineInputInfoType = InputInfoType<MachineProjectResponseDtoType>
 
 // machine-projects/[id]/schedule_tab 인풋 정보 형식
-export type machineScheduleInputType = Partial<
-  Record<keyof MachineProjectScheduleAndEngineerResponseDtoType, InputFieldType>
->
+export type machineScheduleInputInfoType = InputInfoType<MachineProjectScheduleAndEngineerResponseDtoType>
 
 // machine-projects/[id]/machine-project-engineers 인풋 정보 형식
-export type machineProjectEngineerInputType = Partial<Record<keyof machineProjectEngineerDetailDtoType, InputFieldType>>
+export type machineProjectEngineerInputInfoType = InputInfoType<machineProjectEngineerDetailDtoType>
 
 // engineers/[id] 인풋 정보 형식
-export type engineerInputType = Partial<Record<keyof EngineerResponseDtoType, InputFieldType>>
+export type engineerInputInfoType = InputInfoType<EngineerResponseDtoType>
 
 // licenses/[id] 인풋 정보 형식
-export type licenseInputType = Partial<Record<keyof LicenseResponseDtoType, InputFieldType>>
+export type licenseInputInfoType = InputInfoType<LicenseResponseDtoType>
 
+/* -------------------------- Dto Type -------------------------- */
 // -------- 캘린더 ----------
 export interface CalendarEventResponseDtoType {
   id: number
@@ -108,8 +121,6 @@ export type MemberDetailResponseDtoType = {
   memberPrivacyResponseDto: MemberPrivacyDtoType
 }
 
-export type memberStatusType = 'NORMAL' | 'QUIT' | 'PENDING' | 'LEAVE'
-
 export interface MemberBasicDtoType {
   memberId: number
   version: number
@@ -142,31 +153,6 @@ export interface MemberPrivacyDtoType {
   bankName: string
   bankNumber: string
 }
-
-export type officePositionType =
-  | 'TEMPORARY'
-  | 'INTERN'
-  | 'STAFF'
-  | 'JUNIOR_STAFF'
-  | 'ASSISTANT_MANAGER'
-  | 'SENIOR_ASSISTANT_MANAGER'
-  | 'RESPONSIBLE'
-  | 'TEAM_LEADER'
-  | 'SECTION_CHIEF'
-  | 'DEPUTY_GENERAL_MANAGER'
-  | 'MANAGER'
-  | 'SENIOR_MANAGER'
-  | 'DEPUTY_MANAGER'
-  | 'DIRECTOR'
-  | 'EXECUTIVE_DIRECTOR'
-  | 'SENIOR_EXECUTIVE_DIRECTOR'
-  | 'ADVISOR'
-  | 'VICE_PRESIDENT'
-  | 'PRESIDENT'
-
-export type contractTypeType = 'REGULAR' | 'CONTRACT_1Y' | 'CONTRACT_2Y' | 'NON_REGULAR' | 'DAILY' | 'TEMPORARY'
-export type laborFormType = 'RESIDENT' | 'NON_RESIDENT'
-export type workFormType = 'DEEMED' | 'SPECIAL'
 
 export interface MemberOfficeDtoType {
   memberId: number
@@ -327,8 +313,6 @@ export type MachineProjectScheduleAndEngineerResponseDtoType = {
   engineers: machineProjectEngineerDetailDtoType[]
 }
 
-export type gradeType = 'ASSIST' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
-
 // 엔지니어 정보
 export interface machineProjectEngineerDetailDtoType {
   engineerId: number
@@ -357,8 +341,6 @@ export interface MachineProjectEngineerUpdateRequestDtoType {
 }
 
 // ----------- Engineer 관련 API -----------
-export type engineerTypeType = 'MACHINE' | 'SAFETY'
-
 // api/engineers/options
 export interface MachineEngineerOptionListResponseDtoType {
   engineers: MachineEngineerOptionResponseDtoType[]
@@ -453,12 +435,7 @@ export interface MachineInspectionPageResponseDtoType {
 
 // GET api/machine-projects/{machineProjectId}/machine-inspections/{machineInspectionId}: 점검 설비 상세 응답 DTO
 export interface MachineInspectionDetailResponseDtoType {
-  checklistExtensionType:
-    | 'NONE'
-    | 'GAS_MEASUREMENT'
-    | 'WIND_MEASUREMENT'
-    | 'WIND_MEASUREMENT_SA_RA'
-    | 'PIPE_MEASUREMENT'
+  checklistExtensionType: checklistExtensionTypeType
   machineInspectionResponseDto: MachineInspectionResponseDtoType
   engineerIds: number[]
   machineChecklistItemsWithPicCountResponseDtos: MachineChecklistItemsWithPicCountResponseDtosType[]
@@ -466,8 +443,6 @@ export interface MachineInspectionDetailResponseDtoType {
   pipeMeasurementResponseDtos: PipeMeasurementResponseDtoType[]
   windMeasurementResponseDtos: WindMeasurementResponseDtoType[]
 }
-
-export type equipmentPhaseType = 'INSTALL' | 'MANUFACTURE' | 'USE'
 
 // 점검 설비 기본 정보 응답 DTO
 export interface MachineInspectionResponseDtoType {
@@ -634,8 +609,6 @@ export interface MachineEnergyUsageReadResponseDtoType {
   monthlyValues: string
 }
 
-type reportStatusType = 'PENDING' | 'COMPLETED' | 'FAILED'
-
 // GET /api/machine-projects/{machineProjectId}/machine-reports/status 보고서 상태 다건 조회
 export interface MachineReportStatusResponseDtoType {
   machineReportCategoryId: number
@@ -670,12 +643,11 @@ export interface MachineReportCategoryReadResponseDtoType {
 }
 
 // 점검의견서 조회 응답 DTO
-
 export interface machineInspectionSummaryResponseDtoType {
   machineInspectionSummaryResponseDto: {
     summaryElements: {
       machineTopCategoryName: string
-      inspectionResult: 'PASS' | 'FAIL' | 'NONE'
+      inspectionResult: inspectionResultType
       actionRequired: Record<string, string>
     }[]
   }
@@ -710,8 +682,6 @@ export interface machinePicCreateRequestDtoType {
   originalFileName: string
   s3Key: string
 }
-
-type uploadTypeType = 'INSPECTION_IMAGE' | 'PROJECT_IMAGE'
 
 export interface MachineInspectionPicUploadPresignedUrlBatchRequestDtoType {
   uploadType: uploadTypeType
@@ -752,16 +722,12 @@ export type MachinePicUpdateRequestDtoType = Omit<
 >
 
 // ----------- machineProject Pic 관련 -------------
-export type ProjectPicType = 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
-
-// GET /api/machine-projects/{machineProjectId}/machine-project-pics/overview
 // GET /api/machine-projects/{machineProjectId}/machine-project-pics
-
 export interface MachineProjectPicReadResponseDtoType {
   id: number
   version: number
   originalFileName: string
-  machineProjectPicType: ProjectPicType
+  machineProjectPicType: machineProjectPicTypeType
   presignedUrl: string
   downloadPresignedUrl: string
   remark: string
@@ -772,7 +738,7 @@ export interface MachineProjectPicUpdateRequestDtoType {
   version: number
   originalFileName: string
   downloadPresignedUrl: string
-  machineProjectPicType: ProjectPicType
+  machineProjectPicType: machineProjectPicTypeType
   remark: string
 }
 
@@ -856,9 +822,6 @@ export interface MachinePerformanceReviewSummaryResponseDtoType {
   energyUsageByType: string
   energyEfficiencyOperationMethod: string
 }
-
-export type planYearType = 'INSPECTION' | 'REPLACEMENT' | 'REPAIR' | 'INSTALLATION' | 'NONE'
-export type resultType = 'PASS' | 'FAIL' | 'NONE'
 
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/yearly-plan 연도별 계획
 export interface MachinePerformanceReviewYearlyPlanResponseDtoType {
@@ -1095,8 +1058,6 @@ export interface MachinePerformanceReviewOperationStatusResponseDtoType {
   opinion: string
 }
 
-export type matchResultType = 'MATCH' | 'MISMATCH' | 'NONE'
-
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/measurement 측정값 일치
 export interface MachinePerformanceReviewMeasurementResponseDtoType {
   refrigeratorResult: matchResultType
@@ -1232,8 +1193,6 @@ export interface MachinePerformanceReviewImprovementResponseDtoType {
   note: string
 }
 
-export type ynResultType = 'Y' | 'N'
-
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/guide 검토가이드
 export interface MachinePerformanceReviewGuideResponseDtoType {
   builtDrawingYn: ynResultType
@@ -1256,7 +1215,6 @@ export interface MachinePerformanceReviewAgingItemResponseDtoType {
   remark: string
 }
 
-export type agingStandardType = 'KOREA_REAL_ESTATE_BOARD' | 'PUBLIC_PROCUREMENT_SERVICE'
 export interface MachinePerformanceReviewAgingReadResponseDtoType {
   agingEquipments: MachinePerformanceReviewAgingItemResponseDtoType[]
   agingStandard: agingStandardType
@@ -1270,7 +1228,6 @@ export interface MachinePerformanceReviewAgingUpdateResponseDtoType {
 
 // ----------- 모바일 -----------
 // GET /api/engineers/by-member/{memberId}
-
 export interface EngineerBasicResponseDtoType {
   engineerId: number
   companyName: string
@@ -1313,24 +1270,60 @@ export interface PageInfoDtoType {
   totalPages: number
 }
 
-// 인풋 형식
-export type InputFieldType = {
-  size?: BoxSizeType
-  type: InputType
-  label: string
-  options?: Array<{ value: string; label: string }>
-  disabled?: boolean
-}
+/* -------------------------- ENUM Type -------------------------- */
+export type agingStandardType = 'KOREA_REAL_ESTATE_BOARD' | 'PUBLIC_PROCUREMENT_SERVICE'
 
-// 테이블 헤더
-export interface HeaderInfoType {
-  label: string
-  canSort: boolean
-  hideOnTablet: boolean
-}
+export type ynResultType = 'Y' | 'N'
 
-export type HeaderType<T> = Record<keyof T, HeaderInfoType>
+export type matchResultType = 'MATCH' | 'MISMATCH' | 'NONE'
 
-// 모달 Box 사이징, 입력 타입
-export type BoxSizeType = 'sm' | 'md' | 'lg'
-export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text' | 'juminNum' | 'map'
+export type inspectionResultType = 'PASS' | 'FAIL' | 'NONE'
+
+export type planYearType = 'INSPECTION' | 'REPLACEMENT' | 'REPAIR' | 'INSTALLATION' | 'NONE'
+export type resultType = 'PASS' | 'FAIL' | 'NONE'
+
+export type machineProjectPicTypeType = 'OVERVIEW' | 'LOCATION_MAP' | 'ETC'
+
+export type uploadTypeType = 'INSPECTION_IMAGE' | 'PROJECT_IMAGE'
+
+export type equipmentPhaseType = 'INSTALL' | 'MANUFACTURE' | 'USE'
+
+export type officePositionType =
+  | 'TEMPORARY'
+  | 'INTERN'
+  | 'STAFF'
+  | 'JUNIOR_STAFF'
+  | 'ASSISTANT_MANAGER'
+  | 'SENIOR_ASSISTANT_MANAGER'
+  | 'RESPONSIBLE'
+  | 'TEAM_LEADER'
+  | 'SECTION_CHIEF'
+  | 'DEPUTY_GENERAL_MANAGER'
+  | 'MANAGER'
+  | 'SENIOR_MANAGER'
+  | 'DEPUTY_MANAGER'
+  | 'DIRECTOR'
+  | 'EXECUTIVE_DIRECTOR'
+  | 'SENIOR_EXECUTIVE_DIRECTOR'
+  | 'ADVISOR'
+  | 'VICE_PRESIDENT'
+  | 'PRESIDENT'
+
+export type contractTypeType = 'REGULAR' | 'CONTRACT_1Y' | 'CONTRACT_2Y' | 'NON_REGULAR' | 'DAILY' | 'TEMPORARY'
+export type laborFormType = 'RESIDENT' | 'NON_RESIDENT'
+export type workFormType = 'DEEMED' | 'SPECIAL'
+
+export type checklistExtensionTypeType =
+  | 'NONE'
+  | 'GAS_MEASUREMENT'
+  | 'WIND_MEASUREMENT'
+  | 'WIND_MEASUREMENT_SA_RA'
+  | 'PIPE_MEASUREMENT'
+
+export type engineerTypeType = 'MACHINE' | 'SAFETY'
+
+export type gradeType = 'ASSIST' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
+
+export type memberStatusType = 'NORMAL' | 'QUIT' | 'PENDING' | 'LEAVE'
+
+export type reportStatusType = 'PENDING' | 'COMPLETED' | 'FAILED'

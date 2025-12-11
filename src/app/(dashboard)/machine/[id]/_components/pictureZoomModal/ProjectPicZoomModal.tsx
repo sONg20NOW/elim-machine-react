@@ -31,7 +31,7 @@ import { createPortal } from 'react-dom'
 import type {
   MachineProjectPicReadResponseDtoType,
   MachineProjectPicUpdateRequestDtoType,
-  ProjectPicType
+  machineProjectPicTypeType
 } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import getS3Key from '@core/utils/getS3Key'
@@ -45,7 +45,7 @@ import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 interface formType {
   originalFileName: string
-  machineProjectPicType: ProjectPicType
+  machineProjectPicType: machineProjectPicTypeType
   remark: string
 }
 

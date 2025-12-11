@@ -35,7 +35,7 @@ import JSZip from 'jszip'
 
 import { saveAs } from 'file-saver'
 
-import type { MachineProjectPicReadResponseDtoType, ProjectPicType } from '@core/types'
+import type { MachineProjectPicReadResponseDtoType, machineProjectPicTypeType } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { uploadProjectPictures } from '@core/utils/uploadProjectPictures'
 import { auth } from '@core/utils/auth'
@@ -64,7 +64,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
   const [isLoading, setIsLoading] = useState(false)
 
   // 프로젝트 사진 관련
-  const [selectedPicType, setSelectedPicType] = useState<ProjectPicType | '전체'>('전체')
+  const [selectedPicType, setSelectedPicType] = useState<machineProjectPicTypeType | '전체'>('전체')
 
   const [checkedPics, setCheckedPics] = useState<MachineProjectPicReadResponseDtoType[]>([])
   const [showCheck, setShowCheck] = useState(false)
@@ -319,7 +319,7 @@ const ProjectPicListModal = ({ open, setOpen, ToggleProjectPic }: ProjectPicList
             select
             value={selectedPicType}
             onChange={e => {
-              const value = e.target.value as ProjectPicType | '전체'
+              const value = e.target.value as machineProjectPicTypeType | '전체'
 
               setSelectedPicType(value)
               setSelectAll(true)

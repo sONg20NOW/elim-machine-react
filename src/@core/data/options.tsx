@@ -6,7 +6,7 @@ import type {
   gradeType,
   laborFormType,
   officePositionType,
-  ProjectPicType,
+  machineProjectPicTypeType,
   workFormType
 } from '@core/types'
 
@@ -200,7 +200,7 @@ export const workStatusOption = [
 ]
 
 // machine project pic (현장사진)
-export const projectPicOption: { label: string; value: ProjectPicType }[] = [
+export const projectPicOption: { label: string; value: machineProjectPicTypeType }[] = [
   { label: '전경사진', value: 'OVERVIEW' },
   { label: '위치도', value: 'LOCATION_MAP' },
   { label: '기타', value: 'ETC' }

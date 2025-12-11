@@ -1,6 +1,6 @@
-import type { licenseInputType } from '@core/types'
+import type { licenseInputInfoType } from '@core/types'
 
-export const LICENSE_INPUT_INFO: licenseInputType = {
+export const LICENSE_INPUT_INFO: licenseInputInfoType = {
   companyName: { type: 'text', label: '업체명' },
   companyNameAbbr: { type: 'text', label: '영문약어' },
   bizno: { type: 'text', label: '사업자번호' },
