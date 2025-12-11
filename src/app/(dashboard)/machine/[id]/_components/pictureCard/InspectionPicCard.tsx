@@ -80,20 +80,26 @@ export default function InspectionPicCard({
       </Paper>
       <div className='flex flex-col items-center py-1'>
         <Typography
+          align='center'
           {...(handleClickItemName && { component: Button, sx: { p: 0 }, onClick: handleClickItemName })}
           className='text-green-600'
         >
           {pic.machineProjectChecklistItemName}
         </Typography>
         <Typography
+          align='center'
           {...(handleClickSubItemName && { component: Button, sx: { p: 0 }, onClick: handleClickSubItemName })}
           className='text-gray-700'
           style={pic.alternativeSubTitle ? { textDecoration: 'line-through', opacity: '60%' } : {}}
         >
           {pic.machineProjectChecklistSubItemName}
         </Typography>
-        <Typography className='text-blue-500'>{pic.alternativeSubTitle}</Typography>
-        <Typography className='text-red-500'>{pic.measuredValue}</Typography>
+        <Typography align='center' className='text-blue-500'>
+          {pic.alternativeSubTitle}
+        </Typography>
+        <Typography align='center' className='text-red-500'>
+          {pic.measuredValue}
+        </Typography>
       </div>
     </div>
   )
