@@ -29,6 +29,10 @@ import type { MachineReportCategoryReadResponseDtoType, MachineReportStatusRespo
 import ReloadButton from '../ReloadButton'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
+/**
+ * 보고서 다운로드 모달
+ * @returns
+ */
 export default function DownloadReportModal() {
   const machineProjectName = useContext(MacinheProjectNameContext)
   const [open, setOpen] = useState(false)

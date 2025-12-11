@@ -45,6 +45,10 @@ interface formType {
   performanceInspectionReportResult: string
 }
 
+/**
+ * 점검의견서 모달
+ * @returns
+ */
 export default function ChecklistResultSummaryModal() {
   const machineProjectName = useContext(MacinheProjectNameContext)
   const { id } = useParams()

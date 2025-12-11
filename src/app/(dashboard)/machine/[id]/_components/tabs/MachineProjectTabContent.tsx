@@ -9,7 +9,7 @@ import { InputBox } from '@/@core/components/elim-inputbox/InputBox'
 import { MACHINE_INPUT_INFO } from '@/@core/data/input/machineInputInfo'
 import type { MachineProjectResponseDtoType } from '@core/types'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
-import EnergyReport from '../report/EnergyReportModal'
+import EnergyReportModal from '../report/EnergyReportModal'
 import DownloadReportModal from '../report/DownloadReportModal'
 import ChecklistResultSummaryModal from '../report/ChecklistResultSummaryModal'
 import { useGetMachineProject } from '@core/hooks/customTanstackQueries'
@@ -108,7 +108,7 @@ const BasicTabContent = () => {
               <ChecklistResultSummaryModal />
               <MachinePerformanceReviewModal />
 
-              <EnergyReport />
+              <EnergyReportModal />
               <DownloadReportModal />
             </div>
             <Button

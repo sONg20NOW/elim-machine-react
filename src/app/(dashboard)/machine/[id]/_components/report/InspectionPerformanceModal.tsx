@@ -28,6 +28,10 @@ import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'
 import ReloadButton from '../ReloadButton'
 
+/**
+ * 보고서 다운로드 - 설비별 성능점검표 보고서 모달
+ * @returns
+ */
 export default function InspectionPerformanceModal() {
   const [open, setOpen] = useState(false)
 

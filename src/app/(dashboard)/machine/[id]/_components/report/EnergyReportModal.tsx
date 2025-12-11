@@ -24,7 +24,7 @@ import { IconCaretLeftFilled, IconCaretRightFilled, IconX } from '@tabler/icons-
 import styles from '@core/styles/customTable.module.css'
 
 import { useGetEnergyTargets, useGetEnergyTypes, useGetEnergyUsages } from '@core/hooks/customTanstackQueries'
-import AddTargetModal from './AddTargetModal'
+import AddTargetModal from './energyReport/AddTargetModal'
 import { auth } from '@core/utils/auth'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
@@ -40,7 +40,11 @@ const defaultMonths = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', 
 
 const minHeight = '60dvh'
 
-export default function EnergyReport() {
+/**
+ * 에너지 사용량 모달
+ * @returns
+ */
+export default function EnergyReportModal() {
   const machineProjectName = useContext(MacinheProjectNameContext)
 
   const params = useParams()

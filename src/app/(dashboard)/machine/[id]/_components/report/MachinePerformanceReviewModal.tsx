@@ -37,13 +37,13 @@ import type { MachineInspectionRootCategoryResponseDtoType } from '@core/types'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
 // ✅ 각 탭을 dynamic import로 로딩 (Next.js에서만 가능)
-const ResultSummaryTab = dynamic(() => import('./tabs/ResultSummaryTab'))
-const GuideTab = dynamic(() => import('./tabs/GuideTab'))
-const OperationStatusTab = dynamic(() => import('./tabs/OperationStatusTab'))
-const MeasurementTab = dynamic(() => import('./tabs/MeasurementTab'))
-const AgingTab = dynamic(() => import('./tabs/AgingTab'))
-const ImprovementTab = dynamic(() => import('./tabs/ImprovementTab'))
-const YearlyPlanTab = dynamic(() => import('./tabs/YearlyPlanTab'))
+const ResultSummaryTab = dynamic(() => import('./machinePerformanceReviewTabs/ResultSummaryTab'))
+const GuideTab = dynamic(() => import('./machinePerformanceReviewTabs/GuideTab'))
+const OperationStatusTab = dynamic(() => import('./machinePerformanceReviewTabs/OperationStatusTab'))
+const MeasurementTab = dynamic(() => import('./machinePerformanceReviewTabs/MeasurementTab'))
+const AgingTab = dynamic(() => import('./machinePerformanceReviewTabs/AgingTab'))
+const ImprovementTab = dynamic(() => import('./machinePerformanceReviewTabs/ImprovementTab'))
+const YearlyPlanTab = dynamic(() => import('./machinePerformanceReviewTabs/YearlyPlanTab'))
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: 'white',
@@ -86,6 +86,10 @@ export const StyledTextField = styled(TextField)({
   }
 })
 
+/**
+ * 성능점검시 검토사항 모달
+ * @returns
+ */
 export default function MachinePerformanceReviewModal() {
   const machineProjectName = useContext(MacinheProjectNameContext)
   const { id } = useParams()

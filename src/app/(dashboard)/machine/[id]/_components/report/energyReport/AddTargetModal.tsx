@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -12,7 +12,6 @@ import {
   Fab,
   IconButton,
   InputAdornment,
-  InputLabel,
   TextField,
   Typography
 } from '@mui/material'
@@ -29,47 +28,51 @@ import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'
 import { useGetEnergyTargets } from '@core/hooks/customTanstackQueries'
 import type { targetType } from '@core/types'
+import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
+import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 
 export default function AddTargetModal({ machineEnergyTypeId }: { machineEnergyTypeId: number }) {
   const params = useParams()
 
   const [open, setOpen] = useState(false)
 
-  const inputRef = useRef<HTMLInputElement>(null)
-
   const { data: targets, refetch } = useGetEnergyTargets(`${params.id}`, `${machineEnergyTypeId}`)
 
-  const handleAddTarget = async () => {
-    if (!inputRef.current) return
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { isDirty }
+  } = useForm<{ targetName: string }>({
+    defaultValues: {
+      targetName: ''
+    }
+  })
+
+  const handleAddTarget = handleSubmit(async data => {
+    if (data.targetName === '') {
+      printWarningSnackbar('장소명을 입력해주세요')
+    }
 
     try {
-      const newName = inputRef.current.value
-
       const response = await auth
         .post<{ data: { machineEnergyTargetIds: number[] } }>(
           `/api/machine-projects/${params.id}/machine-energy-targets?machineEnergyTypeId=${machineEnergyTypeId}`,
           {
-            machineEnergyTargets: [{ name: newName }]
+            machineEnergyTargets: [{ name: data.targetName }]
           }
         )
         .then(p => p.data.data.machineEnergyTargetIds)
 
-      inputRef.current.value = ''
+      reset({ targetName: '' })
       refetch()
-
-      // await auth.post(`/api/machine-project-energy-types`, {
-      //   machineProjectEnergyTypes: [1, 2, 3, 4].map(value => ({
-      //     machineProjectId: params.id,
-      //     machineEnergyTypeId: value
-      //   }))
-      // })
 
       console.log('target 추가 완료:', response)
       toast.success('장소가 추가되었습니다.')
     } catch (e) {
       handleApiError(e)
     }
-  }
+  })
 
   const handleDeleteTarget = async (target: targetType) => {
     try {
@@ -106,7 +109,7 @@ export default function AddTargetModal({ machineEnergyTypeId }: { machineEnergyT
   }
 
   return (
-    <form>
+    <>
       <Button
         onClick={() => setOpen(true)}
         variant='contained'
@@ -133,18 +136,17 @@ export default function AddTargetModal({ machineEnergyTypeId }: { machineEnergyT
         <DialogContent>
           <div className='grid gap-5'>
             <div className='grid gap-1'>
-              <InputLabel>추가할 장소명</InputLabel>
-              <div className='flex items-center justify-between gap-3'>
-                <TextField inputRef={inputRef} size='small' sx={{ flex: 1 }} />
-                <Fab size='small' type='button' color='secondary' onClick={handleAddTarget}>
+              <form className='flex items-center justify-between gap-3'>
+                <TextField {...register('targetName')} placeholder='추가할 장소명을 입력해주세요' sx={{ flex: 1 }} />
+                <Fab disabled={!isDirty} size='small' type='button' color='secondary' onClick={handleAddTarget}>
                   <IconPlus />
                 </Fab>
-              </div>
+              </form>
             </div>
             <div className='flex flex-col gap-1'>
-              <Typography>기존 장소 목록</Typography>
+              <Typography variant='h5'>기존 장소 목록</Typography>
 
-              <Box sx={{ border: '1px dashed lightgray', borderRadius: 1, p: 2, display: 'grid', gap: 1 }}>
+              <Box sx={{ border: '1px dashed lightgray', borderRadius: 1, p: 2, display: 'grid', gap: 2 }}>
                 {targets && targets.length > 0 ? (
                   targets.map(target => (
                     <TargetBox
@@ -172,17 +174,19 @@ export default function AddTargetModal({ machineEnergyTypeId }: { machineEnergyT
           </Button>
         </DialogActions> */}
       </Dialog>
-    </form>
+    </>
   )
 }
 
 interface TargetBoxProps {
   target: targetType
-  handleDeleteTarget: () => void
+  handleDeleteTarget: () => Promise<void>
   handleModifyTargetName: (target: targetType, name: string) => void
 }
 
 function TargetBox({ target, handleDeleteTarget, handleModifyTargetName }: TargetBoxProps) {
+  const [open, setOpen] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -198,39 +202,45 @@ function TargetBox({ target, handleDeleteTarget, handleModifyTargetName }: Targe
   }
 
   return (
-    <form onSubmit={handleSubmit(changeName)}>
-      <TextField
-        fullWidth
-        variant='standard'
-        {...register('name')}
-        sx={{ p: 2, border: '1px solid lightgray', borderRadius: 2 }}
-        slotProps={{
-          input: {
-            endAdornment: (
-              <div className='flex items-center'>
-                <MotionInputAdornment
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.2 }}
-                  className={!isDirty ? 'text-green-400/0' : 'text-green-500'}
-                  position='end'
-                >
-                  <IconButton disabled={!isDirty} type='submit' size='small'>
-                    <IconCheck size={25} />
-                  </IconButton>
-                </MotionInputAdornment>
+    <>
+      <form onSubmit={handleSubmit(changeName)}>
+        <TextField
+          fullWidth
+          {...register('name')}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <div className='flex items-center'>
+                  <MotionInputAdornment
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className={!isDirty ? 'text-green-400/0' : 'text-green-500'}
+                    position='end'
+                  >
+                    <IconButton disabled={!isDirty} type='submit' size='small'>
+                      <IconCheck size={25} />
+                    </IconButton>
+                  </MotionInputAdornment>
 
-                <InputAdornment className='text-red-400' position='end'>
-                  <IconButton size='small' type='button' onClick={handleDeleteTarget}>
-                    <IconTrashFilled size={25} />
-                  </IconButton>
-                </InputAdornment>
-              </div>
-            )
-          }
-        }}
-        defaultValue={name}
+                  <InputAdornment className='text-red-400' position='end'>
+                    <IconButton size='small' type='button' onClick={() => setOpen(true)}>
+                      <IconTrashFilled size={25} />
+                    </IconButton>
+                  </InputAdornment>
+                </div>
+              )
+            }
+          }}
+          defaultValue={name}
+        />
+      </form>
+      <DeleteModal
+        open={open}
+        setOpen={setOpen}
+        onDelete={handleDeleteTarget}
+        title={`장소 "${target.name}"을(를) 삭제하시겠습니까?`}
       />
-    </form>
+    </>
   )
 }
