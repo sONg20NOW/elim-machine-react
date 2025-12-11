@@ -13,7 +13,6 @@ import { toast } from 'react-toastify'
 
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import type {
-  MachineInspectionDetailResponseDtoType,
   MachinePicCursorType,
   MachinePicPresignedUrlResponseDtoType,
   MachineProjectPicReadResponseDtoType
@@ -78,8 +77,6 @@ const PictureListTabContent = () => {
   const [openInspecitonPic, setOpenInspecitonPic] = useState(false)
   const [openProjectPic, setOpenProjectPic] = useState(false)
 
-  const [selectedInspection, setSelectedInspection] = useState<MachineInspectionDetailResponseDtoType>()
-
   /**
    * set searchParam 'keyword' for searching keyword
    * @param keyword
@@ -108,25 +105,6 @@ const PictureListTabContent = () => {
       router.push(pathname + '?' + params.toString())
     },
     [searchParams, router, pathname]
-  )
-
-  /**
-   * set SelectedInspection to data using picture's inspection id
-   * @param pic
-   */
-  const getInspectionByPic = useCallback(
-    async (pic: MachinePicPresignedUrlResponseDtoType) => {
-      try {
-        const response = await auth.get<{ data: MachineInspectionDetailResponseDtoType }>(
-          `/api/machine-projects/${machineProjectId}/machine-inspections/${pic.machineInspectionId}`
-        )
-
-        setSelectedInspection(response.data.data)
-      } catch (error) {
-        handleApiError(error)
-      }
-    },
-    [machineProjectId]
   )
 
   /**
@@ -288,7 +266,6 @@ const PictureListTabContent = () => {
 
     // 일괄선택 비활성화 시 사진카드 클릭 동작
     else {
-      getInspectionByPic(pic)
       setSelectedInspectionPicId(pic.machinePicId)
       setOpenInspecitonPic(true)
     }
@@ -351,7 +328,6 @@ const PictureListTabContent = () => {
         // 현장사진 <- 설비사진 으로 넘어가는 경우
         if (currentPictureIdx === 0) {
           if (projectPics.length > 0) {
-            setSelectedInspection(undefined)
             setSelectedInspectionPicId(undefined)
             setSelectedProjectPicId(projectPics[projectPics.length - 1].id)
             setOpenProjectPic(true)
@@ -383,7 +359,6 @@ const PictureListTabContent = () => {
           if (inspectionPics.length > 0) {
             setSelectedProjectPicId(undefined)
             setSelectedInspectionPicId(inspectionPics[0].machinePicId)
-            getInspectionByPic(inspectionPics[0])
             setOpenInspecitonPic(true)
           } else {
             toast.warning('다음 사진이 없습니다')
@@ -608,7 +583,7 @@ const PictureListTabContent = () => {
         )}
       </div>
 
-      {selectedInspectionPic && selectedInspection && (
+      {selectedInspectionPic && (
         <InspectionPicZoomModal
           open={openInspecitonPic}
           setOpen={setOpenInspecitonPic}
