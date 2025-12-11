@@ -1,15 +1,8 @@
-import type {
-  HeaderInfoType,
-  MachineEngineerPageResponseDtoType,
-  MachineProjectPageDtoType,
-  MemberPageDtoType,
-  LicensePageResponseDtoType,
-  MachineInspectionPageResponseDtoType
-} from '../../types'
+import type { tableHeaderInfoType } from '../../types'
 
 // TODO: 추후 input info와 연동..? field들에 대해서 번역한 단어를 저장해두는 것도 좋을 듯..
 // table 생성 중 헤더 생성에 필요.
-export const TABLE_HEADER_INFO = {
+export const TABLE_HEADER_INFO: tableHeaderInfoType = {
   // 직원관리 탭 테이블
   member: {
     // roleDescription: { label: '권한', canSort: true },
@@ -24,7 +17,7 @@ export const TABLE_HEADER_INFO = {
     joinDate: { label: '입사일', canSort: true, hideOnTablet: true },
     careerYear: { label: '근속년수', canSort: true, hideOnTablet: true },
     memberStatusDescription: { label: '상태', canSort: false, hideOnTablet: true }
-  } as Record<keyof MemberPageDtoType, HeaderInfoType>,
+  },
   machine: {
     projectStatusDescription: { label: '상태', canSort: false },
     region: { label: '지역', canSort: false },
@@ -37,7 +30,7 @@ export const TABLE_HEADER_INFO = {
     engineerNames: { label: '참여기술진', canSort: false },
     grossArea: { label: '연면적(㎡)', canSort: true },
     tel: { label: '전화번호', canSort: false }
-  } as Record<keyof MachineProjectPageDtoType, HeaderInfoType>,
+  },
   machineInspection: {
     machineParentCateName: { label: '분류', canSort: false },
     machineInspectionName: { label: '설비명', canSort: false },
@@ -47,7 +40,7 @@ export const TABLE_HEADER_INFO = {
     engineerNames: { label: '점검자', canSort: false },
     checkDate: { label: '점검일', canSort: false },
     inspectionStatus: { label: '결과', canSort: false }
-  } as Record<keyof MachineInspectionPageResponseDtoType, HeaderInfoType>,
+  },
   engineers: {
     companyName: { label: '회사명', canSort: false },
     gradeDescription: { label: '등급', canSort: true },
@@ -63,7 +56,7 @@ export const TABLE_HEADER_INFO = {
     latestProjectName: { label: '마지막현장', canSort: false },
     latestProjectBeginDate: { label: '투입기간', canSort: false }, // latestProjectEndDate도 함께 표시
     remark: { label: '비고', canSort: false }
-  } as Record<keyof MachineEngineerPageResponseDtoType, HeaderInfoType>,
+  },
   licenses: {
     companyName: { label: '업체명', canSort: false },
     bizno: { label: '사업자번호', canSort: false, hideOnTablet: true },
@@ -78,5 +71,5 @@ export const TABLE_HEADER_INFO = {
     tel: { label: '전화번호', canSort: false },
     contractDate: { label: '계약일', canSort: false, hideOnTablet: true },
     expireDate: { label: '만료일', canSort: false, hideOnTablet: true }
-  } as Record<keyof LicensePageResponseDtoType, HeaderInfoType>
+  }
 }

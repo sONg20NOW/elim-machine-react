@@ -7,10 +7,10 @@ import {
   officePositionOption,
   workFormOption
 } from '@/@core/data/options'
-import type { memberInputType } from '../../types'
+import type { memberInputInfoType } from '../../types'
 
 // 직원 상세 페이지
-export const MEMBER_INPUT_INFO: memberInputType = {
+export const MEMBER_INPUT_INFO: memberInputInfoType = {
   basic: {
     name: {
       size: 'md',

@@ -28,11 +28,19 @@ export type ThemeColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' 
 export interface HeaderInfoType {
   label: string
   canSort: boolean
-  hideOnTablet: boolean
+  hideOnTablet?: boolean
 }
 
 // table header 정보
-export type HeaderType<T> = Record<keyof T, HeaderInfoType>
+export type HeaderType<T> = Partial<Record<keyof T, HeaderInfoType>>
+
+export interface tableHeaderInfoType {
+  member: HeaderType<MemberPageDtoType>
+  machine: HeaderType<MachineProjectPageDtoType>
+  machineInspection: HeaderType<MachineInspectionPageResponseDtoType>
+  engineers: HeaderType<MachineEngineerPageResponseDtoType>
+  licenses: HeaderType<LicensePageResponseDtoType>
+}
 
 /* -------------------------- InputInfo Type -------------------------- */
 export type InputFieldType = {
@@ -49,7 +57,7 @@ export type InputType = 'multi' | 'yn' | 'text' | 'number' | 'date' | 'long text
 type InputInfoType<T> = Partial<Record<keyof T, InputFieldType>>
 
 // member 인풋 정보 형식
-export type memberInputType = {
+export type memberInputInfoType = {
   basic: InputInfoType<MemberBasicDtoType>
   privacy: InputInfoType<MemberPrivacyDtoType>
   office: InputInfoType<MemberOfficeDtoType>
