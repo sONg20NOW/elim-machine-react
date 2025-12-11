@@ -24,7 +24,7 @@ import ForgotPwModal from './_components/ForgotPwModal'
 import { login } from '@core/utils/auth'
 
 import 'react-toastify/ReactToastify.css'
-import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { printErrorSnackbar, printSuccessSnackbar } from '@core/utils/snackbarHandler'
 

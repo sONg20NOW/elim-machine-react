@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { Backdrop, Button, CircularProgress, Typography } from '@mui/material'
 
-import useAccessTokenStore from '@core/utils/useAuthStore'
+import useAccessTokenStore from '@/@core/hooks/zustand/useAuthStore'
 
 export default function ProtectedPage({ children }: { children: React.ReactNode }) {
   const router = useRouter()

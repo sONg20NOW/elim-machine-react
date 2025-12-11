@@ -15,7 +15,7 @@ import type {
 import { auth } from '@core/utils/auth'
 import AddInspectionModal from '../_components/AddInspectionModal'
 import ProjectInfoCard from '../_components/ProjectInfoCard'
-import useProjectSummaryStore from '@core/utils/useProjectSummaryStore'
+import useProjectSummaryStore from '@/@core/hooks/zustand/useProjectSummaryStore'
 import { printErrorSnackbar } from '@core/utils/snackbarHandler'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 

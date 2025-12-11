@@ -33,8 +33,8 @@ import { auth } from '@core/utils/auth'
 import { useGetEngineer, useGetEngineers, useGetEngineersOptions } from '@core/hooks/customTanstackQueries'
 import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
 import deleteEngineer from './_util/deleteEngineer'
-import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
-import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
+import useUpdateParams from '@/@core/hooks/searchParams/useUpdateParams'
+import useSetQueryParams from '@/@core/hooks/searchParams/useSetQueryParams'
 import BasicTablePagination from '@core/components/elim-table/BasicTablePagination'
 
 /**

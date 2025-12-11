@@ -35,7 +35,7 @@ import {
   useMutatePipeMeasurementResponseDto,
   useMutateWindMeasurementResponseDto
 } from '@core/hooks/customTanstackQueries'
-import useCurrentInspectionIdStore from '@core/utils/useCurrentInspectionIdStore'
+import useCurrentInspectionIdStore from '@/@core/hooks/zustand/useCurrentInspectionIdStore'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import deleteInspection from '../../_utils/deleteInspection'
 import { setOffsetContext } from '../tabs/InspectionListTabContent'

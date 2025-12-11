@@ -17,8 +17,8 @@ import type {
 import MobileHeader from '../../_components/MobileHeader'
 import { auth } from '@core/utils/auth'
 import ProjectInfoCard from './_components/ProjectInfoCard'
-import type { projectSummaryType } from '@core/utils/useProjectSummaryStore'
-import useProjectSummaryStore from '@core/utils/useProjectSummaryStore'
+import type { projectSummaryType } from '@/@core/hooks/zustand/useProjectSummaryStore'
+import useProjectSummaryStore from '@/@core/hooks/zustand/useProjectSummaryStore'
 import { printErrorSnackbar, printSuccessSnackbar } from '@core/utils/snackbarHandler'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 

@@ -30,8 +30,8 @@ import LicenseModal from './_components/LicenseModal'
 import { auth } from '@core/utils/auth'
 import { useGetLicense, useGetLicenses } from '@core/hooks/customTanstackQueries'
 import deleteLicense from './_util/deleteLicense'
-import useUpdateParams from '@core/utils/searchParams/useUpdateParams'
-import useSetQueryParams from '@core/utils/searchParams/useSetQueryParams'
+import useUpdateParams from '@/@core/hooks/searchParams/useUpdateParams'
+import useSetQueryParams from '@/@core/hooks/searchParams/useSetQueryParams'
 import BasicTablePagination from '@/@core/components/elim-table/BasicTablePagination'
 
 export default function Licensepage() {

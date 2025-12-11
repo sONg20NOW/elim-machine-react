@@ -9,7 +9,7 @@ import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { useGetLicenseNames, useMutateSingleMember } from '@core/hooks/customTanstackQueries'
 import { handleApiError } from '@core/utils/errorHandler'
 import type { refType } from '../UserModal'
-import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 
