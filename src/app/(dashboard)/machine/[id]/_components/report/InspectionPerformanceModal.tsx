@@ -26,7 +26,7 @@ import { useGetLeafCategories, useGetReportCategories, useGetReportStatuses } fr
 import type { MachineLeafCategoryResponseDtoType, MachineReportStatusResponseDtoType } from '@core/types'
 import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'
-import ReloadButton from '../ReloadButton'
+import ReloadButton from '../../../../../../@core/components/elim-button/ReloadButton'
 
 /**
  * 보고서 다운로드 - 설비별 성능점검표 보고서 모달

@@ -44,7 +44,7 @@ import { useGetInspectionsSimple, useGetMachineProject } from '@core/hooks/custo
 import { projectPicOption } from '@/@core/data/options'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
-import ReloadButton from '../ReloadButton'
+import ReloadButton from '../../../../../../@core/components/elim-button/ReloadButton'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 type ProjectPicListModalProps = {

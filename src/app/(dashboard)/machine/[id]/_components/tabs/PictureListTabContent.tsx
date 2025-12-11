@@ -27,7 +27,7 @@ import { projectPicOption } from '@/@core/data/options'
 import ProjectPicZoomModal from '../pictureZoomModal/ProjectPicZoomModal'
 import ProjectPicCard from '../pictureCard/ProjectPicCard'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
-import ReloadButton from '../ReloadButton'
+import ReloadButton from '../../../../../../@core/components/elim-button/ReloadButton'
 import { isTabletContext } from '@/@core/contexts/mediaQueryContext'
 
 const PictureListTabContent = () => {

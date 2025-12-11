@@ -26,7 +26,7 @@ import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'
 import InspectionPerformanceModal from './InspectionPerformanceModal'
 import type { MachineReportCategoryReadResponseDtoType, MachineReportStatusResponseDtoType } from '@core/types'
-import ReloadButton from '../ReloadButton'
+import ReloadButton from '../../../../../../@core/components/elim-button/ReloadButton'
 import { MacinheProjectNameContext } from '../tabs/MachineProjectTabContent'
 
 /**

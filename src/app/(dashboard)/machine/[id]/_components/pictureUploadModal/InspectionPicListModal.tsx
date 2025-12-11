@@ -47,7 +47,7 @@ import { useGetInspectionsSimple, useGetSingleInspection } from '@core/hooks/cus
 import { auth } from '@core/utils/auth'
 import InspectionPicCard from '../pictureCard/InspectionPicCard'
 import PicPreviewCard from '../pictureCard/PicPreviewCard'
-import ReloadButton from '../ReloadButton'
+import ReloadButton from '../../../../../../@core/components/elim-button/ReloadButton'
 import { setOffsetContext } from '../tabs/InspectionListTabContent'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
