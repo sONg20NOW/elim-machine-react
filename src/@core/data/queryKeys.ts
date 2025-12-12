@@ -95,7 +95,8 @@ export const QUERY_KEYS = {
   MEMBER: {
     GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId],
     GET_MEMBERS: (queryParams: string) => ['GET_MEMBERS', refineParams(queryParams)],
-    GET_MEMBERS_LOOKUP: ['GET_MEMBERS_LOOKUP']
+    GET_MEMBERS_LOOKUP: ['GET_MEMBERS_LOOKUP'],
+    GET_JUMIN_NUM_VIEW: (memberId: string) => ['GET_JUMIN_NUM_VIEW', memberId]
   },
   MACHINE_PERFORMANCE_REVIEW: {
     GET_RESULT_SUMMARY: (machineProjectId: string) => ['GET_RESULT_SUMMARY', machineProjectId],

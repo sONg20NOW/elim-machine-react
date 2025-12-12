@@ -1234,6 +1234,25 @@ export const useMutateSingleMember = <
   })
 }
 
+export const useGetJuminNumView = (memberId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.MEMBER.GET_JUMIN_NUM_VIEW(memberId),
+    queryFn: async data => {
+      const queryKey = data.queryKey
+      const [keyType, memberId] = queryKey
+
+      const fullJuminNum = await auth
+        .post<{ data: { juminNum: string } }>(`/api/members/jumin-num/view`, { memberId: memberId })
+        .then(v => v.data.data.juminNum)
+
+      console.log(`!!! queryFn ${keyType}`)
+
+      return fullJuminNum
+    },
+    enabled: Number(memberId) > 0
+  })
+}
+
 // ------------------------- 성능점검시 검토사항 관련 -------------------------
 // GET /api/machine-projects/{machineProjectId}/machine-performance-review/yearly-plan 연도별 계획
 export const useGetYearlyPlan = (machineProjectId: string) => {
