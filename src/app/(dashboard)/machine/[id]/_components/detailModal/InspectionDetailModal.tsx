@@ -5,11 +5,26 @@ import { createContext, useCallback, useContext, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Button, MenuItem, Select, Tab, Typography } from '@mui/material'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  MenuItem,
+  Select,
+  Tab,
+  Typography
+} from '@mui/material'
 
 import TabList from '@mui/lab/TabList'
 
 import TabPanel from '@mui/lab/TabPanel'
+
+import { IconX } from '@tabler/icons-react'
+
+import TabContext from '@mui/lab/TabContext'
 
 import type {
   MachineInspectionChecklistItemResultBasicResponseDtoType,
@@ -17,7 +32,6 @@ import type {
   MachineInspectionSimpleResponseDtoType
 } from '@core/types'
 
-import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 
 // style
@@ -304,40 +318,155 @@ const InspectionDetailModalInner = ({
     setShowAlertModal(false)
   }
 
+  const onClose = () => {
+    if (existChange) {
+      setShowAlertModal(true)
+    } else {
+      setOpen(false)
+      setEditData(prev => ({ ...prev, engineerIds: prev.engineerIds.filter(id => id > 0) }))
+    }
+  }
+
   return (
     selectedInspection && (
-      <DefaultModal
-        modifyButton={
+      <Dialog
+        fullWidth
+        open={open}
+        onClose={(_, reason) => reason !== 'backdropClick' && onClose()}
+        maxWidth={'md'}
+        scroll='paper' // ✅ DialogContent 안에서만 스크롤
+        closeAfterTransition={false}
+        sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+
+        // slotProps={{ container: { sx: { alignItems: 'start', mt: '20dvh' } } }}
+      >
+        {/* 닫기 버튼 */}
+        <IconButton
+          aria-label='close'
+          onClick={onClose}
+          sx={theme => ({
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: theme.palette.grey[500]
+          })}
+        >
+          <IconX />
+        </IconButton>
+
+        {/* 수정/삭제 버튼 */}
+        <div className='absolute left-4 top-4 sm:left-8 sm:top-8 flex gap-2'>
           <Button variant='contained' color='error' onClick={() => setShowDeleteModal(true)}>
             삭제
           </Button>
-        }
-        value={tabValue}
-        open={open}
-        setOpen={setOpen}
-        title={
-          <div className='flex items-center'>
-            <Select
-              IconComponent={() => null}
-              variant='standard'
-              value={currentInspectionId}
-              onChange={e => {
-                setInspectionId(Number(e.target.value))
-              }}
-              renderValue={value => (
-                <Typography variant='h3'>{inspectionsSimple.find(v => v.id === value)!.name}</Typography>
-              )}
-            >
-              {inspectionsSimple.map(v => (
-                <MenuItem key={v.id} value={v.id}>
-                  <Typography>{v.name}</Typography>
-                </MenuItem>
-              ))}
-            </Select>
-            <Typography variant='inherit'>{'성능점검표'}</Typography>
-          </div>
-        }
-        primaryButton={
+        </div>
+
+        {/* 제목 */}
+        <DialogTitle
+          sx={{ pt: '1.5rem !important' }}
+          variant='h4'
+          className={
+            'text-lg sm:text-xl flex items-center gap-0 sm:gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'
+          }
+        >
+          <Typography component={'div'} variant='h3'>
+            <div className='flex items-center'>
+              <Select
+                IconComponent={() => null}
+                variant='standard'
+                value={currentInspectionId}
+                onChange={e => {
+                  setInspectionId(Number(e.target.value))
+                }}
+                renderValue={value => (
+                  <Typography variant='h3'>{inspectionsSimple.find(v => v.id === value)!.name}</Typography>
+                )}
+              >
+                {inspectionsSimple.map(v => (
+                  <MenuItem key={v.id} value={v.id}>
+                    <Typography>{v.name}</Typography>
+                  </MenuItem>
+                ))}
+              </Select>
+              <Typography variant='inherit'>{'성능점검표'}</Typography>
+            </div>
+          </Typography>
+        </DialogTitle>
+
+        {/* ✅ 스크롤 처리되는 본문 */}
+        <DialogContent>
+          <TabContext value={tabValue}>
+            <div className={`${styles.container} relative pt-1`}>
+              <TabList
+                onChange={(_, newValue) => {
+                  if (existChange) {
+                    setShowAlertModal(true)
+                  } else {
+                    setTabValue(newValue)
+                  }
+                }}
+              >
+                {thisTabInfo.map(tab =>
+                  existChange && tabValue !== tab.value ? (
+                    <DisabledTabWithTooltip key={tab.value} value={tab.value} label={tab.label} />
+                  ) : (
+                    <Tab key={tab.value} value={tab.value} label={tab.label} />
+                  )
+                )}
+              </TabList>
+              <Button
+                sx={{ position: 'absolute', right: 0, top: 0 }}
+                variant='contained'
+                color='info'
+                onClick={() => setShowPictureListModal(true)}
+              >
+                갤러리 (
+                {editData.machineChecklistItemsWithPicCountResponseDtos?.reduce(
+                  (sum, cate) => (sum += cate.totalMachinePicCount),
+                  0
+                )}
+                )
+              </Button>
+              <div className='overflow-y-auto pt-5'>
+                <TabPanel value={'BASIC'}>
+                  <BasicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+                </TabPanel>
+                <TabPanel value={'PIC'}>
+                  <handleSaveChecklistContext.Provider value={handleSaveChecklist}>
+                    <ChecklistPicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+                  </handleSaveChecklistContext.Provider>
+                </TabPanel>
+                {editData.gasMeasurementResponseDto && (
+                  <TabPanel value={'GAS'}>
+                    <GasTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+                  </TabPanel>
+                )}
+                {editData.windMeasurementResponseDtos && (
+                  <TabPanel value={'WIND'}>
+                    <WindTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+                  </TabPanel>
+                )}
+                {editData.pipeMeasurementResponseDtos && (
+                  <TabPanel value={'PIPE'}>
+                    <PipeTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+                  </TabPanel>
+                )}
+              </div>
+            </div>
+
+            <AlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
+            <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />
+            {/* 갤러리 버튼 클릭 시 동작 */}
+            {showPictureListModal && (
+              <PictureListModal
+                open={showPictureListModal}
+                setOpen={setShowPictureListModal}
+                defaultPicInspectionId={currentInspectionId}
+              />
+            )}
+          </TabContext>
+        </DialogContent>
+        <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16 mt-[20px] lg:mt-[40px]'>
           <div style={{ display: 'flex', gap: 1 }}>
             {isEditing ? (
               <Button
@@ -389,86 +518,8 @@ const InspectionDetailModalInner = ({
               </Button>
             )}
           </div>
-        }
-        onClose={() => {
-          if (existChange) {
-            setShowAlertModal(true)
-          } else {
-            setOpen(false)
-            setEditData(prev => ({ ...prev, engineerIds: prev.engineerIds.filter(id => id > 0) }))
-          }
-        }}
-      >
-        <div className={`${styles.container} relative pt-1`}>
-          <TabList
-            onChange={(_, newValue) => {
-              if (existChange) {
-                setShowAlertModal(true)
-              } else {
-                setTabValue(newValue)
-              }
-            }}
-          >
-            {thisTabInfo.map(tab =>
-              existChange && tabValue !== tab.value ? (
-                <DisabledTabWithTooltip key={tab.value} value={tab.value} label={tab.label} />
-              ) : (
-                <Tab key={tab.value} value={tab.value} label={tab.label} />
-              )
-            )}
-          </TabList>
-          <Button
-            sx={{ position: 'absolute', right: 0, top: 0 }}
-            variant='contained'
-            color='info'
-            onClick={() => setShowPictureListModal(true)}
-          >
-            갤러리 (
-            {editData.machineChecklistItemsWithPicCountResponseDtos?.reduce(
-              (sum, cate) => (sum += cate.totalMachinePicCount),
-              0
-            )}
-            )
-          </Button>
-
-          <div className='pt-5 h-[60dvh] overflow-y-auto'>
-            <TabPanel value={'BASIC'}>
-              <BasicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-            </TabPanel>
-            <TabPanel value={'PIC'}>
-              <handleSaveChecklistContext.Provider value={handleSaveChecklist}>
-                <ChecklistPicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-              </handleSaveChecklistContext.Provider>
-            </TabPanel>
-            {editData.gasMeasurementResponseDto && (
-              <TabPanel value={'GAS'}>
-                <GasTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-              </TabPanel>
-            )}
-            {editData.windMeasurementResponseDtos && (
-              <TabPanel value={'WIND'}>
-                <WindTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-              </TabPanel>
-            )}
-            {editData.pipeMeasurementResponseDtos && (
-              <TabPanel value={'PIPE'}>
-                <PipeTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-              </TabPanel>
-            )}
-          </div>
-        </div>
-
-        <AlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />
-        <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />
-        {/* 갤러리 버튼 클릭 시 동작 */}
-        {showPictureListModal && (
-          <PictureListModal
-            open={showPictureListModal}
-            setOpen={setShowPictureListModal}
-            defaultPicInspectionId={currentInspectionId}
-          />
-        )}
-      </DefaultModal>
+        </DialogActions>
+      </Dialog>
     )
   )
 }
