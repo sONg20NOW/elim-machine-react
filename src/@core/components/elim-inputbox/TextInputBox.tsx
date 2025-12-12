@@ -7,7 +7,6 @@ import { IconEye, IconEyeOff } from '@tabler/icons-react'
 
 import PostCodeButton from '../elim-button/PostCodeButton'
 import { auth } from '@/@core/utils/auth'
-import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 
 interface TextInputBoxProps<T extends Record<string, any>> {
@@ -121,19 +120,18 @@ function JuminNumEndAdorment<T extends Record<string, any>>({
   form: UseFormReturn<T, any, undefined>
   name: Path<T>
 }) {
-  const [show, setShow] = useState(false)
-
-  const user = useCurrentUserStore(set => set.currentUser)
-  const memberId = user?.memberId
-
   const watchedValue: string = form.watch(name)
+
+  const [show, setShow] = useState(!watchedValue.includes('*'))
+
+  const memberId: number = form.getValues().memberId
 
   async function handleClick() {
     if (show) {
       form.setValue(name, watchedValue.substring(0, 8).concat('******').concat(watchedValue.substring(14)) as any)
     } else {
       if (!memberId) {
-        printWarningSnackbar('현재 로그인 중인 계정 정보가 없습니다', 2000)
+        printWarningSnackbar('해당 직원의 계정 정보가 없습니다', 2000)
 
         return
       }
