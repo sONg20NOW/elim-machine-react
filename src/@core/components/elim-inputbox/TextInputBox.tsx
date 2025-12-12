@@ -1,7 +1,14 @@
-import { Grid2, TextField, Typography } from '@mui/material'
+import { useState } from 'react'
+
+import { Grid2, IconButton, TextField, Typography } from '@mui/material'
 import { useFormState, type Path, type PathValue, type RegisterOptions, type UseFormReturn } from 'react-hook-form'
 
+import { IconEye, IconEyeOff } from '@tabler/icons-react'
+
 import PostCodeButton from '../elim-button/PostCodeButton'
+import { auth } from '@/@core/utils/auth'
+import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
+import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
 
 interface TextInputBoxProps<T extends Record<string, any>> {
   name: Path<T>
@@ -12,6 +19,7 @@ interface TextInputBoxProps<T extends Record<string, any>> {
   disabled?: boolean
   placeholder?: string
   postcode?: boolean
+  juminNum?: boolean
   required?: boolean
   rule?: RegisterOptions<T, Path<T>> | undefined
   type?: 'number' | 'date'
@@ -40,6 +48,7 @@ export default function TextInputBox<T extends Record<string, any>>({
   disabled = false,
   placeholder,
   postcode = false,
+  juminNum = false,
   required = false,
   rule,
   type
@@ -80,6 +89,14 @@ export default function TextInputBox<T extends Record<string, any>>({
               }
             }
           })}
+          {...(juminNum && {
+            slotProps: {
+              htmlInput: { name: name },
+              input: {
+                endAdornment: <JuminNumEndAdorment form={form} name={name} />
+              }
+            }
+          })}
           size='small'
         />
         {error && (
@@ -95,4 +112,41 @@ export default function TextInputBox<T extends Record<string, any>>({
       </div>
     </Grid2>
   )
+}
+
+function JuminNumEndAdorment<T extends Record<string, any>>({
+  form,
+  name
+}: {
+  form: UseFormReturn<T, any, undefined>
+  name: Path<T>
+}) {
+  const [show, setShow] = useState(false)
+
+  const user = useCurrentUserStore(set => set.currentUser)
+  const memberId = user?.memberId
+
+  const watchedValue: string = form.watch(name)
+
+  async function handleClick() {
+    if (show) {
+      form.setValue(name, watchedValue.substring(0, 8).concat('******').concat(watchedValue.substring(14)) as any)
+    } else {
+      if (!memberId) {
+        printWarningSnackbar('현재 로그인 중인 계정 정보가 없습니다', 2000)
+
+        return
+      }
+
+      const fullJuminNum = await auth
+        .post<{ data: { juminNum: string } }>(`/api/members/jumin-num/view`, { memberId: memberId })
+        .then(v => v.data.data.juminNum)
+
+      form.setValue(name, fullJuminNum.concat(watchedValue.substring(14)) as any)
+    }
+
+    setShow(prev => !prev)
+  }
+
+  return <IconButton onClick={handleClick}>{show ? <IconEyeOff /> : <IconEye />}</IconButton>
 }

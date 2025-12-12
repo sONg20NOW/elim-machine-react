@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -11,7 +11,11 @@ import TabList from '@mui/lab/TabList'
 
 import TabPanel from '@mui/lab/TabPanel'
 
-import type { MachineInspectionDetailResponseDtoType, MachineInspectionSimpleResponseDtoType } from '@core/types'
+import type {
+  MachineInspectionChecklistItemResultBasicResponseDtoType,
+  MachineInspectionDetailResponseDtoType,
+  MachineInspectionSimpleResponseDtoType
+} from '@core/types'
 
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
@@ -23,7 +27,7 @@ import BasicTabContent from './tabs/BasicTabContent'
 import { GasTabContent } from './tabs/GasTabContent'
 import { WindTabContent } from './tabs/WindTabContent'
 import PipeTabContent from './tabs/PipeTabContent'
-import PicTabContent from './tabs/PicTabContent'
+import ChecklistPicTabContent from './tabs/ChecklistPicTabContent'
 import PictureListModal from '../pictureUploadModal/PictureListModal'
 import {
   useGetInspectionsSimple,
@@ -35,10 +39,9 @@ import {
   useMutatePipeMeasurementResponseDto,
   useMutateWindMeasurementResponseDto
 } from '@core/hooks/customTanstackQueries'
-import useCurrentInspectionIdStore from '@core/utils/useCurrentInspectionIdStore'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import deleteInspection from '../../_utils/deleteInspection'
-import { setOffsetContext } from '../tabs/InspectionListTabContent'
+import { setOffsetContext, useSetInspectionIdContext } from '../tabs/InspectionListTabContent'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 
 const TabInfo: Record<
@@ -71,16 +74,16 @@ const TabInfo: Record<
   ]
 }
 
-type InspectionDetailModalProps = {
+interface InspectionDetailModalProps {
   open: boolean
   setOpen: (open: boolean) => void
+  selectedInspectionId: number
 }
 
-const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) => {
+const InspectionDetailModal = ({ open, setOpen, selectedInspectionId }: InspectionDetailModalProps) => {
   const machineProjectId = useParams().id?.toString() as string
-  const inspectionId = useCurrentInspectionIdStore(set => set.currentInspectionId)
 
-  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, inspectionId.toString())
+  const { data: selectedInspection } = useGetSingleInspection(machineProjectId, selectedInspectionId.toString())
   const { data: inspectionsSimple } = useGetInspectionsSimple(machineProjectId)
 
   return (
@@ -96,7 +99,22 @@ const InspectionDetailModal = ({ open, setOpen }: InspectionDetailModalProps) =>
   )
 }
 
-type InspectionDetailModalInnerProps = {
+/* -------------------- inner -------------------- */
+const handleSaveChecklistContext = createContext<
+  ((data: MachineInspectionChecklistItemResultBasicResponseDtoType[]) => void) | null
+>(null)
+
+export function useHandleSaveChecklistContext() {
+  const handleSaveChecklist = useContext(handleSaveChecklistContext)
+
+  if (!handleSaveChecklist) {
+    throw new Error('no handleSaveChecklistContext')
+  }
+
+  return handleSaveChecklist
+}
+
+interface InspectionDetailModalInnerProps {
   open: boolean
   setOpen: (open: boolean) => void
   selectedInspection: MachineInspectionDetailResponseDtoType
@@ -112,30 +130,33 @@ const InspectionDetailModalInner = ({
   const machineProjectId = useParams().id?.toString() as string
 
   const setOffset = useContext(setOffsetContext)
+  const setInspectionId = useSetInspectionIdContext()
 
-  const { currentInspectionId, setCurrentInspectionId } = useCurrentInspectionIdStore()
+  const currentInspectionId = selectedInspection.machineInspectionResponseDto.id
 
-  const { mutate: mutateMachineInspectionResponseDto } = useMutateMachineInspectionResponseDto(
+  const { mutateAsync: mutateInspectionAsync } = useMutateMachineInspectionResponseDto(
     machineProjectId,
     currentInspectionId.toString()
   )
 
-  const { mutate: mutateEngineerIds } = useMutateEngineerIds(machineProjectId, currentInspectionId.toString())
+  const { mutateAsync: mutateEngineerIdsAsync } = useMutateEngineerIds(machineProjectId, currentInspectionId.toString())
 
-  const { mutate: mutateMachineInspectionChecklistItemResultUpdateRequestDto } =
-    useMutateMachineInspectionChecklistItemResultUpdateRequestDto(machineProjectId, currentInspectionId.toString())
-
-  const { mutate: mutateGasMeasurementResponseDto } = useMutateGasMeasurementResponseDto(
+  const { mutateAsync: mutateChecklistAsync } = useMutateMachineInspectionChecklistItemResultUpdateRequestDto(
     machineProjectId,
     currentInspectionId.toString()
   )
 
-  const { mutate: mutateWindMeasurementResponseDto } = useMutateWindMeasurementResponseDto(
+  const { mutateAsync: mutateGasAsync } = useMutateGasMeasurementResponseDto(
     machineProjectId,
     currentInspectionId.toString()
   )
 
-  const { mutate: mutatePipeMeasurementResponseDto } = useMutatePipeMeasurementResponseDto(
+  const { mutateAsync: mutateWindAsync } = useMutateWindMeasurementResponseDto(
+    machineProjectId,
+    currentInspectionId.toString()
+  )
+
+  const { mutateAsync: mutatePipeAsync } = useMutatePipeMeasurementResponseDto(
     machineProjectId,
     currentInspectionId.toString()
   )
@@ -157,63 +178,96 @@ const InspectionDetailModalInner = ({
 
   const [isEditing, setIsEditing] = useState(false)
 
-  // 저장되었을 경우(selectedMachineData가 바뀐 경우) 최신화
-  useEffect(() => setEditData(structuredClone(selectedInspection)), [selectedInspection])
-
   // ? 미흡사항이 변경되었을 때도 version이 달라서 차이가 발생하므로 version 제외하고 비교.
   const existChange =
     JSON.stringify(selectedInspection) !==
     JSON.stringify({ ...editData, engineerIds: editData.engineerIds.filter(id => id > 0) })
 
+  const updateEditDataUsingChecklistResponse = useCallback(
+    (response: MachineInspectionChecklistItemResultBasicResponseDtoType[]) =>
+      setEditData(prev => {
+        const newMachineChecklistItemsWithPicCountResponseDtos = prev.machineChecklistItemsWithPicCountResponseDtos.map(
+          v => ({
+            ...v,
+            machineInspectionChecklistItemResultBasicResponseDto:
+              response.find(p => p.id === v.machineInspectionChecklistItemResultBasicResponseDto.id) ??
+              v.machineInspectionChecklistItemResultBasicResponseDto
+          })
+        )
+
+        return {
+          ...prev,
+          machineChecklistItemsWithPicCountResponseDtos: newMachineChecklistItemsWithPicCountResponseDtos
+        }
+      }),
+    []
+  )
+
+  const handleSaveChecklist = useCallback(
+    async (data: MachineInspectionChecklistItemResultBasicResponseDtoType[]) => {
+      const response = await mutateChecklistAsync(data)
+
+      updateEditDataUsingChecklistResponse(response)
+    },
+    [mutateChecklistAsync, updateEditDataUsingChecklistResponse]
+  )
+
   // 저장 시 각 탭에 따라 다르게 동작 (! 기본 정보 수정 시 )
   // 1. PUT 보내고 -> 2. selectedMachine, editData 최신화
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     if (existChange) {
       try {
         switch (tabValue) {
           case 'BASIC':
-            mutateMachineInspectionResponseDto(editData.machineInspectionResponseDto)
+            const basicResponse = await mutateInspectionAsync(editData.machineInspectionResponseDto)
+
+            setEditData(prev => ({ ...prev, machineInspectionResponseDto: basicResponse }))
 
             // 참여기술진 변경사항이 있다면 POST.
             if (
               JSON.stringify(editData.engineerIds.filter(id => id > 0)) !==
               JSON.stringify(selectedInspection.engineerIds)
             ) {
-              mutateEngineerIds(editData.engineerIds.filter(id => id > 0))
+              const engineerResponse = await mutateEngineerIdsAsync(editData.engineerIds.filter(id => id > 0))
+
+              setEditData(prev => ({ ...prev, engineerIds: engineerResponse }))
             }
 
             break
 
           case 'PIC':
-            const changedBasics = editData.machineChecklistItemsWithPicCountResponseDtos
+            const changedChecklists = editData.machineChecklistItemsWithPicCountResponseDtos
               .filter(v => {
-                const originalBasic = selectedInspection.machineChecklistItemsWithPicCountResponseDtos.find(
+                const originalChecklists = selectedInspection.machineChecklistItemsWithPicCountResponseDtos.find(
                   p =>
                     p.machineInspectionChecklistItemResultBasicResponseDto.id ===
                     v.machineInspectionChecklistItemResultBasicResponseDto.id
                 )?.machineInspectionChecklistItemResultBasicResponseDto
 
                 return (
-                  JSON.stringify(originalBasic) !==
+                  JSON.stringify(originalChecklists) !==
                   JSON.stringify(v.machineInspectionChecklistItemResultBasicResponseDto)
                 )
               })
               .map(v => v.machineInspectionChecklistItemResultBasicResponseDto)
 
-            mutateMachineInspectionChecklistItemResultUpdateRequestDto(changedBasics)
+            handleSaveChecklist(changedChecklists)
 
             break
           case 'GAS':
-            mutateGasMeasurementResponseDto(editData.gasMeasurementResponseDto)
+            const gasResponse = await mutateGasAsync(editData.gasMeasurementResponseDto)
 
+            setEditData(prev => ({ ...prev, gasMeasurementResponseDto: gasResponse }))
             break
           case 'WIND':
-            mutateWindMeasurementResponseDto(editData.windMeasurementResponseDtos)
+            const windResponse = await mutateWindAsync(editData.windMeasurementResponseDtos)
 
+            setEditData(prev => ({ ...prev, windMeasurementResponseDtos: windResponse }))
             break
           case 'PIPE':
-            mutatePipeMeasurementResponseDto(editData.pipeMeasurementResponseDtos)
+            const pipeResponse = await mutatePipeAsync(editData.pipeMeasurementResponseDtos)
 
+            setEditData(prev => ({ ...prev, pipeMeasurementResponseDtos: pipeResponse }))
             break
           default:
             break
@@ -226,20 +280,7 @@ const InspectionDetailModalInner = ({
         handleApiError(error)
       }
     }
-  }, [
-    editData,
-    existChange,
-    mutateMachineInspectionResponseDto,
-    mutateEngineerIds,
-    mutateMachineInspectionChecklistItemResultUpdateRequestDto,
-    mutateGasMeasurementResponseDto,
-    mutateWindMeasurementResponseDto,
-    mutatePipeMeasurementResponseDto,
-    selectedInspection,
-    tabValue,
-    thisTabInfo,
-    setOffset
-  ])
+  }
 
   const handleDelete = async () => {
     const inspectionInfo = selectedInspection.machineInspectionResponseDto
@@ -281,7 +322,7 @@ const InspectionDetailModalInner = ({
               variant='standard'
               value={currentInspectionId}
               onChange={e => {
-                setCurrentInspectionId(Number(e.target.value))
+                setInspectionId(Number(e.target.value))
               }}
               renderValue={value => (
                 <Typography variant='h3'>{inspectionsSimple.find(v => v.id === value)!.name}</Typography>
@@ -358,9 +399,9 @@ const InspectionDetailModalInner = ({
           }
         }}
       >
-        <div className={`${styles.container} relative`}>
+        <div className={`${styles.container} relative pt-1`}>
           <TabList
-            onChange={(event, newValue) => {
+            onChange={(_, newValue) => {
               if (existChange) {
                 setShowAlertModal(true)
               } else {
@@ -376,45 +417,45 @@ const InspectionDetailModalInner = ({
               )
             )}
           </TabList>
-          <div className='flex gap-2 absolute right-0 top-0'>
-            <Button variant='contained' color='info' onClick={() => setShowPictureListModal(true)}>
-              갤러리 (
-              {editData.machineChecklistItemsWithPicCountResponseDtos?.reduce(
-                (sum, cate) => (sum += cate.totalMachinePicCount),
-                0
-              )}
-              )
-            </Button>
-            {/* <Button variant='contained' color='success'>
-              보고서
-            </Button> */}
+          <Button
+            sx={{ position: 'absolute', right: 0, top: 0 }}
+            variant='contained'
+            color='info'
+            onClick={() => setShowPictureListModal(true)}
+          >
+            갤러리 (
+            {editData.machineChecklistItemsWithPicCountResponseDtos?.reduce(
+              (sum, cate) => (sum += cate.totalMachinePicCount),
+              0
+            )}
+            )
+          </Button>
+
+          <div className='pt-5 h-[60dvh] overflow-y-auto'>
+            <TabPanel value={'BASIC'}>
+              <BasicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+            </TabPanel>
+            <TabPanel value={'PIC'}>
+              <handleSaveChecklistContext.Provider value={handleSaveChecklist}>
+                <ChecklistPicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+              </handleSaveChecklistContext.Provider>
+            </TabPanel>
+            {editData.gasMeasurementResponseDto && (
+              <TabPanel value={'GAS'}>
+                <GasTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+              </TabPanel>
+            )}
+            {editData.windMeasurementResponseDtos && (
+              <TabPanel value={'WIND'}>
+                <WindTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+              </TabPanel>
+            )}
+            {editData.pipeMeasurementResponseDtos && (
+              <TabPanel value={'PIPE'}>
+                <PipeTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
+              </TabPanel>
+            )}
           </div>
-          <TabPanel value={'BASIC'}>
-            <BasicTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-          </TabPanel>
-          <TabPanel value={'PIC'}>
-            <PicTabContent
-              editData={editData}
-              setEditData={setEditData}
-              isEditing={isEditing}
-              handleChangeChecklistItemResult={mutateMachineInspectionChecklistItemResultUpdateRequestDto}
-            />
-          </TabPanel>
-          {editData.gasMeasurementResponseDto && (
-            <TabPanel value={'GAS'}>
-              <GasTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-            </TabPanel>
-          )}
-          {editData.windMeasurementResponseDtos && (
-            <TabPanel value={'WIND'}>
-              <WindTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-            </TabPanel>
-          )}
-          {editData.pipeMeasurementResponseDtos && (
-            <TabPanel value={'PIPE'}>
-              <PipeTabContent editData={editData} setEditData={setEditData} isEditing={isEditing} />
-            </TabPanel>
-          )}
         </div>
 
         <AlertModal open={showAlertModal} setOpen={setShowAlertModal} handleConfirm={handleDontSave} />

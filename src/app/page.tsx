@@ -1,16 +1,16 @@
 'use client'
 
-import { useLayoutEffect } from 'react'
+import { useContext, useLayoutEffect } from 'react'
 
 import { useRouter } from 'next/navigation'
 
 import { Backdrop, CircularProgress, Typography } from '@mui/material'
 
-import useIsTablet from '@core/utils/useIsTablet'
+import { isTabletContext } from '@/@core/contexts/mediaQueryContext'
 
 export default function HomeRedirectPage() {
   const router = useRouter()
-  const isTablet = useIsTablet()
+  const isTablet = useContext(isTabletContext)
 
   useLayoutEffect(() => {
     router.replace(isTablet ? '/check' : '/machine')

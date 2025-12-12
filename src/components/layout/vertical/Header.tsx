@@ -30,7 +30,7 @@ import { Menu, MenuItem, MenuSection } from '@menu/vertical-menu'
 import { logout } from '@core/utils/auth'
 import UserModal from '@/app/(dashboard)/member/_components/UserModal'
 import { useGetSingleMember } from '@core/hooks/customTanstackQueries'
-import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 import { isMobileContext, isTabletContext } from '@/@core/contexts/mediaQueryContext'
 
 // import Logo from '@components/layout/shared/Logo'

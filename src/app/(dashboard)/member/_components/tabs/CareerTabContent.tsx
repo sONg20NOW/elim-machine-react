@@ -8,7 +8,7 @@ import type { MemberCareerDtoType } from '@core/types'
 import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { useMutateSingleMember } from '@core/hooks/customTanstackQueries'
 import { handleApiError } from '@core/utils/errorHandler'
-import type { refType } from '../UserModal'
+import { useSavedTabsContext, type refType } from '../UserModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 
@@ -18,6 +18,8 @@ interface CareerTabContentProps {
 
 const CareerTabContent = forwardRef<refType, CareerTabContentProps>(({ defaultData }, ref) => {
   const memberId = defaultData.memberId
+
+  const savedTabs = useSavedTabsContext()
 
   const { mutateAsync: mutateCareerAsync } = useMutateSingleMember<MemberCareerDtoType>(memberId.toString(), 'career')
 
@@ -38,7 +40,7 @@ const CareerTabContent = forwardRef<refType, CareerTabContentProps>(({ defaultDa
     form.reset()
   }
 
-  const save = form.handleSubmit(async data => {
+  const handleSave = form.handleSubmit(async data => {
     try {
       const newCareer = await mutateCareerAsync(data)
 
@@ -54,6 +56,7 @@ const CareerTabContent = forwardRef<refType, CareerTabContentProps>(({ defaultDa
       })
 
       console.log('career 정보 수정 완료')
+      savedTabs.current?.push('경력정보')
     } catch (e) {
       console.log(e)
       handleApiError(e)
@@ -61,7 +64,7 @@ const CareerTabContent = forwardRef<refType, CareerTabContentProps>(({ defaultDa
   })
 
   useImperativeHandle(ref, () => ({
-    handleSave: save,
+    handleSave: handleSave,
     handleDontSave: dontSave,
     dirty: form.formState.isDirty
   }))

@@ -17,7 +17,7 @@ import { Checkbox, Divider, ListItemIcon, Menu, MenuItem, styled, TableCell, Typ
 import { IconCaretDownFilled, IconCaretUpFilled, IconExclamationCircleFilled } from '@tabler/icons-react'
 
 import type { HeaderType } from '@core/types'
-import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 import { DEFAULT_PAGESIZE } from '@/@core/data/options'
 import { isMobileContext, isTabletContext } from '@/@core/contexts/mediaQueryContext'
 

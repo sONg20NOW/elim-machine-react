@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation'
 import axios from 'axios'
 
 import type { LoginResponseDtoType, TokenResponseDto } from '@core/types'
-import useAccessTokenStore from '@core/utils/useAuthStore'
-import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import useAccessTokenStore from '@/@core/hooks/zustand/useAuthStore'
+import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 
 export const auth = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}`,

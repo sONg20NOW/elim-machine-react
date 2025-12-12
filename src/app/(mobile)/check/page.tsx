@@ -29,7 +29,7 @@ import type { MachineProjectPageDtoType, successResponseDtoType } from '@core/ty
 import MobileHeader from '../_components/MobileHeader'
 import SearchBar from '@/@core/components/elim-inputbox/SearchBar'
 import { auth, logout } from '@core/utils/auth'
-import useCurrentUserStore from '@core/utils/useCurrentUserStore'
+import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 import { useGetEngineerByMemberId } from '@core/hooks/customTanstackQueries'
 import { gradeOption } from '@/@core/data/options'
 import { printErrorSnackbar, printInfoSnackbar } from '@core/utils/snackbarHandler'

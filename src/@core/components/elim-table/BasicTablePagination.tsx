@@ -3,7 +3,7 @@ import { useSearchParams } from 'next/navigation'
 import { Card, TablePagination } from '@mui/material'
 
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/@core/data/options'
-import useSetQueryParams from '@/@core/utils/searchParams/useSetQueryParams'
+import useSetQueryParams from '@/@core/hooks/searchParams/useSetQueryParams'
 
 interface BasicTablePaginationProps {
   totalCount: number

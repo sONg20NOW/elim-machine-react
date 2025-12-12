@@ -13,6 +13,7 @@ import DialogActions from '@mui/material/DialogActions'
 // Component Imports
 import TabContext from '@mui/lab/TabContext'
 
+import type { SxProps } from '@mui/material'
 import { DialogContent, Divider, IconButton, Typography } from '@mui/material'
 import classNames from 'classnames'
 import type { TransitionProps } from '@mui/material/transitions'
@@ -32,6 +33,7 @@ type DefaultModalProps = {
   deleteButton?: ReactNode
   onClose?: () => void
   TransitionProps?: TransitionProps
+  sx?: SxProps
 }
 
 /**
@@ -42,24 +44,26 @@ type DefaultModalProps = {
  * @param value 몇번째 탭인지 알려주는 상태.
  * @returns modal component 리턴.
  */
-export default function DefaultModal({
-  size = 'md',
-  value,
-  open,
-  setOpen,
-  title,
-  headerDescription,
-  children,
-  primaryButton,
-  secondaryButton,
-  modifyButton,
-  deleteButton,
-  onClose = () => {
-    setOpen(false)
-  },
-  TransitionProps
-}: DefaultModalProps) {
-  // States
+export default function DefaultModal(props: DefaultModalProps) {
+  const {
+    size = 'md',
+    value,
+    open,
+    setOpen,
+    title,
+    headerDescription,
+    children,
+    primaryButton,
+    secondaryButton,
+    modifyButton,
+    deleteButton,
+    onClose = () => {
+      setOpen(false)
+    },
+    TransitionProps,
+    sx
+  } = props
+
   return (
     <Dialog
       fullWidth
@@ -68,7 +72,7 @@ export default function DefaultModal({
       maxWidth={size}
       scroll='paper' // ✅ DialogContent 안에서만 스크롤
       closeAfterTransition={false}
-      sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+      sx={{ ...sx, '& .MuiDialog-paper': { overflow: 'visible' } }}
       slotProps={{ transition: TransitionProps }}
     >
       {/* 닫기 버튼 */}

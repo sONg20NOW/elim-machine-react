@@ -156,6 +156,7 @@ export const useMutateLicense = (licenseId: string) => {
 // GET /api/machine-projects/${machineProjectId}/machine-inspections/simple : 설비 목록 조회 (SIMPLE)
 export const useGetInspectionsSimple = (machineProjectId: string) => {
   return useQuery({
+    enabled: machineProjectId !== '',
     queryKey: QUERY_KEYS.MACHINE_INSPECTION.GET_INSPECTIONS_SIMPLE(machineProjectId),
     queryFn: async data => {
       const [keytype, machineProjectId] = data.queryKey
@@ -866,6 +867,7 @@ export const useGetMachineProject = (machineProjectId: string) => {
   )
 
   return useQuery({
+    enabled: machineProjectId !== '',
     queryKey: QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECT(machineProjectId),
     queryFn: fetchMachineProjectData,
     staleTime: 1000 * 60 * 5 // 5분
@@ -1227,8 +1229,26 @@ export const useMutateSingleMember = <
 
     onError: error => {
       console.error(error)
+    }
+  })
+}
+
+export const useGetJuminNumView = (memberId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.MEMBER.GET_JUMIN_NUM_VIEW(memberId),
+    queryFn: async data => {
+      const queryKey = data.queryKey
+      const [keyType, memberId] = queryKey
+
+      const fullJuminNum = await auth
+        .post<{ data: { juminNum: string } }>(`/api/members/jumin-num/view`, { memberId: memberId })
+        .then(v => v.data.data.juminNum)
+
+      console.log(`!!! queryFn ${keyType}`)
+
+      return fullJuminNum
     },
-    throwOnError: true
+    enabled: Number(memberId) > 0
   })
 }
 
