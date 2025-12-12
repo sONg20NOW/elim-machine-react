@@ -13,6 +13,16 @@ interface AlertModalProps {
   confirmMessage?: string
 }
 
+/**
+ *
+ * @param open *
+ * @param setOpen *
+ * @param handleConfirm *
+ * @param title
+ * @param subtitle
+ * @param confirmMessage
+ * @returns
+ */
 export default function AlertModal({ open, setOpen, handleConfirm, title, subtitle, confirmMessage }: AlertModalProps) {
   const [clicked, setClicked] = useState(false)
 
