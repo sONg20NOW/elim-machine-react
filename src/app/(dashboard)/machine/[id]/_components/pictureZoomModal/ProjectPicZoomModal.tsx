@@ -22,7 +22,8 @@ import classNames from 'classnames'
 
 import { useForm } from 'react-hook-form'
 
-import ImageZoom from 'react-image-zooom'
+import Zoom from 'react-medium-image-zoom'
+import 'react-medium-image-zoom/dist/styles.css'
 
 import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
 
@@ -327,7 +328,14 @@ export default function ProjectPicZoomModal({
                   </Button>
                 </div>
               </div>
-              <ImageZoom src={selectedPic.presignedUrl} alt={watchedOriginalFileName} />
+              <Zoom>
+                <img
+                  className='object-contain'
+                  src={selectedPic.presignedUrl}
+                  alt={watchedOriginalFileName}
+                  width={820}
+                />
+              </Zoom>
             </div>
             <Box>
               <Grid2

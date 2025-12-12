@@ -18,13 +18,12 @@ import {
   useMediaQuery
 } from '@mui/material'
 
-import classNames from 'classnames'
+import Zoom from 'react-medium-image-zoom'
+import 'react-medium-image-zoom/dist/styles.css'
 
 import { toast } from 'react-toastify'
 
 import { useForm } from 'react-hook-form'
-
-import ImageZoom from 'react-image-zooom'
 
 import { createPortal } from 'react-dom'
 
@@ -65,7 +64,7 @@ export default function InspectionPicZoomModal({
 }: InspectionPicZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
 
-  const showMovePicBtns = useMediaQuery('(min-width:1755px)')
+  const showMovePicBtns = useMediaQuery('(min-width:1100px)')
 
   const [openAlert, setOpenAlert] = useState(false)
   const [openDelete, setOpenDelete] = useState(false)
@@ -259,12 +258,6 @@ export default function InspectionPicZoomModal({
   return (
     inspectionList && (
       <form className='hidden' onSubmit={handleSave} id={formName}>
-        <style>
-          {`#imageZoom {
-              object-fit: contain;
-              height: 100%;
-            }`}
-        </style>
         {showMovePicBtns &&
           MovePicture &&
           open &&
@@ -304,7 +297,7 @@ export default function InspectionPicZoomModal({
             document.body
           )}
         <Dialog
-          maxWidth='xl'
+          maxWidth='md'
           fullWidth
           open={open}
           onClose={(_, reason) => {
@@ -341,13 +334,10 @@ export default function InspectionPicZoomModal({
               <IconX />
             </IconButton>
           </DialogTitle>
-          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '60dvh' }}>
-            <div
-              className={classNames('flex gap-4 w-full h-full', {
-                'flex-col': isMobile
-              })}
-            >
-              <div className='flex-1 flex flex-col gap-6 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <div className='flex flex-col gap-4 w-full'>
+              {/* 사진창 */}
+              <div className='flex-1 flex flex-col gap-6 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300 h-[50px]'>
                 <div className='w-full flex justify-between'>
                   <div className='flex gap-2'>
                     <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
@@ -379,10 +369,18 @@ export default function InspectionPicZoomModal({
                     </Button>
                   </div>
                 </div>
-                <ImageZoom src={selectedPic.presignedUrl} alt={watchedAlternativeSubTitle} />
+                <Zoom>
+                  <img
+                    className='object-contain'
+                    src={selectedPic.presignedUrl}
+                    alt={watchedAlternativeSubTitle}
+                    width={820}
+                  />
+                </Zoom>
               </div>
+              {/* 정보 수정 창 */}
               <Box>
-                <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={1}>
+                <Grid2 sx={{ marginTop: 2, width: 'full' }} container columnSpacing={3} rowSpacing={2} columns={2}>
                   <MultiInputBox
                     form={form}
                     name='machineInspectionId'
@@ -422,10 +420,12 @@ export default function InspectionPicZoomModal({
                   <TextInputBox
                     form={form}
                     name='measuredValue'
+                    measuredValue
                     labelMap={{ measuredValue: { label: '측정값' } }}
                     placeholder='측정값을 입력해주세요'
                   />
                   <TextInputBox
+                    column={2}
                     multiline
                     form={form}
                     name='remark'
@@ -436,7 +436,7 @@ export default function InspectionPicZoomModal({
               </Box>
             </div>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ mt: 2 }}>
             <div className='flex items-end gap-4'>
               <Typography color={isDirty ? 'error.main' : 'warning.main'}>
                 {!isDirty ? '변경사항이 없습니다' : !watchedChecklistSubItemId && '※하위항목을 지정해주세요'}
