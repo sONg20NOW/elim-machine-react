@@ -8,7 +8,7 @@ import type { MemberBasicDtoType } from '@core/types'
 import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { useGetLicenseNames, useMutateSingleMember } from '@core/hooks/customTanstackQueries'
 import { handleApiError } from '@core/utils/errorHandler'
-import type { refType } from '../UserModal'
+import { useSavedTabsContext, type refType } from '../UserModal'
 import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
@@ -19,6 +19,8 @@ interface BasicTabContentProps {
 
 const BasicTabContent = forwardRef<refType, BasicTabContentProps>(({ defaultData }, ref) => {
   const memberId = defaultData.memberId
+
+  const savedTabs = useSavedTabsContext()
 
   const { currentUser, setCurrentUserName } = useCurrentUserStore()
 
@@ -41,7 +43,7 @@ const BasicTabContent = forwardRef<refType, BasicTabContentProps>(({ defaultData
     form.reset()
   }
 
-  const save = form.handleSubmit(async data => {
+  const handleSave = form.handleSubmit(async data => {
     try {
       const newBasic = await mutateBasicAsync(data)
 
@@ -60,6 +62,7 @@ const BasicTabContent = forwardRef<refType, BasicTabContentProps>(({ defaultData
       }
 
       console.log('basic 정보 수정 완료')
+      savedTabs.current?.push('기본정보')
     } catch (e) {
       console.log(e)
       handleApiError(e)
@@ -67,7 +70,7 @@ const BasicTabContent = forwardRef<refType, BasicTabContentProps>(({ defaultData
   })
 
   useImperativeHandle(ref, () => ({
-    handleSave: save,
+    handleSave: handleSave,
     handleDontSave: dontSave,
     dirty: form.formState.isDirty
   }))

@@ -8,7 +8,7 @@ import type { MemberPrivacyDtoType } from '@core/types'
 import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { useMutateSingleMember } from '@core/hooks/customTanstackQueries'
 import { handleApiError } from '@core/utils/errorHandler'
-import type { refType } from '../UserModal'
+import { useSavedTabsContext, type refType } from '../UserModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 
@@ -21,6 +21,8 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
     defaultData.memberId.toString(),
     'privacy'
   )
+
+  const savedTabs = useSavedTabsContext()
 
   const form = useForm<MemberPrivacyDtoType>({
     defaultValues: {
@@ -50,7 +52,7 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
     form.reset()
   }
 
-  const save = form.handleSubmit(async data => {
+  const handleSave = form.handleSubmit(async data => {
     try {
       const newPrivacy = await mutatePrivacyAsync(data)
 
@@ -74,6 +76,7 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
         bankNumber: newPrivacy.bankNumber ?? ''
       })
 
+      savedTabs.current?.push('개인정보')
       console.log('privacy 정보 수정 완료')
     } catch (e) {
       console.log(e)
@@ -82,7 +85,7 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
   })
 
   useImperativeHandle(ref, () => ({
-    handleSave: save,
+    handleSave: handleSave,
     handleDontSave: dontSave,
     dirty: form.formState.isDirty
   }))
@@ -91,7 +94,7 @@ const PrivacyTabContent = forwardRef<refType, PrivacyTabContentProps>(({ default
     <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
       <Grid2 container spacing={3} columns={2} columnSpacing={5}>
         <MultiInputBox name='foreignYn' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
-        <TextInputBox name='juminNum' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
+        <TextInputBox name='juminNum' juminNum labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
         <TextInputBox type='date' name='birthday' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
         <TextInputBox name='phoneNumber' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />
         <TextInputBox name='emerNum1' labelMap={MEMBER_INPUT_INFO.privacy} form={form} column={1} />

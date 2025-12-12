@@ -8,7 +8,7 @@ import type { MemberEtcDtoType } from '@core/types'
 import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { useMutateSingleMember } from '@core/hooks/customTanstackQueries'
 import { handleApiError } from '@core/utils/errorHandler'
-import type { refType } from '../UserModal'
+import { useSavedTabsContext, type refType } from '../UserModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 
 interface EtcTabContentProps {
@@ -16,6 +16,8 @@ interface EtcTabContentProps {
 }
 
 const EtcTabContent = forwardRef<refType, EtcTabContentProps>(({ defaultData }, ref) => {
+  const savedTabs = useSavedTabsContext()
+
   const memberId = defaultData.memberId
 
   const { mutateAsync: mutateEtcAsync } = useMutateSingleMember<MemberEtcDtoType>(memberId.toString(), 'etc')
@@ -40,7 +42,7 @@ const EtcTabContent = forwardRef<refType, EtcTabContentProps>(({ defaultData }, 
     form.reset()
   }
 
-  const save = form.handleSubmit(async data => {
+  const handleSave = form.handleSubmit(async data => {
     try {
       const newEtc = await mutateEtcAsync(data)
 
@@ -58,6 +60,7 @@ const EtcTabContent = forwardRef<refType, EtcTabContentProps>(({ defaultData }, 
       })
 
       console.log('etc 정보 수정 완료')
+      savedTabs.current?.push('기타정보')
     } catch (e) {
       console.log(e)
       handleApiError(e)
@@ -65,7 +68,7 @@ const EtcTabContent = forwardRef<refType, EtcTabContentProps>(({ defaultData }, 
   })
 
   useImperativeHandle(ref, () => ({
-    handleSave: save,
+    handleSave: handleSave,
     handleDontSave: dontSave,
     dirty: form.formState.isDirty
   }))

@@ -8,7 +8,7 @@ import type { MemberOfficeDtoType } from '@core/types'
 import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { useMutateSingleMember } from '@core/hooks/customTanstackQueries'
 import { handleApiError } from '@core/utils/errorHandler'
-import type { refType } from '../UserModal'
+import { useSavedTabsContext, type refType } from '../UserModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 
@@ -20,6 +20,8 @@ const OfficeTabContent = forwardRef<refType, OfficeTabContentProps>(({ defaultDa
   const memberId = defaultData.memberId
 
   const { mutateAsync: mutateOfficeAsync } = useMutateSingleMember<MemberOfficeDtoType>(memberId.toString(), 'office')
+
+  const savedTabs = useSavedTabsContext()
 
   const form = useForm<MemberOfficeDtoType>({
     defaultValues: {
@@ -70,6 +72,7 @@ const OfficeTabContent = forwardRef<refType, OfficeTabContentProps>(({ defaultDa
       })
 
       console.log('office 정보 수정 완료')
+      savedTabs.current?.push('재직정보')
     } catch (e) {
       console.log(e)
       handleApiError(e)
