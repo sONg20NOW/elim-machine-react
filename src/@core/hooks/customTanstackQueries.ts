@@ -1229,8 +1229,7 @@ export const useMutateSingleMember = <
 
     onError: error => {
       console.error(error)
-    },
-    throwOnError: true
+    }
   })
 }
 
