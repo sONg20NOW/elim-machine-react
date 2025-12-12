@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Grid2, IconButton, TextField, Typography } from '@mui/material'
+import { Grid2, IconButton, MenuItem, TextField, Typography } from '@mui/material'
 import { useFormState, type Path, type PathValue, type RegisterOptions, type UseFormReturn } from 'react-hook-form'
 
 import { IconEye, IconEyeOff } from '@tabler/icons-react'
@@ -8,6 +8,7 @@ import { IconEye, IconEyeOff } from '@tabler/icons-react'
 import PostCodeButton from '../elim-button/PostCodeButton'
 import { auth } from '@/@core/utils/auth'
 import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
+import { measuredValueOption } from '@/@core/data/options'
 
 interface TextInputBoxProps<T extends Record<string, any>> {
   name: Path<T>
@@ -98,6 +99,14 @@ export default function TextInputBox<T extends Record<string, any>>({
               }
             }
           })}
+          {...(measuredValue && {
+            slotProps: {
+              htmlInput: { name: name },
+              input: {
+                endAdornment: <MeasuredValueAutoCompleteBtn form={form} name={name} />
+              }
+            }
+          })}
           size='small'
         />
         {error && (
@@ -149,4 +158,45 @@ function JuminNumEndAdorment<T extends Record<string, any>>({
   }
 
   return <IconButton onClick={handleClick}>{show ? <IconEyeOff /> : <IconEye />}</IconButton>
+}
+
+function MeasuredValueAutoCompleteBtn<T extends Record<string, any>>({
+  form,
+  name
+}: {
+  form: UseFormReturn<T, any, undefined>
+  name: Path<T>
+}) {
+  const [value, setValue] = useState('')
+  const watchedValue = form.watch(name)
+
+  return (
+    <TextField
+      size='small'
+      variant='standard'
+      select
+      value={value}
+      onChange={event => {
+        setValue(event.target.value)
+        form.setValue(name, watchedValue.concat(event.target.value))
+      }}
+      slotProps={{
+        select: {
+          displayEmpty: true,
+          renderValue(value) {
+            const found = measuredValueOption.find(v => v.value === value)
+
+            return <Typography>{found ? found.label : '자동완성'}</Typography>
+          },
+          IconComponent: () => null
+        }
+      }}
+    >
+      {measuredValueOption.map(v => (
+        <MenuItem key={v.value} value={v.value}>
+          {v.label}
+        </MenuItem>
+      ))}
+    </TextField>
+  )
 }

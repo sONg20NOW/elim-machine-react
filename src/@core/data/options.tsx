@@ -213,6 +213,22 @@ export const equipmentPhaseOption: { label: string; value: equipmentPhaseType }[
   { label: '사용일', value: 'USE' }
 ]
 
+// 측정값 자동입력
+export const measuredValueOption = [
+  'A',
+  '㎝',
+  '㎝Hg',
+  'CO',
+  'CO₂',
+  'dB(A)',
+  'Eff',
+  'kgf/㎠',
+  '㎾',
+  'mbar',
+  '㎜',
+  '㎜/s'
+].map(v => ({ value: v, label: v }))
+
 // 공통
 export const PageSizeOptions = [15, 20, 25, 30, 50, 100]
 
