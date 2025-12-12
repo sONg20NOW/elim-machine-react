@@ -49,7 +49,7 @@ export const MEMBER_INPUT_INFO: memberInputInfoType = {
     juminNum: {
       size: 'md',
       type: 'juminNum',
-      label: '주민번호'
+      label: '주민등록번호'
     },
     birthday: {
       size: 'md',
