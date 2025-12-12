@@ -19,6 +19,7 @@ interface TextInputBoxProps<T extends Record<string, any>> {
   placeholder?: string
   postcode?: boolean
   juminNum?: boolean
+  measuredValue?: boolean
   required?: boolean
   rule?: RegisterOptions<T, Path<T>> | undefined
   type?: 'number' | 'date'
@@ -48,6 +49,7 @@ export default function TextInputBox<T extends Record<string, any>>({
   placeholder,
   postcode = false,
   juminNum = false,
+  measuredValue = false,
   required = false,
   rule,
   type
