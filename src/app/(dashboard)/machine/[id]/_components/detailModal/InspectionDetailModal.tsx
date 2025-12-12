@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -191,6 +191,25 @@ const InspectionDetailModalInner = ({
   const thisTabInfo = TabInfo[selectedInspection.checklistExtensionType]
 
   const [isEditing, setIsEditing] = useState(false)
+
+  // 사진 업로드 시 editData 사진 개수 최신화
+  useEffect(() => {
+    setEditData(prev => {
+      const newDtos = prev.machineChecklistItemsWithPicCountResponseDtos.map(v => {
+        const matchedDto = selectedInspection.machineChecklistItemsWithPicCountResponseDtos.find(
+          p => p.machineProjectChecklistItemId === v.machineProjectChecklistItemId
+        )!
+
+        return {
+          ...v,
+          totalMachinePicCount: matchedDto.totalMachinePicCount,
+          checklistSubItems: matchedDto.checklistSubItems
+        }
+      })
+
+      return { ...prev, machineChecklistItemsWithPicCountResponseDtos: newDtos }
+    })
+  }, [selectedInspection.machineChecklistItemsWithPicCountResponseDtos])
 
   // ? 미흡사항이 변경되었을 때도 version이 달라서 차이가 발생하므로 version 제외하고 비교.
   const existChange =
