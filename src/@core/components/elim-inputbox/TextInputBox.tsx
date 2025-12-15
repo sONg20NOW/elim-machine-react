@@ -167,7 +167,6 @@ function MeasuredValueAutoCompleteBtn<T extends Record<string, any>>({
   form: UseFormReturn<T, any, undefined>
   name: Path<T>
 }) {
-  const [value, setValue] = useState('')
   const watchedValue = form.watch(name)
 
   return (
@@ -175,10 +174,9 @@ function MeasuredValueAutoCompleteBtn<T extends Record<string, any>>({
       size='small'
       variant='standard'
       select
-      value={value}
+      value={''}
       onChange={event => {
-        setValue(event.target.value)
-        form.setValue(name, watchedValue.concat(event.target.value))
+        form.setValue(name, watchedValue.concat(event.target.value), { shouldDirty: true })
       }}
       slotProps={{
         select: {
