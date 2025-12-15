@@ -227,7 +227,7 @@ const InspectionListTabContent = () => {
       <setInspectionIdContext.Provider value={setInspectionId}>
         <div className='relative h-full flex flex-col'>
           {/* 필터바 */}
-          <div>
+          <div className='px-3'>
             <BasicTableFilter<MachineInspectionFilterType>
               filterInfo={{
                 engineerName: {
@@ -240,21 +240,22 @@ const InspectionListTabContent = () => {
                 }
               }}
               disabled={disabled}
+              padding={0}
             />
-            {/* 필터 초기화 버튼 */}
-            <Button
-              startIcon={<IconReload />}
-              onClick={() => {
-                resetQueryParams()
-              }}
-              className='max-sm:is-full absolute right-8 top-8'
-              disabled={disabled}
-            >
-              필터 초기화
-            </Button>
           </div>
+          {/* 필터 초기화 버튼 */}
+          <Button
+            startIcon={<IconReload />}
+            onClick={() => {
+              resetQueryParams()
+            }}
+            className='max-sm:is-full absolute right-1 top-0'
+            disabled={disabled}
+          >
+            필터 초기화
+          </Button>
           {/* 상단 기능 요소들: 페이지 당 행수, 설비분류 검색, 위치 검색, 선택삭제, 추가 */}
-          <div className='flex flex-col justify-between items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+          <div className='flex flex-col justify-between items-start md:flex-row md:items-center py-6 px-3 gap-4'>
             <div className='flex gap-2'>
               {/* 페이지당 행수 */}
               <CustomTextField
