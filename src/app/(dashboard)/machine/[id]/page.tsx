@@ -180,7 +180,7 @@ const MachineUpdatePage = () => {
           />
         </div>
 
-        <CardContent className='flex-1 flex flex-col overflow-y-hidden p-0"'>
+        <CardContent className='flex-1 flex flex-col overflow-y-hidden p-0'>
           <TabContext value={tabValue}>
             {/* 탭 목록 */}
             <TabList onChange={handleChange} aria-label='nav tabs example'>
@@ -192,7 +192,7 @@ const MachineUpdatePage = () => {
                 )
               })}
             </TabList>
-            <div className='flex-1 overflow-y-hidden pt-4'>
+            <div className='flex-1 overflow-y-hidden px-6 pt-6'>
               <TabPanel value='현장정보' className='h-full'>
                 {projectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
               </TabPanel>
