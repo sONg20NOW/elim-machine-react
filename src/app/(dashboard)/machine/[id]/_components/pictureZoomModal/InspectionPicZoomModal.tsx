@@ -13,6 +13,7 @@ import {
   DialogTitle,
   Grid2,
   IconButton,
+  Tooltip,
   Typography,
   useMediaQuery
 } from '@mui/material'
@@ -23,7 +24,7 @@ import { useForm } from 'react-hook-form'
 
 import { createPortal } from 'react-dom'
 
-import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
+import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconDownload, IconPhotoUp } from '@tabler/icons-react'
 
 import type {
   MachinePicPresignedUrlResponseDtoType,
@@ -220,7 +221,12 @@ export default function InspectionPicZoomModal({
   })
 
   const handleClose = () => {
-    setOpen(false)
+    if (isDirty) {
+      proceedingJob.current = () => setOpen(false)
+      setOpenAlert(true)
+    } else {
+      setOpen(false)
+    }
   }
 
   const handleDontSave = useCallback(() => {
@@ -302,46 +308,36 @@ export default function InspectionPicZoomModal({
           <Backdrop sx={theme => ({ zIndex: theme.zIndex.modal + 10 })} open={loading}>
             <CircularProgress size={60} sx={{ color: 'white' }} />
           </Backdrop>
-          <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative', pb: 2 }}>
-            <div className='flex justify-between pe-3'>
-              <div className='flex gap-2'>
-                <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
-                  삭제
-                </Button>
-                <Button
-                  color='error'
-                  disabled={!isDirty}
-                  onClick={() => {
-                    proceedingJob.current = undefined
-                    setOpenAlert(true)
-                  }}
-                >
-                  변경사항 폐기
-                </Button>
-              </div>
-              <div className='flex gap-2'>
-                <Button
-                  LinkComponent={'a'}
-                  href={selectedPic.downloadPresignedUrl}
-                  download
-                  variant='contained'
-                  className='bg-blue-500 hover:bg-blue-600'
-                >
-                  다운로드
-                </Button>
-                <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
-                  사진 교체
-                </Button>
-              </div>
+          <DialogTitle
+            sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, position: 'relative', pb: 2, pt: 4 }}
+          >
+            <div className='flex gap-2 items-center'>
+              <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
+                삭제
+              </Button>
+              <Button
+                color='error'
+                disabled={!isDirty}
+                onClick={() => {
+                  proceedingJob.current = undefined
+                  setOpenAlert(true)
+                }}
+              >
+                변경사항 폐기
+              </Button>
             </div>
-            <IconButton
-              type='button'
-              sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
-              size='small'
-              onClick={handleClose}
-            >
-              <IconX />
-            </IconButton>
+            <div className='flex gap-2 items-center'>
+              <Tooltip title='사진 다운로드' arrow>
+                <IconButton type='button' LinkComponent={'a'} href={selectedPic.downloadPresignedUrl} download>
+                  <IconDownload color='dimgray' size={30} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='사진 업로드(교체)' arrow>
+                <IconButton type='button' onClick={() => cameraInputRef.current?.click()}>
+                  <IconPhotoUp color='dimgray' size={30} />
+                </IconButton>
+              </Tooltip>
+            </div>
           </DialogTitle>
           <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 4, height: '80dvh' }}>
             {/* 사진창 */}
@@ -416,16 +412,27 @@ export default function InspectionPicZoomModal({
               <Typography color={isDirty ? 'error.main' : 'warning.main'}>
                 {!isDirty ? '변경사항이 없습니다' : !watchedChecklistSubItemId && '※하위항목을 지정해주세요'}
               </Typography>
-              <Button
-                sx={{ width: 'fit-content' }}
-                variant='contained'
-                type='submit'
-                form={formName}
-                disabled={!isDirty || !watchedChecklistSubItemId || loading}
-                color='success'
-              >
-                저장
-              </Button>
+              <div className='flex'>
+                <Button
+                  sx={{ width: 'fit-content' }}
+                  variant='contained'
+                  type='submit'
+                  form={formName}
+                  disabled={!isDirty || !watchedChecklistSubItemId || loading}
+                  color='success'
+                >
+                  저장
+                </Button>
+                <Button
+                  sx={{ width: 'fit-content' }}
+                  variant='contained'
+                  type='button'
+                  onClick={handleClose}
+                  color='secondary'
+                >
+                  닫기
+                </Button>
+              </div>
             </div>
           </DialogActions>
           <input
