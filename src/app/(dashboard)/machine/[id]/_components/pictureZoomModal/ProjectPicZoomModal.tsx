@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -13,17 +13,11 @@ import {
   DialogTitle,
   Grid2,
   IconButton,
-  TextField,
   Typography,
   useMediaQuery
 } from '@mui/material'
 
-import classNames from 'classnames'
-
 import { useForm } from 'react-hook-form'
-
-import Zoom from 'react-medium-image-zoom'
-import 'react-medium-image-zoom/dist/styles.css'
 
 import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
 
@@ -42,7 +36,7 @@ import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
-import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
+import ImageZoomCard from './ImageZoomCard'
 
 interface formType {
   originalFileName: string
@@ -93,14 +87,10 @@ export default function ProjectPicZoomModal({
   const isDirty = form.formState.isDirty
 
   const watchedMachineProjectPicType = form.watch('machineProjectPicType')
-  const watchedOriginalFileName = form.watch('originalFileName')
 
   const [loading, setLoading] = useState(false)
 
   const cameraInputRef = useRef<HTMLInputElement>(null)
-
-  // 반응형을 위한 미디어쿼리
-  const isMobile = useContext(isMobileContext)
 
   const formName = 'project-pic-form'
 
@@ -202,12 +192,6 @@ export default function ProjectPicZoomModal({
 
   return (
     <form className='hidden' onSubmit={handleSave} id={formName}>
-      <style>
-        {`#imageZoom {
-          object-fit: contain;
-          height: 100%;
-        }`}
-      </style>
       {showMovePicBtns &&
         MovePicture &&
         open &&
@@ -248,7 +232,7 @@ export default function ProjectPicZoomModal({
         )}
 
       <Dialog
-        maxWidth='xl'
+        maxWidth='md'
         fullWidth
         open={open}
         onClose={(_, reason) => {
@@ -256,31 +240,41 @@ export default function ProjectPicZoomModal({
           handleClose()
         }}
       >
-        <Backdrop sx={theme => ({ zIndex: theme.zIndex.modal + 4 })} open={loading}>
+        <Backdrop sx={theme => ({ zIndex: theme.zIndex.modal + 10 })} open={loading}>
           <CircularProgress size={60} sx={{ color: 'white' }} />
         </Backdrop>
         <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative' }}>
-          <TextField
-            key={selectedPic.id}
-            {...form.register('originalFileName')}
-            variant='standard'
-            fullWidth
-            label={
-              <Typography {...(form.formState.dirtyFields.originalFileName && { color: 'primary.main' })}>
-                현장사진명
-              </Typography>
-            }
-            size='small'
-            sx={{ width: '30%' }}
-            slotProps={{
-              htmlInput: {
-                sx: {
-                  fontWeight: 700,
-                  fontSize: isMobile ? 20 : 24
-                }
-              }
-            }}
-          />
+          <div className='w-full flex justify-between pe-3'>
+            <div className='flex gap-2'>
+              <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
+                삭제
+              </Button>
+              <Button
+                color='error'
+                disabled={!isDirty}
+                onClick={() => {
+                  proceedingJob.current = undefined
+                  setOpenAlert(true)
+                }}
+              >
+                변경사항 폐기
+              </Button>
+            </div>
+            <div className='flex gap-2'>
+              <Button
+                LinkComponent='a'
+                href={selectedPic.downloadPresignedUrl}
+                download
+                variant='contained'
+                className='bg-blue-500 hover:bg-blue-600'
+              >
+                다운로드
+              </Button>
+              <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
+                사진 교체
+              </Button>
+            </div>
+          </div>
           <IconButton
             type='button'
             sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
@@ -290,70 +284,32 @@ export default function ProjectPicZoomModal({
             <IconX />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '60dvh' }}>
-          <div
-            className={classNames('flex gap-4 w-full h-full', {
-              'flex-col': isMobile
-            })}
-          >
-            <div className='flex-1 flex flex-col gap-6 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
-              <div className='w-full flex justify-between'>
-                <div className='flex gap-2'>
-                  <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
-                    삭제
-                  </Button>
-                  <Button
-                    color='error'
-                    disabled={!isDirty}
-                    onClick={() => {
-                      proceedingJob.current = undefined
-                      setOpenAlert(true)
-                    }}
-                  >
-                    변경사항 폐기
-                  </Button>
-                </div>
-                <div className='flex gap-2'>
-                  <Button
-                    LinkComponent='a'
-                    href={selectedPic.downloadPresignedUrl}
-                    download
-                    variant='contained'
-                    className='bg-blue-500 hover:bg-blue-600'
-                  >
-                    다운로드
-                  </Button>
-                  <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
-                    사진 교체
-                  </Button>
-                </div>
-              </div>
-              <Zoom>
-                <img
-                  className='object-contain'
-                  src={selectedPic.presignedUrl}
-                  alt={watchedOriginalFileName}
-                  width={820}
-                />
-              </Zoom>
-            </div>
-            <Box>
-              <Grid2
-                key={selectedPic.id}
-                sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }}
-                container
-                spacing={4}
-                columns={1}
-              >
-                <MultiInputBox
-                  form={form}
-                  name='machineProjectPicType'
-                  labelMap={{ machineProjectPicType: { label: '사진 종류', options: projectPicOption } }}
-                />
-                <TextInputBox multiline form={form} name='remark' labelMap={{ remark: { label: '비고' } }} />
-              </Grid2>
-            </Box>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 4, height: '80dvh' }}>
+          <div className='flex-1 overflow-hidden'>
+            <ImageZoomCard src={selectedPic.presignedUrl} alt={selectedPic.originalFileName} />
           </div>
+          <Box>
+            <Grid2 key={selectedPic.id} sx={{ marginTop: 2, width: { xs: 'full' } }} container spacing={4} columns={2}>
+              <TextInputBox
+                form={form}
+                name='originalFileName'
+                labelMap={{ originalFileName: { label: '사진명' } }}
+                placeholder='사진명을 입력해주세요'
+              />
+              <MultiInputBox
+                form={form}
+                name='machineProjectPicType'
+                labelMap={{ machineProjectPicType: { label: '사진 종류', options: projectPicOption } }}
+              />
+              <TextInputBox
+                column={2}
+                multiline={4}
+                form={form}
+                name='remark'
+                labelMap={{ remark: { label: '비고' } }}
+              />
+            </Grid2>
+          </Box>
         </DialogContent>
         <DialogActions>
           <div className='flex items-end gap-4'>
