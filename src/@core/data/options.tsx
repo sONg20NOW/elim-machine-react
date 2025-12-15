@@ -213,6 +213,42 @@ export const equipmentPhaseOption: { label: string; value: equipmentPhaseType }[
   { label: '사용일', value: 'USE' }
 ]
 
+// 측정값 자동입력
+export const measuredValueOption = [
+  '양호',
+  '없음',
+  '정상',
+  'A',
+  '㎝',
+  '㎝Hg',
+  'CO',
+  'CO₂',
+  'dB(A)',
+  'Eff',
+  'kgf/㎠',
+  '㎾',
+  'mbar',
+  '㎜',
+  '㎜/s',
+  '㎜Aq',
+  '㎜Hg',
+  '㎫',
+  '㏁',
+  'NO',
+  'NOx',
+  'Nm³/h',
+  'O₂',
+  'Ratio',
+  'rpm',
+  'V',
+  'XAir',
+  'Ω',
+  '℃',
+  'm³',
+  'm³/h',
+  'm³/min'
+].map(v => ({ value: v, label: v }))
+
 // 공통
 export const PageSizeOptions = [15, 20, 25, 30, 50, 100]
 

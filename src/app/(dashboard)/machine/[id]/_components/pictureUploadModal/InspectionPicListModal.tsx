@@ -723,7 +723,7 @@ const InspectionPicListModal = ({
                   </ImageList>
                 </>
               )}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'end', gap: 2, mt: 5 }}>
                 <input
                   type='file'
                   multiple
@@ -757,6 +757,10 @@ const InspectionPicListModal = ({
                 >
                   취소
                 </Button>
+                {(selectedItem?.machineProjectChecklistItemName === '기타' ||
+                  selectedSubItem?.machineProjectChecklistSubItemName === '기타') && (
+                  <Typography color='warning.main'>※기타 항목의 사진은 보고서 출력에 포함되지 않습니다</Typography>
+                )}
               </Box>
             </Paper>
           </Grid>

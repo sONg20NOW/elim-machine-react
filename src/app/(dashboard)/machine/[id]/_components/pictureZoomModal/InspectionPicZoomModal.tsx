@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { useParams } from 'next/navigation'
 
@@ -13,22 +13,18 @@ import {
   DialogTitle,
   Grid2,
   IconButton,
-  TextField,
+  Tooltip,
   Typography,
   useMediaQuery
 } from '@mui/material'
-
-import classNames from 'classnames'
 
 import { toast } from 'react-toastify'
 
 import { useForm } from 'react-hook-form'
 
-import ImageZoom from 'react-image-zooom'
-
 import { createPortal } from 'react-dom'
 
-import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconX } from '@tabler/icons-react'
+import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconDownload, IconPhotoUp } from '@tabler/icons-react'
 
 import type {
   MachinePicPresignedUrlResponseDtoType,
@@ -43,7 +39,7 @@ import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
-import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
+import ImageZoomCard from './ImageZoomCard'
 
 type formType = Omit<MachinePicUpdateRequestDtoType, 'version' | 's3Key'> & { machineProjectChecklistItemId: number }
 
@@ -65,10 +61,11 @@ export default function InspectionPicZoomModal({
 }: InspectionPicZoomModalProps) {
   const machineProjectId = useParams().id?.toString() as string
 
-  const showMovePicBtns = useMediaQuery('(min-width:1755px)')
+  const showMovePicBtns = useMediaQuery('(min-width:1100px)')
 
   const [openAlert, setOpenAlert] = useState(false)
   const [openDelete, setOpenDelete] = useState(false)
+
   const proceedingJob = useRef<() => void>()
 
   const form = useForm<formType>({
@@ -87,7 +84,6 @@ export default function InspectionPicZoomModal({
 
   const watchedChecklistItemId = form.watch('machineProjectChecklistItemId')
   const watchedChecklistSubItemId = form.watch('machineProjectChecklistSubItemId')
-  const watchedAlternativeSubTitle = form.watch('alternativeSubTitle')
   const watchedMachineInspectionId = form.watch('machineInspectionId')
 
   const { data: selectedInspection } = useGetSingleInspection(machineProjectId, watchedMachineInspectionId.toString())
@@ -110,8 +106,6 @@ export default function InspectionPicZoomModal({
   const { data: inspectionList } = useGetInspectionsSimple(machineProjectId)
 
   const cameraInputRef = useRef<HTMLInputElement>(null)
-
-  const isMobile = useContext(isMobileContext)
 
   const formName = 'inspection-pic-form'
 
@@ -227,7 +221,12 @@ export default function InspectionPicZoomModal({
   })
 
   const handleClose = () => {
-    setOpen(false)
+    if (isDirty) {
+      proceedingJob.current = () => setOpen(false)
+      setOpenAlert(true)
+    } else {
+      setOpen(false)
+    }
   }
 
   const handleDontSave = useCallback(() => {
@@ -259,12 +258,6 @@ export default function InspectionPicZoomModal({
   return (
     inspectionList && (
       <form className='hidden' onSubmit={handleSave} id={formName}>
-        <style>
-          {`#imageZoom {
-              object-fit: contain;
-              height: 100%;
-            }`}
-        </style>
         {showMovePicBtns &&
           MovePicture &&
           open &&
@@ -304,7 +297,7 @@ export default function InspectionPicZoomModal({
             document.body
           )}
         <Dialog
-          maxWidth='xl'
+          maxWidth='md'
           fullWidth
           open={open}
           onClose={(_, reason) => {
@@ -312,145 +305,134 @@ export default function InspectionPicZoomModal({
             handleClose()
           }}
         >
-          <Backdrop sx={theme => ({ zIndex: theme.zIndex.modal + 4 })} open={loading}>
+          <Backdrop sx={theme => ({ zIndex: theme.zIndex.modal + 10 })} open={loading}>
             <CircularProgress size={60} sx={{ color: 'white' }} />
           </Backdrop>
-          <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'relative', pb: 2 }}>
-            <TextField
-              {...form.register('originalFileName')}
-              variant='standard'
-              fullWidth
-              label='설비사진명'
-              size='small'
-              sx={{ width: '30%' }}
-              slotProps={{
-                htmlInput: {
-                  sx: {
-                    fontWeight: 700,
-                    fontSize: isMobile ? 20 : 24
-                  }
-                }
-              }}
-            />
-            <IconButton
-              type='button'
-              sx={{ height: 'fit-content', position: 'absolute', top: 5, right: 5 }}
-              size='small'
-              onClick={handleClose}
-            >
-              <IconX />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, height: '60dvh' }}>
-            <div
-              className={classNames('flex gap-4 w-full h-full', {
-                'flex-col': isMobile
-              })}
-            >
-              <div className='flex-1 flex flex-col gap-6 w-full items-center h-full border-4 p-2 rounded-lg bg-gray-300'>
-                <div className='w-full flex justify-between'>
-                  <div className='flex gap-2'>
-                    <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
-                      삭제
-                    </Button>
-                    <Button
-                      color='error'
-                      disabled={!isDirty}
-                      onClick={() => {
-                        proceedingJob.current = undefined
-                        setOpenAlert(true)
-                      }}
-                    >
-                      변경사항 폐기
-                    </Button>
-                  </div>
-                  <div className='flex gap-2'>
-                    <Button
-                      LinkComponent={'a'}
-                      href={selectedPic.downloadPresignedUrl}
-                      download
-                      variant='contained'
-                      className='bg-blue-500 hover:bg-blue-600'
-                    >
-                      다운로드
-                    </Button>
-                    <Button type='button' variant='contained' onClick={() => cameraInputRef.current?.click()}>
-                      사진 교체
-                    </Button>
-                  </div>
-                </div>
-                <ImageZoom src={selectedPic.presignedUrl} alt={watchedAlternativeSubTitle} />
-              </div>
-              <Box>
-                <Grid2 sx={{ marginTop: 2, width: { xs: 'full', sm: 400 } }} container spacing={4} columns={1}>
-                  <MultiInputBox
-                    form={form}
-                    name='machineInspectionId'
-                    labelMap={{
-                      machineInspectionId: {
-                        label: '설비명',
-                        options: inspectionList.map(v => ({ label: v.name, value: v.id }))
-                      }
-                    }}
-                  />
-                  <MultiInputBox
-                    form={form}
-                    name='machineProjectChecklistItemId'
-                    labelMap={{
-                      machineProjectChecklistItemId: {
-                        label: '점검항목',
-                        options: machineChecklistItemIdOption
-                      }
-                    }}
-                  />
-                  <MultiInputBox
-                    form={form}
-                    name='machineProjectChecklistSubItemId'
-                    labelMap={{
-                      machineProjectChecklistSubItemId: {
-                        label: '하위항목',
-                        options: machineChecklistSubItemIdOption
-                      }
-                    }}
-                  />
-                  <TextInputBox
-                    form={form}
-                    name='alternativeSubTitle'
-                    labelMap={{ alternativeSubTitle: { label: '대체타이틀' } }}
-                    placeholder='대체타이틀을 입력해주세요'
-                  />
-                  <TextInputBox
-                    form={form}
-                    name='measuredValue'
-                    labelMap={{ measuredValue: { label: '측정값' } }}
-                    placeholder='측정값을 입력해주세요'
-                  />
-                  <TextInputBox
-                    multiline
-                    form={form}
-                    name='remark'
-                    labelMap={{ remark: { label: '비고' } }}
-                    placeholder='비고는 보고서에 포함되지 않습니다'
-                  />
-                </Grid2>
-              </Box>
+          <DialogTitle
+            sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, position: 'relative', pb: 2, pt: 4 }}
+          >
+            <div className='flex gap-2 items-center'>
+              <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
+                삭제
+              </Button>
+              <Button
+                color='error'
+                disabled={!isDirty}
+                onClick={() => {
+                  proceedingJob.current = undefined
+                  setOpenAlert(true)
+                }}
+              >
+                변경사항 폐기
+              </Button>
             </div>
+            <div className='flex gap-2 items-center'>
+              <Tooltip title='사진 다운로드' arrow>
+                <IconButton type='button' LinkComponent={'a'} href={selectedPic.downloadPresignedUrl} download>
+                  <IconDownload color='dimgray' size={30} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='사진 업로드(교체)' arrow>
+                <IconButton type='button' onClick={() => cameraInputRef.current?.click()}>
+                  <IconPhotoUp color='dimgray' size={30} />
+                </IconButton>
+              </Tooltip>
+            </div>
+          </DialogTitle>
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 4, height: '80dvh' }}>
+            {/* 사진창 */}
+            <div className='flex-1 overflow-hidden'>
+              <ImageZoomCard src={selectedPic.presignedUrl} alt={selectedPic.originalFileName} />
+            </div>
+            {/* 정보 수정 창 */}
+            <Box>
+              <Grid2 sx={{ marginTop: 2, width: 'full' }} container columnSpacing={3} rowSpacing={2} columns={2}>
+                <TextInputBox
+                  form={form}
+                  name='originalFileName'
+                  labelMap={{ originalFileName: { label: '사진명' } }}
+                  placeholder='사진명을 입력해주세요'
+                />
+                <MultiInputBox
+                  form={form}
+                  name='machineInspectionId'
+                  labelMap={{
+                    machineInspectionId: {
+                      label: '설비명',
+                      options: inspectionList.map(v => ({ label: v.name, value: v.id }))
+                    }
+                  }}
+                />
+                <MultiInputBox
+                  form={form}
+                  name='machineProjectChecklistItemId'
+                  labelMap={{
+                    machineProjectChecklistItemId: {
+                      label: '점검항목',
+                      options: machineChecklistItemIdOption
+                    }
+                  }}
+                />
+                <MultiInputBox
+                  form={form}
+                  name='machineProjectChecklistSubItemId'
+                  labelMap={{
+                    machineProjectChecklistSubItemId: {
+                      label: '하위항목',
+                      options: machineChecklistSubItemIdOption
+                    }
+                  }}
+                />
+                <TextInputBox
+                  form={form}
+                  name='alternativeSubTitle'
+                  labelMap={{ alternativeSubTitle: { label: '대체타이틀' } }}
+                  placeholder='대체타이틀을 입력해주세요'
+                />
+                <TextInputBox
+                  form={form}
+                  name='measuredValue'
+                  measuredValue
+                  labelMap={{ measuredValue: { label: '측정값' } }}
+                  placeholder='측정값을 입력해주세요'
+                />
+                <TextInputBox
+                  column={2}
+                  multiline
+                  form={form}
+                  name='remark'
+                  labelMap={{ remark: { label: '비고' } }}
+                  placeholder='비고는 보고서에 포함되지 않습니다'
+                />
+              </Grid2>
+            </Box>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ mt: 2 }}>
             <div className='flex items-end gap-4'>
               <Typography color={isDirty ? 'error.main' : 'warning.main'}>
                 {!isDirty ? '변경사항이 없습니다' : !watchedChecklistSubItemId && '※하위항목을 지정해주세요'}
               </Typography>
-              <Button
-                sx={{ width: 'fit-content' }}
-                variant='contained'
-                type='submit'
-                form={formName}
-                disabled={!isDirty || !watchedChecklistSubItemId || loading}
-                color='success'
-              >
-                저장
-              </Button>
+              <div className='flex'>
+                <Button
+                  sx={{ width: 'fit-content' }}
+                  variant='contained'
+                  type='submit'
+                  form={formName}
+                  disabled={!isDirty || !watchedChecklistSubItemId || loading}
+                  color='success'
+                >
+                  저장
+                </Button>
+                <Button
+                  sx={{ width: 'fit-content' }}
+                  variant='contained'
+                  type='button'
+                  onClick={handleClose}
+                  color='secondary'
+                >
+                  닫기
+                </Button>
+              </div>
             </div>
           </DialogActions>
           <input

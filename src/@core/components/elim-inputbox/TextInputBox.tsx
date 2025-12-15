@@ -1,14 +1,14 @@
 import { useState } from 'react'
 
-import { Grid2, IconButton, TextField, Typography } from '@mui/material'
+import { Grid2, IconButton, MenuItem, TextField, Typography } from '@mui/material'
 import { useFormState, type Path, type PathValue, type RegisterOptions, type UseFormReturn } from 'react-hook-form'
 
 import { IconEye, IconEyeOff } from '@tabler/icons-react'
 
 import PostCodeButton from '../elim-button/PostCodeButton'
 import { auth } from '@/@core/utils/auth'
-import useCurrentUserStore from '@/@core/hooks/zustand/useCurrentUserStore'
 import { printWarningSnackbar } from '@/@core/utils/snackbarHandler'
+import { measuredValueOption } from '@/@core/data/options'
 
 interface TextInputBoxProps<T extends Record<string, any>> {
   name: Path<T>
@@ -20,6 +20,7 @@ interface TextInputBoxProps<T extends Record<string, any>> {
   placeholder?: string
   postcode?: boolean
   juminNum?: boolean
+  measuredValue?: boolean
   required?: boolean
   rule?: RegisterOptions<T, Path<T>> | undefined
   type?: 'number' | 'date'
@@ -49,6 +50,7 @@ export default function TextInputBox<T extends Record<string, any>>({
   placeholder,
   postcode = false,
   juminNum = false,
+  measuredValue = false,
   required = false,
   rule,
   type
@@ -97,6 +99,14 @@ export default function TextInputBox<T extends Record<string, any>>({
               }
             }
           })}
+          {...(measuredValue && {
+            slotProps: {
+              htmlInput: { name: name },
+              input: {
+                endAdornment: <MeasuredValueAutoCompleteBtn form={form} name={name} />
+              }
+            }
+          })}
           size='small'
         />
         {error && (
@@ -121,19 +131,18 @@ function JuminNumEndAdorment<T extends Record<string, any>>({
   form: UseFormReturn<T, any, undefined>
   name: Path<T>
 }) {
-  const [show, setShow] = useState(false)
-
-  const user = useCurrentUserStore(set => set.currentUser)
-  const memberId = user?.memberId
-
   const watchedValue: string = form.watch(name)
+
+  const [show, setShow] = useState(!watchedValue.includes('*'))
+
+  const memberId: number = form.getValues().memberId
 
   async function handleClick() {
     if (show) {
       form.setValue(name, watchedValue.substring(0, 8).concat('******').concat(watchedValue.substring(14)) as any)
     } else {
       if (!memberId) {
-        printWarningSnackbar('현재 로그인 중인 계정 정보가 없습니다', 2000)
+        printWarningSnackbar('해당 직원의 계정 정보가 없습니다', 2000)
 
         return
       }
@@ -149,4 +158,43 @@ function JuminNumEndAdorment<T extends Record<string, any>>({
   }
 
   return <IconButton onClick={handleClick}>{show ? <IconEyeOff /> : <IconEye />}</IconButton>
+}
+
+function MeasuredValueAutoCompleteBtn<T extends Record<string, any>>({
+  form,
+  name
+}: {
+  form: UseFormReturn<T, any, undefined>
+  name: Path<T>
+}) {
+  const watchedValue = form.watch(name)
+
+  return (
+    <TextField
+      size='small'
+      variant='standard'
+      select
+      value={''}
+      onChange={event => {
+        form.setValue(name, watchedValue.concat(event.target.value), { shouldDirty: true })
+      }}
+      slotProps={{
+        select: {
+          displayEmpty: true,
+          renderValue(value) {
+            const found = measuredValueOption.find(v => v.value === value)
+
+            return <Typography>{found ? found.label : '자동완성'}</Typography>
+          },
+          IconComponent: () => null
+        }
+      }}
+    >
+      {measuredValueOption.map(v => (
+        <MenuItem key={v.value} value={v.value}>
+          {v.label}
+        </MenuItem>
+      ))}
+    </TextField>
+  )
 }
