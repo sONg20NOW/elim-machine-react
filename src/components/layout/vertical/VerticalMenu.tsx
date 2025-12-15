@@ -6,6 +6,7 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import {
+  IconBolt,
   IconCalendar,
   IconChevronRight,
   IconCircle,
@@ -18,6 +19,7 @@ import {
   IconShield,
   IconSpeakerphone,
   IconUsers,
+  IconUsersGroup,
   IconUsersPlus,
   IconZoomQuestion
 } from '@tabler/icons-react'
@@ -116,8 +118,14 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           </MenuItem>
         </MenuSection>
         <MenuSection label='안전진단전검'>
-          <MenuItem disabled href={`/safety`} icon={<IconShield />}>
+          <MenuItem href={`/safety`} icon={<IconShield />}>
             {'안전진단현장'}
+          </MenuItem>
+          <MenuItem href={`/safety/engineer`} icon={<IconUsersGroup />}>
+            {'진단인력'}
+          </MenuItem>
+          <MenuItem href={`/safety/fault`} icon={<IconBolt />}>
+            {'결함관리'}
           </MenuItem>
         </MenuSection>
         <MenuSection label='문의'>
