@@ -192,7 +192,7 @@ const InspectionDetailModalInner = ({
 
   const [isEditing, setIsEditing] = useState(false)
 
-  // 사진 업로드 시 editData 사진 개수 최신화
+  // 사진 업로드 시 editData 사진 개수, 점검결과 최신화
   useEffect(() => {
     setEditData(prev => {
       const newDtos = prev.machineChecklistItemsWithPicCountResponseDtos.map(v => {
@@ -203,7 +203,9 @@ const InspectionDetailModalInner = ({
         return {
           ...v,
           totalMachinePicCount: matchedDto.totalMachinePicCount,
-          checklistSubItems: matchedDto.checklistSubItems
+          checklistSubItems: matchedDto.checklistSubItems,
+          machineInspectionChecklistItemResultBasicResponseDto:
+            matchedDto.machineInspectionChecklistItemResultBasicResponseDto
         }
       })
 
