@@ -1,3 +1,5 @@
+import OnProgressPage from '@/@core/components/OnProgressPage'
+
 export default function SafetyPage() {
-  return null
+  return <OnProgressPage />
 }

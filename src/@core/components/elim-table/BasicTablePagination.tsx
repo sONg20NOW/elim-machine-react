@@ -25,6 +25,7 @@ export default function BasicTablePagination({ totalCount, disabled }: BasicTabl
 
   return (
     <TablePagination
+      component={'div'}
       rowsPerPageOptions={PageSizeOptions}
       count={totalCount}
       rowsPerPage={size}

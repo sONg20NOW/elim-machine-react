@@ -1,5 +1,5 @@
-const LoginLogPage = () => {
-  return null
-}
+import OnProgressPage from '@/@core/components/OnProgressPage'
 
-export default LoginLogPage
+export default function LoginLogPage() {
+  return <OnProgressPage />
+}
