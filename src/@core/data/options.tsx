@@ -215,6 +215,9 @@ export const equipmentPhaseOption: { label: string; value: equipmentPhaseType }[
 
 // 측정값 자동입력
 export const measuredValueOption = [
+  '양호',
+  '없음',
+  '정상',
   'A',
   '㎝',
   '㎝Hg',
@@ -226,7 +229,24 @@ export const measuredValueOption = [
   '㎾',
   'mbar',
   '㎜',
-  '㎜/s'
+  '㎜/s',
+  '㎜Aq',
+  '㎜Hg',
+  '㎫',
+  '㏁',
+  'NO',
+  'NOx',
+  'Nm³/h',
+  'O₂',
+  'Ratio',
+  'rpm',
+  'V',
+  'XAir',
+  'Ω',
+  '℃',
+  'm³',
+  'm³/h',
+  'm³/min'
 ].map(v => ({ value: v, label: v }))
 
 // 공통
