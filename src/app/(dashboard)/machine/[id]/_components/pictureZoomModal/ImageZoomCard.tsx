@@ -39,6 +39,7 @@ export default function ImageZoomCard({ src, alt }: { src: string; alt: string }
               cursor: 'zoom-out',
               objectFit: 'contain',
               maxHeight: '90%',
+              maxWidth: '90%',
               background: 'none'
             }}
             onClick={() => setZoom(false)}
