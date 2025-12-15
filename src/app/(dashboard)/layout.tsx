@@ -32,7 +32,7 @@ const Layout = async (props: ChildrenType) => {
         {/* 내비게이션 바 + 메인 영역 */}
         <div className='flex-1 flex overflow-y-hidden'>
           <Navigation mode={mode} />
-          <div className='flex-1 p-3 h-full flex flex-col gap-4 bg-indigo-100/50'>
+          <div className='flex-1 px-3 pt-3 h-full flex flex-col bg-indigo-100/50'>
             <div className='w-full flex-1 overflow-y-hidden'>{children}</div>
             <VerticalFooter />
           </div>
