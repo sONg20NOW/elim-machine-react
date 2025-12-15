@@ -26,7 +26,7 @@ export default function ImageZoomCard({ src, alt }: { src: string; alt: string }
           className='object-contain'
           src={src}
           alt={alt}
-          style={{ maxHeight: '100%', maxWidth: '100%', cursor: 'zoom-in' }}
+          style={{ maxHeight: '100%', maxWidth: '100%', cursor: 'zoom-in', border: '1px solid gray' }}
           onClick={() => setZoom(true)}
         />
       </div>
