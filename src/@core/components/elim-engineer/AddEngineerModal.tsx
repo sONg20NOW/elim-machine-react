@@ -33,7 +33,7 @@ const AddEngineerModal = ({ open, setOpen, reloadPage, engineerType = 'MACHINE' 
 
   const engineerTerm = ({ MACHINE: '설비인력', SAFETY: '진단인력' } as Record<engineerTypeType, string>)[engineerType]
 
-  const { data: engineerList } = useGetEngineersOptions()
+  const { data: engineerList } = useGetEngineersOptions(engineerType)
 
   const [loading, setLoading] = useState(false)
 

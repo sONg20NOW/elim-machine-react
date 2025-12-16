@@ -46,8 +46,9 @@ import EngineerModal from './EngineerModal'
  */
 export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerType?: engineerTypeType }) {
   const queryClient = useQueryClient()
-
   const searchParams = useSearchParams()
+
+  const engineerTerm = ({ MACHINE: '설비인력', SAFETY: '진단인력' } as Record<engineerTypeType, string>)[engineerType]
 
   // 데이터 리스트
   const {
@@ -303,7 +304,7 @@ export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerTyp
           </div>
         </div>
         <Typography color='warning.main' sx={{ px: 3 }}>
-          ※우클릭으로 설비인력에서 제외할 수 있습니다
+          {`※우클릭으로 ${engineerTerm}에서 제외할 수 있습니다`}
         </Typography>
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
@@ -322,7 +323,7 @@ export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerTyp
             rightClickMenu={[
               {
                 icon: <IconBoltOff color='gray' size={20} />,
-                label: '설비인력에서 제외',
+                label: `${engineerTerm}에서 제외`,
                 handleClick: async row => {
                   await deleteEngineer(row.engineerId, row.version)
                   adjustPage(-1)
