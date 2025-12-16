@@ -75,6 +75,8 @@ export type machineScheduleInputInfoType = InputInfoType<MachineProjectScheduleA
 // machine-projects/[id]/machine-project-engineers 인풋 정보 형식
 export type machineProjectEngineerInputInfoType = InputInfoType<machineProjectEngineerDetailDtoType>
 
+// safety/projects/
+
 // engineers/[id] 인풋 정보 형식
 export type engineerInputInfoType = InputInfoType<EngineerResponseDtoType>
 
@@ -298,7 +300,7 @@ export type MachineProjectResponseDtoType = {
   requirement: string | null
   structure: string | null
   tel: string | null
-  vatIncludedYn: string | null
+  vatIncludedYn: ynResultType | null
   version: number | null
   note: string | null
 }
@@ -376,16 +378,64 @@ export interface SafetyProjectFilterType {
 }
 
 // POST api/safety/projects
-export interface SafetyProjectCreateRequestDto {
+export interface SafetyProjectCreateRequestDtoType {
   companyName: string
   safetyInspectionType: safetyInspectionTypeType
   buildingName: string
-  uniqueNo: string
-  facilityNo: string
-  buildingId: string
+  uniqueNo: string | null
+  facilityNo: string | null
+  buildingId: string | null
   beginDate: string
   endDate: string
+  note: string | null
+}
+
+export interface SafetyProjectReadResponseDtoType {
+  safetyProjectId: number
+  version: number
+  name: string
+  buildingName: string
+  uniqueNo: string
+  buildingId: string
+  facilityNo: string
+  roadAddress: string
+  jibunAddress: string
+  detailAddress: string
+  managementEntityName: string
+  grossArea: string
+  representative: string
+  completeDate: string
+  safetyInspectionType: safetyInspectionTypeType
+  safetyGrade: safetyGradeType
+  facilityClassification: facilityClassificationType
+  manager: string
+  facilityClass: facilityClassType
+  managerPhone: string
+  facilityType: facilityTypeType
+  tel: string
+  bizno: string
+  threeDUrl: string
+  requirement: string
   note: string
+  attachments: SafetyProjectAttachmentReadResponseDtoType[]
+  contractDate: string
+  projectStatus: projectStatusType
+  contractPrice: number
+  companyName: string
+  contractManager: string
+  contractManagerTel: string
+  contractManagerEmail: string
+  contractPartner: string
+  contractPartnerEmail: string
+  contractPartnerTel: string
+  vatIncludedYn: ynResultType
+}
+
+interface SafetyProjectAttachmentReadResponseDtoType {
+  safetyProjectAttachmentId: number
+  safetyAttachmentType: safetyAttachmentTypeType
+  originalFileName: string
+  presignedUrl: string
 }
 
 // ----------- Engineer 관련 API -----------
@@ -1390,3 +1440,44 @@ export type safetyInspectionTypeType =
   | 'PRECISE_SAFETY_DIAGNOSTIC'
   | 'SEISMIC_PERFORMANCE_EVALUATION'
   | 'STRUCTURAL_SAFETY_ASSESSMENT'
+
+export type safetyGradeType = 'POOR' | 'GOOD'
+
+export type facilityClassificationType =
+  | 'BRIDGE'
+  | 'TUNNEL'
+  | 'PORT'
+  | 'DAM'
+  | 'BUILDING'
+  | 'SCHOOL_BUILDING'
+  | 'RIVER'
+  | 'WATERWORKS'
+  | 'EMBANKMENT_AND_RETAINING_WALL'
+  | 'JOINT_DISTRICT'
+
+export type facilityClassType = 'CLASS_1' | 'CLASS_2' | 'CLASS_3' | 'CLASS_OUT'
+
+export type facilityTypeType =
+  | 'CLASS1_BUILDING_21F_OR_50K'
+  | 'CLASS1_RAILWAY_STATION_OVER_30K'
+  | 'CLASS1_UNDERGROUND_OVER_10K'
+  | 'CLASS2_BUILDING_16F_TO_21F_OR_30K_TO_50K'
+  | 'CLASS2_CULTURE_EDU_SALES_ETC'
+  | 'CLASS2_RAILWAY_SUBWAY_STATION'
+  | 'CLASS2_UNDERGROUND_5K_TO_10K'
+  | 'CLASS3_APARTMENT_5F_TO_15F'
+  | 'CLASS3_MULTI_UNIT_HOUSING_660M2_TO_4F'
+  | 'CLASS3_DORMITORY_OVER_660M2'
+  | 'CLASS3_BUILDING_11F_TO_16F_OR_5K_TO_30K'
+  | 'CLASS3_CULTURE_EDU_SALES_ETC_SMALL'
+  | 'CLASS3_RAILWAY_FACILITIES'
+  | 'CLASS3_PUBLIC_OFFICE_OVER_300M2'
+  | 'CLASS3_PUBLIC_OFFICE_OVER_1000M2'
+  | 'CLASS3_UNDERGROUND_UNDER_5000M2'
+  | 'CLASS3_LOCAL_GOV_REQUIRED_FACILITY'
+
+export type safetyAttachmentTypeType =
+  | 'BUILDING_REGISTER'
+  | 'FACILITY_REGISTER'
+  | 'WORK_ORDER'
+  | 'EDUCATION_CERTIFICATE'
