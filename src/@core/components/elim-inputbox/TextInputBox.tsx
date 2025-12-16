@@ -68,7 +68,7 @@ export default function TextInputBox<T extends Record<string, any>>({
           {...(dirty && { color: 'primary.main' })}
           {...(error && { color: 'error.main' })}
           {...(disabled && { color: 'lightgray' })}
-          sx={{ position: 'relative', width: 'fit-content' }}
+          sx={{ position: 'relative', width: 'fit-content', ...(required && { fontWeight: 'bold' }) }}
         >
           {label}
           {required && <sup className='absolute right-0 translate-x-full text-red-500'>*</sup>}
