@@ -18,7 +18,7 @@ export const TABLE_HEADER_INFO: tableHeaderInfoType = {
     careerYear: { label: '근속년수', canSort: true, hideOnTablet: true },
     memberStatusDescription: { label: '상태', canSort: false, hideOnTablet: true }
   },
-  machine: {
+  machineProject: {
     projectStatusDescription: { label: '상태', canSort: false },
     region: { label: '지역', canSort: false },
     machineProjectName: { label: '현장명', canSort: true },
@@ -30,6 +30,20 @@ export const TABLE_HEADER_INFO: tableHeaderInfoType = {
     engineerNames: { label: '참여기술진', canSort: false },
     grossArea: { label: '연면적(㎡)', canSort: true },
     tel: { label: '전화번호', canSort: false }
+  },
+  safetyProject: {
+    projectStatusDescription: { label: '상태', canSort: false },
+    safetyInspectionTypeDescription: { label: '종류', canSort: false },
+    region: { label: '지역', canSort: false },
+    buildingName: { label: '시설물명', canSort: false },
+    fieldBeginDate: { label: '현장점검', canSort: true },
+    fieldEndDate: { label: '점검종료', canSort: true },
+    reportDeadline: { label: '보고서마감', canSort: true },
+    facilityClassificationDescription: { label: '구분', canSort: false },
+    facilityClassDescription: { label: '종별', canSort: false },
+    companyName: { label: '점검업체', canSort: true },
+    engineerNames: { label: '참여기술진', canSort: false },
+    grossArea: { label: '연면적(㎡)', canSort: true }
   },
   machineInspection: {
     machineParentCateName: { label: '분류', canSort: false },
