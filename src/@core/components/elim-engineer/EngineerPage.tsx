@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, createContext, useContext } from 'react'
 
 // MUI Imports
 import { useSearchParams } from 'next/navigation'
@@ -36,6 +36,16 @@ import BasicTablePagination from '@core/components/elim-table/BasicTablePaginati
 import deleteEngineer from '../../utils/deleteEngineer'
 import AddEngineerModal from './AddEngineerModal'
 import EngineerModal from './EngineerModal'
+
+const engineerTypeContext = createContext<engineerTypeType | null>(null)
+
+export function useEngineerTypeContext() {
+  const engineerType = useContext(engineerTypeContext)
+
+  if (!engineerType) throw new Error('error in engineerTypeContext')
+
+  return engineerType
+}
 
 /**
  * @type T
@@ -199,7 +209,7 @@ export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerTyp
   }
 
   return (
-    <>
+    <engineerTypeContext.Provider value={engineerType}>
       <Card className='relative h-full flex flex-col'>
         {/* 탭 제목 */}
         <CardHeader
@@ -349,7 +359,6 @@ export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerTyp
             adjustPage(1)
             removeQueryCaches()
           }}
-          engineerType={engineerType}
         />
       )}
       {openDetail &&
@@ -365,6 +374,6 @@ export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerTyp
             <CircularProgress size={100} sx={{ color: 'white' }} />
           </Backdrop>
         ))}
-    </>
+    </engineerTypeContext.Provider>
   )
 }

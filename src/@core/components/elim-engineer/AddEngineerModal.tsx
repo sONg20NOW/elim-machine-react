@@ -23,19 +23,20 @@ import styles from '@core/styles/customTable.module.css'
 import SelectTd from '../elim-inputbox/SelectTd'
 import TextFieldTd from '../elim-inputbox/TextFieldTd'
 import { gradeOption } from '@/@core/data/options'
+import { useEngineerTypeContext } from './EngineerPage'
 
 type AddEngineerModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   reloadPage: () => void
-  engineerType?: engineerTypeType
 }
 
-const AddEngineerModal = ({ open, setOpen, reloadPage, engineerType = 'MACHINE' }: AddEngineerModalProps) => {
+const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) => {
+  const engineerType = useEngineerTypeContext()
+  const engineerTerm = ({ MACHINE: '설비인력', SAFETY: '진단인력' } as Record<engineerTypeType, string>)[engineerType]
+
   const { data: memberList } = useGetMembersLookup()
   const memberOption = memberList?.map(v => ({ value: v.memberId, label: `${v.name} (${v.email})` })) ?? []
-
-  const engineerTerm = ({ MACHINE: '설비인력', SAFETY: '진단인력' } as Record<engineerTypeType, string>)[engineerType]
 
   const { data: engineerList } = useGetEngineersOptions(engineerType)
 
