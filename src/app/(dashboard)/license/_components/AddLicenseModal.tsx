@@ -6,8 +6,6 @@ import { useState } from 'react'
 // MUI Imports
 import Button from '@mui/material/Button'
 
-import { DialogContent } from '@mui/material'
-
 import { useForm } from 'react-hook-form'
 
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
@@ -85,9 +83,7 @@ const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
         </Button>
       }
     >
-      <DialogContent className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
-        <LicenseInputs form={form} />
-      </DialogContent>
+      <LicenseInputs form={form} />
     </DefaultModal>
   )
 }
