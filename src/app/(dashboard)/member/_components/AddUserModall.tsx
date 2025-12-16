@@ -6,18 +6,21 @@ import { useState } from 'react'
 // MUI Imports
 import Button from '@mui/material/Button'
 
-import { DialogContent, Grid2 } from '@mui/material'
+import { TextField, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
+import classNames from 'classnames'
+
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import type { MemberCreateRequestDtoType } from '@core/types'
-import { MEMBER_INPUT_INFO } from '@/@core/data/input/memberInputInfo'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
-import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
-import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import { useGetLicenseNames } from '@core/hooks/customTanstackQueries'
+import styles from '@core/styles/customTable.module.css'
+import TextFieldTd from '@/@core/components/elim-inputbox/TextFieldTd'
+import SelectTd from '@/@core/components/elim-inputbox/SelectTd'
+import { memberStatusOption } from '@/@core/data/options'
 
 type AddUserModalProps = {
   open: boolean
@@ -60,6 +63,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
 
   return (
     <DefaultModal
+      size='sm'
       open={open}
       setOpen={setOpen}
       title='직원 추가'
@@ -74,22 +78,36 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
         </Button>
       }
     >
-      <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-        <Grid2 container spacing={3} columns={2}>
-          <TextInputBox form={form} name='name' labelMap={MEMBER_INPUT_INFO.basic} required />
-          <TextInputBox form={form} name='email' labelMap={MEMBER_INPUT_INFO.basic} required />
-          <MultiInputBox
-            form={form}
-            name='companyName'
-            labelMap={{
-              ...MEMBER_INPUT_INFO,
-              companyName: { ...MEMBER_INPUT_INFO.basic.companyName, options: companyNameOption }
-            }}
-          />
-          <MultiInputBox form={form} name='memberStatus' labelMap={MEMBER_INPUT_INFO.basic} />
-          <TextInputBox multiline column={2} form={form} name='note' labelMap={MEMBER_INPUT_INFO.basic} />
-        </Grid2>
-      </DialogContent>
+      <div className={classNames('grid gap-5 pt-2 overflow-visible sm:pli-16', styles.container)}>
+        <table style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col width={'25%'} />
+            <col width={'75%'} />
+          </colgroup>
+          <tbody>
+            <tr className={styles.required}>
+              <th>이름</th>
+              <TextFieldTd form={form} name='name' />
+            </tr>
+            <tr className={styles.required}>
+              <th>이메일</th>
+              <TextFieldTd form={form} name='email' />
+            </tr>
+            <tr>
+              <th>소속</th>
+              <SelectTd form={form} name='companyName' option={companyNameOption!} />
+            </tr>
+            <tr>
+              <th>재직상태</th>
+              <SelectTd form={form} name='memberStatus' option={memberStatusOption} />
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <Typography>비고</Typography>
+          <TextField fullWidth multiline rows={3} {...form.register('note')} />
+        </div>
+      </div>
     </DefaultModal>
   )
 }
