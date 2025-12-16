@@ -38,6 +38,7 @@ import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import ImageZoomCard from './ImageZoomCard'
+import ResetButton from '@/@core/components/elim-button/ResetButton'
 
 interface formType {
   originalFileName: string
@@ -256,16 +257,13 @@ export default function ProjectPicZoomModal({
             <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
               삭제
             </Button>
-            <Button
-              color='error'
-              disabled={!isDirty}
+            <ResetButton
+              isDirty={isDirty}
               onClick={() => {
                 proceedingJob.current = undefined
                 setOpenAlert(true)
               }}
-            >
-              변경사항 폐기
-            </Button>
+            />
           </div>
           <div className='flex gap-2 items-center'>
             <Tooltip title='사진 다운로드' arrow>

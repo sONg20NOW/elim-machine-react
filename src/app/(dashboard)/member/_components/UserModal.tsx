@@ -37,6 +37,7 @@ import CareerTabContent from './tabs/CareerTabContent'
 import EtcTabContent from './tabs/EtcTabContent'
 import ForgotPwModal from '@/app/(login)/login/_components/ForgotPwModal'
 import { printWarningSnackbar } from '@core/utils/snackbarHandler'
+import ResetButton from '@/@core/components/elim-button/ResetButton'
 
 export type refType = {
   handleSave: () => Promise<void>
@@ -288,17 +289,14 @@ const UserModal = ({ open, setOpen, selectedUserData, onDelete, reloadPages }: E
                     삭제
                   </Button>
                 )}
-                <Button
-                  color='error'
+                <ResetButton
                   onClick={() => {
                     const dirty = getIsDirty()
 
                     if (dirty) setOpenAlertNoSave(true)
                     else printWarningSnackbar('변경사항이 없습니다', 1500)
                   }}
-                >
-                  변경사항 폐기
-                </Button>
+                />
               </div>
             </div>
             <IconButton type='button' onClick={handleClose} className='absolute right-4 top-4'>

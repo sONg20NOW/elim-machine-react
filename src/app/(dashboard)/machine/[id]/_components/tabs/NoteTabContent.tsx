@@ -10,6 +10,7 @@ import { useGetMachineProject, useMutateMachineProjectNote } from '@core/hooks/c
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import isEditingContext from '../../isEditingContext'
+import ResetButton from '@/@core/components/elim-button/ResetButton'
 
 const MAX_LENGTH = 500
 
@@ -67,9 +68,7 @@ const NoteTabContent = ({}) => {
             <Button variant='contained' color='success' disabled={!isDirty || isPending} onClick={handleSave}>
               저장
             </Button>
-            <Button color='error' disabled={!isDirty || isPending} onClick={() => setOpenAlert(true)}>
-              변경사항 폐기
-            </Button>
+            <ResetButton isDirty={isDirty} onClick={() => setOpenAlert(true)} />
           </div>
           <Typography>
             {watchedNote.length} / {MAX_LENGTH}

@@ -20,6 +20,7 @@ import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import { useMutateLicense } from '@core/hooks/customTanstackQueries'
 import { printWarningSnackbar } from '@core/utils/snackbarHandler'
 import deleteLicense from '../_util/deleteLicense'
+import ResetButton from '@/@core/components/elim-button/ResetButton'
 
 type LicenseModalProps = {
   open: boolean
@@ -153,15 +154,7 @@ const LicenseModal = ({ open, setOpen, initialData, adjustPage, reloadPages }: L
           >
             삭제
           </Button>
-          <Button
-            disabled={!isDirty}
-            color='error'
-            onClick={() => {
-              if (isDirty) setOpenAlertNoSave(true)
-            }}
-          >
-            변경사항 폐기
-          </Button>
+          <ResetButton isDirty={isDirty} onClick={() => isDirty && setOpenAlertNoSave(true)} />
         </div>
       }
     >
