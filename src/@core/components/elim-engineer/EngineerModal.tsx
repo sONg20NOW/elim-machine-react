@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form'
 import classNames from 'classnames'
 
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
-import type { EngineerResponseDtoType } from '@core/types'
+import type { EngineerResponseDtoType, engineerTypeType } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 
@@ -27,6 +27,7 @@ import SelectTd from '../elim-inputbox/SelectTd'
 import TextFieldTd from '../elim-inputbox/TextFieldTd'
 import { gradeOption } from '@/@core/data/options'
 import ResetButton from '../elim-button/ResetButton'
+import { useEngineerTypeContext } from './EngineerPage'
 
 type EngineerModalProps = {
   open: boolean
@@ -38,6 +39,12 @@ type EngineerModalProps = {
 export const MemberIdContext = createContext<number>(0)
 
 const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModalProps) => {
+  const engineerType = useEngineerTypeContext()
+
+  const engineerTerm = ({ MACHINE: '기계설비 기술자', SAFETY: '안전진단 기술자' } as Record<engineerTypeType, string>)[
+    engineerType
+  ]
+
   const engineerId = initialData.id
 
   const [loading, setLoading] = useState(false)
@@ -121,7 +128,12 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
       size='sm'
       open={open}
       setOpen={setOpen}
-      title={<Typography variant='h3'>{initialData.name}</Typography>}
+      title={
+        <>
+          <Typography variant='subtitle1'>{engineerTerm}</Typography>
+          <Typography variant='h3'>{initialData.name}</Typography>
+        </>
+      }
       onClose={handleClose}
       headerDescription={initialData.engineerLicenseNum}
       primaryButton={
