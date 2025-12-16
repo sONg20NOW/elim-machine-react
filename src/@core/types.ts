@@ -375,6 +375,19 @@ export interface SafetyProjectFilterType {
   engineerName: string
 }
 
+// POST api/safety/projects
+export interface SafetyProjectCreateRequestDto {
+  companyName: string
+  safetyInspectionType: safetyInspectionTypeType
+  buildingName: string
+  uniqueNo: string
+  facilityNo: string
+  buildingId: string
+  beginDate: string
+  endDate: string
+  note: string
+}
+
 // ----------- Engineer 관련 API -----------
 // api/engineers/options
 export interface MachineEngineerOptionListResponseDtoType {
@@ -1370,3 +1383,10 @@ export type projectStatusType =
   | 'REPORT_WRITING_COMPLETED'
   | 'REPORT_SUBMITTING'
   | 'REPORT_SUBMITTED'
+
+export type safetyInspectionTypeType =
+  | 'REGULAR_SAFETY_INSPECTION'
+  | 'PRECISE_SAFETY_INSPECTION'
+  | 'PRECISE_SAFETY_DIAGNOSTIC'
+  | 'SEISMIC_PERFORMANCE_EVALUATION'
+  | 'STRUCTURAL_SAFETY_ASSESSMENT'
