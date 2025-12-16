@@ -17,13 +17,13 @@ import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 
 import { useMutateEngineer } from '@core/hooks/customTanstackQueries'
-import deleteEngineer from '../_util/deleteEngineer'
 import { printWarningSnackbar } from '@core/utils/snackbarHandler'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import { ENGINEER_INPUT_INFO } from '@/@core/data/input/engineerInputInfo'
 import { emailRule, phoneRule } from '@/@core/data/inputRule'
+import deleteEngineer from '@/@core/utils/deleteEngineer'
 
 type EngineerModalProps = {
   open: boolean

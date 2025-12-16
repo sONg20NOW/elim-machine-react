@@ -11,7 +11,7 @@ import { Autocomplete, Grid2, TextField, Typography } from '@mui/material'
 import { useForm } from 'react-hook-form'
 
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
-import type { MachineEngineerCreateRequestDtoType } from '@core/types'
+import type { engineerTypeType, MachineEngineerCreateRequestDtoType } from '@core/types'
 
 import { ENGINEER_INPUT_INFO } from '@/@core/data/input/engineerInputInfo'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
@@ -24,11 +24,14 @@ type AddEngineerModalProps = {
   open: boolean
   setOpen: (open: boolean) => void
   reloadPage: () => void
+  engineerType?: engineerTypeType
 }
 
-const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) => {
+const AddEngineerModal = ({ open, setOpen, reloadPage, engineerType = 'MACHINE' }: AddEngineerModalProps) => {
   const { data: memberList } = useGetMembersLookup()
   const memberOption = memberList?.map(v => ({ value: v.memberId, label: `${v.name} (${v.email})` })) ?? []
+
+  const engineerTerm = ({ MACHINE: '설비인력', SAFETY: '진단인력' } as Record<engineerTypeType, string>)[engineerType]
 
   const { data: engineerList } = useGetEngineersOptions()
 
@@ -49,14 +52,14 @@ const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) 
       setLoading(true)
 
       const response = await auth
-        .post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, { ...data, engineerType: 'MACHINE' })
+        .post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, { ...data, engineerType: engineerType })
         .then(v => v.data.data)
 
       reloadPage()
       setOpen(false)
 
       console.log(`new engineer added: ${response.memberId}`)
-      handleSuccess('새 설비인력이 추가되었습니다.')
+      handleSuccess(`새 ${engineerTerm}이 추가되었습니다.`)
     } catch (error: any) {
       handleApiError(error)
     } finally {
@@ -69,14 +72,14 @@ const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) 
       size='sm'
       open={open}
       setOpen={setOpen}
-      title={'신규 설비인력 추가'}
+      title={`${engineerTerm} 추가`}
       primaryButton={
         <Button variant='contained' onClick={() => onSubmitHandler()} type='submit' disabled={loading}>
           추가
         </Button>
       }
       secondaryButton={
-        <Button variant='tonal' color='secondary' type='reset' onClick={() => setOpen(false)}>
+        <Button variant='contained' color='secondary' type='reset' onClick={() => setOpen(false)}>
           취소
         </Button>
       }

@@ -1,5 +1,5 @@
-import OnProgressPage from '@/@core/components/OnProgressPage'
+import EngineerPage from '@/@core/components/elim-engineer/EngineerPage'
 
 export default function SafetyEngineerPage() {
-  return <OnProgressPage />
+  return <EngineerPage engineerType='SAFETY' />
 }
