@@ -287,10 +287,10 @@ export default function MachinePage() {
                   </MenuItem>
                 ))}
               </CustomTextField>
-              {/* 이름으로 검색 */}
+              {/* 현장명으로 검색 */}
               <SearchBar
                 key={`projectName_${projectName}`}
-                placeholder='이름으로 검색'
+                placeholder='현장명으로 검색'
                 defaultValue={projectName ?? ''}
                 setSearchKeyword={projectName => {
                   setQueryParams({ projectName: projectName, page: 0 })
