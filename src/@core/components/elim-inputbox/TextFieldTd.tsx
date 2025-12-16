@@ -5,6 +5,7 @@ import type { Path, UseFormReturn } from 'react-hook-form'
 type TextFieldTdProps<T extends Record<string, any>> = {
   form: UseFormReturn<T, any, undefined>
   name: Path<T>
+  colSpan?: number
 } & Omit<TextFieldProps, 'displayEmpty' | 'renderValue' | 'size'>
 
 /**
@@ -14,17 +15,25 @@ type TextFieldTdProps<T extends Record<string, any>> = {
  * @returns
  * @prop MUI TextField props 사용 가능
  */
-export default function TextFieldTd<T extends Record<string, any>>({ form, name, ...rest }: TextFieldTdProps<T>) {
+export default function TextFieldTd<T extends Record<string, any>>({
+  form,
+  name,
+  colSpan,
+  ...rest
+}: TextFieldTdProps<T>) {
+  const { slotProps, ...restExceptSlotProps } = rest
+
   return (
-    <td className='p-0'>
+    <td colSpan={colSpan} className='p-0'>
       <TextField
         size='small'
         fullWidth
         slotProps={{
-          input: { sx: { '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } } }
+          ...slotProps,
+          input: { ...slotProps?.input, sx: { '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } } }
         }}
         {...form.register(name)}
-        {...rest}
+        {...restExceptSlotProps}
       />
     </td>
   )
