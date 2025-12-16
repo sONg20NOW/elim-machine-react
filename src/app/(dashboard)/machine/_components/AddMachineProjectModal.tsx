@@ -104,7 +104,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
             </tr>
             <tr className={styles.required}>
               <th>현장명</th>
-              <TextFieldTd form={form} name='machineProjectName' />
+              <TextFieldTd form={form} name='machineProjectName' placeholder='현장명은 필수입력입니다' />
             </tr>
           </tbody>
         </table>

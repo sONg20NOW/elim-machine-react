@@ -112,7 +112,7 @@ export default function AddSafetyProjectModal({ open, setOpen, reloadPage }: Add
             </tr>
             <tr className={styles.required}>
               <th>건물명</th>
-              <TextFieldTd form={form} name='buildingName' />
+              <TextFieldTd form={form} name='buildingName' placeholder='건물명은 필수입력입니다' />
             </tr>
             <tr>
               <th>시설물번호</th>

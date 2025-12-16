@@ -87,11 +87,11 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
           <tbody>
             <tr className={styles.required}>
               <th>이름</th>
-              <TextFieldTd form={form} name='name' />
+              <TextFieldTd form={form} name='name' placeholder='이름은 필수입력입니다' />
             </tr>
             <tr className={styles.required}>
               <th>이메일</th>
-              <TextFieldTd form={form} name='email' />
+              <TextFieldTd form={form} name='email' placeholder='이메일은 필수입력입니다' />
             </tr>
             <tr>
               <th>소속</th>

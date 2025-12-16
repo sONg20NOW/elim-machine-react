@@ -106,7 +106,7 @@ const AddEngineerModal = ({ open, setOpen, reloadPage, engineerType = 'MACHINE' 
                   noOptionsText='해당 이름의 직원을 찾을 수 없습니다'
                   getOptionDisabled={option => engineerList?.some(v => v.memberId === option.value) ?? false}
                   onChange={(_, value) => form.setValue('memberId', value?.value ?? 0, { shouldDirty: true })}
-                  renderInput={params => <TextField {...params} />}
+                  renderInput={params => <TextField {...params} placeholder='이름은 필수입력입니다' />}
                 />
               </td>
             </tr>
