@@ -7,7 +7,7 @@ import { Button, Checkbox, Typography } from '@mui/material'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { InputBox } from '@/@core/components/elim-inputbox/InputBox'
 import { MACHINE_PROJECT_INPUT_INFO } from '@/@core/data/input/machineInputInfo'
-import type { MachineProjectResponseDtoType } from '@core/types'
+import type { MachineProjectResponseDtoType, projectStatusType } from '@core/types'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import EnergyReportModal from '../report/EnergyReportModal'
 import DownloadReportModal from '../report/DownloadReportModal'
@@ -32,7 +32,7 @@ const BasicTabContent = () => {
   const { data: projectData, refetch: refetchProjectData } = useGetMachineProject(machineProjectId)
 
   // 초기값 세팅
-  const [editData, setEditData] = useState<MachineProjectResponseDtoType>(JSON.parse(JSON.stringify(projectData)))
+  const [editData, setEditData] = useState<MachineProjectResponseDtoType>(structuredClone(projectData!))
   const [showAlertModal, setShowAlertModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
@@ -94,7 +94,7 @@ const BasicTabContent = () => {
         <div className='h-full flex flex-col max-w-[890px]'>
           {/* 상단 버튼들 : 점검의견서, 성능점검시 검토사항 ... */}
           <div className='flex mb-4 justify-between'>
-            <div className='flex gap-[4px]'>
+            <div className='flex items-center gap-1'>
               {/* <Button
             variant='contained'
             color='info'
@@ -111,15 +111,49 @@ const BasicTabContent = () => {
               <EnergyReportModal />
               <DownloadReportModal />
             </div>
-            <Button
-              variant='contained'
-              color='error'
-              onClick={() => {
-                setShowDeleteModal(true)
-              }}
-            >
-              설비현장 삭제
-            </Button>
+            <div className='flex items-center gap-1'>
+              {isEditing ? (
+                <div className='flex items-end justify-end gap-1'>
+                  <Button color='success' variant='contained' type='submit' disabled={loading || !existChange}>
+                    저장
+                  </Button>
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    type='button'
+                    onClick={() => {
+                      if (existChange) {
+                        setShowAlertModal(true)
+                      } else {
+                        setEditData(JSON.parse(JSON.stringify(projectData)))
+                        setIsEditing(false)
+                      }
+                    }}
+                  >
+                    취소
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant='contained'
+                  color='primary'
+                  onClick={() => {
+                    setIsEditing(true)
+                  }}
+                >
+                  수정
+                </Button>
+              )}
+              <Button
+                variant='contained'
+                color='error'
+                onClick={() => {
+                  setShowDeleteModal(true)
+                }}
+              >
+                삭제
+              </Button>
+            </div>
           </div>
 
           <div
@@ -149,36 +183,9 @@ const BasicTabContent = () => {
                   </colgroup>
                   <tbody>
                     <tr style={{ background: '#f3f4f6' }}>
-                      <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                         관리주체 현황
                       </th>
-                      <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
-                        <div className='flex items-end justify-end gap-2'>
-                          {!existChange && isEditing && (
-                            <Typography variant='caption' color='warning.main'>
-                              변경사항이 없습니다
-                            </Typography>
-                          )}
-                          <Button color='success' variant='contained' type='submit' disabled={loading || !existChange}>
-                            저장
-                          </Button>
-                          <Button
-                            variant='contained'
-                            color='secondary'
-                            type='button'
-                            onClick={() => {
-                              if (existChange) {
-                                setShowAlertModal(true)
-                              } else {
-                                setEditData(JSON.parse(JSON.stringify(projectData)))
-                                setIsEditing(false)
-                              }
-                            }}
-                          >
-                            취소
-                          </Button>
-                        </div>
-                      </td>
                     </tr>
                     {/* 기관명 */}
                     <tr>
@@ -406,7 +413,9 @@ const BasicTabContent = () => {
                           showLabel={false}
                           tabFieldKey='projectStatus'
                           value={editData.projectStatus ?? ''}
-                          onChange={value => setEditData(prev => ({ ...prev, projectStatus: value }))}
+                          onChange={value =>
+                            setEditData(prev => ({ ...prev, projectStatus: value as projectStatusType }))
+                          }
                           tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
@@ -566,20 +575,9 @@ const BasicTabContent = () => {
                     </colgroup>
                     <tbody>
                       <tr style={{ background: '#f3f4f6' }}>
-                        <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                        <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                           관리주체 현황
                         </th>
-                        <td colSpan={3} style={{ textAlign: 'right', padding: '10px 12px' }}>
-                          <Button
-                            variant='contained'
-                            color='primary'
-                            onClick={() => {
-                              setIsEditing(true)
-                            }}
-                          >
-                            수정
-                          </Button>
-                        </td>
                       </tr>
                       <tr>
                         <td align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
