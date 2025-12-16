@@ -6,19 +6,23 @@ import { useState } from 'react'
 // MUI Imports
 import Button from '@mui/material/Button'
 
-import { Autocomplete, Grid2, TextField, Typography } from '@mui/material'
+import { Autocomplete, TextField, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
+
+import classNames from 'classnames'
 
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import type { engineerTypeType, MachineEngineerCreateRequestDtoType } from '@core/types'
 
-import { ENGINEER_INPUT_INFO } from '@/@core/data/input/engineerInputInfo'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
-import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
-import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import { useGetEngineersOptions, useGetMembersLookup } from '@core/hooks/customTanstackQueries'
+
+import styles from '@core/styles/customTable.module.css'
+import SelectTd from '../elim-inputbox/SelectTd'
+import TextFieldTd from '../elim-inputbox/TextFieldTd'
+import { gradeOption } from '@/@core/data/options'
 
 type AddEngineerModalProps = {
   open: boolean
@@ -84,33 +88,42 @@ const AddEngineerModal = ({ open, setOpen, reloadPage, engineerType = 'MACHINE' 
         </Button>
       }
     >
-      <div className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
-        <Grid2 container rowSpacing={2} columnSpacing={5} columns={2}>
-          <div className='flex flex-col w-full relative'>
-            <Typography
-              {...(form.formState.dirtyFields.memberId && { color: 'primary.main' })}
-              {...(form.formState.errors.memberId && { color: 'error.main' })}
-              sx={{ position: 'relative', width: 'fit-content' }}
-            >
-              이름
-              <sup className='absolute right-0 translate-x-full text-red-500'>*</sup>
-            </Typography>
-            <Autocomplete
-              fullWidth
-              size='small'
-              options={memberOption}
-              noOptionsText='해당 이름의 직원을 찾을 수 없습니다'
-              getOptionDisabled={option => engineerList?.some(v => v.memberId === option.value) ?? false}
-              onChange={(_, value) => form.setValue('memberId', value?.value ?? 0, { shouldDirty: true })}
-              renderInput={params => <TextField {...params} />}
-            />
-          </div>
-          <MultiInputBox column={2} form={form} name={'grade'} labelMap={ENGINEER_INPUT_INFO} />
-          <TextInputBox column={2} form={form} name={'engineerLicenseNum'} labelMap={ENGINEER_INPUT_INFO} />
-        </Grid2>
-        <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
-          <TextInputBox column={2} multiline form={form} name={'remark'} labelMap={ENGINEER_INPUT_INFO} />
-        </Grid2>
+      <div className={classNames('grid gap-5 pt-2 overflow-visible sm:pli-16', styles.container)}>
+        <table style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col width={'25%'} />
+            <col width={'75%'} />
+          </colgroup>
+          <tbody>
+            <tr className={styles.required}>
+              <th>이름</th>
+              <td className='p-0'>
+                <Autocomplete
+                  sx={{ '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } }}
+                  fullWidth
+                  size='small'
+                  options={memberOption}
+                  noOptionsText='해당 이름의 직원을 찾을 수 없습니다'
+                  getOptionDisabled={option => engineerList?.some(v => v.memberId === option.value) ?? false}
+                  onChange={(_, value) => form.setValue('memberId', value?.value ?? 0, { shouldDirty: true })}
+                  renderInput={params => <TextField {...params} />}
+                />
+              </td>
+            </tr>
+            <tr>
+              <th>등급</th>
+              <SelectTd form={form} name='grade' option={gradeOption} />
+            </tr>
+            <tr>
+              <th>수첩발급번호</th>
+              <TextFieldTd form={form} name='engineerLicenseNum' />
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <Typography>비고</Typography>
+          <TextField fullWidth multiline rows={3} {...form.register('remark')} />
+        </div>
       </div>
     </DefaultModal>
   )
