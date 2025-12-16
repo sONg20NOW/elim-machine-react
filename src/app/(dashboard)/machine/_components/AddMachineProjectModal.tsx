@@ -71,7 +71,7 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
       size='sm'
       open={open}
       setOpen={setOpen}
-      title='신규 기계설비현장 추가'
+      title='기계설비현장 추가'
       primaryButton={
         <Button variant='contained' onClick={onSubmitHandler} type='submit' disabled={loading}>
           추가

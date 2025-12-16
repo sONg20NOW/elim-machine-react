@@ -62,7 +62,7 @@ const AddUserModal = ({ open, setOpen, handlePageChange }: AddUserModalProps) =>
     <DefaultModal
       open={open}
       setOpen={setOpen}
-      title='신규 직원 추가'
+      title='직원 추가'
       primaryButton={
         <Button variant='contained' onClick={onSubmitHandler} type='submit' disabled={loading}>
           추가

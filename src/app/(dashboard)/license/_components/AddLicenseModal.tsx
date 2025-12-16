@@ -73,7 +73,7 @@ const AddModal = ({ open, setOpen, reloadPage }: AddModalProps) => {
       size='md'
       open={open}
       setOpen={setOpen}
-      title={'신규 라이선스 추가'}
+      title={'라이선스 추가'}
       primaryButton={
         <Button variant='contained' onClick={onSubmitHandler} type='submit' disabled={loading}>
           추가
