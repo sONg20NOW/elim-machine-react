@@ -48,7 +48,9 @@ export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerTyp
   const queryClient = useQueryClient()
   const searchParams = useSearchParams()
 
-  const engineerTerm = ({ MACHINE: '설비인력', SAFETY: '진단인력' } as Record<engineerTypeType, string>)[engineerType]
+  const engineerTerm = ({ MACHINE: '기계설비 기술자', SAFETY: '안전진단 기술자' } as Record<engineerTypeType, string>)[
+    engineerType
+  ]
 
   // 데이터 리스트
   const {
@@ -186,7 +188,7 @@ export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerTyp
 
       adjustPage(-1 * checked.length)
       removeQueryCaches()
-      handleSuccess(`선택된 기계설비 기술자 ${checked.length}명이 성공적으로 삭제되었습니다.`)
+      handleSuccess(`선택된 ${engineerTerm} ${checked.length}명이 성공적으로 삭제되었습니다.`)
       setChecked([])
       setShowCheckBox(false)
     } catch (error) {
@@ -202,7 +204,7 @@ export default function EngineerPage({ engineerType = 'MACHINE' }: { engineerTyp
         {/* 탭 제목 */}
         <CardHeader
           slotProps={{ title: { typography: 'h4' } }}
-          title={`기계설비 기술자 (${totalCount})`}
+          title={`${engineerTerm} (${totalCount})`}
           className='pbe-4'
         />
         {/* 필터바 */}
