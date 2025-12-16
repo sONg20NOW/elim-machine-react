@@ -940,7 +940,7 @@ export const useGetMachineProjects = (queryParams: string) => {
 // GET /api/machine-projects
 export const useGetSafetyProjects = (queryParams: string) => {
   return useQuery({
-    queryKey: QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECTS(queryParams),
+    queryKey: QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECTS(queryParams),
     queryFn: async data => {
       const [keyType, queryParams] = data.queryKey
       const params = new URLSearchParams(queryParams)
