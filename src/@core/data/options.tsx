@@ -8,7 +8,8 @@ import type {
   officePositionType,
   machineProjectPicTypeType,
   workFormType,
-  projectStatusType
+  projectStatusType,
+  safetyInspectionTypeType
 } from '@core/types'
 
 export const YNOption = [
@@ -188,6 +189,18 @@ export const pipeTypeOption = [
   { value: 'CARBON_STEEL', label: '탄소강관' },
   { value: 'STAINLESS_STEEL', label: '스테인리스강관' },
   { value: 'COPPER_PIPE', label: '구리관' }
+]
+
+// safety project
+export const safetyInspectionTypeOption: { label: string; value: safetyInspectionTypeType }[] = [
+  {
+    value: 'REGULAR_SAFETY_INSPECTION',
+    label: '정기안전점검'
+  },
+  { value: 'PRECISE_SAFETY_INSPECTION', label: '정밀안전점검' },
+  { value: 'PRECISE_SAFETY_DIAGNOSTIC', label: '정밀안전진단' },
+  { value: 'SEISMIC_PERFORMANCE_EVALUATION', label: '내진성능평가' },
+  { value: 'STRUCTURAL_SAFETY_ASSESSMENT', label: '구조안전성검토' }
 ]
 
 // engineer
