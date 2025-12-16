@@ -7,8 +7,13 @@ import classNames from 'classnames'
 import type { LicenseCreateRequestDto } from '@core/types'
 import styles from '@core/styles/customTable.module.css'
 import TextFieldTd from '@/@core/components/elim-inputbox/TextFieldTd'
+import PostCodeButton from '@/@core/components/elim-button/PostCodeButton'
 
 export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCreateRequestDto, any, undefined> }) {
+  function onChangePostcodeAddress(value: string) {
+    form.setValue('roadAddress', value, { shouldDirty: true })
+  }
+
   return (
     <div className={classNames('grid gap-5 pt-2 overflow-visible sm:pli-16', styles.container)}>
       <table style={{ tableLayout: 'fixed' }}>
@@ -91,9 +96,16 @@ export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCre
 
             <tr>
               <th>주소</th>
-              <TextFieldTd form={form} name='tel' />
+              <TextFieldTd
+                colSpan={3}
+                form={form}
+                name='roadAddress'
+                slotProps={{ input: { endAdornment: <PostCodeButton onChange={onChangePostcodeAddress} /> } }}
+              />
+            </tr>
+            <tr>
               <th>상세주소</th>
-              <TextFieldTd form={form} name='tel' />
+              <TextFieldTd colSpan={3} form={form} name='detailAddress' />
             </tr>
           </tbody>
         </table>
