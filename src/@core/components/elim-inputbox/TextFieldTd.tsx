@@ -21,7 +21,7 @@ export default function TextFieldTd<T extends Record<string, any>>({ form, name,
         size='small'
         fullWidth
         slotProps={{
-          input: { sx: { borderRadius: 0, '.MuiOutlinedInput-notchedOutline': { border: 0 } } }
+          input: { sx: { '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } } }
         }}
         {...form.register(name)}
         {...rest}

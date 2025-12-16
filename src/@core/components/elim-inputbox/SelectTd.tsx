@@ -36,7 +36,7 @@ export default function SelectTd<T extends Record<string, any>>({
             value={field.value}
             onChange={field.onChange}
             size='small'
-            sx={{ borderRadius: 0, '.MuiOutlinedInput-notchedOutline': { border: 0 } }}
+            sx={{ '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } }}
             fullWidth
             displayEmpty
             renderValue={value =>
