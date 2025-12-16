@@ -7,7 +7,8 @@ import type {
   laborFormType,
   officePositionType,
   machineProjectPicTypeType,
-  workFormType
+  workFormType,
+  projectStatusType
 } from '@core/types'
 
 export const YNOption = [
@@ -134,7 +135,7 @@ export const birthMonthOption = Array.from({ length: 12 }, (_, i) => ({
 }))
 
 // machine - project
-export const projectStatusOption = [
+export const projectStatusOption: { value: projectStatusType; label: string }[] = [
   { value: 'CONTRACT_COMPLETED', label: '계약 완료' },
   { value: 'SITE_INSPECTION_COMPLETED', label: '현장 점검 완료' },
   { value: 'REPORT_WRITING', label: '보고서 작성중' },
