@@ -17,6 +17,15 @@
   background: #f3f4f6;
   padding: 8px;
   text-align: center;
+  font-weight: 400;
+}
+
+.container tr.required th {
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  padding: 8px;
+  text-align: center;
+  font-weight: bolder;
 }
 
 .container td {

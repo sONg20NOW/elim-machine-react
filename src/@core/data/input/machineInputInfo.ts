@@ -6,9 +6,7 @@ import {
   projectStatusOption
 } from '@/@core/data/options'
 import type {
-  InputFieldType,
   machineProjectInputInfoType,
-  MachineProjectCreateRequestDtoType,
   machineProjectEngineerInputInfoType,
   machineScheduleInputInfoType
 } from '../../types'
@@ -108,23 +106,6 @@ export const MACHINE_SCHEDULE_INPUT_INFO: machineScheduleInputInfoType = {
 
     // ! engineer API
     options: []
-  }
-}
-
-// 기계설비현장 추가 페이지
-const { companyName, machineProjectName } = MACHINE_PROJECT_INPUT_INFO
-const { beginDate, endDate, fieldBeginDate, fieldEndDate } = MACHINE_SCHEDULE_INPUT_INFO
-
-export const MACHINE_PROJECT_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoType, InputFieldType> = {
-  companyName: { ...companyName! },
-  machineProjectName: machineProjectName!,
-  beginDate: beginDate!,
-  endDate: endDate!,
-  fieldBeginDate: fieldBeginDate!,
-  fieldEndDate: fieldEndDate!,
-  note: {
-    type: 'long text',
-    label: '특이사항'
   }
 }
 
