@@ -44,10 +44,10 @@ export interface tableHeaderInfoType {
 
 /* -------------------------- InputInfo Type -------------------------- */
 export type InputFieldType = {
-  size?: BoxSizeType
   type: InputType
   label: string
   options?: Array<{ value: string; label: string }>
+  size?: BoxSizeType
   disabled?: boolean
 }
 
@@ -66,7 +66,7 @@ export type memberInputInfoType = {
 }
 
 // machine-projects/[id] 인풋 정보 형식
-export type machineInputInfoType = InputInfoType<MachineProjectResponseDtoType>
+export type machineProjectInputInfoType = InputInfoType<MachineProjectResponseDtoType>
 
 // machine-projects/[id]/schedule_tab 인풋 정보 형식
 export type machineScheduleInputInfoType = InputInfoType<MachineProjectScheduleAndEngineerResponseDtoType>
@@ -228,7 +228,7 @@ export interface MemberFilterType {
   birthMonth: string
 }
 
-// ----------- 기계설비현장 -----------
+// ----------- 기계설비현장 (Machine Project) -----------
 // POST api/machine-projects
 export interface MachineProjectCreateRequestDtoType {
   companyName: string
@@ -290,7 +290,7 @@ export type MachineProjectResponseDtoType = {
   machineManager3Name: string | null
   manager: string | null
   managerPhone: string | null
-  projectStatus: string | null
+  projectStatus: projectStatusType | null
   projectStatusDescription: string | null
   purpose: string | null
   representative: string | null
@@ -334,8 +334,8 @@ export interface machineProjectEngineerDetailDtoType {
 }
 
 // 기계설비현장 필터
-export interface MachineFilterType {
-  projectStatus: string
+export interface MachineProjectFilterType {
+  projectStatus: projectStatusType
   companyName: string
   engineerName: string
 }
@@ -346,6 +346,32 @@ export interface MachineProjectEngineerUpdateRequestDtoType {
   beginDate: string
   endDate: string
   note: string
+}
+
+// ----------- 안전진단현장 (Safety Project) -----------
+// GET /api/safety/projects
+export interface SafetyProjectPageResponseDtoType {
+  safetyProjectId: number
+  version: number
+  projectStatusDescription: string
+  safetyInspectionTypeDescription: string
+  region: string
+  buildingName: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  facilityClassificationDescription: string
+  facilityClassDescription: string
+  companyName: string
+  grossArea: string
+  engineerNames: string[]
+}
+
+// 안전진단현장 필터
+export interface SafetyProjectFilterType {
+  projectStatus: projectStatusType
+  companyName: string
+  engineerName: string
 }
 
 // ----------- Engineer 관련 API -----------
@@ -1335,3 +1361,11 @@ export type gradeType = 'ASSIST' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'E
 export type memberStatusType = 'NORMAL' | 'QUIT' | 'PENDING' | 'LEAVE'
 
 export type reportStatusType = 'PENDING' | 'COMPLETED' | 'FAILED'
+
+export type projectStatusType =
+  | 'CONTRACT_COMPLETED'
+  | 'SITE_INSPECTION_COMPLETED'
+  | 'REPORT_WRITING'
+  | 'REPORT_WRITING_COMPLETED'
+  | 'REPORT_SUBMITTING'
+  | 'REPORT_SUBMITTED'
