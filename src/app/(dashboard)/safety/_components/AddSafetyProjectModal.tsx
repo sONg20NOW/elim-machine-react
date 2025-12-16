@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import Button from '@mui/material/Button'
 
-import { DialogContent, TextField, Typography } from '@mui/material'
+import { TextField, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
@@ -85,75 +85,73 @@ export default function AddSafetyProjectModal({ open, setOpen, reloadPage }: Add
         </Button>
       }
     >
-      <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-        <div className={classNames('grid gap-5 pt-2', styles.container)}>
-          <table style={{ tableLayout: 'fixed' }}>
+      <div className={classNames('grid gap-5 pt-2 overflow-visible sm:pli-16', styles.container)}>
+        <table style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col width={'25%'} />
+            <col width={'75%'} />
+          </colgroup>
+          <tbody>
+            <tr className={styles.required}>
+              <th>점검업체</th>
+              <SelectTd
+                form={form}
+                name='companyName'
+                option={companyNameOption!}
+                placeholder='점검업체를 선택해주세요'
+              />
+            </tr>
+            <tr className={styles.required}>
+              <th>점검종류</th>
+              <SelectTd
+                form={form}
+                name='safetyInspectionType'
+                option={safetyInspectionTypeOption}
+                placeholder='점검종류를 선택해주세요'
+              />
+            </tr>
+            <tr className={styles.required}>
+              <th>건물명</th>
+              <TextFieldTd form={form} name='buildingName' />
+            </tr>
+            <tr>
+              <th>시설물번호</th>
+              <TextFieldTd form={form} name='facilityNo' />
+            </tr>
+            <tr>
+              <th>고유번호</th>
+              <TextFieldTd form={form} name='uniqueNo' />
+            </tr>
+            <tr>
+              <th>건물 ID</th>
+              <TextFieldTd form={form} name='buildingId' />
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <Typography>점검일정</Typography>
+          <table>
             <colgroup>
               <col width={'25%'} />
               <col width={'75%'} />
             </colgroup>
             <tbody>
               <tr className={styles.required}>
-                <th>점검업체</th>
-                <SelectTd
-                  form={form}
-                  name='companyName'
-                  option={companyNameOption!}
-                  placeholder='점검업체를 선택해주세요'
-                />
+                <th>투입시작</th>
+                <TextFieldTd form={form} name='beginDate' type='date' />
               </tr>
               <tr className={styles.required}>
-                <th>점검종류</th>
-                <SelectTd
-                  form={form}
-                  name='safetyInspectionType'
-                  option={safetyInspectionTypeOption}
-                  placeholder='점검종류를 선택해주세요'
-                />
-              </tr>
-              <tr className={styles.required}>
-                <th>건물명</th>
-                <TextFieldTd form={form} name='buildingName' />
-              </tr>
-              <tr>
-                <th>시설물번호</th>
-                <TextFieldTd form={form} name='facilityNo' />
-              </tr>
-              <tr>
-                <th>고유번호</th>
-                <TextFieldTd form={form} name='uniqueNo' />
-              </tr>
-              <tr>
-                <th>건물 ID</th>
-                <TextFieldTd form={form} name='buildingId' />
+                <th>투입종료</th>
+                <TextFieldTd form={form} name='endDate' type='date' />
               </tr>
             </tbody>
           </table>
-          <div>
-            <Typography>점검일정</Typography>
-            <table>
-              <colgroup>
-                <col width={'25%'} />
-                <col width={'75%'} />
-              </colgroup>
-              <tbody>
-                <tr className={styles.required}>
-                  <th>투입시작</th>
-                  <TextFieldTd form={form} name='beginDate' type='date' />
-                </tr>
-                <tr className={styles.required}>
-                  <th>투입종료</th>
-                  <TextFieldTd form={form} name='endDate' type='date' />
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div>
-            <Typography>비고</Typography>
-            <TextField fullWidth multiline rows={3} {...form.register('note')} />
-          </div>
         </div>
-      </DialogContent>
+        <div>
+          <Typography>비고</Typography>
+          <TextField fullWidth multiline rows={3} {...form.register('note')} />
+        </div>
+      </div>
     </DefaultModal>
   )
 }

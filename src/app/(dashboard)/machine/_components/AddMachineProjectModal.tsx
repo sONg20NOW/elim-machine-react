@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import Button from '@mui/material/Button'
 
-import { DialogContent, TextField, Typography } from '@mui/material'
+import { TextField, Typography } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
@@ -86,62 +86,60 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
         </Button>
       }
     >
-      <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-        <div className={classNames('grid gap-5 pt-2', styles.container)}>
-          <table style={{ tableLayout: 'fixed' }}>
+      <div className={classNames('grid gap-5 pt-2 overflow-visible sm:pli-16', styles.container)}>
+        <table style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col width={'25%'} />
+            <col width={'75%'} />
+          </colgroup>
+          <tbody>
+            <tr className={styles.required}>
+              <th>점검업체</th>
+              <SelectTd
+                form={form}
+                name='companyName'
+                option={companyNameOption!}
+                placeholder='점검업체를 선택해주세요'
+              />
+            </tr>
+            <tr className={styles.required}>
+              <th>현장명</th>
+              <TextFieldTd form={form} name='machineProjectName' />
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          <Typography>점검일정</Typography>
+          <table>
             <colgroup>
               <col width={'25%'} />
               <col width={'75%'} />
             </colgroup>
             <tbody>
-              <tr className={styles.required}>
-                <th>점검업체</th>
-                <SelectTd
-                  form={form}
-                  name='companyName'
-                  option={companyNameOption!}
-                  placeholder='점검업체를 선택해주세요'
-                />
+              <tr>
+                <th>투입시작</th>
+                <TextFieldTd form={form} name='beginDate' type='date' />
               </tr>
-              <tr className={styles.required}>
-                <th>현장명</th>
-                <TextFieldTd form={form} name='machineProjectName' />
+              <tr>
+                <th>투입종료</th>
+                <TextFieldTd form={form} name='endDate' type='date' />
+              </tr>
+              <tr>
+                <th>현장점검시작</th>
+                <TextFieldTd form={form} name='fieldBeginDate' type='date' />
+              </tr>
+              <tr>
+                <th>현장점검시작</th>
+                <TextFieldTd form={form} name='fieldEndDate' type='date' />
               </tr>
             </tbody>
           </table>
-          <div>
-            <Typography>점검일정</Typography>
-            <table>
-              <colgroup>
-                <col width={'25%'} />
-                <col width={'75%'} />
-              </colgroup>
-              <tbody>
-                <tr>
-                  <th>투입시작</th>
-                  <TextFieldTd form={form} name='beginDate' type='date' />
-                </tr>
-                <tr>
-                  <th>투입종료</th>
-                  <TextFieldTd form={form} name='endDate' type='date' />
-                </tr>
-                <tr>
-                  <th>현장점검시작</th>
-                  <TextFieldTd form={form} name='fieldBeginDate' type='date' />
-                </tr>
-                <tr>
-                  <th>현장점검시작</th>
-                  <TextFieldTd form={form} name='fieldEndDate' type='date' />
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div>
-            <Typography>비고</Typography>
-            <TextField fullWidth multiline rows={3} {...form.register('note')} />
-          </div>
         </div>
-      </DialogContent>
+        <div>
+          <Typography>비고</Typography>
+          <TextField fullWidth multiline rows={3} {...form.register('note')} />
+        </div>
+      </div>
     </DefaultModal>
   )
 }
