@@ -249,7 +249,7 @@ export default function SafetyPage() {
       <Card className='relative h-full flex flex-col'>
         <CardHeader
           slotProps={{ title: { typography: 'h4' } }}
-          title={`기계설비현장 (${totalCount})`}
+          title={`안전진단현장 (${totalCount})`}
           className='pbe-4'
         />
         {/* 필터바 */}
