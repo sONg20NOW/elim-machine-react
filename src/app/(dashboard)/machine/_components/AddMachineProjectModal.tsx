@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form'
 
 import type { MachineProjectCreateRequestDtoType } from '@core/types'
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
-import { MACHINE_CREATE_INFO } from '@/@core/data/input/machineInputInfo'
+import { MACHINE_PROJECT_CREATE_INFO } from '@/@core/data/input/machineInputInfo'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { auth } from '@core/utils/auth'
 import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
@@ -92,18 +92,24 @@ export default function AddMachineProjectModal({ open, setOpen, reloadPage }: Ad
               form={form}
               name='companyName'
               labelMap={{
-                ...MACHINE_CREATE_INFO,
-                companyName: { ...MACHINE_CREATE_INFO.companyName, options: companyNameOption }
+                ...MACHINE_PROJECT_CREATE_INFO,
+                companyName: { ...MACHINE_PROJECT_CREATE_INFO.companyName, options: companyNameOption }
               }}
             />
-            <TextInputBox column={2} required form={form} name={'machineProjectName'} labelMap={MACHINE_CREATE_INFO} />{' '}
-            <TextInputBox type='date' form={form} name={'beginDate'} labelMap={MACHINE_CREATE_INFO} />
-            <TextInputBox type='date' form={form} name={'endDate'} labelMap={MACHINE_CREATE_INFO} />
-            <TextInputBox type='date' form={form} name={'fieldBeginDate'} labelMap={MACHINE_CREATE_INFO} />
-            <TextInputBox type='date' form={form} name={'fieldEndDate'} labelMap={MACHINE_CREATE_INFO} />
+            <TextInputBox
+              column={2}
+              required
+              form={form}
+              name={'machineProjectName'}
+              labelMap={MACHINE_PROJECT_CREATE_INFO}
+            />{' '}
+            <TextInputBox type='date' form={form} name={'beginDate'} labelMap={MACHINE_PROJECT_CREATE_INFO} />
+            <TextInputBox type='date' form={form} name={'endDate'} labelMap={MACHINE_PROJECT_CREATE_INFO} />
+            <TextInputBox type='date' form={form} name={'fieldBeginDate'} labelMap={MACHINE_PROJECT_CREATE_INFO} />
+            <TextInputBox type='date' form={form} name={'fieldEndDate'} labelMap={MACHINE_PROJECT_CREATE_INFO} />
           </Grid2>
           <Grid2 container rowSpacing={1} columnSpacing={5} columns={1}>
-            <TextInputBox multiline form={form} name={'note'} labelMap={MACHINE_CREATE_INFO} />
+            <TextInputBox multiline form={form} name={'note'} labelMap={MACHINE_PROJECT_CREATE_INFO} />
           </Grid2>
         </div>
       </DialogContent>

@@ -7,14 +7,14 @@ import {
 } from '@/@core/data/options'
 import type {
   InputFieldType,
-  machineInputInfoType,
+  machineProjectInputInfoType,
   MachineProjectCreateRequestDtoType,
   machineProjectEngineerInputInfoType,
   machineScheduleInputInfoType
 } from '../../types'
 
 // 기계설비현장 상세페이지
-export const MACHINE_INPUT_INFO: machineInputInfoType = {
+export const MACHINE_PROJECT_INPUT_INFO: machineProjectInputInfoType = {
   institutionName: { type: 'text', label: '기관명' },
   machineProjectName: { type: 'text', label: '현장명' },
   roadAddress: { type: 'map', label: '주소' },
@@ -112,10 +112,10 @@ export const MACHINE_SCHEDULE_INPUT_INFO: machineScheduleInputInfoType = {
 }
 
 // 기계설비현장 추가 페이지
-const { companyName, machineProjectName } = MACHINE_INPUT_INFO
+const { companyName, machineProjectName } = MACHINE_PROJECT_INPUT_INFO
 const { beginDate, endDate, fieldBeginDate, fieldEndDate } = MACHINE_SCHEDULE_INPUT_INFO
 
-export const MACHINE_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoType, InputFieldType> = {
+export const MACHINE_PROJECT_CREATE_INFO: Record<keyof MachineProjectCreateRequestDtoType, InputFieldType> = {
   companyName: { ...companyName! },
   machineProjectName: machineProjectName!,
   beginDate: beginDate!,

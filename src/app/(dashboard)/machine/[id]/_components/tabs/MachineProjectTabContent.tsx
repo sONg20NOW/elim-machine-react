@@ -6,7 +6,7 @@ import { Button, Checkbox, Typography } from '@mui/material'
 
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { InputBox } from '@/@core/components/elim-inputbox/InputBox'
-import { MACHINE_INPUT_INFO } from '@/@core/data/input/machineInputInfo'
+import { MACHINE_PROJECT_INPUT_INFO } from '@/@core/data/input/machineInputInfo'
 import type { MachineProjectResponseDtoType } from '@core/types'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import EnergyReportModal from '../report/EnergyReportModal'
@@ -191,7 +191,7 @@ const BasicTabContent = () => {
                           tabFieldKey='institutionName'
                           value={editData?.institutionName ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, institutionName: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -207,7 +207,7 @@ const BasicTabContent = () => {
                           tabFieldKey='roadAddress'
                           value={editData.roadAddress ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, roadAddress: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -223,7 +223,7 @@ const BasicTabContent = () => {
                           tabFieldKey='representative'
                           value={editData.representative ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, representative: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -235,7 +235,7 @@ const BasicTabContent = () => {
                           tabFieldKey='grossArea'
                           value={editData.grossArea?.toString() ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, grossArea: Number(value) }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -251,7 +251,7 @@ const BasicTabContent = () => {
                           tabFieldKey='bizno'
                           value={editData.bizno ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, bizno: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -263,7 +263,7 @@ const BasicTabContent = () => {
                           tabFieldKey='houseCnt'
                           value={editData.houseCnt?.toString() ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, houseCnt: Number(value) }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -279,7 +279,7 @@ const BasicTabContent = () => {
                           tabFieldKey='purpose'
                           value={editData.purpose ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, purpose: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -291,7 +291,7 @@ const BasicTabContent = () => {
                           tabFieldKey='manager'
                           value={editData.manager ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, manager: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -307,7 +307,7 @@ const BasicTabContent = () => {
                           tabFieldKey='structure'
                           value={editData.structure ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, structure: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -319,7 +319,7 @@ const BasicTabContent = () => {
                           tabFieldKey='managerPhone'
                           value={editData.managerPhone ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, managerPhone: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -335,7 +335,7 @@ const BasicTabContent = () => {
                           tabFieldKey='tel'
                           value={editData.tel ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, tel: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -347,7 +347,7 @@ const BasicTabContent = () => {
                           tabFieldKey='completeDate'
                           value={editData.completeDate ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, completeDate: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -362,7 +362,7 @@ const BasicTabContent = () => {
                           tabFieldKey='requirement'
                           value={editData.requirement ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, requirement: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -395,7 +395,7 @@ const BasicTabContent = () => {
                           tabFieldKey='contractDate'
                           value={editData.contractDate ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, contractDate: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -407,7 +407,7 @@ const BasicTabContent = () => {
                           tabFieldKey='projectStatus'
                           value={editData.projectStatus ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, projectStatus: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -421,7 +421,7 @@ const BasicTabContent = () => {
                           tabFieldKey='contractPrice'
                           value={editData.contractPrice?.toString() ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, contractPrice: Number(value) }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -433,7 +433,7 @@ const BasicTabContent = () => {
                           tabFieldKey='companyName'
                           value={editData.companyName ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, companyName: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -450,7 +450,7 @@ const BasicTabContent = () => {
                           tabFieldKey='contractManager'
                           value={editData.contractManager ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, contractManager: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                         <InputBox
                           placeholder='전화번호'
@@ -458,7 +458,7 @@ const BasicTabContent = () => {
                           tabFieldKey='contractManagerTel'
                           value={editData.contractManagerTel ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, contractManagerTel: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                         <InputBox
                           placeholder='이메일'
@@ -466,7 +466,7 @@ const BasicTabContent = () => {
                           tabFieldKey='contractManagerEmail'
                           value={editData.contractManagerEmail ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, contractManagerEmail: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
 
@@ -480,7 +480,7 @@ const BasicTabContent = () => {
                           tabFieldKey='contractPartner'
                           value={editData.contractPartner ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, contractPartner: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                         <InputBox
                           placeholder='전화번호'
@@ -488,7 +488,7 @@ const BasicTabContent = () => {
                           tabFieldKey='contractPartnerTel'
                           value={editData.contractPartnerTel ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, contractPartnerTel: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                         <InputBox
                           placeholder='이메일'
@@ -496,7 +496,7 @@ const BasicTabContent = () => {
                           tabFieldKey='contractPartnerEmail'
                           value={editData.contractPartnerEmail ?? ''}
                           onChange={value => setEditData(prev => ({ ...prev, contractPartnerEmail: value }))}
-                          tabInfos={MACHINE_INPUT_INFO}
+                          tabInfos={MACHINE_PROJECT_INPUT_INFO}
                         />
                       </td>
                     </tr>
@@ -519,7 +519,7 @@ const BasicTabContent = () => {
                             tabFieldKey={`machineMaintainer${i}Name`}
                             value={editData[`machineMaintainer${i}Name` as keyof typeof editData]?.toString() ?? ''}
                             onChange={value => setEditData(prev => ({ ...prev, [`machineMaintainer${i}Name`]: value }))}
-                            tabInfos={MACHINE_INPUT_INFO}
+                            tabInfos={MACHINE_PROJECT_INPUT_INFO}
                           />
                           <InputBox
                             placeholder='정보'
@@ -527,7 +527,7 @@ const BasicTabContent = () => {
                             tabFieldKey={`machineMaintainer${i}Info`}
                             value={editData[`machineMaintainer${i}Info` as keyof typeof editData]?.toString() ?? ''}
                             onChange={value => setEditData(prev => ({ ...prev, [`machineMaintainer${i}Info`]: value }))}
-                            tabInfos={MACHINE_INPUT_INFO}
+                            tabInfos={MACHINE_PROJECT_INPUT_INFO}
                           />
                         </td>
                         <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
@@ -540,7 +540,7 @@ const BasicTabContent = () => {
                             tabFieldKey={`machineManager${i}Name`}
                             value={editData[`machineManager${i}Name` as keyof typeof editData]?.toString() ?? ''}
                             onChange={value => setEditData(prev => ({ ...prev, [`machineManager${i}Name`]: value }))}
-                            tabInfos={MACHINE_INPUT_INFO}
+                            tabInfos={MACHINE_PROJECT_INPUT_INFO}
                           />
                           <InputBox
                             placeholder='정보'
@@ -548,7 +548,7 @@ const BasicTabContent = () => {
                             tabFieldKey={`machineManager${i}Info`}
                             value={editData[`machineManager${i}Info` as keyof typeof editData]?.toString() ?? ''}
                             onChange={value => setEditData(prev => ({ ...prev, [`machineManager${i}Info`]: value }))}
-                            tabInfos={MACHINE_INPUT_INFO}
+                            tabInfos={MACHINE_PROJECT_INPUT_INFO}
                           />
                         </td>
                       </tr>

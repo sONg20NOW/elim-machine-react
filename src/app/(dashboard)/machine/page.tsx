@@ -26,9 +26,9 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import CustomTextField from '@core/components/mui/TextField'
 
-import type { MachineFilterType, MachineProjectPageDtoType } from '@core/types'
+import type { MachineProjectFilterType, MachineProjectPageDtoType } from '@core/types'
 import { TABLE_HEADER_INFO } from '@/@core/data/table/tableHeaderInfo'
-import { MACHINE_FILTER_INFO } from '@core/data/filter/machineFilterInfo'
+import { MACHINE_PROJECT_FILTER_INFO } from '@/@core/data/filter/machineProjectFilterInfo'
 import SearchBar from '@core/components/elim-inputbox/SearchBar'
 import BasicTable from '@core/components/elim-table/BasicTable'
 import AddMachineProjectModal from './_components/AddMachineProjectModal'
@@ -90,9 +90,9 @@ export default function MachinePage() {
 
   const MACHINE_FILTER_INFO_WITH_ENGINEERS = useMemo(
     () => ({
-      ...MACHINE_FILTER_INFO,
+      ...MACHINE_PROJECT_FILTER_INFO,
       engineerName: {
-        ...MACHINE_FILTER_INFO.engineerName,
+        ...MACHINE_PROJECT_FILTER_INFO.engineerName,
         options: engineers?.map(engineer => {
           return { value: engineer.engineerName, label: engineer.engineerName }
         })
@@ -249,7 +249,10 @@ export default function MachinePage() {
           className='pbe-4'
         />
         {/* 필터바 */}
-        <BasicTableFilter<MachineFilterType> filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS} disabled={disabled} />
+        <BasicTableFilter<MachineProjectFilterType>
+          filterInfo={MACHINE_FILTER_INFO_WITH_ENGINEERS}
+          disabled={disabled}
+        />
         {/* 필터 초기화 버튼 */}
         <Button
           startIcon={<IconReload />}
@@ -382,7 +385,7 @@ export default function MachinePage() {
         {/* 테이블 */}
         <div className='flex-1 overflow-y-hidden'>
           <BasicTable<MachineProjectPageDtoType>
-            header={TABLE_HEADER_INFO.machine}
+            header={TABLE_HEADER_INFO.machineProject}
             data={machineProjects}
             handleRowClick={handleMachineProjectClick}
             loading={isLoadingPages}

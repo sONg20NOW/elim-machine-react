@@ -36,7 +36,8 @@ export type HeaderType<T> = Partial<Record<keyof T, HeaderInfoType>>
 
 export interface tableHeaderInfoType {
   member: HeaderType<MemberPageDtoType>
-  machine: HeaderType<MachineProjectPageDtoType>
+  machineProject: HeaderType<MachineProjectPageDtoType>
+  safetyProject: HeaderType<SafetyProjectPageResponseDtoType>
   machineInspection: HeaderType<MachineInspectionPageResponseDtoType>
   engineers: HeaderType<MachineEngineerPageResponseDtoType>
   licenses: HeaderType<LicensePageResponseDtoType>
