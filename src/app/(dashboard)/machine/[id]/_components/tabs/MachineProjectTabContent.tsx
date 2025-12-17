@@ -66,10 +66,9 @@ const BasicTabContent = () => {
         }>(`/api/machine-projects/${machineProjectId}`, data)
         .then(v => v.data.data)
 
-      setIsEditing(false)
-
       form.reset(result)
       refetchProjectData()
+      setIsEditing(false)
       handleSuccess('현장정보가 수정되었습니다.')
     } catch (error: any) {
       handleApiError(error, '데이터 저장에 실패했습니다.')
