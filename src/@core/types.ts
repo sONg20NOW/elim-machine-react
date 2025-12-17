@@ -351,6 +351,28 @@ export interface MachineProjectEngineerUpdateRequestDtoType {
   note: string
 }
 
+// PUT /api/machine-projects/{machineProjectId}/schedule 기계설비 프로젝트 점검 일정 수정 요청 DTO
+
+export interface MachineProjectScheduleUpdateRequestDtoType {
+  version: number
+  beginDate: string
+  endDate: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  projectEndDate: string
+  checkType: checkTypeType
+  buildingGrade: string
+  reportManagerEmail: string
+  tiIssueDate: string
+}
+
+export type MachineProjectScheduleUpdateResponseDtoType = MachineProjectScheduleUpdateRequestDtoType & {
+  machineProjectScheduleId: number
+  buildingGradeDescription: string
+  checkTypeDescription: string
+}
+
 // ----------- 안전진단현장 (Safety Project) -----------
 // GET /api/safety/projects
 export interface SafetyProjectPageResponseDtoType {
@@ -1481,3 +1503,5 @@ export type safetyAttachmentTypeType =
   | 'FACILITY_REGISTER'
   | 'WORK_ORDER'
   | 'EDUCATION_CERTIFICATE'
+
+export type checkTypeType = 'COOLING' | 'HEATING'
