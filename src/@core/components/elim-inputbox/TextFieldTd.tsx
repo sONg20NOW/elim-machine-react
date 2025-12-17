@@ -32,7 +32,8 @@ export default function TextFieldTd<T extends Record<string, any>>({
         fullWidth
         slotProps={{
           ...slotProps,
-          input: { ...slotProps?.input, sx: { '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } } }
+          input: { ...slotProps?.input, sx: { '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } } },
+          htmlInput: { ...slotProps?.htmlInput, max: '2999-12-31', min: '1500-01-01' }
         }}
         {...form.register(name)}
         {...restExceptSlotProps}
