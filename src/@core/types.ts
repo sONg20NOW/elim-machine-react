@@ -453,6 +453,12 @@ export interface SafetyProjectReadResponseDtoType {
   vatIncludedYn: ynResultType
 }
 
+// PATCH /api/safety/projects/{safetyProjectId}/special-note
+export interface SafetyProjectNoteUpdateRequestDtoType {
+  version: number
+  specialNote: string
+}
+
 interface SafetyProjectAttachmentReadResponseDtoType {
   safetyProjectAttachmentId: number
   safetyAttachmentType: safetyAttachmentTypeType
