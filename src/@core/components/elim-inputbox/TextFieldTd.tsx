@@ -6,6 +6,7 @@ type TextFieldTdProps<T extends Record<string, any>> = {
   form: UseFormReturn<T, any, undefined>
   name: Path<T>
   colSpan?: number
+  rowSpan?: number
 } & Omit<TextFieldProps, 'displayEmpty' | 'renderValue' | 'size'>
 
 /**
@@ -19,12 +20,13 @@ export default function TextFieldTd<T extends Record<string, any>>({
   form,
   name,
   colSpan,
+  rowSpan,
   ...rest
 }: TextFieldTdProps<T>) {
   const { slotProps, ...restExceptSlotProps } = rest
 
   return (
-    <td colSpan={colSpan} className='p-0'>
+    <td colSpan={colSpan} rowSpan={rowSpan} className='p-0'>
       <TextField
         size='small'
         fullWidth
