@@ -39,7 +39,7 @@ const NoteTabContent = ({}) => {
   }, [isDirty, setIsEditing])
 
   const handleSave = form.handleSubmit(async data => {
-    if (!projectData?.version) {
+    if (typeof projectData?.version !== 'number') {
       console.log('A타입 에러 발생')
 
       return
