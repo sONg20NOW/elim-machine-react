@@ -9,7 +9,8 @@ import type {
   machineProjectPicTypeType,
   workFormType,
   projectStatusType,
-  safetyInspectionTypeType
+  safetyInspectionTypeType,
+  checkTypeType
 } from '@core/types'
 
 export const YNOption = [
@@ -146,7 +147,7 @@ export const projectStatusOption: { value: projectStatusType; label: string }[] 
 ]
 
 // machine - schedule
-export const checkTypeOption = [
+export const checkTypeOption: { value: checkTypeType; label: string }[] = [
   { value: 'COOLING', label: '냉방 점검' },
   { value: 'HEATING', label: '난방 점검' }
 ]
