@@ -467,6 +467,46 @@ export interface SafetyProjectNoteUpdateRequestDtoType {
   specialNote: string
 }
 
+// PATCH /api/safety/projects/{safetyProjectId}/name
+// description:	안전진단 현장명 수정 요청 DTO
+export interface SafetyProjectNameUpdateRequestDtoType {
+  version: number
+  name: string
+}
+
+export interface SafetyProjectNameUpdateResponseDtoType {
+  version: number
+  projectName: string
+}
+
+// GET /api/safety/projects/{safetyProjectId}/schedule-tab
+// description:	안전진단 프로젝트 점검 일정 및 참여 기술진 응답 DTO
+export interface SafetyProjectScheduleAndEngineerResponseDtoType {
+  safetyProjectScheduleId: number
+  version: number
+  beginDate: string
+  endDate: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  projectEndDate: string
+  reportManagerEmail: string
+  tiIssueDate: string
+  engineers: SafetyProjectEngineerDetailResponseDtoType[]
+}
+
+// description:	안전진단 프로젝트 참여 기술진 응답 DTO
+interface SafetyProjectEngineerDetailResponseDtoType {
+  engineerId: number
+  engineerName: string
+  grade: gradeType
+  gradeDescription: string
+  engineerLicenseNum: string
+  beginDate: string
+  endDate: string
+  note: string
+}
+
 // ----------- Engineer 관련 API -----------
 // api/engineers/options
 export interface MachineEngineerOptionListResponseDtoType {
