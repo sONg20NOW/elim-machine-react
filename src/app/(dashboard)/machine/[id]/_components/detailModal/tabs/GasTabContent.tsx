@@ -5,7 +5,7 @@ import { LocalizationProvider, TimeField } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
-import type { MachineInspectionDetailResponseDtoType } from '@core/types'
+import type { fuelTypeType, MachineInspectionDetailResponseDtoType } from '@core/types'
 import { fuelTypeOption } from '@/@core/data/options'
 
 interface GasTabContentProps<T> {
@@ -132,7 +132,7 @@ export function GasTabContent({
                         ...prev,
                         gasMeasurementResponseDto: {
                           ...prev.gasMeasurementResponseDto,
-                          fuelType: e.target.value
+                          fuelType: e.target.value as fuelTypeType
                         }
                       }))
                     }
