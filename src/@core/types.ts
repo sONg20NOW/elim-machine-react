@@ -226,7 +226,7 @@ export interface MemberFilterType {
   contractType: string
   laborForm: string
   workForm: string
-  gender: string
+  gender: genderType
   foreignYn: string
   birthMonth: string
 }
@@ -317,7 +317,7 @@ export type MachineProjectScheduleAndEngineerResponseDtoType = {
   projectEndDate: string
   checkType: string
   checkTypeDescription: string
-  buildingGrade: string
+  buildingGrade: buildingGradeType
   buildingGradeDescription: string
   reportManagerEmail: string
   tiIssueDate: string
@@ -362,7 +362,7 @@ export interface MachineProjectScheduleUpdateRequestDtoType {
   reportDeadline: string
   projectEndDate: string
   checkType: checkTypeType
-  buildingGrade: string
+  buildingGrade: buildingGradeType
   reportManagerEmail: string
   tiIssueDate: string
 }
@@ -584,7 +584,7 @@ export interface MachineEngineerCreateRequestDtoType {
 export interface EngineerFilterType {
   companyName: string
   grade: string
-  workStatus: string
+  workStatus: workStatusType
 }
 
 // ----------- 설비목록 -----------
@@ -665,7 +665,7 @@ export interface MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistS
 // 가스 측정값 응답 DTO
 export interface GasMeasurementResponseDtoType {
   version: number
-  fuelType: string
+  fuelType: fuelTypeType
   capacity: string
   o2: string
   co: string
@@ -685,7 +685,7 @@ export interface GasMeasurementResponseDtoType {
 export interface PipeMeasurementResponseDtoType {
   pipeMeasurementId: number
   version: number
-  pipeType: string
+  pipeType: pipeTypeType
   pipePosition: string
   outerDiameter: string
   nominalThickness: string
@@ -700,7 +700,7 @@ export interface PipeMeasurementResponseDtoType {
 export interface WindMeasurementResponseDtoType {
   windMeasurementId: number
   version: number
-  fanType: string
+  fanType: fanTypeType
   designAirVolumeCMM: string
   designFrequency: string
   designRpm: string
@@ -1560,6 +1560,34 @@ export type safetyAttachmentTypeType =
   | 'EDUCATION_CERTIFICATE'
 
 export type checkTypeType = 'COOLING' | 'HEATING'
+
+export type genderType = 'FEMALE' | 'MALE'
+
+export type buildingGradeType = 'BASIC' | 'INTERMEDIATE' | 'ADVANCED' | 'SUPREME'
+
+export type fuelTypeType =
+  | 'LNG' // 액화천연가스
+  | 'LPG' // 액화석유가스
+  | 'LIQUID_FUEL' // 액체연료
+  | 'SOLID_FUEL' // 고체연료
+  | 'GASEOUS_FUEL' // 기체연료
+  | 'PET_COKE' // 석유코크스
+  | 'BIOGAS' // 바이오가스
+  | 'GAS_HEATPUMP' // 가스히트펌프
+  | 'ETC' // 기타
+
+export type fanTypeType = 'SA' | 'RA'
+
+export type pipeTypeType =
+  | 'CARBON_STEEL' // 탄소강관
+  | 'STAINLESS_STEEL' // 스테인리스강관
+  | 'COPPER_PIPE' // 구리관
+
+export type workStatusType =
+  | 'WAITING' // 대기
+  | 'ONSITE' // 현장
+  | 'WORKING' // 작업
+  | 'RESERVED' // 예약
 
 /* -------------------------- TabValue Type -------------------------- */
 // 기계설비현장 탭
