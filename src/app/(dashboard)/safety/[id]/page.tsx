@@ -15,6 +15,7 @@ import TabList from '@mui/lab/TabList'
 import classNames from 'classnames'
 
 import { IconCheck, IconChevronRight, IconPencil, IconX } from '@tabler/icons-react'
+import TabPanel from '@mui/lab/TabPanel'
 
 import { useForm } from 'react-hook-form'
 
@@ -30,7 +31,10 @@ import {
 import isEditingContext from './isEditingContext'
 import type { SafetyProjectReadResponseDtoType, SafetyProjectTabValueType } from '@/@core/types'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
+
 import useSafetyProjectTabValueStore from '@/@core/hooks/zustand/useSafetyProjectTabValueStore'
+
+import SafetyProjectTabContent from './_components/tabs/SafetyProjectTabContent'
 
 const Tabs: { value: SafetyProjectTabValueType; label: SafetyProjectTabValueType }[] = [
   { value: '현장정보', label: '현장정보' },
@@ -132,11 +136,15 @@ const SafetyProjectPage = () => {
                 )
               })}
             </TabList>
-            {/* <div className='flex-1 overflow-y-hidden pt-6'>
+            <div className='flex-1 overflow-y-hidden pt-6'>
               <TabPanel value='현장정보' className='h-full'>
-                {safetyProjectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
+                {safetyProjectData ? (
+                  <SafetyProjectTabContent />
+                ) : (
+                  <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
+                )}
               </TabPanel>
-              <TabPanel value='점검일정/참여기술진'>
+              {/* <TabPanel value='점검일정/참여기술진'>
                 {scheduleData ? (
                   <ScheduleAndEngineerTabContent />
                 ) : (
@@ -151,8 +159,8 @@ const SafetyProjectPage = () => {
               </TabPanel>
               <TabPanel value='특이사항'>
                 {safetyProjectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
-              </TabPanel>
-            </div> */}
+              </TabPanel> */}
+            </div>
           </TabContext>
         </CardContent>
       </Card>
