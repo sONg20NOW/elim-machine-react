@@ -1,5 +1,5 @@
-const NoticePage = () => {
-  return null
-}
+import OnProgressPage from '@/@core/components/OnProgressPage'
 
-export default NoticePage
+export default function NoticePage() {
+  return <OnProgressPage />
+}

@@ -7,10 +7,25 @@ import type {
   laborFormType,
   officePositionType,
   machineProjectPicTypeType,
-  workFormType
+  workFormType,
+  projectStatusType,
+  safetyInspectionTypeType,
+  checkTypeType,
+  safetyGradeType,
+  memberStatusType,
+  ynResultType,
+  genderType,
+  buildingGradeType,
+  fuelTypeType,
+  fanTypeType,
+  pipeTypeType,
+  workStatusType,
+  facilityClassificationType
 } from '@core/types'
 
-export const YNOption = [
+type OptionType<T> = { value: T; label: string }[]
+
+export const YNOption: OptionType<ynResultType> = [
   { value: 'Y', label: '예' },
   { value: 'N', label: '아니오' }
 ]
@@ -28,7 +43,7 @@ export const roleOption = [
   { value: 'SUPERADMIN', label: '최고 관리자' }
 ]
 
-export const memberStatusOption = [
+export const memberStatusOption: OptionType<memberStatusType> = [
   { value: 'NORMAL', label: '재직중' },
   { value: 'QUIT', label: '퇴사' },
   { value: 'PENDING', label: '가입 승인대기' },
@@ -61,7 +76,7 @@ export const officeDepartmentNameOption = [
   { value: '토목부', label: '토목부' }
 ]
 
-export const officePositionOption: { value: officePositionType; label: string }[] = [
+export const officePositionOption: OptionType<officePositionType> = [
   { value: 'TEMPORARY', label: '단기' },
   { value: 'INTERN', label: '인턴' },
   { value: 'STAFF', label: '사원' },
@@ -83,7 +98,7 @@ export const officePositionOption: { value: officePositionType; label: string }[
   { value: 'PRESIDENT', label: '사장' }
 ]
 
-export const contractTypeOption: { value: contractTypeType; label: string }[] = [
+export const contractTypeOption: OptionType<contractTypeType> = [
   { value: 'REGULAR', label: '정규직' },
   { value: 'CONTRACT_1Y', label: '계약직1년' },
   { value: 'CONTRACT_2Y', label: '계약직2년' },
@@ -110,7 +125,7 @@ export const gradeOption: { value: gradeType; label: string }[] = [
   { value: 'EXPERT', label: '특급' }
 ]
 
-export const genderOption = [
+export const genderOption: OptionType<genderType> = [
   { value: 'MALE', label: '남' },
   { value: 'FEMALE', label: '여' }
 ]
@@ -134,7 +149,7 @@ export const birthMonthOption = Array.from({ length: 12 }, (_, i) => ({
 }))
 
 // machine - project
-export const projectStatusOption = [
+export const projectStatusOption: OptionType<projectStatusType> = [
   { value: 'CONTRACT_COMPLETED', label: '계약 완료' },
   { value: 'SITE_INSPECTION_COMPLETED', label: '현장 점검 완료' },
   { value: 'REPORT_WRITING', label: '보고서 작성중' },
@@ -144,12 +159,12 @@ export const projectStatusOption = [
 ]
 
 // machine - schedule
-export const checkTypeOption = [
+export const checkTypeOption: OptionType<checkTypeType> = [
   { value: 'COOLING', label: '냉방 점검' },
   { value: 'HEATING', label: '난방 점검' }
 ]
 
-export const buildingGradeOption = [
+export const buildingGradeOption: OptionType<buildingGradeType> = [
   { value: 'BASIC', label: '초급' },
   { value: 'INTERMEDIATE', label: '중급' },
   { value: 'ADVANCED', label: '고급' },
@@ -164,7 +179,7 @@ export const picCateInspectionStatusOption = [
 ]
 
 // machine-inspection - gas
-export const fuelTypeOption = [
+export const fuelTypeOption: OptionType<fuelTypeType> = [
   { value: 'LNG', label: 'LNG' }, // 액화천연가스지만 LNG 그대로 많이 씀
   { value: 'LPG', label: 'LPG' }, // 액화석유가스지만 LPG 그대로 씀
   { value: 'LIQUID_FUEL', label: '액체연료' },
@@ -177,22 +192,43 @@ export const fuelTypeOption = [
 ]
 
 // machine-inspection - gas
-export const fanTypeOption = [
+export const fanTypeOption: OptionType<fanTypeType> = [
   { value: 'SA', label: '급기팬 (SA)' },
   { value: 'RA', label: '환기팬 (RA)' }
 ]
 
 // machine-inspection - pipe
-export const pipeTypeOption = [
+export const pipeTypeOption: OptionType<pipeTypeType> = [
   { value: 'CARBON_STEEL', label: '탄소강관' },
   { value: 'STAINLESS_STEEL', label: '스테인리스강관' },
   { value: 'COPPER_PIPE', label: '구리관' }
 ]
 
+// safety project
+export const safetyInspectionTypeOption: OptionType<safetyInspectionTypeType> = [
+  {
+    value: 'REGULAR_SAFETY_INSPECTION',
+    label: '정기안전점검'
+  },
+  { value: 'PRECISE_SAFETY_INSPECTION', label: '정밀안전점검' },
+  { value: 'PRECISE_SAFETY_DIAGNOSTIC', label: '정밀안전진단' },
+  { value: 'SEISMIC_PERFORMANCE_EVALUATION', label: '내진성능평가' },
+  { value: 'STRUCTURAL_SAFETY_ASSESSMENT', label: '구조안전성검토' }
+]
+
+export const safetyGradeOption: OptionType<safetyGradeType> = [
+  { value: 'GOOD', label: '양호' },
+  { value: 'POOR', label: '미흡' }
+]
+
+export const facilityClassificationOption: OptionType<facilityClassificationType> = [
+  // ! 여기부터 작업
+]
+
 // engineer
 export const engineersOption: { value: string | number; label: string }[] = []
 
-export const workStatusOption = [
+export const workStatusOption: OptionType<workStatusType> = [
   { value: 'WAITING', label: '대기' },
   { value: 'ONSITE', label: '현장' },
   { value: 'WORKING', label: '작업' },
@@ -200,14 +236,14 @@ export const workStatusOption = [
 ]
 
 // machine project pic (현장사진)
-export const projectPicOption: { label: string; value: machineProjectPicTypeType }[] = [
+export const projectPicOption: OptionType<machineProjectPicTypeType> = [
   { label: '전경사진', value: 'OVERVIEW' },
   { label: '위치도', value: 'LOCATION_MAP' },
   { label: '기타', value: 'ETC' }
 ]
 
 // 설비 정보
-export const equipmentPhaseOption: { label: string; value: equipmentPhaseType }[] = [
+export const equipmentPhaseOption: OptionType<equipmentPhaseType> = [
   { label: '설치일', value: 'INSTALL' },
   { label: '제조일', value: 'MANUFACTURE' },
   { label: '사용일', value: 'USE' }

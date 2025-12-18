@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form'
 import {
   Box,
   Button,
+  Checkbox,
   Divider,
   IconButton,
   InputAdornment,
@@ -81,10 +82,12 @@ export default function LoginPage() {
         onSubmit={handleSubmit(onSubmit)}
         className='bg-white py-6 px-10 rounded-lg shadow-md min-w-[400px] flex flex-col gap-2 items-center'
       >
-        <Typography variant='h3' sx={{ mt: 2, fontWeight: 600 }}>
-          엘림 워크스페이스
-        </Typography>
-        <Typography variant='h5'>로그인</Typography>
+        <div className='flex flex-col items-center'>
+          <Typography variant='h3' sx={{ mt: 2, fontWeight: 600 }}>
+            엘림 워크스페이스
+          </Typography>
+          <Typography variant='subtitle1'>기계설비현장 웹앱</Typography>
+        </div>
         <Divider />
         <div className='w-full flex flex-col gap-4 items-center'>
           <div className='flex flex-col gap-2 w-full'>
@@ -92,7 +95,7 @@ export default function LoginPage() {
               type='email'
               size='small'
               placeholder='이메일을 입력하세요'
-              {...register('email', { required: '이메일을 입력하세요' })}
+              {...register('email', { required: '이메일을 입력해주세요' })}
               className='border  w-full'
             />
             {errors.email && <p className='text-red-500 text-sm'>{errors.email.message}</p>}
@@ -121,18 +124,22 @@ export default function LoginPage() {
                 }
               }}
               placeholder='비밀번호를 입력하세요'
-              {...register('password', { required: '비밀번호를 입력하세요' })}
+              {...register('password', { required: '비밀번호를 입력해주세요' })}
               className='border w-full'
             />
+            {errors.password && <p className='text-red-500 text-sm'>{errors.password.message}</p>}
           </div>
 
-          {errors.password && <p className='text-red-500 text-sm'>{errors.password.message}</p>}
-          <div className='flex gap-3'>
-            <Button variant='contained' sx={{ width: 'fit-content' }} type='submit' disabled={isSubmitting}>
-              {isSubmitting ? '로그인 중...' : '로그인'}
-            </Button>
+          <div className='flex w-full gap-1 justify-between'>
+            <div className='flex items-center'>
+              <Checkbox />
+              <Typography variant='subtitle1'>자동 로그인</Typography>
+            </div>
             <Button onClick={() => setOpenPwModal(true)}>비밀번호 변경</Button>
           </div>
+          <Button size='large' variant='contained' fullWidth type='submit' disabled={isSubmitting}>
+            {isSubmitting ? '로그인 중...' : '로그인'}
+          </Button>
         </div>
       </form>
       {openPwModal && <ForgotPwModal open={openPwModal} setOpen={setOpenPwModal} />}

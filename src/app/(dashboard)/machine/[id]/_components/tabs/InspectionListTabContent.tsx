@@ -225,9 +225,9 @@ const InspectionListTabContent = () => {
   return (
     <setOffsetContext.Provider value={setOffset}>
       <setInspectionIdContext.Provider value={setInspectionId}>
-        <div className='relative h-full flex flex-col'>
+        <div className='relative h-full flex flex-col overflow-x-hidden'>
           {/* 필터바 */}
-          <div>
+          <div className='px-4 pb-4 flex flex-col gap-4'>
             <BasicTableFilter<MachineInspectionFilterType>
               filterInfo={{
                 engineerName: {
@@ -240,6 +240,7 @@ const InspectionListTabContent = () => {
                 }
               }}
               disabled={disabled}
+              padding={0}
             />
             {/* 필터 초기화 버튼 */}
             <Button
@@ -247,99 +248,99 @@ const InspectionListTabContent = () => {
               onClick={() => {
                 resetQueryParams()
               }}
-              className='max-sm:is-full absolute right-8 top-8'
+              className='max-sm:is-full absolute right-1 top-0'
               disabled={disabled}
             >
               필터 초기화
             </Button>
-          </div>
-          {/* 상단 기능 요소들: 페이지 당 행수, 설비분류 검색, 위치 검색, 선택삭제, 추가 */}
-          <div className='flex flex-col justify-between items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-            <div className='flex gap-2'>
-              {/* 페이지당 행수 */}
-              <CustomTextField
-                size='small'
-                select
-                value={size.toString()}
-                onChange={e => {
-                  setQueryParams({ size: Number(e.target.value), page: 0 })
-                }}
-                className='gap-[5px]'
-                disabled={disabled}
-                slotProps={{
-                  select: {
-                    renderValue: selectedValue => {
-                      return selectedValue + ' 개씩'
+            {/* 상단 기능 요소들: 페이지 당 행수, 설비분류 검색, 위치 검색, 선택삭제, 추가 */}
+            <div className='flex flex-col justify-between items-start md:flex-row md:items-center gap-4'>
+              <div className='flex gap-2'>
+                {/* 페이지당 행수 */}
+                <CustomTextField
+                  size='small'
+                  select
+                  value={size.toString()}
+                  onChange={e => {
+                    setQueryParams({ size: Number(e.target.value), page: 0 })
+                  }}
+                  className='gap-[5px]'
+                  disabled={disabled}
+                  slotProps={{
+                    select: {
+                      renderValue: selectedValue => {
+                        return selectedValue + ' 개씩'
+                      }
                     }
-                  }
-                }}
-              >
-                {PageSizeOptions.map(pageSize => (
-                  <MenuItem key={pageSize} value={pageSize}>
-                    {pageSize}
-                    {`\u00a0\u00a0`}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
-              {/* 이름으로 검색 */}
-              <SearchBar
-                key={`machineCategoryName_${machineCategoryName}`} // 필터 초기화 시 새로 렌더링 되도록 키 지정
-                defaultValue={machineCategoryName ?? ''}
-                placeholder='설비분류로 검색'
-                setSearchKeyword={machineCateName => {
-                  setQueryParams({ machineCategoryName: machineCateName, page: 0 })
-                }}
-                disabled={disabled}
-              />
-              {/* 현장명으로 검색 */}
-              <SearchBar
-                key={`location_${location}`}
-                defaultValue={location ?? ''}
-                placeholder='위치로 검색'
-                setSearchKeyword={location => {
-                  setQueryParams({ location: location, page: 0 })
-                }}
-                disabled={disabled}
-              />
-              <Button variant='contained' color='info' disabled={true || isLoading || isError}>
-                점검대상 및 수량
-              </Button>
-            </div>
-
-            <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
-              {/* 한번에 삭제 */}
-              {!showCheckBox ? (
-                <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
-                  선택삭제
+                  }}
+                >
+                  {PageSizeOptions.map(pageSize => (
+                    <MenuItem key={pageSize} value={pageSize}>
+                      {pageSize}
+                      {`\u00a0\u00a0`}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+                {/* 이름으로 검색 */}
+                <SearchBar
+                  key={`machineCategoryName_${machineCategoryName}`} // 필터 초기화 시 새로 렌더링 되도록 키 지정
+                  defaultValue={machineCategoryName ?? ''}
+                  placeholder='설비분류로 검색'
+                  setSearchKeyword={machineCateName => {
+                    setQueryParams({ machineCategoryName: machineCateName, page: 0 })
+                  }}
+                  disabled={disabled}
+                />
+                {/* 현장명으로 검색 */}
+                <SearchBar
+                  key={`location_${location}`}
+                  defaultValue={location ?? ''}
+                  placeholder='위치로 검색'
+                  setSearchKeyword={location => {
+                    setQueryParams({ location: location, page: 0 })
+                  }}
+                  disabled={disabled}
+                />
+                <Button variant='contained' color='info' disabled={true || isLoading || isError}>
+                  점검대상 및 수량
                 </Button>
-              ) : (
-                <div className='flex gap-1'>
-                  <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
-                    {`(${checked.length}) 삭제`}
-                  </Button>
-                  <Button
-                    variant='contained'
-                    color='secondary'
-                    onClick={() => {
-                      setShowCheckBox(prev => !prev)
-                      handleCheckAll(false)
-                    }}
-                  >
-                    취소
-                  </Button>
-                </div>
-              )}
+              </div>
 
-              {/* 유저 추가 버튼 */}
-              <Button
-                variant='contained'
-                startIcon={<IconPlus />}
-                onClick={() => setOpenAdd(true)}
-                className='max-sm:is-full'
-                disabled={disabled}
-              >
-                추가
-              </Button>
+              <div className='flex sm:flex-row max-sm:is-full items-start sm:items-center gap-10'>
+                {/* 한번에 삭제 */}
+                {!showCheckBox ? (
+                  <Button disabled={disabled} variant='contained' onClick={() => setShowCheckBox(prev => !prev)}>
+                    선택삭제
+                  </Button>
+                ) : (
+                  <div className='flex gap-1'>
+                    <Button variant='contained' color='error' onClick={() => handleDeleteEngineers()}>
+                      {`(${checked.length}) 삭제`}
+                    </Button>
+                    <Button
+                      variant='contained'
+                      color='secondary'
+                      onClick={() => {
+                        setShowCheckBox(prev => !prev)
+                        handleCheckAll(false)
+                      }}
+                    >
+                      취소
+                    </Button>
+                  </div>
+                )}
+
+                {/* 유저 추가 버튼 */}
+                <Button
+                  variant='contained'
+                  startIcon={<IconPlus />}
+                  onClick={() => setOpenAdd(true)}
+                  className='max-sm:is-full'
+                  disabled={disabled}
+                >
+                  추가
+                </Button>
+              </div>
             </div>
           </div>
 

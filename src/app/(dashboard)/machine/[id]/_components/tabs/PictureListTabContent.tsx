@@ -429,9 +429,9 @@ const PictureListTabContent = () => {
   }, [open, refetchPictures])
 
   return (
-    <div className='h-full flex flex-col gap-5'>
+    <div className='h-full flex flex-col' style={{ overflowX: 'hidden' }}>
       {/* 상단 필터링, 검색, 선택삭제 등 */}
-      <div className='flex justify-between'>
+      <div className='flex justify-between pb-2 pt-2'>
         <div className={classNames('flex gap-3', { 'flex-col': isTablet })}>
           <SearchBar placeholder='검색' setSearchKeyword={setKeywordSearchParam} defaultValue={keyword ?? undefined} />
           {inspectionList && (
@@ -582,7 +582,7 @@ const PictureListTabContent = () => {
           </Box>
         )}
       </div>
-
+      <div className='h-8 shadow-xl' />
       {selectedInspectionPic && (
         <InspectionPicZoomModal
           open={openInspecitonPic}

@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { Divider, MenuItem, TextField } from '@mui/material'
 
-import type { MachineInspectionDetailResponseDtoType } from '@core/types'
+import type { fanTypeType, MachineInspectionDetailResponseDtoType } from '@core/types'
 import { fanTypeOption } from '@/@core/data/options'
 
 interface WindTabContentProps<T> {
@@ -209,7 +209,7 @@ export function WindTabContent({
                               setEditData(prev => ({
                                 ...prev,
                                 windMeasurementResponseDtos: prev.windMeasurementResponseDtos.map((w, i) =>
-                                  i === idx ? { ...w, fanType: e.target.value } : w
+                                  i === idx ? { ...w, fanType: e.target.value as fanTypeType } : w
                                 )
                               }))
                             }

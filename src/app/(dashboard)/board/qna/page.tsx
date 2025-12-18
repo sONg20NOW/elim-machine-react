@@ -1,5 +1,5 @@
-const QnaPage = () => {
-  return null
-}
+import OnProgressPage from '@/@core/components/OnProgressPage'
 
-export default QnaPage
+export default function QnaPage() {
+  return <OnProgressPage />
+}

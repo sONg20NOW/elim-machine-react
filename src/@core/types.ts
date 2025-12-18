@@ -36,7 +36,8 @@ export type HeaderType<T> = Partial<Record<keyof T, HeaderInfoType>>
 
 export interface tableHeaderInfoType {
   member: HeaderType<MemberPageDtoType>
-  machine: HeaderType<MachineProjectPageDtoType>
+  machineProject: HeaderType<MachineProjectPageDtoType>
+  safetyProject: HeaderType<SafetyProjectPageResponseDtoType>
   machineInspection: HeaderType<MachineInspectionPageResponseDtoType>
   engineers: HeaderType<MachineEngineerPageResponseDtoType>
   licenses: HeaderType<LicensePageResponseDtoType>
@@ -44,10 +45,10 @@ export interface tableHeaderInfoType {
 
 /* -------------------------- InputInfo Type -------------------------- */
 export type InputFieldType = {
-  size?: BoxSizeType
   type: InputType
   label: string
   options?: Array<{ value: string; label: string }>
+  size?: BoxSizeType
   disabled?: boolean
 }
 
@@ -66,13 +67,15 @@ export type memberInputInfoType = {
 }
 
 // machine-projects/[id] 인풋 정보 형식
-export type machineInputInfoType = InputInfoType<MachineProjectResponseDtoType>
+export type machineProjectInputInfoType = InputInfoType<MachineProjectResponseDtoType>
 
 // machine-projects/[id]/schedule_tab 인풋 정보 형식
 export type machineScheduleInputInfoType = InputInfoType<MachineProjectScheduleAndEngineerResponseDtoType>
 
 // machine-projects/[id]/machine-project-engineers 인풋 정보 형식
 export type machineProjectEngineerInputInfoType = InputInfoType<machineProjectEngineerDetailDtoType>
+
+// safety/projects/
 
 // engineers/[id] 인풋 정보 형식
 export type engineerInputInfoType = InputInfoType<EngineerResponseDtoType>
@@ -223,12 +226,12 @@ export interface MemberFilterType {
   contractType: string
   laborForm: string
   workForm: string
-  gender: string
+  gender: genderType
   foreignYn: string
   birthMonth: string
 }
 
-// ----------- 기계설비현장 -----------
+// ----------- 기계설비현장 (Machine Project) -----------
 // POST api/machine-projects
 export interface MachineProjectCreateRequestDtoType {
   companyName: string
@@ -290,14 +293,14 @@ export type MachineProjectResponseDtoType = {
   machineManager3Name: string | null
   manager: string | null
   managerPhone: string | null
-  projectStatus: string | null
+  projectStatus: projectStatusType | null
   projectStatusDescription: string | null
   purpose: string | null
   representative: string | null
   requirement: string | null
   structure: string | null
   tel: string | null
-  vatIncludedYn: string | null
+  vatIncludedYn: ynResultType | null
   version: number | null
   note: string | null
 }
@@ -314,7 +317,7 @@ export type MachineProjectScheduleAndEngineerResponseDtoType = {
   projectEndDate: string
   checkType: string
   checkTypeDescription: string
-  buildingGrade: string
+  buildingGrade: buildingGradeType
   buildingGradeDescription: string
   reportManagerEmail: string
   tiIssueDate: string
@@ -334,8 +337,8 @@ export interface machineProjectEngineerDetailDtoType {
 }
 
 // 기계설비현장 필터
-export interface MachineFilterType {
-  projectStatus: string
+export interface MachineProjectFilterType {
+  projectStatus: projectStatusType
   companyName: string
   engineerName: string
 }
@@ -343,6 +346,170 @@ export interface MachineFilterType {
 // PUT api/machine-projects-[id]/machine-project-engineers 기계설비 프로젝트 참여 기술진 수정 요청 DTO
 export interface MachineProjectEngineerUpdateRequestDtoType {
   engineerId: number
+  beginDate: string
+  endDate: string
+  note: string
+}
+
+// PUT /api/machine-projects/{machineProjectId}/schedule 기계설비 프로젝트 점검 일정 수정 요청 DTO
+
+export interface MachineProjectScheduleUpdateRequestDtoType {
+  version: number
+  beginDate: string
+  endDate: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  projectEndDate: string
+  checkType: checkTypeType
+  buildingGrade: buildingGradeType
+  reportManagerEmail: string
+  tiIssueDate: string
+}
+
+export type MachineProjectScheduleUpdateResponseDtoType = MachineProjectScheduleUpdateRequestDtoType & {
+  machineProjectScheduleId: number
+  buildingGradeDescription: string
+  checkTypeDescription: string
+}
+
+// ----------- 안전진단현장 (Safety Project) -----------
+// GET /api/safety/projects
+export interface SafetyProjectPageResponseDtoType {
+  safetyProjectId: number
+  version: number
+  projectStatusDescription: string
+  safetyInspectionTypeDescription: string
+  region: string
+  buildingName: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  facilityClassificationDescription: string
+  facilityClassDescription: string
+  companyName: string
+  grossArea: string
+  engineerNames: string[]
+}
+
+// 안전진단현장 필터
+export interface SafetyProjectFilterType {
+  projectStatus: projectStatusType
+  companyName: string
+  engineerName: string
+}
+
+// POST api/safety/projects
+export interface SafetyProjectCreateRequestDtoType {
+  companyName: string
+  safetyInspectionType: safetyInspectionTypeType
+  buildingName: string
+  uniqueNo: string | null
+  facilityNo: string | null
+  buildingId: string | null
+  beginDate: string
+  endDate: string
+  note: string | null
+}
+
+export interface SafetyProjectReadResponseDtoType {
+  safetyProjectId: number
+  version: number
+  name: string
+  buildingName: string
+  uniqueNo: string
+  buildingId: string
+  facilityNo: string
+  roadAddress: string
+  jibunAddress: string
+  detailAddress: string
+  managementEntityName: string
+  grossArea: string
+  representative: string
+  completeDate: string
+  safetyInspectionType: safetyInspectionTypeType
+  safetyGrade: safetyGradeType
+  facilityClassification: facilityClassificationType
+  manager: string
+  facilityClass: facilityClassType
+  managerPhone: string
+  facilityType: facilityTypeType
+  tel: string
+  bizno: string
+  threeDUrl: string
+  requirement: string
+  note: string
+  attachments: SafetyProjectAttachmentReadResponseDtoType[]
+  contractDate: string
+  projectStatus: projectStatusType
+  contractPrice: number
+  companyName: string
+  contractManager: string
+  contractManagerTel: string
+  contractManagerEmail: string
+  contractPartner: string
+  contractPartnerEmail: string
+  contractPartnerTel: string
+  vatIncludedYn: ynResultType
+  specialNote: string
+}
+
+interface SafetyProjectAttachmentReadResponseDtoType {
+  safetyProjectAttachmentId: number
+  safetyAttachmentType: safetyAttachmentTypeType
+  originalFileName: string
+  presignedUrl: string
+}
+
+// PATCH/api/safety/projects/{safetyProjectId}
+export type SafetyProjectUpdateRequestDtoType = Omit<SafetyProjectUpdateResponseDtoType, 'safetyProjectId'>
+
+export type SafetyProjectUpdateResponseDtoType = Omit<
+  SafetyProjectReadResponseDtoType,
+  'specialNote' | 'name' | 'attachments'
+>
+
+// PATCH /api/safety/projects/{safetyProjectId}/special-note - description:	안전진단 프로젝트 특이사항(specialNote) 수정 요청 DTO
+export interface SafetyProjectNoteUpdateRequestDtoType {
+  version: number
+  specialNote: string
+}
+
+// PATCH /api/safety/projects/{safetyProjectId}/name
+// description:	안전진단 현장명 수정 요청 DTO
+export interface SafetyProjectNameUpdateRequestDtoType {
+  version: number
+  name: string
+}
+
+export interface SafetyProjectNameUpdateResponseDtoType {
+  version: number
+  projectName: string
+}
+
+// GET /api/safety/projects/{safetyProjectId}/schedule-tab
+// description:	안전진단 프로젝트 점검 일정 및 참여 기술진 응답 DTO
+export interface SafetyProjectScheduleAndEngineerResponseDtoType {
+  safetyProjectScheduleId: number
+  version: number
+  beginDate: string
+  endDate: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  projectEndDate: string
+  reportManagerEmail: string
+  tiIssueDate: string
+  engineers: SafetyProjectEngineerDetailResponseDtoType[]
+}
+
+// description:	안전진단 프로젝트 참여 기술진 응답 DTO
+interface SafetyProjectEngineerDetailResponseDtoType {
+  engineerId: number
+  engineerName: string
+  grade: gradeType
+  gradeDescription: string
+  engineerLicenseNum: string
   beginDate: string
   endDate: string
   note: string
@@ -417,7 +584,7 @@ export interface MachineEngineerCreateRequestDtoType {
 export interface EngineerFilterType {
   companyName: string
   grade: string
-  workStatus: string
+  workStatus: workStatusType
 }
 
 // ----------- 설비목록 -----------
@@ -498,7 +665,7 @@ export interface MachineChecklistSubItemWithPicCountResponseDtoMachineChecklistS
 // 가스 측정값 응답 DTO
 export interface GasMeasurementResponseDtoType {
   version: number
-  fuelType: string
+  fuelType: fuelTypeType
   capacity: string
   o2: string
   co: string
@@ -518,7 +685,7 @@ export interface GasMeasurementResponseDtoType {
 export interface PipeMeasurementResponseDtoType {
   pipeMeasurementId: number
   version: number
-  pipeType: string
+  pipeType: pipeTypeType
   pipePosition: string
   outerDiameter: string
   nominalThickness: string
@@ -533,7 +700,7 @@ export interface PipeMeasurementResponseDtoType {
 export interface WindMeasurementResponseDtoType {
   windMeasurementId: number
   version: number
-  fanType: string
+  fanType: fanTypeType
   designAirVolumeCMM: string
   designFrequency: string
   designRpm: string
@@ -1335,3 +1502,104 @@ export type gradeType = 'ASSIST' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'E
 export type memberStatusType = 'NORMAL' | 'QUIT' | 'PENDING' | 'LEAVE'
 
 export type reportStatusType = 'PENDING' | 'COMPLETED' | 'FAILED'
+
+export type projectStatusType =
+  | 'CONTRACT_COMPLETED'
+  | 'SITE_INSPECTION_COMPLETED'
+  | 'REPORT_WRITING'
+  | 'REPORT_WRITING_COMPLETED'
+  | 'REPORT_SUBMITTING'
+  | 'REPORT_SUBMITTED'
+
+export type safetyInspectionTypeType =
+  | 'REGULAR_SAFETY_INSPECTION'
+  | 'PRECISE_SAFETY_INSPECTION'
+  | 'PRECISE_SAFETY_DIAGNOSTIC'
+  | 'SEISMIC_PERFORMANCE_EVALUATION'
+  | 'STRUCTURAL_SAFETY_ASSESSMENT'
+
+export type safetyGradeType = 'POOR' | 'GOOD'
+
+export type facilityClassificationType =
+  | 'BRIDGE'
+  | 'TUNNEL'
+  | 'PORT'
+  | 'DAM'
+  | 'BUILDING'
+  | 'SCHOOL_BUILDING'
+  | 'RIVER'
+  | 'WATERWORKS'
+  | 'EMBANKMENT_AND_RETAINING_WALL'
+  | 'JOINT_DISTRICT'
+
+export type facilityClassType = 'CLASS_1' | 'CLASS_2' | 'CLASS_3' | 'CLASS_OUT'
+
+export type facilityTypeType =
+  | 'CLASS1_BUILDING_21F_OR_50K'
+  | 'CLASS1_RAILWAY_STATION_OVER_30K'
+  | 'CLASS1_UNDERGROUND_OVER_10K'
+  | 'CLASS2_BUILDING_16F_TO_21F_OR_30K_TO_50K'
+  | 'CLASS2_CULTURE_EDU_SALES_ETC'
+  | 'CLASS2_RAILWAY_SUBWAY_STATION'
+  | 'CLASS2_UNDERGROUND_5K_TO_10K'
+  | 'CLASS3_APARTMENT_5F_TO_15F'
+  | 'CLASS3_MULTI_UNIT_HOUSING_660M2_TO_4F'
+  | 'CLASS3_DORMITORY_OVER_660M2'
+  | 'CLASS3_BUILDING_11F_TO_16F_OR_5K_TO_30K'
+  | 'CLASS3_CULTURE_EDU_SALES_ETC_SMALL'
+  | 'CLASS3_RAILWAY_FACILITIES'
+  | 'CLASS3_PUBLIC_OFFICE_OVER_300M2'
+  | 'CLASS3_PUBLIC_OFFICE_OVER_1000M2'
+  | 'CLASS3_UNDERGROUND_UNDER_5000M2'
+  | 'CLASS3_LOCAL_GOV_REQUIRED_FACILITY'
+
+export type safetyAttachmentTypeType =
+  | 'BUILDING_REGISTER'
+  | 'FACILITY_REGISTER'
+  | 'WORK_ORDER'
+  | 'EDUCATION_CERTIFICATE'
+
+export type checkTypeType = 'COOLING' | 'HEATING'
+
+export type genderType = 'FEMALE' | 'MALE'
+
+export type buildingGradeType = 'BASIC' | 'INTERMEDIATE' | 'ADVANCED' | 'SUPREME'
+
+export type fuelTypeType =
+  | 'LNG' // 액화천연가스
+  | 'LPG' // 액화석유가스
+  | 'LIQUID_FUEL' // 액체연료
+  | 'SOLID_FUEL' // 고체연료
+  | 'GASEOUS_FUEL' // 기체연료
+  | 'PET_COKE' // 석유코크스
+  | 'BIOGAS' // 바이오가스
+  | 'GAS_HEATPUMP' // 가스히트펌프
+  | 'ETC' // 기타
+
+export type fanTypeType = 'SA' | 'RA'
+
+export type pipeTypeType =
+  | 'CARBON_STEEL' // 탄소강관
+  | 'STAINLESS_STEEL' // 스테인리스강관
+  | 'COPPER_PIPE' // 구리관
+
+export type workStatusType =
+  | 'WAITING' // 대기
+  | 'ONSITE' // 현장
+  | 'WORKING' // 작업
+  | 'RESERVED' // 예약
+
+/* -------------------------- TabValue Type -------------------------- */
+// 기계설비현장 탭
+export type MachineProjectTabValueType = '현장정보' | '점검일정/참여기술진' | '설비목록' | '전체사진' | '특이사항'
+
+// 안전진단현장 탭
+export type SafetyProjectTabValueType =
+  | '현장정보'
+  | '점검일정/참여기술진'
+  | '현장점검표'
+  | '도면목록'
+  | '결함목록'
+  | '전체사진'
+  | '자료실'
+  | '특이사항'

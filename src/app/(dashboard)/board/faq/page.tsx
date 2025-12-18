@@ -1,5 +1,5 @@
-const FaqPage = () => {
-  return null
-}
+import OnProgressPage from '@/@core/components/OnProgressPage'
 
-export default FaqPage
+export default function FaqPage() {
+  return <OnProgressPage />
+}

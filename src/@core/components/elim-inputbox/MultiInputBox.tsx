@@ -45,6 +45,7 @@ export default function MultiInputBox<T extends Record<string, any>>({
           {...(dirty && { color: 'primary.main' })}
           {...(error && { color: 'error.main' })}
           {...(disabled && { color: 'lightgray' })}
+          {...(required && { fontWeight: 'bold' })}
         >
           {label}
           {required && <sup className='absolute right-0 translate-x-full text-red-500'>*</sup>}

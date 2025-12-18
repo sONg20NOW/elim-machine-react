@@ -54,6 +54,14 @@ import type {
   MemberPageDtoType,
   MemberPrivacyDtoType,
   PipeMeasurementResponseDtoType,
+  SafetyProjectNameUpdateRequestDtoType,
+  SafetyProjectNameUpdateResponseDtoType,
+  SafetyProjectNoteUpdateRequestDtoType,
+  SafetyProjectPageResponseDtoType,
+  SafetyProjectReadResponseDtoType,
+  SafetyProjectScheduleAndEngineerResponseDtoType,
+  SafetyProjectUpdateRequestDtoType,
+  SafetyProjectUpdateResponseDtoType,
   successResponseDtoType,
   targetType,
   WindMeasurementResponseDtoType
@@ -822,7 +830,7 @@ export const useGetParticipatedEngineerList = (machineProjectId: string) => {
 }
 
 // GET /api/machine-projects/{machineProjectId}/schedule-tab
-export const useGetScheduleTab = (machineProjectId: string) => {
+export const useGetMachineProjectScheduleTab = (machineProjectId: string) => {
   const fetchScheduleTab: QueryFunction<MachineProjectScheduleAndEngineerResponseDtoType, string[]> = useCallback(
     async data => {
       const response = await auth
@@ -910,6 +918,38 @@ export const useMutateMachineProjectNote = (machineProjectId: string) => {
   })
 }
 
+export const useMutateMachineProjectName = (machineProjectId: string) => {
+  const queryClient = useQueryClient()
+  const machineProjectQueryKey = QUERY_KEYS.MACHINE_PROJECT.GET_MACHINE_PROJECT(machineProjectId)
+
+  return useMutation<SafetyProjectNameUpdateResponseDtoType, AxiosError, SafetyProjectNameUpdateRequestDtoType>({
+    mutationFn: async data => {
+      const response = await auth
+        .put<{
+          data: SafetyProjectNameUpdateResponseDtoType
+        }>(`/api/machine-projects/${machineProjectId}/name`, data)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: newName => {
+      queryClient.setQueryData(machineProjectQueryKey, (prev: MachineProjectResponseDtoType) => ({
+        ...prev,
+        machineProjectName: newName.projectName,
+        version: newName.version
+      }))
+      queryClient.removeQueries({ queryKey: ['GET_MACHINE_PROJECTS'] })
+      console.log('useMutateMachineProjectName.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
 // GET /api/machine-projects
 export const useGetMachineProjects = (queryParams: string) => {
   return useQuery({
@@ -931,8 +971,183 @@ export const useGetMachineProjects = (queryParams: string) => {
       console.log(`!!! queryFn ${keyType}:`)
 
       return response
+    }
+  })
+}
+
+// ------------------------- Safety Project 관련 -------------------------
+// GET /api/machine-projects
+export const useGetSafetyProjects = (queryParams: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECTS(queryParams),
+    queryFn: async data => {
+      const [keyType, queryParams] = data.queryKey
+      const params = new URLSearchParams(queryParams)
+
+      if (!params.has('size')) {
+        params.set('size', '15')
+      }
+
+      const response = await auth
+        .get<{
+          data: successResponseDtoType<SafetyProjectPageResponseDtoType[]>
+        }>(`/api/safety/projects?${params}`)
+        .then(v => v.data.data)
+
+      console.log(`!!! queryFn ${keyType}:`)
+
+      return response
+    }
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/
+export const useGetSafetyProject = (safetyProjectId: string) => {
+  const fetchSafetyProjectData: QueryFunction<SafetyProjectReadResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: SafetyProjectReadResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`)
+
+      return response
     },
-    staleTime: 1000 * 60 * 1 // 5분
+    [safetyProjectId]
+  )
+
+  return useQuery({
+    enabled: safetyProjectId !== '',
+    queryKey: QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId),
+    queryFn: fetchSafetyProjectData
+  })
+}
+
+export const useMutateSafetyProject = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<SafetyProjectUpdateResponseDtoType, AxiosError, SafetyProjectUpdateRequestDtoType>({
+    mutationFn: async data => {
+      const response = await auth
+        .patch<{
+          data: SafetyProjectUpdateResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}`, data)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: newData => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
+        ...prev,
+        ...newData
+      }))
+      queryClient.removeQueries({ queryKey: ['GET_SAFETY_PROJECTS'] })
+
+      console.log('useMutateSafetyProject.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
+export const useMutateSafetyProjectName = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<SafetyProjectNameUpdateResponseDtoType, AxiosError, SafetyProjectNameUpdateRequestDtoType>({
+    mutationFn: async data => {
+      const response = await auth
+        .patch<{
+          data: SafetyProjectNameUpdateResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}/name`, data)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: newName => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
+        ...prev,
+        name: newName.projectName,
+        version: newName.version
+      }))
+      queryClient.removeQueries({ queryKey: ['GET_SAFETY_PROJECTS'] })
+
+      console.log('useMutateSafetyProjectName.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
+export const useMutateSafetyProjectSpecialNote = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<SafetyProjectNoteUpdateRequestDtoType, AxiosError, SafetyProjectNoteUpdateRequestDtoType>({
+    mutationFn: async data => {
+      const response = await auth
+        .patch<{
+          data: SafetyProjectNoteUpdateRequestDtoType
+        }>(`/api/safety/projects/${safetyProjectId}/special-note`, data)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: newNote => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
+        ...prev,
+        note: newNote.specialNote,
+        version: newNote.version
+      }))
+      console.log('useMutateMachineProjectNote.')
+      toast.info('특이사항이 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
+// GET /api/safety/projects/{safetyProjectId}/schedule-tab
+export const useGetSafetyProjectScheduleTab = (safetyProjectId: string) => {
+  const fetchSafetyProjectScheduleTab: QueryFunction<SafetyProjectScheduleAndEngineerResponseDtoType, string[]> =
+    useCallback(
+      async data => {
+        const response = await auth
+          .get<{
+            data: SafetyProjectScheduleAndEngineerResponseDtoType
+          }>(`/api/safety/projects/${safetyProjectId}/schedule-tab`)
+          .then(v => v.data.data)
+
+        const [keyType] = data.queryKey
+
+        console.log(`!!! queryFn ${keyType}:`)
+
+        return response
+      },
+      [safetyProjectId]
+    )
+
+  return useQuery({
+    queryKey: QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT_SCHEDULE_TAB(safetyProjectId),
+    queryFn: fetchSafetyProjectScheduleTab,
+    staleTime: 1000 * 60 * 5 // 5분
   })
 }
 

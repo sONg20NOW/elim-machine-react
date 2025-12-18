@@ -382,7 +382,7 @@ export default function BasicTable<T extends Record<keyof T, string | number | s
                 variant='body'
                 sx={{ ...(error && { color: 'error.main' }) }}
               >
-                {error ? '데이터를 불러오는 데 실패했습니다.' : '데이터가 없습니다.'}
+                {error ? '데이터를 불러오는 데 실패했습니다.' : '현재 조건을 충족하는 데이터가 없습니다.'}
               </StyledTableCell>
             </TableRow>
           )}

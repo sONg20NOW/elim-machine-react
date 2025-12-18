@@ -100,7 +100,7 @@ export default function DefaultModal(props: DefaultModalProps) {
         sx={{ pt: '1.5rem !important' }}
         variant='h4'
         className={classNames(
-          ' flex items-center gap-0 sm:gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16',
+          'flex items-center gap-0 sm:gap-2 whitespace-pre-wrap flex-col text-center sm:pbs-16 sm:pbe-3 sm:pli-16',
           {
             'text-xl sm:text-3xl': size !== 'sm',
             'text-lg sm:text-xl': size === 'sm'

@@ -1,6 +1,6 @@
 import { useSearchParams } from 'next/navigation'
 
-import { Card, TablePagination } from '@mui/material'
+import { TablePagination } from '@mui/material'
 
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@/@core/data/options'
 import useSetQueryParams from '@/@core/hooks/searchParams/useSetQueryParams'
@@ -25,8 +25,8 @@ export default function BasicTablePagination({ totalCount, disabled }: BasicTabl
 
   return (
     <TablePagination
+      component={'div'}
       rowsPerPageOptions={PageSizeOptions}
-      component={Card}
       count={totalCount}
       rowsPerPage={size}
       page={page}
@@ -48,7 +48,7 @@ export default function BasicTablePagination({ totalCount, disabled }: BasicTabl
           paddingLeft: 2,
           paddingRight: 2
         },
-        boxShadow: 20
+        boxShadow: '20'
       }}
     />
   )

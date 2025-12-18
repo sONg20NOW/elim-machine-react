@@ -30,7 +30,7 @@ import type { CalendarColors, CalendarType } from '@/types/apps/calendarTypes'
 // Slice Imports
 import { fetchEvents, filterEvents, updateEvent } from '@/redux-store/slices/calendar'
 import UserModal from '../../member/_components/UserModal'
-import useMachineTabValueStore from '@/@core/hooks/zustand/useMachineTabValueStore'
+import useMachineProjectTabValueStore from '@/@core/hooks/zustand/useMachineProjectTabValueStore'
 import { useGetSingleMember } from '@core/hooks/customTanstackQueries'
 
 type CalenderProps = {
@@ -70,7 +70,7 @@ const Calendar = (props: CalenderProps) => {
   const [memberId, setMemberId] = useState('0')
   const { data: selectedUserData } = useGetSingleMember(memberId.toString())
 
-  const setTabValue = useMachineTabValueStore(set => set.setTabValue)
+  const setTabValue = useMachineProjectTabValueStore(set => set.setTabValue)
 
   // Hooks
   const theme = useTheme()

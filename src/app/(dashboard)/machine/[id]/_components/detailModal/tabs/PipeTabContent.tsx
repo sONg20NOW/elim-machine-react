@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { Divider, MenuItem, TextField } from '@mui/material'
 
-import type { MachineInspectionDetailResponseDtoType } from '@core/types'
+import type { MachineInspectionDetailResponseDtoType, pipeTypeType } from '@core/types'
 import { pipeTypeOption } from '@/@core/data/options'
 
 interface WindTabContentProps<T> {
@@ -72,7 +72,7 @@ export default function PipeTabContent({
                             setEditData(prev => ({
                               ...prev,
                               pipeMeasurementResponseDtos: prev.pipeMeasurementResponseDtos.map((p, i) =>
-                                i === idx ? { ...p, pipeType: e.target.value } : p
+                                i === idx ? { ...p, pipeType: e.target.value as pipeTypeType } : p
                               )
                             }))
                           }

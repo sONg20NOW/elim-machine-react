@@ -7,23 +7,27 @@ import { createContext, useCallback, useRef, useState } from 'react'
 
 import Button from '@mui/material/Button'
 
-import { Backdrop, CircularProgress, Grid2, Typography } from '@mui/material'
+import { Backdrop, CircularProgress, TextField, Typography } from '@mui/material'
 
 import { useForm } from 'react-hook-form'
 
+import classNames from 'classnames'
+
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
-import type { EngineerResponseDtoType } from '@core/types'
+import type { EngineerResponseDtoType, engineerTypeType } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 
 import { useMutateEngineer } from '@core/hooks/customTanstackQueries'
-import deleteEngineer from '../_util/deleteEngineer'
 import { printWarningSnackbar } from '@core/utils/snackbarHandler'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
-import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
-import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
-import { ENGINEER_INPUT_INFO } from '@/@core/data/input/engineerInputInfo'
-import { emailRule, phoneRule } from '@/@core/data/inputRule'
+import deleteEngineer from '@/@core/utils/deleteEngineer'
+import styles from '@core/styles/customTable.module.css'
+import SelectTd from '../elim-inputbox/SelectTd'
+import TextFieldTd from '../elim-inputbox/TextFieldTd'
+import { gradeOption } from '@/@core/data/options'
+import ResetButton from '../elim-button/ResetButton'
+import { useEngineerTypeContext } from './EngineerPage'
 
 type EngineerModalProps = {
   open: boolean
@@ -35,6 +39,12 @@ type EngineerModalProps = {
 export const MemberIdContext = createContext<number>(0)
 
 const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModalProps) => {
+  const engineerType = useEngineerTypeContext()
+
+  const engineerTerm = ({ MACHINE: '기계설비 기술자', SAFETY: '안전진단 기술자' } as Record<engineerTypeType, string>)[
+    engineerType
+  ]
+
   const engineerId = initialData.id
 
   const [loading, setLoading] = useState(false)
@@ -118,7 +128,12 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
       size='sm'
       open={open}
       setOpen={setOpen}
-      title={<Typography variant='h3'>{initialData.name}</Typography>}
+      title={
+        <>
+          <Typography variant='subtitle1'>{engineerTerm}</Typography>
+          <Typography variant='h3'>{initialData.name}</Typography>
+        </>
+      }
       onClose={handleClose}
       headerDescription={initialData.engineerLicenseNum}
       primaryButton={
@@ -132,46 +147,54 @@ const EngineerModal = ({ open, setOpen, initialData, reloadPages }: EngineerModa
         </Button>
       }
       modifyButton={
-        <div className='flex gap-3'>
+        <div className='flex items-center gap-1'>
           <Button variant='contained' color='error' type='reset' onClick={() => setOpenDelete(true)} disabled={loading}>
             삭제
           </Button>
-          <Button
-            disabled={!isDirty}
-            color='error'
-            onClick={() => {
-              if (isDirty) setOpenAlertNoSave(true)
-            }}
-          >
-            변경사항 폐기
-          </Button>
+          <ResetButton isDirty={isDirty} onClick={() => isDirty && setOpenAlertNoSave(true)} />
         </div>
       }
     >
-      <div className='flex flex-col overflow-visible pbs-0 sm:pli-16 gap-4'>
+      <div className={classNames('grid gap-5 pt-2 overflow-visible sm:pli-16', styles.container)}>
         {loading ? (
           <div className='h-full w-full grid place-items-center'>
             <CircularProgress />
           </div>
         ) : (
-          <div className='grid gap-7'>
-            <Grid2 container rowSpacing={2} columnSpacing={5} columns={2}>
-              <TextInputBox column={2} form={form} name={'name'} labelMap={ENGINEER_INPUT_INFO} />
-              <TextInputBox column={2} form={form} name={'email'} labelMap={ENGINEER_INPUT_INFO} rule={emailRule} />
-              <TextInputBox
-                column={2}
-                form={form}
-                name={'phoneNumber'}
-                labelMap={ENGINEER_INPUT_INFO}
-                rule={phoneRule}
-              />
-              <MultiInputBox column={2} form={form} name={'grade'} labelMap={ENGINEER_INPUT_INFO} />
-              <TextInputBox column={2} form={form} name={'engineerLicenseNum'} labelMap={ENGINEER_INPUT_INFO} />
-            </Grid2>
-            <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
-              <TextInputBox column={2} multiline form={form} name={'remark'} labelMap={ENGINEER_INPUT_INFO} />
-            </Grid2>
-          </div>
+          <>
+            <table style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col width={'25%'} />
+                <col width={'75%'} />
+              </colgroup>
+              <tbody>
+                <tr className={styles.required}>
+                  <th>이름</th>
+                  <TextFieldTd form={form} name='name' />
+                </tr>
+                <tr className={styles.required}>
+                  <th>이메일</th>
+                  <TextFieldTd form={form} name='email' />
+                </tr>
+                <tr className={styles.required}>
+                  <th>번호</th>
+                  <TextFieldTd form={form} name='phoneNumber' />
+                </tr>
+                <tr>
+                  <th>등급</th>
+                  <SelectTd form={form} name='grade' option={gradeOption} />
+                </tr>
+                <tr>
+                  <th>수첩발급번호</th>
+                  <TextFieldTd form={form} name='engineerLicenseNum' />
+                </tr>
+              </tbody>
+            </table>
+            <div>
+              <Typography>비고</Typography>
+              <TextField fullWidth multiline rows={3} {...form.register('remark')} />
+            </div>
+          </>
         )}
       </div>
       {openDelete && <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={handleDeleteEngineer} />}
