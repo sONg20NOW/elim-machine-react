@@ -451,11 +451,6 @@ export interface SafetyProjectReadResponseDtoType {
   contractPartnerEmail: string
   contractPartnerTel: string
   vatIncludedYn: ynResultType
-}
-
-// PATCH /api/safety/projects/{safetyProjectId}/special-note
-export interface SafetyProjectNoteUpdateRequestDtoType {
-  version: number
   specialNote: string
 }
 
@@ -464,6 +459,12 @@ interface SafetyProjectAttachmentReadResponseDtoType {
   safetyAttachmentType: safetyAttachmentTypeType
   originalFileName: string
   presignedUrl: string
+}
+
+// PATCH /api/safety/projects/{safetyProjectId}/special-note - description:	안전진단 프로젝트 특이사항(specialNote) 수정 요청 DTO
+export interface SafetyProjectNoteUpdateRequestDtoType {
+  version: number
+  specialNote: string
 }
 
 // ----------- Engineer 관련 API -----------
@@ -1511,3 +1512,18 @@ export type safetyAttachmentTypeType =
   | 'EDUCATION_CERTIFICATE'
 
 export type checkTypeType = 'COOLING' | 'HEATING'
+
+/* -------------------------- TabValue Type -------------------------- */
+// 기계설비현장 탭
+export type MachineProjectTabValueType = '현장정보' | '점검일정/참여기술진' | '설비목록' | '전체사진' | '특이사항'
+
+// 안전진단현장 탭
+export type SafetyProjectTabValueType =
+  | '현장정보'
+  | '점검일정/참여기술진'
+  | '현장점검표'
+  | '도면목록'
+  | '결함목록'
+  | '전체사진'
+  | '자료실'
+  | '특이사항'
