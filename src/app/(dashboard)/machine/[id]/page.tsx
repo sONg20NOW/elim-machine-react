@@ -27,11 +27,11 @@ import BasicTabContent from './_components/tabs/MachineProjectTabContent'
 import ScheduleAndEngineerTabContent from './_components/tabs/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/tabs/NoteTabContent'
 import InspectionListTabContent from './_components/tabs/InspectionListTabContent'
-import type { MachineTabValue } from '@/@core/hooks/zustand/useMachineTabValueStore'
-import useMachineTabValueStore from '@/@core/hooks/zustand/useMachineTabValueStore'
+import useMachineProjectTabValueStore from '@/@core/hooks/zustand/useMachineProjectTabValueStore'
 import { useGetEngineersOptions, useGetMachineProject, useGetScheduleTab } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import isEditingContext from './isEditingContext'
+import type { MachineProjectTabValueType } from '@/@core/types'
 
 const Tabs = [
   { value: '현장정보', label: '현장정보' },
@@ -47,7 +47,7 @@ const MachineUpdatePage = () => {
   const params = useParams()
   const machineProjectId = params?.id as string
 
-  const { tabValue, setTabValue } = useMachineTabValueStore(state => state)
+  const { tabValue, setTabValue } = useMachineProjectTabValueStore(state => state)
   const [isEditing, setIsEditing] = useState(false)
 
   const { data: engineerList } = useGetEngineersOptions()
@@ -68,7 +68,7 @@ const MachineUpdatePage = () => {
   })
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
-    setTabValue(newValue as MachineTabValue)
+    setTabValue(newValue as MachineProjectTabValueType)
   }
 
   const handleChangeProjectName = handleSubmit(

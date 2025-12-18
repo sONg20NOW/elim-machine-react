@@ -34,7 +34,7 @@ import BasicTable from '@core/components/elim-table/BasicTable'
 import AddMachineProjectModal from './_components/AddMachineProjectModal'
 import { DEFAULT_PAGESIZE, PageSizeOptions } from '@core/data/options'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import useMachineTabValueStore from '@/@core/hooks/zustand/useMachineTabValueStore'
+import useMachineProjectTabValueStore from '@/@core/hooks/zustand/useMachineProjectTabValueStore'
 import { auth } from '@core/utils/auth'
 import BasicTableFilter from '@/@core/components/elim-table/BasicTableFilter'
 import { useGetEngineersOptions, useGetMachineProjects } from '@core/hooks/customTanstackQueries'
@@ -57,7 +57,7 @@ export default function MachinePage() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const setTabValue = useMachineTabValueStore(state => state.setTabValue)
+  const setTabValue = useMachineProjectTabValueStore(state => state.setTabValue)
 
   const page = Number(searchParams.get('page') ?? 0)
   const size = Number(searchParams.get('size') ?? DEFAULT_PAGESIZE)

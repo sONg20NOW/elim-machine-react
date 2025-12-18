@@ -2,11 +2,11 @@ import type { StateCreator } from 'zustand'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type MachineProjectTabValue = '현장정보' | '점검일정/참여기술진' | '설비목록' | '전체사진' | '특이사항'
+import type { MachineProjectTabValueType } from '@/@core/types'
 
 interface TabValueState {
-  tabValue: MachineProjectTabValue
-  setTabValue: (value: MachineProjectTabValue) => void
+  tabValue: MachineProjectTabValueType
+  setTabValue: (value: MachineProjectTabValueType) => void
 }
 
 const machineProjectTabValueCreator: StateCreator<TabValueState> = set => ({
@@ -14,7 +14,7 @@ const machineProjectTabValueCreator: StateCreator<TabValueState> = set => ({
   tabValue: '현장정보',
 
   // ⭐ 액션 (Action)
-  setTabValue: (value: MachineProjectTabValue) => {
+  setTabValue: (value: MachineProjectTabValueType) => {
     set({ tabValue: value }) // set 함수를 통해 상태 업데이트
     console.log(`zustand call! (tabvalue: ${value})`)
   }
