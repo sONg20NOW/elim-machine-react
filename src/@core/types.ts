@@ -462,7 +462,10 @@ interface SafetyProjectAttachmentReadResponseDtoType {
 }
 
 // PATCH/api/safety/projects/{safetyProjectId}
-export type SafetyProjectUpdateRequestDtoType = Omit<SafetyProjectUpdateResponseDtoType, 'safetyProjectId'>
+export type SafetyProjectUpdateRequestDtoType = Omit<
+  SafetyProjectReadResponseDtoType,
+  'safetyProjectId' | 'specialNote' | 'name' | 'attachments'
+>
 
 export type SafetyProjectUpdateResponseDtoType = Omit<
   SafetyProjectReadResponseDtoType,
@@ -482,6 +485,7 @@ export interface SafetyProjectNameUpdateRequestDtoType {
   name: string
 }
 
+// 이름 수정 응답 DTO
 export interface SafetyProjectNameUpdateResponseDtoType {
   version: number
   projectName: string
