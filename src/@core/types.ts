@@ -461,6 +461,14 @@ interface SafetyProjectAttachmentReadResponseDtoType {
   presignedUrl: string
 }
 
+// PATCH/api/safety/projects/{safetyProjectId}
+export type SafetyProjectUpdateRequestDtoType = Omit<SafetyProjectUpdateResponseDtoType, 'safetyProjectId'>
+
+export type SafetyProjectUpdateResponseDtoType = Omit<
+  SafetyProjectReadResponseDtoType,
+  'specialNote' | 'name' | 'attachments'
+>
+
 // PATCH /api/safety/projects/{safetyProjectId}/special-note - description:	안전진단 프로젝트 특이사항(specialNote) 수정 요청 DTO
 export interface SafetyProjectNoteUpdateRequestDtoType {
   version: number

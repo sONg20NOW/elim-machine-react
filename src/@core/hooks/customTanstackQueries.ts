@@ -60,6 +60,8 @@ import type {
   SafetyProjectPageResponseDtoType,
   SafetyProjectReadResponseDtoType,
   SafetyProjectScheduleAndEngineerResponseDtoType,
+  SafetyProjectUpdateRequestDtoType,
+  SafetyProjectUpdateResponseDtoType,
   successResponseDtoType,
   targetType,
   WindMeasurementResponseDtoType
@@ -1022,6 +1024,38 @@ export const useGetSafetyProject = (safetyProjectId: string) => {
     enabled: safetyProjectId !== '',
     queryKey: QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId),
     queryFn: fetchSafetyProjectData
+  })
+}
+
+export const useMutateSafetyProject = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<SafetyProjectUpdateResponseDtoType, AxiosError, SafetyProjectUpdateRequestDtoType>({
+    mutationFn: async data => {
+      const response = await auth
+        .patch<{
+          data: SafetyProjectUpdateResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}`, data)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: newData => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
+        ...prev,
+        ...newData
+      }))
+      queryClient.removeQueries({ queryKey: ['GET_SAFETY_PROJECTS'] })
+
+      console.log('useMutateSafetyProject.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
   })
 }
 
