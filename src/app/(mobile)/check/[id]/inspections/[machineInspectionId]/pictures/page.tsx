@@ -34,7 +34,7 @@ import type {
 } from '@core/types'
 import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
 import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
-import getS3Key from '@core/utils/getS3Key'
+import getPictureS3Key from '@/@core/utils/getPictureS3Key'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const max_pic = 100
@@ -151,7 +151,7 @@ export default function PicturePage() {
     if (!files) return
     const file: File = files[0]
 
-    const s3Key = await getS3Key(
+    const s3Key = await getPictureS3Key(
       `${machineProjectId}`,
       [file],
       `${machineInspectionId}`,

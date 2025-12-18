@@ -18,7 +18,7 @@ import type { MachineInspectionPicUploadPresignedUrlBatchRequestDtoType } from '
     uploadSuccess: boolean;
 }[]
  */
-export default async function getS3Key(
+export default async function getPictureS3Key(
   machineProjectId: string,
   files: File[],
   inspectionId?: string,

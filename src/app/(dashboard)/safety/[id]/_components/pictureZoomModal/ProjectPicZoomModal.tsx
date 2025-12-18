@@ -30,7 +30,7 @@ import type {
   machineProjectPicTypeType
 } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import getS3Key from '@core/utils/getS3Key'
+import getPictureS3Key from '@/@core/utils/getPictureS3Key'
 import { auth } from '@core/utils/auth'
 import { projectPicOption } from '@/@core/data/options'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
@@ -100,7 +100,7 @@ export default function ProjectPicZoomModal({
     try {
       setLoading(true)
 
-      const S3KeyResult = await getS3Key(
+      const S3KeyResult = await getPictureS3Key(
         machineProjectId,
         [file],
         undefined,

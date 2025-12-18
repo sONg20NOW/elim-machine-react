@@ -1,6 +1,6 @@
 import { auth } from '@core/utils/auth'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import getS3Key from './getS3Key'
+import getPictureS3Key from './getPictureS3Key'
 import type { machineProjectPicTypeType } from '../types'
 
 export const uploadProjectPictures = async (
@@ -9,7 +9,7 @@ export const uploadProjectPictures = async (
   machineProjectPicType: machineProjectPicTypeType
 ) => {
   try {
-    const S3uploadResults = await getS3Key(
+    const S3uploadResults = await getPictureS3Key(
       machineProjectId,
       filesToUpload,
       undefined,
