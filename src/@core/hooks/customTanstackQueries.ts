@@ -54,7 +54,9 @@ import type {
   MemberPageDtoType,
   MemberPrivacyDtoType,
   PipeMeasurementResponseDtoType,
+  SafetyProjectNoteUpdateRequestDtoType,
   SafetyProjectPageResponseDtoType,
+  SafetyProjectReadResponseDtoType,
   successResponseDtoType,
   targetType,
   WindMeasurementResponseDtoType
@@ -958,6 +960,64 @@ export const useGetSafetyProjects = (queryParams: string) => {
       console.log(`!!! queryFn ${keyType}:`)
 
       return response
+    }
+  })
+}
+
+// GET /api/machine-projects/{machineProjectId}/
+export const useGetSafetyProject = (safetyProjectId: string) => {
+  const fetchSafetyProjectData: QueryFunction<SafetyProjectReadResponseDtoType, string[]> = useCallback(
+    async data => {
+      const response = await auth
+        .get<{
+          data: SafetyProjectReadResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}`)
+        .then(v => v.data.data)
+
+      const [keyType] = data.queryKey
+
+      console.log(`!!! queryFn ${keyType}:`)
+
+      return response
+    },
+    [safetyProjectId]
+  )
+
+  return useQuery({
+    enabled: safetyProjectId !== '',
+    queryKey: QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId),
+    queryFn: fetchSafetyProjectData
+  })
+}
+
+export const useMutateSafetyProjectSpecialNote = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<SafetyProjectNoteUpdateRequestDtoType, AxiosError, SafetyProjectNoteUpdateRequestDtoType>({
+    mutationFn: async data => {
+      const response = await auth
+        .patch<{
+          data: SafetyProjectNoteUpdateRequestDtoType
+        }>(`/api/safety/projects/${safetyProjectId}/special-note`, data)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: newNote => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
+        ...prev,
+        note: newNote.specialNote,
+        version: newNote.version
+      }))
+      console.log('useMutateMachineProjectNote.')
+      toast.info('특이사항이 성공적으로 저장되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
     }
   })
 }

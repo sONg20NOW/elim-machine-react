@@ -93,7 +93,8 @@ export const QUERY_KEYS = {
     GET_MACHINE_PROJECTS: (queryParams: string) => ['GET_MACHINE_PROJECTS', refineParams(queryParams)]
   },
   SAFETY_PROJECT: {
-    GET_SAFETY_PROJECTS: (queryParams: string) => ['GET_SAFETY_PROJECTS', refineParams(queryParams)]
+    GET_SAFETY_PROJECTS: (queryParams: string) => ['GET_SAFETY_PROJECTS', refineParams(queryParams)],
+    GET_SAFETY_PROJECT: (safetyProjectId: string) => ['GET_SAFETY_PROJECT', safetyProjectId]
   },
   MEMBER: {
     GET_SINGLE_MEMBER: (memberId: string) => ['GET_SINGLE_MEMBER', memberId],
