@@ -23,7 +23,7 @@ import PictureListTabContent from './_components/tabs/PictureListTabContent'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import CustomTextField from '@core/components/mui/TextField'
 import DisabledTabWithTooltip from '@/app/(dashboard)/machine/[id]/_components/DisabledTabWithTooltip'
-import BasicTabContent from './_components/tabs/MachineProjectTabContent'
+import MachineProjectTabContent from './_components/tabs/MachineProjectTabContent'
 import ScheduleAndEngineerTabContent from './_components/tabs/ScheduleAndEngineerTabContent'
 import NoteTabContent from './_components/tabs/NoteTabContent'
 import InspectionListTabContent from './_components/tabs/InspectionListTabContent'
@@ -134,7 +134,11 @@ const MachineUpdatePage = () => {
             </TabList>
             <div className='flex-1 overflow-y-hidden pt-6'>
               <TabPanel value='현장정보' className='h-full'>
-                {machineProjectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
+                {machineProjectData ? (
+                  <MachineProjectTabContent />
+                ) : (
+                  <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
+                )}
               </TabPanel>
               <TabPanel value='점검일정/참여기술진'>
                 {scheduleData ? (
