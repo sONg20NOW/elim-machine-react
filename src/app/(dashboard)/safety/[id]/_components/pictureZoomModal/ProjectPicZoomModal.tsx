@@ -1,0 +1,355 @@
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+
+import { useParams } from 'next/navigation'
+
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid2,
+  IconButton,
+  Tooltip,
+  Typography,
+  useMediaQuery
+} from '@mui/material'
+
+import { useForm } from 'react-hook-form'
+
+import { IconCircleCaretLeftFilled, IconCircleCaretRightFilled, IconDownload, IconPhotoUp } from '@tabler/icons-react'
+
+import { createPortal } from 'react-dom'
+
+import type {
+  MachineProjectPicReadResponseDtoType,
+  MachineProjectPicUpdateRequestDtoType,
+  machineProjectPicTypeType
+} from '@core/types'
+import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
+import getS3Key from '@core/utils/getS3Key'
+import { auth } from '@core/utils/auth'
+import { projectPicOption } from '@/@core/data/options'
+import AlertModal from '@/@core/components/elim-modal/AlertModal'
+import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
+import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
+import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
+import ImageZoomCard from './ImageZoomCard'
+import ResetButton from '@/@core/components/elim-button/ResetButton'
+
+interface formType {
+  originalFileName: string
+  machineProjectPicType: machineProjectPicTypeType
+  remark: string
+}
+
+interface ProjectPicZoomModalProps {
+  MovePicture?: (dir: 'next' | 'previous') => void
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+  selectedPic: MachineProjectPicReadResponseDtoType
+  setPictures: Dispatch<SetStateAction<MachineProjectPicReadResponseDtoType[]>>
+}
+
+// ! 확대 기능 구현, 현재 리스트에 있는 목록 슬라이드로 이동 가능 기능 구현, 사진 정보 수정 기능 구현(이름 수정은 연필로)
+export default function ProjectPicZoomModal({
+  MovePicture,
+  open,
+  setOpen,
+  selectedPic,
+  setPictures
+}: ProjectPicZoomModalProps) {
+  const machineProjectId = useParams().id?.toString() as string
+
+  const showMovePicBtns = useMediaQuery('(min-width:1100px)')
+
+  const [openAlert, setOpenAlert] = useState(false)
+  const [openDelete, setOpenDelete] = useState(false)
+  const proceedingJob = useRef<() => void>()
+
+  const form = useForm<formType>({
+    defaultValues: {
+      originalFileName: selectedPic.originalFileName ?? '',
+      machineProjectPicType: selectedPic.machineProjectPicType ?? '',
+      remark: selectedPic.remark ?? ''
+    }
+  })
+
+  useEffect(() => {
+    form.reset({
+      originalFileName: selectedPic.originalFileName ?? '',
+      machineProjectPicType: selectedPic.machineProjectPicType ?? '',
+      remark: selectedPic.remark ?? ''
+    })
+  }, [form, selectedPic.id, selectedPic.originalFileName, selectedPic.machineProjectPicType, selectedPic.remark])
+
+  const isDirty = form.formState.isDirty
+
+  const watchedMachineProjectPicType = form.watch('machineProjectPicType')
+
+  const [loading, setLoading] = useState(false)
+
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+
+  const formName = 'project-pic-form'
+
+  const onChangeImage = async (file: File) => {
+    try {
+      setLoading(true)
+
+      const S3KeyResult = await getS3Key(
+        machineProjectId,
+        [file],
+        undefined,
+        undefined,
+        undefined,
+        watchedMachineProjectPicType
+      )
+
+      if (!S3KeyResult) return
+
+      const presignedUrl = URL.createObjectURL(file)
+      const s3Key = S3KeyResult[0].s3Key
+
+      const response = await auth
+        .put<{
+          data: MachineProjectPicUpdateRequestDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/${selectedPic.id}`, {
+          version: selectedPic.version,
+          s3Key: s3Key
+        })
+        .then(v => v.data.data)
+
+      setPictures(prev =>
+        prev.map(v => (v.id === selectedPic.id ? { ...v, ...response, presignedUrl: presignedUrl } : v))
+      )
+      handleSuccess('사진이 교체되었습니다')
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSave = form.handleSubmit(async data => {
+    try {
+      setLoading(true)
+
+      const response = await auth
+        .put<{
+          data: MachineProjectPicUpdateRequestDtoType
+        }>(`/api/machine-projects/${machineProjectId}/machine-project-pics/${selectedPic.id}`, {
+          ...data,
+          version: selectedPic.version
+        })
+        .then(v => v.data.data)
+
+      form.reset({
+        originalFileName: response.originalFileName ?? '',
+        machineProjectPicType: response.machineProjectPicType ?? '',
+        remark: response.remark ?? ''
+      })
+      setPictures(prev => prev.map(v => (v.id === selectedPic.id ? { ...v, ...response } : v)))
+
+      handleSuccess('사진 정보가 변경되었습니다.')
+    } catch (error) {
+      handleApiError(error)
+    } finally {
+      setLoading(false)
+    }
+  })
+
+  const handleClose = () => {
+    if (isDirty) {
+      proceedingJob.current = () => setOpen(false)
+      setOpenAlert(true)
+    } else {
+      setOpen(false)
+    }
+  }
+
+  const handleDontSave = useCallback(() => {
+    proceedingJob.current && proceedingJob.current()
+    form.reset()
+    setOpenAlert(false)
+  }, [form])
+
+  const handleDelete = useCallback(async () => {
+    try {
+      setLoading(true)
+      await auth.delete(`/api/machine-projects/${machineProjectId}/machine-project-pics`, {
+        data: {
+          machineProjectPicDeleteRequestDtos: [{ id: selectedPic.id, version: selectedPic.version }]
+        }
+      } as any)
+
+      setOpen(false)
+      setPictures(prev => prev.filter(v => v.id !== selectedPic.id))
+      handleSuccess('사진이 정상적으로 삭제되었습니다')
+    } catch (e) {
+      handleApiError(e)
+    } finally {
+      setOpenDelete(false)
+      setLoading(false)
+    }
+  }, [machineProjectId, selectedPic.id, selectedPic.version, setOpen, setPictures])
+
+  return (
+    <form className='hidden' onSubmit={handleSave} id={formName}>
+      {showMovePicBtns &&
+        MovePicture &&
+        open &&
+        createPortal(
+          <>
+            <IconButton
+              disabled={loading}
+              sx={theme => ({ zIndex: theme.zIndex.modal + 1 })}
+              className='fixed left-10 top-1/2'
+              onClick={() => {
+                if (isDirty) {
+                  proceedingJob.current = () => MovePicture('previous')
+                  setOpenAlert(true)
+                } else {
+                  MovePicture('previous')
+                }
+              }}
+            >
+              <IconCircleCaretLeftFilled size={50} color='white' />
+            </IconButton>
+            <IconButton
+              disabled={loading}
+              sx={theme => ({ zIndex: theme.zIndex.modal + 1 })}
+              className='fixed right-10 top-1/2'
+              onClick={() => {
+                if (isDirty) {
+                  proceedingJob.current = () => MovePicture('next')
+                  setOpenAlert(true)
+                } else {
+                  MovePicture('next')
+                }
+              }}
+            >
+              <IconCircleCaretRightFilled color='white' size={50} />
+            </IconButton>
+          </>,
+          document.body
+        )}
+
+      <Dialog
+        maxWidth='md'
+        fullWidth
+        open={open}
+        onClose={(_, reason) => {
+          if (reason === 'backdropClick') return
+          handleClose()
+        }}
+      >
+        <Backdrop sx={theme => ({ zIndex: theme.zIndex.modal + 10 })} open={loading}>
+          <CircularProgress size={60} sx={{ color: 'white' }} />
+        </Backdrop>
+        <DialogTitle
+          sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, position: 'relative', pb: 2, pt: 4 }}
+        >
+          <div className='flex gap-2 items-center'>
+            <Button color='error' variant='contained' onClick={() => setOpenDelete(true)}>
+              삭제
+            </Button>
+            <ResetButton
+              isDirty={isDirty}
+              onClick={() => {
+                proceedingJob.current = undefined
+                setOpenAlert(true)
+              }}
+            />
+          </div>
+          <div className='flex gap-2 items-center'>
+            <Tooltip title='사진 다운로드' arrow>
+              <IconButton type='button' LinkComponent={'a'} href={selectedPic.downloadPresignedUrl} download>
+                <IconDownload color='dimgray' size={30} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title='사진 업로드(교체)' arrow>
+              <IconButton type='button' onClick={() => cameraInputRef.current?.click()}>
+                <IconPhotoUp color='dimgray' size={30} />
+              </IconButton>
+            </Tooltip>
+          </div>
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 4, height: '80dvh' }}>
+          <div className='flex-1 overflow-hidden'>
+            <ImageZoomCard src={selectedPic.presignedUrl} alt={selectedPic.originalFileName} />
+          </div>
+          <Box>
+            <Grid2 key={selectedPic.id} sx={{ marginTop: 2, width: { xs: 'full' } }} container spacing={4} columns={2}>
+              <TextInputBox
+                form={form}
+                name='originalFileName'
+                labelMap={{ originalFileName: { label: '사진명' } }}
+                placeholder='사진명을 입력해주세요'
+              />
+              <MultiInputBox
+                form={form}
+                name='machineProjectPicType'
+                labelMap={{ machineProjectPicType: { label: '사진 종류', options: projectPicOption } }}
+              />
+              <TextInputBox
+                column={2}
+                multiline={4}
+                form={form}
+                name='remark'
+                labelMap={{ remark: { label: '비고' } }}
+              />
+            </Grid2>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <div className='flex items-end gap-4'>
+            <Typography color={isDirty ? 'error.main' : 'warning.main'}>
+              {!isDirty ? '변경사항이 없습니다' : !watchedMachineProjectPicType && '※사진종류를 지정해주세요'}
+            </Typography>
+            <div className='flex'>
+              <Button
+                sx={{ width: 'fit-content' }}
+                variant='contained'
+                type='submit'
+                form={formName}
+                disabled={!isDirty || !watchedMachineProjectPicType || loading}
+                color='success'
+              >
+                저장
+              </Button>
+              <Button
+                sx={{ width: 'fit-content' }}
+                variant='contained'
+                type='button'
+                onClick={handleClose}
+                color='secondary'
+              >
+                닫기
+              </Button>
+            </div>
+          </div>
+        </DialogActions>
+        <input
+          type='file'
+          accept='image/*'
+          className='hidden'
+          ref={cameraInputRef}
+          onChange={e => {
+            if (!e.target.files) return
+
+            const files = Array.from(e.target.files)
+
+            onChangeImage(files[0])
+          }}
+        />
+      </Dialog>
+
+      <AlertModal open={openAlert} setOpen={setOpenAlert} handleConfirm={handleDontSave} />
+      <DeleteModal open={openDelete} setOpen={setOpenDelete} onDelete={handleDelete} />
+    </form>
+  )
+}
