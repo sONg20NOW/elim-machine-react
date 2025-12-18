@@ -21,7 +21,7 @@ import { buildingGradeOption, checkTypeOption, gradeOption } from '@/@core/data/
 import {
   useGetEngineersOptions,
   useGetParticipatedEngineerList,
-  useGetScheduleTab
+  useGetMachineProjectScheduleTab
 } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
@@ -57,7 +57,7 @@ const ScheduleAndEngineerTabContentInner = () => {
 
   const { isEditing, setIsEditing } = useContext(isEditingContext)!
 
-  const { data: scheduleData, refetch: refetchScheduleData } = useGetScheduleTab(machineProjectId)
+  const { data: scheduleData, refetch: refetchScheduleData } = useGetMachineProjectScheduleTab(machineProjectId)
 
   const { data: participatedEngineers, refetch: refetchParticipatedEngineers } =
     useGetParticipatedEngineerList(machineProjectId)

@@ -1,14 +1,14 @@
 'use client'
 
 import type { SyntheticEvent } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import { redirect, useParams } from 'next/navigation'
 
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 
-import { CardContent, IconButton, Tab, Typography, useMediaQuery } from '@mui/material'
+import { CardContent, IconButton, Tab, Typography } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
@@ -28,10 +28,15 @@ import ScheduleAndEngineerTabContent from './_components/tabs/ScheduleAndEnginee
 import NoteTabContent from './_components/tabs/NoteTabContent'
 import InspectionListTabContent from './_components/tabs/InspectionListTabContent'
 import useMachineProjectTabValueStore from '@/@core/hooks/zustand/useMachineProjectTabValueStore'
-import { useGetEngineersOptions, useGetMachineProject, useGetScheduleTab } from '@core/hooks/customTanstackQueries'
-import { auth } from '@core/utils/auth'
+import {
+  useGetEngineersOptions,
+  useGetMachineProject,
+  useGetMachineProjectScheduleTab,
+  useMutateMachineProjectName
+} from '@core/hooks/customTanstackQueries'
 import isEditingContext from './isEditingContext'
-import type { MachineProjectTabValueType } from '@/@core/types'
+import type { MachineProjectResponseDtoType, MachineProjectTabValueType } from '@/@core/types'
+import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const Tabs = [
   { value: '현장정보', label: '현장정보' },
@@ -42,7 +47,7 @@ const Tabs = [
 ]
 
 const MachineUpdatePage = () => {
-  const isMobile = useMediaQuery('(max-width:600px)')
+  const isMobile = useContext(isMobileContext)
 
   const params = useParams()
   const machineProjectId = params?.id as string
@@ -51,63 +56,19 @@ const MachineUpdatePage = () => {
   const [isEditing, setIsEditing] = useState(false)
 
   const { data: engineerList } = useGetEngineersOptions()
-  const { data: projectData, refetch: refetchProjectData } = useGetMachineProject(machineProjectId)
-  const { data: scheduleData, refetch: refetchScheduleData } = useGetScheduleTab(machineProjectId)
+  const { data: machineProjectData, refetch: refetchMachineProjectData } = useGetMachineProject(machineProjectId)
 
-  const [isEditingProjectName, setIsEditingProjectName] = useState(false)
-
-  const {
-    reset,
-    register,
-    handleSubmit,
-    formState: { isDirty }
-  } = useForm<{ machineProjectName: string }>({
-    defaultValues: {
-      machineProjectName: projectData?.machineProjectName ?? ''
-    }
-  })
+  const { data: scheduleData, refetch: refetchScheduleData } = useGetMachineProjectScheduleTab(machineProjectId)
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
     setTabValue(newValue as MachineProjectTabValueType)
   }
 
-  const handleChangeProjectName = handleSubmit(
-    useCallback(
-      async data => {
-        if (isDirty) {
-          try {
-            const response = await auth
-              .put<{ data: { projectName: string; version: number } }>(
-                `/api/machine-projects/${machineProjectId}/name`,
-                {
-                  version: projectData?.version,
-                  name: data.machineProjectName
-                }
-              )
-              .then(v => v.data.data)
-
-            reset({ machineProjectName: response.projectName })
-            refetchProjectData()
-            handleSuccess('프로젝트 이름이 변경되었습니다.')
-          } catch (error) {
-            handleApiError(error)
-          }
-        }
-      },
-      [machineProjectId, projectData?.version, isDirty, reset, refetchProjectData]
-    )
-  )
-
-  const cancelChangingProjectName = useCallback(() => {
-    reset()
-    setIsEditingProjectName(false)
-  }, [reset, setIsEditingProjectName])
-
   useEffect(() => {
     if (machineProjectId) {
       switch (tabValue) {
         case '현장정보':
-          if (!projectData) refetchProjectData()
+          if (!machineProjectData) refetchMachineProjectData()
           break
         case '점검일정/참여기술진':
           if (!scheduleData) refetchScheduleData()
@@ -116,7 +77,15 @@ const MachineUpdatePage = () => {
           break
       }
     }
-  }, [machineProjectId, tabValue, refetchProjectData, refetchScheduleData, engineerList, projectData, scheduleData])
+  }, [
+    machineProjectId,
+    tabValue,
+    refetchMachineProjectData,
+    refetchScheduleData,
+    engineerList,
+    machineProjectData,
+    scheduleData
+  ])
 
   return (
     <isEditingContext.Provider value={{ isEditing, setIsEditing }}>
@@ -124,57 +93,28 @@ const MachineUpdatePage = () => {
         <div className={classNames('flex items-center justify-between', { 'p-0': isMobile, 'px-6 py-6': !isMobile })}>
           <CardHeader
             title={
-              <div
-                className={classNames('flex gap-0', {
-                  'flex-col text-left items-start': isMobile,
-                  'items-center': !isMobile
-                })}
-              >
-                <Typography
-                  variant='h4'
-                  sx={{
-                    ':hover': { color: 'primary.main' },
-                    alignItems: 'center',
-                    display: 'flex'
-                  }}
-                  onClick={() => redirect('/machine')}
+              machineProjectData && (
+                <div
+                  className={classNames('flex gap-0', {
+                    'flex-col text-left items-start': isMobile,
+                    'items-center': !isMobile
+                  })}
                 >
-                  기계설비현장
-                  <IconChevronRight />
-                </Typography>
-                <form className='flex items-center' onSubmit={handleChangeProjectName}>
-                  {!isEditingProjectName ? (
-                    <Typography color='black' variant='h4' sx={{ cursor: 'default' }}>
-                      {projectData?.machineProjectName ?? ''}
-                    </Typography>
-                  ) : (
-                    <CustomTextField
-                      {...register('machineProjectName')}
-                      slotProps={{
-                        input: { sx: { fontSize: 20, width: 'fit-content' } },
-                        htmlInput: { sx: { py: '0 !important' } }
-                      }}
-                    />
-                  )}
-                  <IconButton
-                    type='submit'
-                    onClick={() => {
-                      setIsEditingProjectName(prev => !prev)
+                  <Typography
+                    variant='h4'
+                    sx={{
+                      ':hover': { color: 'primary.main' },
+                      alignItems: 'center',
+                      display: 'flex'
                     }}
+                    onClick={() => redirect('/machine')}
                   >
-                    {!isEditingProjectName ? (
-                      <IconPencil />
-                    ) : (
-                      <IconCheck className='text-green-400 hover:text-green-500' />
-                    )}
-                  </IconButton>
-                  {isEditingProjectName && (
-                    <IconButton type='button' onClick={cancelChangingProjectName}>
-                      <IconX className='text-red-400 hover:text-red-500' />
-                    </IconButton>
-                  )}
-                </form>
-              </div>
+                    기계설비현장
+                    <IconChevronRight />
+                  </Typography>
+                  <MachineProjectNameBox machineProjectData={machineProjectData} />
+                </div>
+              )
             }
             sx={{ cursor: 'pointer', padding: 0 }}
           />
@@ -194,7 +134,7 @@ const MachineUpdatePage = () => {
             </TabList>
             <div className='flex-1 overflow-y-hidden pt-6'>
               <TabPanel value='현장정보' className='h-full'>
-                {projectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
+                {machineProjectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
               </TabPanel>
               <TabPanel value='점검일정/참여기술진'>
                 {scheduleData ? (
@@ -210,13 +150,89 @@ const MachineUpdatePage = () => {
                 <PictureListTabContent />
               </TabPanel>
               <TabPanel value='특이사항'>
-                {projectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
+                {machineProjectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
               </TabPanel>
             </div>
           </TabContext>
         </CardContent>
       </Card>
     </isEditingContext.Provider>
+  )
+}
+
+function MachineProjectNameBox({ machineProjectData }: { machineProjectData: MachineProjectResponseDtoType }) {
+  const params = useParams()
+  const machineProjectId = params?.id as string
+
+  const { mutateAsync: mutateAsyncName } = useMutateMachineProjectName(machineProjectId)
+  const [isEditingProjectName, setIsEditingProjectName] = useState(false)
+
+  const {
+    reset,
+    register,
+    handleSubmit,
+    formState: { isDirty }
+  } = useForm<{ name: string }>({
+    defaultValues: {
+      name: machineProjectData?.machineProjectName ?? ''
+    }
+  })
+
+  const handleChangeProjectName = handleSubmit(
+    useCallback(
+      async data => {
+        if (isDirty) {
+          try {
+            const newData = await mutateAsyncName({
+              name: data.name,
+              version: machineProjectData?.version ?? 0
+            })
+
+            reset({ name: newData.projectName })
+            handleSuccess('프로젝트 이름이 변경되었습니다.')
+          } catch (error) {
+            handleApiError(error)
+          }
+        }
+      },
+      [isDirty, mutateAsyncName, reset, machineProjectData?.version]
+    )
+  )
+
+  const cancelChangingProjectName = useCallback(() => {
+    reset()
+    setIsEditingProjectName(false)
+  }, [reset, setIsEditingProjectName])
+
+  return (
+    <form className='flex items-center' onSubmit={handleChangeProjectName}>
+      {!isEditingProjectName ? (
+        <Typography color='black' variant='h4' sx={{ cursor: 'default' }}>
+          {machineProjectData?.machineProjectName ?? ''}
+        </Typography>
+      ) : (
+        <CustomTextField
+          {...register('name')}
+          slotProps={{
+            input: { sx: { fontSize: 20, width: 'fit-content' } },
+            htmlInput: { sx: { py: '0 !important' } }
+          }}
+        />
+      )}
+      <IconButton
+        type='submit'
+        onClick={() => {
+          setIsEditingProjectName(prev => !prev)
+        }}
+      >
+        {!isEditingProjectName ? <IconPencil /> : <IconCheck className='text-green-400 hover:text-green-500' />}
+      </IconButton>
+      {isEditingProjectName && (
+        <IconButton type='button' onClick={cancelChangingProjectName}>
+          <IconX className='text-red-400 hover:text-red-500' />
+        </IconButton>
+      )}
+    </form>
   )
 }
 
