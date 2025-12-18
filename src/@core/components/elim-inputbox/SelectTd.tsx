@@ -7,6 +7,7 @@ type SelectTdProps<T extends Record<string, any>> = {
   form: UseFormReturn<T, any, undefined>
   name: Path<T>
   option: { label: string; value: string | number; disabled?: boolean }[]
+  colSpan?: number
   placeholder?: string
 } & Omit<SelectProps, 'displayEmpty'>
 
@@ -15,6 +16,7 @@ type SelectTdProps<T extends Record<string, any>> = {
  * @param form *
  * @param name *
  * @param option *
+ * @param colSpan
  * @param placeholder
  * @returns
  * @prop MUI Select props 사용 가능
@@ -23,11 +25,12 @@ export default function SelectTd<T extends Record<string, any>>({
   form,
   name,
   option,
+  colSpan = 1,
   placeholder,
   ...rest
 }: SelectTdProps<T>) {
   return (
-    <td className='p-0'>
+    <td colSpan={colSpan} className='p-0'>
       <Controller
         control={form.control}
         name={name}
