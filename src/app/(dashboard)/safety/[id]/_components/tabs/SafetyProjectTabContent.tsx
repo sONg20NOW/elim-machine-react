@@ -336,6 +336,26 @@ const SafetyProjectTabContent = () => {
                       첨부파일
                     </th>
                   </tr>
+                  <tr>
+                    {/* 건축물대장 */}
+                    <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>건축물대장</th>
+                    <TextFieldTd colSpan={3} form={safetyProjectForm} name='buildingName' />
+                  </tr>
+                  {/* 시설물대장 */}
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>시설물대장</th>
+                    <TextFieldTd colSpan={3} form={safetyProjectForm} name='buildingName' />
+                  </tr>
+                  {/* 과업지시서 */}
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>과업지시서</th>
+                    <TextFieldTd colSpan={3} form={safetyProjectForm} name='buildingName' />
+                  </tr>
+                  {/* 교육수료증 */}
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>교육수료증</th>
+                    <TextFieldTd colSpan={3} form={safetyProjectForm} name='buildingName' />
+                  </tr>
                   {/* ----- 계약사항 ----- */}
                   <tr style={{ background: '#f3f4f6' }}>
                     <th colSpan={4} style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>
@@ -621,6 +641,42 @@ const SafetyProjectTabContent = () => {
                     <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                       첨부파일
                     </th>
+                  </tr>
+                  {/* 건축물대장 */}
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      건축물대장
+                    </th>
+                    <td colSpan={3} style={{ padding: '10px 12px' }}>
+                      {safetyProjectData.name || '-'}
+                    </td>
+                  </tr>
+                  {/* 시설물대장 */}
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      시설물대장
+                    </th>
+                    <td colSpan={3} style={{ padding: '10px 12px' }}>
+                      {safetyProjectData.name || '-'}
+                    </td>
+                  </tr>
+                  {/* 과업지시서 */}
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      과업지시서
+                    </th>
+                    <td colSpan={3} style={{ padding: '10px 12px' }}>
+                      {safetyProjectData.name || '-'}
+                    </td>
+                  </tr>
+                  {/* 교육수료증 */}
+                  <tr>
+                    <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      교육수료증
+                    </th>
+                    <td colSpan={3} style={{ padding: '10px 12px' }}>
+                      {safetyProjectData.name || '-'}
+                    </td>
                   </tr>
                   {/* 계약사항 */}
                   <tr style={{ background: '#f3f4f6' }}>
