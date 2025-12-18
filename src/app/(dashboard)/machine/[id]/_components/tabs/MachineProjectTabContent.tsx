@@ -223,7 +223,32 @@ const BasicTabContent = () => {
                       <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>대표자</th>
                       <TextFieldTd form={form} name='representative' />
                       <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>연면적(㎡)</th>
-                      <TextFieldTd type='number' form={form} name='grossArea' />
+                      <td className='p-0'>
+                        <Controller
+                          control={form.control}
+                          name='grossArea'
+                          render={({ field }) => (
+                            <NumericFormat
+                              valueIsNumericString
+                              decimalSeparator='.'
+                              allowNegative={false}
+                              decimalScale={5}
+                              customInput={TextField}
+                              size='small'
+                              value={field.value}
+                              onValueChange={values => {
+                                field.onChange(values.floatValue)
+                              }}
+                              fullWidth
+                              slotProps={{
+                                input: {
+                                  sx: { '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } }
+                                }
+                              }}
+                            />
+                          )}
+                        />
+                      </td>
                     </tr>
                     {/* 사업자번호 / 세대수 */}
                     <tr>
