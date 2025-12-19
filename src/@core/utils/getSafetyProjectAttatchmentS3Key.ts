@@ -2,34 +2,33 @@ import axios from 'axios'
 
 import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'
-import type { machineProjectPicTypeType } from '../types'
 
 /**
- * S3 Bucket에 현장사진들을 등록하고 s3Key 정보를 받는 함수
+ * S3 Bucket에 안전진단현장 첨부파일들을 등록하고 s3Key 정보를 받는 함수
  * 
  * 해당 s3Key를 백엔드 서버에 저장하는 것을 별도로 처리해주어야 함.
- * @param machineProjectId * string
+ * @param safetyProjectId * string
  * @param files * 
- * @param machineProjectPicType * "OVERVIEW" | "LOCATION_MAP" | "ETC"
+ * @param attatchmentType * '건축물대장' | '시설물대장' | '과업지시서' | '교육수료증'
  * @returns s3Key 정보를 담은 객체 배열 {
     fileName: string;
     s3Key: string;
     uploadSuccess: boolean;
 }[]
  */
-export default async function getMachineProjectPicS3Key(
-  machineProjectId: string,
+export default async function getSafetyProjectAttatchmentS3Key(
+  safetyProjectId: string,
   files: File[],
-  machineProjectPicType: machineProjectPicTypeType
+  attatchmentType: '건축물대장' | '시설물대장' | '과업지시서' | '교육수료증'
 ) {
   try {
     // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴. -> S3 저장소 배정)
     const presignedResponse = await auth.post<{
       data: { presignedUrlResponseDtos: { s3Key: string; presignedUrl: string }[] }
-    }>(`/api/presigned-urls/machine-projects/${machineProjectId}/machine-project-pics/upload`, {
-      uploadType: 'PROJECT_IMAGE',
+    }>(`/api/presigned-urls/safety/projects/${safetyProjectId}`, {
+      uploadType: 'SAFETY_PROJECT_ATTACHMENT',
       originalFileNames: files.map(file => file.name),
-      machineProjectPicType: machineProjectPicType
+      attachmentType: attatchmentType
     })
 
     const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos

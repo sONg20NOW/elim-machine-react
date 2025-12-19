@@ -5,7 +5,7 @@ import { handleApiError } from '@core/utils/errorHandler'
 import type { MachineInspectionPicUploadPresignedUrlBatchRequestDtoType } from '../types'
 
 /**
- * S3 Bucket에 사진들을 등록하고 s3Key 정보를 받는 함수
+ * S3 Bucket에 설비사진들을 등록하고 s3Key 정보를 받는 함수
  * @param machineProjectId 필수
  * @param files 필수
  * @param inspectionId (설비사진 필수)
