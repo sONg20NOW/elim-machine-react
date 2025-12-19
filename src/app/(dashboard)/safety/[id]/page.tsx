@@ -43,7 +43,8 @@ const Tabs: { value: SafetyProjectTabValueType; label: SafetyProjectTabValueType
   { value: '도면목록', label: '도면목록' },
   { value: '결함목록', label: '결함목록' },
   { value: '전체사진', label: '전체사진' },
-  { value: '자료실', label: '자료실' },
+
+  // { value: '자료실', label: '자료실' },
   { value: '특이사항', label: '특이사항' }
 ]
 

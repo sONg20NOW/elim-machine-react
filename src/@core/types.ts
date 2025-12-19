@@ -1636,5 +1636,6 @@ export type SafetyProjectTabValueType =
   | '도면목록'
   | '결함목록'
   | '전체사진'
-  | '자료실'
+
+  // | '자료실'
   | '특이사항'
