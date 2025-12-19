@@ -58,7 +58,6 @@ import type {
   SafetyProjectAttachmentCreateResponseDtoType,
   SafetyProjectAttachmentUpdateRequestDtoType,
   SafetyProjectAttachmentUpdateResponseDtoType,
-  SafetyProjectEngineerDetailResponseDtoType,
   SafetyProjectEngineerUpdateRequestDtoType,
   SafetyProjectEngineerUpdateResponseDtoType,
   SafetyProjectNameUpdateRequestDtoType,
@@ -68,6 +67,8 @@ import type {
   SafetyProjectPageResponseDtoType,
   SafetyProjectReadResponseDtoType,
   SafetyProjectScheduleAndEngineerResponseDtoType,
+  SafetyProjectScheduleUpdateRequestDtoType,
+  SafetyProjectScheduleUpdateResponseDtoType,
   SafetyProjectUpdateRequestDtoType,
   SafetyProjectUpdateResponseDtoType,
   successResponseDtoType,
@@ -75,7 +76,6 @@ import type {
   WindMeasurementResponseDtoType
 } from '@core/types' // 타입 임포트
 import { handleApiError } from '@core/utils/errorHandler'
-import { gradeOption } from '../data/options'
 
 // ------------------------- License 관련 -------------------------
 export const useGetLicenseNames = () => {
@@ -1244,13 +1244,46 @@ export const useGetSafetyProjectScheduleTab = (safetyProjectId: string) => {
   })
 }
 
+export const useMutateSafetyProjectSchedule = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT_SCHEDULE_TAB(safetyProjectId)
+
+  return useMutation<SafetyProjectScheduleUpdateResponseDtoType, AxiosError, SafetyProjectScheduleUpdateRequestDtoType>(
+    {
+      mutationFn: async data => {
+        const response = await auth
+          .put<{
+            data: SafetyProjectScheduleUpdateResponseDtoType
+          }>(`/api/safety/projects/${safetyProjectId}/schedule`, data)
+          .then(v => v.data.data)
+
+        return response
+      },
+
+      onSuccess: newData => {
+        queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
+          ...prev,
+          ...newData
+        }))
+        queryClient.removeQueries({ queryKey: ['GET_SAFETY_PROJECTS'] })
+
+        console.log('useMutateSafetyProjectSchedule.')
+      },
+
+      onError: error => {
+        console.error(error)
+        handleApiError(error)
+      }
+    }
+  )
+}
+
 export const useMutateSafetyProjectEngineers = (safetyProjectId: string) => {
-  const { data: engineers } = useGetEngineersOptions('SAFETY')
   const queryClient = useQueryClient()
   const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT_SCHEDULE_TAB(safetyProjectId)
 
   return useMutation<
-    SafetyProjectEngineerDetailResponseDtoType[],
+    SafetyProjectEngineerUpdateResponseDtoType[],
     AxiosError,
     SafetyProjectEngineerUpdateRequestDtoType[]
   >({
@@ -1261,28 +1294,7 @@ export const useMutateSafetyProjectEngineers = (safetyProjectId: string) => {
         }>(`/api/safety/projects/${safetyProjectId}/safety-project-engineers`, { engineers: data })
         .then(v => v.data.data.safetyProjectEngineers)
 
-      const engineerOptions = response.map(v => engineers?.find(p => p.engineerId === v.engineerId)).filter(v => !!v)
-
-      const newEngineers = engineerOptions
-        .map(v => {
-          const matchedResponse = response.find(p => p.engineerId === v.engineerId)
-
-          if (!matchedResponse) return undefined
-
-          return {
-            engineerId: v.engineerId,
-            engineerName: v.engineerName,
-            grade: gradeOption.find(k => k.value === v.gradeDescription)?.value ?? ('' as const),
-            gradeDescription: v.gradeDescription,
-            engineerLicenseNum: v.engineerLicenseNum,
-            beginDate: matchedResponse.beginDate,
-            endDate: matchedResponse.endDate,
-            note: matchedResponse.note
-          }
-        })
-        .filter(v => !!v)
-
-      return newEngineers
+      return response
     },
 
     onSuccess: response => {
@@ -1424,6 +1436,7 @@ export const useMutateEngineer = (engineerId: string) => {
 
     onSuccess: data => {
       queryClient.setQueryData(queryKey, data)
+      queryClient.removeQueries({ queryKey: ['GET_SAFETY_PROJECT_SCHEDULE_TAB'] })
       console.log('EngineerResponseDtoType가 성공적으로 수정되었습니다.')
     },
 

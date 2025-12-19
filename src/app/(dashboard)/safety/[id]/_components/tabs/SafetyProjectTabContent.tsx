@@ -135,15 +135,6 @@ const SafetyProjectTabContent = () => {
               */}
             <Button
               variant='contained'
-              color='warning'
-              onClick={() => {
-                console.log('?')
-              }}
-            >
-              보고서 환경설정
-            </Button>
-            <Button
-              variant='contained'
               color='success'
               onClick={() => {
                 console.log('?')

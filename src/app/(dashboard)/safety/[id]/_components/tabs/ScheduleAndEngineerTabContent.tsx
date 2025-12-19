@@ -13,18 +13,16 @@ import classNames from 'classnames'
 import dayjs from 'dayjs'
 
 import type {
-  MachineProjectScheduleUpdateResponseDtoType,
   SafetyProjectEngineerDetailResponseDtoType,
   SafetyProjectScheduleAndEngineerResponseDtoType
 } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import { gradeOption } from '@/@core/data/options'
 import {
   useGetEngineersOptions,
   useGetSafetyProjectScheduleTab,
-  useMutateSafetyProjectEngineers
+  useMutateSafetyProjectEngineers,
+  useMutateSafetyProjectSchedule
 } from '@core/hooks/customTanstackQueries'
-import { auth } from '@core/utils/auth'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import isEditingContext from '../../isEditingContext'
 import styles from '@core/styles/customTable.module.css'
@@ -34,7 +32,6 @@ import TextFieldTd from '@/@core/components/elim-inputbox/TextFieldTd'
 const SafetyProjectEngineerInitialData: SafetyProjectEngineerDetailResponseDtoType = {
   engineerId: 0,
   engineerName: '',
-  grade: '',
   gradeDescription: '',
   engineerLicenseNum: '',
   beginDate: '',
@@ -48,8 +45,9 @@ const ScheduleAndEngineerTabContent = () => {
 
   const { isEditing, setIsEditing } = useContext(isEditingContext)!
 
-  const { data: scheduleEngineerData, refetch: refetchScheduleData } = useGetSafetyProjectScheduleTab(safetyProjectId)
+  const { data: scheduleEngineerData } = useGetSafetyProjectScheduleTab(safetyProjectId)
   const { mutateAsync: mutateAsyncEngineers } = useMutateSafetyProjectEngineers(safetyProjectId)
+  const { mutateAsync: mutateAsyncSchedule } = useMutateSafetyProjectSchedule(safetyProjectId)
 
   const { engineers: engineersData, ...rest } = scheduleEngineerData!
 
@@ -105,14 +103,10 @@ const ScheduleAndEngineerTabContent = () => {
 
       if (isDirtySchedule) {
         await scheduleForm.handleSubmit(async data => {
-          const scheduleResponse = await auth
-            .put<{
-              data: MachineProjectScheduleUpdateResponseDtoType
-            }>(`/api/machine-projects/${safetyProjectId}/schedule`, data)
-            .then(v => v.data.data)
+          const response = await mutateAsyncSchedule(data)
 
-          scheduleForm.reset(scheduleResponse)
-          refetchScheduleData()
+          scheduleForm.reset(response)
+
           message.push('점검일정')
         })()
       }
@@ -135,7 +129,6 @@ const ScheduleAndEngineerTabContent = () => {
     const skeletonEngineer: SafetyProjectEngineerDetailResponseDtoType = {
       engineerId: 0,
       engineerName: '',
-      grade: '',
       gradeDescription: '',
       engineerLicenseNum: '',
       beginDate: watchedBeginDate ?? firstEngineer?.beginDate,
@@ -298,10 +291,7 @@ const ScheduleAndEngineerTabContent = () => {
                               ...SafetyProjectEngineerInitialData,
                               beginDate: watchedBeginDate,
                               endDate: watchedEndDate,
-                              ...newEngineerInfo,
-                              grade:
-                                gradeOption.find(value => value.label === newEngineerInfo?.gradeDescription)?.value ??
-                                ''
+                              ...newEngineerInfo
                             }
 
                             if (newEngineer) {
@@ -328,8 +318,8 @@ const ScheduleAndEngineerTabContent = () => {
                           ))}
                         </Select>
                       </td>
-                      <td>{engineer.gradeDescription}</td>
-                      <td>{engineer.engineerLicenseNum}</td>
+                      <td className='bg-gray-50'>{engineer.gradeDescription}</td>
+                      <td className='bg-gray-50'>{engineer.engineerLicenseNum}</td>
                       <td className='p-0'>
                         <TextField
                           disabled={engineer.engineerId === 0}

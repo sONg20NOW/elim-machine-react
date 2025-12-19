@@ -513,12 +513,37 @@ export interface SafetyProjectScheduleAndEngineerResponseDtoType {
 export interface SafetyProjectEngineerDetailResponseDtoType {
   engineerId: number
   engineerName: string
-  grade: gradeType | ''
   gradeDescription: string
   engineerLicenseNum: string
   beginDate: string
   endDate: string
   note: string
+}
+
+// 점검일정 수정 요청/응답 dto
+export interface SafetyProjectScheduleUpdateRequestDtoType {
+  version: number
+  beginDate: string
+  endDate: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  projectEndDate: string
+  reportManagerEmail: string
+  tiIssueDate: string
+}
+
+export interface SafetyProjectScheduleUpdateResponseDtoType {
+  safetyProjectScheduleId: number
+  version: number
+  beginDate: string
+  endDate: string
+  fieldBeginDate: string
+  fieldEndDate: string
+  reportDeadline: string
+  projectEndDate: string
+  reportManagerEmail: string
+  tiIssueDate: string
 }
 
 export interface SafetyProjectEngineerUpdateRequestDtoType {
@@ -528,7 +553,7 @@ export interface SafetyProjectEngineerUpdateRequestDtoType {
   note: string
 }
 
-export type SafetyProjectEngineerUpdateResponseDtoType = SafetyProjectEngineerUpdateRequestDtoType
+export type SafetyProjectEngineerUpdateResponseDtoType = SafetyProjectEngineerDetailResponseDtoType
 
 // description:	안전진단 현장 첨부파일 등록 요청 DTO
 export interface SafetyProjectAttachmentCreateRequestDtoType {
