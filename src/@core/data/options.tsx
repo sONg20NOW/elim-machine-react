@@ -268,6 +268,18 @@ export const facilityTypeOption: OptionType<facilityTypeType> = [
   { value: 'CLASS3_LOCAL_GOV_REQUIRED_FACILITY', label: '3종-지자체 지정 필요 시설' }
 ]
 
+/**
+ * 안전진단 첨부파일 종류 옵션
+ */
+export const safetyAttachmentTypeOption = [
+  { value: 'BUILDING_REGISTER', label: '건축물대장' },
+  { value: 'FACILITY_REGISTER', label: '시설물대장' },
+  { value: 'WORK_ORDER', label: '과업지시서' },
+  { value: 'EDUCATION_CERTIFICATE', label: '교육수료증' }
+] as const
+
+export type safetyAttachmentTypeLabelType = (typeof safetyAttachmentTypeOption)[number]['label']
+
 // engineer
 export const engineersOption: { value: string | number; label: string }[] = []
 
