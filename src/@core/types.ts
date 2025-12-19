@@ -478,6 +478,8 @@ export interface SafetyProjectNoteUpdateRequestDtoType {
   specialNote: string
 }
 
+export type SafetyProjectNoteUpdateResponseDtoType = SafetyProjectNoteUpdateRequestDtoType
+
 // PATCH /api/safety/projects/{safetyProjectId}/name
 // description:	안전진단 현장명 수정 요청 DTO
 export interface SafetyProjectNameUpdateRequestDtoType {
@@ -508,15 +510,55 @@ export interface SafetyProjectScheduleAndEngineerResponseDtoType {
 }
 
 // description:	안전진단 프로젝트 참여 기술진 응답 DTO
-interface SafetyProjectEngineerDetailResponseDtoType {
+export interface SafetyProjectEngineerDetailResponseDtoType {
   engineerId: number
   engineerName: string
-  grade: gradeType
+  grade: gradeType | ''
   gradeDescription: string
   engineerLicenseNum: string
   beginDate: string
   endDate: string
   note: string
+}
+
+export interface SafetyProjectEngineerUpdateRequestDtoType {
+  engineerId: number
+  beginDate: string
+  endDate: string
+  note: string
+}
+
+export type SafetyProjectEngineerUpdateResponseDtoType = SafetyProjectEngineerUpdateRequestDtoType
+
+// description:	안전진단 현장 첨부파일 등록 요청 DTO
+export interface SafetyProjectAttachmentCreateRequestDtoType {
+  safetyAttachmentType: safetyAttachmentTypeType
+  originalFileName: string
+  s3Key: string
+}
+
+// description:	첨부파일 단건 등록 응답 DTO
+export interface SafetyProjectAttachmentCreateResponseDtoType {
+  safetyProjectAttachmentId: number
+}
+
+// description:	안전진단 프로젝트 첨부파일 단건 수정 요청 DTO
+export interface SafetyProjectAttachmentUpdateRequestDtoType {
+  safetyProjectAttachmentId: number
+  safetyAttachmentType: safetyAttachmentTypeType
+  originalFileName: string
+  s3Key: string
+}
+
+// PUT /api/safety/projects/{safetyProjectId}/attachments
+// description:	안전진단 프로젝트 첨부파일 단건 수정 요청 DTO
+export interface SafetyProjectAttachmentUpdateResponseDtoType {
+  safetyProjectAttachmentId: number
+  safetyAttachmentType: safetyAttachmentTypeType
+  originalFileName: string
+  s3Key: string
+  presignedUrl: string
+  downloadPresignedUrl: string
 }
 
 // ----------- Engineer 관련 API -----------
@@ -867,37 +909,6 @@ export interface MachineInspectionPicUploadPresignedUrlBatchRequestDtoType {
   originalFileNames: string[]
   machineProjectChecklistItemId: number
   machineProjectChecklistSubItemId: number
-}
-
-// description:	안전진단 현장 첨부파일 등록 요청 DTO
-export interface SafetyProjectAttachmentCreateRequestDtoType {
-  safetyAttachmentType: safetyAttachmentTypeType
-  originalFileName: string
-  s3Key: string
-}
-
-// description:	첨부파일 단건 등록 응답 DTO
-export interface SafetyProjectAttachmentCreateResponseDtoType {
-  safetyProjectAttachmentId: number
-}
-
-// description:	안전진단 프로젝트 첨부파일 단건 수정 요청 DTO
-export interface SafetyProjectAttachmentUpdateRequestDtoType {
-  safetyProjectAttachmentId: number
-  safetyAttachmentType: safetyAttachmentTypeType
-  originalFileName: string
-  s3Key: string
-}
-
-// PUT /api/safety/projects/{safetyProjectId}/attachments
-// description:	안전진단 프로젝트 첨부파일 단건 수정 요청 DTO
-export interface SafetyProjectAttachmentUpdateResponseDtoType {
-  safetyProjectAttachmentId: number
-  safetyAttachmentType: safetyAttachmentTypeType
-  originalFileName: string
-  s3Key: string
-  presignedUrl: string
-  downloadPresignedUrl: string
 }
 
 // ----------- 무한스크롤 사진 관련 -----------

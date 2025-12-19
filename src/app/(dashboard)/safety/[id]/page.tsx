@@ -36,6 +36,7 @@ import useSafetyProjectTabValueStore from '@/@core/hooks/zustand/useSafetyProjec
 
 import SafetyProjectTabContent from './_components/tabs/SafetyProjectTabContent'
 import NoteTabContent from './_components/tabs/NoteTabContent'
+import ScheduleAndEngineerTabContent from './_components/tabs/ScheduleAndEngineerTabContent'
 
 const Tabs: { value: SafetyProjectTabValueType; label: SafetyProjectTabValueType }[] = [
   { value: '현장정보', label: '현장정보' },
@@ -64,7 +65,8 @@ const SafetyProjectPage = () => {
   const { data: safetyProjectData, refetch: refetchSafetyProjectData } = useGetSafetyProject(safetyProjectId)
 
   // 안전진단 점검일정/참여기술진 조회
-  const { data: scheduleData, refetch: refetchScheduleData } = useGetSafetyProjectScheduleTab(safetyProjectId)
+  const { data: scheduleEngineerData, refetch: refetchScheduleEngineerData } =
+    useGetSafetyProjectScheduleTab(safetyProjectId)
 
   const handleChange = (event: SyntheticEvent, newValue: SafetyProjectTabValueType) => {
     setTabValue(newValue)
@@ -77,7 +79,7 @@ const SafetyProjectPage = () => {
           if (!safetyProjectData) refetchSafetyProjectData()
           break
         case '점검일정/참여기술진':
-          if (!scheduleData) refetchScheduleData()
+          if (!scheduleEngineerData) refetchScheduleEngineerData()
           break
         default:
           break
@@ -87,10 +89,10 @@ const SafetyProjectPage = () => {
     safetyProjectId,
     tabValue,
     refetchSafetyProjectData,
-    refetchScheduleData,
+    refetchScheduleEngineerData,
     engineerList,
     safetyProjectData,
-    scheduleData
+    scheduleEngineerData
   ])
 
   return (
@@ -146,13 +148,14 @@ const SafetyProjectPage = () => {
                   <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
                 )}
               </TabPanel>
-              {/* <TabPanel value='점검일정/참여기술진'>
-                {scheduleData ? (
+              <TabPanel value='점검일정/참여기술진'>
+                {scheduleEngineerData ? (
                   <ScheduleAndEngineerTabContent />
                 ) : (
                   <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
                 )}
               </TabPanel>
+              {/*
               <TabPanel value='설비목록' className='h-full'>
                 <InspectionListTabContent />
               </TabPanel>
