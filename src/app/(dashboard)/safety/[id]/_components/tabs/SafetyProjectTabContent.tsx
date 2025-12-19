@@ -2,7 +2,7 @@ import { useCallback, useContext, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
-import { Button, Checkbox, TextField, Typography } from '@mui/material'
+import { Button, Checkbox, IconButton, TextField, Typography } from '@mui/material'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -10,6 +10,8 @@ import { NumericFormat } from 'react-number-format'
 import dayjs from 'dayjs'
 
 import { toast } from 'react-toastify'
+
+import { IconFileUpload } from '@tabler/icons-react'
 
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import type {
@@ -871,16 +873,19 @@ function EditingAttachmentRow({
     <div className='flex justify-between items-center relative'>
       {attachment ? (
         <a href={attachment.presignedUrl} target='_blank'>
-          <Typography sx={{ textDecorationLine: 'underline', color: 'info.main' }}>
+          <Typography sx={{ textDecorationLine: 'underline' }} className='text-blue-500'>
             {attachment.originalFileName}
           </Typography>
         </a>
       ) : (
         '-'
       )}
-      <Button onClick={() => inputRef.current?.click()} className='absolute right-0' variant='contained' color='info'>
-        업로드
-      </Button>
+      <IconButton
+        onClick={() => inputRef.current?.click()}
+        className='absolute right-0 text-blue-500 hover:text-blue-600'
+      >
+        <IconFileUpload />
+      </IconButton>
       <input
         ref={inputRef}
         className='hidden'
@@ -908,7 +913,7 @@ function NotEditingAttachmentRow({
 
   return attachment ? (
     <a href={attachment.presignedUrl} target='_blank'>
-      <Typography sx={{ textDecorationLine: 'underline', color: 'info.main' }}>
+      <Typography sx={{ textDecorationLine: 'underline' }} className='text-blue-500'>
         {attachment.originalFileName}
       </Typography>
     </a>
