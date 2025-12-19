@@ -54,6 +54,10 @@ import type {
   MemberPageDtoType,
   MemberPrivacyDtoType,
   PipeMeasurementResponseDtoType,
+  SafetyProjectAttachmentCreateRequestDtoType,
+  SafetyProjectAttachmentCreateResponseDtoType,
+  SafetyProjectAttachmentUpdateRequestDtoType,
+  SafetyProjectAttachmentUpdateResponseDtoType,
   SafetyProjectNameUpdateRequestDtoType,
   SafetyProjectNameUpdateResponseDtoType,
   SafetyProjectNoteUpdateRequestDtoType,
@@ -1050,6 +1054,90 @@ export const useMutateSafetyProject = (safetyProjectId: string) => {
       queryClient.removeQueries({ queryKey: ['GET_SAFETY_PROJECTS'] })
 
       console.log('useMutateSafetyProject.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
+export const useMutatePutSafetyProjectAttachment = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<
+    SafetyProjectAttachmentUpdateResponseDtoType,
+    AxiosError,
+    SafetyProjectAttachmentUpdateRequestDtoType
+  >({
+    mutationFn: async data => {
+      const response = await auth
+        .put<{
+          data: SafetyProjectAttachmentUpdateResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}/attachments`, data)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: newAttachment => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => {
+        const newAttachments = prev.attachments.map(v =>
+          v.safetyProjectAttachmentId === newAttachment.safetyProjectAttachmentId
+            ? { ...v, originalFileName: newAttachment.originalFileName, presignedUrl: newAttachment.presignedUrl }
+            : v
+        )
+
+        return { ...prev, attachments: newAttachments }
+      })
+      console.log('useMutatePutSafetyProjectAttachment.')
+      toast.info('첨부파일 수정이 완료되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
+export const useMutatePostSafetyProjectAttachment = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<
+    SafetyProjectAttachmentCreateResponseDtoType,
+    AxiosError,
+    SafetyProjectAttachmentCreateRequestDtoType & { presignedUrl: string }
+  >({
+    mutationFn: async data => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { presignedUrl, ...rest } = data
+
+      const response = await auth
+        .post<{
+          data: SafetyProjectAttachmentCreateResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}/attachments`, rest)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: (newAttachment, request) => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => {
+        const newAttachments = prev.attachments.push({
+          safetyProjectAttachmentId: newAttachment.safetyProjectAttachmentId,
+          safetyAttachmentType: request.safetyAttachmentType,
+          originalFileName: request.originalFileName,
+          presignedUrl: request.presignedUrl
+        })
+
+        return { ...prev, attachments: newAttachments }
+      })
+      console.log('useMutatePutSafetyProjectAttachment.')
+      toast.info('첨부파일 생성이 완료되었습니다.')
     },
 
     onError: error => {
