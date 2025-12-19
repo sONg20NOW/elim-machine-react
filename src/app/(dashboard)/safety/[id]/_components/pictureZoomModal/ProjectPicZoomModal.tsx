@@ -30,7 +30,6 @@ import type {
   machineProjectPicTypeType
 } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import getS3Key from '@core/utils/getS3Key'
 import { auth } from '@core/utils/auth'
 import { projectPicOption } from '@/@core/data/options'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
@@ -39,6 +38,7 @@ import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
 import ImageZoomCard from './ImageZoomCard'
 import ResetButton from '@/@core/components/elim-button/ResetButton'
+import getMachineProjectPicS3Key from '@/@core/utils/getMachineProjectPicS3Key'
 
 interface formType {
   originalFileName: string
@@ -100,14 +100,7 @@ export default function ProjectPicZoomModal({
     try {
       setLoading(true)
 
-      const S3KeyResult = await getS3Key(
-        machineProjectId,
-        [file],
-        undefined,
-        undefined,
-        undefined,
-        watchedMachineProjectPicType
-      )
+      const S3KeyResult = await getMachineProjectPicS3Key(machineProjectId, [file], watchedMachineProjectPicType)
 
       if (!S3KeyResult) return
 

@@ -15,6 +15,7 @@ import TabList from '@mui/lab/TabList'
 import classNames from 'classnames'
 
 import { IconCheck, IconChevronRight, IconPencil, IconX } from '@tabler/icons-react'
+import TabPanel from '@mui/lab/TabPanel'
 
 import { useForm } from 'react-hook-form'
 
@@ -30,7 +31,12 @@ import {
 import isEditingContext from './isEditingContext'
 import type { SafetyProjectReadResponseDtoType, SafetyProjectTabValueType } from '@/@core/types'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
+
 import useSafetyProjectTabValueStore from '@/@core/hooks/zustand/useSafetyProjectTabValueStore'
+
+import SafetyProjectTabContent from './_components/tabs/SafetyProjectTabContent'
+import NoteTabContent from './_components/tabs/NoteTabContent'
+import ScheduleAndEngineerTabContent from './_components/tabs/ScheduleAndEngineerTabContent'
 
 const Tabs: { value: SafetyProjectTabValueType; label: SafetyProjectTabValueType }[] = [
   { value: '현장정보', label: '현장정보' },
@@ -39,7 +45,8 @@ const Tabs: { value: SafetyProjectTabValueType; label: SafetyProjectTabValueType
   { value: '도면목록', label: '도면목록' },
   { value: '결함목록', label: '결함목록' },
   { value: '전체사진', label: '전체사진' },
-  { value: '자료실', label: '자료실' },
+
+  // { value: '자료실', label: '자료실' },
   { value: '특이사항', label: '특이사항' }
 ]
 
@@ -58,7 +65,8 @@ const SafetyProjectPage = () => {
   const { data: safetyProjectData, refetch: refetchSafetyProjectData } = useGetSafetyProject(safetyProjectId)
 
   // 안전진단 점검일정/참여기술진 조회
-  const { data: scheduleData, refetch: refetchScheduleData } = useGetSafetyProjectScheduleTab(safetyProjectId)
+  const { data: scheduleEngineerData, refetch: refetchScheduleEngineerData } =
+    useGetSafetyProjectScheduleTab(safetyProjectId)
 
   const handleChange = (event: SyntheticEvent, newValue: SafetyProjectTabValueType) => {
     setTabValue(newValue)
@@ -71,7 +79,7 @@ const SafetyProjectPage = () => {
           if (!safetyProjectData) refetchSafetyProjectData()
           break
         case '점검일정/참여기술진':
-          if (!scheduleData) refetchScheduleData()
+          if (!scheduleEngineerData) refetchScheduleEngineerData()
           break
         default:
           break
@@ -81,10 +89,10 @@ const SafetyProjectPage = () => {
     safetyProjectId,
     tabValue,
     refetchSafetyProjectData,
-    refetchScheduleData,
+    refetchScheduleEngineerData,
     engineerList,
     safetyProjectData,
-    scheduleData
+    scheduleEngineerData
   ])
 
   return (
@@ -132,27 +140,32 @@ const SafetyProjectPage = () => {
                 )
               })}
             </TabList>
-            {/* <div className='flex-1 overflow-y-hidden pt-6'>
+            <div className='flex-1 overflow-y-hidden pt-6'>
               <TabPanel value='현장정보' className='h-full'>
-                {safetyProjectData ? <BasicTabContent /> : <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>}
+                {safetyProjectData ? (
+                  <SafetyProjectTabContent />
+                ) : (
+                  <Typography>프로젝트 정보를 불러오는 중입니다.</Typography>
+                )}
               </TabPanel>
               <TabPanel value='점검일정/참여기술진'>
-                {scheduleData ? (
+                {scheduleEngineerData ? (
                   <ScheduleAndEngineerTabContent />
                 ) : (
                   <Typography>점검일정 및 참여기술진 정보를 불러오는 중입니다.</Typography>
                 )}
               </TabPanel>
+              {/*
               <TabPanel value='설비목록' className='h-full'>
                 <InspectionListTabContent />
               </TabPanel>
               <TabPanel value='전체사진' className='h-full'>
                 <PictureListTabContent />
-              </TabPanel>
+              </TabPanel>*/}
               <TabPanel value='특이사항'>
                 {safetyProjectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
               </TabPanel>
-            </div> */}
+            </div>
           </TabContext>
         </CardContent>
       </Card>

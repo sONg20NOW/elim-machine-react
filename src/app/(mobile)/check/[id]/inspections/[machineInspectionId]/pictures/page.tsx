@@ -34,7 +34,7 @@ import type {
 } from '@core/types'
 import { useGetChecklistInfo, useGetSingleInspectionSumamry } from '@core/hooks/customTanstackQueries'
 import { printErrorSnackbar, printSuccessSnackbar, printWarningSnackbar } from '@core/utils/snackbarHandler'
-import getS3Key from '@core/utils/getS3Key'
+import getInspectionPicS3Key from '@/@core/utils/getInspectionPicS3Key'
 import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 
 const max_pic = 100
@@ -148,15 +148,15 @@ export default function PicturePage() {
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
 
-    if (!files) return
+    if (!files || !selectedPic) return
     const file: File = files[0]
 
-    const s3Key = await getS3Key(
+    const s3Key = await getInspectionPicS3Key(
       `${machineProjectId}`,
       [file],
       `${machineInspectionId}`,
-      selectedPic?.machineProjectChecklistItemId,
-      selectedPic?.machineProjectChecklistSubItemId
+      selectedPic.machineProjectChecklistItemId,
+      selectedPic.machineProjectChecklistSubItemId
     ).then(v => v && v[0])
 
     if (!s3Key?.uploadSuccess) {

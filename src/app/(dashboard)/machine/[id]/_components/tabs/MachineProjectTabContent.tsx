@@ -6,6 +6,7 @@ import { Button, Checkbox, TextField, Typography } from '@mui/material'
 
 import type { Path } from 'react-hook-form'
 import { Controller, useForm } from 'react-hook-form'
+import dayjs from 'dayjs'
 
 import { NumericFormat } from 'react-number-format'
 
@@ -29,7 +30,7 @@ import useCompanyNameOption from '@/@core/hooks/useCompanyNameOption'
 
 export const MacinheProjectNameContext = createContext<string>('')
 
-const BasicTabContent = () => {
+const MachineProjectTabContent = () => {
   const router = useRouter()
 
   const { isEditing, setIsEditing } = useContext(isEditingContext)!
@@ -107,7 +108,7 @@ const BasicTabContent = () => {
           {/* 상단 버튼들 : 점검의견서, 성능점검시 검토사항 ... */}
           <div className='flex mb-4 justify-between'>
             <div className='flex items-center gap-1'>
-              {/* 
+              {/*
               <Button
                 variant='contained'
                 color='info'
@@ -117,7 +118,7 @@ const BasicTabContent = () => {
                 }}
               >
                 입수자료
-              </Button> 
+              </Button>
               */}
               <ChecklistResultSummaryModal />
               <MachinePerformanceReviewModal />
@@ -157,7 +158,7 @@ const BasicTabContent = () => {
                   수정
                 </Button>
               )}
-              <Button
+              {/* <Button
                 variant='contained'
                 color='error'
                 onClick={() => {
@@ -165,7 +166,7 @@ const BasicTabContent = () => {
                 }}
               >
                 삭제
-              </Button>
+              </Button> */}
             </div>
           </div>
 
@@ -286,7 +287,7 @@ const BasicTabContent = () => {
                     {/* 계약사항 및 책임자 헤더 */}
                     <tr style={{ background: '#f3f4f6' }}>
                       <th
-                        colSpan={3}
+                        colSpan={4}
                         style={{
                           textAlign: 'left',
                           padding: '10px 12px',
@@ -297,25 +298,6 @@ const BasicTabContent = () => {
                       >
                         계약사항 및 책임자
                       </th>
-                      <td className='grid place-items-end items-center border-0 p-0'>
-                        <div className='flex items-center'>
-                          <Typography color='primary.dark' variant='h6'>
-                            부가세 포함
-                          </Typography>
-                          <Controller
-                            control={form.control}
-                            name='vatIncludedYn'
-                            render={({ field }) => (
-                              <Checkbox
-                                checked={field.value === 'Y'}
-                                onChange={e => {
-                                  form.setValue('vatIncludedYn', e.target.checked ? 'Y' : 'N', { shouldDirty: true })
-                                }}
-                              />
-                            )}
-                          />
-                        </div>
-                      </td>
                     </tr>
                     <tr>
                       <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>계약일</th>
@@ -326,28 +308,50 @@ const BasicTabContent = () => {
                     <tr>
                       <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>계약금액</th>
                       <td className='p-0'>
-                        <Controller
-                          control={form.control}
-                          name='contractPrice'
-                          render={({ field }) => (
-                            <NumericFormat
-                              thousandSeparator
-                              customInput={TextField}
-                              size='small'
-                              value={field.value}
-                              onValueChange={values => {
-                                field.onChange(values.floatValue)
-                              }}
-                              fullWidth
-                              slotProps={{
-                                input: {
-                                  startAdornment: '￦',
-                                  sx: { '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } }
-                                }
-                              }}
+                        <div className='flex items-center w-full'>
+                          <Controller
+                            control={form.control}
+                            name='contractPrice'
+                            render={({ field }) => (
+                              <NumericFormat
+                                thousandSeparator
+                                customInput={TextField}
+                                size='small'
+                                value={field.value}
+                                onValueChange={values => {
+                                  field.onChange(values.floatValue)
+                                }}
+                                fullWidth
+                                slotProps={{
+                                  input: {
+                                    startAdornment: '￦',
+                                    sx: { '.MuiOutlinedInput-notchedOutline': { border: 0, borderRadius: 0 } }
+                                  }
+                                }}
+                              />
+                            )}
+                          />
+                          <div className='flex items-center px-2 border-l h-full bg-gray-50'>
+                            <Typography variant='caption' sx={{ whiteSpace: 'nowrap' }}>
+                              VAT포함
+                            </Typography>
+                            <Controller
+                              control={form.control}
+                              name='vatIncludedYn'
+                              render={({ field }) => (
+                                <Checkbox
+                                  size='small'
+                                  checked={field.value === 'Y'}
+                                  onChange={e => {
+                                    form.setValue('vatIncludedYn', e.target.checked ? 'Y' : 'N', {
+                                      shouldDirty: true
+                                    })
+                                  }}
+                                />
+                              )}
                             />
-                          )}
-                        />
+                          </div>
+                        </div>
                       </td>
 
                       <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>점검업체</th>
@@ -505,7 +509,9 @@ const BasicTabContent = () => {
                         준공일
                       </th>
                       <td style={{ padding: '10px 12px' }}>
-                        {projectData.completeDate ? new Date(projectData.completeDate).toLocaleDateString() : '-'}
+                        {projectData.completeDate
+                          ? dayjs(new Date(projectData.completeDate)).format('YYYY-MM-DD')
+                          : '-'}
                       </td>
                     </tr>
                     <tr style={{ height: '114px' }}>
@@ -517,24 +523,18 @@ const BasicTabContent = () => {
                       </td>
                     </tr>
                     <tr style={{ background: '#f3f4f6' }}>
-                      <th colSpan={3} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
+                      <th colSpan={4} align='left' style={{ padding: '10px 12px', fontWeight: 700, fontSize: 16 }}>
                         계약사항 및 책임자
                       </th>
-                      <td className='grid place-items-end items-center'>
-                        <div className='flex items-center'>
-                          <Typography color='primary.dark' variant='h6' sx={{ opacity: '70%' }}>
-                            부가세 포함
-                          </Typography>
-                          <Checkbox checked={projectData.vatIncludedYn === 'Y'} disabled />
-                        </div>
-                      </td>
                     </tr>
                     <tr>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                         계약일
                       </th>
                       <td style={{ padding: '10px 12px' }}>
-                        {projectData.contractDate ? new Date(projectData.contractDate).toLocaleDateString() : '-'}
+                        {projectData.contractDate
+                          ? dayjs(new Date(projectData.contractDate)).format('YYYY-MM-DD')
+                          : '-'}
                       </td>
                       <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
                         진행상태
@@ -654,4 +654,4 @@ const BasicTabContent = () => {
   )
 }
 
-export default BasicTabContent
+export default MachineProjectTabContent

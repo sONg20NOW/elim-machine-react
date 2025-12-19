@@ -92,8 +92,8 @@ const Calendar = (props: CalenderProps) => {
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     initialView: 'dayGridMonth',
     headerToolbar: {
-      start: 'title',
-      end: 'today, prev,  next,'
+      start: 'today, prev,  next, title',
+      end: ''
     },
     datesSet(dateInfo) {
       const currentDate = dateInfo.view.calendar.getDate()

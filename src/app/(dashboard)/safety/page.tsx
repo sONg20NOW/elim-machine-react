@@ -41,6 +41,7 @@ import useUpdateParams from '@/@core/hooks/searchParams/useUpdateParams'
 import useSetQueryParams from '@/@core/hooks/searchParams/useSetQueryParams'
 import BasicTablePagination from '@core/components/elim-table/BasicTablePagination'
 import { SAFETY_PROJECT_FILTER_INFO } from '@/@core/data/filter/safetyProjectFilterInfo'
+import useSafetyProjectTabValueStore from '@/@core/hooks/zustand/useSafetyProjectTabValueStore'
 
 // datepicker 한글화
 dayjs.locale('ko')
@@ -62,6 +63,8 @@ export default function SafetyPage() {
   const region = searchParams.get('region')
   const fieldBeginDate = searchParams.get('fieldBeginDate')
   const fieldEndDate = searchParams.get('fieldEndDate')
+
+  const setTabValue = useSafetyProjectTabValueStore(set => set.setTabValue)
 
   const [curMonth, setCurMonth] = useState<0 | 1 | 3 | 6 | null>(0)
 
@@ -180,6 +183,7 @@ export default function SafetyPage() {
     if (!safetyProject?.safetyProjectId) return
 
     try {
+      setTabValue('현장정보')
       router.push(`/safety/${safetyProject.safetyProjectId}`)
     } catch (error) {
       handleApiError(error, '프로젝트 정보를 불러오는 데 실패했습니다.')
@@ -294,10 +298,10 @@ export default function SafetyPage() {
                   </MenuItem>
                 ))}
               </CustomTextField>
-              {/* 시설물명으로 검색 */}
+              {/* 건물명으로 검색 */}
               <SearchBar
                 key={`projectName_${buildingName}`}
-                placeholder='시설물명으로 검색'
+                placeholder='건물명으로 검색'
                 defaultValue={buildingName ?? ''}
                 setSearchKeyword={keyword => {
                   setQueryParams({ buildingName: keyword, page: 0 })

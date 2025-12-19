@@ -32,7 +32,7 @@ import type {
   MachinePicUpdateResponseDtoType
 } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import getS3Key from '@core/utils/getS3Key'
+import getInspectionPicS3Key from '@/@core/utils/getInspectionPicS3Key'
 import { useGetInspectionsSimple, useGetSingleInspection } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
@@ -148,13 +148,12 @@ export default function InspectionPicZoomModal({
     try {
       setLoading(true)
 
-      const S3KeyResult = await getS3Key(
+      const S3KeyResult = await getInspectionPicS3Key(
         machineProjectId,
         [file],
         selectedPic.machineInspectionId.toString(),
         selectedPic.machineProjectChecklistItemId,
-        selectedPic.machineProjectChecklistSubItemId,
-        undefined
+        selectedPic.machineProjectChecklistSubItemId
       )
 
       if (!S3KeyResult) return

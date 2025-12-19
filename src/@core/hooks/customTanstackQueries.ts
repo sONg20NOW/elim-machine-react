@@ -54,12 +54,21 @@ import type {
   MemberPageDtoType,
   MemberPrivacyDtoType,
   PipeMeasurementResponseDtoType,
+  SafetyProjectAttachmentCreateRequestDtoType,
+  SafetyProjectAttachmentCreateResponseDtoType,
+  SafetyProjectAttachmentUpdateRequestDtoType,
+  SafetyProjectAttachmentUpdateResponseDtoType,
+  SafetyProjectEngineerUpdateRequestDtoType,
+  SafetyProjectEngineerUpdateResponseDtoType,
   SafetyProjectNameUpdateRequestDtoType,
   SafetyProjectNameUpdateResponseDtoType,
   SafetyProjectNoteUpdateRequestDtoType,
+  SafetyProjectNoteUpdateResponseDtoType,
   SafetyProjectPageResponseDtoType,
   SafetyProjectReadResponseDtoType,
   SafetyProjectScheduleAndEngineerResponseDtoType,
+  SafetyProjectScheduleUpdateRequestDtoType,
+  SafetyProjectScheduleUpdateResponseDtoType,
   SafetyProjectUpdateRequestDtoType,
   SafetyProjectUpdateResponseDtoType,
   successResponseDtoType,
@@ -1059,6 +1068,90 @@ export const useMutateSafetyProject = (safetyProjectId: string) => {
   })
 }
 
+export const useMutatePutSafetyProjectAttachment = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<
+    SafetyProjectAttachmentUpdateResponseDtoType,
+    AxiosError,
+    SafetyProjectAttachmentUpdateRequestDtoType
+  >({
+    mutationFn: async data => {
+      const response = await auth
+        .put<{
+          data: SafetyProjectAttachmentUpdateResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}/attachments`, data)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: newAttachment => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => {
+        const newAttachments = prev.attachments.map(v =>
+          v.safetyProjectAttachmentId === newAttachment.safetyProjectAttachmentId
+            ? { ...v, originalFileName: newAttachment.originalFileName, presignedUrl: newAttachment.presignedUrl }
+            : v
+        )
+
+        return { ...prev, attachments: newAttachments }
+      })
+      console.log('useMutatePutSafetyProjectAttachment.')
+      toast.info('첨부파일 수정이 완료되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
+export const useMutatePostSafetyProjectAttachment = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
+
+  return useMutation<
+    SafetyProjectAttachmentCreateResponseDtoType,
+    AxiosError,
+    SafetyProjectAttachmentCreateRequestDtoType & { presignedUrl: string }
+  >({
+    mutationFn: async data => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { presignedUrl, ...rest } = data
+
+      const response = await auth
+        .post<{
+          data: SafetyProjectAttachmentCreateResponseDtoType
+        }>(`/api/safety/projects/${safetyProjectId}/attachments`, rest)
+        .then(v => v.data.data)
+
+      return response
+    },
+
+    onSuccess: (newAttachment, request) => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => {
+        const newAttachments = prev.attachments.push({
+          safetyProjectAttachmentId: newAttachment.safetyProjectAttachmentId,
+          safetyAttachmentType: request.safetyAttachmentType,
+          originalFileName: request.originalFileName,
+          presignedUrl: request.presignedUrl
+        })
+
+        return { ...prev, attachments: newAttachments }
+      })
+      console.log('useMutatePutSafetyProjectAttachment.')
+      toast.info('첨부파일 생성이 완료되었습니다.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
+  })
+}
+
 export const useMutateSafetyProjectName = (safetyProjectId: string) => {
   const queryClient = useQueryClient()
   const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
@@ -1096,11 +1189,11 @@ export const useMutateSafetyProjectSpecialNote = (safetyProjectId: string) => {
   const queryClient = useQueryClient()
   const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT(safetyProjectId)
 
-  return useMutation<SafetyProjectNoteUpdateRequestDtoType, AxiosError, SafetyProjectNoteUpdateRequestDtoType>({
+  return useMutation<SafetyProjectNoteUpdateResponseDtoType, AxiosError, SafetyProjectNoteUpdateRequestDtoType>({
     mutationFn: async data => {
       const response = await auth
         .patch<{
-          data: SafetyProjectNoteUpdateRequestDtoType
+          data: SafetyProjectNoteUpdateResponseDtoType
         }>(`/api/safety/projects/${safetyProjectId}/special-note`, data)
         .then(v => v.data.data)
 
@@ -1110,7 +1203,7 @@ export const useMutateSafetyProjectSpecialNote = (safetyProjectId: string) => {
     onSuccess: newNote => {
       queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
         ...prev,
-        note: newNote.specialNote,
+        specialNote: newNote.specialNote,
         version: newNote.version
       }))
       console.log('useMutateMachineProjectNote.')
@@ -1148,6 +1241,76 @@ export const useGetSafetyProjectScheduleTab = (safetyProjectId: string) => {
     queryKey: QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT_SCHEDULE_TAB(safetyProjectId),
     queryFn: fetchSafetyProjectScheduleTab,
     staleTime: 1000 * 60 * 5 // 5분
+  })
+}
+
+export const useMutateSafetyProjectSchedule = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT_SCHEDULE_TAB(safetyProjectId)
+
+  return useMutation<SafetyProjectScheduleUpdateResponseDtoType, AxiosError, SafetyProjectScheduleUpdateRequestDtoType>(
+    {
+      mutationFn: async data => {
+        const response = await auth
+          .put<{
+            data: SafetyProjectScheduleUpdateResponseDtoType
+          }>(`/api/safety/projects/${safetyProjectId}/schedule`, data)
+          .then(v => v.data.data)
+
+        return response
+      },
+
+      onSuccess: newData => {
+        queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
+          ...prev,
+          ...newData
+        }))
+        queryClient.removeQueries({ queryKey: ['GET_SAFETY_PROJECTS'] })
+
+        console.log('useMutateSafetyProjectSchedule.')
+      },
+
+      onError: error => {
+        console.error(error)
+        handleApiError(error)
+      }
+    }
+  )
+}
+
+export const useMutateSafetyProjectEngineers = (safetyProjectId: string) => {
+  const queryClient = useQueryClient()
+  const queryKey = QUERY_KEYS.SAFETY_PROJECT.GET_SAFETY_PROJECT_SCHEDULE_TAB(safetyProjectId)
+
+  return useMutation<
+    SafetyProjectEngineerUpdateResponseDtoType[],
+    AxiosError,
+    SafetyProjectEngineerUpdateRequestDtoType[]
+  >({
+    mutationFn: async data => {
+      const response = await auth
+        .put<{
+          data: { safetyProjectEngineers: SafetyProjectEngineerUpdateResponseDtoType[] }
+        }>(`/api/safety/projects/${safetyProjectId}/safety-project-engineers`, { engineers: data })
+        .then(v => v.data.data.safetyProjectEngineers)
+
+      return response
+    },
+
+    onSuccess: response => {
+      queryClient.setQueryData(queryKey, (prev: SafetyProjectScheduleAndEngineerResponseDtoType) => {
+        return {
+          ...prev,
+          engineers: response
+        } as SafetyProjectScheduleAndEngineerResponseDtoType
+      })
+      console.log('useMutateSafetyProjectEngineers.')
+    },
+
+    onError: error => {
+      console.error(error)
+      handleApiError(error)
+    }
   })
 }
 
@@ -1273,6 +1436,7 @@ export const useMutateEngineer = (engineerId: string) => {
 
     onSuccess: data => {
       queryClient.setQueryData(queryKey, data)
+      queryClient.removeQueries({ queryKey: ['GET_SAFETY_PROJECT_SCHEDULE_TAB'] })
       console.log('EngineerResponseDtoType가 성공적으로 수정되었습니다.')
     },
 

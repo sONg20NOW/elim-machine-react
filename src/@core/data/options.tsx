@@ -20,7 +20,9 @@ import type {
   fanTypeType,
   pipeTypeType,
   workStatusType,
-  facilityClassificationType
+  facilityClassificationType,
+  facilityClassType,
+  facilityTypeType
 } from '@core/types'
 
 type OptionType<T> = { value: T; label: string }[]
@@ -222,8 +224,61 @@ export const safetyGradeOption: OptionType<safetyGradeType> = [
 ]
 
 export const facilityClassificationOption: OptionType<facilityClassificationType> = [
-  // ! 여기부터 작업
+  { value: 'BRIDGE', label: '교량' },
+  { value: 'TUNNEL', label: '터널' },
+  { value: 'PORT', label: '항만' },
+  { value: 'DAM', label: '댐' },
+  { value: 'BUILDING', label: '건축물' },
+  { value: 'SCHOOL_BUILDING', label: '건축물 (학교)' },
+  { value: 'RIVER', label: '하천' },
+  { value: 'WATERWORKS', label: '상하수도' },
+  { value: 'EMBANKMENT_AND_RETAINING_WALL', label: '옹벽 및 절토사면' },
+  { value: 'JOINT_DISTRICT', label: '공동구' }
 ]
+
+export const facilityClassOption: OptionType<facilityClassType> = [
+  { value: 'CLASS_1', label: '1종' },
+  { value: 'CLASS_2', label: '2종' },
+  { value: 'CLASS_3', label: '3종' },
+  { value: 'CLASS_OUT', label: '종외시설' }
+]
+
+export const facilityTypeOption: OptionType<facilityTypeType> = [
+  // 1종 시설물
+  { value: 'CLASS1_BUILDING_21F_OR_50K', label: '1종-건축물(21층 이상 또는 연면적 5만㎡ 이상)' },
+  { value: 'CLASS1_RAILWAY_STATION_OVER_30K', label: '1종-철도역사(연면적 3만㎡ 이상)' },
+  { value: 'CLASS1_UNDERGROUND_OVER_10K', label: '1종-지하도상가(연면적 1만㎡ 이상)' },
+
+  // 2종 시설물
+  { value: 'CLASS2_BUILDING_16F_TO_21F_OR_30K_TO_50K', label: '2종-건축물(16층~21층 미만 또는 3만~5만㎡ 미만)' },
+  { value: 'CLASS2_CULTURE_EDU_SALES_ETC', label: '2종-문화·교육·판매·숙박 등(연면적 3만㎡ 미만)' },
+  { value: 'CLASS2_RAILWAY_SUBWAY_STATION', label: '2종-철도·지하철 역사' },
+  { value: 'CLASS2_UNDERGROUND_5K_TO_10K', label: '2종-지하도상가(5천㎡~1만㎡ 미만)' },
+
+  // 3종 시설물
+  { value: 'CLASS3_APARTMENT_5F_TO_15F', label: '3종-공동주택(아파트 5층~15층)' },
+  { value: 'CLASS3_MULTI_UNIT_HOUSING_660M2_TO_4F', label: '3종-연립주택(660㎡ 초과, 4층 이하)' },
+  { value: 'CLASS3_DORMITORY_OVER_660M2', label: '3종-기숙사(연면적 660㎡ 초과)' },
+  { value: 'CLASS3_BUILDING_11F_TO_16F_OR_5K_TO_30K', label: '3종-건축물(11층~16층 미만 또는 5천~3만㎡ 미만)' },
+  { value: 'CLASS3_CULTURE_EDU_SALES_ETC_SMALL', label: '3종-문화·교육·판매·숙박 등(소규모)' },
+  { value: 'CLASS3_RAILWAY_FACILITIES', label: '3종-철도시설물' },
+  { value: 'CLASS3_PUBLIC_OFFICE_OVER_300M2', label: '3종-공공기관(300㎡ 초과)' },
+  { value: 'CLASS3_PUBLIC_OFFICE_OVER_1000M2', label: '3종-공공기관(1,000㎡ 초과)' },
+  { value: 'CLASS3_UNDERGROUND_UNDER_5000M2', label: '3종-지하도상가(5,000㎡ 미만)' },
+  { value: 'CLASS3_LOCAL_GOV_REQUIRED_FACILITY', label: '3종-지자체 지정 필요 시설' }
+]
+
+/**
+ * 안전진단 첨부파일 종류 옵션
+ */
+export const safetyAttachmentTypeOption = [
+  { value: 'BUILDING_REGISTER', label: '건축물대장' },
+  { value: 'FACILITY_REGISTER', label: '시설물대장' },
+  { value: 'WORK_ORDER', label: '과업지시서' },
+  { value: 'EDUCATION_CERTIFICATE', label: '교육수료증' }
+] as const
+
+export type safetyAttachmentTypeLabelType = (typeof safetyAttachmentTypeOption)[number]['label']
 
 // engineer
 export const engineersOption: { value: string | number; label: string }[] = []

@@ -12,6 +12,8 @@ import { useForm } from 'react-hook-form'
 
 import classNames from 'classnames'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import type { engineerTypeType, MachineEngineerCreateRequestDtoType } from '@core/types'
 
@@ -32,6 +34,7 @@ type AddEngineerModalProps = {
 }
 
 const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) => {
+  const queryClient = useQueryClient()
   const engineerType = useEngineerTypeContext()
   const engineerTerm = ({ MACHINE: '설비인력', SAFETY: '진단인력' } as Record<engineerTypeType, string>)[engineerType]
 
@@ -59,6 +62,8 @@ const AddEngineerModal = ({ open, setOpen, reloadPage }: AddEngineerModalProps) 
       const response = await auth
         .post<{ data: MachineEngineerCreateRequestDtoType }>(`/api/engineers`, { ...data, engineerType: engineerType })
         .then(v => v.data.data)
+
+      queryClient.removeQueries({ queryKey: ['GET_ENGINEERS_OPTIONS', engineerType] })
 
       reloadPage()
       setOpen(false)
