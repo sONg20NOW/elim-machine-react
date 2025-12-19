@@ -1,15 +1,5 @@
-import {
-  buildingGradeOption,
-  checkTypeOption,
-  companyNameOption,
-  gradeOption,
-  projectStatusOption
-} from '@/@core/data/options'
-import type {
-  machineProjectInputInfoType,
-  machineProjectEngineerInputInfoType,
-  machineScheduleInputInfoType
-} from '../../types'
+import { companyNameOption, projectStatusOption } from '@/@core/data/options'
+import type { machineProjectInputInfoType } from '../../types'
 
 // 기계설비현장 상세페이지
 export const MACHINE_PROJECT_INPUT_INFO: machineProjectInputInfoType = {
@@ -54,71 +44,4 @@ export const MACHINE_PROJECT_INPUT_INFO: machineProjectInputInfoType = {
   machineMaintainer3Info: { type: 'text', label: '유지관리자3(정보)' },
   machineManager3Name: { type: 'text', label: '담당자3(이름)' },
   machineManager3Info: { type: 'text', label: '담당자3(정보)' }
-}
-
-// 점검일정 / 참여기술진 탭 테이블 수정에 사용.
-export const MACHINE_SCHEDULE_INPUT_INFO: machineScheduleInputInfoType = {
-  fieldBeginDate: {
-    type: 'date',
-    label: '현장점검시작'
-  },
-  fieldEndDate: {
-    type: 'date',
-    label: '현장점검종료'
-  },
-  beginDate: {
-    type: 'date',
-    label: '투입시작'
-  },
-  endDate: {
-    type: 'date',
-    label: '투입종료'
-  },
-  reportDeadline: {
-    type: 'date',
-    label: '보고서마감일'
-  },
-  projectEndDate: {
-    type: 'date',
-    label: '프로젝트종료'
-  },
-  checkType: {
-    type: 'multi',
-    label: '점검종류',
-    options: checkTypeOption
-  },
-  buildingGrade: {
-    type: 'multi',
-    label: '건물등급',
-    options: buildingGradeOption
-  },
-  reportManagerEmail: {
-    type: 'text',
-    label: '담당자 이메일'
-  },
-  tiIssueDate: {
-    type: 'date',
-    label: '계산서 발급일'
-  },
-  engineers: {
-    type: 'multi',
-    label: '참여기술진',
-
-    // ! engineer API
-    options: []
-  }
-}
-
-// 점검일정/참여기술진 - 참여기술진 수정
-export const MACHINE_PROJECT_ENGINEER_INPUT_INFO: machineProjectEngineerInputInfoType = {
-  engineerName: { type: 'text', label: '이름' },
-  grade: {
-    type: 'multi',
-    label: '등급',
-    options: gradeOption
-  },
-  engineerLicenseNum: { type: 'text', label: '수첩발급번호' },
-  beginDate: { type: 'date', label: '투입시작일' },
-  endDate: { type: 'date', label: '투입종료일' },
-  note: { type: 'text', label: '비고' }
 }

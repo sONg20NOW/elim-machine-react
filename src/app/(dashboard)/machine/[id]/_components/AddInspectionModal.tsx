@@ -4,7 +4,7 @@ import { useContext, useEffect } from 'react'
 
 import { useParams } from 'next/navigation'
 
-import { Button, Typography, Grid2 } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 
 import { toast } from 'react-toastify'
 
@@ -14,14 +14,16 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { IconCaretLeftFilled, IconCaretRightFilled } from '@tabler/icons-react'
 
+import styles from '@core/styles/customTable.module.css'
+
 import DefaultModal from '@/@core/components/elim-modal/DefaultModal'
 import type { MachineInspectionCreateRequestDtoType } from '@core/types'
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
 import { useGetCategories } from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
-import MultiInputBox from '@/@core/components/elim-inputbox/MultiInputBox'
-import TextInputBox from '@/@core/components/elim-inputbox/TextInputBox'
 import { setOffsetContext } from './tabs/InspectionListTabContent'
+import SelectTd from '@/@core/components/elim-inputbox/SelectTd'
+import TextFieldTd from '@/@core/components/elim-inputbox/TextFieldTd'
 
 type AddInspectionModalProps = {
   open: boolean
@@ -83,7 +85,8 @@ const AddInspectionModal = ({ open, setOpen }: AddInspectionModalProps) => {
   })
 
   return (
-    categoryList && (
+    categoryList &&
+    rootCategoryList && (
       <DefaultModal
         size='xs'
         open={open}
@@ -124,34 +127,42 @@ const AddInspectionModal = ({ open, setOpen }: AddInspectionModalProps) => {
           </Button>
         }
       >
-        <Grid2 container spacing={2} columns={1}>
-          <MultiInputBox
-            required
-            form={form}
-            name='parentCategoryId'
-            labelMap={{
-              parentCategoryId: {
-                label: '분류',
-                options: rootCategoryList?.map(v => ({ label: v.name, value: v.id }))
-              }
-            }}
-          />
-          {childCategoryList && childCategoryList.length > 0 && (
-            <MultiInputBox
-              required
-              form={form}
-              name='machineCategoryId'
-              labelMap={{
-                machineCategoryId: {
-                  label: '종류',
-                  options: childCategoryList.map(v => ({ label: v.name, value: v.id }))
-                }
-              }}
-            />
-          )}
-          <TextInputBox form={form} name='purpose' labelMap={{ purpose: { label: '용도' } }} />
-          <TextInputBox form={form} name='location' labelMap={{ location: { label: '위치' } }} />
-        </Grid2>
+        <div className={styles.container}>
+          <table>
+            <colgroup>
+              <col width={'25%'} />
+              <col width={'75%'} />
+            </colgroup>
+            <tbody>
+              <tr>
+                <th>분류</th>
+                <SelectTd
+                  form={form}
+                  name='parentCategoryId'
+                  option={rootCategoryList.map(v => ({ label: v.name, value: v.id }))}
+                />
+              </tr>
+              {childCategoryList && childCategoryList.length > 0 && (
+                <tr>
+                  <th>종류</th>
+                  <SelectTd
+                    form={form}
+                    name='machineCategoryId'
+                    option={childCategoryList.map(v => ({ label: v.name, value: v.id }))}
+                  />
+                </tr>
+              )}
+              <tr>
+                <th>용도</th>
+                <TextFieldTd form={form} name='purpose' />
+              </tr>
+              <tr>
+                <th>위치</th>
+                <TextFieldTd form={form} name='location' />
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </DefaultModal>
     )
   )

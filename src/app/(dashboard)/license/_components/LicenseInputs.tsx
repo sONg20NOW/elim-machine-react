@@ -89,9 +89,9 @@ export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCre
 
             <tr>
               <th>업종</th>
-              <TextFieldTd form={form} name='homepageAddr' />
+              <TextFieldTd form={form} name='businessCategory' />
               <th>업태</th>
-              <TextFieldTd form={form} name='fax' />
+              <TextFieldTd form={form} name='businessType' />
             </tr>
 
             <tr>
@@ -122,9 +122,9 @@ export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCre
           <tbody>
             <tr>
               <th>계약일</th>
-              <TextFieldTd form={form} name='managerName' type='date' />
+              <TextFieldTd form={form} name='contractDate' type='date' />
               <th>만료일</th>
-              <TextFieldTd form={form} name='managerEmail' type='date' />
+              <TextFieldTd form={form} name='expireDate' type='date' />
             </tr>
           </tbody>
         </table>
@@ -134,40 +134,5 @@ export default function LicenseInputs({ form }: { form: UseFormReturn<LicenseCre
         <TextField fullWidth multiline rows={3} {...form.register('remark')} />
       </div>
     </div>
-
-    // <div className='grid gap-5 flex flex-col overflow-visible pbs-0 sm:pli-16'>
-    //   <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
-    //     <TextInputBox required form={form} name={'companyName'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox form={form} name={'companyNameAbbr'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox form={form} name={'bizno'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox form={form} name={'ceoName'} labelMap={LICENSE_INPUT_INFO} />
-    //   </Grid2>
-    //   <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
-    //     <TextInputBox form={form} name={'managerName'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox form={form} name={'managerEmail'} labelMap={LICENSE_INPUT_INFO} rule={emailRule} />
-    //     <TextInputBox form={form} name={'managerPhoneNumber'} labelMap={LICENSE_INPUT_INFO} />
-    //   </Grid2>
-    //   <Divider />
-    //   <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
-    //     <TextInputBox form={form} name={'taxEmail'} labelMap={LICENSE_INPUT_INFO} rule={emailRule} />
-    //     <TextInputBox form={form} name={'homepageAddr'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox form={form} name={'fax'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox form={form} name={'tel'} labelMap={LICENSE_INPUT_INFO} />
-    //   </Grid2>
-    //   <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
-    //     <TextInputBox type='date' form={form} name={'contractDate'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox type='date' form={form} name={'expireDate'} labelMap={LICENSE_INPUT_INFO} />
-    //   </Grid2>
-    //   <Divider />
-    //   <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
-    //     <TextInputBox form={form} name={'businessCategory'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox form={form} name={'businessType'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox column={2} postcode form={form} name={'roadAddress'} labelMap={LICENSE_INPUT_INFO} />
-    //     <TextInputBox column={2} form={form} name={'detailAddress'} labelMap={LICENSE_INPUT_INFO} />
-    //   </Grid2>
-    //   <Grid2 container rowSpacing={1} columnSpacing={5} columns={2}>
-    //     <TextInputBox multiline column={2} form={form} name={'remark'} labelMap={LICENSE_INPUT_INFO} />
-    //   </Grid2>
-    // </div>
   )
 }
