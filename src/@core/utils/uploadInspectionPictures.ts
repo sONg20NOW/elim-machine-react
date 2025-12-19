@@ -1,5 +1,5 @@
 import { auth } from '@core/utils/auth'
-import getPictureS3Key from './getPictureS3Key'
+import getInspectionPicS3Key from './getInspectionPicS3Key'
 import type { machinePicCreateRequestDtoType } from '../types'
 
 export const uploadInspectionPictures = async (
@@ -10,13 +10,12 @@ export const uploadInspectionPictures = async (
   checklistSubItemId: number
 ) => {
   try {
-    const S3uploadResults = await getPictureS3Key(
+    const S3uploadResults = await getInspectionPicS3Key(
       machineProjectId,
       filesToUpload,
       inspectionId,
       checklistItemId,
-      checklistSubItemId,
-      undefined
+      checklistSubItemId
     )
 
     if (!S3uploadResults) {
@@ -71,13 +70,12 @@ export const uploadSingleInspectionPic = async (
   checklistSubItemId: number
 ) => {
   try {
-    const S3uploadResults = await getPictureS3Key(
+    const S3uploadResults = await getInspectionPicS3Key(
       machineProjectId,
       [file],
       inspectionId,
       checklistItemId,
-      checklistSubItemId,
-      undefined
+      checklistSubItemId
     )
 
     if (!S3uploadResults) {
