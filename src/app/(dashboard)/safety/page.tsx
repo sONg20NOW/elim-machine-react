@@ -298,10 +298,10 @@ export default function SafetyPage() {
                   </MenuItem>
                 ))}
               </CustomTextField>
-              {/* 시설물명으로 검색 */}
+              {/* 건물명으로 검색 */}
               <SearchBar
                 key={`projectName_${buildingName}`}
-                placeholder='시설물명으로 검색'
+                placeholder='건물명으로 검색'
                 defaultValue={buildingName ?? ''}
                 setSearchKeyword={keyword => {
                   setQueryParams({ buildingName: keyword, page: 0 })

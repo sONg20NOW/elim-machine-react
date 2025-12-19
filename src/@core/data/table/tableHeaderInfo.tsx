@@ -35,7 +35,7 @@ export const TABLE_HEADER_INFO: tableHeaderInfoType = {
     projectStatusDescription: { label: '상태', canSort: false },
     safetyInspectionTypeDescription: { label: '종류', canSort: false },
     region: { label: '지역', canSort: false },
-    buildingName: { label: '시설물명', canSort: false },
+    buildingName: { label: '건물명', canSort: false },
     fieldBeginDate: { label: '현장점검', canSort: true },
     fieldEndDate: { label: '점검종료', canSort: true },
     reportDeadline: { label: '보고서마감', canSort: true },
