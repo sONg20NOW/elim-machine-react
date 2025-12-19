@@ -650,7 +650,7 @@ const SafetyProjectTabContent = () => {
                   {/* 요청사항 */}
                   <tr style={{ height: '114px' }}>
                     <th align='left' style={{ padding: '10px 12px', fontWeight: 600 }}>
-                      관리주체 요청사항
+                      요청사항
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px', verticalAlign: 'top' }}>
                       <p style={{ whiteSpace: 'pre-wrap' }}>{safetyProjectData.requirement || '-'}</p>
