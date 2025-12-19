@@ -869,6 +869,37 @@ export interface MachineInspectionPicUploadPresignedUrlBatchRequestDtoType {
   machineProjectChecklistSubItemId: number
 }
 
+// description:	안전진단 현장 첨부파일 등록 요청 DTO
+export interface SafetyProjectAttachmentCreateRequestDtoType {
+  safetyAttachmentType: safetyAttachmentTypeType
+  originalFileName: string
+  s3Key: string
+}
+
+// description:	첨부파일 단건 등록 응답 DTO
+export interface SafetyProjectAttachmentCreateResponseDtoType {
+  safetyProjectAttachmentId: number
+}
+
+// description:	안전진단 프로젝트 첨부파일 단건 수정 요청 DTO
+export interface SafetyProjectAttachmentUpdateRequestDtoType {
+  safetyProjectAttachmentId: number
+  safetyAttachmentType: safetyAttachmentTypeType
+  originalFileName: string
+  s3Key: string
+}
+
+// PUT /api/safety/projects/{safetyProjectId}/attachments
+// description:	안전진단 프로젝트 첨부파일 단건 수정 요청 DTO
+export interface SafetyProjectAttachmentUpdateResponseDtoType {
+  safetyProjectAttachmentId: number
+  safetyAttachmentType: safetyAttachmentTypeType
+  originalFileName: string
+  s3Key: string
+  presignedUrl: string
+  downloadPresignedUrl: string
+}
+
 // ----------- 무한스크롤 사진 관련 -----------
 // 무한스크롤 커서 정보 (사진 조회용)
 export interface MachinePicCursorType {
