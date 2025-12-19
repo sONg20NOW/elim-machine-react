@@ -35,6 +35,7 @@ import { isMobileContext } from '@/@core/contexts/mediaQueryContext'
 import useSafetyProjectTabValueStore from '@/@core/hooks/zustand/useSafetyProjectTabValueStore'
 
 import SafetyProjectTabContent from './_components/tabs/SafetyProjectTabContent'
+import NoteTabContent from './_components/tabs/NoteTabContent'
 
 const Tabs: { value: SafetyProjectTabValueType; label: SafetyProjectTabValueType }[] = [
   { value: '현장정보', label: '현장정보' },
@@ -157,10 +158,10 @@ const SafetyProjectPage = () => {
               </TabPanel>
               <TabPanel value='전체사진' className='h-full'>
                 <PictureListTabContent />
-              </TabPanel>
+              </TabPanel>*/}
               <TabPanel value='특이사항'>
                 {safetyProjectData ? <NoteTabContent /> : <Typography>특이사항 정보를 불러오는 중입니다.</Typography>}
-              </TabPanel> */}
+              </TabPanel>
             </div>
           </TabContext>
         </CardContent>

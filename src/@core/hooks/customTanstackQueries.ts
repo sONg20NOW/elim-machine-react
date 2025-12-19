@@ -1198,7 +1198,7 @@ export const useMutateSafetyProjectSpecialNote = (safetyProjectId: string) => {
     onSuccess: newNote => {
       queryClient.setQueryData(queryKey, (prev: SafetyProjectReadResponseDtoType) => ({
         ...prev,
-        note: newNote.specialNote,
+        specialNote: newNote.specialNote,
         version: newNote.version
       }))
       console.log('useMutateMachineProjectNote.')
