@@ -2,6 +2,7 @@ import axios from 'axios'
 
 import { auth } from '@core/utils/auth'
 import { handleApiError } from '@core/utils/errorHandler'
+import type { safetyAttachmentTypeLabelType } from '../data/options'
 
 /**
  * S3 Bucket에 안전진단현장 첨부파일들을 등록하고 s3Key 정보를 받는 함수
@@ -9,17 +10,17 @@ import { handleApiError } from '@core/utils/errorHandler'
  * 해당 s3Key를 백엔드 서버에 저장하는 것을 별도로 처리해주어야 함.
  * @param safetyProjectId * string
  * @param files * 
- * @param attatchmentType * '건축물대장' | '시설물대장' | '과업지시서' | '교육수료증'
+ * @param attachmentType * '건축물대장' | '시설물대장' | '과업지시서' | '교육수료증'
  * @returns s3Key 정보를 담은 객체 배열 {
     fileName: string;
     s3Key: string;
     uploadSuccess: boolean;
 }[]
  */
-export default async function getSafetyProjectAttatchmentS3Key(
+export default async function getSafetyProjectAttachmentS3Key(
   safetyProjectId: string,
   files: File[],
-  attatchmentType: '건축물대장' | '시설물대장' | '과업지시서' | '교육수료증'
+  attachmentType: safetyAttachmentTypeLabelType
 ) {
   try {
     // 1. 프리사인드 URL 요청 (백엔드 서버로 POST해서 받아옴. -> S3 저장소 배정)
@@ -28,7 +29,7 @@ export default async function getSafetyProjectAttatchmentS3Key(
     }>(`/api/presigned-urls/safety/projects/${safetyProjectId}`, {
       uploadType: 'SAFETY_PROJECT_ATTACHMENT',
       originalFileNames: files.map(file => file.name),
-      attachmentType: attatchmentType
+      attachmentType: attachmentType
     })
 
     const presignedUrls = presignedResponse.data.data.presignedUrlResponseDtos
@@ -55,7 +56,7 @@ export default async function getSafetyProjectAttatchmentS3Key(
       return {
         fileName: file.name,
         s3Key: presignedData.s3Key,
-        uploadSuccess: true
+        presignedUrl: presignedData.presignedUrl
       }
     })
 
