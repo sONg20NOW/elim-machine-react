@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useContext, useRef, useState } from 'react'
 
 import { useParams, useRouter } from 'next/navigation'
 
@@ -9,10 +9,21 @@ import { Controller, useForm } from 'react-hook-form'
 import { NumericFormat } from 'react-number-format'
 import dayjs from 'dayjs'
 
+import { toast } from 'react-toastify'
+
 import { handleApiError, handleSuccess } from '@core/utils/errorHandler'
-import type { SafetyProjectUpdateRequestDtoType } from '@core/types'
+import type {
+  safetyAttachmentTypeType,
+  SafetyProjectReadResponseDtoType,
+  SafetyProjectUpdateRequestDtoType
+} from '@core/types'
 import DeleteModal from '@/@core/components/elim-modal/DeleteModal'
-import { useGetSafetyProject, useMutateSafetyProject } from '@core/hooks/customTanstackQueries'
+import {
+  useGetSafetyProject,
+  useMutatePostSafetyProjectAttachment,
+  useMutatePutSafetyProjectAttachment,
+  useMutateSafetyProject
+} from '@core/hooks/customTanstackQueries'
 import { auth } from '@core/utils/auth'
 import AlertModal from '@/@core/components/elim-modal/AlertModal'
 import isEditingContext from '../../isEditingContext'
@@ -25,19 +36,21 @@ import {
   facilityClassOption,
   facilityTypeOption,
   projectStatusOption,
+  safetyAttachmentTypeOption,
   safetyGradeOption,
   safetyInspectionTypeOption
 } from '@/@core/data/options'
 import useCompanyNameOption from '@/@core/hooks/useCompanyNameOption'
+import getSafetyProjectAttachmentS3Key from '@/@core/utils/getSafetyProjectAttachmentS3Key'
 
 const SafetyProjectTabContent = () => {
   const router = useRouter()
 
-  const { isEditing, setIsEditing } = useContext(isEditingContext)!
-  const [loading, setLoading] = useState(false)
-
   const params = useParams()
   const safetyProjectId = params?.id as string
+
+  const { isEditing, setIsEditing } = useContext(isEditingContext)!
+  const [loading, setLoading] = useState(false)
 
   const { data: safetyProjectData } = useGetSafetyProject(safetyProjectId)
 
@@ -339,22 +352,39 @@ const SafetyProjectTabContent = () => {
                   <tr>
                     {/* 건축물대장 */}
                     <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>건축물대장</th>
-                    <TextFieldTd colSpan={3} form={safetyProjectForm} name='buildingName' />
+                    <td colSpan={3} style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>
+                      <EditingAttachmentRow
+                        safetyProjectData={safetyProjectData}
+                        safetyAttachmentType='BUILDING_REGISTER'
+                      />
+                    </td>
                   </tr>
                   {/* 시설물대장 */}
                   <tr>
                     <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>시설물대장</th>
-                    <TextFieldTd colSpan={3} form={safetyProjectForm} name='buildingName' />
+                    <td colSpan={3} style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>
+                      <EditingAttachmentRow
+                        safetyProjectData={safetyProjectData}
+                        safetyAttachmentType='FACILITY_REGISTER'
+                      />
+                    </td>
                   </tr>
                   {/* 과업지시서 */}
                   <tr>
                     <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>과업지시서</th>
-                    <TextFieldTd colSpan={3} form={safetyProjectForm} name='buildingName' />
+                    <td colSpan={3} style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>
+                      <EditingAttachmentRow safetyProjectData={safetyProjectData} safetyAttachmentType='WORK_ORDER' />
+                    </td>
                   </tr>
                   {/* 교육수료증 */}
                   <tr>
                     <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>교육수료증</th>
-                    <TextFieldTd colSpan={3} form={safetyProjectForm} name='buildingName' />
+                    <td colSpan={3} style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600 }}>
+                      <EditingAttachmentRow
+                        safetyProjectData={safetyProjectData}
+                        safetyAttachmentType='EDUCATION_CERTIFICATE'
+                      />
+                    </td>
                   </tr>
                   {/* ----- 계약사항 ----- */}
                   <tr style={{ background: '#f3f4f6' }}>
@@ -648,7 +678,10 @@ const SafetyProjectTabContent = () => {
                       건축물대장
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px' }}>
-                      {safetyProjectData.name || '-'}
+                      <NotEditingAttachmentRow
+                        safetyProjectData={safetyProjectData}
+                        safetyAttachmentType='BUILDING_REGISTER'
+                      />
                     </td>
                   </tr>
                   {/* 시설물대장 */}
@@ -657,7 +690,10 @@ const SafetyProjectTabContent = () => {
                       시설물대장
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px' }}>
-                      {safetyProjectData.name || '-'}
+                      <NotEditingAttachmentRow
+                        safetyProjectData={safetyProjectData}
+                        safetyAttachmentType='FACILITY_REGISTER'
+                      />
                     </td>
                   </tr>
                   {/* 과업지시서 */}
@@ -666,7 +702,10 @@ const SafetyProjectTabContent = () => {
                       과업지시서
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px' }}>
-                      {safetyProjectData.name || '-'}
+                      <NotEditingAttachmentRow
+                        safetyProjectData={safetyProjectData}
+                        safetyAttachmentType='WORK_ORDER'
+                      />
                     </td>
                   </tr>
                   {/* 교육수료증 */}
@@ -675,7 +714,10 @@ const SafetyProjectTabContent = () => {
                       교육수료증
                     </th>
                     <td colSpan={3} style={{ padding: '10px 12px' }}>
-                      {safetyProjectData.name || '-'}
+                      <NotEditingAttachmentRow
+                        safetyProjectData={safetyProjectData}
+                        safetyAttachmentType='EDUCATION_CERTIFICATE'
+                      />
                     </td>
                   </tr>
                   {/* 계약사항 */}
@@ -760,6 +802,118 @@ const SafetyProjectTabContent = () => {
         {showDeleteModal && <DeleteModal open={showDeleteModal} setOpen={setShowDeleteModal} onDelete={handleDelete} />}
       </form>
     )
+  )
+}
+
+function EditingAttachmentRow({
+  safetyProjectData,
+  safetyAttachmentType
+}: {
+  safetyProjectData: SafetyProjectReadResponseDtoType
+  safetyAttachmentType: safetyAttachmentTypeType
+}) {
+  const params = useParams()
+  const safetyProjectId = params?.id as string
+
+  const { refetch } = useGetSafetyProject(safetyProjectId)
+  const { mutateAsync: mutateAsyncPut } = useMutatePutSafetyProjectAttachment(safetyProjectId)
+  const { mutateAsync: mutateAsyncPost } = useMutatePostSafetyProjectAttachment(safetyProjectId)
+
+  const attachments = Array.isArray(safetyProjectData?.attachments) ? safetyProjectData.attachments : []
+  const attachment = attachments?.find(v => v.safetyAttachmentType === safetyAttachmentType)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  async function onUploadAttachment(file: File) {
+    const safetyAttachmentTypeLabel = safetyAttachmentTypeOption.find(v => v.value === safetyAttachmentType)?.label
+
+    if (!safetyAttachmentTypeLabel) {
+      toast.error('K 타입 에러 발생. 관리자 호출.')
+
+      return
+    }
+
+    const S3KeyResult = await getSafetyProjectAttachmentS3Key(safetyProjectId, [file], safetyAttachmentTypeLabel)
+
+    if (!S3KeyResult) return
+
+    const { s3Key, fileName, presignedUrl } = S3KeyResult[0]
+
+    try {
+      // 첨부파일이 존재하지 않다면 생성
+      if (!attachment) {
+        await mutateAsyncPost({
+          safetyAttachmentType: safetyAttachmentType,
+          originalFileName: fileName,
+          s3Key: s3Key,
+          presignedUrl: presignedUrl
+        })
+      }
+
+      // 첨부파일이 이미 있다면 변경
+      else {
+        await mutateAsyncPut({
+          safetyProjectAttachmentId: attachment.safetyProjectAttachmentId,
+          safetyAttachmentType: safetyAttachmentType,
+          originalFileName: fileName,
+          s3Key: s3Key
+        })
+      }
+
+      refetch()
+    } catch (e) {
+      handleApiError(e)
+    }
+
+    // 마지막으로 쿼리 캐시 수정
+  }
+
+  return (
+    <div className='flex justify-between items-center relative'>
+      {attachment ? (
+        <a href={attachment.presignedUrl} target='_blank'>
+          <Typography sx={{ textDecorationLine: 'underline', color: 'info.main' }}>
+            {attachment.originalFileName}
+          </Typography>
+        </a>
+      ) : (
+        '-'
+      )}
+      <Button onClick={() => inputRef.current?.click()} className='absolute right-0' variant='contained' color='info'>
+        업로드
+      </Button>
+      <input
+        ref={inputRef}
+        className='hidden'
+        type='file'
+        onChange={e => {
+          if (!e.target.files) return
+
+          const files = Array.from(e.target.files)
+
+          onUploadAttachment(files[0])
+        }}
+      />
+    </div>
+  )
+}
+
+function NotEditingAttachmentRow({
+  safetyProjectData,
+  safetyAttachmentType
+}: {
+  safetyProjectData: SafetyProjectReadResponseDtoType
+  safetyAttachmentType: safetyAttachmentTypeType
+}) {
+  const attachment = safetyProjectData.attachments.find(v => v.safetyAttachmentType === safetyAttachmentType)
+
+  return attachment ? (
+    <a href={attachment.presignedUrl} target='_blank'>
+      <Typography sx={{ textDecorationLine: 'underline', color: 'info.main' }}>
+        {attachment.originalFileName}
+      </Typography>
+    </a>
+  ) : (
+    '-'
   )
 }
 
