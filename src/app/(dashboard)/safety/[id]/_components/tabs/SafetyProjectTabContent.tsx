@@ -133,6 +133,24 @@ const SafetyProjectTabContent = () => {
                 입수자료
               </Button>
               */}
+            <Button
+              variant='contained'
+              color='warning'
+              onClick={() => {
+                console.log('?')
+              }}
+            >
+              보고서 환경설정
+            </Button>
+            <Button
+              variant='contained'
+              color='success'
+              onClick={() => {
+                console.log('?')
+              }}
+            >
+              보고서 제출완료
+            </Button>
           </div>
           <div className='flex items-center gap-3'>
             {isEditing ? (
@@ -166,7 +184,7 @@ const SafetyProjectTabContent = () => {
                 수정
               </Button>
             )}
-            <Button
+            {/* <Button
               variant='contained'
               color='error'
               onClick={() => {
@@ -174,7 +192,7 @@ const SafetyProjectTabContent = () => {
               }}
             >
               삭제
-            </Button>
+            </Button> */}
           </div>
         </div>
 

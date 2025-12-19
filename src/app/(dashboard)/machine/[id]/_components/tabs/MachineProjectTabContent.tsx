@@ -158,7 +158,7 @@ const MachineProjectTabContent = () => {
                   수정
                 </Button>
               )}
-              <Button
+              {/* <Button
                 variant='contained'
                 color='error'
                 onClick={() => {
@@ -166,7 +166,7 @@ const MachineProjectTabContent = () => {
                 }}
               >
                 삭제
-              </Button>
+              </Button> */}
             </div>
           </div>
 
